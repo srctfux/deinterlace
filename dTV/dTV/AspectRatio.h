@@ -98,9 +98,14 @@ typedef struct _aspectsettings {
 	// Luminance cutoff for a black pixel for letterbox detection.  0-127.
 	long LuminanceThreshold;
 
-	// Ignore this many non-black pixels when detecting letterbox.  0 means
-	// use a reasonable default.
+	// Ignore this many non-black pixels when detecting letterbox.
+	// -1 means use a reasonable default. Otherwise, the value is a percent
+	// of pixels in line
 	long IgnoreNonBlackPixels;
+
+	// Ratio of pixels to look at for each line.
+	// 1 means all the pixels, 2 means half of the pixels...
+	long SkipPixels;
 
 	// Nonzero to continuously scan for aspect ratio changes.
 	BOOL AutoDetectAspect;

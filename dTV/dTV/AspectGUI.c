@@ -757,7 +757,7 @@ SETTING AspectSettings[ASPECT_SETTING_LASTONE] =
 	},
 	{
 		"Ignore Non-Black Pixels", SLIDER, 0, &aspectSettings.IgnoreNonBlackPixels,
-		0, 0, 2000, 10, 1,
+		-1, -1, 100, 1, 1,
 		NULL,
 		"ASPECT", "IgnoreNonBlackPixels", NULL,
 	},
@@ -862,6 +862,12 @@ SETTING AspectSettings[ASPECT_SETTING_LASTONE] =
 		FALSE, 0, 1, 1, 1,
 		NULL,
 		"ASPECT", "AutoSizeWindow", NULL,
+	},
+	{
+		"Skip Pixels", SLIDER, 0, &aspectSettings.SkipPixels,
+		8, 1, 16, 1, 1,
+		NULL,
+		"ASPECT", "SkipPixels", NULL,
 	},
 };
 

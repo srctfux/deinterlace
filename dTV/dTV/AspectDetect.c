@@ -129,20 +129,21 @@ int FindTopOfImage(short** EvenField, short **OddField)
 	int maxX = CurrentX - aspectSettings.InitialOverscan * 2;
 	int maxY = CurrentY / 2 - aspectSettings.InitialOverscan;
 	BYTE *pixel;
-	int ignoreCount = aspectSettings.IgnoreNonBlackPixels;
+	int ignoreCount = 0;
+	int ignoreCountPercent = aspectSettings.IgnoreNonBlackPixels;
 	int pixelCount;
 	const int BytesBetweenLuminanceValues = 2;	// just for clarity's sake
-	const int SkipPixels = 8;			// check fewer pixels to reduce CPU hit
+	const int SkipPixels = aspectSettings.SkipPixels;	// check fewer pixels to reduce CPU hit
 
-	if (ignoreCount == 0)
+	if (ignoreCountPercent == -1)
 	{
-		// The user didn't specify an ignore count.  Default to ~15%
+		// The user didn't specify an ignore count.  Default to ~16%
 		// of the horizontal size of the image.
-		ignoreCount = (CurrentX / 7) / SkipPixels;
+		ignoreCountPercent = 16;
 	}
-	else
+	if (ignoreCountPercent > 0)
 	{
-		ignoreCount /= SkipPixels;
+		ignoreCount = CurrentX * ignoreCountPercent / SkipPixels / 100;
 		if (ignoreCount == 0)
 			ignoreCount = 1;
 	}
@@ -178,20 +179,21 @@ int FindBottomOfImage(short** EvenField, short** OddField)
 	int maxX = CurrentX - aspectSettings.InitialOverscan * 2;
 	int maxY = CurrentY - aspectSettings.InitialOverscan * 2;
 	BYTE *pixel;
-	int ignoreCount = aspectSettings.IgnoreNonBlackPixels;
+	int ignoreCount = 0;
+	int ignoreCountPercent = aspectSettings.IgnoreNonBlackPixels;
 	int pixelCount;
 	const int BytesBetweenLuminanceValues = 2;	// just for clarity's sake
-	const int SkipPixels = 8;			// check fewer pixels to reduce CPU hit
+	const int SkipPixels = aspectSettings.SkipPixels;	// check fewer pixels to reduce CPU hit
 
-	if (ignoreCount == 0)
+	if (ignoreCountPercent == -1)
 	{
-		// The user didn't specify an ignore count.  Default to ~15%
+		// The user didn't specify an ignore count.  Default to ~16%
 		// of the horizontal size of the image.
-		ignoreCount = (CurrentX / 7) / SkipPixels;
+		ignoreCountPercent = 16;
 	}
-	else
+	if (ignoreCountPercent > 0)
 	{
-		ignoreCount /= SkipPixels;
+		ignoreCount = CurrentX * ignoreCountPercent / SkipPixels / 100;
 		if (ignoreCount == 0)
 			ignoreCount = 1;
 	}
