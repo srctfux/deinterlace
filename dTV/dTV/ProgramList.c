@@ -414,9 +414,9 @@ BOOL APIENTRY AnalogScanProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 		hMemDC = CreateCompatibleDC(hdc);
 		
 		if(BT848_IsVideoPresent() == TRUE)
-			hOldBm = SelectObject(hMemDC, RedBulb);
-		else
 			hOldBm = SelectObject(hMemDC, GreenBulb);
+		else
+			hOldBm = SelectObject(hMemDC, RedBulb);
 
 		GetObject(RedBulb, sizeof(BITMAP), (LPSTR) & bm);
 
