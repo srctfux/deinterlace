@@ -246,6 +246,29 @@ extern  UINT	BlcTotalAverageComb;
 extern  BOOL	BlcShowControls;
 extern  UINT	BlcVerticalSmoothing;
 
+// Add some global fields for Adv Video Flags - Tom Barry 12/15/00
+extern  BYTE	BtAgcDisable;
+extern  BYTE	BtCrush;
+extern  BYTE	BtEvenChromaAGC;
+extern  BYTE	BtOddChromaAGC;
+extern  BYTE	BtEvenLumaPeak;
+extern  BYTE	BtOddLumaPeak;
+extern  BYTE	BtFullLumaRange;
+extern  BYTE	BtEvenLumaDec;
+extern  BYTE	BtOddLumaDec;
+extern  BYTE	BtEvenComb;
+extern  BYTE	BtOddComb;
+extern  BYTE	BtColorBars;
+extern  BYTE	BtGammaCorrection;
+extern	BYTE    BtCoring;
+extern  BYTE    BtHorFilter;
+extern	BYTE    BtVertFilter;
+extern	BYTE    BtColorKill;
+extern	BYTE    BtWhiteCrushUp;
+extern	BYTE    BtWhiteCrushDown;
+
+extern  UINT    CpuFeatureFlags;		// TRB 12/20/00 Processor capability flags
+
 //------------------------------------------------------------------------
 // ######### IMPORTANT! READ ME FIRST! ##########
 //

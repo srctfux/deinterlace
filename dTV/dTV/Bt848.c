@@ -279,6 +279,28 @@ void BT848_Restart_RISC_Code()
 	BT848_WriteByte(BT848_CAP_CTL, CapCtl);
 }
 
+BYTE	BtAgcDisable = 0;								// Luma AGC, 0 says AGC enabled
+BYTE	BtCrush = BT848_ADC_CRUSH;				// Adaptive AGC, 0 says Crush disabled
+BYTE	BtEvenChromaAGC = BT848_SCLOOP_CAGC;	// Even CAGC, 0 says CAGC disable
+BYTE	BtOddChromaAGC = BT848_SCLOOP_CAGC;		// Odd chroma AGC
+BYTE	BtEvenLumaPeak = 0;						// Even Peak, 0 says normal, not Luma peak
+BYTE	BtOddLumaPeak = 0;							
+BYTE	BtFullLumaRange = BT848_OFORM_RANGE;    // Full Range Luma, 0=normal,1=full
+												// should be 1 for NTSC
+BYTE	BtEvenLumaDec = 0;						// Even Luma decimation,  0 says disable
+BYTE	BtOddLumaDec = 0;
+BYTE	BtEvenComb = BT848_VSCALE_COMB;			// Even Comb, enabled
+BYTE	BtOddComb = BT848_VSCALE_COMB;
+BYTE	BtColorBars = 0;                        // Display Color Bars, 0 = no
+BYTE	BtGammaCorrection = 0 ;					// Gamma Correction Removal, 0 = Enabled
+BYTE    BtCoring = BT848_OFORM_CORE0;           // Coring function: (0,1,2,or 3) << 5
+BYTE    BtHorFilter = 0 << 3;				    // Horizontal Filer: (0,1,2,3) << 3
+												// maybe only 0,1 valid for full res?
+BYTE    BtVertFilter = 0;						// Vert. Filter, only 0 and 4 valid here
+BYTE    BtColorKill = BT848_SCLOOP_CKILL;		// Kill color if B/W: (0,1) << 5
+BYTE    BtWhiteCrushUp = 0xcf;					// Crush up - entire register value
+BYTE    BtWhiteCrushDown = 0x7f;				// Crush down - entire register value
+
 void BT848_ResetHardware()
 {
 	BT848_SetDMA(FALSE);
@@ -290,20 +312,23 @@ void BT848_ResetHardware()
 	BT848_WriteWord(BT848_GPIO_DMA_CTL, 0xfc);
 	BT848_WriteByte(BT848_IFORM, BT848_IFORM_MUX1 | BT848_IFORM_XTAUTO | BT848_IFORM_PAL_BDGHI);
 
-	BT848_WriteByte(BT848_E_CONTROL, 0x00);
-	BT848_WriteByte(BT848_O_CONTROL, 0x00);
+	BT848_WriteByte(BT848_E_CONTROL, BtEvenLumaDec);
+	BT848_WriteByte(BT848_O_CONTROL, BtOddLumaDec);
 
-	BT848_WriteByte(BT848_E_SCLOOP, BT848_SCLOOP_CAGC);
-	BT848_WriteByte(BT848_O_SCLOOP, BT848_SCLOOP_CAGC);
-
-	BT848_WriteByte(BT848_OFORM, BT848_OFORM_CORE0 | BT848_OFORM_RANGE);
+	BT848_WriteByte(BT848_E_SCLOOP, 
+		(BYTE) (BtEvenChromaAGC | BtEvenLumaPeak | BtColorKill | BtHorFilter));
 	
-	BT848_WriteByte(BT848_E_VSCALE_HI, BT848_VSCALE_COMB);
-	BT848_WriteByte(BT848_O_VSCALE_HI, BT848_VSCALE_COMB);
-	
-	BT848_WriteByte(BT848_ADC, BT848_ADC_RESERVED | BT848_ADC_CRUSH);
+	BT848_WriteByte(BT848_O_SCLOOP, 
+		(BYTE) (BtOddChromaAGC | BtOddLumaPeak | BtColorKill | BtHorFilter));
 
-	BT848_WriteByte(BT848_COLOR_CTL, 0x00);
+	BT848_WriteByte(BT848_OFORM, (BYTE)(BtCoring | BtFullLumaRange));
+	
+	BT848_WriteByte(BT848_E_VSCALE_HI, BtEvenComb);
+	BT848_WriteByte(BT848_O_VSCALE_HI, BtOddComb);
+	
+	BT848_WriteByte(BT848_ADC, (BYTE) (BT848_ADC_RESERVED | BtAgcDisable | BtCrush)); 
+
+	BT848_WriteByte(BT848_COLOR_CTL, (BYTE) (BtColorBars | BtGammaCorrection));
 	
 	BT848_WriteByte(BT848_TDEC, 0x00);
 
@@ -334,6 +359,7 @@ void BT848_ResetHardware()
 	BT848_SetSaturationV(InitialSaturationV);
 	BT848_SetVideoSource(VideoSource);
 	BT848_SetGeoSize();
+	BT848_WriteByte(BT848_WC_DOWN, BtWhiteCrushDown);			// TRB 12/00 allow parm
 }
 
 PHYS RiscLogToPhys(DWORD * pLog)
@@ -445,7 +471,7 @@ void BT848_SetPLL(PLLFREQ PLL)
 		Sleep(10);
 	}
 
-	BT848_WriteByte(BT848_WC_UP, 0xcf);
+	BT848_WriteByte(BT848_WC_UP, BtWhiteCrushUp);			// TRB 12/00 allow parm
 	BT848_WriteByte(BT848_VTOTAL_LO, 0x00);
 	BT848_WriteByte(BT848_VTOTAL_HI, 0x00);
 	BT848_WriteByte(BT848_DVSIF, 0x00);
@@ -505,8 +531,8 @@ BOOL BT848_SetGeoSize()
 // MAE 2 Nov 2000 - End of change for Macrovision fix
 
 	hactive = CurrentX;
-	vtc = (hactive < 193) ? 2 : ((hactive < 385) ? 1 : 0);
-
+//	vtc = (hactive < 193) ?	2 : ((hactive < 385) ? 1 : 0);		// TRB 12/15/00  allow vertical filter from ini
+	vtc = BtVertFilter;		
 	hscale = ((TVSettings[TVTYPE].wHActivex1 - CurrentX) * 4096UL) / CurrentX;
 	vdelay = TVSettings[TVTYPE].wVDelay;
 	hdelay = ((CurrentX * TVSettings[TVTYPE].wHDelayx1) / TVSettings[TVTYPE].wHActivex1) & 0x3fe;

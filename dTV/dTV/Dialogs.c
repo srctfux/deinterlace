@@ -302,6 +302,15 @@ BOOL APIENTRY AdvVideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lPa
 		// Gamma correction removal, 0=enabled
 		CheckDlgButton(hDlg, IDC_GAMMA_CORR, 
 			((BT848_ReadByte(BT848_COLOR_CTL) & BT848_COLOR_CTL_GAMMA) == 0));
+
+		// More Vertical Filter, 0=no, 4=yes, other values no good at our res
+		// (Z filter)	TRB 12/19/00
+		CheckDlgButton(hDlg, IDC_VERT_FILTER, 
+			((BtVertFilter & BT848_VTC_VFILT_2TAPZ) == BT848_VTC_VFILT_2TAPZ));
+		
+		// More Horizontal Filter, 0=no, else max full res filter TRB 12/19/00
+		CheckDlgButton(hDlg, IDC_HOR_FILTER, 
+			((BtHorFilter & BT848_SCLOOP_HFILT_FULL) == BT848_SCLOOP_HFILT_FULL));
 		
 
 		break;
@@ -323,6 +332,7 @@ BOOL APIENTRY AdvVideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lPa
 				? 0 
 				: BT848_ADC_AGC_EN);		// 0 says AGC enabled
 			BT848_MaskDataByte(BT848_ADC, flag, BT848_ADC_AGC_EN);
+			BtAgcDisable = flag;
 			break;  
 
 		case IDC_CRUSH:						// Changed Adaptive AGC
@@ -330,6 +340,7 @@ BOOL APIENTRY AdvVideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lPa
 				? BT848_ADC_CRUSH
 				:0);						// 0 says Crush disabled
 			BT848_MaskDataByte(BT848_ADC, flag, BT848_ADC_CRUSH);
+			BtCrush = flag;
 			break;  
 
 		case IDC_E_CAGC:					// Changed Even CAGC
@@ -337,6 +348,7 @@ BOOL APIENTRY AdvVideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lPa
 				? BT848_SCLOOP_CAGC
 				: 0);						// 0 says CAGC disable
 			BT848_MaskDataByte(BT848_E_SCLOOP, flag, BT848_SCLOOP_CAGC);
+			BtEvenChromaAGC = flag;
 			break;
 
 		case IDC_O_CAGC:					// Changed Odd CAGC
@@ -344,6 +356,7 @@ BOOL APIENTRY AdvVideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lPa
 				? BT848_SCLOOP_CAGC
 				: 0);						// 0 says CAGC disable
 			BT848_MaskDataByte(BT848_O_SCLOOP, flag, BT848_SCLOOP_CAGC);
+			BtOddChromaAGC = flag;
 			break;
 
 		case IDC_E_LUMA_PEAK:				// Changed Even Peak
@@ -351,6 +364,7 @@ BOOL APIENTRY AdvVideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lPa
 				? BT848_SCLOOP_LUMA_PEAK
 				: 0);						// 0 says normal, not Luma peak
 			BT848_MaskDataByte(BT848_E_SCLOOP, flag, BT848_SCLOOP_LUMA_PEAK);
+			BtEvenLumaPeak = flag;
 			break;
 
 		case IDC_O_LUMA_PEAK:				// Changed Odd Peak
@@ -358,6 +372,7 @@ BOOL APIENTRY AdvVideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lPa
 				? BT848_SCLOOP_LUMA_PEAK
 				: 0);						// 0 says normal, not Luma peak
 			BT848_MaskDataByte(BT848_O_SCLOOP, flag, BT848_SCLOOP_LUMA_PEAK);
+			BtOddLumaPeak = flag;
 			break;
 
 		case IDC_LUMA_RANGE:				// Luma Output Range
@@ -365,6 +380,7 @@ BOOL APIENTRY AdvVideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lPa
 				? BT848_OFORM_RANGE
 				: 0);						// 0 says Luma Normal, 1=Full
 			BT848_MaskDataByte(BT848_OFORM, flag, BT848_OFORM_RANGE);
+			BtFullLumaRange = flag;
 			break;
 
 		case IDC_E_LUMA_DEC:				// Changed Even L.decimation
@@ -372,6 +388,7 @@ BOOL APIENTRY AdvVideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lPa
 				? BT848_CONTROL_LDEC
 				: 0);						// 0 says disable
 			BT848_MaskDataByte(BT848_E_CONTROL, flag, BT848_CONTROL_LDEC);
+			BtEvenLumaDec = flag;
 			break;
 
 		case IDC_O_LUMA_DEC:				// Changed Odd L.decimation
@@ -379,6 +396,7 @@ BOOL APIENTRY AdvVideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lPa
 				? BT848_CONTROL_LDEC
 				: 0);						// 0 says disable
 			BT848_MaskDataByte(BT848_O_CONTROL, flag, BT848_CONTROL_LDEC);
+			BtOddLumaDec = flag;
 			break;
 
 		case IDC_E_COMB:					// Changed Even COMB
@@ -386,6 +404,7 @@ BOOL APIENTRY AdvVideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lPa
 				? BT848_VSCALE_COMB
 				: 0);						// 0 says disable
 			BT848_MaskDataByte(BT848_E_VSCALE_HI, flag, BT848_VSCALE_COMB);
+			BtEvenComb = flag;
 			break;
 
 		case IDC_O_COMB:					// Changed Odd COMB
@@ -393,6 +412,7 @@ BOOL APIENTRY AdvVideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lPa
 				? BT848_VSCALE_COMB
 				: 0);						// 0 says disable
 			BT848_MaskDataByte(BT848_O_VSCALE_HI, flag, BT848_VSCALE_COMB);
+			BtOddComb = flag;
 			break;
 
 		case IDC_COLOR_BARS:				// Color Bars
@@ -400,14 +420,35 @@ BOOL APIENTRY AdvVideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lPa
 				? BT848_COLOR_CTL_COLOR_BARS
 				: 0);						// 0 says disable
 			BT848_MaskDataByte(BT848_COLOR_CTL, flag, BT848_COLOR_CTL_COLOR_BARS);
+			BtColorBars = flag;
 			break;
 
 		case IDC_GAMMA_CORR:				// Gamma correction removal
 			flag = (BYTE)(BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_GAMMA_CORR)
 				? 0
-				: BT848_COLOR_CTL_GAMMA );	// 0 says enabled
+				: BT848_COLOR_CTL_GAMMA );	// 0 says enable removal
 			BT848_MaskDataByte(BT848_COLOR_CTL, flag, BT848_COLOR_CTL_GAMMA);
+			BtGammaCorrection = flag;
 			break;
+
+		case IDC_VERT_FILTER:				// Use vertical z-filter
+			flag = (BYTE)(BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_VERT_FILTER)
+				? BT848_VTC_VFILT_2TAPZ		// yes, use z-filter
+				: 0);
+			BT848_MaskDataByte(BT848_E_VTC, flag, BT848_VTC_VFILT_2TAPZ);
+			BT848_MaskDataByte(BT848_O_VTC, flag, BT848_VTC_VFILT_2TAPZ);
+			BtVertFilter = flag;
+			break;
+
+		case IDC_HOR_FILTER:				// Use Hor peaking filter
+			flag = (BYTE)(BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_HOR_FILTER)
+				? BT848_SCLOOP_HFILT_FULL	// yes, use max full res peak
+				: 0);
+			BT848_MaskDataByte(BT848_E_SCLOOP, flag, BT848_SCLOOP_HFILT_FULL);
+			BT848_MaskDataByte(BT848_O_SCLOOP, flag, BT848_SCLOOP_HFILT_FULL);
+			BtHorFilter = flag;
+			break;
+
 		}
 		break;
 	}

@@ -114,6 +114,8 @@ void LoadSettingsFromIni()
 	PulldownSwitchInterval = GetPrivateProfileInt("Pulldown", "PulldownSwitchInterval", PulldownSwitchInterval, szIniFile);
 	PulldownSwitchMax = GetPrivateProfileInt("Pulldown", "PulldownSwitchMax", PulldownSwitchMax, szIniFile);
 	StaticImageFieldCount = GetPrivateProfileInt("Pulldown", "StaticImageFieldCount", StaticImageFieldCount, szIniFile);
+	// TRB 12/00
+	gPulldownMode = GetPrivateProfileInt("Deinterlace", "DeinterlaceMode", gPulldownMode, szIniFile);
 
 	EdgeDetect = GetPrivateProfileInt("Deinterlace", "EdgeDetect", EdgeDetect, szIniFile);
 	JaggieThreshold = GetPrivateProfileInt("Deinterlace", "JaggieThreshold", JaggieThreshold, szIniFile);
@@ -185,6 +187,40 @@ void LoadSettingsFromIni()
 	// MAE 2 Nov 2000 - Start of change for Macrovision fix
 	InitialBDelay = GetPrivateProfileInt("Hardware", "InitialBDelay", InitialBDelay, szIniFile);
 	// MAE 2 Nov 2000 - End of change for Macrovision fix
+
+	// TRB 1218/00 - Add some Adv Video Settings to ini file
+	BtAgcDisable = 
+		GetPrivateProfileInt("Hardware", "BtAgcDisable", BtAgcDisable >> 4, szIniFile) << 4;
+	BtCrush = GetPrivateProfileInt("Hardware", "BtCrush", BtCrush, szIniFile);
+	BtEvenChromaAGC = 
+		GetPrivateProfileInt("Hardware", "BtEvenChromaAGC", BtEvenChromaAGC >> 6, szIniFile) << 6;
+	BtOddChromaAGC = 
+		GetPrivateProfileInt("Hardware", "BtOddChromaAGC", BtOddChromaAGC >> 6, szIniFile) << 6;
+	BtEvenLumaPeak = 
+		GetPrivateProfileInt("Hardware", "BtEvenLumaPeak", BtEvenLumaPeak >> 7, szIniFile) << 7;
+	BtOddLumaPeak = 
+		GetPrivateProfileInt("Hardware", "BtOddLumaPeak", BtOddLumaPeak >> 7, szIniFile) << 7;
+	BtFullLumaRange = 
+		GetPrivateProfileInt("Hardware", "BtFullLumaRange", BtFullLumaRange >> 7, szIniFile) << 7;
+	BtEvenLumaDec = 
+		GetPrivateProfileInt("Hardware", "BtEvenLumaDec", BtEvenLumaDec >> 5, szIniFile) << 5;
+	BtOddLumaDec = 
+		GetPrivateProfileInt("Hardware", "BtOddLumaDec", BtOddLumaDec >> 5, szIniFile) << 5;
+	BtEvenComb = 
+		GetPrivateProfileInt("Hardware", "BtEvenComb", BtEvenComb >> 6, szIniFile) << 6;
+	BtOddComb = 
+		GetPrivateProfileInt("Hardware", "BtOddComb", BtOddComb >> 6, szIniFile) << 6;
+	BtColorBars = 
+		GetPrivateProfileInt("Hardware", "BtColorBars", BtColorBars >> 6, szIniFile) << 6;
+	BtGammaCorrection = 
+		GetPrivateProfileInt("Hardware", "BtGammaCorrection", BtGammaCorrection >> 4, szIniFile) << 4;
+	BtCoring = GetPrivateProfileInt("Hardware", "BtCoring", BtCoring >> 5, szIniFile) << 5;
+	BtHorFilter =
+		GetPrivateProfileInt("Hardware", "BtHorFilter", BtHorFilter >> 3, szIniFile) << 3;
+	BtVertFilter = GetPrivateProfileInt("Hardware", "BtVertFilter", BtVertFilter, szIniFile);
+	BtColorKill = GetPrivateProfileInt("Hardware", "BtColorKill", BtColorKill >> 5, szIniFile) << 5;
+	BtWhiteCrushUp = GetPrivateProfileInt("Hardware", "BtWhiteCrushUp", BtWhiteCrushUp, szIniFile);
+	BtWhiteCrushDown = GetPrivateProfileInt("Hardware", "BtWhiteCrushDown", BtWhiteCrushDown, szIniFile);
 
 	ManuellAudio[0] = GetPrivateProfileInt("Hardware", "GPIO_OUT_EN", 0, szIniFile); 
 	ManuellAudio[1] = GetPrivateProfileInt("Hardware", "GPIO_DATA_TUNER", 0, szIniFile);  
@@ -366,6 +402,9 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("Pulldown", "PulldownSwitchMax", PulldownSwitchMax, szIniFile);
 	WritePrivateProfileInt("Pulldown", "StaticImageFieldCount", StaticImageFieldCount, szIniFile);
 
+	// TRB 12/00
+	WritePrivateProfileInt("Deinterlace", "DeinterlaceMode", gPulldownMode, szIniFile);
+
 	WritePrivateProfileInt("Deinterlace", "EdgeDetect", EdgeDetect, szIniFile);
 	WritePrivateProfileInt("Deinterlace", "JaggieThreshold", JaggieThreshold, szIniFile);
 	WritePrivateProfileInt("Deinterlace", "SpatialTolerance", SpatialTolerance, szIniFile);
@@ -419,6 +458,27 @@ void WriteSettingsToIni()
 // MAE 2 Nov 2000 - Start of change for Macrovision fix
 	WritePrivateProfileInt("Hardware", "InitialBDelay", InitialBDelay, szIniFile); 
 // MAE 2 Nov 2000 - End of change for Macrovision fix
+
+// TRB 1218/00 - Add some Adv Video Settings to ini file
+	WritePrivateProfileInt("Hardware", "BtAgcDisable", BtAgcDisable >> 4, szIniFile);
+	WritePrivateProfileInt("Hardware", "BtCrush", BtCrush, szIniFile);
+	WritePrivateProfileInt("Hardware", "BtEvenChromaAGC", BtEvenChromaAGC >> 6, szIniFile);
+	WritePrivateProfileInt("Hardware", "BtOddChromaAGC", BtOddChromaAGC >> 6, szIniFile);
+	WritePrivateProfileInt("Hardware", "BtEvenLumaPeak", BtEvenLumaPeak >> 7, szIniFile);
+	WritePrivateProfileInt("Hardware", "BtOddLumaPeak", BtOddLumaPeak >> 7, szIniFile);
+	WritePrivateProfileInt("Hardware", "BtFullLumaRange", BtFullLumaRange >> 7, szIniFile);
+	WritePrivateProfileInt("Hardware", "BtEvenLumaDec", BtEvenLumaDec >> 5, szIniFile);
+	WritePrivateProfileInt("Hardware", "BtOddLumaDec", BtOddLumaDec >> 5, szIniFile);
+	WritePrivateProfileInt("Hardware", "BtEvenComb", BtEvenComb >> 6, szIniFile);
+	WritePrivateProfileInt("Hardware", "BtOddComb", BtOddComb >> 6, szIniFile);
+	WritePrivateProfileInt("Hardware", "BtColorBars", BtColorBars >> 6, szIniFile);
+	WritePrivateProfileInt("Hardware", "BtGammaCorrection", BtGammaCorrection >> 4, szIniFile);
+	WritePrivateProfileInt("Hardware", "BtCoring", BtCoring >> 5, szIniFile);
+	WritePrivateProfileInt("Hardware", "BtHorFilter", BtHorFilter >> 3, szIniFile);
+	WritePrivateProfileInt("Hardware", "BtVertFilter", BtVertFilter, szIniFile);
+	WritePrivateProfileInt("Hardware", "BtColorKill", BtColorKill >> 5, szIniFile);
+	WritePrivateProfileInt("Hardware", "BtWhiteCrushUp", BtWhiteCrushUp, szIniFile);
+	WritePrivateProfileInt("Hardware", "BtWhiteCrushDown", BtWhiteCrushDown, szIniFile);
 
 	WritePrivateProfileInt("Hardware", "GPIO_OUT_EN", ManuellAudio[0], szIniFile); 
 	WritePrivateProfileInt("Hardware", "GPIO_DATA_TUNER", ManuellAudio[1], szIniFile);  

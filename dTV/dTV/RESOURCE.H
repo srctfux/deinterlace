@@ -570,8 +570,10 @@
 #define IDC_DT7                         1786
 #define IDC_O_COMB                      1786
 #define IDC_DT8                         1787
+#define IDC_HOR_FILTER                  1787
 #define IDC_DT9                         1788
 #define IDC_DT10                        1789
+#define IDC_VERT_FILTER                 1789
 #define IDC_DT11                        1790
 #define IDC_MIN_CLIP                    1790
 #define IDC_DT12                        1791

@@ -186,17 +186,19 @@ PHYS GetPhysicalAddress(PMemStruct dma, LPBYTE pLinear, DWORD dwSizeWanted, DWOR
 #define BT848_SAT_V_LO         0x038
 #define BT848_HUE              0x03C
 
-#define BT848_E_SCLOOP         0x040
+#define BT848_E_SCLOOP         0x040 
 #define BT848_O_SCLOOP         0x0C0
 #define BT848_SCLOOP_LUMA_PEAK  (1<<7)
 #define BT848_SCLOOP_CAGC       (1<<6)
 #define BT848_SCLOOP_CKILL      (1<<5)
-#define BT848_SCLOOP_HFILT_AUTO (0<<3)
+#define BT848_SCLOOP_HFILT_FULL (1<<3)	// TRB 12/00 max full res peakg filter
+#define BT848_SCLOOP_HFILT_AUTO (0<<3)	// TRB Not sure these match doc?
 #define BT848_SCLOOP_HFILT_CIF  (1<<3)
 #define BT848_SCLOOP_HFILT_QCIF (2<<3)
 #define BT848_SCLOOP_HFILT_ICON (3<<3)
 
 #define BT848_WC_UP            0x044
+#define BT848_WC_DOWN          0x078
 #define BT848_VTOTAL_LO        0x0B0
 #define BT848_VTOTAL_HI        0x0B4
 #define BT848_DVSIF            0x0FC
@@ -237,7 +239,7 @@ PHYS GetPhysicalAddress(PMemStruct dma, LPBYTE pLinear, DWORD dwSizeWanted, DWOR
 #define BT848_VTC_VFILT_3TAP   1
 #define BT848_VTC_VFILT_4TAP   2
 #define BT848_VTC_VFILT_5TAP   3
-
+#define BT848_VTC_VFILT_2TAPZ  4
 #define BT848_SRESET           0x07C
 
 #define BT848_COLOR_FMT             0x0D4

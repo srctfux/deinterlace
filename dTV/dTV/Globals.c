@@ -225,3 +225,5 @@ char BTVendorID[10];
 char BTDeviceID[10];
 char MSPVersion[16];
 
+UINT CpuFeatureFlags;		// TRB 12/20/00 Processor capability flags
+

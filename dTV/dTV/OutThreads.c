@@ -500,7 +500,7 @@ void UpdateNTSCPulldownMode(long FieldDiff,
         MOVIE_FIELD_CYCLE = 0;
 		MISMATCH_COUNT = 0;
 		MATCH_COUNT = 0;
-		gPulldownMode = VIDEO_MODE_WEAVE;
+//		gPulldownMode = VIDEO_MODE_WEAVE;   // TRB 12/20/00 Allow from parm
 		UpdatePulldownStatus();
 		dwLastFlipTicks = -1;
 		memset(&ModeSwitchTimestamps[0], 0, sizeof(ModeSwitchTimestamps));
