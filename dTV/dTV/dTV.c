@@ -158,6 +158,8 @@ UINT CpuFeatureFlags;		// TRB 12/20/00 Processor capability flags
 BOOL bInMenuOrDialogBox = FALSE;
 BOOL bIgnoreMouse = FALSE;
 
+UINT MsgWheel;
+
 BOOL IsFullScreen_OnChange(long NewValue);
 BOOL DisplayStatusBar_OnChange(long NewValue);
 void Cursor_UpdateVisibility();
@@ -321,6 +323,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		StatusBar_ShowWindow(FALSE);
 	}
 
+	MsgWheel = RegisterWindowMessage("MSWHEEL_ROLLMSG");
+
 	// 2000-10-31 Added by Mark Rejhon
 	// Now show the window, directly to maximized or windowed right away.
 	// That way, if the end user has configured dTV to startup maximized,
@@ -409,6 +413,21 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 	int i;
 	long nValue;
 	BOOL bDone;
+
+	if (message == MsgWheel)
+	{
+		// crack the mouse wheel delta
+		// +ve is forward (away from user)
+		// -ve is backward (towards user)
+		if((short)wParam > 0)
+		{
+			PostMessage(hWnd, WM_COMMAND, IDM_CHANNELPLUS, 0);
+		}
+		else
+		{
+			PostMessage(hWnd, WM_COMMAND, IDM_CHANNELMINUS, 0);
+		}
+	}
 
 	switch (message)
 	{
@@ -1600,20 +1619,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			{
 				PostMessage(hWnd, WM_COMMAND, IDM_CHANNELMINUS, 0);
 			}
-		}
-		break;
-
-	case 0xCB0B:
-		// crack the mouse wheel delta
-		// +ve is forward (away from user)
-		// -ve is backward (towards user)
-		if((short)wParam > 0)
-		{
-			PostMessage(hWnd, WM_COMMAND, IDM_CHANNELPLUS, 0);
-		}
-		else
-		{
-			PostMessage(hWnd, WM_COMMAND, IDM_CHANNELMINUS, 0);
 		}
 		break;
 
