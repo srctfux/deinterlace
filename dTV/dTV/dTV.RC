@@ -832,6 +832,16 @@ BEGIN
             MENUITEM "Orbiting\tCtrl+O",            IDM_WINPOS_ORBIT
             MENUITEM "Auto-Size Window",            IDM_WINPOS_AUTOSIZE
         END
+        POPUP "&Zoom"
+        BEGIN
+            MENUITEM "X1",                          IDM_ZOOM_10
+            MENUITEM "X1.5",                        IDM_ZOOM_15
+            MENUITEM "X2",                          IDM_ZOOM_20
+            MENUITEM "X2.5",                        IDM_ZOOM_25
+            MENUITEM "X3",                          IDM_ZOOM_30
+            MENUITEM "X3.5",                        IDM_ZOOM_35
+            MENUITEM "X4",                          IDM_ZOOM_40
+        END
     END
     POPUP "&Settings"
     BEGIN
