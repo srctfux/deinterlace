@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: ColorConverter.cpp,v 1.2 2002-07-29 17:51:40 tobbej Exp $
+// $Id: ColorConverter.cpp,v 1.3 2002-08-01 20:30:26 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,10 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.2  2002/07/29 17:51:40  tobbej
+// added vertical mirror.
+// fixed field ordering and even/odd flags, seems like it is working
+//
 // Revision 1.1  2002/07/15 18:18:12  tobbej
 // support for rgb24 input
 //
@@ -117,7 +121,7 @@ bool CColorConverter::SetFormat(const AM_MEDIA_TYPE *mt)
 	return false;
 }
 
-bool CColorConverter::Convert(BYTE *dst,BYTE *src,COVERSION_FORMAT cnv,bool bVertMirror)
+bool CColorConverter::Convert(BYTE *dst,BYTE *src,COVERSION_FORMAT cnv,bool &bVertMirror)
 {
 	if(m_pfnConv==NULL)
 	{
@@ -164,7 +168,7 @@ bool CColorConverter::Convert(BYTE *dst,BYTE *src,COVERSION_FORMAT cnv,bool bVer
 	default:
 		return false;
 	}
-	
+	bVertMirror=bVMirror;
 	return true;
 }
 

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: ColorConverter.h,v 1.2 2002-07-29 17:51:40 tobbej Exp $
+// $Id: ColorConverter.h,v 1.3 2002-08-01 20:30:27 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,10 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.2  2002/07/29 17:51:40  tobbej
+// added vertical mirror.
+// fixed field ordering and even/odd flags, seems like it is working
+//
 // Revision 1.1  2002/07/15 18:18:13  tobbej
 // support for rgb24 input
 //
@@ -72,7 +76,7 @@ public:
 	 * @param cnv
 	 * @param bVertMirror true if sample shoud be fliped when converting
 	 */
-	bool Convert(BYTE *dst,BYTE *src,COVERSION_FORMAT cnv,bool bVertMirror);
+	bool Convert(BYTE *dst,BYTE *src,COVERSION_FORMAT cnv,bool &bVertMirror);
 
 private:
 	///function pinter to color conversion function

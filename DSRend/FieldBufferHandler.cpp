@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: FieldBufferHandler.cpp,v 1.5 2002-07-29 17:51:40 tobbej Exp $
+// $Id: FieldBufferHandler.cpp,v 1.6 2002-08-01 20:30:27 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,10 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.5  2002/07/29 17:51:40  tobbej
+// added vertical mirror.
+// fixed field ordering and even/odd flags, seems like it is working
+//
 // Revision 1.4  2002/07/15 18:19:43  tobbej
 // support for rgb24 input
 // new settings
@@ -246,6 +250,7 @@ HRESULT CFieldBufferHandler::InsertSample(CComPtr<IMediaSample> pSample)
 
 		long LineSize=bmiHeader.biWidth*2;
 		size_t FieldSize=(bmiHeader.biHeight/2)*LineSize;
+		bool bVertMirror=m_bVertMirror;
 		
 		//first field
 		CFieldInfo field1;
@@ -256,23 +261,24 @@ HRESULT CFieldBufferHandler::InsertSample(CComPtr<IMediaSample> pSample)
 			m_Fields.RemoveAt(0);
 			///@todo m_DroppedFields++ but only if the buffer was never used
 		}
-
-		field1.flags=m_bSwapFields ? BUFFER_FLAGS_FIELD_ODD : BUFFER_FLAGS_FIELD_EVEN;
 		
 		//split the field
 		if(m_bNeedConv)
 		{
-			m_ColorConv.Convert(field1.GetBufferSetSize(FieldSize),pSampleBuffer,CColorConverter::COVERSION_FORMAT::CNV_EVEN,m_bVertMirror);
+			m_ColorConv.Convert(field1.GetBufferSetSize(FieldSize),pSampleBuffer,CColorConverter::COVERSION_FORMAT::CNV_EVEN,bVertMirror);
+			field1.flags=(bVertMirror ? !m_bSwapFields : m_bSwapFields) ? BUFFER_FLAGS_FIELD_ODD : BUFFER_FLAGS_FIELD_EVEN;
 		}
 		else
 		{
 			field1.GetBufferSetSize(FieldSize);
 			for(int i=0;i<bmiHeader.biHeight/2;i++)
 			{
-				m_pfnMemcpy(field1.pBuffer+i*LineSize,pSampleBuffer+ (m_bVertMirror ? (bmiHeader.biHeight-1-(2*i))*LineSize : (2*i)*LineSize),LineSize);
+				m_pfnMemcpy(field1.pBuffer+i*LineSize,pSampleBuffer+ (bVertMirror ? (bmiHeader.biHeight-1-(2*i))*LineSize : (2*i)*LineSize),LineSize);
 			}
+			field1.flags=m_bSwapFields ? BUFFER_FLAGS_FIELD_ODD : BUFFER_FLAGS_FIELD_EVEN;
 		}
 		ATLASSERT(field1.bInUse==false);
+		
 
 		//set timestamp when sample shoud be rendered
 		field1.rtRenderTime=-1;
@@ -320,21 +326,24 @@ HRESULT CFieldBufferHandler::InsertSample(CComPtr<IMediaSample> pSample)
 			///@todo m_DroppedFields++ but only if the buffer was never used
 		}
 
-		field2.flags= m_bSwapFields ? BUFFER_FLAGS_FIELD_EVEN : BUFFER_FLAGS_FIELD_ODD;
+		bVertMirror=m_bVertMirror;
 		//split the field
 		if(m_bNeedConv)
 		{
-			m_ColorConv.Convert(field2.GetBufferSetSize(FieldSize),pSampleBuffer,CColorConverter::COVERSION_FORMAT::CNV_ODD,m_bVertMirror);
+			m_ColorConv.Convert(field2.GetBufferSetSize(FieldSize),pSampleBuffer,CColorConverter::COVERSION_FORMAT::CNV_ODD,bVertMirror);
+			field2.flags= (bVertMirror ? !m_bSwapFields : m_bSwapFields) ? BUFFER_FLAGS_FIELD_EVEN : BUFFER_FLAGS_FIELD_ODD;
 		}
 		else
 		{
 			field2.GetBufferSetSize(FieldSize);
 			for(int i=0;i<bmiHeader.biHeight/2;i++)
 			{
-				m_pfnMemcpy(field2.pBuffer+i*LineSize,pSampleBuffer+ (m_bVertMirror ? (bmiHeader.biHeight-1-(2*i+1))*LineSize : (2*i+1)*LineSize),LineSize);
+				m_pfnMemcpy(field2.pBuffer+i*LineSize,pSampleBuffer+ (bVertMirror ? (bmiHeader.biHeight-1-(2*i+1))*LineSize : (2*i+1)*LineSize),LineSize);
 			}
+			field2.flags=m_bSwapFields ? BUFFER_FLAGS_FIELD_EVEN : BUFFER_FLAGS_FIELD_ODD;
 		}
 		ATLASSERT(field2.bInUse==false);
+		
 		
 		//set timestamp when sample shoud be rendered
 		field2.rtRenderTime=-1;
