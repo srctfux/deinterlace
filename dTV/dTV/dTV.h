@@ -45,9 +45,6 @@ SETTING* dTV_GetSetting(DTV_SETTING Setting);
 void dTV_ReadSettingsFromIni();
 void dTV_WriteSettingsToIni();
 
-
-void ChangeChannel(int NewChannel);
-
 void SetThreadProcessorAndPriority();
 
 LONG APIENTRY MainWndProc(HWND, UINT, UINT, LONG);
@@ -79,13 +76,9 @@ BOOL IsStatusBarVisible();
 extern HANDLE hInst;
 extern HWND hWnd;
 
-extern int CurrentProgramm;
-
 extern int pgsizex;
 extern int pgsizey;
 extern int pgstartx;
 extern int pgstarty;
-
-extern int AudioSource;
 
 #endif

@@ -53,6 +53,8 @@ BOOL InitialSuperBass = FALSE;
 char InitialEqualizer[5] = {0x00, 0x00, 0x00, 0x00, 0x00};
 char InitialSpatial = 0x00;
 
+long AudioSource = AUDIOMUX_MUTE;
+
 /*
 0		Audio_Tuner,
 1		Audio_Radio,

@@ -42,8 +42,8 @@
 
 ePULLDOWNMODES gPALFilmFallbackMode = VIDEO_MODE_2FRAME;
 // Default values which can be overwritten by the INI file
-long PulldownThresholdLow = -1500;
-long PulldownThresholdHigh = 200;
+long PulldownThresholdLow = 30;
+long PulldownThresholdHigh = 10;
 long PALPulldownRepeatCount = 3;
 long PALPulldownRepeatCount2 = 1;
 
@@ -55,11 +55,13 @@ long PALPulldownRepeatCount2 = 1;
 ///////////////////////////////////////////////////////////////////////////////
 void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 {
-	static long LastCombFactor;
+	static long LastCombFactor = 0;
 	static long RepeatCount;
-	static long LastPolarity;
-	static long LastDiff;
+	static long LastPolarity = -1;
+	static double LastDiff = 0;
 	static DWORD StartFilmTicks = 0;
+	double PercentDecrease = 0;
+	double PercentIncrease = 0;
 
 	// call with pInfo as NULL to reset static variables when we start the thread
 	// each time
@@ -76,9 +78,12 @@ void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 	}
 
 	GetCombFactor(pInfo);
+	PercentDecrease = ((double)pInfo->CombFactor * 100.0) / ((double)LastCombFactor + 100.0);
+	PercentIncrease = ((double)(pInfo->CombFactor - LastCombFactor) * 100.0) / ((double)LastCombFactor + 100.0);
+
 	if(!DeintMethods[gPulldownMode].bIsFilmMode)
 	{
-		if((pInfo->CombFactor - LastCombFactor) < PulldownThresholdLow && LastDiff > PulldownThresholdLow)
+		if(PercentDecrease < PulldownThresholdLow && LastDiff > PulldownThresholdLow)
 		{
 			if(LastPolarity == pInfo->IsOdd)
 			{
@@ -99,7 +104,7 @@ void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 						else
 						{
 							RepeatCount = 1;					
-							LOG(" Upped RepeatCount - Too long", RepeatCount);
+							LOG(" Upped RepeatCount - Too long");
 						}
 					}
 				}
@@ -130,7 +135,7 @@ void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 	}
 	else
 	{
-		if((pInfo->CombFactor - LastCombFactor) < PulldownThresholdLow)
+		if(PercentDecrease < PulldownThresholdLow)
 		{
 			if(LastPolarity != pInfo->IsOdd)
 			{
@@ -150,7 +155,7 @@ void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 			}
 		}
 		
-		if((pInfo->CombFactor - LastCombFactor) > PulldownThresholdHigh && LastDiff > PulldownThresholdLow)
+		if(PercentIncrease > PulldownThresholdHigh && LastDiff > PulldownThresholdLow)
 		{
 			if(gPulldownMode == FILM_22_PULLDOWN_ODD && pInfo->IsOdd == TRUE)
 			{
@@ -175,7 +180,7 @@ void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 		}
 	}
 
-	LastDiff = (pInfo->CombFactor - LastCombFactor);
+	LastDiff = PercentDecrease;
 	LastCombFactor = pInfo->CombFactor;
 }
 
@@ -216,12 +221,12 @@ SETTING FD50Settings[FD50_SETTING_LASTONE] =
 {
 	{
 		"Pulldown Threshold Low", SLIDER, 0, &PulldownThresholdLow,
-		-1500, -5000, -1, 100, NULL,
+		40, 0, 100, 5, NULL,
 		"Pulldown", "PulldownThresholdLow", NULL,
 	},
 	{
 		"Pulldown Threshold High", SLIDER, 0, &PulldownThresholdHigh,
-		200, 1, 5000, 100, NULL,
+		10, 0, 200, 5, NULL,
 		"Pulldown", "PulldownThresholdHigh", NULL,
 	},
 	{

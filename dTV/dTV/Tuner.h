@@ -67,6 +67,7 @@ typedef struct TChannels
 
 extern struct TCountries Countries[35];
 extern struct TChannels Channels;
+
 struct TCountries Countries[35];
 
 #endif

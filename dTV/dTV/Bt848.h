@@ -78,6 +78,7 @@ struct TTVSetting
 SETTING* BT848_GetSetting(BT848_SETTING Setting);
 void BT848_ReadSettingsFromIni();
 void BT848_WriteSettingsToIni();
+void BT848_SetMenu(HMENU hMenu);
 
 // create new type for physical memory
 typedef unsigned long PHYS;
@@ -474,7 +475,6 @@ extern BYTE* pDisplay[5];
 extern BYTE* pVBILines[5];
 
 extern int TVTYPE;
-extern int VideoSource;
 
 // 10/19/2000 Mark Rejhon
 // Better NTSC defaults
@@ -492,7 +492,7 @@ extern int VideoSource;
 //int InitialSaturationV = 0xb4;
 //int InitialOverscan    = 4;
 
-extern int CurrentX;
+extern long CurrentX;
 extern int CurrentY;
 extern int CurrentVBILines;
 

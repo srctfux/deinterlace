@@ -37,9 +37,12 @@
 
 #include "stdafx.h"
 #include "bt848.h"
-// FIXME: Temp so that overscan works
-#include "AspectRatio.h"
 #include "OutThreads.h"
+#include "Audio.h"
+#include "AspectRatio.h"
+#include "Tuner.h"
+#include "MixerDev.h"
+#include "ProgramList.h"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -66,6 +69,8 @@ BOOL BT848_BDelay_OnChange(long Data);
 BOOL BT848_Overscan_OnChange(long Data);
 BOOL BT848_Registers_OnChange(long IgnoreCompletely);
 BOOL BT848_WhiteCrush_OnChange(long IgnoreCompletely);
+BOOL CurrentX_OnChange(long NewValue);
+BOOL VideoSource_OnChange(long NewValue);
 
 PMemStruct Risc_dma;
 PMemStruct Vbi_dma[5];
@@ -151,8 +156,6 @@ struct TTVSetting TVSettings[] =
 
 int TVTYPE = -1;
 
-int VideoSource = SOURCE_COMPOSITE;
-
 // 10/19/2000 Mark Rejhon
 // Better NTSC defaults
 // These are the original defaults, likely optimized for PAL (could use refinement).
@@ -163,9 +166,12 @@ int InitialSaturation  = (DEFAULT_SAT_U_NTSC + DEFAULT_SAT_V_NTSC) / 2;
 int InitialSaturationU = DEFAULT_SAT_U_NTSC;
 int InitialSaturationV = DEFAULT_SAT_V_NTSC;
 
-int CurrentX = 720;
+long CurrentX = 720;
+long CustomPixelWidth = 720;
 int CurrentY;
 int CurrentVBILines = 0;
+
+long VideoSource = SOURCE_COMPOSITE;
 
 //===========================================================================
 // CCIR656 Digital Input Support
@@ -419,6 +425,8 @@ void BT848_ResetHardware()
 {
 	BT848_SetDMA(FALSE);
 	BT848_WriteByte(BT848_SRESET, 0);
+	Sleep(100);
+
 	BT848_WriteDword(BT848_RISC_STRT_ADD, RiscBasePhysical);
 	BT848_WriteByte(BT848_CAP_CTL, 0x00);
 	BT848_WriteByte(BT848_VBI_PACK_SIZE, (VBI_SPL / 4) & 0xff);
@@ -781,7 +789,6 @@ BOOL BT848_SetVideoSource(int nInput)
 		break;
 	}
 	
-	VideoSource = nInput;
 	BT848_MaskDataByte(BT848_IFORM, (BYTE) (((MuxSel) & 3) << 5), BT848_IFORM_MUXSEL);
 	BT848_AndOrDataDword(BT848_GPIO_DATA, MuxSel >> 4, ~TVCards[CardType].GPIOMuxMask);
 	return TRUE;
@@ -1328,6 +1335,90 @@ BOOL APIENTRY AdvVideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lPa
 	return (FALSE);
 }
 
+BOOL VideoSource_OnChange(long NewValue)
+{
+	Stop_Capture();
+	VideoSource = NewValue;
+
+	switch(NewValue)
+	{
+	case SOURCE_TUNER:
+		BT848_ResetHardware();
+		BT848_SetGeoSize();
+		WorkoutOverlaySize();
+		if(Audio_MSP_IsPresent())
+		{
+			AudioSource = AUDIOMUX_MSP_RADIO;
+		}
+		else
+		{
+			AudioSource = AUDIOMUX_TUNER;
+		}
+		BT848_SetVideoSource(VideoSource);
+		ChangeChannel(CurrentProgramm);
+		break;
+
+	// MAE 13 Dec 2000 for CCIR656 Digital input
+    case SOURCE_CCIR656:
+		BT848_ResetHardware();
+		BT848_Enable656();
+		WorkoutOverlaySize();
+        AudioSource = AUDIOMUX_EXTERNAL;
+		break;
+/*
+        // FIXME: We really need separate picture settings for each input.
+		// Reset defaults for brightness, contrast, color U and V
+		InitialBrightness = 0;
+		InitialContrast = 0x80;
+		InitialSaturationU = 0x80;
+		InitialSaturationV = 0x80;
+		BT848_SetBrightness(InitialBrightness);
+		BT848_SetContrast(InitialContrast);
+		BT848_SetSaturationU(InitialSaturationU);
+		BT848_SetSaturationV(InitialSaturationV);
+*/
+
+	case SOURCE_COMPOSITE:
+	case SOURCE_SVIDEO:
+	case SOURCE_OTHER1:
+	case SOURCE_OTHER2:
+	case SOURCE_COMPVIASVIDEO:
+		BT848_ResetHardware();
+		BT848_SetGeoSize();
+		WorkoutOverlaySize();
+		BT848_SetVideoSource(VideoSource);
+		AudioSource = AUDIOMUX_EXTERNAL;
+		break;
+	default:
+		break;
+	}
+
+	if(!System_In_Mute)
+	{
+		Audio_SetSource(AudioSource);
+	}
+	Start_Capture();
+	return FALSE;
+}
+
+BOOL CurrentX_OnChange(long NewValue)
+{
+	CurrentX = NewValue;
+	if(CurrentX != 768 &&
+		CurrentX != 720 &&
+		CurrentX != 384 &&
+		CurrentX != 320)
+	{
+		CustomPixelWidth = CurrentX;
+	}
+	Stop_Capture();
+	BT848_SetGeoSize();
+	WorkoutOverlaySize();
+	Start_Capture();
+	return FALSE;
+}
+
+
 
 /////////////////////////////////////////////////////////////////////////////
 // Start of Settings related code
@@ -1465,6 +1556,21 @@ SETTING BT848Settings[BT848_SETTING_LASTONE] =
 		0x7f, 0, 255, 10, NULL,
 		"Hardware", "BtWhiteCrushDown", BT848_WhiteCrush_OnChange,
 	},
+	{
+		"Pixels per Line", SLIDER, 0, &CurrentX,
+		720, 0, 768, 0, NULL,
+		"MainWindow", "CurrentX", CurrentX_OnChange,
+	},
+	{
+		"CustomPixelWidth", SLIDER, 0, &CustomPixelWidth,
+		700, 0, 768, 0, NULL,
+		"MainWindow", "CustomPixelWidth", NULL,
+	},
+	{
+		"Video Source", SLIDER, 0, &VideoSource,
+		SOURCE_COMPOSITE, SOURCE_TUNER, SOURCE_CCIR656, 0, NULL,
+		"Hardware", "VideoSource", VideoSource_OnChange,
+	},
 };
 
 SETTING* BT848_GetSetting(BT848_SETTING Setting)
@@ -1497,3 +1603,20 @@ void BT848_WriteSettingsToIni()
 	}
 }
 
+void BT848_SetMenu(HMENU hMenu)
+{
+	CheckMenuItem(hMenu, IDM_SOURCE_TUNER,         (VideoSource == 0)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_SOURCE_COMPOSITE,     (VideoSource == 1)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_SOURCE_SVIDEO,        (VideoSource == 2)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_SOURCE_OTHER1,        (VideoSource == 3)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_SOURCE_OTHER2,        (VideoSource == 4)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_SOURCE_COMPVIASVIDEO, (VideoSource == 5)?MF_CHECKED:MF_UNCHECKED);
+    CheckMenuItem(hMenu, IDM_SOURCE_CCIR656,       (VideoSource == 6)?MF_CHECKED:MF_UNCHECKED);
+
+	CheckMenuItem(hMenu, ID_SETTINGS_PIXELWIDTH_768, (CurrentX == 768)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, ID_SETTINGS_PIXELWIDTH_720, (CurrentX == 720)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, ID_SETTINGS_PIXELWIDTH_640, (CurrentX == 640)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, ID_SETTINGS_PIXELWIDTH_384, (CurrentX == 384)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, ID_SETTINGS_PIXELWIDTH_320, (CurrentX == 320)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, ID_SETTINGS_PIXELWIDTH_CUSTOM, (CurrentX == CustomPixelWidth)?MF_CHECKED:MF_UNCHECKED);
+}

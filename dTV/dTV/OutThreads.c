@@ -392,6 +392,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 
 		if (lpDDOverlay == NULL || lpDDOverlayBack == NULL)
 		{
+			LOG(" No Overlay surface Created");
 			ExitThread(-1);
 		}
 
@@ -545,6 +546,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 						{
 							PostMessage(hWnd, WM_COMMAND, IDM_OVERLAY_STOP, 0);
 							PostMessage(hWnd, WM_COMMAND, IDM_OVERLAY_START, 0);
+							LOG(" Falling out after LockOverlay");
 							ExitThread(1);
 							return 0;
 						}
@@ -581,7 +583,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				// if there is any exception thrown in the above then just carry on
 				__except (EXCEPTION_EXECUTE_HANDLER) 
 				{ 
-					;
+					LOG(" Crash in output code");
 				}
 
 				// somewhere above we will have locked the buffer, unlock before flip
@@ -592,6 +594,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 					{
 						PostMessage(hWnd, WM_COMMAND, IDM_OVERLAY_STOP, 0);
 						PostMessage(hWnd, WM_COMMAND, IDM_OVERLAY_START, 0);
+						LOG(" Falling out after Surface Unlock");
 						ExitThread(1);
 						return 0;
 					}
@@ -633,6 +636,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 						{
 							PostMessage(hWnd, WM_COMMAND, IDM_OVERLAY_STOP, 0);
 							PostMessage(hWnd, WM_COMMAND, IDM_OVERLAY_START, 0);
+							LOG(" Falling out after flip");
 							ExitThread(1);
 							return 0;
 						}
@@ -677,6 +681,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 	// if there is any exception thrown then exit the thread
 	__except (EXCEPTION_EXECUTE_HANDLER) 
     { 
+		LOG(" Crash in OutThreads main loop");
 		ExitThread(1);
 		return 0;
 	}

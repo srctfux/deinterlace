@@ -93,10 +93,12 @@ void Load_Program_List_ASCII();
 BOOL APIENTRY ProgramListProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 BOOL APIENTRY ChannelNumberProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 BOOL APIENTRY AnalogScanProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
+void ChangeChannel(int NewChannel);
 
 #define MAXPROGS 4096
 
 extern struct TProgramm Programm[MAXPROGS+1];
 extern int CountryCode;
+extern long CurrentProgramm;
 
 #endif

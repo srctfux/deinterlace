@@ -33,6 +33,8 @@
 BYTE TunerDeviceWrite, TunerDeviceRead;
 char TunerStatus[30] = "No Device on I2C-Bus";
 TVTUNERID TunerType = TUNER_ABSENT;
+int ProcessorSpeed = 0;
+int TradeOff = 1;
 
 struct TChannels Channels;
 

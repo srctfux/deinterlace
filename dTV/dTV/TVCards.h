@@ -210,6 +210,8 @@ extern const AUTODETECT878 AutoDectect878[];
 extern const TVTUNERSETUP Tuners[TUNER_LASTONE];
 extern TVTUNERID TunerType;
 extern TVCARDID CardType;
+extern int ProcessorSpeed;
+extern int TradeOff;
 
 
 

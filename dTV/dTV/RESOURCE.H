@@ -556,8 +556,10 @@
 #define IDC_CARDSSELECT                 1771
 #define IDC_EM12                        1771
 #define IDC_TUNERSELECT                 1772
+#define IDC_TRADEOFF                    1773
 #define IDC_AGC                         1774
 #define IDC_DEFAULT                     1774
+#define IDC_PROCESSOR_SPEED             1774
 #define IDC_CRUSH                       1775
 #define IDC_E_CAGC                      1776
 #define IDC_O_CAGC                      1777
@@ -752,9 +754,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        157
+#define _APS_NEXT_RESOURCE_VALUE        158
 #define _APS_NEXT_COMMAND_VALUE         783
-#define _APS_NEXT_CONTROL_VALUE         1874
+#define _APS_NEXT_CONTROL_VALUE         1875
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

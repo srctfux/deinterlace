@@ -45,6 +45,8 @@
 #include "dTV.h"
 #include "vbi.h"
 #include "Status.h"
+#include "Audio.h"
+#include "VBI_VideoText.h"
 
 int CurSel;
 unsigned short SelectButton;
@@ -55,6 +57,8 @@ HWND ProgList;
 struct TProgramm Programm[MAXPROGS+1];
 
 int CountryCode = 1;
+
+long CurrentProgramm = 0;
 
 BOOL APIENTRY ProgramListProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 {
@@ -607,4 +611,25 @@ BOOL APIENTRY AnalogScanProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 	}
 	return (FALSE);
 	UNREFERENCED_PARAMETER(lParam);
+}
+
+//---------------------------------------------------------------------------
+void ChangeChannel(int NewChannel)
+{
+	if (TunerType != TUNER_ABSENT)
+	{
+		if(NewChannel >= 0 && NewChannel < MAXPROGS)
+		{
+			if (Programm[NewChannel].freq != 0)
+			{
+				Audio_SetSource(AUDIOMUX_MUTE);
+				CurrentProgramm = NewChannel;
+				Tuner_SetFrequency(TunerType, MulDiv(Programm[CurrentProgramm].freq * 1000, 16, 1000000));
+				Sleep(20);
+				Audio_SetSource(AudioSource);
+
+				VT_ChannelChange();
+			}
+		}
+	}
 }

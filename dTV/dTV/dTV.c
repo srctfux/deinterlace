@@ -82,8 +82,6 @@ HANDLE hInst = NULL;
 
 BOOL bDoResize = FALSE;
 
-int CurrentProgramm = 0;
-
 HWND VThWnd;
 
 unsigned long freq;
@@ -135,16 +133,12 @@ BOOL bDisplaySplashScreen = TRUE;
 BOOL bIsFullScreen = FALSE;
 BOOL bForceFullScreen = FALSE;
 
-int AudioSource = AUDIOMUX_MUTE;
-
 HFONT currFont = NULL;
 
 UINT CpuFeatureFlags;		// TRB 12/20/00 Processor capability flags
 
-
 BOOL IsFullScreen_OnChange(long NewValue);
 BOOL DisplayStatusBar_OnChange(long NewValue);
-void SwitchToSource(int nInput);
 void Cursor_SetVisibility(BOOL bVisible);
 const char * GetSourceName(int nVideoSource);
 
@@ -282,6 +276,8 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 	char Text[128];
 	char Text1[128];
 	int i, j, k;
+	long nValue;
+
 	switch (message)
 	{
 
@@ -394,7 +390,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			return (TRUE);
 
 		case IDM_CHANNELPLUS:
-			if (VideoSource == SOURCE_TUNER)
+			if (Setting_GetValue(BT848_GetSetting(VIDEOSOURCE)) == SOURCE_TUNER)
 			{
 				// MAE 8 Nov 2000 Added wrap around
 				if (Programm[CurrentProgramm + 1].freq != 0)
@@ -409,7 +405,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_CHANNELMINUS:
-			if (VideoSource == SOURCE_TUNER)
+			if (Setting_GetValue(BT848_GetSetting(VIDEOSOURCE)) == SOURCE_TUNER)
 			{
 				// MAE 8 Nov 2000 Added wrap around
 				if (CurrentProgramm != 0)
@@ -872,32 +868,16 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_SOURCE_TUNER:
-			SwitchToSource(SOURCE_TUNER);
-			break;
-
 		case IDM_SOURCE_COMPOSITE:
-			SwitchToSource(SOURCE_COMPOSITE);
-			break;
-		
 		case IDM_SOURCE_SVIDEO:
-			SwitchToSource(SOURCE_SVIDEO);
-			break;
-
 		case IDM_SOURCE_OTHER1:
-			SwitchToSource(SOURCE_OTHER1);
-			break;
-
 		case IDM_SOURCE_OTHER2:
-			SwitchToSource(SOURCE_OTHER2);
-			break;
-
 		case IDM_SOURCE_COMPVIASVIDEO:
-			SwitchToSource(SOURCE_COMPVIASVIDEO);
-			break;
-
-		// MAE 13 Dec 2000 for CCIR656 Digital input
         case IDM_SOURCE_CCIR656:
-			SwitchToSource(SOURCE_CCIR656);
+			nValue = LOWORD(wParam) - IDM_SOURCE_TUNER;
+			OSD_ShowText(hWnd, GetSourceName(nValue), 0);
+			StatusBar_ShowText(STATUS_KEY, GetSourceName(nValue));
+			Setting_SetValue(BT848_GetSetting(VIDEOSOURCE), nValue);
 			break;
 		        
 		case IDM_HWINFO:
@@ -1012,7 +992,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_CHANNEL_LIST:
-			if (VideoSource == SOURCE_TUNER)
+			if (Setting_GetValue(BT848_GetSetting(VIDEOSOURCE)) == SOURCE_TUNER)
 			{
 				DialogBox(hInst, "CHANNELLIST", hWnd, (DLGPROC) ProgramListProc);
 				OSD_ShowText(hWnd,Programm[CurrentProgramm].Name, 0);
@@ -1070,24 +1050,28 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case ID_SETTINGS_PIXELWIDTH_768:
+			Setting_SetValue(BT848_GetSetting(CURRENTX), 768);
+			break;
+
 		case ID_SETTINGS_PIXELWIDTH_720:
+			Setting_SetValue(BT848_GetSetting(CURRENTX), 720);
+			break;
+		
 		case ID_SETTINGS_PIXELWIDTH_640:
+			Setting_SetValue(BT848_GetSetting(CURRENTX), 640);
+			break;
+		
 		case ID_SETTINGS_PIXELWIDTH_384:
+			Setting_SetValue(BT848_GetSetting(CURRENTX), 384);
+			break;
+		
 		case ID_SETTINGS_PIXELWIDTH_320:
-            switch(LOWORD(wParam))
-            {
-            case ID_SETTINGS_PIXELWIDTH_768:  CurrentX = 768; break;
-		    case ID_SETTINGS_PIXELWIDTH_720:  CurrentX = 720; break;
-		    case ID_SETTINGS_PIXELWIDTH_640:  CurrentX = 640; break;
-		    case ID_SETTINGS_PIXELWIDTH_384:  CurrentX = 384; break; 
-		    case ID_SETTINGS_PIXELWIDTH_320:  CurrentX = 320; break;
-            default:                          CurrentX = 720; break;
-            }
-			sprintf(Text, "%d Pixel Sampling", CurrentX);
-			Stop_Capture();
-			BT848_SetGeoSize();
-			WorkoutOverlaySize();
-			Start_Capture();
+			Setting_SetValue(BT848_GetSetting(CURRENTX), 320);
+			break;
+		
+		case ID_SETTINGS_PIXELWIDTH_CUSTOM:
+			Setting_SetValue(BT848_GetSetting(CURRENTX), 
+				Setting_GetValue(BT848_GetSetting(CUSTOMPIXELWIDTH)));
 			break;
 
 		case IDM_SPACEBAR:
@@ -1133,7 +1117,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_SHOW_OSD:
-			OSD_ShowText(hWnd, GetSourceName(VideoSource), 0);
+			OSD_ShowText(hWnd, GetSourceName(Setting_GetValue(BT848_GetSetting(VIDEOSOURCE))), 0);
 			break;
 
 		case IDM_HIDE_OSD:
@@ -1386,7 +1370,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		break;
 
 	case WM_CHAR:
-		if (VideoSource == SOURCE_TUNER)
+		if (Setting_GetValue(BT848_GetSetting(VIDEOSOURCE)) == SOURCE_TUNER)
 		{
 			if (((char) wParam >= '0') && ((char) wParam <= '9'))
 			{
@@ -1578,16 +1562,16 @@ void MainWndOnInitBT(HWND hWnd)
         // EAS20001226: Don't clobber what was read in from the ini file.
 		//AudioSource = AUDIOMUX_EXTERNAL;
 
-		if(VideoSource == SOURCE_TUNER)
+		if(Setting_GetValue(BT848_GetSetting(VIDEOSOURCE)) == SOURCE_TUNER)
 		{
 			ChangeChannel(CurrentProgramm);
 		}
 
-		StatusBar_ShowText(STATUS_KEY, GetSourceName(VideoSource));
+		StatusBar_ShowText(STATUS_KEY, GetSourceName(Setting_GetValue(BT848_GetSetting(VIDEOSOURCE))));
 
         // OK we're ready to go
 		BT848_ResetHardware();
-        if (VideoSource == SOURCE_CCIR656)
+        if (Setting_GetValue(BT848_GetSetting(VIDEOSOURCE)) == SOURCE_CCIR656)
         {
     		BT848_Enable656();
         }
@@ -1596,12 +1580,12 @@ void MainWndOnInitBT(HWND hWnd)
     		BT848_SetGeoSize();
         }
 		WorkoutOverlaySize();
-		Start_Capture();
-
+		
 		SetMenuAnalog();
 
 		SetTimer(hWnd, 10, 5000, NULL);
 		bDoResize = TRUE;
+		Start_Capture();
 	}
 	else
 	{
@@ -1794,12 +1778,6 @@ void SetMenuAnalog()
 	CheckMenuItem(hMenu, IDM_TYPEFORMAT_8, (TVTYPE == 8)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_TYPEFORMAT_9, (TVTYPE == 9)?MF_CHECKED:MF_UNCHECKED);
 
-	CheckMenuItem(hMenu, ID_SETTINGS_PIXELWIDTH_768, (CurrentX == 768)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, ID_SETTINGS_PIXELWIDTH_720, (CurrentX == 720)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, ID_SETTINGS_PIXELWIDTH_640, (CurrentX == 640)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, ID_SETTINGS_PIXELWIDTH_384, (CurrentX == 384)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, ID_SETTINGS_PIXELWIDTH_320, (CurrentX == 320)?MF_CHECKED:MF_UNCHECKED);
-
 	EnableMenuItem(hMenu, IDM_SOURCE_TUNER, (TVCards[TVTYPE].TunerInput != -1)?MF_ENABLED:MF_GRAYED);
 	if(TVCards[TVTYPE].SVideoInput == -1)
 	{
@@ -1815,14 +1793,6 @@ void SetMenuAnalog()
 		EnableMenuItem(hMenu, IDM_SOURCE_OTHER2, (TVCards[TVTYPE].nVideoInputs > 4)?MF_ENABLED:MF_GRAYED);
 		EnableMenuItem(hMenu, IDM_SOURCE_COMPVIASVIDEO, MF_ENABLED);
 	}
-
-	CheckMenuItem(hMenu, IDM_SOURCE_TUNER,         (VideoSource == 0)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_SOURCE_COMPOSITE,     (VideoSource == 1)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_SOURCE_SVIDEO,        (VideoSource == 2)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_SOURCE_OTHER1,        (VideoSource == 3)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_SOURCE_OTHER2,        (VideoSource == 4)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_SOURCE_COMPVIASVIDEO, (VideoSource == 5)?MF_CHECKED:MF_UNCHECKED);
-    CheckMenuItem(hMenu, IDM_SOURCE_CCIR656,       (VideoSource == 6)?MF_CHECKED:MF_UNCHECKED);
 
 	CheckMenuItem(hMenu, IDM_MUTE,    System_In_Mute?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_AUDIO_0, (AudioSource == 0)?MF_CHECKED:MF_UNCHECKED);
@@ -1868,6 +1838,7 @@ void SetMenuAnalog()
 	OutThreads_SetMenu(hMenu);
 	Deinterlace_SetMenu(hMenu);
 	FLT_TNoise_SetMenu(hMenu);
+	BT848_SetMenu(hMenu);
 }
 
 //---------------------------------------------------------------------------
@@ -1876,27 +1847,6 @@ void CleanUpMemory()
 	Mixer_Exit();
 	VBI_Exit();
 	BT848_MemoryFree();
-}
-
-//---------------------------------------------------------------------------
-void ChangeChannel(int NewChannel)
-{
-	if (TunerType != TUNER_ABSENT)
-	{
-		if(NewChannel >= 0 && NewChannel < MAXPROGS)
-		{
-			if (Programm[NewChannel].freq != 0)
-			{
-				Audio_SetSource(AUDIOMUX_MUTE);
-				CurrentProgramm = NewChannel;
-				Tuner_SetFrequency(TunerType, MulDiv(Programm[CurrentProgramm].freq * 1000, 16, 1000000));
-				Sleep(20);
-				Audio_SetSource(AudioSource);
-
-				VT_ChannelChange();
-			}
-		}
-	}
 }
 
 //---------------------------------------------------------------------------
@@ -2097,74 +2047,6 @@ BOOL ShowMenu_OnChange(long NewValue)
 	}
 	return FALSE;
 }
-
-void SwitchToSource(int nInput)
-{
-	Stop_Capture();
-	VideoSource = nInput;
-	OSD_ShowText(hWnd, GetSourceName(VideoSource), 0);
-	StatusBar_ShowText(STATUS_KEY, GetSourceName(VideoSource));
-
-	switch(nInput)
-	{
-	case SOURCE_TUNER:
-		BT848_ResetHardware();
-		BT848_SetGeoSize();
-		WorkoutOverlaySize();
-		if(Audio_MSP_IsPresent())
-		{
-			AudioSource = AUDIOMUX_MSP_RADIO;
-		}
-		else
-		{
-			AudioSource = AUDIOMUX_TUNER;
-		}
-		BT848_SetVideoSource(VideoSource);
-		ChangeChannel(CurrentProgramm);
-		break;
-
-	// MAE 13 Dec 2000 for CCIR656 Digital input
-    case SOURCE_CCIR656:
-		BT848_ResetHardware();
-		BT848_Enable656();
-		WorkoutOverlaySize();
-        AudioSource = AUDIOMUX_EXTERNAL;
-		break;
-/*
-        // FIXME: We really need separate picture settings for each input.
-		// Reset defaults for brightness, contrast, color U and V
-		InitialBrightness = 0;
-		InitialContrast = 0x80;
-		InitialSaturationU = 0x80;
-		InitialSaturationV = 0x80;
-		BT848_SetBrightness(InitialBrightness);
-		BT848_SetContrast(InitialContrast);
-		BT848_SetSaturationU(InitialSaturationU);
-		BT848_SetSaturationV(InitialSaturationV);
-*/
-
-	case SOURCE_COMPOSITE:
-	case SOURCE_SVIDEO:
-	case SOURCE_OTHER1:
-	case SOURCE_OTHER2:
-	case SOURCE_COMPVIASVIDEO:
-		BT848_ResetHardware();
-		BT848_SetGeoSize();
-		WorkoutOverlaySize();
-		BT848_SetVideoSource(VideoSource);
-		AudioSource = AUDIOMUX_EXTERNAL;
-		break;
-	default:
-		break;
-	}
-
-	if(!System_In_Mute)
-	{
-		Audio_SetSource(AudioSource);
-	}
-	Start_Capture();
-}
-
 
 ////////////////////////////////////////////////////////////////////////////
 // Start of Settings related code

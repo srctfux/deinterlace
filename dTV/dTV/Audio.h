@@ -113,4 +113,6 @@ extern int MSPMinorMode;
 extern int MSPMode;
 extern int MSPStereo;
 
+extern long AudioSource;
+
 #endif

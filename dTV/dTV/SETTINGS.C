@@ -128,9 +128,10 @@ void LoadSettingsFromIni()
 	DebugLogEnabled = GetPrivateProfileInt("Files", "DebugLogEnabled", DebugLogEnabled, szIniFile);
 
 	CardType = GetPrivateProfileInt("Hardware", "CardType", TVCARD_UNKNOWN, szIniFile);
-	VideoSource = GetPrivateProfileInt("Hardware", "VideoSource", VideoSource, szIniFile);
 	TunerType = GetPrivateProfileInt("Hardware", "TunerType", TUNER_ABSENT, szIniFile); 
 	TVTYPE = GetPrivateProfileInt("Hardware", "TVType", -1, szIniFile); 
+	ProcessorSpeed = GetPrivateProfileInt("Hardware", "ProcessorSpeed", ProcessorSpeed, szIniFile); 
+	TradeOff = GetPrivateProfileInt("Hardware", "TradeOff", TradeOff, szIniFile); 
 
 	Capture_VBI = (GetPrivateProfileInt("Show", "CaptureVBI", Capture_VBI, szIniFile) != 0);  
 	CurrentProgramm = GetPrivateProfileInt("Show", "LastProgram", CurrentProgramm, szIniFile);
@@ -336,9 +337,10 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("Files", "DebugLogEnabled", DebugLogEnabled, szIniFile);
 
 	WritePrivateProfileInt("Hardware", "CardType", CardType, szIniFile);
-	WritePrivateProfileInt("Hardware", "VideoSource", VideoSource, szIniFile);
 	WritePrivateProfileInt("Hardware", "TunerType", TunerType, szIniFile); 
 	WritePrivateProfileInt("Hardware", "TVType", TVTYPE, szIniFile); 
+	WritePrivateProfileInt("Hardware", "ProcessorSpeed", ProcessorSpeed, szIniFile); 
+	WritePrivateProfileInt("Hardware", "TradeOff", TradeOff, szIniFile); 
 
 	WritePrivateProfileInt("Show", "CaptureVBI", Capture_VBI, szIniFile);
 	WritePrivateProfileInt("Show", "LastProgram", CurrentProgramm, szIniFile);
