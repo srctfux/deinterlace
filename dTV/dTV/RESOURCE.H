@@ -199,6 +199,7 @@
 #define IDM_WINPOS_AUTOSIZE             812
 #define IDM_CHANNEL_PREVIOUS            813
 #define IDM_VBI_WSS                     814
+#define IDM_AUTOHIDE_OSD                815
 #define IDM_END                         1032
 #define IDM_SOURCE_TUNER                1089
 #define IDM_SOURCE_COMPOSITE            1090
@@ -794,7 +795,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        158
-#define _APS_NEXT_COMMAND_VALUE         815
+#define _APS_NEXT_COMMAND_VALUE         816
 #define _APS_NEXT_CONTROL_VALUE         1879
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

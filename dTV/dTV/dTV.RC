@@ -749,6 +749,9 @@ BEGIN
         MENUITEM "&Always on Top",              IDM_ON_TOP
         MENUITEM "&Pause\tP",                   IDM_CAPTURE_PAUSE
         MENUITEM "Take Sti&ll Picture\tL",      IDM_TAKESTILL
+        MENUITEM "Show &OSD\tEnter",            IDM_SHOW_OSD
+        MENUITEM "&Hide OSD\tBackspace",        IDM_HIDE_OSD
+        MENUITEM "A&utohide OSD",               IDM_AUTOHIDE_OSD, CHECKED
     END
     POPUP "&AspectRatio"
     BEGIN

@@ -1132,6 +1132,19 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			OSD_Clear(hWnd);
 			break;
 
+		case IDM_AUTOHIDE_OSD:
+			if (Setting_GetValue(OSD_GetSetting(OSD_AUTOHIDE_SCREEN)))
+			{
+				OSD_ShowText(hWnd, "Persistent OSD screens", 0);
+				Setting_SetValue(OSD_GetSetting(OSD_AUTOHIDE_SCREEN), FALSE);
+			}
+			else
+			{
+				OSD_ShowText(hWnd, "Autohide OSD screens", 0);
+				Setting_SetValue(OSD_GetSetting(OSD_AUTOHIDE_SCREEN), TRUE);
+			}
+			break;
+
 		case IDM_SET_OSD_TEXT:
             // Useful for external programs for custom control of dTV's OSD display
             // Such as macros in software such as Girder, etc.
@@ -1914,6 +1927,7 @@ void SetMenuAnalog()
 	CheckMenuItem(hMenu, IDM_ON_TOP,            bAlwaysOnTop?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_AUTOSTEREO,        AutoStereoSelect?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_SPLASH_ON_STARTUP, bDisplaySplashScreen?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_AUTOHIDE_OSD,      Setting_GetValue(OSD_GetSetting(OSD_AUTOHIDE_SCREEN))?MF_CHECKED:MF_UNCHECKED);
 
 	AspectRatio_SetMenu(hMenu);
 	FD60_SetMenu(hMenu);
