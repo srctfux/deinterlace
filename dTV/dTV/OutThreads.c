@@ -82,6 +82,7 @@
 #include "FD_60Hz.h"
 #include "FD_50Hz.h"
 #include "FD_Common.h"
+#include "CPU.h"
 
 // Thread related variables
 BOOL                bStopThread = FALSE;
@@ -382,6 +383,18 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 		StartAverageCounterTicks = RunningAverageCounterTicks;
 	}
 
+	// set up Deinterlace Info struct
+	memset(&info, 0, sizeof(info));
+	info.CpuFeatureFlags = CpuFeatureFlags;
+	if(CpuFeatureFlags & FEATURE_SSE)
+	{
+		info.pMemcpy = memcpySSE;
+	}
+	else
+	{
+		info.pMemcpy = memcpyMMX;
+	}
+
 	// catch anything fatal in this loop so we don't crash the machine
 	__try
 	{
@@ -411,8 +424,6 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 			UpdatePALPulldownMode(NULL);
 		else
 			UpdateNTSCPulldownMode(NULL);
-
-		memset(&info, 0, sizeof(info));
 
 		// start the capture off
 		BT848_Restart_RISC_Code();

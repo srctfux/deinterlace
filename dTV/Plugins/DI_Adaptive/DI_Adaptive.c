@@ -23,47 +23,39 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
-#include "deinterlace.h"
-#include "cpu.h"
-#define DOLOGGING
-#include "DebugLog.h"
-#include "OutThreads.h"
-#include "Status.h"
-#include "FD_60Hz.h"
-#include "FD_Common.h"
-#include "DI_Adaptive.h"
-#include "DI_Bob.h"
+#include "windows.h"
+#include "dTV_Deinterlace.h"
 
-long				StaticImageFieldCount = 100;
-long				LowMotionFieldCount = 4;
-ePULLDOWNMODES		StaticImageMode = SIMPLE_WEAVE;
-ePULLDOWNMODES		LowMotionMode = VIDEO_MODE_2FRAME;
-ePULLDOWNMODES		HighMotionMode = VIDEO_MODE_2FRAME;
-long				AdaptiveThres32Pulldown = 15;
-long				AdaptiveThresPulldownMismatch = 900;
+long		StaticImageFieldCount = 100;
+long		LowMotionFieldCount = 4;
+long		StaticImageMode = INDEX_WEAVE;
+long		LowMotionMode = INDEX_VIDEO_2FRAME;
+long		HighMotionMode = INDEX_VIDEO_2FRAME;
+long		AdaptiveThres32Pulldown = 15;
+long		AdaptiveThresPulldownMismatch = 900;
 
 
-static ePULLDOWNMODES CurrentMode = PULLDOWNMODES_LAST_ONE;		// Will use HighMotionMode after ini file is read
+long CurrentMode = -1;		// Will use HighMotionMode after ini file is read
+DEINTERLACE_METHOD* DeintMethods[100] = {NULL,};
 
 ///////////////////////////////////////////////////////////////////////////////
 // UpdateAdaptiveMode
 //
 // Switches to a new adaptive mode.  Updates the status bar if needed.
 ///////////////////////////////////////////////////////////////////////////////
-static void UpdateAdaptiveMode(ePULLDOWNMODES mode)
+void UpdateAdaptiveMode(long mode)
 {
 	char AdaptiveName[200], *ModeName;
 
 	if (CurrentMode == mode)
 		return;
 
-	ModeName = DeintMethods[mode].szAdaptiveName;
+	ModeName = DeintMethods[mode]->szAdaptiveName;
 	if (ModeName == NULL)
-		ModeName = DeintMethods[mode].szName;
+		ModeName = DeintMethods[mode]->szName;
 
-	sprintf(AdaptiveName, "Adaptive - %s", ModeName);
-	StatusBar_ShowText(STATUS_PAL, AdaptiveName);
+	wsprintf(AdaptiveName, "Adaptive - %s", ModeName);
+	//StatusBar_ShowText(STATUS_PAL, AdaptiveName);
 	CurrentMode = mode;
 }
 
@@ -84,29 +76,27 @@ static void UpdateAdaptiveMode(ePULLDOWNMODES mode)
 // modes.  On slower machines VIDEO_MODE_BOB (high) and VIDEO_MODE_WEAVE (low)
 // can be used instead since they're less CPU-intensive.
 ///////////////////////////////////////////////////////////////////////////////
-BOOL AdaptiveDeinterlace(DEINTERLACE_INFO *info)
+BOOL DeinterlaceAdaptive(DEINTERLACE_INFO *info)
 {
 	static long MATCH_COUNT = 0;
 
 	// If this is our first time, update the current adaptive mode to whatever
 	// the ini file said our high-motion mode should be.
-	if (CurrentMode == PULLDOWNMODES_LAST_ONE)
+	if (CurrentMode == -1)
 		UpdateAdaptiveMode(HighMotionMode);
 
 	// reset MATCH_COUNT when we are called and the info
 	// struct doesn't contain at least an odd and an even frame
 	if(info->EvenLines[0] == NULL || info->OddLines[0] == NULL)
 	{
-		MATCH_COUNT = 0;
-		UpdateAdaptiveMode(HighMotionMode);
-		return Bob(info);
+		return FALSE;
 	}
 
 	// If the field difference is bigger than the threshold, then
 	// the current field is very different from the field two fields ago.
 	// so reset the match count and switch back
 	// to either low or high motion
-	CompareFields(info);
+	//CompareFields(info);
     if(info->FieldDiff > AdaptiveThres32Pulldown)
 	{
 		MATCH_COUNT = 0;
@@ -116,12 +106,10 @@ BOOL AdaptiveDeinterlace(DEINTERLACE_INFO *info)
 		if (CurrentMode == StaticImageMode &&
 			info->FieldDiff < AdaptiveThresPulldownMismatch)
 		{
-			LOG(" Match count 0, switching to low-motion");
 			UpdateAdaptiveMode(LowMotionMode);
 		}
 		else if(CurrentMode != HighMotionMode)
 		{
-			LOG(" Match count 0, switching to high-motion");
 			UpdateAdaptiveMode(HighMotionMode);
 		}
 	}
@@ -132,17 +120,15 @@ BOOL AdaptiveDeinterlace(DEINTERLACE_INFO *info)
 		if (MATCH_COUNT >= LowMotionFieldCount &&
 			CurrentMode == HighMotionMode)
 		{
-			LOG(" Match count %ld, switching to low-motion", MATCH_COUNT);
 			UpdateAdaptiveMode(LowMotionMode);
 		}
 		if (MATCH_COUNT >= StaticImageFieldCount &&
 			CurrentMode == LowMotionMode)
 		{
-			LOG(" Match count %ld, switching to static-image", MATCH_COUNT);
 			UpdateAdaptiveMode(StaticImageMode);
 		}
 	}
-	return DeintMethods[CurrentMode].pfnAlgorithm(info);
+	return DeintMethods[CurrentMode]->pfnAlgorithm(info);
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -164,20 +150,20 @@ SETTING DI_AdaptiveSettings[DI_ADAPTIVE_SETTING_LASTONE] =
 	},
 	{
 		"Static Image Mode", ITEMFROMLIST, 0, &StaticImageMode,
-		SIMPLE_WEAVE, 0, PULLDOWNMODES_LAST_ONE - 1, 1, 1,
-		DeintModeNames,
+		INDEX_WEAVE, 0, 99, 1, 1,
+		NULL,
 		"Pulldown", "StaticImageMode", NULL,
 	},
 	{
 		"Low Motion Mode", ITEMFROMLIST, 0, &LowMotionMode,
-		VIDEO_MODE_2FRAME, 0, PULLDOWNMODES_LAST_ONE - 1, 1, 1,
-		DeintModeNames,
+		INDEX_VIDEO_2FRAME, 0, 99, 1, 1,
+		NULL,
 		"Pulldown", "LowMotionMode", NULL,
 	},
 	{
 		"High Motion Mode", ITEMFROMLIST, 0, &HighMotionMode,
-		VIDEO_MODE_2FRAME, 0, PULLDOWNMODES_LAST_ONE - 1, 1, 1,
-		DeintModeNames,
+		INDEX_VIDEO_2FRAME, 0, 99, 1, 1,
+		NULL,
 		"Pulldown", "HighMotionMode", NULL,
 	},
 	{
@@ -194,32 +180,32 @@ SETTING DI_AdaptiveSettings[DI_ADAPTIVE_SETTING_LASTONE] =
 	},
 };
 
-SETTING* DI_Adaptive_GetSetting(DI_ADAPTIVE_SETTING Setting)
+DEINTERLACE_METHOD AdaptiveMethod =
 {
-	if(Setting > -1 && Setting < DI_ADAPTIVE_SETTING_LASTONE)
-	{
-		return &(DI_AdaptiveSettings[Setting]);
-	}
-	else
-	{
-		return NULL;
-	}
+	"Adaptive", 
+	NULL, 
+	FALSE, 
+	FALSE, 
+	DeinterlaceAdaptive, 
+	50, 
+	60,
+	DI_ADAPTIVE_SETTING_LASTONE,
+	DI_AdaptiveSettings,
+	9,
+	NULL,
+	NULL,
+	INDEX_ADAPTIVE,
+	0,
+	0,
+	-1,
+};
+
+__declspec(dllexport) DEINTERLACE_METHOD* GetDeinterlacePluginInfo(long CpuFeatureFlags)
+{
+	return &AdaptiveMethod;
 }
 
-void DI_Adaptive_ReadSettingsFromIni()
+BOOL WINAPI _DllMainCRTStartup(HANDLE hInst, ULONG ul_reason_for_call, LPVOID lpReserved)
 {
-	int i;
-	for(i = 0; i < DI_ADAPTIVE_SETTING_LASTONE; i++)
-	{
-		Setting_ReadFromIni(&(DI_AdaptiveSettings[i]));
-	}
-}
-
-void DI_Adaptive_WriteSettingsToIni()
-{
-	int i;
-	for(i = 0; i < DI_ADAPTIVE_SETTING_LASTONE; i++)
-	{
-		Setting_WriteToIni(&(DI_AdaptiveSettings[i]));
-	}
+	return TRUE;
 }
