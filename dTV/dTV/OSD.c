@@ -73,6 +73,9 @@
 #include "dTV.h"
 #include "VBI_WSSdecode.h"
 
+extern long NumFilters;
+extern FILTER_METHOD* Filters[];
+
 #define	OSD_SCREEN_1	1
 #define	OSD_SCREEN_2	2
 #define	OSD_SCREEN_3	3
@@ -611,6 +614,15 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 
 		// Deinterlace mode
 		nLine = -1;
+		if (Setting_GetValue(OutThreads_GetSetting(DOACCURATEFLIPS)))
+		{
+			strcpy(szInfo, "Judder Terminator ON");
+		}
+		else
+		{
+			strcpy(szInfo, "Judder Terminator OFF");
+		}
+		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine--, dfMargin, dfSize));
 		if (Setting_GetValue(FD60_GetSetting(FALLBACKTOVIDEO)))
 		{
 			strcpy(szInfo, "Fallback on Bad Pulldown ON");
@@ -633,24 +645,19 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 
 		// Filters
 		nLine = -1;
-		if (Setting_GetValue(Filter_GetSetting(-1, USETEMPORALNOISEFILTER)))
+		for (i = 0 ; i < NumFilters ; i++)
 		{
-			strcpy(szInfo, "Noise Filter ON");
+			strcpy(szInfo, Filters[i]->szName);
+			if (Filters[i]->bActive)
+			{
+				strcat(szInfo, " ON");
+			}
+			else
+			{
+				strcat(szInfo, " OFF");
+			}
+			OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine--, dfMargin, dfSize));
 		}
-		else
-		{
-			strcpy(szInfo, "Noise Filter OFF");
-		}
-		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine--, dfMargin, dfSize));
-		if (Setting_GetValue(Filter_GetSetting(-1, USEGAMMAFILTER)))
-		{
-			strcpy(szInfo, "Gamma Filter ON");
-		}
-		else
-		{
-			strcpy(szInfo, "Gamma Filter OFF");
-		}
-		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine--, dfMargin, dfSize));
 		break;
 
 	// WSS DATA DECODING SCREEN
