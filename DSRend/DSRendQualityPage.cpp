@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendQualityPage.cpp,v 1.2 2002-03-08 11:14:04 tobbej Exp $
+// $Id: DSRendQualityPage.cpp,v 1.3 2002-07-06 16:38:30 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,10 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.2  2002/03/08 11:14:04  tobbej
+// changed property page a bit
+// removed some debug output
+//
 // Revision 1.1.1.1  2002/02/03 10:52:53  tobbej
 // First import of new direct show renderer filter
 //
@@ -131,17 +135,35 @@ LRESULT CDSRendQualityPage::OnClickedRestore(WORD wNotifyCode, WORD wID, HWND hW
 HRESULT CDSRendQualityPage::SetObjects( ULONG nObjects, IUnknown** ppUnk )
 {
 	ATLTRACE(_T("%s(%d) : CDSRendQualityPage::SetObjects\n"),__FILE__,__LINE__);
-	if(ppUnk==NULL)
-		return E_POINTER;
-	if(nObjects!=1)
-		return E_FAIL;
-
-	HRESULT hr=(*ppUnk)->QueryInterface(IID_IQualProp,(void **)&m_pQuality);
-	if(FAILED(hr))
+	
+	
+	//check if the objects is to be released
+	if(nObjects==0)
 	{
-		return E_NOINTERFACE;
+		if(m_pQuality==NULL)
+		{
+			return E_UNEXPECTED;
+		}
+		else
+		{
+			m_pQuality=NULL;
+			return S_OK;
+		}
 	}
-	return IPropertyPageImpl<CDSRendQualityPage>::SetObjects(nObjects,ppUnk);
+	else
+	{
+		if(ppUnk==NULL)
+			return E_POINTER;
+		if(nObjects!=1)
+			return E_FAIL;
+
+		HRESULT hr=(*ppUnk)->QueryInterface(IID_IQualProp,(void **)&m_pQuality);
+		if(FAILED(hr))
+		{
+			return E_NOINTERFACE;
+		}
+		return IPropertyPageImpl<CDSRendQualityPage>::SetObjects(nObjects,ppUnk);
+	}
 }
 
 void CDSRendQualityPage::findUpstreamFilter()
@@ -349,3 +371,16 @@ void CDSRendQualityPage::updateDialog()
 		::EnableWindow(hWnd,FALSE);
 	}
 }
+
+/*LRESULT CDSRendQualityPage::OnEraseBkgnd(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
+{
+	HDC hDC=(HDC)wParam;
+	HWND hParent=GetParent();
+	POINT pt={0,0};
+	MapWindowPoints(hParent, &pt, 1);
+
+	OffsetWindowOrgEx(hDC,pt.x, pt.y,&pt);
+	LRESULT lResult = SendMessage(hParent,WM_ERASEBKGND,(WPARAM)hDC, 0L);
+	SetWindowOrgEx(hDC,pt.x, pt.y,NULL);
+	return lResult;
+}*/

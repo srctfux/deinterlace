@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendQualityPage.h,v 1.1.1.1 2002-02-03 10:52:53 tobbej Exp $
+// $Id: DSRendQualityPage.h,v 1.2 2002-07-06 16:38:30 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1.1.1  2002/02/03 10:52:53  tobbej
+// First import of new direct show renderer filter
+//
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -76,6 +79,7 @@ END_COM_MAP()
 BEGIN_MSG_MAP(CDSRendQualityPage)
 	CHAIN_MSG_MAP(IPropertyPageImpl<CDSRendQualityPage>)
 	MESSAGE_HANDLER(WM_TIMER, OnTimer)
+	//MESSAGE_HANDLER(WM_ERASEBKGND, OnEraseBkgnd)
 	COMMAND_HANDLER(IDC_RESET, BN_CLICKED, OnClickedReset)
 	COMMAND_HANDLER(IDC_RESTORE, BN_CLICKED, OnClickedRestore)
 END_MSG_MAP()
@@ -100,6 +104,7 @@ private:
 	long m_UpStreamDrawnStart;
 	long m_UpStreamDroppedStart;
 	LRESULT OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
+	//LRESULT OnEraseBkgnd(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 	LRESULT OnClickedReset(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
 	LRESULT OnClickedRestore(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
 };
