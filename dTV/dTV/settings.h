@@ -39,8 +39,8 @@
 #include "structs.h"
 #include "globals.h"
 
-void LoadSettingsFromIni();
-void WriteSettingsToIni();
+void LoadSettingsFromIni(LPSTR Name);  // add parm
+void WriteSettingsToIni(LPSTR Name);   // add parm
 void WritePrivateProfileInt(LPCTSTR lpAppName,  LPCTSTR lpKeyName,  int nValue, LPCTSTR lpFileName);
 
 #define INIFILE "dTV.ini"

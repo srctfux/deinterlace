@@ -54,8 +54,13 @@ void LoadSettingsFromIni(LPSTR Name)
 	int i;
 
 	GetCurrentDirectory(MAX_PATH, szIniFile);
-	strcat(szIniFile, "\\dTV.ini");
-
+	if (*Name == 0)			// add parm TRB 12/00
+		strcat(szIniFile, "\\dTV.ini");
+	else
+	{
+		strcat(szIniFile, "\\");
+		strcat(szIniFile, Name);
+	}
 	emstartx = GetPrivateProfileInt("MainWindow", "StartLeft", 10, szIniFile);
 	emstarty = GetPrivateProfileInt("MainWindow", "StartTop", 10, szIniFile);
 	emsizex = GetPrivateProfileInt("MainWindow", "StartWidth", 754, szIniFile);
@@ -310,14 +315,21 @@ void LoadSettingsFromIni(LPSTR Name)
 	AspectConsistencyTime = GetPrivateProfileInt("ASPECT", "AspectConsistencyTime", AspectConsistencyTime, szIniFile);
 }
 
-void WriteSettingsToIni()
+void WriteSettingsToIni(LPSTR Name)
 {
 	char szIniFile[MAX_PATH];
 	char szKey[128];
 	int i;
 
 	GetCurrentDirectory(MAX_PATH, szIniFile);
-	strcat(szIniFile, "\\dTV.ini");
+	
+	if (*Name == 0)			// add parm TRB 12/00
+		strcat(szIniFile, "\\dTV.ini");
+	else
+	{
+		strcat(szIniFile, "\\");
+		strcat(szIniFile, Name);
+	}
 
 	WritePrivateProfileInt("MainWindow", "AlwaysOnTop", bAlwaysOnTop, szIniFile);
 	WritePrivateProfileInt("MainWindow", "DisplaySplashScreen", bDisplaySplashScreen, szIniFile);

@@ -177,7 +177,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		return FALSE;
 	}
 
-	LoadSettingsFromIni();
+	LoadSettingsFromIni(lpCmdLine);
 	if (bDisplaySplashScreen)
 	{
 		SplashWnd = CreateDialog(hInst, "SPLASHBOX", NULL, SplashProc);
@@ -289,7 +289,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 	ExitDD();
 	// save settings
-	WriteSettingsToIni();
+	WriteSettingsToIni(lpCmdLine);
 	return msg.wParam;
 }
 
