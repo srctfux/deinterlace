@@ -56,6 +56,7 @@ void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 	static long RepeatCount;
 	static long LastPolarity;
 	static long LastDiff;
+	static DWORD StartFilmTicks = 0;
 
 	// call with pInfo as NULL to reset static variables when we start the thread
 	// each time
@@ -67,6 +68,8 @@ void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 		LastDiff = 0;
 		UpdatePulldownStatus();
 		dwLastFlipTicks = -1;
+		ResetModeSwitches();
+		StartFilmTicks = 0;
 		return;
 	}
 
@@ -79,8 +82,24 @@ void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 			{
 				if(RepeatCount < PulldownRepeatCount)
 				{
-					RepeatCount++;
-					LOG("Upped RepeatCount %d", RepeatCount);
+					if(RepeatCount == 0)
+					{
+						RepeatCount = 1;
+					}
+					else
+					{
+						LOG("Film Detect Gap %d", (GetTickCount() - StartFilmTicks));
+						if((GetTickCount() - StartFilmTicks) < 100)
+						{
+							RepeatCount++;
+							LOG("Upped RepeatCount %d", RepeatCount);
+						}
+						else
+						{
+							RepeatCount = 1;					
+							LOG("Upped RepeatCount - Too long", RepeatCount);
+						}
+					}
 				}
 				else
 				{
@@ -104,6 +123,7 @@ void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 				RepeatCount = 1;
 				LOG("Reset RepeatCount %d", RepeatCount);
 			}
+			StartFilmTicks = GetTickCount();
 		}
 	}
 	else
