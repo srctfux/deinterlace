@@ -40,6 +40,12 @@ static BOOL TwoFrameSSE(DEINTERLACE_INFO *info);
 //
 
 
+// debugging feature
+// output the value of mm4 at this point which is pink where we will weave
+// and green were we are going to bob
+// uncomment next line to see this
+//#define CHECK_BOBWEAVE
+
 BOOL DeinterlaceFieldGreedy2Frame(DEINTERLACE_INFO *info)
 {
 	int Line;

@@ -128,22 +128,33 @@ MAINLOOP_LABEL:
 
 		pcmpgtd mm4, DwordTwo
 
-		movq mm5, mm4
-// mm4 now is 1 where we want to bob and 0 where we want to weave
-		pand	mm4, mm0				
-		pandn	mm5, mm7				
-		por		mm4, mm5				
-
 		// Put the pixels in place.
 		add edi, 8
 		mov dword ptr[B0], edi
 		mov edi, dword ptr[Dest]
+
+// debugging feature
+// output the value of mm4 at this point which is pink where we will weave
+// and green were we are going to bob
+#ifdef CHECK_BOBWEAVE
 #ifdef IS_SSE
 		movntq qword ptr[edi], mm4
 #else
 		movq qword ptr[edi], mm4
 #endif
+#else
 
+		movq mm5, mm4
+// mm4 now is 1 where we want to bob and 0 where we want to weave
+		pand	mm4, mm0				
+		pandn	mm5, mm7				
+		por		mm4, mm5				
+#ifdef IS_SSE
+		movntq qword ptr[edi], mm4
+#else
+		movq qword ptr[edi], mm4
+#endif
+#endif
 		// Advance to the next set of pixels.
 		add edi, 8
 		add eax, 8

@@ -1526,6 +1526,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			OSD_Redraw(hWnd, sPaint.hdc);
 			EndPaint(hWnd, &sPaint);
             ValidateRect(hWnd, &sPaint.rcPaint);
+			StatusBar_Repaint();
 		}
 		break;
 
@@ -1545,14 +1546,14 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 //---------------------------------------------------------------------------
 void SaveWindowPos(HWND hWnd)
 {
-	RECT rScreen;
+	WINDOWPLACEMENT WndPlace;
 	if(hWnd != NULL)
 	{
-		GetWindowRect(hWnd, &rScreen);
-		emstarty = rScreen.top;
-		emsizey = rScreen.bottom - rScreen.top;
-		emstartx = rScreen.left;
-		emsizex = rScreen.right - rScreen.left;
+		GetWindowPlacement(hWnd, &WndPlace);
+		emstarty = WndPlace.rcNormalPosition.top;
+		emsizey = WndPlace.rcNormalPosition.bottom - WndPlace.rcNormalPosition.top;
+		emstartx = WndPlace.rcNormalPosition.left;
+		emsizex = WndPlace.rcNormalPosition.right - WndPlace.rcNormalPosition.left;
 	}
 }
 
@@ -1858,10 +1859,7 @@ void MainWndOnDestroy()
 	__try
 	{
 		LOG("Try SaveWindowPos");
-		if(bIsFullScreen == FALSE)
-		{
-			SaveWindowPos(hWnd);
-		}
+		SaveWindowPos(hWnd);
 	}
 	__except(EXCEPTION_EXECUTE_HANDLER) {LOG("Error SaveWindowPos");}
 	
