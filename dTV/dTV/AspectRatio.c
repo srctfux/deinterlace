@@ -632,7 +632,7 @@ void WorkoutOverlaySize()
 // To support letterboxed movies shown on TV channels that put little channel
 // logos in the corner, we allow the user to configure a maximum number of
 // non-black pixels which will be ignored for purposes of the computation.
-// By default this is 20% of the horizontal capture resolution, which will
+// By default this is 15% of the horizontal capture resolution, which will
 // produce good results if the aspect ratio analysis is done on a bright scene.
 //
 // This function can almost certainly be made more efficient using MMX
