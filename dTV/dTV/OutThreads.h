@@ -30,6 +30,8 @@
 //                                     Cut out all decoding
 //                                     Cut out digital hardware stuff
 //
+// 07 Jan 2001   John Adcock           Added gNTSCFilmFallbackMode setting
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __OUTTHREADS_H___
@@ -64,6 +66,7 @@ BYTE * LockOverlay();		// Lock overlay, returns ptr to buffer
 
 extern ePULLDOWNMODES gPulldownMode;
 extern ePULLDOWNMODES gPALFilmFallbackMode;
+extern ePULLDOWNMODES gNTSCFilmFallbackMode;
 extern ePULLDOWNMODES StaticImageMode;
 extern ePULLDOWNMODES LowMotionMode;
 extern ePULLDOWNMODES HighMotionMode;

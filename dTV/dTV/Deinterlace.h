@@ -24,6 +24,8 @@
 //
 // 05 Jan 2001   John Adcock           Added flip frequencies to DeintMethods
 //
+// 07 Jan 2001   John Adcock           Added Adaptive deinterlacing method
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __DEINTERLACE_H___
@@ -52,7 +54,8 @@ typedef enum
 	EVEN_ONLY = 13,
 	ODD_ONLY = 14,
 	BLENDED_CLIP = 15,
-	PULLDOWNMODES_LAST_ONE = 16
+	ADAPTIVE = 16,
+	PULLDOWNMODES_LAST_ONE = 17
 } ePULLDOWNMODES;
 
 #define MAX_FIELD_HISTORY 5
@@ -135,10 +138,12 @@ DEINTERLACE_FUNC HalfHeightBoth;
 DEINTERLACE_FUNC HalfHeightEvenOnly;
 DEINTERLACE_FUNC HalfHeightOddOnly;
 DEINTERLACE_FUNC FilmMode;
+DEINTERLACE_FUNC AdaptiveDeinterlace;
+
 
 void memcpyMMX(void *Dest, void *Src, size_t nBytes);
 void memcpyBOBMMX(void *Dest1, void *Dest2, void *Src, size_t nBytes);
-long GetCombFactor(short** pLines1, short** pLines2);
+long GetCombFactor(short** pPrimaryLines, short** pSecondaryLines, BOOL IsPrimaryOdd);
 long CompareFields(short** pLines1, short** pLines2, RECT *rect);
 
 extern long BitShift;

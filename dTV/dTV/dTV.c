@@ -40,6 +40,10 @@
 //
 // 03 Jan 2001   Michael Eskin         Added MSP muting
 //
+// 07 Jan 2001   John Adcock           Added Adaptive deinterlacing
+//                                     Changed display and handling of
+//                                     change deinterlacing method
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -497,11 +501,26 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			if(bAutoDetectMode == FALSE)
 			{
 				ShowText(hWnd, "Auto Pulldown Detect ON");
-				SetDeinterlaceMode(VIDEO_MODE_BOB);
+				if(TVSettings[TVTYPE].Is25fps)
+				{
+					SetDeinterlaceMode(gPALFilmFallbackMode);
+				}
+				else
+				{
+					SetDeinterlaceMode(gNTSCFilmFallbackMode);
+				}
 				bAutoDetectMode = TRUE;
 			}
 			else
 			{
+				if(TVSettings[TVTYPE].Is25fps)
+				{
+					SetDeinterlaceMode(gPALFilmFallbackMode);
+				}
+				else
+				{
+					SetDeinterlaceMode(gNTSCFilmFallbackMode);
+				}
 				bAutoDetectMode = FALSE;
 				ShowText(hWnd, "Auto Pulldown Detect OFF");
 			}
@@ -526,6 +545,11 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_32PULL5:
 		case IDM_22PULLODD:
 		case IDM_22PULLEVEN:
+			bAutoDetectMode = FALSE;
+			SetDeinterlaceMode(LOWORD(wParam) - IDM_VIDEO_BOB);
+			ShowText(hWnd, DeinterlaceModeName(-1));
+			break;
+
 		case IDM_WEAVE:
 		case IDM_BOB:
 		case IDM_VIDEO_WEAVE:
@@ -534,14 +558,32 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_ODD_ONLY:
 		case IDM_VIDEO_2FRAME:
 		case IDM_SCALER_BOB:
-			SetDeinterlaceMode(LOWORD(wParam) - IDM_VIDEO_BOB);
-			ShowText(hWnd, DeinterlaceModeName(-1));
-			break;
-
 		case IDM_BLENDED_CLIP:
-			SetDeinterlaceMode(BLENDED_CLIP);
-			if (BlcShowControls)
+		case IDM_ADAPTIVE:
+			if(bAutoDetectMode)
+			{
+				if(TVSettings[TVTYPE].Is25fps)
+				{
+					gPALFilmFallbackMode = LOWORD(wParam) - IDM_VIDEO_BOB;
+				}
+				else
+				{
+					gNTSCFilmFallbackMode = LOWORD(wParam) - IDM_VIDEO_BOB;
+				}
+				if(!DeintMethods[gPulldownMode].bIsFilmMode)
+				{
+					SetDeinterlaceMode(LOWORD(wParam) - IDM_VIDEO_BOB);
+				}
+			}
+			else
+			{
+				SetDeinterlaceMode(LOWORD(wParam) - IDM_VIDEO_BOB);
+			}
+			ShowText(hWnd, DeinterlaceModeName(-1));
+			if(gPulldownMode == IDM_BLENDED_CLIP && BlcShowControls)
+			{
 				DialogBox(hInst, "BLENDED_CLIP", hWnd, BlendedClipProc);
+			}
 			break;
 
 		case IDM_ABOUT:
@@ -1193,7 +1235,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			{
 				int NewPulldownMode = gPulldownMode + 1;
 
-				// if we can't use a bTV plug-in then skip it
 				if(NewPulldownMode == PULLDOWNMODES_LAST_ONE)
 				{
 					NewPulldownMode = VIDEO_MODE_BOB;
@@ -1880,6 +1921,7 @@ void MainWndOnCreate(HWND hWnd)
 //---------------------------------------------------------------------------
 void SetMenuAnalog()
 {
+	ePULLDOWNMODES ModeToShow;
 	CheckMenuItem(GetMenu(hWnd), ThreadClassId + 1150, MF_CHECKED);
 	CheckMenuItem(GetMenu(hWnd), PriorClassId + 1160, MF_CHECKED);
 
@@ -2013,23 +2055,43 @@ void SetMenuAnalog()
 	CheckMenuItem(GetMenu(hWnd), IDM_AUTOSTEREO,        AutoStereoSelect?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_SPLASH_ON_STARTUP, bDisplaySplashScreen?MF_CHECKED:MF_UNCHECKED);
 
+
 	CheckMenuItem(GetMenu(hWnd), IDM_AUTODETECT, bAutoDetectMode?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_FALLBACK, bFallbackToVideo?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_VIDEO_BOB, (gPulldownMode == VIDEO_MODE_BOB && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_VIDEO_WEAVE, (gPulldownMode == VIDEO_MODE_WEAVE && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_VIDEO_2FRAME, (gPulldownMode == VIDEO_MODE_2FRAME && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_WEAVE, (gPulldownMode == SIMPLE_WEAVE && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_BOB, (gPulldownMode == SIMPLE_BOB && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_SCALER_BOB, (gPulldownMode == SCALER_BOB && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_22PULLODD, (gPulldownMode == FILM_22_PULLDOWN_ODD && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_22PULLEVEN, (gPulldownMode == FILM_22_PULLDOWN_EVEN && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_32PULL1, (gPulldownMode == FILM_32_PULLDOWN_0 && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_32PULL2, (gPulldownMode == FILM_32_PULLDOWN_1 && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_32PULL3, (gPulldownMode == FILM_32_PULLDOWN_2 && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_32PULL4, (gPulldownMode == FILM_32_PULLDOWN_3 && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_32PULL5, (gPulldownMode == FILM_32_PULLDOWN_4 && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_ODD_ONLY, (gPulldownMode == ODD_ONLY && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_EVEN_ONLY, (gPulldownMode == EVEN_ONLY && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
+
+	if(bAutoDetectMode)
+	{
+		if(TVSettings[TVTYPE].Is25fps)
+		{
+			ModeToShow = gPALFilmFallbackMode;
+		}
+		else
+		{
+			ModeToShow = gNTSCFilmFallbackMode;
+		}
+	}
+	else
+	{
+		ModeToShow = gPulldownMode;
+	}
+
+	CheckMenuItem(GetMenu(hWnd), IDM_VIDEO_BOB, (ModeToShow == VIDEO_MODE_BOB) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_VIDEO_WEAVE, (ModeToShow == VIDEO_MODE_WEAVE) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_VIDEO_2FRAME, (ModeToShow == VIDEO_MODE_2FRAME) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_WEAVE, (ModeToShow == SIMPLE_WEAVE) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_BOB, (ModeToShow == SIMPLE_BOB) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_SCALER_BOB, (ModeToShow == SCALER_BOB) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_22PULLODD, (ModeToShow == FILM_22_PULLDOWN_ODD) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_22PULLEVEN, (ModeToShow == FILM_22_PULLDOWN_EVEN) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_32PULL1, (ModeToShow == FILM_32_PULLDOWN_0) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_32PULL2, (ModeToShow == FILM_32_PULLDOWN_1) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_32PULL3, (ModeToShow == FILM_32_PULLDOWN_2) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_32PULL4, (ModeToShow == FILM_32_PULLDOWN_3) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_32PULL5, (ModeToShow == FILM_32_PULLDOWN_4) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_ODD_ONLY, (ModeToShow == ODD_ONLY) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_EVEN_ONLY, (ModeToShow == EVEN_ONLY) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_BLENDED_CLIP, (ModeToShow == BLENDED_CLIP) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_ADAPTIVE, (ModeToShow == ADAPTIVE) ?MF_CHECKED:MF_UNCHECKED);
 
 	SetMenuAspectRatio(hWnd);
 }

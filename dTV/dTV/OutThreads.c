@@ -48,6 +48,13 @@
 // 05 Jan 2001   John Adcock           First attempt at judder fix
 //                                     Added loop to make sure that we are never
 //                                     too early for a flip
+//                                     Changed default for gPulldownMode to 2 frame
+//
+// 07 Jan 2001   John Adcock           Added Adaptive deinterlacing method
+//                                     Split code that did adaptive method
+//                                     out of UpdateNTSCPulldownMode
+//                                     Added gNTSCFilmFallbackMode setting
+//                                     Fixed PAL detection bug
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -78,6 +85,7 @@ HANDLE              OutThread;
 // Dynamically updated variables
 ePULLDOWNMODES      gPulldownMode = VIDEO_MODE_2FRAME;
 ePULLDOWNMODES      gPALFilmFallbackMode = VIDEO_MODE_2FRAME;
+ePULLDOWNMODES      gNTSCFilmFallbackMode = ADAPTIVE;
 int                 CurrentFrame=0;
 DWORD               dwLastFlipTicks = -1;
 DWORD				ModeSwitchTimestamps[MAXMODESWITCHES];
@@ -93,13 +101,8 @@ long                ThresholdPulldownMismatch = 900;
 long                ThresholdPulldownComb = 150;
 long                PulldownSwitchInterval = 3000;
 long                PulldownSwitchMax = 4;
-long				StaticImageFieldCount = 100;
-long				LowMotionFieldCount = 4;
 BOOL                bAutoDetectMode = TRUE;
 BOOL                bFallbackToVideo = TRUE;
-ePULLDOWNMODES		StaticImageMode = SIMPLE_WEAVE;
-ePULLDOWNMODES		LowMotionMode = VIDEO_MODE_2FRAME;
-ePULLDOWNMODES		HighMotionMode = VIDEO_MODE_2FRAME;
 
 // TRB 10/28/00 changes, parms, and new fields for sync problem fixes
 BYTE			    * lpCurOverlay;				// made static for Lock rtn, curr vid buff ptr
@@ -318,7 +321,6 @@ static int TrackModeSwitches()
 ///////////////////////////////////////////////////////////////////////////////
 void SetDeinterlaceMode(int mode)
 {
-	bAutoDetectMode = FALSE;
 	gPulldownMode = mode;
 	UpdatePulldownStatus();
 	SetHalfHeight(DeintMethods[mode].bIsHalfHeight);
@@ -463,19 +465,6 @@ void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField)
 // woven-together frame.  If it's too high, we immediately switch to video
 // deinterlace mode to prevent weave artifacts from appearing.
 //
-// In video mode, we support three styles of deinterlacing and switch among
-// them depending on the amount of motion in the scene.  If there's a lot of
-// motion, we use HighMotionMode.  If there's little or no motion for at least
-// LowMotionFieldCount fields, we switch to LowMotionMode.  And if, after that,
-// there's no motion for StaticImageFieldCount fields, we switch to
-// StaticImageMode.
-//
-// Exactly which modes are used in these three cases is configurable in the INI
-// file. It is entirely legal for some or all of the three video modes to be the
-// same; by default, VIDEO_MODE_2FRAME is used for both the high and low motion
-// modes.  On slower machines VIDEO_MODE_BOB (high) and VIDEO_MODE_WEAVE (low)
-// can be used instead since they're less CPU-intensive.
-//
 // This function normally gets called 60 times per second.
 ///////////////////////////////////////////////////////////////////////////////
 void UpdateNTSCPulldownMode(long FieldDiff,
@@ -517,13 +506,6 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 	{
 		MATCH_COUNT = 0;
 
-		if (gPulldownMode == StaticImageMode)
-		{
-			// We're in still-image mode and the image is no longer static.  Go
-			// back to a motion mode immediately.
-			SwitchToVideo = TRUE;
-		}
-
 		if (MISMATCH_COUNT > PulldownRepeatCount2 * 5)
 		{
 			// There have been no duplicate fields lately.
@@ -537,14 +519,6 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 			SwitchToVideo = TRUE;
 		}
 
-		if (FieldDiff >= ThresholdPulldownMismatch &&
-			gPulldownMode == LowMotionMode)
-		{
-			// A big field difference; switch to high-motion mode
-			// if we're in low-motion mode.
-			SwitchToVideo = TRUE;
-		}
-
 		// If we're in a film mode and an incoming field would cause
 		// weave artifacts, optionally switch to video mode but make
 		// it very easy to get back into film mode in case this was
@@ -554,7 +528,7 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 			ThresholdPulldownMismatch > 0 &&		    // only do video-force check if there's a threshold.
 			FieldDiff >= ThresholdPulldownMismatch &&	// only force video if this field is very different,
 			DoWeWantToFlip(OnOddField) &&				// and we would weave it with the previous field,
-			(CombFactor = GetCombFactor(EvenField, OddField)) > ThresholdPulldownComb) // and it'd produce artifacts
+			(CombFactor = GetCombFactor(EvenField, OddField, FALSE)) > ThresholdPulldownComb) // and it'd produce artifacts
 		{
 			SwitchToVideo = TRUE;
 			NextPulldownRepeatCount = 1;
@@ -562,19 +536,9 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 
 		if (SwitchToVideo)
 		{
-			// If we're in still mode, it might be okay to drop to
-			// low-motion mode.
-			if (gPulldownMode == StaticImageMode &&
-				FieldDiff < ThresholdPulldownMismatch)
-			{
-				gPulldownMode = LowMotionMode;
-			}
-			else
-			{
-				gPulldownMode = HighMotionMode;
-				MOVIE_VERIFY_CYCLE = 0;
-				MOVIE_FIELD_CYCLE = 0;
-			}
+			gPulldownMode = gNTSCFilmFallbackMode;
+			MOVIE_VERIFY_CYCLE = 0;
+			MOVIE_FIELD_CYCLE = 0;
 			UpdatePulldownStatus();
 			LOG(" Back to Video, comb factor %d", CombFactor);
 		}
@@ -663,7 +627,7 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 					// the film mode we just dropped out of was correct.
 					if (bFallbackToVideo && TrackModeSwitches(gPulldownMode))
 					{
-						gPulldownMode = HighMotionMode;
+						gPulldownMode = gNTSCFilmFallbackMode;
 						MOVIE_VERIFY_CYCLE = 0;
 						MOVIE_FIELD_CYCLE = 0;
 						UpdatePulldownStatus();
@@ -723,28 +687,8 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 			// or dropped. Reset MISMATCH_COUNT to 0 below and let
 			// detection cycle happen again in order to re-synchronize.
 			//
-			// If we've seen matching fields for a while and we're in
-			// video mode, switch to weave mode since we're probably
-			// looking at a static image and video mode can introduce
-			// flickering.  But don't switch out of film mode when we
-			// hit a static image.
 		}
 		MISMATCH_COUNT = 0;
-
-		if (MATCH_COUNT >= LowMotionFieldCount &&
-			gPulldownMode == HighMotionMode)
-		{
-			gPulldownMode = LowMotionMode;
-			LOG(" Match count %ld, switching to low-motion", MATCH_COUNT);
-			UpdatePulldownStatus();
-		}
-		if (MATCH_COUNT >= StaticImageFieldCount &&
-			gPulldownMode == LowMotionMode)
-		{
-			gPulldownMode = StaticImageMode;
-			LOG(" Match count %ld, switching to static-image", MATCH_COUNT);
-			UpdatePulldownStatus();
-		}
 	}
 }
 
@@ -1017,7 +961,14 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 			{
 				if((bAutoDetectMode == TRUE && bIsPAL) || DeintMethods[gPulldownMode].bRequiresCombFactor)
 				{
-					info.CombFactor = GetCombFactor(info.EvenLines[0], info.OddLines[0]);
+					if(info.IsOdd)
+					{
+						info.CombFactor = GetCombFactor(info.OddLines[0], info.EvenLines[0], TRUE);
+					}
+					else
+					{
+						info.CombFactor = GetCombFactor(info.EvenLines[0], info.OddLines[0], FALSE);
+					}
 					LOG(" Frame %d %c CF = %d", CurrentFrame, info.IsOdd ? 'O' : 'E', info.CombFactor);
 				}
 
@@ -1037,7 +988,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				PrevPulldownMode = gPulldownMode;				
 				if(bAutoDetectMode == TRUE && bIsPAL)
 				{
-					UpdatePALPulldownMode(info.CombFactor, TRUE);
+					UpdatePALPulldownMode(info.CombFactor, info.IsOdd);
 				}
 
 				if(bAutoDetectMode == TRUE && !bIsPAL)

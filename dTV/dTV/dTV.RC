@@ -815,6 +815,7 @@ BEGIN
             MENUITEM "&Scaler BOB",                 IDM_SCALER_BOB
             MENUITEM "E&ven Fields Only",           IDM_EVEN_ONLY
             MENUITEM "O&dd Fields Only",            IDM_ODD_ONLY
+            MENUITEM "Ada&ptive Deinterlace",       IDM_ADAPTIVE
             MENUITEM SEPARATOR
             POPUP "&Manual Film Mode Select"
             BEGIN

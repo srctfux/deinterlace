@@ -131,6 +131,10 @@ SOURCE=.\Deinterlace.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\DI_Adaptive.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\DI_BlendedClip.c
 # End Source File
 # Begin Source File

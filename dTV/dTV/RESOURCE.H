@@ -82,6 +82,7 @@
 #define IDM_EVEN_ONLY                   543
 #define IDM_ODD_ONLY                    544
 #define IDM_BLENDED_CLIP                545
+#define IDM_ADAPTIVE                    546
 #define IDM_ADV_VIDEOSETTINGS           561
 #define IDM_SHIFT_SPACEBAR              562
 #define IDM_SPLASH_ON_STARTUP           563
@@ -722,7 +723,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        156
-#define _APS_NEXT_COMMAND_VALUE         768
+#define _APS_NEXT_COMMAND_VALUE         769
 #define _APS_NEXT_CONTROL_VALUE         1812
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

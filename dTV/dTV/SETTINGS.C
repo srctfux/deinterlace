@@ -31,6 +31,12 @@
 //
 // 05 Jan 2001   John Adcock           Added GetRefreshRate function
 //                                     Added DoAccurateFlips parameter
+//                                     Added gPALFilmFallbackMode setting
+//
+// 07 Jan 2001   John Adcock           Added gNTSCFilmFallbackMode setting
+//                                     Changed saving of gPulldownMode
+//                                     so that we don't ever restart in film mode
+//                                     when we're doing autodetect  
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -130,7 +136,9 @@ void LoadSettingsFromIni()
 	// JA 02/01/2001
 	// use SetDeinterlaceFunction so that Half height gets set correctly
 	SetDeinterlaceMode(GetPrivateProfileInt("Deinterlace", "DeinterlaceMode", gPulldownMode, szIniFile));
+	// JA added film fallback modes
 	gPALFilmFallbackMode = GetPrivateProfileInt("Deinterlace", "PALFilmFallbackMode", gPALFilmFallbackMode, szIniFile);
+	gNTSCFilmFallbackMode = GetPrivateProfileInt("Deinterlace", "NTSCFilmFallbackMode", gNTSCFilmFallbackMode, szIniFile);
 	bAutoDetectMode = (GetPrivateProfileInt("Pulldown", "bAutoDetectMode", bAutoDetectMode, szIniFile) != 0);
 
 	EdgeDetect = GetPrivateProfileInt("Deinterlace", "EdgeDetect", EdgeDetect, szIniFile);
@@ -391,8 +399,27 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("Pulldown", "LowMotionMode", LowMotionMode, szIniFile);
 	WritePrivateProfileInt("Pulldown", "HighMotionMode", HighMotionMode, szIniFile);
 
-	// TRB 12/00
-	WritePrivateProfileInt("Deinterlace", "DeinterlaceMode", gPulldownMode, szIniFile);
+	// JA 07/01/2001
+	// if we are in autodect mode we don't want to save the current film mode
+	// so save the current fallback mode instead.
+	if(bAutoDetectMode && DeintMethods[gPulldownMode].bIsFilmMode)
+	{
+		if(TVSettings[TVTYPE].Is25fps)
+		{
+			WritePrivateProfileInt("Deinterlace", "DeinterlaceMode", gPALFilmFallbackMode, szIniFile);
+		}
+		else
+		{
+			WritePrivateProfileInt("Deinterlace", "DeinterlaceMode", gNTSCFilmFallbackMode, szIniFile);
+		}
+	}
+	else
+	{
+		WritePrivateProfileInt("Deinterlace", "DeinterlaceMode", gPulldownMode, szIniFile);
+	}
+	// JA added film fallback modes
+	WritePrivateProfileInt("Deinterlace", "PALFilmFallbackMode", gPALFilmFallbackMode, szIniFile);
+	WritePrivateProfileInt("Deinterlace", "NTSCFilmFallbackMode", gNTSCFilmFallbackMode, szIniFile);
 
 	WritePrivateProfileInt("Deinterlace", "EdgeDetect", EdgeDetect, szIniFile);
 	WritePrivateProfileInt("Deinterlace", "JaggieThreshold", JaggieThreshold, szIniFile);

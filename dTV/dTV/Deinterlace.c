@@ -29,6 +29,10 @@
 //
 // 05 Jan 2001   John Adcock           Added flip frequencies to DeintMethods
 //
+// 07 Jan 2001   John Adcock           Added Adaptive deinterlacing method
+//                                     Changed GetCombFactor to work on a primary
+//                                     and secondary set of fields.
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -78,7 +82,9 @@ DEINTERLACE_METHOD DeintMethods[PULLDOWNMODES_LAST_ONE] =
 	// ODD_ONLY
 	{"Odd Scanlines Only", FALSE, FALSE, TRUE, FALSE, HalfHeightOddOnly, 25, 30},
 	// BLENDED_CLIP
-	{"Blended Clip", FALSE, FALSE, FALSE, FALSE, BlendedClipping, 18, 15},
+	{"Blended Clip", FALSE, FALSE, FALSE, FALSE, BlendedClipping, 50, 60},
+	// ADAPTIVE
+	{"Adaptive", TRUE, FALSE, FALSE, FALSE, AdaptiveDeinterlace, 50, 60},
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -188,8 +194,8 @@ EndCopyLoop:
 ///////////////////////////////////////////////////////////////////////////////
 // GetCombFactor
 //
-// This routine basically calculates how close the pixels in pLines2
-// are the interpelated pixels between pLines1
+// This routine basically calculates how close the pixels in pSecondaryLines
+// are the interpelated pixels between pPrimaryLines
 // this idea was taken from the VirtualDub CVideoTelecineRemover class
 // at the moment it is the correct algoritm outlined in the comments
 // not the one used in that program
@@ -201,7 +207,7 @@ EndCopyLoop:
 // VBI lines are off screen
 // the BitShift value is used to filter out noise and quantization error
 ///////////////////////////////////////////////////////////////////////////////
-long GetCombFactor(short** pLines1, short** pLines2)
+long GetCombFactor(short** pPrimaryLines, short** pSecondaryLines, BOOL IsPrimaryOdd)
 {
 	int Line;
 	long LineFactor;
@@ -219,7 +225,7 @@ long GetCombFactor(short** pLines1, short** pLines2)
 	const __int64 Mask = 0x7f7f7f7f7f7f7f7f;
 
 	// If one of the fields is missing, treat them as very different.
-	if (pLines1 == NULL || pLines2 == NULL)
+	if (pPrimaryLines == NULL || pSecondaryLines == NULL)
 		return 0x7fffffff;
 
 	qwEdgeDetect = EdgeDetect;
@@ -227,11 +233,11 @@ long GetCombFactor(short** pLines1, short** pLines2)
 	qwThreshold = JaggieThreshold;
 	qwThreshold += (qwThreshold << 48) + (qwThreshold << 32) + (qwThreshold << 16);
 
-	for (Line = 100; Line < ((CurrentY - 100) / 2); ++Line)
+	for (Line = 50; Line < ((CurrentY / 2) - 50); ++Line)
 	{
-		YVal1 = pLines1[Line] + InitialOverscan;
-		YVal2 = pLines2[Line] + InitialOverscan;
-		YVal3 = pLines1[Line + 1] + InitialOverscan;
+		YVal1 = pPrimaryLines[Line] + InitialOverscan;
+		YVal2 = pSecondaryLines[Line + IsPrimaryOdd] + InitialOverscan;
+		YVal3 = pPrimaryLines[Line + 1] + InitialOverscan;
 		_asm
 		{
 			mov ecx, ActiveX
