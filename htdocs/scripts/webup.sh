@@ -56,6 +56,7 @@ rm -R -f htdocs/screenshots
 rm -R -f htdocs/setup
 rm -R -f htdocs/scripts
 rm -R -f htdocs/portuguese
+rm -R -f htdocs/portuguese
 
 #Check out the htdocs module from the dScaler CVS using pserver.
 #You will need to log in to pserver once; after that, you should be fine, unless the CVS
