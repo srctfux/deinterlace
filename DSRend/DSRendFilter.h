@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendFilter.h,v 1.4 2002-03-08 11:14:04 tobbej Exp $
+// $Id: DSRendFilter.h,v 1.5 2002-03-11 19:25:58 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,10 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.4  2002/03/08 11:14:04  tobbej
+// changed property page a bit
+// removed some debug output
+//
 // Revision 1.3  2002/02/07 13:08:20  tobbej
 // fixed some syncronization problems
 //
@@ -72,7 +76,6 @@ private:
  * @todo add quality-control management
  * @todo add more statistics on IQualProp, not all data is updated
  * @todo add buffering of IMediaSamples, might need a IMemAllocator first
- * @todo when pausing, rendering must block
  * @todo add support for field input
  * @todo maybe create a new mediatype enumerator object
  */

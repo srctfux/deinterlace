@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendFilter.cpp,v 1.5 2002-03-08 11:14:04 tobbej Exp $
+// $Id: DSRendFilter.cpp,v 1.6 2002-03-11 19:25:47 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,10 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.5  2002/03/08 11:14:04  tobbej
+// changed property page a bit
+// removed some debug output
+//
 // Revision 1.4  2002/02/07 13:08:20  tobbej
 // fixed some syncronization problems
 //
@@ -109,6 +113,7 @@ HRESULT CDSRendFilter::Stop()
 	}
 	
 	//free buffered sample and sync with rendering thread
+	m_InputPin.resumePause();
 	stopWait();
 	CAutoLockCriticalSection rendLock(&m_renderLock);
 	m_sampleLock.Lock();
@@ -159,6 +164,9 @@ HRESULT CDSRendFilter::Run(REFERENCE_TIME tStart)
 	m_cFramesDropped=0;
 
 	m_tStart=tStart;
+	
+	//resume the rendering thread if it was blocked on the pause event
+	m_InputPin.resumePause();
 	m_filterState=State_Running;
 	
 	return S_OK;

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendInPin.h,v 1.3 2002-02-07 13:08:20 tobbej Exp $
+// $Id: DSRendInPin.h,v 1.4 2002-03-11 19:26:01 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.3  2002/02/07 13:08:20  tobbej
+// fixed some syncronization problems
+//
 // Revision 1.2  2002/02/06 15:01:23  tobbej
 // fixed race condition betwen stop and recive
 // updated some comments
@@ -114,6 +117,8 @@ END_COM_MAP()
 public:
 	/// @return true if connected
 	bool isConnected() {return m_pConnected!=NULL;};
+	
+	void resumePause() {m_resumePauseEvent.setEvent();}
 
 private:
 	/**
@@ -131,6 +136,9 @@ private:
 	
 	///streaming lock
 	CComAutoCriticalSection m_Lock;
+	
+	///Event used to make the rendering block when filter is paused
+	CEvent m_resumePauseEvent;
 
 	///pin that this filter is connected to. if this is NULL this pin is not connected
 	CComPtr<IPin> m_pConnected;
