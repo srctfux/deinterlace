@@ -236,7 +236,7 @@ void Reset_Capture()
 BOOL WaitForNextField(BOOL LastField)
 {
 	BOOL bIsOddField;
-	int OldPos = CurrentFrame * 2 + LastField;
+	int OldPos = (CurrentFrame * 2 + LastField + 1) % 10;
 	RunningLate = Hurry_When_Late;        // user specified bool parm
 	while(OldPos == BT848_GetRISCPosAsInt())
 	{
@@ -1065,6 +1065,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 
 			if (RunningLate)
 			{
+				RunningLate = RunningLate;
 				// do nothing
 			}
 			// if we have dropped a field then do BOB 
