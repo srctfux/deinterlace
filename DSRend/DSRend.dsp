@@ -280,6 +280,10 @@ SOURCE=.\AutoLockCriticalSection.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\ColorConverter.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\Cpu.cpp
 # End Source File
 # Begin Source File
@@ -408,6 +412,10 @@ SOURCE=.\memalloc.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\SettingsPage.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\StdAfx.cpp
 # ADD CPP /Yc"stdafx.h"
 # End Source File
@@ -418,6 +426,10 @@ SOURCE=.\StdAfx.cpp
 # Begin Source File
 
 SOURCE=.\AutoLockCriticalSection.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ColorConverter.h
 # End Source File
 # Begin Source File
 
@@ -461,6 +473,10 @@ SOURCE=.\Resource.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\SettingsPage.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\StdAfx.h
 # End Source File
 # End Group
@@ -479,9 +495,20 @@ SOURCE=.\DSRendInPin.rgs
 
 SOURCE=.\DSRendQualityPage.rgs
 # End Source File
+# Begin Source File
+
+SOURCE=.\SettingsPage.rgs
+# End Source File
 # End Group
 # End Target
 # End Project
+# Section DSRend : {69562074-7573-6C61-2053-747564696F5C}
+# 	1:22:IDS_TITLECSettingsPage:108
+# 	1:17:IDR_CSETTINGSPAGE:111
+# 	1:25:IDS_HELPFILECSettingsPage:109
+# 	1:26:IDS_DOCSTRINGCSettingsPage:110
+# 	1:17:IDD_CSETTINGSPAGE:112
+# End Section
 # Section DSRend : {03014021-60FF-0321-FF40-0103FF6825E3}
 # 	1:30:IDS_DOCSTRINGDSRendQualityPage:105
 # 	1:21:IDD_DSRENDQUALITYPAGE:107

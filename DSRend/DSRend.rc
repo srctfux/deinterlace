@@ -102,13 +102,14 @@ END
 IDR_DSRENDFILTER        REGISTRY DISCARDABLE    "DSRendFilter.rgs"
 IDR_DSRENDINPIN         REGISTRY DISCARDABLE    "DSRendInPin.rgs"
 IDR_DSRENDQUALITYPAGE   REGISTRY DISCARDABLE    "DSRendQualityPage.rgs"
+IDR_SETTINGSPAGE        REGISTRY DISCARDABLE    "SettingsPage.rgs"
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Dialog
 //
 
-IDD_DSRENDQUALITYPAGE DIALOG DISCARDABLE  0, 0, 246, 111
+IDD_DSRENDQUALITYPAGE DIALOG DISCARDABLE  0, 0, 246, 101
 STYLE WS_CHILD
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -139,6 +140,53 @@ BEGIN
                     BS_MULTILINE
 END
 
+IDD_SETTINGSPAGE DIALOG DISCARDABLE  0, 0, 170, 186
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    COMBOBOX        IDC_SETTINGSPAGE_FIELDFORMAT,75,5,75,40,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Force YUY2 input format",IDC_SETTINGSPAGE_FORCEYUY2,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,60,93,10
+    LTEXT           "Force field/frame input",IDC_STATIC,0,10,72,8
+    GROUPBOX        "Status",IDC_STATIC,0,140,170,45
+    LTEXT           "Field format",IDC_STATIC,6,151,37,8
+    LTEXT           "",IDC_SETTINGSPAGE_FIELD,85,150,50,10,SS_SUNKEN
+    LTEXT           "Uses color coversion",IDC_STATIC,5,160,67,8
+    LTEXT           "",IDC_SETTINGSPAGE_COLORCNV,85,160,50,10,SS_SUNKEN
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKFRAME | SS_SUNKEN | 
+                    WS_GROUP,5,55,160,1
+    LTEXT           "Enabling this will force the filter to only accept YUY2 and not do any color coversion. This can improve preformance but this can make the filter not work with some filters or capture cards",
+                    IDC_STATIC,5,76,160,34
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKFRAME | SS_SUNKEN | 
+                    WS_GROUP,5,115,160,1
+    LTEXT           "This setting allows you to chose how the filter handles frame and field input.\nFor best compatibility leave this at default.",
+                    IDC_STATIC,5,25,160,25
+    CONTROL         "Swap even and odd fields",IDC_SETTINGSPAGE_SWAPFIELDS,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,120,98,10
+    CONTROL         "Vertical mirror",IDC_SETTINGSPAGE_VERTMIRROR,"Button",
+                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,5,130,55,10
+    LTEXT           "Size",IDC_STATIC,5,170,19,8
+    LTEXT           "",IDC_SETTINGSPAGE_SIZE,85,170,50,10,SS_SUNKEN
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_SETTINGSPAGE, DIALOG
+    BEGIN
+        RIGHTMARGIN, 85
+        BOTTOMMARGIN, 91
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -151,6 +199,9 @@ BEGIN
     IDS_TITLEDSRendQualityPage "Statistics"
     IDS_HELPFILEDSRendQualityPage "Help File Name"
     IDS_DOCSTRINGDSRendQualityPage "Your Help String"
+    IDS_TITLESettingsPage   "Settings"
+    IDS_HELPFILESettingsPage "Help File Name"
+    IDS_DOCSTRINGSettingsPage "Your Help String"
 END
 
 #endif    // English (U.S.) resources

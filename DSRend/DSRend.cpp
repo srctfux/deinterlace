@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRend.cpp,v 1.2 2002-07-06 16:43:01 tobbej Exp $
+// $Id: DSRend.cpp,v 1.3 2002-07-15 18:21:09 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.2  2002/07/06 16:43:01  tobbej
+// new field buffering
+//
 // Revision 1.1.1.1  2002/02/03 10:52:53  tobbej
 // First import of new direct show renderer filter
 //
@@ -48,12 +51,14 @@
 #include "DSRendFilter.h"
 #include "DSRendQualityPage.h"
 #include "Cpu.h"
+#include "SettingsPage.h"
 
 CComModule _Module;
 
 BEGIN_OBJECT_MAP(ObjectMap)
 OBJECT_ENTRY(CLSID_DSRendFilter, CDSRendFilter)
 OBJECT_ENTRY(CLSID_DSRendQualityPage, CDSRendQualityPage)
+OBJECT_ENTRY(CLSID_SettingsPage, CSettingsPage)
 END_OBJECT_MAP()
 
 /// Filter name
