@@ -656,7 +656,7 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 		if ((WSS_CtrlData.NbDecodeErr+WSS_CtrlData.NbDecodeOk) > 0)
 		{
-			sprintf (szInfo, "Last : %s", WSS_CtrlData.DecodeOk ? "OK" : "ERROR");
+			sprintf (szInfo, "Last : %s", (WSS_CtrlData.DecodeStatus == WSS_STATUS_OK) ? "OK" : "ERROR");
 			OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 		}
 
@@ -675,7 +675,7 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 			OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine--, dfMargin, dfSize));
 			OSD_AddText("Debug", dfSize, OSD_COLOR_SECTION, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine--, dfMargin, dfSize));
 
-			if (WSS_CtrlData.DecodeOk)
+			if (WSS_CtrlData.DecodeStatus != WSS_STATUS_ERROR)
 			{
 				nLine = 3;
 

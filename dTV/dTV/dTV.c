@@ -1090,7 +1090,8 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
 		case IDM_VBI:
 			Stop_Capture();
-			Capture_VBI = !Capture_VBI;
+			Setting_SetValue(VBI_GetSetting(CAPTURE_VBI), 
+				!Setting_GetValue(VBI_GetSetting(CAPTURE_VBI)));
 			Start_Capture();
 			break;
 

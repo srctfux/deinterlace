@@ -132,13 +132,27 @@ void VBI_AGC(BYTE * Buffer, int start, int stop, int step)
 ////////////////////////////////////////////////////////////////////////////
 // Start of Settings related code
 /////////////////////////////////////////////////////////////////////////////
+BOOL Capture_VBI_OnChange(long NewValue)
+{
+	Capture_VBI = (BOOL)NewValue;
+	WSS_init();
+	return FALSE;
+}
+
+BOOL DoWSS_OnChange(long NewValue)
+{
+	DoWSS = (BOOL)NewValue;
+	WSS_init();
+	return FALSE;
+}
+
 SETTING VBISettings[VBI_SETTING_LASTONE] =
 {
 	{
 		"Capture VBI", ONOFF, 0, &Capture_VBI,
 		FALSE, 0, 1, 1, 1,
 		NULL,
-		"Show", "CaptureVBI", NULL,
+		"Show", "CaptureVBI", Capture_VBI_OnChange,
 	},
 	{
 		"CC Mode", NUMBER, 0, &CCMode,
@@ -162,7 +176,7 @@ SETTING VBISettings[VBI_SETTING_LASTONE] =
 		"WSS", ONOFF, 0, &DoWSS,
 		FALSE, 0, 1, 1, 1,
 		NULL,
-		"VBI", "DoWSS", NULL,
+		"VBI", "DoWSS", DoWSS_OnChange,
 	},
 };
 

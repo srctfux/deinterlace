@@ -30,6 +30,10 @@
 #define WSS625_SUBTITLE_INSIDE		1
 #define WSS625_SUBTITLE_OUTSIDE		2
 
+#define	WSS_STATUS_OK				1
+#define	WSS_STATUS_ERROR			0
+#define	WSS_STATUS_PONCTUAL_ERROR	2
+
 // WSS data
 typedef struct _WSS_DataStruct {
 	int		AspectRatio;
@@ -47,20 +51,21 @@ extern WSS_DataStruct WSS_Data;
 
 // WSS control data
 typedef struct _WSS_CtrlDataStruct {
-	BOOL	DecodeOk;			// Status of last decoding
-	int		NbDecodeErr;		// Number of decoding errors
-	int		NbDecodeOk;			// Number of correct decoding
-	int		NbSuccessiveErr;	// Number of successive decoding errors
-	int		MinPos;
-	int		MaxPos;
-	int		TotalPos;
-	int		NbErrPos;
-	int		AspectRatioWhenErr;
-	int		AspectModeWhenErr;
+	int	DecodeStatus;		// Status of last decoding
+	int	NbDecodeErr;		// Number of decoding errors
+	int	NbDecodeOk;			// Number of correct decoding
+	int	NbSuccessiveErr;	// Number of successive decoding errors
+	int	MinPos;
+	int	MaxPos;
+	int	TotalPos;
+	int	NbErrPos;
+	int	AspectRatioWhenErr;
+	int	AspectModeWhenErr;
 } WSS_CtrlDataStruct;
 extern WSS_CtrlDataStruct WSS_CtrlData;
 
-void WSS_init ();
-int WSS_DecodeLine(BYTE* vbiline);
+extern void WSS_init ();
+extern int WSS_DecodeLine(BYTE* vbiline);
+extern BOOL WSS_GetRecommendedAR (int* pMode, int* pRatio);
 
 #endif

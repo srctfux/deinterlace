@@ -44,6 +44,7 @@
 #include "Status.h"
 #include "bt848.h"
 #include "dTV.h"
+#include "VBI_WSSdecode.h"
 
 // From dtv.c .... We really need to reduce reliance on globals by going C++!
 // Perhaps in the meantime, it could be passed as a parameter to WorkoutOverlay()
@@ -264,16 +265,19 @@ void AdjustAspectRatio(short** EvenField, short** OddField)
 {
 	static int lastNewRatio = 0;
 	static int newRatioFrameCount = 0;
-	int newRatio;
+	int newRatio, newMode;
 	int tick_count = GetTickCount();
 	int tickCutoff = tick_count - (aspectSettings.AspectHistoryTime * 1000);
 	int i;
 	int haveSeenThisRatio, haveSeenSmallerRatio;
+	int wss_source_mode, wss_source_ratio;
 
 	if(EvenField == NULL || OddField == NULL)
 	{
 		return;
 	}
+
+	newMode = aspectSettings.aspect_mode;
 
 	// ADDED by Mark Rejhon: Eliminates the "tiny slit" problem in starry 
 	// scenes such as those in Star Wars or start of Toy Story 2,
@@ -283,6 +287,31 @@ void AdjustAspectRatio(short** EvenField, short** OddField)
 	if (aspectSettings.DetectAspectNow || aspectSettings.AutoDetectAspect)
 	{
 		newRatio = FindAspectRatio(EvenField, OddField);
+
+		// Take into account aspect ratio from WSS data
+		// * wss_source_mode = 1 for non anamorphic source
+		//   and 2 for anamorphic source
+		// * wss_source_ratio = -1 if ratio is not defined
+		//   in WSS data
+		if (WSS_GetRecommendedAR(&wss_source_mode, &wss_source_ratio))
+		{
+			if (wss_source_mode != aspectSettings.aspect_mode)
+			{
+				newMode = wss_source_mode;
+			}
+			// If source is anamorphic
+			if (wss_source_mode == 2)
+			{
+				// Convert ratio to a 16/9 ratio
+				newRatio *= 1333 / 1000;
+			}
+			// The ratio must at least the ratio defined in WSS data
+			if (newRatio < wss_source_ratio)
+			{
+				newRatio = wss_source_ratio;
+			}
+		}
+
 		if (bIsFullScreen && aspectSettings.target_aspect && (newRatio > aspectSettings.target_aspect))
 		{
 			newRatio = aspectSettings.target_aspect;
@@ -293,7 +322,7 @@ void AdjustAspectRatio(short** EvenField, short** OddField)
 	if (aspectSettings.DetectAspectNow)
 	{
 
-		SwitchToRatio(aspectSettings.aspect_mode, newRatio);
+		SwitchToRatio(newMode, newRatio);
 		newRatioFrameCount = 0;
 		aspectSettings.DetectAspectNow = FALSE;
 		return;
@@ -316,9 +345,11 @@ void AdjustAspectRatio(short** EvenField, short** OddField)
 		// If the new ratio is less than the old one -- that is, if we've just
 		// become less letterboxed -- switch to the new ratio immediately to
 		// avoid cutting the image off.
+//		if ((newMode != aspectSettings.aspect_mode)
+//		 || (newRatio < aspectSettings.source_aspect))
 		if (newRatio < aspectSettings.source_aspect)
 		{
-			SwitchToRatio(aspectSettings.aspect_mode, newRatio);
+			SwitchToRatio(newMode, newRatio);
 			newRatioFrameCount = 0;
 		}
 		else if (ABS(newRatio - aspectSettings.source_aspect) > aspectSettings.AspectEqualFudgeFactor && newRatio == lastNewRatio)
@@ -359,7 +390,7 @@ void AdjustAspectRatio(short** EvenField, short** OddField)
 					(haveSeenThisRatio && newRatioFrameCount >= aspectSettings.ZoomInFrameCount) ||
 					! haveSeenSmallerRatio)
 				{
-					SwitchToRatio(aspectSettings.aspect_mode, newRatio);
+					SwitchToRatio(newMode, newRatio);
 				}
 			}
 		}

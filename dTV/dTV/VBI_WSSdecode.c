@@ -33,9 +33,9 @@
 #include "VBI_WSSdecode.h"
 #include "vbi.h"
 #include "bt848.h"
-#include "AspectRatio.h"
-#include "dTV.h"
-#include "OSD.h"
+// #include "AspectRatio.h"
+// #include "dTV.h"
+// #include "OSD.h"
 #include "DebugLog.h"
 
 #define	WSS_MAX_SUCCESSIVE_ERR		6
@@ -122,7 +122,7 @@ static void WSS_clear_data ()
 void WSS_init ()
 {
 	// Clear WSS control data
-	WSS_CtrlData.DecodeOk = FALSE;
+	WSS_CtrlData.DecodeStatus = WSS_STATUS_ERROR;
 	WSS_CtrlData.NbDecodeErr = 0;
 	WSS_CtrlData.NbDecodeOk = 0;
 	WSS_CtrlData.NbSuccessiveErr = WSS_MAX_SUCCESSIVE_ERR;
@@ -341,109 +341,128 @@ static BOOL WSS525_DecodeLine(BYTE* vbiline)
 
 int WSS_DecodeLine(BYTE* vbiline)
 {
-	int		PrevAspectMode = WSS_Data.AspectMode;
-	int		PrevAspectRatio = WSS_Data.AspectRatio;
-	BOOL	PrevDecodeOk = WSS_CtrlData.DecodeOk;
-	int		NewAspectMode;
-	int		NewAspectRatio;
-	BOOL	bSwitch = FALSE;
-	char	szInfo[32];
+//	int		PrevAspectMode = WSS_Data.AspectMode;
+//	int		PrevAspectRatio = WSS_Data.AspectRatio;
+//	int		PrevDecodeStatus = WSS_CtrlData.DecodeStatus;
+	BOOL	bResuDecoding;
+//	int		NewAspectMode;
+//	int		NewAspectRatio;
+//	BOOL	bSwitch = FALSE;
+//	char	szInfo[32];
 
 	switch (BT848_GetTVFormat()->wCropHeight)
 	{
 	// 625-line systems
 	case 576:
-		WSS_CtrlData.DecodeOk = WSS625_DecodeLine(vbiline);
+		bResuDecoding = WSS625_DecodeLine(vbiline);
 		break;
 
 	// 525-line systems
 	case 400:
-		WSS_CtrlData.DecodeOk = WSS525_DecodeLine(vbiline);
+		bResuDecoding = WSS525_DecodeLine(vbiline);
 		break;
 
 	default:
-		WSS_CtrlData.DecodeOk = FALSE;
+		bResuDecoding = FALSE;
 		break;
 	}
 
-	if (! WSS_CtrlData.DecodeOk)
+	if (! bResuDecoding)
 	{
 		WSS_CtrlData.NbDecodeErr++;
 		WSS_CtrlData.NbSuccessiveErr++;
 		// Clear WSS decoded data
 		// after two many successive decoding errors
+		if (WSS_CtrlData.NbSuccessiveErr >= WSS_MAX_SUCCESSIVE_ERR)
+			WSS_CtrlData.DecodeStatus = WSS_STATUS_ERROR;
+		else
+			WSS_CtrlData.DecodeStatus = WSS_STATUS_PONCTUAL_ERROR;
 		if (WSS_CtrlData.NbSuccessiveErr == WSS_MAX_SUCCESSIVE_ERR)
 		{
 			WSS_clear_data();
-			bSwitch = TRUE;
-			NewAspectMode = WSS_CtrlData.AspectModeWhenErr;
-			NewAspectRatio = WSS_CtrlData.AspectRatioWhenErr;
+//			bSwitch = TRUE;
+//			NewAspectMode = WSS_CtrlData.AspectModeWhenErr;
+//			NewAspectRatio = WSS_CtrlData.AspectRatioWhenErr;
 		}
 	}
 	else
 	{
-		if (! PrevDecodeOk && (WSS_CtrlData.NbSuccessiveErr >= WSS_MAX_SUCCESSIVE_ERR))
-		{
-			WSS_CtrlData.AspectModeWhenErr = aspectSettings.aspect_mode;
-			WSS_CtrlData.AspectRatioWhenErr = aspectSettings.source_aspect;
-		}
+//		if (! PrevDecodeOk && (WSS_CtrlData.NbSuccessiveErr >= WSS_MAX_SUCCESSIVE_ERR))
+//		{
+//			WSS_CtrlData.AspectModeWhenErr = aspectSettings.aspect_mode;
+//			WSS_CtrlData.AspectRatioWhenErr = aspectSettings.source_aspect;
+//		}
 
+		WSS_CtrlData.DecodeStatus = WSS_STATUS_OK;
 		WSS_CtrlData.NbDecodeOk++;
 		WSS_CtrlData.NbSuccessiveErr = 0;
 
-		// Manage WSS ratio information
-		if ( (WSS_Data.AspectMode != -1)
-		  && (WSS_Data.AspectRatio != -1) )
-		{
-			if ( (WSS_Data.AspectMode != PrevAspectMode)
-			  || (WSS_Data.AspectRatio != PrevAspectRatio) )
-			{
-				bSwitch = TRUE;
-				NewAspectMode = WSS_Data.AspectMode;
-				NewAspectRatio = WSS_Data.AspectRatio;
-			}
-			else
-			{
-				NewAspectMode = WSS_Data.AspectMode;
-				if (WSS_Data.AspectMode != aspectSettings.aspect_mode)
-				{
-					bSwitch = TRUE;
-				}
-				if (WSS_Data.AspectRatio > aspectSettings.source_aspect)
-				{
-					bSwitch = TRUE;
-					NewAspectRatio = WSS_Data.AspectRatio;
-				}
-				else
-				{
-					NewAspectRatio = aspectSettings.source_aspect;
-				}
-			}
-		}
+//		// Manage WSS ratio information
+//		if ( (WSS_Data.AspectMode != -1)
+//		  && (WSS_Data.AspectRatio != -1) )
+//		{
+//			if ( (WSS_Data.AspectMode != PrevAspectMode)
+//			  || (WSS_Data.AspectRatio != PrevAspectRatio) )
+//			{
+//				bSwitch = TRUE;
+//				NewAspectMode = WSS_Data.AspectMode;
+//				NewAspectRatio = WSS_Data.AspectRatio;
+//			}
+//			else
+//			{
+//				NewAspectMode = WSS_Data.AspectMode;
+//				if (WSS_Data.AspectMode != aspectSettings.aspect_mode)
+//				{
+//					bSwitch = TRUE;
+//				}
+//				if (WSS_Data.AspectRatio > aspectSettings.source_aspect)
+//				{
+//					bSwitch = TRUE;
+//					NewAspectRatio = WSS_Data.AspectRatio;
+//				}
+//				else
+//				{
+//					NewAspectRatio = aspectSettings.source_aspect;
+//				}
+//			}
+//		}
 	}
 
-	if (bSwitch
-	 && (NewAspectMode != -1)
-	 && (NewAspectRatio != -1)
-	 && ( (NewAspectMode != aspectSettings.aspect_mode)
-	   || (NewAspectRatio != aspectSettings.source_aspect) ) )
+//	if (bSwitch
+//	 && (NewAspectMode != -1)
+//	 && (NewAspectRatio != -1)
+//	 && ( (NewAspectMode != aspectSettings.aspect_mode)
+//	   || (NewAspectRatio != aspectSettings.source_aspect) ) )
+//	{
+//		SwitchToRatio (NewAspectMode, NewAspectRatio);
+//
+//		// OSD message
+//		sprintf(szInfo, "%.2f:1", (double)Setting_GetValue(Aspect_GetSetting(SOURCE_ASPECT)) / 1000.0);
+//		if ( (Setting_GetValue(Aspect_GetSetting(ASPECT_MODE)) == 1)
+//		  && (Setting_GetValue(Aspect_GetSetting(SOURCE_ASPECT)) != 1333) )
+//		{
+//			strcat(szInfo, " Letterbox");
+//		}
+//		else if (Setting_GetValue(Aspect_GetSetting(ASPECT_MODE)) == 2)
+//		{
+//			strcat(szInfo, " Anamorphic");
+//		}
+//		strcat(szInfo, " Signal");
+//		OSD_ShowText(hWnd, szInfo, 0);
+//	}
+
+	return ((WSS_CtrlData.DecodeStatus == WSS_STATUS_OK) ? 0 : -1);
+}
+
+BOOL WSS_GetRecommendedAR (int* pMode, int* pRatio)
+{
+	if ((WSS_CtrlData.DecodeStatus == WSS_STATUS_ERROR)
+		|| (WSS_Data.AspectMode == -1) )
+		return FALSE;
+	else
 	{
-		SwitchToRatio (NewAspectMode, NewAspectRatio);
-
-		// OSD message
-		sprintf(szInfo, "%.2f:1", (double)Setting_GetValue(Aspect_GetSetting(SOURCE_ASPECT)) / 1000.0);
-		if ( (Setting_GetValue(Aspect_GetSetting(ASPECT_MODE)) == 1)
-		  && (Setting_GetValue(Aspect_GetSetting(SOURCE_ASPECT)) != 1333) )
-		{
-			strcat(szInfo, " Letterbox");
-		}
-		else if (Setting_GetValue(Aspect_GetSetting(ASPECT_MODE)) == 2)
-		{
-			strcat(szInfo, " Anamorphic");
-		}
-		strcat(szInfo, " Signal");
-		OSD_ShowText(hWnd, szInfo, 0);
+		*pMode = WSS_Data.AspectMode;
+		*pRatio = WSS_Data.AspectRatio;
+		return TRUE;
 	}
-
-	return (WSS_CtrlData.DecodeOk ? 0 : -1);
 }
