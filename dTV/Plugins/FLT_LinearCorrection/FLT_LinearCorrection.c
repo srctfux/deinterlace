@@ -27,11 +27,13 @@ FILTER_METHOD LinearCorrMethod;
 
 typedef struct _BlendStruct
 {
-	int		pixel1;
-	double	coef1;
-	int		pixel2;
-	double	coef2;
-	int		pixel_UV;
+	int	pixel1;		// The first pixel to use to calculate luminance
+	int	coef1;		// Coef to apply to pixel1
+					// double value between 0 and 1 multiplied by 1000 to use integer
+	int	pixel2;		// The second pixel to use to calculate luminance
+	int	coef2;		// Coef to apply to pixel2
+					// double value between 0 and 1 multiplied by 1000 to use integer
+	int	pixelUV;	// Pixel to use to calculate color
 } BlendStruct;
 
 int PictureWidth = -1;
@@ -64,6 +66,9 @@ void UpdLinearFilterTables(int Width)
 			{
 				LinearFilterTab[i][j].pixel1 = -1;
 				LinearFilterTab[i][j].pixel2 = -1;
+				LinearFilterTab[i][j].coef1 = 0;
+				LinearFilterTab[i][j].coef2 = 0;
+				LinearFilterTab[i][j].pixelUV = -1;
 			}
 			else
 			{
@@ -77,20 +82,20 @@ void UpdLinearFilterTables(int Width)
 				LinearFilterTab[i][j].pixel2 = (int)pixel_after;
 				if (pixel_before < pixel_after)
 				{
-					LinearFilterTab[i][j].coef1 = pixel_after - pos;
-					LinearFilterTab[i][j].coef2 = pos - pixel_before;
+					LinearFilterTab[i][j].coef1 = (int)ceil((pixel_after - pos) * 1000.0 - 0.5);
+					LinearFilterTab[i][j].coef2 = (int)ceil((pos - pixel_before) * 1000.0 - 0.5);
 				}
 				else
 				{
-					LinearFilterTab[i][j].coef1 = 0.5;
-					LinearFilterTab[i][j].coef2 = 0.5;
+					LinearFilterTab[i][j].coef1 = 500;
+					LinearFilterTab[i][j].coef2 = 500;
 				}
 				if ((j % 2) == (LinearFilterTab[i][j].pixel1 % 2))
-					LinearFilterTab[i][j].pixel_UV = LinearFilterTab[i][j].pixel1;
+					LinearFilterTab[i][j].pixelUV = LinearFilterTab[i][j].pixel1;
 				else if ((j % 2) == (LinearFilterTab[i][j].pixel2 % 2))
-					LinearFilterTab[i][j].pixel_UV = LinearFilterTab[i][j].pixel2;
+					LinearFilterTab[i][j].pixelUV = LinearFilterTab[i][j].pixel2;
 				else
-					LinearFilterTab[i][j].pixel_UV = LinearFilterTab[i][j].pixel1 + 1;
+					LinearFilterTab[i][j].pixelUV = LinearFilterTab[i][j].pixel1 + 1;
 			}
 		}
 	}
@@ -147,10 +152,6 @@ void ApplyLinearFilter(BYTE* pLine, int NewWidth, MEMCPY_FUNC *pCopy)
 {
 	int i;
 
-	// Exit if no transform is to be applied to the line
-	if (NewWidth == PictureWidth)
-		return;
-
 	for (i=0 ; i<PictureWidth ; i++)
 	{
 		if (LinearFilterTab[NewWidth][i].pixel1 == -1)
@@ -174,8 +175,8 @@ void ApplyLinearFilter(BYTE* pLine, int NewWidth, MEMCPY_FUNC *pCopy)
 			if (!DoOnlyMasking)
 			{
 				// Build temporary new line
-				TmpBuf[i*2] = (int)ceil(pLine[LinearFilterTab[NewWidth][i].pixel1*2] * LinearFilterTab[NewWidth][i].coef1 + pLine[LinearFilterTab[NewWidth][i].pixel2*2] * LinearFilterTab[NewWidth][i].coef2 - 0.5);
-				TmpBuf[i*2+1] = pLine[LinearFilterTab[NewWidth][i].pixel_UV*2+1];
+				TmpBuf[i*2] = (pLine[LinearFilterTab[NewWidth][i].pixel1*2] * LinearFilterTab[NewWidth][i].coef1 + pLine[LinearFilterTab[NewWidth][i].pixel2*2] * LinearFilterTab[NewWidth][i].coef2) / 1000;
+				TmpBuf[i*2+1] = pLine[LinearFilterTab[NewWidth][i].pixelUV*2+1];
 			}
 		}
 	}
@@ -190,27 +191,31 @@ void ApplyLinearFilter(BYTE* pLine, int NewWidth, MEMCPY_FUNC *pCopy)
 BOOL LinearCorrection(DEINTERLACE_INFO *info)
 {
 	int i;
-	BYTE* pLine;
 
 	if (info->Overlay == NULL)
 		return FALSE;
 
-	if ((info->FrameWidth > MAX_WIDTH) || (info->FrameHeight > MAX_HEIGHT))
-		return FALSE;
-
+	// If there is a change concerning the height or the width of the picture
 	if ((info->FrameWidth != PictureWidth) || (info->FrameHeight != PictureHeight))
 	{
+		// Verify that the filter can manage this size of picture
+		if ((info->FrameWidth > MAX_WIDTH) || (info->FrameHeight > MAX_HEIGHT))
+			return FALSE;
+
+		// Update the internal tables of the filter
 		UpdNbPixelsPerLineTable(info->FrameHeight, info->FrameWidth);
 		UpdLinearFilterTables(info->FrameWidth);
 		PictureWidth = info->FrameWidth;
 		PictureHeight = info->FrameHeight;
 	}
 
-	// Update each line
+	// Update each line of the picture
 	for (i=0 ; i<PictureHeight ; i++)
 	{
-		pLine = info->Overlay + i * info->OverlayPitch;
-		ApplyLinearFilter(pLine, NbPixelsPerLineTab[i], info->pMemcpy);
+		if (NbPixelsPerLineTab[i] != PictureWidth)
+		{
+			ApplyLinearFilter(info->Overlay + i * info->OverlayPitch, NbPixelsPerLineTab[i], info->pMemcpy);
+		}
 	}
 
 	return TRUE;
