@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSGraph.cpp,v 1.2 2001-08-08 16:13:28 tobbej Exp $
+// $Id: DSGraph.cpp,v 1.3 2001-09-19 17:45:14 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2001 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.2  2001/08/08 16:13:28  tobbej
+// added a few comments
+//
 // Revision 1.1  2001/08/08 16:01:04  tobbej
 // new test app for playing movie files thru dmo filter
 //
@@ -136,7 +139,7 @@ void CDSGraph::createDIFilter()
 {
 	HRESULT hr;
 	//create and insert deinterlace dmo filter in graf
-	hr=m_pDIFilter.CoCreateInstance(CLSID_DMOWrapperFilter);
+	/*hr=m_pDIFilter.CoCreateInstance(CLSID_DMOWrapperFilter);
 	if(FAILED(hr))
 	{
 		AfxMessageBox("failed to create deinterlace dmo");
@@ -153,6 +156,12 @@ void CDSGraph::createDIFilter()
 			return;
 		}
 		
+	}*/
+	hr=m_pDIFilter.CoCreateInstance(CLSID_DIDMOWrapper);
+	if(FAILED(hr))
+	{
+		AfxMessageBox("failed to create deinterlace filter");
+		return;
 	}
 	hr=m_pGraph->AddFilter(m_pDIFilter,L"Deinterlace filter");
 }
