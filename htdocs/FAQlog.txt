@@ -18,6 +18,10 @@ Any questions regarding the FAQ should go to me, Yvonus, at yvonus@removethis_bi
 
 
 --8<----------------
+5/9 John
+- Merged in changes from developers version of file
+- Changed links so that the text can simply be copied to the help file
+- Ran HTML through HTML tidy
 
 30/08 Yvonus
 . Added the "Troubleshooting>What is the crashlog.txt file ?"
