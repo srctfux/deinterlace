@@ -65,7 +65,7 @@ void LoadSettingsFromIni(LPSTR Name)
 	MainProcessor = GetPrivateProfileInt("Threads", "WindowProcessor", 0, szIniFile);
 	DecodeProcessor = GetPrivateProfileInt("Threads", "DecodeProcessor", 0, szIniFile);
 
-	bDisplayStatusBar = (GetPrivateProfileInt("Show", "StatusBar", 0, szIniFile) != 0);
+	bDisplayStatusBar = (GetPrivateProfileInt("Show", "StatusBar", 1, szIniFile) != 0);
 	Show_Menu = (GetPrivateProfileInt("Show", "Menu", 1, szIniFile) != 0);
 
 	PulldownThresholdLow = GetPrivateProfileInt("Pulldown", "PulldownThresholdLow", PulldownThresholdLow, szIniFile);

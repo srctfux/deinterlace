@@ -392,9 +392,9 @@ DoNext8Bytes:
 
 			movq mm7, mm6
 
-			pandn mm7, mm1
-
 			pand mm0, mm6
+
+			pandn mm7, mm1
 
 			por mm7, mm0
 
@@ -500,9 +500,9 @@ DoNext8Bytes:
 
 			movq mm7, mm6
 
-			pandn mm7, mm1
-
 			pand mm0, mm6
+
+			pandn mm7, mm1
 
 			por mm7, mm0
 
