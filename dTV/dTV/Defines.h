@@ -51,6 +51,14 @@ typedef enum
 	PULLDOWNMODES_LAST_ONE
 } ePULLDOWNMODES;
 
+#define IS_PULLDOWN_MODE(x) ((x) == FILM_22_PULLDOWN_ODD || \
+							 (x) == FILM_22_PULLDOWN_EVEN || \
+							 (x) == FILM_32_PULLDOWN_0 || \
+							 (x) == FILM_32_PULLDOWN_1 || \
+							 (x) == FILM_32_PULLDOWN_2 || \
+							 (x) == FILM_32_PULLDOWN_3 || \
+							 (x) == FILM_32_PULLDOWN_4)
+
 #define MAXVTDIALOG 8
 #define MAXPROGS 4096
 #define VBI_DATA_SIZE 2048*39

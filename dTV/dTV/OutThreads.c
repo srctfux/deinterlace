@@ -439,10 +439,12 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 							short **OddField)
 {
 	int CombFactor = 0;
+	boolean SwitchToVideo = FALSE;
 	static long MISMATCH_COUNT = 0;
 	static long MOVIE_FIELD_CYCLE = 0;
 	static long MOVIE_VERIFY_CYCLE = 0;
-	
+	static ePULLDOWNMODES OldPulldownMode = VIDEO_MODE;
+
 	// Call with FieldDiff -1 is an initialization call.
 	// This resets static variables when we start the thread each time.
 	// This probably should be done in an .Initialize() member function
@@ -466,17 +468,9 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 	//
     if(FieldDiff > Threshold32Pulldown)
 	{
-		if (MISMATCH_COUNT > PulldownRepeatCount2 * 5 ||
-			(bFallbackToVideo &&
-			 ThresholdPulldownMismatch > 0 &&		    // only do video-force check if there's a threshold
-			 FieldDiff >= ThresholdPulldownMismatch &&	// only force video if this field is very different,
-			 DoWeWantToFlip(TRUE, OnOddField) &&	    // and we would weave it with the previous field,
-			 (CombFactor = GetCombFactor(EvenField, OddField)) > ThresholdPulldownComb)) // and it'd produce artifacts
+		if (MISMATCH_COUNT > PulldownRepeatCount2 * 5)
 		{
-			// Either we're forcing video mode thanks to a pulldown
-			// mismatch, OR...
-			//
-			// There has been no duplicate fields lately.
+			// There have been no duplicate fields lately.
 			// It's probably video source.
 			//
 			// MAX_MISMATCH should be a reasonably high value so
@@ -484,7 +478,26 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 			// in switching to video source everytime there is
 			// video noise or a single spurious field added/dropped
 			// during a movie causing mis-synchronization problems. 
+			SwitchToVideo = TRUE;
+		}
 
+		// If we're in a film mode and an incoming field would cause
+		// weave artifacts, optionally switch to video mode but make
+		// it very easy to get back into film mode in case this was
+		// just a glitchy scene change.
+		if (IS_PULLDOWN_MODE(gPulldownMode) &&
+			bFallbackToVideo &&							// let the user turn this on and off.
+			ThresholdPulldownMismatch > 0 &&		    // only do video-force check if there's a threshold.
+			FieldDiff >= ThresholdPulldownMismatch &&	// only force video if this field is very different,
+			DoWeWantToFlip(TRUE, OnOddField) &&			// and we would weave it with the previous field,
+			(CombFactor = GetCombFactor(EvenField, OddField)) > ThresholdPulldownComb) // and it'd produce artifacts
+		{
+			SwitchToVideo = TRUE;
+			NextPulldownRepeatCount = 1;
+		}
+
+		if (SwitchToVideo)
+		{
 			gPulldownMode = VIDEO_MODE;
 			MOVIE_VERIFY_CYCLE = 0;
 			MOVIE_FIELD_CYCLE = 0;
@@ -504,16 +517,18 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 		{
 			// 3:2 pulldown is a cycle of 5 fields where there is only
 			// one duplicate field pair, and 4 mismatching pairs.
-			// We need to continue detection for at least 2 cycles
-			// to be very certain that it is actually 3:2 pulldown
-			// This would mean a latency of 10 fields.
+			// We need to continue detection for at least PulldownRepeatCount
+			// cycles to be very certain that it is actually 3:2 pulldown.
+			// For a repeat count of 2, this would mean a latency of 10
+			// fields.
 			//
-			if(MOVIE_VERIFY_CYCLE >= PulldownRepeatCount &&
-			   MOVIE_VERIFY_CYCLE >= NextPulldownRepeatCount)
+			// If NextPulldownRepeatCount is nonzero, it's a temporary
+			// repeat count setting attempting to compensate for some kind
+			// of anomaly in the sequence of fields, so use it instead.
+			if(NextPulldownRepeatCount > 0 && MOVIE_VERIFY_CYCLE >= NextPulldownRepeatCount ||
+			   NextPulldownRepeatCount == 0 && MOVIE_VERIFY_CYCLE >= PulldownRepeatCount)
 			{
-				ePULLDOWNMODES OldPulldownMode = gPulldownMode;
-
-				// If the pulldown repeat count was temporarily increased, get
+				// If the pulldown repeat count was temporarily changed, get
 				// rid of the temporary setting.
 				NextPulldownRepeatCount = 0;
 
@@ -567,6 +582,12 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 					// switching back to movie mode for at least a certain
 					// amount of time.
 					//
+					// This is only triggered on switches between different
+					// film modes, not switches between video and film mode.
+					// Since we can drop down to video if we're not sure
+					// we should stay in pulldown mode, we don't want to
+					// bail out of film mode if we subsequently decide that
+					// the film mode we just dropped out of was correct.
 					if (bFallbackToVideo && TrackModeSwitches(gPulldownMode))
 					{
 						gPulldownMode = VIDEO_MODE;
@@ -590,6 +611,7 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 					}
 				}
 
+				OldPulldownMode = gPulldownMode;
 			}
 			else
 			{
