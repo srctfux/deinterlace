@@ -1,0 +1,8 @@
+
+ TODO:
+   
+   * interlace detection so taht you don't have to set key1 on or off manually
+
+   * Think about Mark Rejhon's 3/2 pulldown filter as well
+
+   * Support free compliers not just MSVC

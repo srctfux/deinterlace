@@ -89,11 +89,35 @@ LINK32=link.exe
 # Name "bTVPlugin - Win32 Debug"
 # Begin Source File
 
+SOURCE=.\Authors.txt
+# End Source File
+# Begin Source File
+
+SOURCE=.\Copying.txt
+# End Source File
+# Begin Source File
+
+SOURCE=.\News.txt
+# End Source File
+# Begin Source File
+
 SOURCE=.\Plugin.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\Plugin.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\README.txt
+# End Source File
+# Begin Source File
+
+SOURCE=.\Thanks.txt
+# End Source File
+# Begin Source File
+
+SOURCE=.\Todo.txt
 # End Source File
 # End Target
 # End Project

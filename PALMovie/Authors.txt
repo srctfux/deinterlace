@@ -1,0 +1,5 @@
+Authors of PALMovie.
+
+John Adcock (john@adcock8.freeserve.co.uk)
+
+The work is very heavily based on the bTV SDK code by Borg (borgx@box43.gnet.pl)
