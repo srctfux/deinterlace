@@ -164,12 +164,22 @@ unsigned short VTColourTable[9] =
 	32767,	//Transparent
 };
 
-char InitialHue = 0x00;
-char InitialBrightness = 0x00;
-int InitialContrast = 0xd8;
-int InitialSaturationU = 0xfe;
-int InitialSaturationV = 0xb4;
-int InitialOverscan = 4;
+// 10/19/2000 Mark Rejhon
+// Better NTSC defaults
+char InitialHue        = 0;
+char InitialBrightness = 20;
+int InitialContrast    = 207;
+int InitialSaturationU = 254;
+int InitialSaturationV = 219;
+int InitialOverscan    = 4;
+
+// These are the original defaults, likely optimized for PAL (could use refinement).
+//char InitialHue        = 0x00;
+//char InitialBrightness = 0x00;
+//int InitialContrast    = 0xd8;
+//int InitialSaturationU = 0xfe;
+//int InitialSaturationV = 0xb4;
+//int InitialOverscan    = 4;
 
 BOOL Has_MSP=FALSE;
 
