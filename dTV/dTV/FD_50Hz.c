@@ -57,7 +57,7 @@ void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 	static long LastPolarity;
 	static long LastDiff;
 
-	// call with pInfo->CombFactors -1 to reset static variables when we start the thread
+	// call with pInfo as NULL to reset static variables when we start the thread
 	// each time
 	if(pInfo == NULL)
 	{
