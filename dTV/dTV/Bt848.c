@@ -684,7 +684,6 @@ BOOL BT848_IsVideoPresent()
 // First syncs to field
 // Then waits for data
 // Then tells the bt848 where to put each line of data
-
 void BT848_CreateRiscCode(int nFlags)
 {
 	DWORD *pRiscCode;
@@ -694,7 +693,7 @@ void BT848_CreateRiscCode(int nFlags)
 	PHYS pPhysical;
 	DWORD GotBytesPerLine;
 	DWORD BytesPerLine = 0;
-	
+
 	pRiscCode = Risc_dma->dwUser;
 
 	// we create the RISC code for 10 fields

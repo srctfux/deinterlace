@@ -70,11 +70,11 @@
 #include "FD_60Hz.H"
 #include "FD_50Hz.H"
 #include "FLT_TNoise.h"
+#include "Splash.h"
 
 
 HWND hWnd = NULL;
 HANDLE hInst = NULL;
-HWND SplashWnd = NULL;
 
 //---------------------------------------------------------------------------
 // 2000-12-19 Added by Mark Rejhon
@@ -147,7 +147,6 @@ int pgstartx = -1;
 int pgstarty = -1;
 
 BOOL bAlwaysOnTop = FALSE;
-BOOL bDisplaySplashScreen = TRUE;
 BOOL bDisplayStatusBar = TRUE;
 BOOL bIsFullScreen = FALSE;
 
@@ -193,13 +192,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	SetIniFileForSettings(lpCmdLine);
 	LoadSettingsFromIni();
 
-	if (bDisplaySplashScreen)
-	{
-		SplashWnd = CreateDialog(hInst, "SPLASHBOX", NULL, SplashProc);
-	}
-#ifndef _DEBUG
-	SetWindowPos(SplashWnd, HWND_TOPMOST, 10, 10, 20, 20, SWP_NOMOVE | SWP_NOCOPYBITS | SWP_NOSIZE);
-#endif
+	ShowSpashScreen();
 
 	wc.style = 0;
 	wc.lpfnWndProc = (WNDPROC) MainWndProc;
@@ -1057,7 +1050,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
 		case IDM_VIDEOSETTINGS:
 			DialogBox(hInst, "VIDEOSETTINGS", hWnd, VideoSettingProc);
-			WorkoutOverlaySize();
 			break;
 
 		case IDM_ADV_VIDEOSETTINGS:
@@ -1548,9 +1540,11 @@ void MainWndOnInitBT(HWND hWnd)
 	int i;
 	BOOL bInitOK = FALSE;
 
+	AddSplashTextLine("Hardware Init", 0);
+
 	if (BT848_FindTVCard(hWnd) == TRUE)
 	{
-		SetDlgItemText(SplashWnd, IDC_TEXT2, BT848_ChipType());
+		AddSplashTextLine(BT848_ChipType(), 0);
 		if(InitDD(hWnd) == TRUE)
 		{
 			if(Overlay_Create() == TRUE)
@@ -1564,11 +1558,10 @@ void MainWndOnInitBT(HWND hWnd)
 	}
 	else
 	{
-		SetDlgItemText(SplashWnd, IDC_TEXT1, "");
-		SetDlgItemText(SplashWnd, IDC_TEXT2, "No");
-		SetDlgItemText(SplashWnd, IDC_TEXT3, "Suitable");
-		SetDlgItemText(SplashWnd, IDC_TEXT4, "Hardware");
-		SetDlgItemText(SplashWnd, IDC_TEXT5, "");
+		AddSplashTextLine("", 0);
+		AddSplashTextLine("No", 0);
+		AddSplashTextLine("Suitable", 0);
+		AddSplashTextLine("Hardware", 0);
 	}
 
 	if (bInitOK)
@@ -1630,30 +1623,30 @@ void MainWndOnInitBT(HWND hWnd)
 			SendMessage(hWnd, WM_COMMAND, IDM_TOGGLE_MENU, 0);
 		}
 
-		sprintf(Text, "No Tuner");
 		if (Tuner_Init(TunerType) == TRUE)
 		{
-			sprintf(Text, "Tuner OK");
+			AddSplashTextLine("Tuner OK", 0);
 		}
-		SetDlgItemText(SplashWnd, IDC_TEXT4, Text);
+		else
+		{
+			AddSplashTextLine("No Tuner", 0);
+		}
 
 		// MAE 8 Dec 2000 Start of change
 		// JA 8 Jan 2001 Tidied up
 
 		if (Audio_MSP_Init(0x80, 0x81) == TRUE)
 		{
-			sprintf(Text, "MSP Device OK");
+			AddSplashTextLine("MSP Device OK", 0);
 			Audio_SetVolume(InitialVolume);
 		}
 		else
 		{
-			sprintf(Text, "No MSP Device");
+			AddSplashTextLine("No MSP Device", 0);
 		}
 
 		// JA 8 Jan 2001 End of Tidy
 		// MAE 8 Dec 2000 End of change
-		SetDlgItemText(SplashWnd, IDC_TEXT5, Text);
-
 		if (Audio_MSP_IsPresent() == TRUE)
 		{
 			SetTimer(hWnd, TIMER_MSP, TIMER_MSP_MS, NULL);
@@ -1718,14 +1711,8 @@ void MainWndOnCreate(HWND hWnd)
 	int ProcessorMask;
 
 	GetSystemInfo(&SysInfo);
-	SetDlgItemText(SplashWnd, IDC_TEXT1, "Table Build");
-	SetDlgItemText(SplashWnd, IDC_TEXT2, "");
-	SetDlgItemText(SplashWnd, IDC_TEXT3, "");
-	SetDlgItemText(SplashWnd, IDC_TEXT4, "");
-	SetDlgItemText(SplashWnd, IDC_TEXT5, "");
-	Sleep(100);
-
-	SetDlgItemText(SplashWnd, IDC_TEXT2, "VideoText");
+	AddSplashTextLine("Table Build", 0);
+	AddSplashTextLine("VideoText", 0);
 
 	VBI_Init();	
 	
@@ -1735,43 +1722,34 @@ void MainWndOnCreate(HWND hWnd)
 	if (USE_MIXER == TRUE)
 	{
 		Sleep(100);
-		SetDlgItemText(SplashWnd, IDC_TEXT1, "Sound-System");
-		SetDlgItemText(SplashWnd, IDC_TEXT2, "");
-		SetDlgItemText(SplashWnd, IDC_TEXT3, "");
-		SetDlgItemText(SplashWnd, IDC_TEXT4, "");
-		SetDlgItemText(SplashWnd, IDC_TEXT5, "");
+		AddSplashTextLine("Sound-System", 0);
 
 		Enumerate_Sound_SubSystem();
 		if (SoundSystem.DeviceCount == 0)
 		{
-			SetDlgItemText(SplashWnd, TEXT3, "No Soundsystem found");
+			AddSplashTextLine("No Soundsystem found", 0);
 		}
 		else
 		{
 			if (SoundSystem.DeviceCount >= 1)
-				SetDlgItemText(SplashWnd, TEXT3, SoundSystem.MixerDev[0].szPname);
+				AddSplashTextLine(SoundSystem.MixerDev[0].szPname, 0);
 			if (SoundSystem.DeviceCount >= 2)
-				SetDlgItemText(SplashWnd, TEXT4, SoundSystem.MixerDev[1].szPname);
+				AddSplashTextLine(SoundSystem.MixerDev[1].szPname, 0);
 			if (SoundSystem.DeviceCount >= 3)
-				SetDlgItemText(SplashWnd, TEXT5, SoundSystem.MixerDev[2].szPname);
-			Sleep(100);
-			SetDlgItemText(SplashWnd, IDC_TEXT3, "");
-			SetDlgItemText(SplashWnd, IDC_TEXT4, "");
-			SetDlgItemText(SplashWnd, IDC_TEXT5, "");
+				AddSplashTextLine(SoundSystem.MixerDev[2].szPname, 0);
 
 			if (Volume.SoundSystem >= 0)
-				sprintf(Text, "%s", SoundSystem.MixerDev[Volume.SoundSystem].szPname);
+				AddSplashTextLine(SoundSystem.MixerDev[Volume.SoundSystem].szPname, 0);
 			else if (Mute.SoundSystem >= 0)
-				sprintf(Text, "%s", SoundSystem.MixerDev[Mute.SoundSystem].szPname);
+				AddSplashTextLine(SoundSystem.MixerDev[Mute.SoundSystem].szPname, 0);
 			else
-				sprintf(Text, "%s", SoundSystem.MixerDev[0].szPname);
-			SetDlgItemText(SplashWnd, IDC_TEXT2, Text);
+				AddSplashTextLine(SoundSystem.MixerDev[0].szPname, 0);
 
 			if (Volume.SoundSystem >= 0)
 				sprintf(Text, "Volume -> %s", SoundSystem.To_Lines[Volume.SoundSystem].To_Connection[Volume.Destination].MixerConnections[Volume.Connection].szName);
 			else
 				sprintf(Text, "Volume Not Set");
-			SetDlgItemText(SplashWnd, IDC_TEXT3, Text);
+			AddSplashTextLine(Text, 0);
 
 			if (Mute.SoundSystem >= 0)
 				sprintf(Text, "%s -> %s  %s", SoundSystem.To_Lines[Mute.SoundSystem].To_Connection[Mute.Destination].MixerConnections[Mute.Connection].szName,
@@ -1779,7 +1757,7 @@ void MainWndOnCreate(HWND hWnd)
 						SoundSystem.To_Lines[Mute.SoundSystem].To_Connection[Mute.Destination].To_Control[Mute.Connection].MixerControl[Mute.Control].szName);
 			else
 				sprintf(Text, "Mute Not Set");
-			SetDlgItemText(SplashWnd, IDC_TEXT4, Text);
+			AddSplashTextLine(Text, 0);
 
 			if (MIXER_LINKER_KANAL == -1)
 				Mixer_Get_Volume(&MIXER_LINKER_KANAL, &MIXER_RECHTER_KANAL);
@@ -1788,17 +1766,13 @@ void MainWndOnCreate(HWND hWnd)
 			Mixer_Set_Volume(MIXER_LINKER_KANAL, MIXER_RECHTER_KANAL);
 		}
 	}
-	SetDlgItemText(SplashWnd, IDC_TEXT1, "System Analysis");
-	SetDlgItemText(SplashWnd, IDC_TEXT2, "");
-	SetDlgItemText(SplashWnd, IDC_TEXT3, "");
-	SetDlgItemText(SplashWnd, IDC_TEXT4, "");
-	SetDlgItemText(SplashWnd, IDC_TEXT5, "");
+	AddSplashTextLine("System Analysis", 0);
 
 	Sleep(100);
 	sprintf(Text, "Processor %d ", SysInfo.dwProcessorType);
-	SetDlgItemText(SplashWnd, IDC_TEXT2, Text);
+	AddSplashTextLine(Text, 0);
 	sprintf(Text, "Number %d ", SysInfo.dwNumberOfProcessors);
-	SetDlgItemText(SplashWnd, IDC_TEXT3, Text);
+	AddSplashTextLine(Text, 0);
 
 	if (SysInfo.dwNumberOfProcessors > 1)
 	{
@@ -1821,23 +1795,16 @@ void MainWndOnCreate(HWND hWnd)
 
 		}
 
-		SetDlgItemText(SplashWnd, IDC_TEXT1, "Multi-Processor");
+		AddSplashTextLine("Multi-Processor", 0);
 		sprintf(Text, "Main-CPU %d ", MainProcessor);
-		SetDlgItemText(SplashWnd, IDC_TEXT2, Text);
+		AddSplashTextLine(Text, 0);
 		sprintf(Text, "DECODE-CPU %d ", DecodeProcessor);
-		SetDlgItemText(SplashWnd, IDC_TEXT3, Text);
+		AddSplashTextLine(Text, 0);
 		Sleep(100);
 	}
 
 	ProcessorMask = 1 << (MainProcessor);
 	i = SetThreadAffinityMask(GetCurrentThread(), ProcessorMask);
-
-	SetDlgItemText(SplashWnd, IDC_TEXT1, "Hardware Analyse");
-	SetDlgItemText(SplashWnd, IDC_TEXT2, "");
-	SetDlgItemText(SplashWnd, IDC_TEXT3, "");
-	SetDlgItemText(SplashWnd, IDC_TEXT4, "");
-	SetDlgItemText(SplashWnd, IDC_TEXT5, "");
-	Sleep(200);
 
 	if(bIsFullScreen == TRUE)
 	{

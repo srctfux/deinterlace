@@ -73,7 +73,6 @@ int AdjustSliderDown(int * pnValue, int nLower);
 
 extern HANDLE hInst;
 extern HWND hWnd;
-extern HWND SplashWnd;
 
 extern int DecodeProcessor;
 extern int MainProcessor;
@@ -92,7 +91,6 @@ extern int pgstarty;
 
 extern BOOL bAlwaysOnTop;
 extern BOOL bIsFullScreen;
-extern BOOL bDisplaySplashScreen;
 extern BOOL bDisplayStatusBar;
 extern BOOL Show_Menu;
 

@@ -49,6 +49,8 @@
 #include "tuner.h"
 #include "vbi.h"
 #include "cpu.h"
+#include "slider.h"
+#include "AspectRatio.h"
 
 int UTLoop=0;
 int UTPage=150;
@@ -86,8 +88,7 @@ BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 	static int TSaturationV;
 	static int TOverscan;
 	static int LastSaturation;
-
-	int x, y, j;
+	int j;
 
 	switch (message)
 	{
@@ -99,6 +100,7 @@ BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 		TSaturationU = InitialSaturationU;
 		TSaturationV = InitialSaturationV;
 		TOverscan = InitialOverscan;
+
 		SetDlgItemInt(hDlg, IDC_D1, TBrightness, TRUE);
 		SetDlgItemInt(hDlg, IDC_D2, TContrast, FALSE);
 		SetDlgItemInt(hDlg, IDC_D3, THue, TRUE);
@@ -108,144 +110,186 @@ BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 		SetDlgItemInt(hDlg, IDC_D6, TSaturationV, FALSE);
 		SetDlgItemInt(hDlg, IDC_D7, TOverscan, FALSE);
 
-		SetSliderInt(GetDlgItem(hDlg, IDC_S1), 33, TBrightness,  -128, 127);
-		SetSliderInt(GetDlgItem(hDlg, IDC_S2), 109, TContrast,  0, 255);
-		SetSliderInt(GetDlgItem(hDlg, IDC_S3), 183, THue, -128, 127);
-		SetSliderInt(GetDlgItem(hDlg, IDC_S4), 258, LastSaturation, 0, 255);
-		SetSliderInt(GetDlgItem(hDlg, IDC_S5), 334, TSaturationU, 0, 255);
-		SetSliderInt(GetDlgItem(hDlg, IDC_S6), 410, TSaturationV, 0, 255);
-		SetSliderInt(GetDlgItem(hDlg, IDC_S7), 482, TOverscan, 0, 128);
+		// Setup Bightness Slider
+		Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER1), -128, 127);
+		Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER1), 0x00);
+		Slider_SetLineSize(GetDlgItem(hDlg, IDC_SLIDER1), 1);
+		Slider_SetPageSize(GetDlgItem(hDlg, IDC_SLIDER1), 10);
+		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER1),TBrightness);
+
+		// Setup Contrast Slider
+		Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER2), 0, 255);
+		Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER2), 0xd8);
+		Slider_SetLineSize(GetDlgItem(hDlg, IDC_SLIDER2), 1);
+		Slider_SetPageSize(GetDlgItem(hDlg, IDC_SLIDER2), 10);
+		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER2),TContrast);
+
+		// Setup Hue Slider
+		Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER3), -128, 127);
+		Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER3), 0x00);
+		Slider_SetLineSize(GetDlgItem(hDlg, IDC_SLIDER3), 1);
+		Slider_SetPageSize(GetDlgItem(hDlg, IDC_SLIDER3), 10);
+		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER3),THue);
+
+		// Setup Saturation Slider
+		Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER4), abs(TSaturationU - TSaturationV) / 2, 255 - (abs(TSaturationU - TSaturationV) / 2));
+		Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER4), 0xd9);
+		Slider_SetLineSize(GetDlgItem(hDlg, IDC_SLIDER4), 1);
+		Slider_SetPageSize(GetDlgItem(hDlg, IDC_SLIDER4), 10);
+		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER4),LastSaturation);
+
+		// Setup SaturationU Slider
+		Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER5), 0, 255);
+		Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER5), 0xfe);
+		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER5),TSaturationU);
+		Slider_SetLineSize(GetDlgItem(hDlg, IDC_SLIDER5), 1);
+		Slider_SetPageSize(GetDlgItem(hDlg, IDC_SLIDER5), 10);
+
+		// Setup SaturationU Slider
+		Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER6), 0, 255);
+		Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER6), 0xb4);
+		Slider_SetLineSize(GetDlgItem(hDlg, IDC_SLIDER6), 1);
+		Slider_SetPageSize(GetDlgItem(hDlg, IDC_SLIDER6), 10);
+		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER6),TSaturationV);
+
+		// Setup Overscan Slider
+		if(CurrentX > CurrentY)
+		{
+			Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER7), 0, CurrentY / 2 - 1);
+		}
+		else
+		{
+			Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER7), 0, CurrentX / 2 - 1);
+		}
+		Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER7), 0x04);
+		Slider_SetLineSize(GetDlgItem(hDlg, IDC_SLIDER7), 1);
+		Slider_SetPageSize(GetDlgItem(hDlg, IDC_SLIDER7), 10);
+		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER7),TOverscan);
 		break;
 
-	case WM_MOUSEMOVE:
-
-		y = HIWORD(lParam);
-		x = LOWORD(lParam);
-		if (wParam == MK_LBUTTON)
-		{
-			if ((y >= 70) && (y <= 240))
-			{
-				if ((x >= 33) && (x <= 55))
-				{
-					MoveWindow(GetDlgItem(hDlg, IDC_S1), 33, y - 2, 22, 8, TRUE);
-					TBrightness = GetSliderInt(y, -127, 127);
-					SetDlgItemInt(hDlg, IDC_D1, TBrightness, TRUE);
-					BT848_SetBrightness(TBrightness);
-				}
-				else if ((x >= 109) && (x <= 131))
-				{
-					MoveWindow(GetDlgItem(hDlg, IDC_S2), 109, y - 2, 22, 8, TRUE);
-					TContrast = GetSliderInt(y, 0, 255);
-					SetDlgItemInt(hDlg, IDC_D2, TContrast, FALSE);
-					BT848_SetContrast(TContrast);
-				}
-				else if ((x >= 183) && (x <= 205))
-				{
-					MoveWindow(GetDlgItem(hDlg, IDC_S3), 183, y - 2, 22, 8, TRUE);
-					THue = GetSliderInt(y, -127, 127);
-					SetDlgItemInt(hDlg, IDC_D3, THue, TRUE);
-					BT848_SetHue(THue);
-				}
-				else if ((x >= 258) && (x <= 280))
-				{
-					j = GetSliderInt(y, 0, 255) - LastSaturation;
-
-					if ((j + TSaturationV <= 255) && (j + TSaturationU <= 255) && (j + TSaturationV >= 0) && (j + TSaturationU >= 0))
-					{
-
-						MoveWindow(GetDlgItem(hDlg, IDC_S4), 258, y - 2, 22, 8, TRUE);
-						TSaturationU += j;
-						SetSliderInt(GetDlgItem(hDlg, IDC_S5), 334, TSaturationU, 0, 255);
-						TSaturationV += j;
-						SetSliderInt(GetDlgItem(hDlg, IDC_S6), 410, TSaturationV, 0, 255);
-						LastSaturation = (TSaturationU + TSaturationV) / 2;
-						SetDlgItemInt(hDlg, IDC_D5, TSaturationU, FALSE);
-						SetDlgItemInt(hDlg, IDC_D6, TSaturationV, FALSE);
-						SetDlgItemInt(hDlg, IDC_D4, LastSaturation, FALSE);
-						BT848_SetSaturationU(TSaturationU);
-						BT848_SetSaturationV(TSaturationV);
-					}
-				}
-				else if ((x >= 334) && (x <= 356))
-				{
-					MoveWindow(GetDlgItem(hDlg, IDC_S5), 334, y - 2, 22, 8, TRUE);
-					TSaturationU = GetSliderInt(y, 0, 255);
-					LastSaturation = (TSaturationU + TSaturationV) / 2;
-					SetDlgItemInt(hDlg, IDC_D4, LastSaturation, FALSE);
-					SetSliderInt(GetDlgItem(hDlg, IDC_S4), 258, LastSaturation, 0, 255);
-					SetDlgItemInt(hDlg, IDC_D5, TSaturationU, FALSE);
-					BT848_SetSaturationU(TSaturationU);
-				}
-				else if ((x >= 410) && (x <= 432))
-				{
-					MoveWindow(GetDlgItem(hDlg, IDC_S6), 410, y - 2, 22, 8, TRUE);
-					TSaturationV = GetSliderInt(y, 0, 255);
-					LastSaturation = (TSaturationU + TSaturationV) / 2;
-					SetDlgItemInt(hDlg, IDC_D4, LastSaturation, FALSE);
-					SetSliderInt(GetDlgItem(hDlg, IDC_S4), 258, LastSaturation, 0, 255);
-					SetDlgItemInt(hDlg, IDC_D6, TSaturationV, FALSE);
-					BT848_SetSaturationV(TSaturationV);
-				}
-				else if ((x >= 482) && (x <= 504))
-				{
-					MoveWindow(GetDlgItem(hDlg, IDC_S7), 482, y - 2, 22, 8, TRUE);
-					TOverscan = GetSliderInt(y, 0, 128);
-					SetDlgItemInt(hDlg, IDC_D7, TOverscan, TRUE);
-				}
-			}
-		}
-		return (FALSE);
 	case WM_COMMAND:
-		if (LOWORD(wParam) == IDOK)
+		switch(LOWORD(wParam))
 		{
+		case IDOK:
 			InitialBrightness = TBrightness;
 			InitialContrast = TContrast;
 			InitialHue = THue;
 			InitialSaturationU = TSaturationU;
 			InitialSaturationV = TSaturationV;
-			InitialOverscan = TOverscan;
+			WorkoutOverlaySize();
 			EndDialog(hDlg, TRUE);
-		}
+			break;
 
-		if (LOWORD(wParam) == IDCANCEL)
-		{
+		case IDCANCEL:
 			BT848_SetBrightness(InitialBrightness);
 			BT848_SetContrast(InitialContrast);
 			BT848_SetHue(InitialHue);
 			BT848_SetSaturationU(InitialSaturationU);
 			BT848_SetSaturationV(InitialSaturationV);
+			InitialOverscan = TOverscan;
+			WorkoutOverlaySize();
 			EndDialog(hDlg, TRUE);
-		}
+			break;
 
-		if (LOWORD(wParam) == IDDEFAULT)
-		{
+		case IDDEFAULT:
 			THue = 0x00;
 			TBrightness = 0x00;
 			TContrast = 0xd8;
 			TSaturationU = 0xfe;
 			TSaturationV = 0xb4;
-			TOverscan = 4;
+			InitialOverscan = 4;
+			LastSaturation = (TSaturationU + TSaturationV) /2;
 			BT848_SetBrightness(TBrightness);
 			BT848_SetContrast(TContrast);
 			BT848_SetHue(THue);
 			BT848_SetSaturationU(TSaturationU);
 			BT848_SetSaturationV(TSaturationV);
+			WorkoutOverlaySize();
 			SetDlgItemInt(hDlg, IDC_D1, TBrightness, TRUE);
 			SetDlgItemInt(hDlg, IDC_D2, TContrast, FALSE);
 			SetDlgItemInt(hDlg, IDC_D3, THue, TRUE);
-			SetDlgItemInt(hDlg, IDC_D4, ((TSaturationU + TSaturationV) / 2), FALSE);
+			SetDlgItemInt(hDlg, IDC_D4, LastSaturation, FALSE);
 			SetDlgItemInt(hDlg, IDC_D5, TSaturationU, FALSE);
 			SetDlgItemInt(hDlg, IDC_D6, TSaturationV, FALSE);
 			SetDlgItemInt(hDlg, IDC_D7, TOverscan, FALSE);
-			SetSliderInt(GetDlgItem(hDlg, IDC_S1), 33, TBrightness,  -128, 127);
-			SetSliderInt(GetDlgItem(hDlg, IDC_S2), 109, TContrast,  0, 255);
-			SetSliderInt(GetDlgItem(hDlg, IDC_S3), 183, THue, -128, 127);
-			SetSliderInt(GetDlgItem(hDlg, IDC_S4), 258, LastSaturation, 0, 255);
-			SetSliderInt(GetDlgItem(hDlg, IDC_S5), 334, TSaturationU, 0, 255);
-			SetSliderInt(GetDlgItem(hDlg, IDC_S6), 410, TSaturationV, 0, 255);
-			SetSliderInt(GetDlgItem(hDlg, IDC_S7), 482, TOverscan, 0, 128);
+			Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER4), abs(TSaturationU - TSaturationV) / 2, 255 - abs(TSaturationU - TSaturationV) / 2);
+			Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER1), TBrightness);
+			Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER2), TContrast);
+			Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER3), THue);
+			Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER4), LastSaturation);
+			Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER5), TSaturationU);
+			Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER6), TSaturationV);
+			Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER7), TOverscan);
+			break;
+		default:
 			break;
 		}
+		break;
+	case WM_VSCROLL:
+	case WM_HSCROLL:
+		if((HWND)lParam == GetDlgItem(hDlg, IDC_SLIDER1))
+		{
+			TBrightness = Slider_GetPos((HWND)lParam);
+			SetDlgItemInt(hDlg, IDC_D1, TBrightness, TRUE);
+			BT848_SetBrightness(TBrightness);
+		}
+		else if((HWND)lParam == GetDlgItem(hDlg, IDC_SLIDER2))
+		{
+			TContrast = Slider_GetPos((HWND)lParam);
+			SetDlgItemInt(hDlg, IDC_D2, TContrast, TRUE);
+			BT848_SetContrast(TContrast);
+		}
+		else if((HWND)lParam == GetDlgItem(hDlg, IDC_SLIDER3))
+		{
+			THue = Slider_GetPos((HWND)lParam);
+			SetDlgItemInt(hDlg, IDC_D3, THue, TRUE);
+			BT848_SetHue(THue);
+		}
+		else if((HWND)lParam == GetDlgItem(hDlg, IDC_SLIDER4))
+		{
+			j = Slider_GetPos((HWND)lParam) - LastSaturation;
+			if(j != 0)
+			{
+				TSaturationU += j;
+				TSaturationV += j;
+				LastSaturation += j;
+				Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER5), TSaturationU);
+				Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER6), TSaturationV);
+				SetDlgItemInt(hDlg, IDC_D4, LastSaturation, FALSE);
+				SetDlgItemInt(hDlg, IDC_D5, TSaturationU, FALSE);
+				SetDlgItemInt(hDlg, IDC_D6, TSaturationV, FALSE);
+				BT848_SetSaturationU(TSaturationU);
+				BT848_SetSaturationV(TSaturationV);
+			}
+		}
+		else if((HWND)lParam == GetDlgItem(hDlg, IDC_SLIDER5))
+		{
+			TSaturationU = Slider_GetPos((HWND)lParam);
+			SetDlgItemInt(hDlg, IDC_D5, TSaturationU, TRUE);
+			LastSaturation = (TSaturationU + TSaturationV) / 2;
+			BT848_SetSaturationU(TSaturationU);
+			Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER4), abs(TSaturationU - TSaturationV) / 2, 255 - abs(TSaturationU - TSaturationV) / 2);
+			Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER4),LastSaturation);
+			SetDlgItemInt(hDlg, IDC_D4, LastSaturation, FALSE);
+		}
+		else if((HWND)lParam == GetDlgItem(hDlg, IDC_SLIDER6))
+		{
+			TSaturationV = Slider_GetPos((HWND)lParam);
+			SetDlgItemInt(hDlg, IDC_D6, TSaturationV, TRUE);
+			LastSaturation = (TSaturationU + TSaturationV) / 2;
+			BT848_SetSaturationV(TSaturationV);
+			Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER4), abs(TSaturationU - TSaturationV) / 2, 255 - abs(TSaturationU - TSaturationV) / 2);
+			Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER4),LastSaturation);
+			SetDlgItemInt(hDlg, IDC_D4, LastSaturation, FALSE);
+		}
+		else if((HWND)lParam == GetDlgItem(hDlg, IDC_SLIDER7))
+		{
+			InitialOverscan = Slider_GetPos((HWND)lParam);
+			SetDlgItemInt(hDlg, IDC_D7, InitialOverscan, TRUE);
+			WorkoutOverlaySize();
+		}
+		break;
+	default:
 		break;
 	}
 	return (FALSE);
@@ -864,29 +908,6 @@ BOOL APIENTRY AudioSettingProc1(HWND hDlg, UINT message, UINT wParam, LONG lPara
 	}
 
 	return (FALSE);
-}
-
-BOOL APIENTRY SplashProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
-{
-
-	switch (message)
-	{
-	case WM_INITDIALOG:
-		InvalidateRect(hDlg, NULL, TRUE);
-		SetTimer(hDlg, 2, 5000, NULL);
-		return (TRUE);
-
-	case WM_TIMER:
-		if (wParam == 2)
-		{
-			SplashWnd  = NULL;
-			EndDialog(hDlg, 0);
-		}
-
-		return (FALSE);
-	}
-	return (FALSE);
-	UNREFERENCED_PARAMETER(lParam);
 }
 
 BOOL APIENTRY AboutProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)

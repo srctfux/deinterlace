@@ -130,59 +130,78 @@ BOOL Overlay_Update(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL Color
 {
 	HRESULT		ddrval;
 	DDOVERLAYFX DDOverlayFX;
+	DDCOLORKEY DestColorKey;
 
 	if ((lpDD == NULL) || (lpDDSurface == NULL) || (lpDDOverlay == NULL))
 	{
 		return (FALSE);
 	}
 
-	memset(&DDOverlayFX, 0x00, sizeof(DDOverlayFX));
-	DDOverlayFX.dwSize = sizeof(DDOverlayFX);
-
-	if (pSrcRect == NULL)
+	// Get original Destination Color key so that we can use that
+	// if setting it from the ini file color doesn't work
+	ddrval = IDirectDrawSurface_GetColorKey(lpDDOverlay, DDCKEY_DESTOVERLAY, &DestColorKey);
+	if (ddrval != DD_OK && ddrval != DDERR_NOCOLORKEY && ddrval != DDERR_NOCOLORKEYHW)
 	{
-		ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, NULL, lpDDSurface, NULL, dwFlags, &DDOverlayFX);
+		char szErrorMsg[200];
+		sprintf(szErrorMsg, "Error %x calling ColorKey value", ddrval);
+		ErrorBox(szErrorMsg);
+	}
+	// if GetColorKey says we have no hardware then don't bother trying to change
+	// the overlay value at all
+	if(ddrval != DDERR_NOCOLORKEYHW)
+	{
+		memset(&DDOverlayFX, 0x00, sizeof(DDOverlayFX));
+		DDOverlayFX.dwSize = sizeof(DDOverlayFX);
+
+		if (pSrcRect == NULL)
+		{
+			ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, NULL, lpDDSurface, NULL, dwFlags, &DDOverlayFX);
+			if (ddrval != DD_OK)
+			{
+				// 2001-01-06 John Adcock
+				// Now show return code
+				char szErrorMsg[200];
+				sprintf(szErrorMsg, "Error %x calling UpdateOverlay (Hide)", ddrval);
+				ErrorBox(szErrorMsg);
+			}
+			return (TRUE);
+		}
+
+		dwFlags |= DDOVER_KEYDESTOVERRIDE;
+
+		PhysicalOverlayColor = Overlay_ColorMatch(lpDDSurface, OverlayColor);
+		if (PhysicalOverlayColor == 0)		// sometimes we glitch and can't get the value
+		{
+			LOG(" Physical overlay color is zero!  Retrying.");
+			PhysicalOverlayColor = Overlay_ColorMatch(lpDDSurface, OverlayColor);
+		}
+		LOG(" Physical overlay color is %x", PhysicalOverlayColor);
+
+		DDOverlayFX.dckDestColorkey.dwColorSpaceHighValue = PhysicalOverlayColor;
+		DDOverlayFX.dckDestColorkey.dwColorSpaceLowValue = PhysicalOverlayColor;
+
+		ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, pSrcRect, lpDDSurface, pDestRect, dwFlags, &DDOverlayFX);
 		if (ddrval != DD_OK)
 		{
-			// 2001-01-06 John Adcock
-			// Now show return code
-			char szErrorMsg[200];
-			sprintf(szErrorMsg, "Error %x calling UpdateOverlay (Hide)", ddrval);
-			ErrorBox(szErrorMsg);
+			if ((pDestRect->top < pDestRect->bottom) && (pDestRect->left < pDestRect->right))
+			{
+				// 2000-10-29 Added by Mark Rejhon
+				// Display error message only if rectangle dimensions are positive.
+				// Negative rectangle dimensions are frequently caused by the user
+				// resizing the window smaller than the video size.
+				// 2001-01-06 John Adcock
+				// Now show return code
+				char szErrorMsg[200];
+				sprintf(szErrorMsg, "Error %x in UpdateOverlay (Low %x High %x)", ddrval, DestColorKey.dwColorSpaceLowValue, DestColorKey.dwColorSpaceHighValue);
+				ErrorBox(szErrorMsg);
+			}
+			lpDDOverlay = NULL;
+			return (FALSE);
 		}
-		return (TRUE);
 	}
-
-	dwFlags |= DDOVER_KEYDESTOVERRIDE;
-
-	PhysicalOverlayColor = Overlay_ColorMatch(lpDDSurface, OverlayColor);
-	if (PhysicalOverlayColor == 0)		// sometimes we glitch and can't get the value
+	else
 	{
-		LOG(" Physical overlay color is zero!  Retrying.");
-		PhysicalOverlayColor = Overlay_ColorMatch(lpDDSurface, OverlayColor);
-	}
-	LOG(" Physical overlay color is %x", PhysicalOverlayColor);
-
-	DDOverlayFX.dckDestColorkey.dwColorSpaceHighValue = PhysicalOverlayColor;
-	DDOverlayFX.dckDestColorkey.dwColorSpaceLowValue = PhysicalOverlayColor;
-
-	ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, pSrcRect, lpDDSurface, pDestRect, dwFlags, &DDOverlayFX);
-	if (ddrval != DD_OK)
-	{
-		if ((pDestRect->top < pDestRect->bottom) && (pDestRect->left < pDestRect->right))
-		{
-			// 2000-10-29 Added by Mark Rejhon
-			// Display error message only if rectangle dimensions are positive.
-			// Negative rectangle dimensions are frequently caused by the user
-			// resizing the window smaller than the video size.
-			// 2001-01-06 John Adcock
-			// Now show return code
-			char szErrorMsg[200];
-			sprintf(szErrorMsg, "Error %x calling UpdateOverlay (Show)", ddrval);
-			ErrorBox(szErrorMsg);
-		}
-		lpDDOverlay = NULL;
-		return (FALSE);
+		ErrorBox("No Destination ColorKey HW");
 	}
 
 	return TRUE;

@@ -143,7 +143,7 @@ long GetCombFactor(DEINTERLACE_INFO *pInfo)
 	qwThreshold = JaggieThreshold;
 	qwThreshold += (qwThreshold << 48) + (qwThreshold << 32) + (qwThreshold << 16);
 
-	for (Line = pInfo->SourceRect.top / 2; Line < pInfo->SourceRect.bottom / 2; ++Line)
+	for (Line = pInfo->SourceRect.top / 2; Line < pInfo->SourceRect.bottom / 2 - 1; ++Line)
 	{
 		if(pInfo->IsOdd)
 		{
