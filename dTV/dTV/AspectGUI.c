@@ -557,6 +557,10 @@ void PaintColorkey(HWND hWnd, BOOL bEnable, HDC hDC, RECT* PaintRect)
 	
 	// Draw black in the 4 borders
 	GetClientRect(hWnd,&winRect);
+	
+	//TJ 010508 make sure we dont paint over the statusbar
+	//if we do, it will cause flashing
+	winRect.bottom-=StatusBar_Height();
 
 	// Top
 	r2.left = 0;
