@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DeinterlaceSettings.cpp,v 1.1.1.1 2001-07-30 16:14:44 tobbej Exp $
+// $Id: DeinterlaceSettings.cpp,v 1.2 2001-08-06 17:47:19 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2001 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1.1.1  2001/07/30 16:14:44  tobbej
+// initial import of new dmo filter
+//
 //
 //////////////////////////////////////////////////////////////////////////////
 
@@ -153,7 +156,8 @@ LRESULT CDeinterlaceSettings::OnSettingsDefault(WORD wNotifyCode, WORD wID, HWND
 	
 	if(SUCCEEDED(pDI->GetSetting(index,&setting)))
 	{
-		pDI->put_SettingValue(index,setting.Default);
+		if(SUCCEEDED(pDI->put_SettingValue(index,setting.Default)))
+			UpdateControls();
 	}
 	
 	return 0;
@@ -182,25 +186,25 @@ void CDeinterlaceSettings::UpdateControls()
 	HWND hSlider=GetDlgItem(IDC_SETTINGS_SLIDER);
 	HWND hCombo=GetDlgItem(IDC_SETTINGS_COMBO);
 
-	if(::IsWindowVisible(hSpin))
+	if(::GetWindowLong(hSpin,GWL_STYLE) & WS_VISIBLE)
 	{
 		SendMessage(hSpin,UDM_SETRANGE32,setting.MinValue,setting.MaxValue);
 	}
 
-	if(::IsWindowVisible(hEdit))
+	if(::GetWindowLong(hEdit,GWL_STYLE) & WS_VISIBLE)
 	{
 		TCHAR buffer[50];
 		wsprintf(buffer,_T("%ld"),value);
 		::SetWindowText(hEdit,buffer);
 	}
 
-	if(::IsWindowVisible(hCheck))
+	if(::GetWindowLong(hCheck,GWL_STYLE) & WS_VISIBLE)
 	{
 		CheckDlgButton(IDC_SETTINGS_CHECK,value);
 		::SetWindowText(hCheck,reinterpret_cast<LPTSTR>(setting.szDisplayName));
 	}
 	
-	if(::IsWindowVisible(hSlider))
+	if(::GetWindowLong(hSlider,GWL_STYLE) & WS_VISIBLE)
 	{
 	    SendMessage(hSlider,TBM_CLEARTICS,(WPARAM)TRUE,(LPARAM)0);
 		SendMessage(hSlider,TBM_SETRANGEMAX,(WPARAM)TRUE,(LPARAM)setting.MaxValue);
@@ -211,7 +215,7 @@ void CDeinterlaceSettings::UpdateControls()
 		SendMessage(hSlider,TBM_SETPOS,(WPARAM)TRUE,(LPARAM)value);
 	}
 
-	if(::IsWindowVisible(hCombo))
+	if(::GetWindowLong(hCombo,GWL_STYLE) & WS_VISIBLE)
 	{
 		SendMessage(hCombo,CB_RESETCONTENT,0,0);
 	}
