@@ -21,8 +21,8 @@
 #include "cpu.h"
 #include "FLT_TNoise.h"
 
-long TemporalLuminanceThreshold = 10;	// Pixel luminance differences below this are considered noise.
-long TemporalChromaThreshold = 12;		// Pixel chroma differences below this are considered noise.
+long TemporalLuminanceThreshold = 6;	// Pixel luminance differences below this are considered noise.
+long TemporalChromaThreshold = 7;		// Pixel chroma differences below this are considered noise.
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -96,13 +96,13 @@ SETTING FLT_TNoiseSettings[FLT_TNOISE_SETTING_LASTONE] =
 {
 	{
 		"Temporal Luminance Threshold", SLIDER, 0, &TemporalLuminanceThreshold,
-		10, 0, 255, 1, 1,
+		6, 0, 255, 1, 1,
 		NULL,
 		"NoiseFilter", "TemporalLuminanceThreshold", NULL,
 	},
 	{
 		"TemporalChromaThreshold", SLIDER, 0, &TemporalChromaThreshold,
-		12, 0, 255, 1, 1,
+		7, 0, 255, 1, 1,
 		NULL,
 		"NoiseFilter", "TemporalChromaThreshold", NULL,
 	},
