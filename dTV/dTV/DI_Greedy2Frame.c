@@ -24,8 +24,8 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "deinterlace.h"
 #include "cpu.h"
+#include "deinterlace.h"
 #include "DI_Greedy2Frame.h"
 
 long GreedyTwoFrameThreshold = 8;
@@ -116,12 +116,12 @@ BOOL DeinterlaceFieldGreedy2Frame(DEINTERLACE_INFO *info)
 		// Always use the most recent data verbatim.  By definition it's correct (it'd
 		// be shown on an interlaced display) and our job is to fill in the spaces
 		// between the new lines.
-		memcpyMMX(Dest, B1, info->LineLength);
-		Dest -= info->OverlayPitch;
 
 		if (CpuFeatureFlags & FEATURE_SSE) {
 #ifdef USE_SSE
 #define IS_SSE 1
+		memcpySSE(Dest, B1, info->LineLength);
+		Dest -= info->OverlayPitch;
 #include "DI_Greedy2Frame.asm"
 #undef IS_SSE
 #endif
@@ -129,12 +129,16 @@ BOOL DeinterlaceFieldGreedy2Frame(DEINTERLACE_INFO *info)
 		else if (CpuFeatureFlags & FEATURE_3DNOW) {
 #ifdef USE_3DNOW
 #define IS_3DNOW 1
+		memcpyMMX(Dest, B1, info->LineLength);
+		Dest -= info->OverlayPitch;
 #include "DI_Greedy2Frame.asm"
 #undef IS_3DNOW
 #endif
 		}
 		else {
 #define IS_MMX 1
+		memcpyMMX(Dest, B1, info->LineLength);
+		Dest -= info->OverlayPitch;
 #include "DI_Greedy2Frame.asm"
 #undef IS_MMX
 		}

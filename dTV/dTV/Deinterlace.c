@@ -177,16 +177,16 @@ void memcpySSE(void *Dest, void *Src, size_t nBytes)
 		shr     ecx, 7                      // nBytes / 128
 align 8
 CopyLoopSSE:
-		// movaps would be slightly more efficient but the capture data
-		// isn't reliably 16-byte aligned.
-		movups	xmm0, xmmword ptr[esi]
-		movups	xmm1, xmmword ptr[esi+16*1]
-		movups	xmm2, xmmword ptr[esi+16*2]
-		movups	xmm3, xmmword ptr[esi+16*3]
-		movups	xmm4, xmmword ptr[esi+16*4]
-		movups	xmm5, xmmword ptr[esi+16*5]
-		movups	xmm6, xmmword ptr[esi+16*6]
-		movups	xmm7, xmmword ptr[esi+16*7]
+		// movaps should be slightly more efficient
+		// as the data is 16 bit aligned
+		movaps	xmm0, xmmword ptr[esi]
+		movaps	xmm1, xmmword ptr[esi+16*1]
+		movaps	xmm2, xmmword ptr[esi+16*2]
+		movaps	xmm3, xmmword ptr[esi+16*3]
+		movaps	xmm4, xmmword ptr[esi+16*4]
+		movaps	xmm5, xmmword ptr[esi+16*5]
+		movaps	xmm6, xmmword ptr[esi+16*6]
+		movaps	xmm7, xmmword ptr[esi+16*7]
 		movntps	xmmword ptr[edi], xmm0
 		movntps	xmmword ptr[edi+16*1], xmm1
 		movntps	xmmword ptr[edi+16*2], xmm2

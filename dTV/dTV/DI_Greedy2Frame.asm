@@ -47,15 +47,16 @@
 		mov esi, dword ptr [M0]		
 		mov esp, dword ptr [T0]
 		shr ecx, 3						// there are LineLength / 8 qwords
+		movq    mm6, Mask
 
 align 8
 MAINLOOP_LABEL:
 
 		mov edi, dword ptr [B0]
 		movq	mm1, qword ptr[eax]		// T1
-		movq	mm2, qword ptr[ebx]		// M1
+		movq	mm0, qword ptr[ebx]		// M1
 		movq	mm3, qword ptr[edx]		// B1
-		movq	mm0, qword ptr[esi]     // M0
+		movq	mm2, qword ptr[esi]     // M0
 
 		// Average T1 and B1 so we can do interpolated bobbing if we bob onto T1.
 		movq mm7, mm3					// mm7 = B1
@@ -68,70 +69,66 @@ MAINLOOP_LABEL:
 #ifdef IS_MMX
 		movq mm5, mm1					// mm5 = T1
 		psrlw mm7, 1					// mm7 = B1 / 2
-		pand mm7, Mask					// mask off lower bits
+		pand mm7, mm6					// mask off lower bits
 		psrlw mm5, 1					// mm5 = T1 / 2
-		pand mm5, Mask					// mask off lower bits
+		pand mm5, mm6					// mask off lower bits
 		paddw mm7, mm5					// mm7 = (T1 + B1) / 2
 #endif
 
-// calculate |M1-M0| put result in mm5
-		movq	mm6, mm2
-		psubusb mm6, mm0
-		movq	mm5, mm0
-		psubusb mm5, mm2
-		por		mm5, mm6
-		psrlw	mm5, 1
-		pand	mm5, Mask
+// calculate |M1-M0| put result in mm2 nned to keep mm0 intact
+		movq	mm4, mm0
+		psubusb mm2, mm0
+		psubusb mm4, mm2
+		por		mm4, mm2
+		psrlw	mm4, 1
+		pand	mm4, mm6
 
 // if |M1-M0| > Threshold we want dword worth of twos
-		pcmpgtb mm5, qwGreedyTwoFrameThreshold
-		pand	mm5, Mask				// get rid of any sign bit
-		pcmpgtd mm5, DwordOne			// do we want to bob
-		pandn   mm5, DwordTwo
-		movq mm4, mm5					
+		pcmpgtb mm4, qwGreedyTwoFrameThreshold
+		pand	mm4, Mask				// get rid of any sign bit
+		pcmpgtd mm4, DwordOne			// do we want to bob
+		pandn   mm4, DwordTwo
 
 		movq	mm2, qword ptr[esp]		// mm2 = T0
 
 // calculate |T1-T0| put result in mm5
-		movq	mm6, mm2
-		psubusb mm6, mm1
-		movq	mm5, mm1
-		psubusb mm5, mm2
-		por		mm5, mm6
+		movq	mm5, mm2
+		psubusb mm5, mm1
+		psubusb mm1, mm2
+		por		mm5, mm1
 		psrlw	mm5, 1
-		pand	mm5, Mask
+		pand	mm5, mm6
 
 // if |T1-T0| > Threshold we want dword worth of ones
 		pcmpgtb mm5, qwGreedyTwoFrameThreshold
-		pand	mm5, Mask				// get rid of any sign bit
+		pand	mm5, mm6				// get rid of any sign bit
 		pcmpgtd mm5, DwordOne			
 		pandn   mm5, DwordOne
-		paddd mm4, mm5					
+		paddd mm4, mm5
 
 		movq	mm2, qword ptr[edi]     // B0
 
 // calculate |B1-B0| put result in mm5
-		movq	mm6, mm3
-		psubusb mm6, mm2
 		movq	mm5, mm2
 		psubusb mm5, mm3
-		por		mm5, mm6
+		psubusb mm3, mm2
+		por		mm5, mm3
 		psrlw	mm5, 1
-		pand	mm5, Mask
+		pand	mm5, mm6
 
 // if |B1-B0| > Threshold we want dword worth of ones
 		pcmpgtb mm5, qwGreedyTwoFrameThreshold
-		pand	mm5, Mask				// get rid of any sign bit
-		pcmpgtd mm5, DwordOne			
+		pand	mm5, mm6				// get rid of any sign bit
+		pcmpgtd mm5, DwordOne
 		pandn   mm5, DwordOne
-		paddd mm4, mm5					
+		paddd mm4, mm5
 
-		pcmpgtd mm4, DwordTwo
-
-		// Put the pixels in place.
+		// Get the dest pointer.
 		add edi, 8
 		mov dword ptr[B0], edi
 		mov edi, dword ptr[Dest]
+
+		pcmpgtd mm4, DwordTwo
 
 // debugging feature
 // output the value of mm4 at this point which is pink where we will weave
@@ -145,7 +142,7 @@ MAINLOOP_LABEL:
 #else
 
 		movq mm5, mm4
-// mm4 now is 1 where we want to bob and 0 where we want to weave
+// mm4 now is 1 where we want to weave and 0 where we want to bob
 		pand	mm4, mm0				
 		pandn	mm5, mm7				
 		por		mm4, mm5				
