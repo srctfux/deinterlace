@@ -539,7 +539,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				SetDeinterlaceMode(LOWORD(wParam) - IDM_VIDEO_BOB);
 			}
 			ShowText(hWnd, DeinterlaceModeName(-1));
-			if(gPulldownMode == IDM_BLENDED_CLIP && BlcShowControls)
+			if(LOWORD(wParam) == IDM_BLENDED_CLIP && BlcShowControls)
 			{
 				DialogBox(hInst, "BLENDED_CLIP", hWnd, BlendedClipProc);
 			}
