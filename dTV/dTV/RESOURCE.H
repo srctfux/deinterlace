@@ -20,6 +20,7 @@
 #define IDM_CAPTURE_PAUSE               232
 #define IDM_CHANNEL_LIST                242
 #define IDM_SHOW_OSD                    243
+#define IDM_HIDE_OSD                    244
 #define IDM_CALL_VIDEOTEXT              245
 #define IDM_CALL_VIDEOTEXTSMALL         252
 #define IDM_VT_RESET                    261
@@ -131,9 +132,7 @@
 #define IDM_ADV_VIDEOSETTINGS           545
 #define IDM_SHIFT_SPACEBAR              546
 #define IDM_SPLASH_ON_STARTUP           547
-#define IDM_STOP                        548
 #define IDM_OVERLAY_STOP                548
-#define IDM_START                       549
 #define IDM_OVERLAY_START               549
 #define IDM_BLENDED_CLIP                551
 #define IDM_FALLBACK                    552
@@ -143,7 +142,7 @@
 #define IDM_KONTRAST_CURRENT            558
 #define IDM_BRIGHTNESS_CURRENT          559
 #define IDM_OVERSCAN_CURRENT            560
-#define IDM_HIDE_OSD                    561
+#define IDM_TESTER                      562
 #define IDM_END                         1032
 #define IDM_TUNER                       1089
 #define IDM_EXTERN1                     1090
@@ -711,7 +710,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        155
-#define _APS_NEXT_COMMAND_VALUE         562
+#define _APS_NEXT_COMMAND_VALUE         563
 #define _APS_NEXT_CONTROL_VALUE         1812
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
