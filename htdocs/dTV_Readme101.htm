@@ -1,0 +1,228 @@
+<html><!-- #BeginTemplate "/Templates/dtvnormal.dwt" -->
+<head>
+<!-- #BeginEditable "doctitle" --> 
+<title>dTV -- Readme 1.1</title>
+<!-- #EndEditable --> 
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<style type="text/css">
+<!--
+p {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
+.bottommenu {  font-family: Arial, Helvetica, sans-serif; font-size: 8pt; font-style: normal; text-decoration: none}
+h3 {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt; font-style: normal; font-weight: bold}
+h1 {  font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 18pt; font-weight: bold}
+li {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
+h2 {  font-family: Arial, Helvetica, sans-serif; font-size: 14pt; font-weight: bold}
+ol {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
+blockquote {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
+pre {  font-family: "Courier New", Courier, mono; font-size: 9pt}
+-->
+</style>
+</head>
+
+<body bgcolor="#FFFFFF">
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr> 
+    <td height="1" width="160"><img src="/dtv/images/spacer.gif" width="1" height="1"></td>
+    <td height="1" width="342"><img src="/dtv/images/spacer.gif" width="1" height="1"></td>
+    <td height="1" width="501"><img src="/dtv/images/spacer.gif" width="1" height="1"></td>
+  </tr>
+  <tr> 
+    <td width="160"><img src="/dtv/images/dtvlogotvthumb.jpg" width="160" height="140" alt="dTV Logo"></td>
+    <td colspan="2" align="right" valign="bottom">
+      <font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><!-- #BeginEditable "Page%20Title" -->dTV 
+      Readme&nbsp;<!-- #EndEditable --></b></font></td>
+  </tr>
+  <tr bgcolor="#FFCC00" align="right"> 
+    <td colspan="3"><img src="/dtv/images/yellowspacer.gif" width="100%" height="2"></td>
+  </tr>
+  <tr> 
+    <td colspan="3">&nbsp;</td>
+  </tr>
+  <tr>
+    <td colspan="3"><!-- #BeginEditable "Text" --> 
+      <h2>dTV - version 1.1</h2>
+      <H2><a HREF="http://deinterlace.sourceforge.net/">Original site</a></H2>
+      <H2>by John Adcock [<a href="mailto:john@adcock8.freeserve.co.uk">john@adcock8.freeserve.co.uk</a>]</H2>
+      <P>What's new: Everthing</P>
+      <H2>License:</H2>
+      <P>This file is subject to the terms of the <A HREF=http://www.gnu.org/copyleft/gpl.html>GNU 
+        General Public License</A> as published by the Free Software Foundation. 
+        A copy of this license is included with this software distribution in 
+        the file COPYING.html. If you do not have a copy, you may obtain a copy 
+        by writing to the Free Software Foundation, 675 Mass Ave, Cambridge, MA 
+        02139, USA.</P>
+      <P>This software is distributed in the hope that it will be useful, but 
+        WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
+        or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License 
+        for more details</P>
+      <H2>Requirements:</H2>
+      <P>I think it will run on Win 95/98 and NT. I have tested it on 98, Windows 
+        2000.</P>
+      <P>You will need a processor faster than about Pentium II 400MHz.</P>
+      <P>You will definitely need a PCI TV card with a BT848 BT849 BT878 BT879 
+        in it.</P>
+      <P>This software will not work with ATI All-in-Wonder or Matrox TV cards.</P>
+      <h1><font color="#FF0000">Warning</font></h1>
+      <P><font color="#FF0000">This program installs a temporary driver while 
+        it runs.&nbsp; This means that some of the code runs inside Ring0 along 
+        with the kernel.&nbsp; What this means is that if anything goes wrong 
+        this program can crash your whole system causing a BSOD in NT or a hanging 
+        95/98.&nbsp; I have had no problems running the exe stand alone but you 
+        may get problems.&nbsp; If using a debugger then it it is very important 
+        that the program is allowed to shut down normally.&nbsp; If you use Stop 
+        Debugging while running the program you system WILL crash.</font></P>
+      <P><font color="#FF0000">As a precaution sync the disks before running this 
+        program.&nbsp; Use the sync utility from <a href="http://www.sysinternals.com/">http://www.sysinternals.com/</a> 
+        for whichever operating system you are running.</font></P>
+      <H2>Installation:</H2>
+      <P>Put all the files into a directory and run dTV.exe.</P>
+      <h2>Getting It Working:</h2>
+      <P>On my setup I have got it working with PAL and NTSC.&nbsp; My card has 
+        a BT878 and so it may work differently or not at all with your card.</P>
+      <P>I have not really tested the tuner part of the program, so first select 
+        the external input</P>
+      <h3>PAL Setup</h3>
+      <ol>
+        <li>Select video card type from list in Hardware/TV-Card</li>
+        <li>Select tuner type from list in Hardware/Select Tuner</li>
+        <li>In Hardware/PLL settings Box marked PLL (28MHz Crystal) should be 
+          ticked if you have anything except an B848 card, try with first</li>
+        <li>Select required input from Settings/Video Input.</li>
+        <li>Adjust Video settings using Setting/Video Adjustments</li>
+      </ol>
+      <h3>NTSC Setup</h3>
+      <ol>
+        <li>Select video card type from list in Hardware/TV-Card</li>
+        <li>Select tuner type from list in Hardware/Select Tuner</li>
+        <li>Select NTSC from Settings/Video Format.</li>
+        <li>Select required input from Settings/Video Input.</li>
+        <li>Adjust Video settings using Setting/Video Adjustments</li>
+      </ol>
+      <h2>Keyboard shortcuts</h2>
+      <p>Brightness down - b<br>
+        Brightness up - Shift b<br>
+        colour down - c<br>
+        colour up - Shift c<br>
+        Contrast down - k<br>
+        Contrast up - shift k<br>
+        Hue down - h<br>
+        Hue up - shift h<br>
+        Mute - m<br>
+        Channel up - F1<br>
+        Channel down - F2<br>
+        Toggle Menu on/off - F4<br>
+        Toggle Full Screen - F6<br>
+        Toggle Status Bar on/off - s<br>
+        Exit - Esc</p>
+      <h2>What if That Doesn't Work?</h2>
+      <p>Try the various PLL settings.<br>
+        <a href="mailto:john@adcock8.freeserve.co.uk">E-Mail me</a> for help so 
+        that we can try and get your card supported</p>
+      <H2>What does it do?</H2>
+      <P>At the moment it allows you to trawl thought the available pull down 
+        modes manually using the space bar.&nbsp; So to use get a picture by playing 
+        around with the settings as above.&nbsp; Then put in a film and press 
+        the spacebar until the weave patterns disappear.</P>
+      <p>It is possible to specify a bTV plugin for the program to use.&nbsp; 
+        The default is bDeinterlace.dll with UseKey1 set to 1.</p>
+      <H2>History</H2>
+      <P>1.1 Added support for bTV plugins and full screen support.<br>
+        1.0 The original version only had support for manual inverse telecine.</P>
+      <H2>Card Support</H2>
+      <hr>
+      <p>Here is list of the cards that should be supported (list taken from the 
+        linux bttv driver on which my program was originally based.<BR>
+      </p>
+      <OL TYPE=1>
+        <LI>Hauppauge PCI TV Cards
+        <LI>MIRO PCTV
+        <LI>STB PCI TV Cards
+        <LI>Intel PCI TV Cards
+        <LI>Diamond DTV2000
+        <LI>AVerMedia TVPhone
+        <LI>MATRIX-Vision MV-Delta
+        <LI>Fly Video II
+        <LI>TurboTV
+        <LI>MIRO PCTV pro
+        <LI>ADS Technologies Channel Surfer TV
+        <LI>AVerMedia TVCapture 98
+        <LI>Aimslab VHX
+        <LI>Zoltrix TV-Max
+        <LI>Pixelview PlayTV (bt878)
+        <LI>Leadtek WinView 601
+        <LI>AVEC Intercapture
+        <LI>LifeView FlyKit w/o Tuner
+        <LI>CEI Raffles Card
+        <LI>Lucky Star Image World ConferenceTV
+        <LI>Phoebe Tv Master + FM
+        <LI>Modular Technology MM205 PCTV bt878
+        <LI>Askey/Typhoon/Anubis Magic TView CPH051/061 (bt878)
+        <LI>Terratec/Vobis TV-Boostar
+        <LI>MAXI TV Video PCI2
+        <LI>Terratec TerraTV+
+        <LI>Imagenation PXC200
+        <LI>FlyVideo 98
+        <LI>iProTV
+        <LI>Intel Create and Share PCI
+        <LI>Terratec TerraTValue
+        <LI>Leadtek WinFast 2000
+        <LI>Chronos Video Shuttle II
+        <LI>Typhoon TView TV/FM Tuner
+        <LI>PixelView PlayTV pro
+        <LI>TView99 CPH063
+        <LI>Pinnacle PCTV Rave
+        <LI>AVerMedia TVPhone 98
+        <LI>ProVideo PV951
+        <LI>Little OnAir TV
+        <LI>Sigma TVII-FM
+        <LI>MATRIX-Vision MV-Delta 2
+        <LI>Zoltrix Genie TV
+        <LI>Terratec TV/Radio+
+        <LI>Dynalink Magic TView
+        <LI>Any other card with a bt848, bt849 or bt878<BR>
+      </OL>
+      <H2>FAQS:</H2>
+      <P>Q:Where is the FAQ?<BR>
+        A: There isn't one yet. go to the <a href="http://www.avsforum.com/ubbcgi/Ultimate.cgi">AVS 
+        Forum</a> and search the Home Theater Computers Forum for dTV, hopefully 
+        at the top there should be a thread discussing how to set it up for various 
+        cards.</P>
+      <P>Q: How do I uninstall the program?<BR>
+        A: just Delete it.</P>
+      <P>Q: Will you answer questions about the code/fix bugs?<BR>
+        A: Probably, don't expect lightning speed.</P>
+      <P>Q: How did you do it?<BR>
+        A: Get the <a href="/dtv/dTVsrc.zip">source</a> and see for yourself.</P>
+      <H2>Enjoy!</H2>
+      <!-- #EndEditable --></td>
+  </tr>
+  <tr> 
+    <td colspan="3">&nbsp;</td>
+  </tr>
+  <tr bgcolor="#FFCC00"> 
+    <td colspan="3"> 
+      <div align="center"><img src="/dtv/images/yellowspacer.gif" width="100%" height="2"></div>
+    </td>
+  </tr>
+  <tr> 
+    <td colspan="3">&nbsp;</td>
+  </tr>
+  <tr> 
+    <td colspan="3"> 
+      <div align="center"><a href="/dtv/" class="bottommenu">home</a> | <a href="/dtv/about.htm" class="bottommenu">about</a> 
+        | <a href="/dtv/Reviews.htm" class="bottommenu">reviews</a> |&nbsp;<a href="/dtv/screenshots.htm" class="bottommenu">screenshots</a> 
+        | <a href="/dtv/News.htm" class="bottommenu">news</a> | <a href="/dtv/Thanks.htm" class="bottommenu"></a><a href="/dtv/downloads.htm" class="bottommenu">download</a> 
+        | <a href="/dtv/Reviews.htm" class="bottommenu"></a><a href="/dtv/Authors.htm" class="bottommenu">authors</a> 
+        | <a href="/dtv/Thanks.htm" class="bottommenu">thanks</a> <br>
+        <a href="/dtv/installation.htm" class="bottommenu">setup</a> | <a href="/dtv/keyboard.htm" class="bottommenu">keyboard 
+        shortcuts </a> | <a href="http://sourceforge.net/mail/?group_id=7420" class="bottommenu">mailing 
+        list</a> | <a href="/dtv/FAQ.htm" class="bottommenu">faq</a> | <a href="/dtv/developers.htm" class="bottommenu">developers</a> 
+        | <a href="/dtv/Links.htm" class="bottommenu">links</a></div>
+    </td>
+  </tr>
+</table>
+<p><a href="http://sourceforge.net"><img src="http://sourceforge.net/sflogo.php?group_id=7420&type=1" width="88" height="31" border="0"
+alt="SourceForge.net" align="right"></a></p>
+<p>&nbsp; </p>
+</body>
+<!-- #EndTemplate --></html>

@@ -1,0 +1,185 @@
+<html><!-- #BeginTemplate "/Templates/dtvnormal.dwt" -->
+<head>
+<!-- #BeginEditable "doctitle" --> 
+<title>Untitled Document</title>
+<!-- #EndEditable --> 
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<style type="text/css">
+<!--
+p {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
+.bottommenu {  font-family: Arial, Helvetica, sans-serif; font-size: 8pt; font-style: normal; text-decoration: none}
+h3 {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt; font-style: normal; font-weight: bold}
+h1 {  font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 18pt; font-weight: bold}
+li {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
+h2 {  font-family: Arial, Helvetica, sans-serif; font-size: 14pt; font-weight: bold}
+ol {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
+blockquote {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
+pre {  font-family: "Courier New", Courier, mono; font-size: 9pt}
+-->
+</style>
+</head>
+
+<body bgcolor="#FFFFFF">
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr> 
+    <td height="1" width="160"><img src="/dtv/images/spacer.gif" width="1" height="1"></td>
+    <td height="1" width="342"><img src="/dtv/images/spacer.gif" width="1" height="1"></td>
+    <td height="1" width="501"><img src="/dtv/images/spacer.gif" width="1" height="1"></td>
+  </tr>
+  <tr> 
+    <td width="160"><img src="/dtv/images/dtvlogotvthumb.jpg" width="160" height="140" alt="dTV Logo"></td>
+    <td colspan="2" align="right" valign="bottom">
+      <font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><!-- #BeginEditable "Page%20Title" -->Developer 
+      Documentation &nbsp;<!-- #EndEditable --></b></font></td>
+  </tr>
+  <tr bgcolor="#FFCC00" align="right"> 
+    <td colspan="3"><img src="/dtv/images/yellowspacer.gif" width="100%" height="2"></td>
+  </tr>
+  <tr> 
+    <td colspan="3">&nbsp;</td>
+  </tr>
+  <tr>
+    <td colspan="3"><!-- #BeginEditable "Text" --> 
+      <p>First of all welcome to dTV development!&nbsp; If you have any interest 
+        in video and TV I'm sure you will find working on dTV rewarding.&nbsp; 
+        There is a pretty steep learning curve but what you learn will be useful 
+        in every area of your home theater hobby.</p>
+      <h2><br>
+        Prerequisites</h2>
+      <p>You must be a proficient C programmer with some knowledge of windows 
+        programming.&nbsp; dTV is probably not a good project to cut your teeth 
+        on as any crashes&nbsp;while developing causes your computer to hang.&nbsp; 
+        Be careful and back up your machine regularly.</p>
+      <p>You must have access to a version of Microsoft Visual C++ and the latest 
+        source.</p>
+      <h2><br>
+        Background Reading</h2>
+      <p>The software talks directly to the bt8x8 chip on whatever PCI card you 
+        have installed.&nbsp; It would be very sensible to read the data sheet 
+        for this card to get an idea of how the chip works and hopefully be able 
+        to work out some of the code.&nbsp; Get the datasheet from <a href="http://www.conexant.com/techinfo/ShowFiles.asp?ID=108&amp;ST=C">Conexant</a>.</p>
+      <p>The code for the linux drivers that forms the basis for Multidec can 
+        be found <a href="http://me.in-berlin.de/~kraxel/bttv.html">here</a>.&nbsp; 
+        This is a much later version than the one used by MultiDec so it is more 
+        than possible that bugs have been fixed. The functions starting BT848_ 
+        in the code should map to a similarly named function in the file bttv_driver.c.</p>
+      <p>This <a href="http://www.video-demystified.com/mm/tutor/ch08.pdf">chapter 
+        from Video Demystified</a> describes in detail both VideoText and closed 
+        captions as well as full details of NTSC, PAL and SECAM.&nbsp; Without 
+        this the VBI code will be imposiible to understand.</p>
+      <p>This <a href="ftp://telepresence.dmem.strath.ac.uk/pub/bt848/spec/">FTP 
+        site</a> contains documents on the MSP sound chips and Phillips and Temic 
+        tuners that would be useful for anyone looking to improve these areas.&nbsp; 
+        I only recently found this site and have had a quick look and found that 
+        most of the information you need should be buried in this lot.&nbsp;</p>
+      <h2><br>
+        File by File</h2>
+      <p>Audio.c - Deals with the sound.&nbsp; The function Audio_SetSource selects 
+        the sound channel output by the card.&nbsp; For cards with an MSP chip 
+        there are several other functions to deals with the features of those 
+        chips. None of this code has been tested by me.</p>
+      <p>bt848.c - Deals with low level and chip specific details, don't even 
+        bother looking in here if you haven't got the datasheet.</p>
+      <p>bTVPlugin.c - Adds abilty to call bTV plugins.</p>
+      <p>ccdecode.c - Very early Closed Caption decoder, read the description 
+        of CC in the Video Demystified first and then see if you can work out 
+        what the code is trying to do.&nbsp; The code is untested and there have 
+        been no reported successes with it.</p>
+      <p>DebugLog.c - Adds the ability to output formatted strings to the dTVLog.txt 
+        file to assist in debugging.&nbsp; To use Logging you must place a #define 
+        DOLOGGING at the top of the file you wish to include logging and then 
+        use the LOG function which works like printf.</p>
+      <p>Deinterlace.c - Contains the assembler code used for deinterlacing and 
+        for auto pulldown detection.&nbsp; The assembler makes heavy use of MMX 
+        instructions.&nbsp; If&nbsp;you know basic x86 assembler and want to find 
+        out about the new instruction see the <a href="http://developer.intel.com/design/pro/MANUALS/refer.htm">Intel 
+        Developer Manuals</a> Volume 2 has a description of all the instructions.</p>
+      <p>Dialogs.c - Contains the code for most of the simple dialogs used by 
+        the menus.</p>
+      <p><b>dTV.c</b> - Contains the Main windows event handler and WinMain.&nbsp; 
+        This file is the best place to start to get a feel for how the software 
+        functions at a high level.</p>
+      <p>ErrorBox.c - Simple error handling message box.</p>
+      <p>Globals.c - Globals not allocated to a particular source file are initialized 
+        here.</p>
+      <p>i2c.c - This code implements the I2C protocol which is used to talk to 
+        other components on the card like to tuner or sound chips. Should be no 
+        reason to change anything in here.</p>
+      <p>MixerDev.c - Lots of code to control the sound cards mixer through windows 
+        API code.&nbsp; I haven't touched this code and have no idea how it works.</p>
+      <p>Other.c - Was used by me as a bucket to place code, now contains just 
+        the overlay handling code.</p>
+      <p><b>OutThread.c</b> - This is where the main logic of the display code 
+        is.&nbsp; Al the auto detection and flipping is handled in here.&nbsp; 
+        This would be the file I expect to change the most and would be a good 
+        second file to take a look at.&nbsp; The main functions are YUVOutThreadPAL 
+        and YUVOutThreadNTSC</p>
+      <p>ProgramList.c - Handles the Program List dialog box.&nbsp; This could 
+        definitely do with improvement.</p>
+      <p>Settings.c - Loads and saves settings to the dTV ini file.&nbsp; Contains 
+        defaults for some settings.</p>
+      <p>Status.c - Code for the status bar.&nbsp; should be OK</p>
+      <p>Tuner.c - Handles the tuner and also the country settings.&nbsp; This 
+        area could be massively improved.&nbsp; There is a file channels.ini which 
+        should be used instead of the channels.lst file.</p>
+      <p>TVCards.c - Contains the details of all the cards that should be supported 
+        by dTV.&nbsp; The data is taken from the bttv driver so check that they 
+        haven't changed their values.&nbsp; The structures are similar but not 
+        exactly the same so check that the values are being transposed properly.</p>
+      <p>vbi.c - High level VBI decoding. VBI_DecodeLine is the high level function.</p>
+      <p>vt.c - VideoText decoder</p>
+      <h2><br>
+        Comments</h2>
+      <p>Code that is commented with new style comments (//) has been done by 
+        me.&nbsp; The old style comments (/* */) were from the original code.</p>
+      <p>My long term aim is to move the code over to C++, my moves towards this 
+        are by the naming convention where the public functions of a c file are 
+        that file name followed by an&nbsp; underscore e.g. BT848_ResetHardware() 
+        will eventually become m_BT848-&gt;ResetHardware().&nbsp; This should 
+        reduce the huge number of global variables use throughout the program 
+        without impacting performance too much.</p>
+      <p>Sound chip support needs a lot of further investigation.&nbsp; The code 
+        in bttv is probably a good place to start.&nbsp; Note that bttv supports 
+        many different sound chips, These could be added in a similar way to the 
+        MSP chip but you're on your own.</p>
+      <p>Tuner support also need a lot of work.&nbsp; There is no support currently 
+        for fine tuning or manual channel setup.</p>
+      <p>The variable TVSettings (initialized in Global.c) contains the screen 
+        sizes and timing for the different video formats.&nbsp; The setting in 
+        1.6 were calibrated to my DX2 cards NTSC output.&nbsp; The PAL settings 
+        have not been optimized for DVD/LD and are at a higher resolution.&nbsp; 
+        If you want to add a new format put it here.&nbsp; Or if the other settings 
+        do not work try changes here.</p>
+      <p>Last Changed - John Adcock 4th September 2000</p>
+      <!-- #EndEditable --></td>
+  </tr>
+  <tr> 
+    <td colspan="3">&nbsp;</td>
+  </tr>
+  <tr bgcolor="#FFCC00"> 
+    <td colspan="3"> 
+      <div align="center"><img src="/dtv/images/yellowspacer.gif" width="100%" height="2"></div>
+    </td>
+  </tr>
+  <tr> 
+    <td colspan="3">&nbsp;</td>
+  </tr>
+  <tr> 
+    <td colspan="3"> 
+      <div align="center"><a href="/dtv/" class="bottommenu">home</a> | <a href="/dtv/about.htm" class="bottommenu">about</a> 
+        | <a href="/dtv/Reviews.htm" class="bottommenu">reviews</a> |&nbsp;<a href="/dtv/screenshots.htm" class="bottommenu">screenshots</a> 
+        | <a href="/dtv/News.htm" class="bottommenu">news</a> | <a href="/dtv/Thanks.htm" class="bottommenu"></a><a href="/dtv/downloads.htm" class="bottommenu">download</a> 
+        | <a href="/dtv/Reviews.htm" class="bottommenu"></a><a href="/dtv/Authors.htm" class="bottommenu">authors</a> 
+        | <a href="/dtv/Thanks.htm" class="bottommenu">thanks</a> <br>
+        <a href="/dtv/installation.htm" class="bottommenu">setup</a> | <a href="/dtv/keyboard.htm" class="bottommenu">keyboard 
+        shortcuts </a> | <a href="http://sourceforge.net/mail/?group_id=7420" class="bottommenu">mailing 
+        list</a> | <a href="/dtv/FAQ.htm" class="bottommenu">faq</a> | <a href="/dtv/developers.htm" class="bottommenu">developers</a> 
+        | <a href="/dtv/Links.htm" class="bottommenu">links</a></div>
+    </td>
+  </tr>
+</table>
+<p><a href="http://sourceforge.net"><img src="http://sourceforge.net/sflogo.php?group_id=7420&type=1" width="88" height="31" border="0"
+alt="SourceForge.net" align="right"></a></p>
+<p>&nbsp; </p>
+</body>
+<!-- #EndTemplate --></html>
