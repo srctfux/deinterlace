@@ -26,7 +26,7 @@
 #DEFAULT (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSROOT/commitlog
 
 
-CVSROOT $CVSROOT/CVSROOT/syncmail %{sVv} deinterlace-checkins@lists.sourceforge.net
+CVSROOT $CVSROOT/CVSROOT/syncmail %{sVv} dschmelzer@hotmail.com
 dTV $CVSROOT/CVSROOT/syncmail %{sVv} deinterlace-checkins@lists.sourceforge.net
 htdocs $CVSROOT/CVSROOT/syncmail %{sVv} deinterlace-checkins@lists.sourceforge.net
 DEFAULT $CVSROOT/CVSROOT/syncmail %{sVv} deinterlace-checkins@lists.sourceforge.net
