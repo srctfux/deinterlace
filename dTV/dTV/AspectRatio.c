@@ -1135,6 +1135,7 @@ BOOL CustomTargetAspect_OnChange(long NewValue)
 
 BOOL SourceAspect_OnChange(long NewValue)
 {
+	AutoDetectAspect = FALSE;
 	source_aspect = NewValue;
 	WorkoutOverlaySize();
 	return FALSE;
@@ -1142,6 +1143,7 @@ BOOL SourceAspect_OnChange(long NewValue)
 
 BOOL CustomSourceAspect_OnChange(long NewValue)
 {
+	AutoDetectAspect = FALSE;
 	custom_source_aspect = NewValue;
 	source_aspect = NewValue;
 	WorkoutOverlaySize();
@@ -1206,8 +1208,8 @@ SETTING AspectSettings[ASPECT_SETTING_LASTONE] =
 		"ASPECT", "Mode", AspectMode_OnChange,
 	},
 	{
-		"Aspect Autodetect Sensitivity", SLIDER, 0, &LuminanceThreshold,
-		30, 0, 2000, 1, 1,
+		"Auto Detect Aspect Sensitivity", SLIDER, 0, &LuminanceThreshold,
+		30, 0, 127, 1, 1,
 		NULL,
 		"ASPECT", "LuminanceThreshold", NULL,
 	},
