@@ -211,7 +211,6 @@ typedef struct
 TVCARDID Card_AutoDetect();
 int Card_AutoDetectTuner(TVCARDID CardId);
 void Card_Init();
-void init_PXC200();
 const TVCARDSETUP* GetCardSetup();
 const TVTUNERSETUP* GetTunerSetup();
 void TVCard_FirstTimeSetupHardware(HINSTANCE hInst, HWND hWnd);

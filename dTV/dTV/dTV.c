@@ -1493,6 +1493,9 @@ void MainWndOnInitBT(HWND hWnd)
 			AddSplashTextLine("No Tuner");
 		}
 
+		// do any card related startup routines
+		Card_Init();
+
 		// MAE 8 Dec 2000 Start of change
 		// JA 8 Jan 2001 Tidied up
 

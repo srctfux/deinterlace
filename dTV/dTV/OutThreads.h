@@ -64,7 +64,7 @@ void SetupCaptureFlags();
 DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter);
 
 void UpdatePulldownStatus();
-BOOL WaitForNextField(BOOL LastField);
+BOOL WaitForNextField(BOOL LastField, BOOL* RunningLate);
 void SetDeinterlaceMode(int mode);
 char *DeinterlaceModeName(int mode);
 BYTE * LockOverlay();		// Lock overlay, returns ptr to buffer

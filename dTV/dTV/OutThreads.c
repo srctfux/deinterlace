@@ -97,7 +97,6 @@ BOOL                bAutoDetectMode = TRUE;
 
 // TRB 10/28/00 changes, parms, and new fields for sync problem fixes
 DDSURFACEDESC		ddsd;						// also add a surface descriptor for Lock			
-BOOL				RunningLate = FALSE;        // Set when we are not keeping up
 HRESULT             FlipResult = 0;             // Need to try again for flip?
 BOOL                Wait_For_Flip = TRUE;       // User parm, default=TRUE
 BOOL	            DoAccurateFlips = TRUE;     // User parm, default=TRUE
@@ -258,15 +257,18 @@ void Reset_Capture()
 // slower or heavily loaded systems but use all available time for processing a good
 // picture when nothing else is running.  TRB 10/28/00
 //
-BOOL WaitForNextField(BOOL LastField)
+BOOL WaitForNextField(BOOL LastField, BOOL* RunningLate)
 {
 	BOOL bIsOddField;
 	int OldPos = (CurrentFrame * 2 + LastField + 1) % 10;
-	RunningLate = Hurry_When_Late;        // user specified bool parm
+	*RunningLate = TRUE;
 	while(OldPos == BT848_GetRISCPosAsInt())
 	{
-		Sleep(Sleep_Interval);
-		RunningLate = FALSE;			// if we waited then we are not late
+		if(!DoAccurateFlips)
+		{
+			Sleep(Sleep_Interval);
+		}
+		*RunningLate = FALSE;			// if we waited then we are not late
 	}
 
 	switch(BT848_GetRISCPosAsInt())
@@ -370,8 +372,6 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 	int nLineTarget;
 	int nFrame = 0;
 	DWORD dwLastSecondTicks;
-	DWORD FlipTicks = 0;
-	DWORD LastFlipTicks = 0;
 	short* ppEvenLines[5][DTV_MAX_HEIGHT / 2];
 	short* ppOddLines[5][DTV_MAX_HEIGHT / 2];
 	BYTE* pDest;
@@ -383,9 +383,31 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 	DEINTERLACE_INFO info;
 	DWORD FlipFlag;
 	ePULLDOWNMODES PrevPulldownMode = PULLDOWNMODES_LAST_ONE;
-	int FlipAdjust;
-
+	BOOL FlipAdjust;
+	LARGE_INTEGER TimerFrequency;
 	BOOL bIsPAL = BT848_GetTVFormat()->Is25fps;
+	double RunningAverageCounterTicks;
+	double StartAverageCounterTicks;
+	LARGE_INTEGER LastFieldTime;
+	LARGE_INTEGER CurrentFieldTime;
+	LARGE_INTEGER LastFlipTime;
+	LARGE_INTEGER CurrentFlipTime;
+	BOOL RunningLate = FALSE;
+	double Weight = 0.005;
+
+	// get the Frequency of the high resolution timer
+	QueryPerformanceFrequency(&TimerFrequency);
+
+	if(bIsPAL)
+	{
+		RunningAverageCounterTicks = (double)TimerFrequency.QuadPart / 30.0;
+		StartAverageCounterTicks = RunningAverageCounterTicks;
+	}
+	else
+	{
+		RunningAverageCounterTicks = (double)TimerFrequency.QuadPart / 29.97;
+		StartAverageCounterTicks = RunningAverageCounterTicks;
+	}
 
 	// catch anything fatal in this loop so we don't crash the machine
 	__try
@@ -426,10 +448,65 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 		BT848_Restart_RISC_Code();
 
 		dwLastSecondTicks = GetTickCount();
-		FlipAdjust = 0;
 		while(!bStopThread)
 		{
-			info.IsOdd = WaitForNextField(info.IsOdd);
+			info.IsOdd = WaitForNextField(info.IsOdd, &RunningLate);
+			if(DoAccurateFlips)
+			{
+				// we've just got a new field
+				// we are going to time the odd to odd
+				// input frequency
+				if(info.IsOdd)
+				{
+					QueryPerformanceCounter(&CurrentFieldTime);
+					if(!RunningLate)
+					{
+						// if we're not running late then
+						// and we got a good clean run last time
+						if(LastFieldTime.QuadPart != 0)
+						{
+							// gets the last ticks odd - odd
+							double RecentTicks = (double)(CurrentFieldTime.QuadPart - LastFieldTime.QuadPart);
+							// only allow values within 5% if current value
+							// should prevent spurious values getting through
+							if(RecentTicks > RunningAverageCounterTicks * 0.95 &&
+								RecentTicks < RunningAverageCounterTicks * 1.05)
+							{
+								// update the average
+								// we're doing this weighted average because
+								// it has lots of nice properties
+								// especially that we don't need to keep a 
+								// data history
+								RunningAverageCounterTicks = Weight * RecentTicks + (1.0 - Weight) * RunningAverageCounterTicks;
+								LOG(" Last %f", RecentTicks);
+								LOG(" Running Average %f", RunningAverageCounterTicks);
+							}
+						}
+						// save current value for next time
+						LastFieldTime.QuadPart = CurrentFieldTime.QuadPart;
+					}
+					else
+					{
+						// if we're running late then
+						// time will be rubbish
+						// so make sure it won't be used
+						LastFieldTime.QuadPart = 0;
+					}
+				}
+				// we have to sleep somewhere might as well be here
+				// since we don't sleep anywhere in the WaitForNextField
+				// anymore
+				Sleep(Sleep_Interval);
+			}
+			
+			// if we don't have Hurry_When_Late set
+			// then make sure we don't hurry as we're
+			// assuming we'll catch up
+			if(!Hurry_When_Late)
+			{
+				RunningLate = FALSE;
+			}
+
 			if(bIsPaused == FALSE)
 			{
 				info.CurrentFrame = CurrentFrame;
@@ -446,9 +523,12 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 
 				// if we are trying to do the flips properly then we may
 				// get behind on processsing and so need to be able to catch up
-				if(DoAccurateFlips && RefreshRate > 0)
+				// from at least a lag of two whole fields
+				// if we find we are behind then set the FlipAdjust
+				// to ask for a speed up later on
+				if(DoAccurateFlips)
 				{
-					FlipAdjust = 0;
+					FlipAdjust = FALSE;
 					if(info.IsOdd)
 					{
 						if((LastEvenFrame + 1) % 5 == CurrentFrame &&
@@ -456,7 +536,15 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 						{
 							info.IsOdd = FALSE;
 							LOG(" Slightly late");
-							FlipAdjust = 1;
+							FlipAdjust = TRUE;
+						}
+						if((LastEvenFrame + 1) % 5 == CurrentFrame &&
+							(LastOddFrame + 2) % 5 == CurrentFrame)
+						{
+							CurrentFrame = (CurrentFrame + 4) % 5;
+							info.CurrentFrame = CurrentFrame;
+							LOG(" Very late");
+							FlipAdjust = TRUE;
 						}
 					}
 					else
@@ -468,7 +556,15 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 							LOG(" Slightly late");
 							CurrentFrame = (CurrentFrame + 4) % 5;
 							info.CurrentFrame = CurrentFrame;
-							FlipAdjust = 1;
+							FlipAdjust = TRUE;
+						}
+						if((LastEvenFrame + 2) % 5 == CurrentFrame &&
+								(LastOddFrame + 2) % 5 == CurrentFrame)
+						{
+							CurrentFrame = (CurrentFrame + 4) % 5;
+							info.CurrentFrame = CurrentFrame;
+							FlipAdjust = TRUE;
+							LOG(" Very late");
 						}
 					}
 				}
@@ -484,7 +580,15 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 						bMissedFrame = TRUE;
 						nFrame++;
 						LOG(" Dropped Frame");
-						FlipAdjust = 5;
+						// if we dropped a frame
+						// then it seems a good idea
+						// to start again with the running average
+						// we could have changed inputs had a glitch
+						// of some sort, done some ff frew
+						if(DoAccurateFlips)
+						{
+							RunningAverageCounterTicks = StartAverageCounterTicks;
+						}
 					}
 					memmove(&info.OddLines[1], &info.OddLines[0], sizeof(info.OddLines) - sizeof(info.OddLines[0]));
 					info.OddLines[0] = ppOddLines[CurrentFrame];
@@ -498,8 +602,16 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 						info.OddLines[0] = NULL;
 						bMissedFrame = TRUE;
 						nFrame++;
-						LOG("Dropped Frame");
-						FlipAdjust = 5;
+						LOG(" Dropped Frame");
+						// if we dropped a frame
+						// then it seems a good idea
+						// to start again with the running average
+						// we could have changed inputs had a glitch
+						// of some sort, done some ff frew
+						if(DoAccurateFlips)
+						{
+							RunningAverageCounterTicks = StartAverageCounterTicks;
+						}
 					}
 					memmove(&info.EvenLines[1], &info.EvenLines[0], sizeof(info.EvenLines) - sizeof(info.EvenLines[0]));
 					info.EvenLines[0] = ppEvenLines[CurrentFrame];
@@ -508,6 +620,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				// update the source area
 				GetSourceRect(&info.SourceRect);
 				
+				// if we're running late then tell the user
 				if (RunningLate)
 				{
 					nFrame++;
@@ -527,7 +640,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 					}
 				}
 
-				if (!RunningLate && Capture_VBI == TRUE)
+				if (Capture_VBI == TRUE)
 				{
 					BYTE * pVBI = (LPBYTE) pVBILines[CurrentFrame];
 					if (info.IsOdd)
@@ -605,52 +718,6 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 
 					if (bFlipNow)
 					{
-						// Need to wait for a good time to flip
-						// only if we have been in the same mode for at least one flip
-						if(DoAccurateFlips && PrevPulldownMode == gPulldownMode && RefreshRate > 0)
-						{
-							long FlipsToWait;
-							double FPS;
-							// work out the minimum number of flips to
-							// display each screen for
-							if(bIsPAL)
-							{
-								FPS = DeintMethods[gPulldownMode].FrameRate50Hz;
-							}
-							else
-							{
-								FPS = DeintMethods[gPulldownMode].FrameRate60Hz;
-								FlipsToWait = ((long) (RefreshRate / DeintMethods[gPulldownMode].FrameRate60Hz)) - FlipAdjust;
-							}
-							if(floor((double)RefreshRate / FPS) == ceil((double)RefreshRate / FPS))
-							{
-								FlipsToWait = (long) (RefreshRate / FPS) - FlipAdjust;
-								if(FlipAdjust)
-								{
-									LOG("Putting Fast Frame in");
-								}
-							}
-							else
-							{
-								FlipsToWait = (long) (RefreshRate / FPS);
-							}
-							// wait for the flip
-							// (1000 / Refresh) rate is time between each flip
-							// we then make sure the flips are not called too close together
-							// note that on some systems the flip call returns after the flip is
-							// set up (e.g. nVidia) and on others (e.g. ATI) after the flip has happened
-							// so to make sure that the flips occur at the appropriate place
-							// we must consider the worst case.  This code curertly doesn't do that and so
-							// won't work.
-							// the + 2 is just some margin for error and should
-							// give us enough time to get to the flip call before the next vsync
-							if(FlipsToWait > 1)
-							{
-								LOG(" Wait for flip %d %c %d", FlipsToWait, info.IsOdd?'O':'E', (GetTickCount() - FlipTicks));
-								while(!bStopThread && (GetTickCount() - FlipTicks) < (DWORD)((1000.0 / (double)RefreshRate) * (double)(FlipsToWait - 1)) + 2.0);
-							}
-						}
-
 						// setup flip flag
 						// the odd and even flags may help the scaled bob
 						// on some cards
@@ -659,6 +726,40 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 						{
 							FlipFlag |= (info.IsOdd)?DDFLIP_ODD:DDFLIP_EVEN;
 						}
+
+						// Need to wait for a good time to flip
+						// only if we have been in the same mode for at least one flip
+						if(DoAccurateFlips && PrevPulldownMode == gPulldownMode)
+						{
+							LONGLONG TicksToWait;
+							// work out the required ticks between flips
+							if(bIsPAL)
+							{
+								TicksToWait = (LONGLONG)(RunningAverageCounterTicks * 25.0 / (double)DeintMethods[gPulldownMode].FrameRate50Hz);
+							}
+							else
+							{
+								TicksToWait = (LONGLONG)(RunningAverageCounterTicks * 30.0 / (double)DeintMethods[gPulldownMode].FrameRate60Hz);
+							}
+							// if we are geting behind then we need to speed up
+							// slightly however don't ever go more than 3% off spec
+							if(FlipAdjust == TRUE)
+							{
+								if(RunningAverageCounterTicks > StartAverageCounterTicks * 0.97)
+								{
+									RunningAverageCounterTicks *= 0.999;
+								}
+							}
+							QueryPerformanceCounter(&CurrentFlipTime);
+							if(bMissedFrame == FALSE)
+							{
+								while(!bStopThread && (CurrentFlipTime.QuadPart - LastFlipTime.QuadPart) < TicksToWait)
+								{
+									QueryPerformanceCounter(&CurrentFlipTime);
+								}
+							}
+						}
+
 						FlipResult = IDirectDrawSurface_Flip(lpDDOverlay, NULL, FlipFlag); 
 						if(FlipResult == DDERR_SURFACELOST)
 						{
@@ -668,25 +769,17 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 							ExitThread(1);
 							return 0;
 						}
-						if(DoAccurateFlips && bWaitForVsync && RefreshRate > 0)
+
+						if(DoAccurateFlips)
 						{
-							Overlay_WaitForVerticalBlank();
+							LastFlipTime.QuadPart = CurrentFlipTime.QuadPart;
 						}
-						
-						// save the time of the last flip
-						FlipTicks = GetTickCount();
-						LOG(" Flipped %d %c %d", CurrentFrame, info.IsOdd?'O':'E', (FlipTicks - LastFlipTicks));
-						LastFlipTicks = FlipTicks;
 
 						if(PrevPulldownMode != gPulldownMode)
 						{
 							if(DeintMethods[gPulldownMode].bIsHalfHeight || 
 								DeintMethods[PrevPulldownMode].bIsHalfHeight)
 							{
-								if(!DoAccurateFlips || !bWaitForVsync || RefreshRate == 0)
-								{
-									//Overlay_WaitForVerticalBlank();
-								}
 								SetDeinterlaceMode(gPulldownMode);
 							}
 						}

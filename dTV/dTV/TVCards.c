@@ -44,6 +44,8 @@ TVTUNERID TunerType = TUNER_ABSENT;
 long ProcessorSpeed = 1;
 long TradeOff = 1;
 
+void hauppauge_boot_msp34xx();
+void init_PXC200();
 
 const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 {
@@ -680,7 +682,7 @@ void Card_Init()
 	case TVCARD_HAUPPAUGE878:
 		//hauppauge_readee(btv,eeprom_data,0xa0);
         //hauppauge_eeprom(btv);
-        //hauppauge_boot_msp34xx(btv);
+        hauppauge_boot_msp34xx();
 		break;
 	case TVCARD_PXC200:
 		init_PXC200();
@@ -689,6 +691,19 @@ void Card_Init()
 		break;
 	}
 }
+
+/* reset/enable the MSP on some Hauppauge cards */
+/* Thanks to Kyösti Mälkki (kmalkki@cc.hut.fi)! */
+void hauppauge_boot_msp34xx()
+{
+	/* reset/enable the MSP on some Hauppauge cards */
+	/* Thanks to Kyösti Mälkki (kmalkki@cc.hut.fi)! */
+	BT848_AndOrDataDword(BT848_GPIO_OUT_EN, 32, ~32);
+	BT848_AndOrDataDword(BT848_GPIO_DATA, 0, ~32);
+	Sleep(10);
+	BT848_AndOrDataDword(BT848_GPIO_DATA, 32, ~32);
+}
+
 
 /* ----------------------------------------------------------------------- */
 /*  Imagenation L-Model PXC200 Framegrabber */
