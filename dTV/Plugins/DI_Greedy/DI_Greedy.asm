@@ -56,7 +56,9 @@ BOOL DeinterlaceGreedy_MMX(DEINTERLACE_INFO *info)
 	short **pOddLines = info->OddLines[0];
 	short **pEvenLines = info->EvenLines[0];
 	short **pPrevLines = info->IsOdd ? info->OddLines[1] : info->EvenLines[1];
+#ifdef IS_MMX
 	const __int64 ShiftMask = 0xfefffefffefffeff;	// to avoid shifting chroma to luma
+#endif
 	__int64 MaxComb;
 	__int64 i;
 

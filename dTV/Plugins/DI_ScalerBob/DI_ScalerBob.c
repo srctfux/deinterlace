@@ -46,6 +46,11 @@ BOOL DeinterlaceScalerBob(DEINTERLACE_INFO *info)
 						info->LineLength * 2);
 		}
 	}
+	// need to clear up MMX registers
+	_asm
+	{
+		emms
+	}
 	return TRUE;
 }
 

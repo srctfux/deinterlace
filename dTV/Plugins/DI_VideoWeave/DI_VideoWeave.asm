@@ -53,7 +53,9 @@ BOOL DeinterlaceFieldWeave_MMX(DEINTERLACE_INFO *info)
 	__int64 qwSpatialTolerance;
 	__int64 qwTemporalTolerance;
 	__int64 qwThreshold;
+#ifdef IS_MMX
 	const __int64 Mask = 0xfefefefefefefefe;
+#endif
 
 	// Make sure we have all the data we need.
 	pEvenLines = info->EvenLines[0];
@@ -146,8 +148,8 @@ MAINLOOP_LABEL:
 		    pavgusb mm0, mm2
 #else
 			pand mm0, Mask					// mm0 = E1 with lower chroma bit stripped off
-			psrlw mm0, 1					// mm0 = E1 / 2
 			pand mm2, Mask					// mm2 = E2 with lower chroma bit stripped off
+			psrlw mm0, 1					// mm0 = E1 / 2
 			psrlw mm2, 1					// mm2 = E2 / 2
 			paddb mm0, mm2					// mm2 = (E1 + E2) / 2
 #endif

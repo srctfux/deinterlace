@@ -534,6 +534,12 @@ DoNext8Bytes:
 		info->pMemcpy(lpCurOverlay + (info->FrameHeight - 1) * info->OverlayPitch,
 				  pOddLines[info->FieldHeight - 1],
 				  info->LineLength);
+		
+		// need to clear up MMX registers
+		_asm
+		{
+			emms
+		}
 	}
 
 // We will keep moving averages of the Motion and Comb factors.  For extra precision the 

@@ -40,6 +40,11 @@ BOOL DeinterlaceEvenOnly(DEINTERLACE_INFO *info)
 						info->EvenLines[0][nLineTarget],
 						info->LineLength * 2);
 		}
+		// need to clear up MMX registers
+		_asm
+		{
+			emms
+		}
 		return TRUE;
 	}
 	else

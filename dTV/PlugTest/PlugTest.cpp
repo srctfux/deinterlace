@@ -25,9 +25,48 @@
 
 #include "stdafx.h"
 
-void memcpyTest(void *Dest, void *Src, size_t nBytes)
+void memcpyMMX(void *Dest, void *Src, size_t nBytes)
 {
-	memcpy(Dest, Src, nBytes);
+	__asm {
+		mov		esi, dword ptr[Src]
+		mov		edi, dword ptr[Dest]
+		mov		ecx, nBytes
+		shr     ecx, 6                      // nBytes / 64
+align 8
+CopyLoop:
+		movq	mm0, qword ptr[esi]
+		movq	mm1, qword ptr[esi+8*1]
+		movq	mm2, qword ptr[esi+8*2]
+		movq	mm3, qword ptr[esi+8*3]
+		movq	mm4, qword ptr[esi+8*4]
+		movq	mm5, qword ptr[esi+8*5]
+		movq	mm6, qword ptr[esi+8*6]
+		movq	mm7, qword ptr[esi+8*7]
+		movq	qword ptr[edi], mm0
+		movq	qword ptr[edi+8*1], mm1
+		movq	qword ptr[edi+8*2], mm2
+		movq	qword ptr[edi+8*3], mm3
+		movq	qword ptr[edi+8*4], mm4
+		movq	qword ptr[edi+8*5], mm5
+		movq	qword ptr[edi+8*6], mm6
+		movq	qword ptr[edi+8*7], mm7
+		add		esi, 64
+		add		edi, 64
+		loop CopyLoop
+		mov		ecx, nBytes
+		and     ecx, 63
+		cmp     ecx, 0
+		je EndCopyLoop
+align 8
+CopyLoop2:
+		mov dl, byte ptr[esi] 
+		mov byte ptr[edi], dl
+		inc esi
+		inc edi
+		dec ecx
+		jne near CopyLoop2
+EndCopyLoop:
+	}
 }
 
 BOOL FillInfoStruct(DEINTERLACE_INFO* info, char* SnapshotFile)
@@ -90,7 +129,7 @@ BOOL FillInfoStruct(DEINTERLACE_INFO* info, char* SnapshotFile)
 
 	info->Overlay = (BYTE*)malloc(info->OverlayPitch * info->FrameHeight);
 	info->CpuFeatureFlags = 0;
-	info->pMemcpy = memcpyTest;
+	info->pMemcpy = memcpyMMX;
 	fclose(file);      
 	return TRUE;
 }
@@ -409,7 +448,14 @@ int ProcessSnapShot(char* SnapshotFile, char* FilterPlugin, char* DeintPlugin, c
 	DEINTERLACE_INFO info;
 	DEINTERLACE_METHOD* DeintMethod = NULL;
 	FILTER_METHOD* FilterMethod = NULL;
-	
+	LARGE_INTEGER EndTime;
+	LARGE_INTEGER StartTime;
+	LARGE_INTEGER TimerFrequency;
+
+	// get the Frequency of the high resolution timer
+	QueryPerformanceFrequency(&TimerFrequency);
+	double TimerFreq = (double)TimerFrequency.QuadPart;
+
 	if(!FillInfoStruct(&info, SnapshotFile))
 	{
 		return 1;
@@ -427,7 +473,11 @@ int ProcessSnapShot(char* SnapshotFile, char* FilterPlugin, char* DeintPlugin, c
 	{
 		if(FilterMethod->bOnInput == TRUE)
 		{
+			QueryPerformanceCounter(&StartTime);
 			FilterMethod->pfnAlgorithm(&info);
+			QueryPerformanceCounter(&EndTime);
+			double Ticks = (double)(EndTime.QuadPart - StartTime.QuadPart);
+			printf("Input Filter %f microsecs\n", Ticks * 1000000 / TimerFreq);
 		}
 	}
 
@@ -436,13 +486,21 @@ int ProcessSnapShot(char* SnapshotFile, char* FilterPlugin, char* DeintPlugin, c
 		return 1;
 	}
 
+	QueryPerformanceCounter(&StartTime);
 	DeintMethod->pfnAlgorithm(&info);
+	QueryPerformanceCounter(&EndTime);
+	double Ticks = (double)(EndTime.QuadPart - StartTime.QuadPart);
+	printf("Deint %f microsecs\n", Ticks * 1000000 / TimerFreq);
 
 	if(FilterMethod != NULL)
 	{
 		if(FilterMethod->bOnInput == FALSE)
 		{
+			QueryPerformanceCounter(&StartTime);
 			FilterMethod->pfnAlgorithm(&info);
+			QueryPerformanceCounter(&EndTime);
+			double Ticks = (double)(EndTime.QuadPart - StartTime.QuadPart);
+			printf("Output Filter %f microsecs\n", Ticks * 1000000 / TimerFreq);
 		}
 	}
 
@@ -466,14 +524,14 @@ int ProcessSnapShot(char* SnapshotFile, char* FilterPlugin, char* DeintPlugin, c
 int main(int argc, char* argv[])
 {
 	printf("PlugTest (c) 2001 John Adcock\n\n");
-	printf("PlugTest comes with ABSOLUTELY NO WARRANTY");
-	printf("This is free software, and you are welcome");
-	printf("to redistribute it under certain conditions.");
-	printf("See http://www.gnu.org/copyleft/gpl.html for details.");
+	printf("PlugTest comes with ABSOLUTELY NO WARRANTY\n");
+	printf("This is free software, and you are welcome\n");
+	printf("to redistribute it under certain conditions.\n");
+	printf("See http://www.gnu.org/copyleft/gpl.html for details.\n\n");
 
 	if(argc != 4 && argc != 5)
 	{
-		printf("\nUsage: PlugTest dTVSnapFile [FilterPlugIn] DeintPlugIn OutputTifFile\n");
+		printf("Usage: PlugTest dTVSnapFile [FilterPlugIn] DeintPlugIn OutputTifFile\n");
 		return 1;
 	}
 	if(argc == 4)

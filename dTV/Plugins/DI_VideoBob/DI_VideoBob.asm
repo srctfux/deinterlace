@@ -54,7 +54,9 @@ BOOL DeinterlaceFieldBob_MMX(DEINTERLACE_INFO *info)
 	
 	__int64 qwEdgeDetect;
 	__int64 qwThreshold;
-	const __int64 Mask = 0x7f7f7f7f7f7f7f7f;
+#ifdef IS_MMX
+	const __int64 Mask = 0xfefefefefefefefe;
+#endif
 	const __int64 YMask    = 0x00ff00ff00ff00ff;
 
 	qwEdgeDetect = EdgeDetect;
@@ -127,10 +129,10 @@ MAINLOOP_LABEL:
 #elif defined(IS_3DNOW)
 		    pavgusb mm0, mm2
 #else
-			psrlw mm0, 01
-			psrlw mm2, 01
 			pand  mm0, Mask
 			pand  mm2, Mask
+			psrlw mm0, 01
+			psrlw mm2, 01
 			paddw mm0, mm2
 #endif
 

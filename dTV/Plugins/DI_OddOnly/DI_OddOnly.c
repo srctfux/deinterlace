@@ -39,6 +39,11 @@ BOOL DeinterlaceOddOnly(DEINTERLACE_INFO *info)
 						info->OddLines[0][nLineTarget],
 						info->LineLength * 2);
 		}
+		// need to clear up MMX registers
+		_asm
+		{
+			emms
+		}
 		return TRUE;
 	}
 	else

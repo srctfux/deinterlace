@@ -528,7 +528,6 @@ CopyLoop2:
 		dec ecx
 		jne near CopyLoop2
 EndCopyLoop:
-		emms
 	}
 }
 
@@ -582,7 +581,6 @@ CopyLoop2SSE:
 		dec ecx
 		jne near CopyLoop2SSE
 EndCopyLoopSSE:
-		emms
 	}
 }
 #endif

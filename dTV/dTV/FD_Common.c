@@ -300,6 +300,10 @@ BOOL Weave(DEINTERLACE_INFO *info)
 		info->pMemcpy(lpOverlay, info->OddLines[0][i], info->LineLength);
 		lpOverlay += info->OverlayPitch;
 	}
+	_asm
+	{
+		emms
+	}
 	return TRUE;
 }
 

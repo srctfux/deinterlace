@@ -32,61 +32,17 @@ FILTER_METHOD TemporalNoiseMethod;
 // current and previous values.
 /////////////////////////////////////////////////////////////////////////////
 
-BOOL FilterTemporalNoise(DEINTERLACE_INFO *info)
-{
-	short *NewPixel;
-	short *OldPixel;
-	int y;
-	int Cycles;
-	__int64 qwNoiseThreshold;
-
-	// Need to have the current and next-to-previous fields to do the filtering.
-	if ((info->IsOdd && (info->OddLines[0] == NULL || info->OddLines[1] == NULL)) ||
-		(! info->IsOdd && (info->EvenLines[0] == NULL || info->EvenLines[1] == NULL)))
-	{
-		return FALSE;
-	}
-
-	qwNoiseThreshold = TemporalLuminanceThreshold | (TemporalChromaThreshold << 8);
-	qwNoiseThreshold |= (qwNoiseThreshold << 48) | (qwNoiseThreshold << 32) | (qwNoiseThreshold << 16);
-	Cycles = info->LineLength / 8;
-
-	for (y = 0; y < info->FieldHeight; y++)
-	{
-		if (info->IsOdd)
-		{
-			NewPixel = info->OddLines[0][y];
-			OldPixel = info->OddLines[1][y];
-		}
-		else
-		{
-			NewPixel = info->EvenLines[0][y];
-			OldPixel = info->EvenLines[1][y];
-		}
-
-		if (info->CpuFeatureFlags & FEATURE_SSE) {
-#ifdef USE_SSE
-#define IS_SSE
+#define IS_SSE 1
 #include "FLT_TNoise.asm"
 #undef IS_SSE
-#endif
-		}
-		else if (info->CpuFeatureFlags & FEATURE_3DNOW) {
-#ifdef USE_3DNOW
-#define IS_3DNOW
+
+#define IS_3DNOW 1
 #include "FLT_TNoise.asm"
 #undef IS_3DNOW
-#endif
-		}
-		else {
-#define IS_MMX
+
+#define IS_MMX 1
 #include "FLT_TNoise.asm"
 #undef IS_MMX
-		}
-	}
-
-	return TRUE;
-}
 
 ////////////////////////////////////////////////////////////////////////////
 // Start of Settings related code
@@ -119,7 +75,7 @@ FILTER_METHOD TemporalNoiseMethod =
 	"Noise Reduction (Temporal)\tN",
 	FALSE,
 	TRUE,
-	FilterTemporalNoise, 
+	FilterTemporalNoise_MMX, 
 	// IDM_NOISE_FILTER so that accelerator works
 	768,
 	FALSE,
@@ -134,6 +90,18 @@ FILTER_METHOD TemporalNoiseMethod =
 
 __declspec(dllexport) FILTER_METHOD* GetFilterPluginInfo(long CpuFeatureFlags)
 {
+    if (CpuFeatureFlags & FEATURE_SSE)
+    {
+        TemporalNoiseMethod.pfnAlgorithm = FilterTemporalNoise_SSE;
+    }
+    else if (CpuFeatureFlags & FEATURE_3DNOW)
+    {
+        TemporalNoiseMethod.pfnAlgorithm = FilterTemporalNoise_3DNOW;
+    }
+    else
+    {
+        TemporalNoiseMethod.pfnAlgorithm = FilterTemporalNoise_MMX;
+    }
 	return &TemporalNoiseMethod;
 }
 

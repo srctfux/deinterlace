@@ -102,6 +102,10 @@ SOURCE=.\DI_VideoBob.c
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Source File
+
+SOURCE=.\DI_VideoBob.asm
+# End Source File
 # End Group
 # Begin Group "Resource Files"
 
