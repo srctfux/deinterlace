@@ -1603,6 +1603,20 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		}
 		break;
 
+	case 0xCB0B:
+		// crack the mouse wheel delta
+		// +ve is forward (away from user)
+		// -ve is backward (towards user)
+		if((short)wParam > 0)
+		{
+			PostMessage(hWnd, WM_COMMAND, IDM_CHANNELPLUS, 0);
+		}
+		else
+		{
+			PostMessage(hWnd, WM_COMMAND, IDM_CHANNELMINUS, 0);
+		}
+		break;
+
 	case WM_SYSCOMMAND:
 		switch (wParam & 0xFFF0)
 		{
