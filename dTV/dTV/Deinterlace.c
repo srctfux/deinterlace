@@ -1286,21 +1286,21 @@ Next8Bytes:
 // VBI lines are off screen
 // the BitShift value is used to filter out noise and quantization error
 ///////////////////////////////////////////////////////////////////////////////
-long CompareFields(short** pLines1, short** pLines2)
+long CompareFields(short** pLines1, short** pLines2, RECT *rect)
 {
 	int Line;
 	long LineFactor;
 	long DiffFactor = 0;
 	short* YVal1;
 	short* YVal2;
-	long ActiveX = CurrentX - 2 * InitialOverscan;
+	long ActiveX = rect->right - rect->left;
 	const __int64 YMask    = 0x00ff00ff00ff00ff;
 	__int64 wBitShift    = BitShift;
 
-	for (Line = 80; Line < ((CurrentY - 80) / 2); ++Line)
+	for (Line = rect->top / 2; Line < rect->bottom / 2; ++Line)
 	{
-		YVal1 = pLines1[Line] + InitialOverscan;
-		YVal2 = pLines2[Line] + InitialOverscan;
+		YVal1 = pLines1[Line] + (rect->left & ~1);
+		YVal2 = pLines2[Line] + (rect->left & ~1);
 		_asm
 		{
 			mov ecx, ActiveX

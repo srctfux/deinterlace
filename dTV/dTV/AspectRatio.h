@@ -39,6 +39,7 @@ void    PaintColorkey(HWND hWnd, BOOL bEnable);
 int		FindAspectRatio(short** EvenField, short** OddField);
 void	AdjustAspectRatio(short** EvenField, short** OddField);
 void	SetHalfHeight(int IsHalfHeight);
+void	GetSourceRect(RECT *rect);
 
 extern long LuminanceThreshold;
 extern long IgnoreNonBlackPixels;

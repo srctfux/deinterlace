@@ -1008,7 +1008,11 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 					}
 					else
 					{
-						CompareResult = CompareFields(ppOddLines[(CurrentFrame + 4) % 5], ppOddLines[CurrentFrame]);
+						RECT source;
+
+						GetSourceRect(&source);
+						CompareResult = CompareFields(ppOddLines[(CurrentFrame + 4) % 5], ppOddLines[CurrentFrame],
+						                              &source);
 						LOG(" Frame %d O CR = %d", CurrentFrame, CompareResult);
 						UpdateNTSCPulldownMode(CompareResult, 
 											   TRUE,
@@ -1133,7 +1137,11 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 					}
 					else
 					{
-						CompareResult = CompareFields(ppEvenLines[(CurrentFrame + 4) % 5], ppEvenLines[CurrentFrame]);
+						RECT source;
+
+						GetSourceRect(&source);
+						CompareResult = CompareFields(ppEvenLines[(CurrentFrame + 4) % 5], ppEvenLines[CurrentFrame],
+														&source);
 						LOG(" Frame %d E CR = %d", CurrentFrame, CompareResult);
 						UpdateNTSCPulldownMode(CompareResult,
 											   FALSE,

@@ -124,6 +124,7 @@ static int ratio_time[RATIO_HISTORY_CHANGES];
 static int DetectAspectNow = FALSE;
 
 RECT destinationRectangle = {0,0,0,0};
+RECT sourceRectangle = {0,0,0,0};
 
 
 //----------------------------------------------------------------------------
@@ -740,6 +741,7 @@ void WorkoutOverlaySize()
 	// Save the Overlay Destination and force a repaint 
 	// Moved to after Overlay_Update in hopes of removing purple flashing.
 	destinationRectangle = rOverlayDest;
+	sourceRectangle = rOverlaySrc;
 	ScreenToClient(hWnd,((PPOINT)&destinationRectangle));
 	ScreenToClient(hWnd,((PPOINT)&destinationRectangle)+1);
 	InvalidateRect(hWnd,NULL,FALSE);
@@ -997,4 +999,12 @@ void AdjustAspectRatio(short** EvenField, short** OddField)
 			lastNewRatio = newRatio;
 		}
 	}
+}
+
+
+//----------------------------------------------------------------------------
+// Returns the current source rectangle.
+void GetSourceRect(RECT *rect)
+{
+	memcpy(rect, &sourceRectangle, sizeof(RECT));
 }
