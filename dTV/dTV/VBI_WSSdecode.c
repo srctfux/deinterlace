@@ -37,12 +37,31 @@
 #define DOLOGGING
 #include "DebugLog.h"
 
+#define	WSS_MAX_SUCCESSIVE_ERR		10
+
+// Structure of WSS signal for 625-line systems
 #define	WSS625_RUNIN_CODE_LENGTH	29
 #define	WSS625_START_CODE_LENGTH	24
 #define	WSS625_BEFORE_DATA_LENGTH	(WSS625_RUNIN_CODE_LENGTH+WSS625_START_CODE_LENGTH)
 #define	WSS625_DATA_BIT_LENGTH		6
-
 #define	WSS625_NB_DATA_BITS			14
+#define	WSS625_START_POS_MIN		50
+#define	WSS625_START_POS_MAX		200
+
+// Possible ratio values for 625-line systems
+#define	WSS625_RATIO_133					0x08
+#define	WSS625_RATIO_155					0x0e
+#define	WSS625_RATIO_177_ANAMORPHIC			0x07
+#define	WSS625_RATIO_155_LETTERBOX_CENTER	0x01
+#define	WSS625_RATIO_155_LETTERBOX_TOP		0x02
+#define	WSS625_RATIO_177_LETTERBOX_CENTER	0x0b
+#define	WSS625_RATIO_177_LETTERBOX_TOP		0x04
+#define	WSS625_RATIO_BIG_LETTERBOX_CENTER	0x0d
+
+// Possible ratio values for 525-line systems
+#define	WSS525_RATIO_133					0x00
+#define	WSS525_RATIO_177_ANAMORPHIC			0x01
+#define	WSS525_RATIO_133_LETTERBOX			0x02
 
 #define AR_NONANAMORPHIC 1
 #define AR_ANAMORPHIC    2
@@ -51,7 +70,7 @@
 
 extern int decodebit(unsigned char *data, int threshold, int NumPixels);
 
-// Last WSS data decoded
+// WSS decoded data
 int		WSSAspectRatio = -1;
 int		WSSAspectMode = -1;
 BOOL	WSSFilmMode = FALSE;
@@ -63,13 +82,14 @@ BOOL	WSSSurroundSound = FALSE;
 BOOL	WSSCopyrightAsserted = FALSE;
 BOOL	WSSCopyProtection = FALSE;
 
-BOOL	WSSDecodeOk = FALSE;	// Status of last decoding
-int		WSSNbDecodeErr = 0;		// Number of decoding errors
-int		WSSNbDecodeOk = 0;		// Number of correct decoding
-int		WSSMinPos = 0;
-int		WSSMaxPos = 0;
-int		WSSAvgPos = 0;
-static int	WSSTotalPos = 0;
+// WSS control data
+BOOL	WSSDecodeOk = FALSE;		// Status of last decoding
+int		WSSNbDecodeErr = 0;			// Number of decoding errors
+int		WSSNbDecodeOk = 0;			// Number of correct decoding
+int		WSSMinPos = WSS625_START_POS_MAX;
+int		WSSMaxPos = WSS625_START_POS_MIN;
+int		WSSTotalPos = 0;
+static int	WSSNbSuccessiveErr = 0;	// Number of successive decoding errors
 
 // Sequence values for run-in code
 static int WSS625_runin[WSS625_RUNIN_CODE_LENGTH] = { 1,1,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1 };
@@ -83,7 +103,38 @@ static int WSS625_0[WSS625_DATA_BIT_LENGTH] = { 0,0,0,1,1,1 };
 // Sequence values for a data bit = 0
 static int WSS625_1[WSS625_DATA_BIT_LENGTH] = { 1,1,1,0,0,0 };
 
-void log_databit(int bit_pos, int decoded_bit, BYTE* vbiline, double ClockPixels)
+// Clear WSS decoded data
+static void WSS_clear_data ()
+{
+	WSSAspectRatio = -1;
+	WSSAspectMode = -1;
+	WSSFilmMode = FALSE;
+	WSSColorPlus = FALSE;
+	WSSHelperSignals = FALSE;
+	WSSTeletextSubtitle = FALSE;
+	WSSOpenSubtitles = WSS625_SUBTITLE_NO;
+	WSSSurroundSound = FALSE;
+	WSSCopyrightAsserted = FALSE;
+	WSSCopyProtection = FALSE;
+}
+
+// Clear WSS decoded data and WSS control data
+void WSS_init ()
+{
+	// Clear WSS control data
+	WSSDecodeOk = FALSE;
+	WSSNbDecodeErr = 0;
+	WSSNbDecodeOk = 0;
+	WSSMinPos = WSS625_START_POS_MAX;
+	WSSMaxPos = WSS625_START_POS_MIN;
+	WSSTotalPos = 0;
+	WSSNbSuccessiveErr = 0;
+
+	// Clear WSS decoded data
+	WSS_clear_data ();
+}
+
+static void log_databit(int bit_pos, int decoded_bit, BYTE* vbiline, double ClockPixels)
 {
 	int	i, pos;
 
@@ -94,7 +145,7 @@ void log_databit(int bit_pos, int decoded_bit, BYTE* vbiline, double ClockPixels
 	}
 }
 
-BOOL decode_sequence(BYTE* vbiline, int *DecodedVals, int NbVal, int Threshold, double ClockPixels)
+static BOOL decode_sequence(BYTE* vbiline, int *DecodedVals, int NbVal, int Threshold, double ClockPixels)
 {
 	int	i;
 	int	NbPixels = ROUND (ClockPixels);
@@ -107,7 +158,7 @@ BOOL decode_sequence(BYTE* vbiline, int *DecodedVals, int NbVal, int Threshold, 
 	return ( (i == NbVal) ? TRUE : FALSE );
 }
 
-BOOL WSS625_DecodeLine(BYTE* vbiline)
+static BOOL WSS625_DecodeLine(BYTE* vbiline)
 {
 	int		i, j;
 	BOOL	DecodeOk = FALSE;
@@ -118,25 +169,15 @@ BOOL WSS625_DecodeLine(BYTE* vbiline)
 	int		packedbits;
 	int		nb;
 
-//	int		min = 255;
-//	int		max = 0;
-
 	ClockPixels = 7.09379;
 	Threshold = VBI_thresh;
-//	for (i = 50 ; i < 1500 ; i++)
-//	{
-//		if (vbiline[i] > max)	max = vbiline[i];
-//		if (vbiline[i] < min)	min = vbiline[i];
-//	}
-//	Threshold = (max - min) / 2 + min;
 	if (Threshold < 10)
 	{
-		WSSNbDecodeErr++;
 //		LOG("WSS signal threshold < 10");
 		return FALSE;
 	}
 
-	for (i = 50 ; i < 200 ; i++)
+	for (i = WSS625_START_POS_MIN ; i <= WSS625_START_POS_MAX ; i++)
 	{
 		// run-in code decoding
 		pos = i;
@@ -206,21 +247,11 @@ BOOL WSS625_DecodeLine(BYTE* vbiline)
 	if (DecodeOk)
 	{
 		// Decoding statistics
-		WSSNbDecodeOk++;
 		WSSTotalPos += i;
-		if (WSSNbDecodeOk == 1)
-		{
+		if (i < WSSMinPos)
 			WSSMinPos = i;
+		if (i > WSSMaxPos)
 			WSSMaxPos = i;
-		}
-		else
-		{
-			if (i < WSSMinPos)
-				WSSMinPos = i;
-			if (i > WSSMaxPos)
-				WSSMaxPos = i;
-		}
-		WSSAvgPos = ROUND(((double)WSSTotalPos) / ((double)WSSNbDecodeOk));
 
 		packedbits = 0;
 		for (j = 0 ; j < WSS625_NB_DATA_BITS ; j++)
@@ -266,19 +297,18 @@ BOOL WSS625_DecodeLine(BYTE* vbiline)
 		WSSCopyrightAsserted = (packedbits & 0x1000) ? TRUE : FALSE;
 		WSSCopyProtection = (packedbits & 0x2000) ? TRUE : FALSE;
 	}
-	else
-	{
-		WSSNbDecodeErr++;
-//		LOG("WSS nb decoding errors = %d", WSSNbDecodeErr);
-	}
 
 	return DecodeOk;
 }
 
-BOOL WSS525_DecodeLine(BYTE* vbiline)
+static BOOL WSS525_DecodeLine(BYTE* vbiline)
 {
 	BOOL	DecodeOk = FALSE;
 	int		packedbits;
+
+	// !!!!!!!!!!!!!!!!!!!!
+	// !!! Code missing !!!
+	// !!!!!!!!!!!!!!!!!!!!
 
 	if (DecodeOk)
 	{
@@ -300,21 +330,16 @@ BOOL WSS525_DecodeLine(BYTE* vbiline)
 			break;
 		}
 	}
-	else
-	{
-		WSSNbDecodeErr++;
-	}
 
 	return DecodeOk;
 }
 
 int WSS_DecodeLine(BYTE* vbiline)
 {
-	int		OldAspectMode = WSSAspectMode;
-	int		OldAspectRatio = WSSAspectRatio;
+	int		PrevAspectMode = WSSAspectMode;
+	int		PrevAspectRatio = WSSAspectRatio;
 	int		NewAspectMode;
 	int		NewAspectRatio;
-	BOOL	OldDecodeStatus = WSSDecodeOk;
 	BOOL	bSwitch = FALSE;
 
 	switch (BT848_GetTVFormat()->wCropHeight)
@@ -336,15 +361,28 @@ int WSS_DecodeLine(BYTE* vbiline)
 
 	if (! WSSDecodeOk)
 	{
+		WSSNbDecodeErr++;
+		WSSNbSuccessiveErr++;
+		// Clear WSS decoded data
+		// after two many successive decoding errors
+		if (WSSNbSuccessiveErr > WSS_MAX_SUCCESSIVE_ERR)
+		{
+			WSS_clear_data();
+			WSSNbSuccessiveErr = 0;
+		}
 		return -1;
 	}
 	else
 	{
+		WSSNbDecodeOk++;
+		WSSNbSuccessiveErr = 0;
+
+		// Manage WSS ratio information
 		if ( (WSSAspectMode != -1)
 		  && (WSSAspectRatio != -1) )
 		{
-			if ( (WSSAspectMode != OldAspectMode)
-			  || (WSSAspectRatio != OldAspectRatio) )
+			if ( (WSSAspectMode != PrevAspectMode)
+			  || (WSSAspectRatio != PrevAspectRatio) )
 			{
 				bSwitch = TRUE;
 				NewAspectMode = WSSAspectMode;

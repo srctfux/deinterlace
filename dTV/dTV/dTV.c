@@ -1379,6 +1379,10 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
         case OSD_TIMER_ID:
 			OSD_Clear(hWnd);
             break;
+        //-------------------------------
+        case OSD_TIMER_REFRESH_ID:
+			OSD_RefreshInfosScreen(hWnd, 0, OSD_REFRESH_DATA);
+            break;
 		//-------------------------------
 		case TIMER_BOUNCE:
 		case TIMER_ORBIT:

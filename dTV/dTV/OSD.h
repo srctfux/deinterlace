@@ -48,8 +48,15 @@ void OSD_SetMenu(HMENU hMenu);
 // Make sure that the timer ID does not conflict with those in DTV.H
 #define OSD_TIMER_ID			42
 #define OSD_TIMER_DELAY			4000
+#define OSD_TIMER_REFRESH_ID	41
+#define OSD_TIMER_REFRESH_DELAY	750
 
 #define OSD_MAX_TEXT			25
+
+// Values for "ShowType" parameter in functions OSD_Show and OSD_RefreshInfosScreen
+#define	OSD_PERSISTENT		1
+#define	OSD_AUTOHIDE		2
+#define	OSD_REFRESH_DATA	3
 
 typedef enum
 {
@@ -69,16 +76,15 @@ typedef struct OSD_INFO_TAG
 	RECT            currentRect;       // MRS 2-24-01 Saves the current drawn rectangle (used to limit invalidation area)
 } OSD_INFO;
 
-int OSD_GetNbText();
 void OSD_ClearAllTexts();
 void OSD_AddText(LPCTSTR szText, double dfSize, long textColor, OSD_TEXT_XPOS textXpos, double dfXpos, double dfYpos);
-void OSD_Show(HWND hWnd, BOOL persistent);
+void OSD_Show(HWND hWnd, int ShowType, int refresh_delay);
 void OSD_ShowText(HWND hWnd, LPCTSTR szText, double dfSize);
 void OSD_ShowTextPersistent(HWND hWnd, LPCTSTR szText, double dfSize);
 void OSD_ShowTextOverride(HWND hWnd, LPCTSTR szText, double dfSize);
 void OSD_Redraw(HWND hWnd, HDC hDC);
 void OSD_Clear(HWND hWnd);
-double OSD_GetLineYpos (int nLine, double dfMargin, double dfSize);
+void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType);
 void OSD_ShowInfosScreen(HWND hWnd, double dfSize);
 
 #endif

@@ -42,6 +42,10 @@
 // 18 Mar 2001   Laurent Garnier       Added multiple screens feature
 //                                     Added specific screen for WSS data decoding
 //
+// 22 Mar 2001   Laurent Garnier       Screen Refresh managed with a timer
+//                                     Choice (in ini file) between persistent
+//                                     screens and screens with autohide timer
+//
 // NOTICE FROM MARK: This code will probably be rewritten, but keeping 
 // this code neat and architecturally well organized, will maximize code 
 // recyclability.   There is a need for multiple independent OSD elements,
@@ -84,40 +88,36 @@ char szFontName[128] = "Arial";
 long OutlineColor = RGB(0,0,0);
 long TextColor = RGB(0,255,0);
 long DefaultSizePerc = 10;
+long DefaultSmallSizePerc = 4;
 BOOL bAntiAlias = TRUE;
 BOOL bOutline = TRUE;
 eOSDBackground Background;
+BOOL bAutoHide = TRUE;
 
 //---------------------------------------------------------------------------
 // Global OSD Information structure
 OSD_INFO    grOSD[OSD_MAX_TEXT];
 int         NbText = 0;
 struct {
-	int		screen_id;	// OSD screen identifier
-	BOOL	active;		// Screen to take into account or not
+	int		screen_id;		// OSD screen identifier
+	int		refresh_delay;	// Refresh period in ms (0 means no refresh)
+	BOOL	active;			// Screen to take into account or not
 } ActiveScreens[] = {
-	{	OSD_SCREEN_1,	TRUE	},
-	{	OSD_SCREEN_2,	TRUE	},
-	{	OSD_SCREEN_3,	FALSE	},
-	{	OSD_SCREEN_4,	FALSE	},
-	{	OSD_SCREEN_5,	FALSE	},
-	{	OSD_SCREEN_6,	FALSE	},
-	{	OSD_SCREEN_7,	FALSE	},
-	{	OSD_SCREEN_8,	FALSE	},
-	{	OSD_SCREEN_9,	FALSE	},
-	{	OSD_SCREEN_10,	FALSE	},
+	{	OSD_SCREEN_1,	0,							TRUE	},
+	{	OSD_SCREEN_2,	OSD_TIMER_REFRESH_DELAY,	TRUE	},
+	{	OSD_SCREEN_3,	0,							FALSE	},
+	{	OSD_SCREEN_4,	0,							FALSE	},
+	{	OSD_SCREEN_5,	0,							FALSE	},
+	{	OSD_SCREEN_6,	0,							FALSE	},
+	{	OSD_SCREEN_7,	0,							FALSE	},
+	{	OSD_SCREEN_8,	0,							FALSE	},
+	{	OSD_SCREEN_9,	0,							FALSE	},
+	{	OSD_SCREEN_10,	0,							FALSE	},
 };
 int	IdxCurrentScreen = -1;	// index of the current displayed OSD screen
 
 
 BOOL        bOverride = FALSE;
-
-//---------------------------------------------------------------------------
-// Return the number of texts currently defined for OSD
-int OSD_GetNbText()
-{
-	return (NbText);
-}
 
 //---------------------------------------------------------------------------
 // Clean the list of texts for OSD
@@ -161,21 +161,24 @@ void OSD_AddText(LPCTSTR szText, double dfSize, long textColor, OSD_TEXT_XPOS te
 
 //---------------------------------------------------------------------------
 // Display defined OSD texts
-void OSD_Show(HWND hWnd, BOOL persistent)
+void OSD_Show(HWND hWnd, int ShowType, int refresh_delay)
 {
     RECT		winRect;
 	HDC         hDC;
 
 	if (bOverride) return;
-	if (persistent == TRUE)
+	if (ShowType == OSD_PERSISTENT)
 		KillTimer(hWnd, OSD_TIMER_ID);
+	KillTimer(hWnd, OSD_TIMER_REFRESH_ID);
 	hDC = GetDC(hWnd);
 	GetClientRect(hWnd,&winRect);
 	PaintColorkey(hWnd, TRUE, hDC, &winRect);
 	OSD_Redraw(hWnd, hDC);
 	ReleaseDC(hWnd, hDC);
-	if (persistent == FALSE)
+	if (ShowType == OSD_AUTOHIDE)
 		SetTimer(hWnd, OSD_TIMER_ID, OSD_TIMER_DELAY, NULL);
+	if (refresh_delay > 0)
+		SetTimer(hWnd, OSD_TIMER_REFRESH_ID, refresh_delay, NULL);
 	StatusBar_Repaint();
 }
 
@@ -188,7 +191,7 @@ void OSD_ShowText(HWND hWnd, LPCTSTR szText, double dfSize)
 	{
 		OSD_ClearAllTexts();
 		OSD_AddText(szText, dfSize, 0, OSD_XPOS_RIGHT, 0.9, 0.1);
-		OSD_Show(hWnd, FALSE);
+		OSD_Show(hWnd, OSD_AUTOHIDE, 0);
 		IdxCurrentScreen = -1;
 	}
 	else
@@ -208,7 +211,7 @@ void OSD_ShowTextPersistent(HWND hWnd, LPCTSTR szText, double dfSize)
 	{
 		OSD_ClearAllTexts();
 		OSD_AddText(szText, dfSize, 0, OSD_XPOS_RIGHT, 0.9, 0.1);
-		OSD_Show(hWnd, TRUE);
+		OSD_Show(hWnd, OSD_PERSISTENT, 0);
 		IdxCurrentScreen = -1;
 	}
 	else
@@ -237,6 +240,7 @@ void OSD_Clear(HWND hWnd)
 	int	i;
 
 	KillTimer(hWnd, OSD_TIMER_ID);
+	KillTimer(hWnd, OSD_TIMER_REFRESH_ID);
     bOverride = FALSE;
 	for (i = 0 ; i < NbText ; i++)
 	{
@@ -419,7 +423,7 @@ void OSD_Redraw(HWND hWnd, HDC hDC)
 //    Use line number < 0 if reference is bottom
 //    dfMargin is a percent of screen height/width and value must be between 0 and 1
 //    dfSize is a percent of screen height and value must be between 0 and 100
-double OSD_GetLineYpos (int nLine, double dfMargin, double dfSize)
+static double OSD_GetLineYpos (int nLine, double dfMargin, double dfSize)
 {
 	double	dfY;
 	double	dfH = dfSize / 100;
@@ -446,36 +450,18 @@ double OSD_GetLineYpos (int nLine, double dfMargin, double dfSize)
 }
 
 //---------------------------------------------------------------------------
-// Display multiple informations on scrren
-void OSD_ShowInfosScreen(HWND hWnd, double dfSize)
+// Display/Refresh on screen the current information screen
+void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 {
-	double	dfMargin = 0.05;	// 5% of screen height/width
+	double	dfMargin = 0.02;	// 2% of screen height/width
 	char	szInfo[64];
 	int		nLine;
-	int		NbScreens;			// number of OSD scrrens
-	int		NbActiveScreens;	// number of active OSD screens
-	int		IdxScreen;
-	int		i, idx;
 
-	// determine which screen to display
-	NbScreens = sizeof (ActiveScreens) / sizeof (ActiveScreens[0]);
-	IdxScreen = IdxCurrentScreen + 1;
-	if (IdxScreen >= NbScreens)
-		IdxScreen = 0;
-	IdxCurrentScreen = -1;
-	for (i = IdxScreen ; i < (IdxScreen+NbScreens) ; i++)
-	{
-		idx = i % NbScreens;
-		if (ActiveScreens[idx].active)
-		{
-			NbActiveScreens++;
-			if (IdxCurrentScreen == -1)
-				IdxCurrentScreen = idx;
-		}
-	}
 	// Case : no OSD screen
 	if (IdxCurrentScreen == -1)
 		return;
+
+	if (dfSize == 0)	dfSize = DefaultSmallSizePerc;
 
 	OSD_ClearAllTexts();
 
@@ -483,8 +469,6 @@ void OSD_ShowInfosScreen(HWND hWnd, double dfSize)
 	{
 	// GENERAL SCREEN
 	case OSD_SCREEN_1:
-		if (dfSize == 0)	dfSize = 4;	// 4% of screen height
-
 		// dTV version
 		OSD_AddText(GetProductNameAndVersion(), dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (1, dfMargin, dfSize));
 
@@ -652,10 +636,8 @@ void OSD_ShowInfosScreen(HWND hWnd, double dfSize)
 
 	// WSS DATA DECODING SCREEN
 	case OSD_SCREEN_2:
-		if (dfSize == 0)	dfSize = 4;	// 6% of screen height
-
 		// Title
-		OSD_AddText("WSS data decoding", 8, RGB(255,150,150), OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (1, dfMargin, 10));
+		OSD_AddText("WSS data decoding", dfSize*1.5, RGB(255,150,150), OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (1, dfMargin, dfSize*1.5));
 
 		nLine = 3;
 
@@ -676,8 +658,6 @@ void OSD_ShowInfosScreen(HWND hWnd, double dfSize)
 
 			if (WSSDecodeOk)
 			{
-				nLine++;
-
 				OSD_AddText("Data", dfSize, RGB(150,150,255), OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 
 				// WSS data
@@ -726,13 +706,9 @@ void OSD_ShowInfosScreen(HWND hWnd, double dfSize)
 				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 			}
 
-			nLine++;
-
-			OSD_AddText("Debug", dfSize, RGB(150,150,255), OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+			OSD_AddText("Stats", dfSize, RGB(150,150,255), OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 
 			// Debug informations
-			sprintf (szInfo, "Average start position : %d", WSSAvgPos);
-			OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 			sprintf (szInfo, "Minimum start position : %d", WSSMinPos);
 			OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 			sprintf (szInfo, "Maximum start position : %d", WSSMaxPos);
@@ -768,7 +744,40 @@ void OSD_ShowInfosScreen(HWND hWnd, double dfSize)
 		break;
 	}
 
-	OSD_Show(hWnd, FALSE);
+	OSD_Show(hWnd, ShowType, ActiveScreens[IdxCurrentScreen].refresh_delay);
+}
+
+//---------------------------------------------------------------------------
+// Display on screen the first information screen if no screen is already
+// displayed, or the next one
+void OSD_ShowInfosScreen(HWND hWnd, double dfSize)
+{
+	int		NbScreens;			// number of OSD scrrens
+	int		NbActiveScreens;	// number of active OSD screens
+	int		IdxScreen;
+	int		i, idx;
+
+	// determine which screen to display
+	NbScreens = sizeof (ActiveScreens) / sizeof (ActiveScreens[0]);
+	IdxScreen = IdxCurrentScreen + 1;
+	if (IdxScreen >= NbScreens)
+		IdxScreen = 0;
+	IdxCurrentScreen = -1;
+	for (i = IdxScreen ; i < (IdxScreen+NbScreens) ; i++)
+	{
+		idx = i % NbScreens;
+		if (ActiveScreens[idx].active)
+		{
+			NbActiveScreens++;
+			if (IdxCurrentScreen == -1)
+				IdxCurrentScreen = idx;
+		}
+	}
+	// Case : no OSD screen
+	if (IdxCurrentScreen == -1)
+		return;
+
+	OSD_RefreshInfosScreen(hWnd, dfSize, bAutoHide ? OSD_AUTOHIDE : OSD_PERSISTENT);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -796,6 +805,12 @@ SETTING OSDSettings[OSD_SETTING_LASTONE] =
 		"OSD", "DefaultSizePerc", NULL,
 	},
 	{
+		"OSD Default Small Size", NUMBER, 0, &DefaultSmallSizePerc,
+		 4, 0, 100, 1, 1,
+		 NULL,
+		"OSD", "DefaultSmallSizePerc", NULL,
+	},
+	{
 		"OSD Anti Alias", ONOFF, 0, &bAntiAlias,
 		 TRUE, 0, 1, 1, 1,
 		 NULL,
@@ -812,6 +827,12 @@ SETTING OSDSettings[OSD_SETTING_LASTONE] =
 		 TRUE, 0,  1, 1, 1,
 		 NULL,
 		"OSD", "Outline", NULL,
+	},
+	{
+		"OSD Auto Hide Texts", ONOFF, 0, &bAutoHide,
+		 TRUE, 0, 1, 1, 1,
+		 NULL,
+		"OSD", "AutoHide", NULL,
 	},
 };
 

@@ -26,26 +26,11 @@
 #ifndef __WSSDECODE_H___
 #define __WSSDECODE_H___
 
-// Possible ratio values for 625-line systems
-#define	WSS625_RATIO_133					0x08
-#define	WSS625_RATIO_155					0x0e
-#define	WSS625_RATIO_177_ANAMORPHIC			0x07
-#define	WSS625_RATIO_155_LETTERBOX_CENTER	0x01
-#define	WSS625_RATIO_155_LETTERBOX_TOP		0x02
-#define	WSS625_RATIO_177_LETTERBOX_CENTER	0x0b
-#define	WSS625_RATIO_177_LETTERBOX_TOP		0x04
-#define	WSS625_RATIO_BIG_LETTERBOX_CENTER	0x0d
-
 #define WSS625_SUBTITLE_NO			0
 #define WSS625_SUBTITLE_INSIDE		1
 #define WSS625_SUBTITLE_OUTSIDE		2
 
-// Possible ratio values for 525-line systems
-#define	WSS525_RATIO_133					0x00
-#define	WSS525_RATIO_177_ANAMORPHIC			0x01
-#define	WSS525_RATIO_133_LETTERBOX			0x02
-
-// Last WSS data decoded
+// WSS data
 extern int	WSSAspectRatio;
 extern int	WSSAspectMode;
 extern BOOL	WSSFilmMode;
@@ -57,13 +42,15 @@ extern BOOL	WSSSurroundSound;
 extern BOOL	WSSCopyrightAsserted;
 extern BOOL	WSSCopyProtection;
 
+// WSS control data
 extern BOOL	WSSDecodeOk;	// Status of last decoding
 extern int	WSSNbDecodeErr;	// Number of decoding errors
 extern int	WSSNbDecodeOk;	// Number of correct decoding
 extern int	WSSMinPos;
 extern int	WSSMaxPos;
-extern int	WSSAvgPos;
+extern int	WSSTotalPos;
 
+void WSS_init ();
 int WSS_DecodeLine(BYTE* vbiline);
 
 #endif
