@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: mediatypes.cpp,v 1.1.1.1 2002-02-03 10:52:53 tobbej Exp $
+// $Id: mediatypes.cpp,v 1.2 2002-05-11 12:26:37 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1.1.1  2002/02/03 10:52:53  tobbej
+// First import of new direct show renderer filter
+//
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -102,10 +105,11 @@ void freeMediaType(AM_MEDIA_TYPE *pmt)
 	//ATLTRACE(_T("%s(%d) : freeMediaType\n"),__FILE__,__LINE__);
 	ATLASSERT(pmt!=NULL);
 	
-	if(pmt->cbFormat!=0)
+	if(pmt->cbFormat!=0 && pmt->pbFormat!=NULL)
 	{
 		CoTaskMemFree(pmt->pbFormat);
 		pmt->pbFormat=NULL;
+		pmt->cbFormat=NULL;
 	}
 	if(pmt->pUnk!=NULL)
 	{
