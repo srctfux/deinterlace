@@ -21,9 +21,15 @@
 //
 // 11 Aug 2000   John Adcock           Better support for error messages
 //
+// 12 Dec 2000   Mark Rejhon           Changed to use onscreen display
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+
+#ifndef _DEBUG
+#include "OSD.h"
+#endif
 
 extern HWND hWnd;
 
@@ -31,7 +37,19 @@ void _ErrorBox(HWND hwndParent, LPCSTR szFile, int Line, LPCSTR szMessage)
 {
 	char szDispMessage[1024];
 
-	_snprintf(szDispMessage,1024, "%s\nThe error occured in %s at line %d", szMessage, szFile, Line);
+#ifndef _DEBUG
+    if (hWnd != NULL)
+    {
+        // Show OSD text immediately and pause for 2 seconds.
+        // OSD will continue to show after 2 seconds,
+        // if there are no other OSD's pending afterwards. (thus the reason for 2 second delay)
+        _snprintf(szDispMessage, sizeof(szDispMessage), "ERROR: %s", szMessage);
+        OSD_ShowTextPersistent(hWnd, szDispMessage, 4);
+        OSD_Redraw(hWnd);
+        Sleep(2000);
+    }
+#else
+	_snprintf(szDispMessage, sizeof(szDispMessage), "%s\nThe error occured in %s at line %d", szMessage, szFile, Line);
 	if(hwndParent == NULL)
 	{
 		MessageBox(hWnd, szDispMessage, "dTV Error", MB_ICONSTOP | MB_OK);
@@ -40,6 +58,5 @@ void _ErrorBox(HWND hwndParent, LPCSTR szFile, int Line, LPCSTR szMessage)
 	{
 		MessageBox(hwndParent, szDispMessage, "dTV Error", MB_ICONSTOP | MB_OK);
 	}
+#endif
 }
-
-
