@@ -37,7 +37,9 @@ void Timing_Setup();
 void Timing_WaitForNextField(DEINTERLACE_INFO* pInfo);
 void Timing_Reset();
 void Timing_WaitForTimeToFlip(DEINTERLACE_INFO* pInfo, DEINTERLACE_METHOD* CurrentMethod, BOOL* bStopThread);
-long Timing_GetDroppedFrames();
-void Timing_ResetDroppedFrames();
+long Timing_GetDroppedFields();
+void Timing_ResetDroppedFields();
+long Timing_GetUsedFields();
+void Timing_ResetUsedFields();
 
 #endif

@@ -68,8 +68,10 @@ BOOL WaitForNextField(BOOL LastField, BOOL* RunningLate);
 BYTE * LockOverlay();		// Lock overlay, returns ptr to buffer
 
 // Statistics
-extern long	nTotalDropFrames;
-extern long	nDropFramesLastSec;
+extern long	nTotalDropFields;
+extern long	nDropFieldsLastSec;
+extern long	nTotalUsedFields;
+extern long	nUsedFieldsLastSec;
 extern long nSecTicks;
 extern long nInitialTicks;
 extern long nLastTicks;

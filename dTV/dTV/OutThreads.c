@@ -110,8 +110,10 @@ BOOL bReversePolarity = FALSE;
 long OverlayPitch = 0;
 
 // Statistics
-long nTotalDropFrames = 0;
-long nDropFramesLastSec = 0;
+long nTotalDropFields = 0;
+long nDropFieldsLastSec = -1;
+long nTotalUsedFields = 0;
+long nUsedFieldsLastSec = -1;
 long nSecTicks = 0;
 long nInitialTicks = -1;
 long nLastTicks = 0;
@@ -648,16 +650,34 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 			CurrentTickCount = GetTickCount();
 			if (dwLastSecondTicks + 1000 < CurrentTickCount)
 			{
-				nTotalDropFrames += Timing_GetDroppedFrames();
-				nDropFramesLastSec = Timing_GetDroppedFrames();
-				Timing_ResetDroppedFrames();
+				nTotalDropFields += Timing_GetDroppedFields();
+				nTotalUsedFields += Timing_GetUsedFields();
+				if ((CurrentTickCount - dwLastSecondTicks) < 1050)
+				{
+					nDropFieldsLastSec = Timing_GetDroppedFields();
+					nUsedFieldsLastSec = Timing_GetUsedFields();
+				}
+				else
+				{
+					nDropFieldsLastSec = -1;
+					nUsedFieldsLastSec = -1;
+				}
+				Timing_ResetDroppedFields();
+				Timing_ResetUsedFields();
 				nSecTicks += CurrentTickCount - dwLastSecondTicks;
 				dwLastSecondTicks = CurrentTickCount;
 				CurrentMethod->ModeTicks += CurrentTickCount - nLastTicks;
 				nLastTicks = CurrentTickCount;
 				if (IsStatusBarVisible())
 				{
-					sprintf(Text, "%d DF/S", nDropFramesLastSec);
+					if (nDropFieldsLastSec == -1)
+					{
+						strcpy(Text, "DF/S");
+					}
+					else
+					{
+						sprintf(Text, "%d DF/S", nDropFieldsLastSec);
+					}
 					
 					//TJ 010508: this will cause YUVOutThread thread to stop
 					//responding if main thread is not processing messages

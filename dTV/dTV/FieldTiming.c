@@ -38,7 +38,8 @@ LARGE_INTEGER LastFlipTime;
 LARGE_INTEGER CurrentFlipTime;
 BOOL bIsPAL;
 BOOL FlipAdjust;
-int nFrame = 0;
+int nDroppedFields = 0;
+int nUsedFields = 0;
 double Weight = 0.005;
 
 void Timing_Setup()
@@ -136,7 +137,7 @@ void Timing_WaitForNextFieldNormal(DEINTERLACE_INFO* pInfo)
 		memset(pInfo->EvenLines, 0, MAX_FIELD_HISTORY * sizeof(short**));
 		memset(pInfo->OddLines, 0, MAX_FIELD_HISTORY * sizeof(short**));
 		pInfo->bMissedFrame = TRUE;
-		nFrame += Diff - 1;
+		nDroppedFields += Diff - 1;
 		LOG(" Dropped Frame");
 	}
 	else
@@ -144,8 +145,12 @@ void Timing_WaitForNextFieldNormal(DEINTERLACE_INFO* pInfo)
 		pInfo->bMissedFrame = FALSE;
 		if (pInfo->bRunningLate)
 		{
-			nFrame++;
+			nDroppedFields++;
 			LOG("Running Late");
+		}
+		else
+		{
+			nUsedFields++;
 		}
 	}
 
@@ -181,18 +186,21 @@ void Timing_WaitForNextFieldAccurate(DEINTERLACE_INFO* pInfo)
 	Diff = (10 + NewPos - OldPos) % 10;
 	if(Diff == 1)
 	{
+		nUsedFields++;
 	}
 	else if(Diff == 2) 
 	{
 		NewPos = (OldPos + 1) % 10;
 		FlipAdjust = TRUE;
 		LOG(" Slightly late");
+		nUsedFields++;
 	}
 	else if(Diff == 3) 
 	{
 		NewPos = (OldPos + 1) % 10;
 		FlipAdjust = TRUE;
 		LOG(" Very late");
+		nUsedFields++;
 	}
 	else
 	{
@@ -200,7 +208,7 @@ void Timing_WaitForNextFieldAccurate(DEINTERLACE_INFO* pInfo)
 		memset(pInfo->EvenLines, 0, MAX_FIELD_HISTORY * sizeof(short**));
 		memset(pInfo->OddLines, 0, MAX_FIELD_HISTORY * sizeof(short**));
 		pInfo->bMissedFrame = TRUE;
-		nFrame += Diff - 1;
+		nDroppedFields += Diff - 1;
 		LOG(" Dropped Frame");
 		Timing_Reset();
 	}
@@ -312,12 +320,22 @@ void Timing_WaitForTimeToFlip(DEINTERLACE_INFO* pInfo, DEINTERLACE_METHOD* Curre
 	FlipAdjust = FALSE;
 }
 
-long Timing_GetDroppedFrames()
+long Timing_GetDroppedFields()
 {
-	return nFrame;
+	return nDroppedFields;
 }
 
-void Timing_ResetDroppedFrames()
+void Timing_ResetDroppedFields()
 {
-	nFrame = 0;
+	nDroppedFields = 0;
+}
+
+long Timing_GetUsedFields()
+{
+	return nUsedFields;
+}
+
+void Timing_ResetUsedFields()
+{
+	nUsedFields = 0;
 }
