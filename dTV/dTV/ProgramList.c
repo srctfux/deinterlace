@@ -40,6 +40,8 @@
 #include "tuner.h"
 #include "bt848.h"
 #include "dTV.h"
+#include "vbi.h"
+#include "Status.h"
 
 int CurSel;
 unsigned short SelectButton;
@@ -47,12 +49,14 @@ int EditProgramm;
 char KeyValue;
 HWND ProgList;
 
+struct TProgramm Programm[MAXPROGS+1];
+
+int CountryCode=0;
 
 BOOL APIENTRY ProgramListProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 {
 	int i, j, k;
 	static BOOL NextBlock = FALSE;
-	LOGFONT Mfont = { 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Times New Roman" };
 	RECT ptrtoWndPos;
 	static int currX, currY;
 	int fwKeys = wParam;		// key flags
@@ -66,7 +70,6 @@ BOOL APIENTRY ProgramListProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 	switch (message)
 	{
 	case WM_INITDIALOG:
-		currFont = CreateFontIndirect(&Mfont);
 		hsizex = LoadCursor(hInst, "Csizex");
 
 		ProgList = CreateWindow("LISTBOX", NULL, WS_BORDER | WS_CHILD | WS_VISIBLE |
@@ -106,7 +109,7 @@ BOOL APIENTRY ProgramListProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 
 		SendMessage(ProgList, LB_SETCURSEL, CurSel, (LPARAM) 0);
 
-    SetFocus(ProgList); 
+		SetFocus(ProgList); 
  
 		break;
 
@@ -126,31 +129,6 @@ BOOL APIENTRY ProgramListProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 		InitWin = FALSE;
 		i = 0;
 		j = 6;
-		while (i < 15)
-		{
-			ButtonList[i].s = 0;
-			if (ButtonList[i].FieldId > -1)
-			{
-				if (j < currX - 12)
-				{
-					ShowWindow(GetDlgItem(hDlg, IDC_MOVE1 + i), SW_SHOW);
-
-					k = ButtonList[i].x;
-					if (j + k > currX - 12)
-						k = (currX - 12) - j;
-					MoveWindow(GetDlgItem(hDlg, IDC_MOVE1 + i), j, 2, k, 19, TRUE);
-					ButtonList[i].s = j;
-					ButtonList[i].r = k;
-					j = j + k;
-				}
-				else
-				{
-					ShowWindow(GetDlgItem(hDlg, IDC_MOVE1 + i), SW_HIDE);
-				}
-			}
-
-			i++;
-		}
 
 		MoveWindow(ProgList, 6, 25, currX, currY, TRUE);
 
@@ -596,7 +574,7 @@ BOOL APIENTRY AnalogScanProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 			if (!Tuner_SetFrequency(TunerType, MulDiv((Freq * 1000), 16, 1000000)))
 			{
 				sprintf(Text, "Set Frequency %10.2f Mhz fialed", (float) Freq / 1000);
-				SetWindowText(hwndTextField, Text);
+				StatusBar_ShowText(STATUS_TEXT, Text);
 			}
 
 			// MAE 7 Nov 2000 Added to get right channel names

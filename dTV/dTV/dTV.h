@@ -87,4 +87,34 @@ int AdjustSliderDown(int * pnValue, int nLower);
 #define TIMER_AUTOSAVE      55
 #define TIMER_AUTOSAVE_MS   1500
 
+extern HANDLE hInst;
+extern HWND hWnd;
+extern HWND SplashWnd;
+
+extern int DecodeProcessor;
+extern int MainProcessor;
+
+extern int CurrentProgramm;
+
+extern int emsizex;
+extern int emsizey;
+extern int emstartx;
+extern int emstarty;
+
+extern int pgsizex;
+extern int pgsizey;
+extern int pgstartx;
+extern int pgstarty;
+
+extern BOOL bAlwaysOnTop;
+extern BOOL bIsFullScreen;
+extern BOOL bDisplaySplashScreen;
+extern BOOL bDisplayStatusBar;
+extern BOOL Show_Menu;
+
+extern int PriorClassId;
+extern int ThreadClassId;
+
+extern int AudioSource;
+
 #endif

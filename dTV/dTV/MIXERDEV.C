@@ -34,11 +34,26 @@
 
 #include "stdafx.h"
 #include "MixerDev.h"
+#include "dTV.h"
 
-unsigned int LastOpenMixer=0xffffffff;
+unsigned int LastOpenMixer = 0xffffffff;
 int MIXER_MITTE;
+HMIXER hMixer = NULL;
+BOOL System_In_Mute = FALSE;
+BOOL USE_MIXER = FALSE;
 
 struct TSoundSystem SoundSystem;
+
+struct TMixerAccess Volume = {-1,0,0,0};
+struct TMixerAccess Mute = {-1,0,0,0};
+
+struct TMixerLoad MixerLoad[64];
+
+int MIXER_LINKER_KANAL=-1;
+int MIXER_RECHTER_KANAL=-1;
+int MixerVolumeStep=-1;
+int MixerVolumeMax=-1;
+
 
 void Enumerate_Sound_SubSystem(void)
 {

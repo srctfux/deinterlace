@@ -31,12 +31,21 @@
 #ifndef __STATUS_H___
 #define __STATUS_H___
 
+typedef enum
+{
+	STATUS_TEXT,
+	STATUS_PAL,
+	STATUS_FPS,
+	STATUS_KEY,
+	STATUS_AUDIO,
+} eSTATUSBAR_BOX;
+
 BOOL StatusBar_Init(HANDLE);
-BOOL StatusBar_Create(HWND, HANDLE, int);
 BOOL StatusBar_Adjust(HWND);
 HWND StatusBar_AddField(HANDLE, int, int, int, BOOL);
-BOOL StatusBar_Destry(void);
-void StatusBar_ShowText(HWND hwndTextField, LPCTSTR szText);
+void StatusBar_Destroy(void);
+void StatusBar_ShowText(eSTATUSBAR_BOX Field, LPCTSTR  szText);
+void StatusBar_ShowWindow(BOOL bShow);
 
 
 #endif

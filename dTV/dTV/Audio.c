@@ -28,11 +28,26 @@
 #include "audio.h"
 #include "globals.h"
 #include "tvcards.h"
+#include "Status.h"
 
 BYTE AudioDeviceWrite;
 BYTE AudioDeviceRead;
 
 int CAudioSource=0;
+
+BOOL Has_MSP = FALSE;
+char MSPStatus[30] = "";
+char MSPVersion[16] = "";
+BOOL MSPToneControl = FALSE;
+
+int InitialVolume = 1000;
+char InitialBalance = 0x00;
+char InitialLoudness = 0x00;
+char InitialBass = 0x00;
+char InitialTreble = 0x00;
+BOOL InitialSuperBass = FALSE;
+char InitialEqualizer[5] = {0x00, 0x00, 0x00, 0x00, 0x00};
+char InitialSpatial = 0x00;
 
 /*
 0		Audio_Tuner,
@@ -169,26 +184,41 @@ BOOL Audio_SetSource(AUDIOMUXTYPE nChannel)
 	return TRUE;
 }
 
-BOOL Audio_Init(BYTE DWrite, BYTE DRead)
+BOOL Audio_MSP_IsPresent()
+{
+	return Has_MSP;
+}
+
+const char* Audio_MSP_Status()
+{
+	return MSPStatus;
+}
+
+const char* Audio_MSP_VersionString()
+{
+	return MSPVersion;
+}
+
+BOOL Audio_MSP_Init(BYTE DWrite, BYTE DRead)
 {
 	int i;
 
 	AudioDeviceWrite = DWrite;
 	AudioDeviceRead = DRead;
 
-	Has_MSP = TRUE;
+	Has_MSP = FALSE;
 
 	if (!I2CBus_AddDevice(DRead))
 	{
-		Has_MSP = FALSE;
 		return (FALSE);
 	}
 
 	if (!I2CBus_AddDevice(DWrite))
 	{
-		Has_MSP = FALSE;
 		return (FALSE);
 	}
+
+	Has_MSP = TRUE;
 
 	sprintf(MSPStatus, "MSP-Device I2C-Bus I/O 0x80/0x81");
 
@@ -623,7 +653,7 @@ void Audio_MSP_Print_Mode()
 	char Text[128];
 
 	if (Has_MSP == FALSE)
-		strcpy(Text, "Kein MSP-Audio-Device");
+		strcpy(Text, "No MSP Audio Device");
 	else
 	{
 
@@ -712,7 +742,7 @@ void Audio_MSP_Print_Mode()
 			break;
 		}
 	}
-	SetWindowText(hwndAudioField, Text);
+	StatusBar_ShowText(STATUS_AUDIO, Text);
 }
 
 void Audio_MSP_Watch_Mode()

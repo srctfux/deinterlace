@@ -41,7 +41,6 @@ typedef enum
 	AUDIOMUX_STEREO
 } AUDIOMUXTYPE;
 
-BOOL Audio_Init(BYTE DRead, BYTE DWrite);
 BOOL Audio_SetSource(AUDIOMUXTYPE nChannel);
 void Audio_Autodetect();
 BOOL Audio_WriteMSP(BYTE bSubAddr, int wAddr, int wData);
@@ -56,6 +55,11 @@ void Audio_SetToneControl(BOOL nMode);
 BOOL Audio_SetEqualizer(int nIndex, char nLevel);
 int Audio_GetStereoMode(BOOL bHardwareMode);
 BOOL Audio_Mute(void); // MAE 8 Dec 2000
+
+BOOL Audio_MSP_Init(BYTE DRead, BYTE DWrite);
+BOOL Audio_MSP_IsPresent();
+const char* Audio_MSP_Status();
+const char* Audio_MSP_VersionString();
 BOOL Audio_MSP_Reset();
 BOOL Audio_MSP_Version();
 void Audio_MSP_Set_MajorMinor_Mode(int MajorMode, int MinorMode);
@@ -63,6 +67,8 @@ void Audio_MSP_SetMode(int type);
 void Audio_MSP_SetStereo(int MajorMode, int MinorMode, int mode);
 void Audio_MSP_Watch_Mode();
 void Audio_MSP_Print_Mode();
+
+BOOL APIENTRY AudioSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 
 // MSP34x0 definitions
 #define MSP_CONTROL 0x00 // Software reset
@@ -87,5 +93,21 @@ void Audio_MSP_Print_Mode();
 /* This macro is allowed for *constants* only, gcc must calculate it
    at compile time.  Remember -- no floats in kernel mode */
 #define MSP_CARRIER(freq) ((int)((float)(freq/18.432)*(1<<24)))
+
+extern BOOL AutoStereoSelect;
+
+extern int InitialVolume;
+extern char InitialBalance;
+extern char InitialLoudness;
+extern char InitialBass;
+extern char InitialTreble;
+extern BOOL InitialSuperBass;
+extern char InitialEqualizer[5];
+extern char InitialSpatial;
+
+extern int MSPMajorMode;
+extern int MSPMinorMode;
+extern int MSPMode;
+extern int MSPStereo;
 
 #endif

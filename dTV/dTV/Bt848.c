@@ -28,6 +28,8 @@
 //
 // 02 Jan 2001   John Adcock           Made RISC Code linear
 //
+// 08 Jan 2001   John Adcock           Added C++ like access for strings
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -43,20 +45,111 @@ typedef struct BT848_STRUCT
    DWORD dwSubSystemID;
 } BT848_STRUCT;
 
-
 BT848_STRUCT* hBT8X8 = NULL;
+
+PMemStruct Risc_dma;
+PMemStruct Vbi_dma[5];
+PMemStruct Display_dma[5];
+
+BYTE* pDisplay[5] = { NULL,NULL,NULL,NULL,NULL };
+BYTE* pVBILines[5] = { NULL,NULL,NULL,NULL,NULL };
 
 PHYS    RiscBasePhysical; 
 DWORD  *RiscBaseLinear;
 long BytesPerRISCField = 1;
 
+char BTVendorID[10] = "";
+char BTDeviceID[10] = "";
+char BTChipType[10] = "";
+
+BOOL bSaveSettings = FALSE;
+
+// MAE 2 Nov 2000 - Start of change for Macrovision fix
+// If non-zero in .ini file, will override TV table setting
+int	InitialBDelay = 0x00;  // Original hardware default value was 0x5D
+// MAE 2 Nov 2000 - End of change for Macrovision fix
+
+// MAE, 3 Nov 2000
+//    Changed all BDELAY values from 5D to 5C for Macrovision fix
+//
+// John Adcock, 19 Dec 2000
+//    Fixed PAL-N to stop it from crashing, improved PAL-M values
+//    These were the old PAL-N Values that crashed dTV
+//    /* PAL-M */
+//    { 754, 480,  910, 0x70, 0x5c, (BT848_IFORM_PAL_M|BT848_IFORM_XT0),
+//        910, 754, 135, 754, 0x1a, 0, FALSE, 400},
+//    /* PAL-N */
+//    { 922, 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_N|BT848_IFORM_XT1),
+//	      1135, 922, 186, 922, 0x1c, 0, TRUE, 400},
+//
+struct TTVSetting TVSettings[] =
+{
+	/* PAL-BDGHI */
+	{ "PAL DBGHI", 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_BDGHI|BT848_IFORM_XT1),
+	    186, 922, 0x20, 0, TRUE, 511, 19},
+	/* NTSC */
+	{ "NTSC", 480, 910, 0x68, 0x5c, (BT848_IFORM_NTSC|BT848_IFORM_XT0),
+	    137, 754, 0x1a, 0, FALSE, 400, 13},
+	/* SECAM */
+	{ "SECAM", 576, 1135, 0x7f, 0xb0, (BT848_IFORM_SECAM|BT848_IFORM_XT1),
+	    186, 922, 0x20, 0, TRUE, 511, 19},
+	/* PAL-M */
+	{ "PAL-M", 480,  910, 0x68, 0x5c, (BT848_IFORM_PAL_M|BT848_IFORM_XT0),
+	    137, 754, 0x1a, 0, FALSE, 400, 13},
+    /* PAL-N */
+    { "PAL-M", 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_N|BT848_IFORM_XT1),
+        186, 922, 0x20, 0, TRUE, 511, 19},
+	/* NTSC Japan*/
+	{ "NTSC Japan", 480,  910, 0x70, 0x5c, (BT848_IFORM_NTSC_JAP|BT848_IFORM_XT0),
+	    135, 754, 0x1a, 0, FALSE, 400, 13},
+    /* PAL-60 */
+	{ "PAL 60", 480, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_BDGHI|BT848_IFORM_XT1),
+	    186, 922, 0x1a, 0, TRUE, 400, 13},
+};
+
+int TVTYPE = -1;
+
+int VideoSource = SOURCE_COMPOSITE;
+
+// 10/19/2000 Mark Rejhon
+// Better NTSC defaults
+// These are the original defaults, likely optimized for PAL (could use refinement).
+//int InitialHue        = 0x00;
+//int InitialBrightness = 0x00;
+//int InitialContrast    = 0xd8;
+//int InitialSaturationU = 0xfe;
+//int InitialSaturationV = 0xb4;
+//int InitialOverscan    = 4;
+int InitialHue         = 0;
+int InitialBrightness  = 20;
+int InitialContrast    = 207;
+int InitialSaturationU = 254;
+int InitialSaturationV = 219;
+int InitialOverscan    = 4;
+
+int CurrentX = 720;
+int CurrentY;
+int CurrentVBILines = 0;
+
+
+const char* BT848_VendorID()
+{
+	return BTVendorID;
+}
+
+const char* BT848_DeviceID()
+{
+	return BTDeviceID;
+}
+
+const char* BT848_ChipType()
+{
+	return BTChipType;
+}
+
 BOOL BT848_FindTVCard(HWND hWnd)
 {
-	FILE *SettingFile;
-
-	char VersionString[255];
 	int ret;
-	unsigned short i;
 
 	strcpy(BTVendorID, "0x109e");
 	strcpy(BTDeviceID, "0x036e");
@@ -64,8 +157,7 @@ BOOL BT848_FindTVCard(HWND hWnd)
 	ret = BT848_Open(0x109e, 0x36e, TRUE, FALSE);
 	if (ret == 0)
 	{
-		strcpy(BTTyp, "BT878");
-		strcpy(VersionString, "BT878 found");
+		strcpy(BTChipType, "BT878");
 	}
 	else if (ret == 3)
 	{
@@ -79,8 +171,7 @@ BOOL BT848_FindTVCard(HWND hWnd)
 		ret = BT848_Open(0x109e, 0x350, TRUE, FALSE);
 		if (ret == 0)
 		{
-			strcpy(BTTyp, "BT848");
-			strcpy(VersionString, "BT848 found");
+			strcpy(BTChipType, "BT848");
 		}
 		else if (ret == 3)
 		{
@@ -94,8 +185,7 @@ BOOL BT848_FindTVCard(HWND hWnd)
 			ret = BT848_Open(0x109e, 0x351, TRUE, FALSE);
 			if (ret == 0)
 			{
-				strcpy(BTTyp, "BT849");
-				strcpy(VersionString, "BT849 found");
+				strcpy(BTChipType, "BT849");
 			}
 			else if (ret == 3)
 			{
@@ -109,12 +199,11 @@ BOOL BT848_FindTVCard(HWND hWnd)
 				ret = BT848_Open(0x109e, 0x36F, TRUE, FALSE);
 				if (ret == 0)
 				{
-					strcpy(BTTyp, "BT878");
-					strcpy(VersionString, "Anubis BT878");
+					strcpy(BTChipType, "BT878a");
 				}
 				else if (ret == 3)
 				{
-					ErrorBox("PCI-Card with Anubis Bt849 Cannot be locked");
+					ErrorBox("PCI-Card with Bt878a Cannot be locked");
 					return (FALSE);
 				}
 			}
@@ -123,81 +212,84 @@ BOOL BT848_FindTVCard(HWND hWnd)
 
 	if (ret != 0)
 	{
-		strcpy(VersionString, "No BT8x8 Found");
-		SetDlgItemText(SplashWnd, IDC_TEXT2, VersionString);
 		return (FALSE);
 	}
 
 	if (bSaveSettings == TRUE)
 	{
-		if ((SettingFile = fopen("Setting.BT", "w")) != NULL)
-		{
-			fprintf(SettingFile, "BT848_COLOR_CTL %02x\n", BT848_ReadByte(BT848_COLOR_CTL));
-			fprintf(SettingFile, "BT848_CAP_CTL %02x\n", BT848_ReadByte(BT848_CAP_CTL));
-			fprintf(SettingFile, "BT848_VBI_PACK_SIZE %02x\n", BT848_ReadByte(BT848_VBI_PACK_SIZE));
-			fprintf(SettingFile, "BT848_VBI_PACK_DEL %02x\n", BT848_ReadByte(BT848_VBI_PACK_DEL));
-			fprintf(SettingFile, "BT848_GPIO_DMA_CTL %02x\n", BT848_ReadByte(BT848_GPIO_DMA_CTL));
-			fprintf(SettingFile, "BT848_IFORM %02x\n", BT848_ReadByte(BT848_IFORM));
-
-			fprintf(SettingFile, "BT848_E_SCLOOP %02x\n", BT848_ReadByte(BT848_E_SCLOOP));
-			fprintf(SettingFile, "BT848_O_SCLOOP %02x\n", BT848_ReadByte(BT848_O_SCLOOP));
-			fprintf(SettingFile, "BT848_ADELAY %02x\n", BT848_ReadByte(BT848_ADELAY));
-			fprintf(SettingFile, "BT848_BDELAY %02x\n", BT848_ReadByte(BT848_BDELAY));
-
-			fprintf(SettingFile, "BT848_E_HSCALE_HI %02x\n", BT848_ReadByte(BT848_E_HSCALE_HI));
-			fprintf(SettingFile, "BT848_E_HSCALE_LO %02x\n", BT848_ReadByte(BT848_E_HSCALE_LO));
-			fprintf(SettingFile, "BT848_E_VSCALE_HI %02x\n", BT848_ReadByte(BT848_E_VSCALE_HI));
-			fprintf(SettingFile, "BT848_E_VSCALE_LO %02x\n", BT848_ReadByte(BT848_E_VSCALE_LO));
-			fprintf(SettingFile, "BT848_E_HACTIVE_LO %02x\n", BT848_ReadByte(BT848_E_HACTIVE_LO));
-			fprintf(SettingFile, "BT848_E_HDELAY_LO %02x\n", BT848_ReadByte(BT848_E_HDELAY_LO));
-			fprintf(SettingFile, "BT848_E_VACTIVE_LO %02x\n", BT848_ReadByte(BT848_E_VACTIVE_LO));
-			fprintf(SettingFile, "BT848_E_VDELAY_LO %02x\n", BT848_ReadByte(BT848_E_VDELAY_LO));
-			fprintf(SettingFile, "BT848_E_CROP %02x\n", BT848_ReadByte(BT848_E_CROP));
-
-			fprintf(SettingFile, "BT848_O_HSCALE_HI %02x\n", BT848_ReadByte(BT848_O_HSCALE_HI));
-			fprintf(SettingFile, "BT848_O_HSCALE_LO %02x\n", BT848_ReadByte(BT848_O_HSCALE_LO));
-			fprintf(SettingFile, "BT848_O_VSCALE_HI %02x\n", BT848_ReadByte(BT848_O_VSCALE_HI));
-			fprintf(SettingFile, "BT848_O_VSCALE_LO %02x\n", BT848_ReadByte(BT848_E_VSCALE_LO));
-			fprintf(SettingFile, "BT848_O_HACTIVE_LO %02x\n", BT848_ReadByte(BT848_O_HACTIVE_LO));
-			fprintf(SettingFile, "BT848_O_HDELAY_LO %02x\n", BT848_ReadByte(BT848_O_HDELAY_LO));
-			fprintf(SettingFile, "BT848_O_VACTIVE_LO %02x\n", BT848_ReadByte(BT848_O_VACTIVE_LO));
-			fprintf(SettingFile, "BT848_O_VDELAY_LO %02x\n", BT848_ReadByte(BT848_O_VDELAY_LO));
-			fprintf(SettingFile, "BT848_O_CROP %02x\n", BT848_ReadByte(BT848_O_CROP));
-
-			fprintf(SettingFile, "BT848_PLL_F_LO %02x\n", BT848_ReadByte(BT848_PLL_F_LO));
-			fprintf(SettingFile, "BT848_PLL_F_HI %02x\n", BT848_ReadByte(BT848_PLL_F_HI));
-			fprintf(SettingFile, "BT848_PLL_XCI %02x\n", BT848_ReadByte(BT848_PLL_XCI));
-
-			fprintf(SettingFile, "BT848_BRIGHT %02x\n", BT848_ReadByte(BT848_BRIGHT));
-			fprintf(SettingFile, "BT848_CONTRAST_LO %02x\n", BT848_ReadByte(BT848_CONTRAST_LO));
-			fprintf(SettingFile, "BT848_SAT_V_LO %02x\n", BT848_ReadByte(BT848_SAT_V_LO));
-			fprintf(SettingFile, "BT848_SAT_U_LO %02x\n", BT848_ReadByte(BT848_SAT_U_LO));
-			fprintf(SettingFile, "BT848_GPIO_OUT_EN %04x\n", BT848_ReadWord(BT848_GPIO_OUT_EN));
-			fprintf(SettingFile, "BT848_GPIO_OUT_EN_HIBYTE %02x\n", BT848_ReadByte(BT848_GPIO_OUT_EN_HIBYTE));
-
-			fprintf(SettingFile, "BT848_GPIO_REG_INP %04x\n", BT848_ReadWord(BT848_GPIO_REG_INP));
-			fprintf(SettingFile, "BT848_GPIO_REG_INP_HIBYTE %02x\n", BT848_ReadByte(BT848_GPIO_REG_INP_HIBYTE));
-
-			fprintf(SettingFile, "BT848_GPIO_DATA %04x\n", BT848_ReadWord(BT848_GPIO_DATA));
-			fprintf(SettingFile, "BT848_GPIO_DATA_HIBYTE %02x\n", BT848_ReadByte(BT848_GPIO_DATA_HIBYTE));
-			i = ((BT848_ReadByte(BT848_GPIO_OUT_EN_HIBYTE)) << 16) + BT848_ReadWord(BT848_GPIO_OUT_EN);
-			fprintf(SettingFile, "*********************************************\n");
-			fprintf(SettingFile, "Ausgelesene Einträge für Eigenen KartenTyp\n");
-			fprintf(SettingFile, "Eintrag für BT848_GPIO_OUT_EN  %9d     ( Schaltwert )\n", i);
-			i = ((BT848_ReadByte(BT848_GPIO_REG_INP_HIBYTE)) << 16) + BT848_ReadWord(BT848_GPIO_REG_INP);
-			fprintf(SettingFile, "Eintrag für BT848_GPIO_REG_INP %9d     ( Input-Control )\n", i);
-			i = ((BT848_ReadByte(BT848_GPIO_DATA_HIBYTE)) << 16) + BT848_ReadWord(BT848_GPIO_DATA);
-			fprintf(SettingFile, "Eintrag für BT848_GPIO_DATA    %9d     ( Eingangswunsch) \n", i);
-			fprintf(SettingFile, "*********************************************\n");
-			fclose(SettingFile);
-		}
+		BT848_SaveSettings("Setting.BT");
 	}
 
-	SetDlgItemText(SplashWnd, IDC_TEXT2, VersionString);
-
-	strcpy(VersionString, "Interrupt OK");
-	SetDlgItemText(SplashWnd, IDC_TEXT3, VersionString);
 	return (TRUE);
+}
+
+
+void BT848_SaveSettings(LPCSTR szFileName)
+{
+	FILE *SettingFile;
+	unsigned short i;
+
+	if ((SettingFile = fopen(szFileName, "w")) != NULL)
+	{
+		fprintf(SettingFile, "BT848_COLOR_CTL %02x\n", BT848_ReadByte(BT848_COLOR_CTL));
+		fprintf(SettingFile, "BT848_CAP_CTL %02x\n", BT848_ReadByte(BT848_CAP_CTL));
+		fprintf(SettingFile, "BT848_VBI_PACK_SIZE %02x\n", BT848_ReadByte(BT848_VBI_PACK_SIZE));
+		fprintf(SettingFile, "BT848_VBI_PACK_DEL %02x\n", BT848_ReadByte(BT848_VBI_PACK_DEL));
+		fprintf(SettingFile, "BT848_GPIO_DMA_CTL %02x\n", BT848_ReadByte(BT848_GPIO_DMA_CTL));
+		fprintf(SettingFile, "BT848_IFORM %02x\n", BT848_ReadByte(BT848_IFORM));
+
+		fprintf(SettingFile, "BT848_E_SCLOOP %02x\n", BT848_ReadByte(BT848_E_SCLOOP));
+		fprintf(SettingFile, "BT848_O_SCLOOP %02x\n", BT848_ReadByte(BT848_O_SCLOOP));
+		fprintf(SettingFile, "BT848_ADELAY %02x\n", BT848_ReadByte(BT848_ADELAY));
+		fprintf(SettingFile, "BT848_BDELAY %02x\n", BT848_ReadByte(BT848_BDELAY));
+
+		fprintf(SettingFile, "BT848_E_HSCALE_HI %02x\n", BT848_ReadByte(BT848_E_HSCALE_HI));
+		fprintf(SettingFile, "BT848_E_HSCALE_LO %02x\n", BT848_ReadByte(BT848_E_HSCALE_LO));
+		fprintf(SettingFile, "BT848_E_VSCALE_HI %02x\n", BT848_ReadByte(BT848_E_VSCALE_HI));
+		fprintf(SettingFile, "BT848_E_VSCALE_LO %02x\n", BT848_ReadByte(BT848_E_VSCALE_LO));
+		fprintf(SettingFile, "BT848_E_HACTIVE_LO %02x\n", BT848_ReadByte(BT848_E_HACTIVE_LO));
+		fprintf(SettingFile, "BT848_E_HDELAY_LO %02x\n", BT848_ReadByte(BT848_E_HDELAY_LO));
+		fprintf(SettingFile, "BT848_E_VACTIVE_LO %02x\n", BT848_ReadByte(BT848_E_VACTIVE_LO));
+		fprintf(SettingFile, "BT848_E_VDELAY_LO %02x\n", BT848_ReadByte(BT848_E_VDELAY_LO));
+		fprintf(SettingFile, "BT848_E_CROP %02x\n", BT848_ReadByte(BT848_E_CROP));
+
+		fprintf(SettingFile, "BT848_O_HSCALE_HI %02x\n", BT848_ReadByte(BT848_O_HSCALE_HI));
+		fprintf(SettingFile, "BT848_O_HSCALE_LO %02x\n", BT848_ReadByte(BT848_O_HSCALE_LO));
+		fprintf(SettingFile, "BT848_O_VSCALE_HI %02x\n", BT848_ReadByte(BT848_O_VSCALE_HI));
+		fprintf(SettingFile, "BT848_O_VSCALE_LO %02x\n", BT848_ReadByte(BT848_E_VSCALE_LO));
+		fprintf(SettingFile, "BT848_O_HACTIVE_LO %02x\n", BT848_ReadByte(BT848_O_HACTIVE_LO));
+		fprintf(SettingFile, "BT848_O_HDELAY_LO %02x\n", BT848_ReadByte(BT848_O_HDELAY_LO));
+		fprintf(SettingFile, "BT848_O_VACTIVE_LO %02x\n", BT848_ReadByte(BT848_O_VACTIVE_LO));
+		fprintf(SettingFile, "BT848_O_VDELAY_LO %02x\n", BT848_ReadByte(BT848_O_VDELAY_LO));
+		fprintf(SettingFile, "BT848_O_CROP %02x\n", BT848_ReadByte(BT848_O_CROP));
+
+		fprintf(SettingFile, "BT848_PLL_F_LO %02x\n", BT848_ReadByte(BT848_PLL_F_LO));
+		fprintf(SettingFile, "BT848_PLL_F_HI %02x\n", BT848_ReadByte(BT848_PLL_F_HI));
+		fprintf(SettingFile, "BT848_PLL_XCI %02x\n", BT848_ReadByte(BT848_PLL_XCI));
+
+		fprintf(SettingFile, "BT848_BRIGHT %02x\n", BT848_ReadByte(BT848_BRIGHT));
+		fprintf(SettingFile, "BT848_CONTRAST_LO %02x\n", BT848_ReadByte(BT848_CONTRAST_LO));
+		fprintf(SettingFile, "BT848_SAT_V_LO %02x\n", BT848_ReadByte(BT848_SAT_V_LO));
+		fprintf(SettingFile, "BT848_SAT_U_LO %02x\n", BT848_ReadByte(BT848_SAT_U_LO));
+		fprintf(SettingFile, "BT848_GPIO_OUT_EN %04x\n", BT848_ReadWord(BT848_GPIO_OUT_EN));
+		fprintf(SettingFile, "BT848_GPIO_OUT_EN_HIBYTE %02x\n", BT848_ReadByte(BT848_GPIO_OUT_EN_HIBYTE));
+
+		fprintf(SettingFile, "BT848_GPIO_REG_INP %04x\n", BT848_ReadWord(BT848_GPIO_REG_INP));
+		fprintf(SettingFile, "BT848_GPIO_REG_INP_HIBYTE %02x\n", BT848_ReadByte(BT848_GPIO_REG_INP_HIBYTE));
+
+		fprintf(SettingFile, "BT848_GPIO_DATA %04x\n", BT848_ReadWord(BT848_GPIO_DATA));
+		fprintf(SettingFile, "BT848_GPIO_DATA_HIBYTE %02x\n", BT848_ReadByte(BT848_GPIO_DATA_HIBYTE));
+		i = ((BT848_ReadByte(BT848_GPIO_OUT_EN_HIBYTE)) << 16) + BT848_ReadWord(BT848_GPIO_OUT_EN);
+		fprintf(SettingFile, "*********************************************\n");
+		fprintf(SettingFile, "Ausgelesene Einträge für Eigenen KartenTyp\n");
+		fprintf(SettingFile, "Eintrag für BT848_GPIO_OUT_EN  %9d     ( Schaltwert )\n", i);
+		i = ((BT848_ReadByte(BT848_GPIO_REG_INP_HIBYTE)) << 16) + BT848_ReadWord(BT848_GPIO_REG_INP);
+		fprintf(SettingFile, "Eintrag für BT848_GPIO_REG_INP %9d     ( Input-Control )\n", i);
+		i = ((BT848_ReadByte(BT848_GPIO_DATA_HIBYTE)) << 16) + BT848_ReadWord(BT848_GPIO_DATA);
+		fprintf(SettingFile, "Eintrag für BT848_GPIO_DATA    %9d     ( Eingangswunsch) \n", i);
+		fprintf(SettingFile, "*********************************************\n");
+		fclose(SettingFile);
+	}
 }
 
 DWORD BT848_GetSubSystemID()
@@ -242,6 +334,18 @@ BOOL BT848_MemoryInit(void)
 
 	return (TRUE);
 }
+
+void BT848_MemoryFree()
+{
+	int i;
+	Free_DMA(&Risc_dma);
+	for(i = 0; i < 5; i++)
+	{
+		Free_DMA(&Vbi_dma[i]);
+		Free_Display_DMA(i);
+	}
+}
+
 
 void BT848_Restart_RISC_Code()
 {

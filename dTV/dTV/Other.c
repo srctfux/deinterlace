@@ -58,13 +58,12 @@
 #include "VBI_VideoText.h"
 #include "DebugLog.h"
 
+LPDIRECTDRAW lpDD = NULL;
+
 LPDIRECTDRAWSURFACE     lpDDSurface = NULL;
 // OverLay
 LPDIRECTDRAWSURFACE     lpDDOverlay = NULL;
 LPDIRECTDRAWSURFACE     lpDDOverlayBack = NULL;
-BYTE* lpOverlay = NULL;
-BYTE* lpOverlayBack = NULL;
-long OverlayPitch = 0;
 BOOL Can_ColorKey=FALSE;
 DWORD DestSizeAlign;
 DWORD SrcSizeAlign;
@@ -251,8 +250,6 @@ BOOL Overlay_Create()
 		return (FALSE);
 	}
 	ddrval = DDERR_WASSTILLDRAWING;
-	OverlayPitch = ddsd.lPitch;
-	lpOverlay = ddsd.lpSurface;
 
 	ddrval = IDirectDrawSurface_Unlock(lpDDOverlay, ddsd.lpSurface);
 	if (FAILED(ddrval))
@@ -278,7 +275,7 @@ BOOL Overlay_Create()
 			return (FALSE);
 		}
 		ddrval = DDERR_WASSTILLDRAWING;
-		lpOverlayBack = ddsd.lpSurface;
+
 		ddrval = IDirectDrawSurface_Unlock(lpDDOverlayBack, ddsd.lpSurface);
 		if (FAILED(ddrval))
 		{

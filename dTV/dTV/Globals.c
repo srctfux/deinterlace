@@ -32,6 +32,8 @@
 //
 // 02 Jan 2001   John Adcock           Added VBI Lines to TVSettings
 //
+// 08 Jan 2001   John Adcock           Started Global Variable Tidy up
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -39,184 +41,15 @@
 #include "Audio.h"
 #include "bt848.h"
 
-int InitialVolume = 1000;
-char InitialBalance = 0x00;
-char InitialLoudness = 0x00;
-char InitialBass = 0x00;
-char InitialTreble = 0x00;
-BOOL InitialSuperBass = FALSE;
-char InitialEqualizer[5] = {0x00, 0x00, 0x00, 0x00, 0x00};
-BOOL MSPToneControl = FALSE;
-char InitialSpatial = 0x00;
-
-HWND ShowPDCInfo=NULL;
-HWND ShowVTInfo=NULL;
-HWND ShowVPSInfo=NULL;
-
-// MAE, 3 Nov 2000
-//    Changed all BDELAY values from 5D to 5C for Macrovision fix
-//
-// John Adcock, 19 Dec 2000
-//    Fixed PAL-N to stop it from crashing, improved PAL-M values
-//    These were the old PAL-N Values that crashed dTV
-//    /* PAL-M */
-//    { 754, 480,  910, 0x70, 0x5c, (BT848_IFORM_PAL_M|BT848_IFORM_XT0),
-//        910, 754, 135, 754, 0x1a, 0, FALSE, 400},
-//    /* PAL-N */
-//    { 922, 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_N|BT848_IFORM_XT1),
-//	      1135, 922, 186, 922, 0x1c, 0, TRUE, 400},
-//
-struct TTVSetting TVSettings[] =
-{
-	/* PAL-BDGHI */
-	{ "PAL DBGHI", 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_BDGHI|BT848_IFORM_XT1),
-	    186, 922, 0x20, 0, TRUE, 511, 19},
-	/* NTSC */
-	{ "NTSC", 480, 910, 0x68, 0x5c, (BT848_IFORM_NTSC|BT848_IFORM_XT0),
-	    137, 754, 0x1a, 0, FALSE, 400, 13},
-	/* SECAM */
-	{ "SECAM", 576, 1135, 0x7f, 0xb0, (BT848_IFORM_SECAM|BT848_IFORM_XT1),
-	    186, 922, 0x20, 0, TRUE, 511, 19},
-	/* PAL-M */
-	{ "PAL-M", 480,  910, 0x68, 0x5c, (BT848_IFORM_PAL_M|BT848_IFORM_XT0),
-	    137, 754, 0x1a, 0, FALSE, 400, 13},
-    /* PAL-N */
-    { "PAL-M", 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_N|BT848_IFORM_XT1),
-        186, 922, 0x20, 0, TRUE, 511, 19},
-	/* NTSC Japan*/
-	{ "NTSC Japan", 480,  910, 0x70, 0x5c, (BT848_IFORM_NTSC_JAP|BT848_IFORM_XT0),
-	    135, 754, 0x1a, 0, FALSE, 400, 13},
-    /* PAL-60 */
-	{ "PAL 60", 480, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_BDGHI|BT848_IFORM_XT1),
-	    186, 922, 0x1a, 0, TRUE, 400, 13},
-};
-
-
-unsigned int ManuellAudio[8] =
-{
-	0x0000,
-	0x0000,
-	0x0000,
-	0x0000,
-	0x0000,
-	0x0000,
-	0x0000,
-	0x0000
-};
-
-
-BOOL System_In_Mute=FALSE;
-
-BOOL bSaveSettings = FALSE;
-
-char CurrentDir[256];
-
-HMIXER hMixer=NULL;
-
-BOOL bIsOddField = FALSE;
-
-struct TMixerAccess Volume={-1,0,0,0};
-struct TMixerAccess Mute={-1,0,0,0};
-
-struct TMixerLoad MixerLoad[64];
-
-struct TLNB LNB =
-{
-	FALSE,
-	10700, 12750, 9750, 10600, 11700, TRUE, TRUE,
-	10700, 12750, 9750, 10600, 11700, TRUE, TRUE,
-	10700, 12750, 9750, 10600, 11700, TRUE, TRUE,
-	10700, 12750, 9750, 10600, 11700, TRUE, TRUE,
-};
-
-HWND hWnd = NULL;
-HANDLE hInst = NULL;
-
-int emsizex = 754;
-int emsizey = 521;
-int emstartx = 10;
-int emstarty = 10;
-
-int pgsizex = -1;
-int pgsizey = -1;
-int pgstartx = -1;
-int pgstarty = -1;
-
-BOOL bAlwaysOnTop = FALSE;
-BOOL bDisplaySplashScreen = TRUE;
-BOOL bDisplayStatusBar = TRUE;
-
-PMemStruct Risc_dma;
-PMemStruct Vbi_dma[5];
-PMemStruct Display_dma[5];
-
 HANDLE Bt848Device=NULL;
 
 int TVFormat;
-int AudioSource = AUDIOMUX_MUTE;
-int VideoSource = SOURCE_COMPOSITE;
-int CountryCode=0;
-int TVTYPE = -1;
-
-/// VideoText
-unsigned short VTColourTable[9] =
-{
-	0,		//Black
-	31744,	//Red
-	992,	//Green
-	32736,	//Yellow
-	31,		//Blue
-	15375,	//Invisible
-	15871,	//Cyan
-	32767,	//White
-	32767,	//Transparent
-};
-
-// 10/19/2000 Mark Rejhon
-// Better NTSC defaults
-int InitialHue         = 0;
-int InitialBrightness  = 20;
-int InitialContrast    = 207;
-int InitialSaturationU = 254;
-int InitialSaturationV = 219;
-int InitialOverscan    = 4;
-
-// MAE 2 Nov 2000 - Start of change for Macrovision fix
-// If non-zero in .ini file, will override TV table setting
-int	InitialBDelay = 0x00;  // Original hardware default value was 0x5D
-// MAE 2 Nov 2000 - End of change for Macrovision fix
-
-// These are the original defaults, likely optimized for PAL (could use refinement).
-//int InitialHue        = 0x00;
-//int InitialBrightness = 0x00;
-//int InitialContrast    = 0xd8;
-//int InitialSaturationU = 0xfe;
-//int InitialSaturationV = 0xb4;
-//int InitialOverscan    = 4;
-
-BOOL Has_MSP=FALSE;
-
-BOOL Capture_VBI = FALSE;
-
-LPDIRECTDRAW lpDD = NULL;
 
 int VBI_Flags=3;
 
-struct TProgramm Programm[MAXPROGS+1];
-
 HFONT currFont = NULL;
 
-
-struct SOTREC SOTInfoRec;
-
-unsigned short UTPages[12];
-unsigned short UTCount=0;
-
 BOOL bIsFullScreen = FALSE;
-
-char BTVendorID[10];
-char BTDeviceID[10];
-char MSPVersion[16];
 
 UINT CpuFeatureFlags;		// TRB 12/20/00 Processor capability flags
 

@@ -58,7 +58,6 @@ void UpdateNTSCPulldownMode(long FieldDiff, BOOL OnOddField, short **evenField, 
 
 BOOL DoWeWantToFlip(BOOL bIsOddField);
 void UpdatePulldownStatus();
-void Deinterlace(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay);
 BOOL WaitForNextField(BOOL LastField);
 void SetDeinterlaceMode(int mode);
 char *DeinterlaceModeName(int mode);

@@ -46,6 +46,24 @@ HANDLE VBIThread;
 BYTE VBI_thresh;
 BYTE VBI_off;
 int vtstep;
+BOOL VTLarge=TRUE;
+
+BOOL Capture_VBI = FALSE;
+
+HWND ShowVTInfo=NULL;
+HWND ShowVPSInfo=NULL;
+
+struct TPacket30 Packet30;
+
+void VBI_Init()
+{
+	VBI_VT_Init();
+}
+
+void VBI_Exit()
+{
+	VBI_VT_Exit();
+}
 
 void VBI_DecodeLine(unsigned char *VBI_Buffer, int line)
 {

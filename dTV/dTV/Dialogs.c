@@ -693,9 +693,9 @@ BOOL APIENTRY AudioSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 	switch (message)
 	{
 	case WM_INITDIALOG:
-		if (Has_MSP == FALSE)
+		if (Audio_MSP_IsPresent() == FALSE)
 		{
-			ErrorBox("No MSP-Audio-Device found");
+			ErrorBox("No MSP Audio Device found");
 			EndDialog(hDlg, 0);
 		}
 
@@ -928,9 +928,9 @@ BOOL APIENTRY AudioSettingProc1(HWND hDlg, UINT message, UINT wParam, LONG lPara
 	switch (message)
 	{
 	case WM_INITDIALOG:
-		if (Has_MSP == FALSE)
+		if (Audio_MSP_IsPresent() == FALSE)
 		{
-			ErrorBox("No MSP-Audio-Device found");
+			ErrorBox("No MSP Audio Device found");
 			EndDialog(hDlg, 0);
 		}
 
@@ -1217,7 +1217,6 @@ BOOL APIENTRY VideoTextUnterTitelProc(HWND hDlg, UINT message, UINT wParam, LONG
 							  //       LBS_DISABLENOSCROLL ,
 							  0, 0, 0, 0, hDlg, NULL, hInst, NULL);
 
-		SendMessage(UTList, WM_SETFONT, (WPARAM) currFont, TRUE);
 		SetTimer(hDlg, 0, 500, NULL);
 
 	case WM_SIZE:
@@ -1490,104 +1489,17 @@ VOID APIENTRY DrawEntireItem(HWND hDlg, LPDRAWITEMSTRUCT lpdis, INT Typ)
 	return;
 }
 
-BOOL APIENTRY CardSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
-{
-	static int SaveTuner;
-	static int SaveVideoSource;
-
-	switch (message)
-	{
-	case WM_INITDIALOG:
-		SaveTuner = CardType;
-		SaveVideoSource = AudioSource;
-		PostMessage(hDlg, WM_USER, 1, 0);
-		break;
-
-	case WM_USER:
-
-		if (wParam == 1)
-		{
-			SetDlgItemInt(hDlg, IDC_EDIT1, ManuellAudio[0], FALSE);
-			SetDlgItemInt(hDlg, IDC_EDIT2, ManuellAudio[1], FALSE);
-			SetDlgItemInt(hDlg, IDC_EDIT3, ManuellAudio[2], FALSE);
-			SetDlgItemInt(hDlg, IDC_EDIT4, ManuellAudio[3], FALSE);
-			SetDlgItemInt(hDlg, IDC_EDIT5, ManuellAudio[4], FALSE);
-			SetDlgItemInt(hDlg, IDC_EDIT6, ManuellAudio[5], FALSE);
-			SetDlgItemInt(hDlg, IDC_EDIT7, ManuellAudio[6], FALSE);
-			SetDlgItemInt(hDlg, IDC_EDIT8, ManuellAudio[7], FALSE);
-
-		}
-
-		break;
-	case WM_COMMAND:
-
-		if (LOWORD(wParam) == IDSET)
-		{
-			CardType = 6;
-			AudioSource = 0;
-			if (IsDlgButtonChecked(hDlg, IDC_RADIO1))
-				AudioSource = 0;
-			if (IsDlgButtonChecked(hDlg, IDC_RADIO2))
-				AudioSource = 1;
-			if (IsDlgButtonChecked(hDlg, IDC_RADIO3))
-				AudioSource = 2;
-			if (IsDlgButtonChecked(hDlg, IDC_RADIO4))
-				AudioSource = 3;
-			if (IsDlgButtonChecked(hDlg, IDC_RADIO5))
-				AudioSource = 4;
-			if (IsDlgButtonChecked(hDlg, IDC_RADIO6))
-				AudioSource = 5;
-			ManuellAudio[0] = GetDlgItemInt(hDlg, IDC_EDIT1, NULL, FALSE);
-			ManuellAudio[1] = GetDlgItemInt(hDlg, IDC_EDIT2, NULL, FALSE);
-			ManuellAudio[2] = GetDlgItemInt(hDlg, IDC_EDIT3, NULL, FALSE);
-			ManuellAudio[3] = GetDlgItemInt(hDlg, IDC_EDIT4, NULL, FALSE);
-			ManuellAudio[4] = GetDlgItemInt(hDlg, IDC_EDIT5, NULL, FALSE);
-			ManuellAudio[5] = GetDlgItemInt(hDlg, IDC_EDIT6, NULL, FALSE);
-			ManuellAudio[6] = GetDlgItemInt(hDlg, IDC_EDIT7, NULL, FALSE);
-			ManuellAudio[7] = GetDlgItemInt(hDlg, IDC_EDIT8, NULL, FALSE);
-			Audio_SetSource(AudioSource);
-		}
-
-		if (LOWORD(wParam) == IDOK)
-		{
-			ManuellAudio[0] = GetDlgItemInt(hDlg, IDC_EDIT1, NULL, FALSE);
-			ManuellAudio[1] = GetDlgItemInt(hDlg, IDC_EDIT2, NULL, FALSE);
-			ManuellAudio[2] = GetDlgItemInt(hDlg, IDC_EDIT3, NULL, FALSE);
-			ManuellAudio[3] = GetDlgItemInt(hDlg, IDC_EDIT4, NULL, FALSE);
-			ManuellAudio[4] = GetDlgItemInt(hDlg, IDC_EDIT5, NULL, FALSE);
-			ManuellAudio[5] = GetDlgItemInt(hDlg, IDC_EDIT6, NULL, FALSE);
-			ManuellAudio[6] = GetDlgItemInt(hDlg, IDC_EDIT7, NULL, FALSE);
-			ManuellAudio[7] = GetDlgItemInt(hDlg, IDC_EDIT8, NULL, FALSE);
-
-			SetMenuAnalog();
-			EndDialog(hDlg, TRUE);
-		}
-
-		if (LOWORD(wParam) == IDCANCEL)
-		{
-			CardType = SaveTuner;
-			AudioSource = SaveVideoSource;
-			Audio_SetSource(AudioSource);
-			EndDialog(hDlg, TRUE);
-		}
-		break;
-	}
-
-	return (FALSE);
-}
-
 BOOL APIENTRY ChipSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 {
 	switch (message)
 	{
 	case WM_INITDIALOG:
-		SetDlgItemText(hDlg, IDC_TEXT6, BTVendorID);
-		SetDlgItemText(hDlg, IDC_TEXT7, BTDeviceID);
-
-		SetDlgItemText(hDlg, IDC_TEXT1, BTTyp);
-		SetDlgItemText(hDlg, IDC_TEXT13, TunerStatus);
-		SetDlgItemText(hDlg, IDC_TEXT14, MSPStatus);
-		SetDlgItemText(hDlg, IDC_TEXT16, MSPVersion);
+		SetDlgItemText(hDlg, IDC_TEXT1, BT848_ChipType());
+		SetDlgItemText(hDlg, IDC_TEXT6, BT848_VendorID());
+		SetDlgItemText(hDlg, IDC_TEXT7, BT848_DeviceID());
+		SetDlgItemText(hDlg, IDC_TEXT13, Tuner_Status());
+		SetDlgItemText(hDlg, IDC_TEXT14, Audio_MSP_Status());
+		SetDlgItemText(hDlg, IDC_TEXT16, Audio_MSP_VersionString());
 
 		SetDlgItemText(hDlg, IDC_TEXT18, "YUV2");
 

@@ -109,5 +109,4 @@ DWORD GetRefreshRate();
 
 #define INIFILE "dTV.ini"
 
-
 #endif

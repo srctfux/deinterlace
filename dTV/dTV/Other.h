@@ -53,4 +53,7 @@ extern DWORD DestSizeAlign;
 extern DWORD SrcSizeAlign;
 extern COLORREF OverlayColor;
 
+extern LPDIRECTDRAWSURFACE lpDDOverlay;
+extern LPDIRECTDRAWSURFACE lpDDOverlayBack;
+
 #endif

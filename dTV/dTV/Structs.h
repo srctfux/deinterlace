@@ -109,50 +109,6 @@ typedef struct TVTDialog
 	unsigned char AsciiBuffer[26][40];
 };
 
-struct PIDFilters
-{
-	char FilterName[5];
-	unsigned char FilterId;
-	unsigned short PID;
-};
-
-typedef struct TProgramm
-{
-	char Name[255];
-    unsigned long freq;
-    char Typ;
-    BOOL  Tuner_Auto;
-	BOOL  PMT_Auto;
-	BOOL  PID_Auto;
-    int power;             /* LNB power 0=off/pass through, 1=on */
-	int volt;              /* 14/18V (V=0/H=1) */
-	int afc;
-	int ttk;               /* 22KHz */
-	int diseqc;            /* Diseqc input select */
-	unsigned int srate;
-	int qam;
-	int fec;
-	int norm;
-	unsigned short  tp_id;
-	unsigned short  Video_pid;
-	unsigned short  Audio_pid;
-    unsigned short  TeleText_pid;          /* Teletext PID */
-	unsigned short  PMT_pid;
-    unsigned short  PCR_pid;
-	unsigned short  PMC_pid;
-	unsigned short  SID_pid;
-	unsigned short  AC3_pid;
-	unsigned short  EMM_pid;
-	unsigned short  ECM_pid;
-	unsigned char   TVType; //  == 00 PAL ; 11 == NTSC
-	unsigned char   ServiceTyp;
-    unsigned char   CA_ID;
-	unsigned short  Temp_Audio;
-    unsigned char   Buffer[10];   // For later Use
-	unsigned short  FilterNumber;
-    struct PIDFilters Filters[12];
-};
-
 struct TPacket30
 {
 	// Type 0 data
@@ -210,23 +166,6 @@ typedef struct TVT
 	struct TVTPage *SubPage;
 };
 
-struct TTVSetting
-{
-	LPCSTR szDesc;
-	WORD wCropHeight;
-	WORD wTotalWidth;
-	BYTE bDelayA;
-	BYTE bDelayB;
-	BYTE bIForm;
-	WORD wHDelayx1;
-	WORD wHActivex1;
-	WORD wVDelay;
-	WORD wCropOffset;
-	BOOL Is25fps;
-	WORD VBIPacketSize;
-	WORD VBILines;
-};
-
 struct TMixerAccess
 {
     int SoundSystem;
@@ -255,14 +194,6 @@ struct TMixerControls
 	int ControlsCount;
 	MIXERCONTROL          *MixerControl;
 	MIXERCONTROLDETAILS   *MixerDetail;
-};
-
-struct TBL
-{
-	short FieldId;
-	unsigned short x;
-	unsigned short s;
-	unsigned short r;
 };
 
 struct TMixerConnections

@@ -30,6 +30,7 @@
 #define DOLOGGING
 #include "DebugLog.h"
 #include "OutThreads.h"
+#include "Status.h"
 
 long				StaticImageFieldCount = 100;
 long				LowMotionFieldCount = 4;
@@ -66,7 +67,7 @@ BOOL AdaptiveDeinterlace(DEINTERLACE_INFO *info)
 	{
 		MATCH_COUNT = 0;
 		CurrentMode = HighMotionMode;
-		SetWindowText(hwndPalField, "Adaptive - High Motion");
+		StatusBar_ShowText(STATUS_PAL, "Adaptive - High Motion");
 		return Bob(info);
 	}
 
@@ -85,13 +86,13 @@ BOOL AdaptiveDeinterlace(DEINTERLACE_INFO *info)
 		{
 			CurrentMode = LowMotionMode;
 			LOG(" Match count 0, switching to low-motion");
-			SetWindowText(hwndPalField, "Adaptive - Low Motion");
+			StatusBar_ShowText(STATUS_PAL, "Adaptive - Low Motion");
 		}
 		else if(CurrentMode != HighMotionMode)
 		{
 			CurrentMode = HighMotionMode;
 			LOG(" Match count 0, switching to high-motion");
-			SetWindowText(hwndPalField, "Adaptive - High Motion");
+			StatusBar_ShowText(STATUS_PAL, "Adaptive - High Motion");
 		}
 	}
     else
@@ -103,14 +104,14 @@ BOOL AdaptiveDeinterlace(DEINTERLACE_INFO *info)
 		{
 			CurrentMode = LowMotionMode;
 			LOG(" Match count %ld, switching to low-motion", MATCH_COUNT);
-			SetWindowText(hwndPalField, "Adaptive - Low Motion");
+			StatusBar_ShowText(STATUS_PAL, "Adaptive - Low Motion");
 		}
 		if (MATCH_COUNT >= StaticImageFieldCount &&
 			CurrentMode == LowMotionMode)
 		{
 			CurrentMode = StaticImageMode;
 			LOG(" Match count %ld, switching to static-image", MATCH_COUNT);
-			SetWindowText(hwndPalField, "Adaptive - Static");
+			StatusBar_ShowText(STATUS_PAL, "Adaptive - Static");
 		}
 	}
 	return DeintMethods[CurrentMode].pfnAlgorithm(info);

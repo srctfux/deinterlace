@@ -43,6 +43,8 @@
 //
 // 05 Jan 2001   John Adcock           Added DoAccurateFlips
 //
+// 08 Jan 2001   John Adcock           Started Global Variable Tidy up
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __GLOBALS_H___
@@ -60,159 +62,9 @@
 // This makes other programmers' lives easier keeping track of variables.
 //------------------------------------------------------------------------
 
-extern BITMAPINFO *VTCharSetLarge ;
-extern BITMAPINFO *VTCharSetSmall;
-extern BITMAPINFO *VTScreen[MAXVTDIALOG];
-extern BOOL AutoStereoSelect;
-extern BOOL bFilterBothRedBlue;
-extern BOOL bIsOddField;
-extern BOOL bNoBlue,bNoRed,bNoGreen;
-extern BOOL bSaveSettings;
-extern BOOL Capture_VBI;
-extern BOOL Display_Status_Bar;
-extern BOOL Has_MSP;
-extern BOOL MSPToneControl;
-extern BOOL System_In_Mute;
-extern BOOL USE_MIXER;
-extern BOOL VTLarge;
-extern BYTE* pDisplay[5];
-extern BYTE* pVBILines[5];
-extern BYTE VT_Header_Line[40];
-extern char BTTyp[30];
-extern BOOL InitialSuperBass;
-extern char InitialBalance;
-extern char InitialBass;
-extern char InitialEqualizer[5];
-extern char InitialLoudness;
-extern char InitialMixer[MAXPNAMELEN];
-extern char InitialMixerConnect[MIXER_LONG_NAME_CHARS];
-extern char InitialMixerLine[MIXER_LONG_NAME_CHARS];
-extern char InitialSpatial;
-extern char InitialTreble;
-extern char MSPStatus[30];
-extern char VPS_chname[9];
-extern char VPS_lastname[9];
-extern HANDLE FilterEvent[MAXFILTER];
-extern HANDLE hInst;
-extern HMIXER hMixer;
-extern HWND hWnd;
-extern HWND hwndAudioField;
-extern HWND hwndFPSField;
-extern HWND hwndKeyField,hwndFPSField;
-extern HWND hwndTextField, hwndPalField;
-extern HWND ShowPDCInfo;
-extern HWND ShowVPSInfo;
-extern HWND ShowVTInfo;
-extern HWND SplashWnd;
-extern HWND hwndStatusBar;
-extern int NumberOfProcessors;
-extern int DecodeProcessor;
-extern int BytesOut;
-extern int CurrentConnect;
-extern int CurrentLine;
-extern int CurrentMixer;
-extern int CurrentMode;
-extern int CurrentPitch;
-extern int CurrentProgramm;
-extern int CurrentX;
-extern int CurrentY;
-extern int CurrentVBILines;
-extern int DeviceNumber;
-extern int FirstWidthEven;
-extern int FirstWidthOdd;
-extern int InitialContrast;
-extern int InitialProg;
-extern int InitialSaturationU;
-extern int InitialSaturationV;
-extern int InitialBrightness;
-extern int InitialHue;
-
-// MAE 2 Nov 2000 - Start of change for Macrovision fix
-extern int InitialBDelay;
-// MAE 2 Nov 2000 - End of change for Macrovision fix
-
-extern int InitialOverscan;
-extern int InitialVolume;
-extern int LineFlag;
-extern int MainProcessor;
-extern int MasterTestzeilen;
-extern int MIXER_LINKER_KANAL;
-extern int MIXER_RECHTER_KANAL;
-extern int MixerVolumeMax;
-extern int MixerVolumeStep;
-extern int MSPMajorMode;
-extern int MSPMinorMode;
-extern int MSPMode;
-extern int MSPStereo;
-extern int TVTYPE;
-extern int VideoSource;
-extern int VT_Cache;
-extern int VT_LATIN;
-extern LPDIRECTDRAW lpDD;
-extern LPDIRECTDRAWSURFACE lpDDOverlay;
-extern LPDIRECTDRAWSURFACE lpDDOverlayBack;
-extern LPDIRECTDRAWSURFACE lpDDSurface;
-extern BYTE* lpOverlay;
-extern BYTE* lpOverlayBack;
-extern long OverlayPitch;
-extern MIXERCAPS *MixerDev;
-extern MIXERLINE *MixerLine;
-extern short nLevelHigh;
-extern short nLevelLow;
-extern struct SOTREC SOTInfoRec;
-extern struct TLNB LNB;
-extern struct TMixerAccess Mute;
-extern struct TMixerAccess Volume;
-extern struct TMixerLoad MixerLoad[64];
-extern struct TPacket30 Packet30;
-extern struct TSoundSystem SoundSystem;
-extern struct TVDat VDat;
-extern struct TVT VTFrame[800];
-extern struct TVTDialog VTDialog[MAXVTDIALOG];
-extern struct TTVSetting TVSettings[];
-extern unsigned int ManuellAudio[8];
-extern unsigned short cp_odd[256][285];
-extern unsigned short UTCount;
-extern unsigned short UTCount;
-extern unsigned short UTPages[12];
-extern unsigned short UTPages[12];
-extern unsigned short VTColourTable[9];
-extern PMemStruct Display_dma[5];
-extern PMemStruct Risc_dma;
-extern PMemStruct Vbi_dma[5];
-
-extern int emsizex;
-extern int emsizey;
-extern int emstartx;
-extern int emstarty;
-extern BOOL bAlwaysOnTop;
-extern BOOL bIsFullScreen;
-extern BOOL bDisplaySplashScreen;
-
-extern int pgsizex;
-extern int pgsizey;
-extern int pgstartx;
-extern int pgstarty;
-
-extern struct TBL ButtonList[15];
-
-extern int PriorClassId;
-extern int ThreadClassId;
-extern BOOL bDisplayStatusBar;
-
-extern BOOL Show_Menu;
-extern int AudioSource;
-
-extern int CountryCode;
-
-extern struct TProgramm Programm[MAXPROGS+1];
 extern HFONT currFont;
 extern HBITMAP RedBulb;
 extern HBITMAP GreenBulb;
-
-extern char BTVendorID[10];
-extern char BTDeviceID[10];
-extern char MSPVersion[16];
 
 extern BOOL	Wait_For_Flip;          // User parm, default=TRUE
 extern BOOL	DoAccurateFlips;        // User parm, default=TRUE

@@ -42,6 +42,9 @@
 #include "AspectRatio.h"
 #include "resource.h"
 #include "DebugLog.h"
+#include "Status.h"
+#include "bt848.h"
+#include "dTV.h"
 
 #define AR_STRETCH       0
 #define AR_NONANAMORPHIC 1
@@ -538,7 +541,7 @@ void UpdateWindowState()
 	{
 		SetWindowLong(hWnd, GWL_STYLE, WS_VISIBLE);
 		SetMenu(hWnd, NULL);
-		ShowWindow(hwndStatusBar, SW_HIDE);
+		StatusBar_ShowWindow(FALSE);
 		SetWindowPos(hWnd,
 					HWND_TOPMOST,
 					0,
@@ -551,7 +554,7 @@ void UpdateWindowState()
 	{
 		SetWindowLong(hWnd, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_VISIBLE);
 		SetMenu(hWnd, (Show_Menu == TRUE)?hMenu:NULL);
-		ShowWindow(hwndStatusBar, bDisplayStatusBar?SW_SHOW:SW_HIDE);
+		StatusBar_ShowWindow(bDisplayStatusBar);
 		SetWindowPos(hWnd,bAlwaysOnTop?HWND_TOPMOST:HWND_NOTOPMOST,
 					0,0,0,0,
 					SWP_NOSIZE | SWP_NOMOVE | SWP_SHOWWINDOW);

@@ -39,6 +39,7 @@
 #include "deinterlace.h"
 #include "globals.h"
 #include "cpu.h"
+#include "bt848.h"
 
 long BitShift = 13;
 long EdgeDetect = 625;

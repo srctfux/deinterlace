@@ -28,10 +28,15 @@
 #include "Tuner.h"
 
 BYTE TunerDeviceWrite, TunerDeviceRead;
-char TunerStatus[30];
+char TunerStatus[30] = "No Device on I2C-Bus";
 TVTUNERID TunerType = TUNER_ABSENT;
 
 struct TChannels Channels;
+
+const char* Tuner_Status()
+{
+	return TunerStatus;
+}
 
 BOOL Tuner_Init(int TunerNr)
 {

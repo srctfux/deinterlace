@@ -37,8 +37,10 @@
 #include "VBI_VideoText.h"
 #include "VBI_CCdecode.h"
 #include "VBI.h"
+#include "dTV.h"
 
 struct TVT VTFrame[800];
+struct TVTDialog VTDialog[MAXVTDIALOG];
 
 int SubPage=0;
 
@@ -104,7 +106,75 @@ int VT_Cache=0;
 
 BYTE VT_Header_Line[40];
 
+unsigned short UTCount = 0;
+unsigned short UTPages[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
+
+
 #define GetBit(val,bit,mask) (BYTE)(((val)>>(bit))&(mask))
+
+BITMAPINFO* VTCharSetLarge = NULL;
+BITMAPINFO* VTCharSetSmall = NULL;
+BITMAPINFO* VTScreen[MAXVTDIALOG];
+
+/// VideoText
+unsigned short VTColourTable[9] =
+{
+	0,		//Black
+	31744,	//Red
+	992,	//Green
+	32736,	//Yellow
+	31,		//Blue
+	15375,	//Invisible
+	15871,	//Cyan
+	32767,	//White
+	32767,	//Transparent
+};
+
+void VBI_VT_Init()
+{
+	HGLOBAL hGlobal;
+	int i;
+
+	hGlobal = LoadResource(hInst, FindResource(hInst, "VTCHARLARGE", RT_BITMAP));
+	VTCharSetLarge = (BITMAPINFO *) LockResource(hGlobal);
+	hGlobal = LoadResource(hInst, FindResource(hInst, "VTCHARSMALL", RT_BITMAP));
+	VTCharSetSmall = (BITMAPINFO *) LockResource(hGlobal);
+
+	for (i = 0; i < 800; i++)
+	{
+		VTFrame[i].SubPage = NULL;
+		VTFrame[i].SubCount = 0;
+	}
+
+	for (i = 0; i < MAXVTDIALOG; i++)
+	{
+		VTDialog[i].Dialog = NULL;
+	}
+	VTScreen[0] = NULL;
+	VT_ChannelChange();
+}
+
+void VBI_VT_Exit()
+{
+	int i;
+
+	for (i = 0; i < 800; i++)
+	{
+		if (VTFrame[i].SubPage != NULL)
+		{
+			free(VTFrame[i].SubPage);
+		}
+		VTFrame[i].SubPage = NULL;
+		VTFrame[i].SubCount = 0;
+	}
+	for (i = 0; i < MAXVTDIALOG; i++)
+	{
+		free(VTScreen[i]);
+	}
+	
+	DeleteObject(VTCharSetLarge);
+	DeleteObject(VTCharSetSmall);
+}
 
 void VBI_decode_vps(unsigned char *data)
 {
@@ -500,17 +570,11 @@ void StorePacket30(BYTE * p)
 {
 	DWORD d, b;
 	BYTE h, m, s, a, CNI0, CNI1, CNI2, CNI3;
-	char Text[20];
 	int n;
 
 	if (*p != 0x55)
 		return;					// Some error, the data should be here...
 	p += 5;
-
-	if (ShowPDCInfo != NULL)
-	{
-
-	}
 
 	if (unhamtab[*p] == 0)		// TSDP
 	{
@@ -542,29 +606,6 @@ void StorePacket30(BYTE * p)
 			Packet30.Identifier[n] = p[n] & 0x7f;
 		Packet30.Identifier[n] = '\0';
 
-		if (ShowPDCInfo != NULL)
-		{
-			SetDlgItemText(ShowPDCInfo, TEXT1, Packet30.Identifier);
-			SetDlgItemText(ShowPDCInfo, TEXT2, Packet30.Unknown);
-			sprintf(Text, "%d", Packet30.NetId);
-			SetDlgItemText(ShowPDCInfo, TEXT3, Text);
-			sprintf(Text, "%d", Packet30.HomePage.nMag);
-			SetDlgItemText(ShowPDCInfo, TEXT4, Text);
-			sprintf(Text, "%d", Packet30.HomePage.nPage);
-			SetDlgItemText(ShowPDCInfo, TEXT5, Text);
-			sprintf(Text, "%d", Packet30.HomePage.nSubcode);
-			SetDlgItemText(ShowPDCInfo, TEXT6, Text);
-			sprintf(Text, "%02x", Packet30.UTC.Offset);
-			SetDlgItemText(ShowPDCInfo, TEXT7, Text);
-			sprintf(Text, "%d", Packet30.UTC.JulianDay);
-			SetDlgItemText(ShowPDCInfo, TEXT8, Text);
-			sprintf(Text, "%02d", Packet30.UTC.Hour);
-			SetDlgItemText(ShowPDCInfo, TEXT9, Text);
-			sprintf(Text, "%02d", Packet30.UTC.Min);
-			SetDlgItemText(ShowPDCInfo, TEXT10, Text);
-			sprintf(Text, "%02d", Packet30.UTC.Sec);
-			SetDlgItemText(ShowPDCInfo, TEXT11, Text);
-		}
 	}
 	else if (unhamtab[*p] == 2)	// PDC
 	{
@@ -598,32 +639,6 @@ void StorePacket30(BYTE * p)
 		for (n = 0; n < 20; n++)
 			Packet30.Identifier[n] = p[n] & 0x7f;
 		Packet30.Identifier[n] = '\0';
-
-		if (ShowPDCInfo != NULL)
-		{
-			sprintf(Text, "%d", Packet30.PDC.LCI);
-			SetDlgItemText(ShowPDCInfo, TEXT12, Text);
-			sprintf(Text, "%d", Packet30.PDC.LUF);
-			SetDlgItemText(ShowPDCInfo, TEXT13, Text);
-			sprintf(Text, "%d", Packet30.PDC.PRF);
-			SetDlgItemText(ShowPDCInfo, TEXT14, Text);
-			sprintf(Text, "%d", Packet30.PDC.PCS);
-			SetDlgItemText(ShowPDCInfo, TEXT15, Text);
-			sprintf(Text, "%d", Packet30.PDC.MI);
-			SetDlgItemText(ShowPDCInfo, TEXT16, Text);
-			sprintf(Text, "%d", Packet30.PDC.day);
-			SetDlgItemText(ShowPDCInfo, TEXT17, Text);
-			sprintf(Text, "%d", Packet30.PDC.month);
-			SetDlgItemText(ShowPDCInfo, TEXT18, Text);
-			sprintf(Text, "%d", Packet30.PDC.hour);
-			SetDlgItemText(ShowPDCInfo, TEXT19, Text);
-			sprintf(Text, "%d", Packet30.PDC.minute);
-			SetDlgItemText(ShowPDCInfo, TEXT20, Text);
-			sprintf(Text, "%d", Packet30.PDC.CNI);
-			SetDlgItemText(ShowPDCInfo, TEXT21, Text);
-			sprintf(Text, "%d", Packet30.PDC.PTY);
-			SetDlgItemText(ShowPDCInfo, TEXT22, Text);
-		}
 	}
 }
 

@@ -62,5 +62,17 @@ MMRESULT Get_Control_Values(MIXERCONTROLDETAILS * Setting, int Device);
 MMRESULT Set_Control_Values(MIXERCONTROLDETAILS * Setting, int Device);
 void Enumerate_Sound_SubSystem(void);
 
+extern struct TMixerAccess Volume;
+extern struct TMixerAccess Mute;
+extern struct TMixerLoad MixerLoad[64];
+extern BOOL System_In_Mute;
+extern BOOL USE_MIXER;
+
+extern int MIXER_LINKER_KANAL;
+extern int MIXER_RECHTER_KANAL;
+extern int MixerVolumeMax;
+extern int MixerVolumeStep;
+extern struct TSoundSystem SoundSystem;
+
 
 #endif

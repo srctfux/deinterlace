@@ -39,6 +39,8 @@
 #include "structs.h"
 #include "globals.h"
 
+void VBI_Init();
+void VBI_Exit();
 void VBI_DecodeLine(unsigned char *VBI_Buffer, int line);
 void VBI_AGC(BYTE * Buffer, int start, int stop, int step);
 
@@ -46,5 +48,15 @@ extern int VBI_Flags;
 extern int VBI_FPS;
 extern BYTE VBI_thresh;
 extern BYTE VBI_off;
+extern BOOL Capture_VBI;
+extern BOOL VTLarge;
+extern char VPS_lastname[9];
+extern HWND ShowVPSInfo;
+extern HWND ShowVTInfo;
+extern struct TPacket30 Packet30;
+
+extern struct TVT VTFrame[800];
+extern struct TVTDialog VTDialog[MAXVTDIALOG];
+extern unsigned short VTColourTable[9];
 
 #endif

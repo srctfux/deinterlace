@@ -32,6 +32,8 @@
 //
 // 02 Jan 2001   John Adcock           Made RISC Code linear
 //
+// 08 Jan 2001   John Adcock           Added C++ like access for strings
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __BT848_H___
@@ -50,6 +52,23 @@ typedef enum
     SOURCE_CCIR656
 } VIDEOSOURCETYPE;
 
+struct TTVSetting
+{
+	LPCSTR szDesc;
+	WORD wCropHeight;
+	WORD wTotalWidth;
+	BYTE bDelayA;
+	BYTE bDelayB;
+	BYTE bIForm;
+	WORD wHDelayx1;
+	WORD wHActivex1;
+	WORD wVDelay;
+	WORD wCropOffset;
+	BOOL Is25fps;
+	WORD VBIPacketSize;
+	WORD VBILines;
+};
+
 // create new type for physical memory
 typedef unsigned long PHYS;
 
@@ -57,6 +76,7 @@ typedef unsigned long PHYS;
 BOOL BT848_FindTVCard(HWND hWnd);
 DWORD BT848_GetSubSystemID();
 BOOL BT848_MemoryInit(void);
+void BT848_MemoryFree();
 void BT848_ResetHardware();
 int BT848_Open(DWORD dwVendorID, DWORD dwDeviceID,  DWORD options,BOOL Lock);
 void BT848_Close();
@@ -107,6 +127,14 @@ PHYS GetPhysicalAddress(PMemStruct dma, LPBYTE pLinear, DWORD dwSizeWanted, DWOR
 
 // CCIR656 Digital input support
 BOOL BT848_Enable656(void);
+
+// Access to chip description strings
+const char* BT848_VendorID();
+const char* BT848_DeviceID();
+const char* BT848_ChipType();
+
+// saves register values to file
+void BT848_SaveSettings(LPCSTR szFileName);
 
 // Brooktree 848 registers
 #define BT848_DSTATUS          0x000
@@ -434,5 +462,29 @@ BOOL BT848_Enable656(void);
 #define BT848_VTC_HSFMT_48       		0x40
 #define BT848_VTC_HSFMT_32       		0x80
 #define BT848_VTC_HSFMT_16       		0xC0
+
+extern BOOL bSaveSettings;
+extern BYTE* pDisplay[5];
+extern BYTE* pVBILines[5];
+
+// MAE 2 Nov 2000 - Start of change for Macrovision fix
+extern int InitialBDelay;
+// MAE 2 Nov 2000 - End of change for Macrovision fix
+
+extern int TVTYPE;
+extern int VideoSource;
+
+extern int InitialContrast;
+extern int InitialSaturationU;
+extern int InitialSaturationV;
+extern int InitialBrightness;
+extern int InitialHue;
+extern int InitialOverscan;
+
+extern int CurrentX;
+extern int CurrentY;
+extern int CurrentVBILines;
+
+extern struct TTVSetting TVSettings[];
 
 #endif

@@ -34,6 +34,7 @@
 
 #include "stdafx.h"
 #include "status.h"
+#include "dTV.h"
 
 #if !defined (APIENTRY)
 #define APIENTRY FAR PASCAL
@@ -50,7 +51,7 @@ typedef struct _tagStatus
 
 Status statusField[MAXSTATUS];
 
-extern HWND hwndStatusBar;
+HWND hwndStatusBar = NULL;
 
 int cntStatusField = 0;
 int dyStatus, cxStatusBorder, cyStatusBorder, cxFrame, cyFrame, dyField;
@@ -60,6 +61,20 @@ HBRUSH hbrBtnFace;
 
 LONG APIENTRY StatusProc(HWND, UINT, UINT, LONG);
 LONG APIENTRY StatusFieldProc(HWND, UINT, UINT, LONG);
+
+HWND hwndStatusBar;
+HWND hwndTextField;
+HWND hwndPalField;
+HWND hwndKeyField;
+HWND hwndFPSField;
+HWND hwndAudioField;
+
+#define ID_STATUSBAR    1700
+#define ID_TEXTFIELD       ID_STATUSBAR+1
+#define ID_KENNUNGFFIELD   ID_STATUSBAR+2
+#define ID_CODEFIELD       ID_STATUSBAR+3
+#define ID_FPSFIELD        ID_STATUSBAR+4
+#define ID_AUDIOFIELD      ID_STATUSBAR+5
 
 BOOL StatusBar_Init(HANDLE hInstance)
 {
@@ -95,21 +110,52 @@ BOOL StatusBar_Init(HANDLE hInstance)
 	if (!RegisterClass(&wndclass))
 		return FALSE;
 
-	return (TRUE);
-}
-
-BOOL StatusBar_Create(HWND hwnd, HANDLE hInst, int iId)
-{
 	cxStatusBorder = GetSystemMetrics(SM_CXBORDER);
 	cyStatusBorder = GetSystemMetrics(SM_CYBORDER);
 
-	hwndStatusBar = CreateWindow("SamplerStatus", "SamplerStatus", WS_CHILD | WS_BORDER | WS_VISIBLE, 0, 0, 0, 0, hwnd, (HMENU) iId, hInst, NULL);
+	hwndStatusBar = CreateWindow("SamplerStatus", "SamplerStatus", WS_CHILD | WS_BORDER | WS_VISIBLE, 0, 0, 0, 0, hWnd, (HMENU)ID_STATUSBAR, hInst, NULL);
 
 	if (!hwndStatusBar)
 	{
 		return FALSE;
 	}
-	return TRUE;
+	
+	hwndTextField = StatusBar_AddField(hwndStatusBar, ID_TEXTFIELD, 110, 0, FALSE);
+	hwndAudioField = StatusBar_AddField(hwndStatusBar, ID_AUDIOFIELD, 110, 0, FALSE);
+	hwndPalField = StatusBar_AddField(hwndStatusBar, ID_CODEFIELD, 110, 0, FALSE);
+	hwndKeyField = StatusBar_AddField(hwndStatusBar, ID_KENNUNGFFIELD, 90, 50, FALSE);
+	hwndFPSField = StatusBar_AddField(hwndStatusBar, ID_FPSFIELD, 45, 45, TRUE);
+
+	StatusBar_Adjust(hWnd);
+
+	return (TRUE);
+}
+
+void StatusBar_ShowText(eSTATUSBAR_BOX Box, LPCTSTR szText)
+{
+	if (IsWindowVisible(hwndStatusBar))
+	{
+		switch(Box)
+		{
+		case STATUS_KEY:
+			SetWindowText(hwndKeyField, szText);
+			break;
+		case STATUS_FPS:
+			SetWindowText(hwndFPSField, szText);
+			break;
+		case STATUS_PAL:
+			SetWindowText(hwndPalField, szText);
+			break;
+		case STATUS_TEXT:
+			SetWindowText(hwndTextField, szText);
+			break;
+		case STATUS_AUDIO:
+			SetWindowText(hwndAudioField, szText);
+			break;
+		default:
+			break;
+		}
+	}
 }
 
 BOOL StatusBar_Adjust(HWND hwnd)
@@ -118,6 +164,7 @@ BOOL StatusBar_Adjust(HWND hwnd)
 
 	GetClientRect(hwnd, &rect);
 	MoveWindow(hwndStatusBar, rect.left - cxStatusBorder, rect.bottom - dyStatus + cyStatusBorder, rect.right - rect.left + (cxStatusBorder * 2), dyStatus, TRUE);
+	InvalidateRect(hwndStatusBar, NULL, FALSE);
 	return TRUE;
 }
 
@@ -159,11 +206,6 @@ HWND StatusBar_AddField(HANDLE hInst, int iId, int iMin, int iMax, BOOL bNewGrou
 	}
 
 	return statusField[cntStatusField++].hwnd;
-}
-
-BOOL StatusBar_Destroy(void)
-{
-	return DeleteObject(hbrBtnFace);
 }
 
 LONG APIENTRY StatusProc(HWND hwnd, UINT msg, UINT wParam, LONG lParam)
@@ -406,12 +448,13 @@ LONG APIENTRY StatusFieldProc(HWND hwnd, UINT msg, UINT wParam, LONG lParam)
 	return 0L;
 }
 
-//---------------------------------------------------------------------------
-// Show text in statusbar only, if statusbar is enabled
-void StatusBar_ShowText(HWND hwndTextField, LPCTSTR szText)
+void StatusBar_ShowWindow(BOOL bShow)
 {
-	if (IsWindowVisible(hwndTextField))
-	{
-		SetWindowText(hwndTextField, szText);
-	}
+	ShowWindow(hwndStatusBar, (bShow)?SW_SHOW:SW_HIDE);
+}
+
+void StatusBar_Destroy(void)
+{
+	DestroyWindow(hwndStatusBar);	
+	DeleteObject(hbrBtnFace);
 }

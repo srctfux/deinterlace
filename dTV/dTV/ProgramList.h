@@ -39,6 +39,51 @@
 #include "structs.h"
 #include "globals.h"
 
+struct PIDFilters
+{
+	char FilterName[5];
+	unsigned char FilterId;
+	unsigned short PID;
+};
+
+typedef struct TProgramm
+{
+	char Name[255];
+    unsigned long freq;
+    char Typ;
+    BOOL  Tuner_Auto;
+	BOOL  PMT_Auto;
+	BOOL  PID_Auto;
+    int power;             /* LNB power 0=off/pass through, 1=on */
+	int volt;              /* 14/18V (V=0/H=1) */
+	int afc;
+	int ttk;               /* 22KHz */
+	int diseqc;            /* Diseqc input select */
+	unsigned int srate;
+	int qam;
+	int fec;
+	int norm;
+	unsigned short  tp_id;
+	unsigned short  Video_pid;
+	unsigned short  Audio_pid;
+    unsigned short  TeleText_pid;          /* Teletext PID */
+	unsigned short  PMT_pid;
+    unsigned short  PCR_pid;
+	unsigned short  PMC_pid;
+	unsigned short  SID_pid;
+	unsigned short  AC3_pid;
+	unsigned short  EMM_pid;
+	unsigned short  ECM_pid;
+	unsigned char   TVType; //  == 00 PAL ; 11 == NTSC
+	unsigned char   ServiceTyp;
+    unsigned char   CA_ID;
+	unsigned short  Temp_Audio;
+    unsigned char   Buffer[10];   // For later Use
+	unsigned short  FilterNumber;
+    struct PIDFilters Filters[12];
+};
+
+
 void Write_Program_List();
 void Write_Program_List_ASCII();
 void Load_Program_List();
@@ -49,5 +94,10 @@ BOOL APIENTRY ChannelNumberProc(HWND hDlg, UINT message, UINT wParam, LONG lPara
 VOID APIENTRY HandleFocusStateChannelList(HWND hDlg, LPDRAWITEMSTRUCT lpdis);
 VOID APIENTRY DrawEntireItemChannelList(HWND hDlg, LPDRAWITEMSTRUCT lpdis, INT Typ);
 BOOL APIENTRY AnalogScanProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
+
+#define MAXPROGS 4096
+
+extern struct TProgramm Programm[MAXPROGS+1];
+extern int CountryCode;
 
 #endif

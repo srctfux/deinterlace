@@ -65,6 +65,11 @@
 #include "vbi.h"
 #include "COMMCTRL.H"
 
+
+HWND hWnd = NULL;
+HANDLE hInst = NULL;
+HWND SplashWnd = NULL;
+
 //---------------------------------------------------------------------------
 // 2000-12-19 Added by Mark Rejhon
 // These are constants for the GetCurrentAdjustmentStepCount()
@@ -79,18 +84,7 @@
 #define ADJ_BUTTON_REPRESS_ACCEL_STEP       500    // Milliseconds between each acceleration of adjustment
 #define ADJ_BUTTON_REPRESS_MAX_STEP         15     // Maximum adjustment step at one time
 
-HWND hwndStatusBar;
-HWND hwndTextField;
-HWND hwndPalField;
-HWND hwndKeyField;
-HWND hwndFPSField;
-HWND hwndAudioField;
-
 BOOL bDoResize = FALSE;
-
-struct TVTDialog VTDialog[MAXVTDIALOG];
-
-BOOL VTLarge=TRUE;
 
 int CurrentProgramm;
 
@@ -105,20 +99,12 @@ unsigned long freq;
 char Typ;
 unsigned int srate;
 
-struct TBL ButtonList[15];
-
-BYTE  *pDisplay[5] =  { NULL,NULL,NULL,NULL,NULL  };
-BYTE  *pVBILines[5] =  { NULL,NULL,NULL,NULL,NULL  };
-
 int MoveXDist=-1;
 int MoveYDist=-1;
 
 
-BITMAPINFO          *VTCharSetLarge                    = NULL;
-BITMAPINFO          *VTCharSetSmall                    = NULL;
 HBITMAP             RedBulb;
 HBITMAP             GreenBulb;
-BITMAPINFO          *VTScreen[MAXVTDIALOG];
 
 long WStyle;
 
@@ -126,22 +112,9 @@ BOOL    Show_Menu=TRUE;
 HMENU   hMenu;
 HANDLE  hAccel;
 
-HWND SplashWnd;
-
-struct TPacket30 Packet30;
-
-
 char ChannelString[10];
 
-char BTTyp[30];
-char MSPStatus[30] = "";
-
 int LastFrame;
-
-
-int CurrentX = 720;
-int CurrentY;
-int CurrentVBILines = 0;
 
 int FORMAT_MASK = 0x0F;
 int PalFormat = 0;
@@ -154,22 +127,27 @@ int BeforeVD=0;
 
 int WriteIndex=1;
 
-
-BOOL USE_MIXER=FALSE;
-int  MIXER_LINKER_KANAL=-1;
-int  MIXER_RECHTER_KANAL=-1;
-int MixerVolumeStep=-1;
-int MixerVolumeMax=-1;
-
-int InitialProg=-1;
-
-int NumberOfProcessors=1;
 int MainProcessor=0;
 int DecodeProcessor=0;
 
 BOOL bShowCursor = TRUE;
 
-BOOL gbHasMSP = FALSE; // MAE 8 Dec 2000 Added
+int emsizex = 754;
+int emsizey = 521;
+int emstartx = 10;
+int emstarty = 10;
+
+int pgsizex = -1;
+int pgsizey = -1;
+int pgstartx = -1;
+int pgstarty = -1;
+
+BOOL bAlwaysOnTop = FALSE;
+BOOL bDisplaySplashScreen = TRUE;
+BOOL bDisplayStatusBar = TRUE;
+
+int AudioSource = AUDIOMUX_MUTE;
+
 
 /****************************************************************************
 
@@ -184,7 +162,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	WNDCLASS wc;
 	HINSTANCE statusbar;
 	MSG msg;
-	HGLOBAL hGlobal;
 	HWND hPrevWindow;
 
 	hInst = hInstance;
@@ -242,30 +219,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	statusbar = hInst;
 	if (!StatusBar_Init(statusbar)) return FALSE;
 
-	if (StatusBar_Create(hWnd, statusbar, ID_STATUSBAR))
-	{
-		hwndTextField = StatusBar_AddField(statusbar, ID_TEXTFIELD, 110, 0, FALSE);
-		hwndAudioField = StatusBar_AddField(statusbar, ID_AUDIOFIELD, 110, 0, FALSE);
-		hwndPalField = StatusBar_AddField(statusbar, ID_CODEFIELD, 110, 0, FALSE);
-		hwndKeyField = StatusBar_AddField(statusbar, ID_KENNUNGFFIELD, 90, 50, FALSE);
-		hwndFPSField = StatusBar_AddField(statusbar, ID_FPSFIELD, 45, 45, TRUE);
-	}
-	else
-	{
-		return FALSE;
-	}
-
-	StatusBar_Adjust(hWnd);
-
 	if (bDisplayStatusBar == FALSE)
 	{
-		ShowWindow(hwndStatusBar, SW_HIDE);
+		StatusBar_ShowWindow(FALSE);
 	}
-
-	hGlobal = LoadResource(hInst, FindResource(hInst, "VTCHARLARGE", RT_BITMAP));
-	VTCharSetLarge = (BITMAPINFO *) LockResource(hGlobal);
-	hGlobal = LoadResource(hInst, FindResource(hInst, "VTCHARSMALL", RT_BITMAP));
-	VTCharSetSmall = (BITMAPINFO *) LockResource(hGlobal);
 
 	RedBulb = LoadBitmap(hInst, "REDBULB");
 	GreenBulb = LoadBitmap(hInst, "GREENBULB");
@@ -293,8 +250,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	}
 
 	DeleteObject(currFont);
-	DeleteObject(VTCharSetLarge);
-	DeleteObject(VTCharSetSmall);
 	DeleteObject(RedBulb);
 	DeleteObject(GreenBulb);
 
@@ -452,7 +407,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 					ChangeChannel(0);
 
 				sprintf(Text, "    Channel %s ",Programm[CurrentProgramm].Name);
-				StatusBar_ShowText(hwndTextField, Text);
+				StatusBar_ShowText(STATUS_TEXT, Text);
 				OSD_ShowText(hWnd,Programm[CurrentProgramm].Name, 0);
 			}
 
@@ -485,7 +440,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				}
 
 				sprintf(Text, "    Channel %s ",Programm[CurrentProgramm].Name);
-				StatusBar_ShowText(hwndTextField, Text);
+				StatusBar_ShowText(STATUS_TEXT, Text);
 				OSD_ShowText(hWnd,Programm[CurrentProgramm].Name, 0);
 			}
 
@@ -762,7 +717,8 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				}
 				
 				// MAE 8 Dec 2000 Start of change
-				if (gbHasMSP)
+				// JA 8 Jan 20001 Changed to use function
+				if (Audio_MSP_IsPresent())
 				{
 					// Mute the MSP decoder
 					Audio_Mute();
@@ -784,7 +740,8 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 					Mixer_UnMute();
 				}
 				// MAE 8 Dec 2000 Start of change
-				if (gbHasMSP)
+				// JA 8 Jan 20001 Changed to use function
+				if (Audio_MSP_IsPresent())
 				{
 					Audio_SetVolume(InitialVolume);
 				}
@@ -962,7 +919,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			Start_Capture();
 
 			sprintf(Text, "Channel %s", Programm[CurrentProgramm].Name);
-			StatusBar_ShowText(hwndTextField, Text);
+			StatusBar_ShowText(STATUS_TEXT, Text);
 			OSD_ShowText(hWnd,Programm[CurrentProgramm].Name, 0);
 			break;
 
@@ -981,7 +938,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			}
 			OSD_ShowVideoSource(hWnd, VideoSource);
 			sprintf(Text, "Extern %d", VideoSource);
-			StatusBar_ShowText(hwndTextField, Text);
+			StatusBar_ShowText(STATUS_TEXT, Text);
 
 			Stop_Capture();
 			BT848_ResetHardware();
@@ -1002,7 +959,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			VideoSource = SOURCE_CCIR656;
 			OSD_ShowVideoSource(hWnd, VideoSource);
 			sprintf(Text, "CCIR656 Digital", VideoSource);
-			StatusBar_ShowText(hwndTextField, Text);
+			StatusBar_ShowText(STATUS_TEXT, Text);
 
 			Stop_Capture();
 			BT848_ResetHardware();
@@ -1431,7 +1388,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
         case TIMER_STATUS:
 			if (!BT848_IsVideoPresent())
 			{
-				StatusBar_ShowText(hwndTextField, "No Video Signal Found");
+				StatusBar_ShowText(STATUS_TEXT, "No Video Signal Found");
 			}
 			else
 			{
@@ -1451,7 +1408,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
 				if (System_In_Mute == TRUE)
 					sprintf(Text1, "Volume Mute");
-				StatusBar_ShowText(hwndTextField, Text1);
+				StatusBar_ShowText(STATUS_TEXT, Text1);
 			}
             break;
         //-------------------------------
@@ -1547,7 +1504,8 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		Audio_SetSource(AUDIOMUX_MUTE);
 		
 		// MAE 8 Dec 2000 Start of change
-		if (gbHasMSP)
+		// JA 8 Jan 20001 Changed to use function
+		if (Audio_MSP_IsPresent())
 		{
 			// Mute the MSP decoder
 			Audio_Mute();
@@ -1561,6 +1519,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			SaveWindowPos(hWnd);
 		}
 		BT848_Close();
+		StatusBar_Destroy();
 		PostQuitMessage(0);
 		break;
 
@@ -1587,12 +1546,10 @@ void MainWndOnInitBT(HWND hWnd)
 	char Text[128];
 	int i;
 	BOOL bInitOK = FALSE;
-	MSPStatus[0] = 0x00;
-
-	CurrentProgramm = InitialProg;
 
 	if (BT848_FindTVCard(hWnd) == TRUE)
 	{
+		SetDlgItemText(SplashWnd, IDC_TEXT2, BT848_ChipType());
 		if(InitDD(hWnd) == TRUE)
 		{
 			if(Overlay_Create() == TRUE)
@@ -1672,8 +1629,6 @@ void MainWndOnInitBT(HWND hWnd)
 			SendMessage(hWnd, WM_COMMAND, IDM_TOGGLE_MENU, 0);
 		}
 
-		sprintf(TunerStatus, "No Device on I2C-Bus");
-
 		sprintf(Text, "No Tuner");
 		if (Tuner_Init(TunerType) == TRUE)
 		{
@@ -1682,33 +1637,23 @@ void MainWndOnInitBT(HWND hWnd)
 		SetDlgItemText(SplashWnd, IDC_TEXT4, Text);
 
 		// MAE 8 Dec 2000 Start of change
-		gbHasMSP = FALSE;
+		// JA 8 Jan 2001 Tidied up
 
-		if (MSPStatus[0] == 0x00)
+		if (Audio_MSP_Init(0x80, 0x81) == TRUE)
 		{
-			sprintf(MSPStatus, "No Device on I2C-Bus");
-			sprintf(Text, "No MSP-Device");
-
-			if (Audio_Init(0x80, 0x81) == TRUE)
-			{
-				sprintf(Text, "MSP-Device OK");
-				sprintf(MSPStatus, "MSP-Device I2C-Bus I/O 0x80/0x81");
-
-				gbHasMSP = TRUE;
-				
-				Audio_SetVolume(InitialVolume);
-			}
+			sprintf(Text, "MSP Device OK");
+			Audio_SetVolume(InitialVolume);
 		}
 		else
 		{
-			sprintf(Text, "MSP-Device OK");
-			gbHasMSP = TRUE;
+			sprintf(Text, "No MSP Device");
 		}
 
+		// JA 8 Jan 2001 End of Tidy
 		// MAE 8 Dec 2000 End of change
 		SetDlgItemText(SplashWnd, IDC_TEXT5, Text);
 
-		if (Has_MSP == TRUE)
+		if (Audio_MSP_IsPresent() == TRUE)
 		{
 			SetTimer(hWnd, TIMER_MSP, TIMER_MSP_MS, NULL);
 		}
@@ -1733,7 +1678,7 @@ void MainWndOnInitBT(HWND hWnd)
 
 		if (bDisplayStatusBar == TRUE)
 		{
-			SetWindowText(hwndKeyField, Text);
+			StatusBar_ShowText(STATUS_KEY, Text);
 		}
 
         // OK we're ready to go
@@ -1779,26 +1724,12 @@ void MainWndOnCreate(HWND hWnd)
 	SetDlgItemText(SplashWnd, IDC_TEXT5, "");
 	Sleep(100);
 
-	Sleep(100);
 	SetDlgItemText(SplashWnd, IDC_TEXT2, "VideoText");
-	for (i = 0; i < 800; i++)
-	{
-		VTFrame[i].SubPage = NULL;
-		VTFrame[i].SubCount = 0;
-	}
 
-	VT_ChannelChange();
-
-	for (i = 0; i < MAXVTDIALOG; i++)
-	{
-		VTDialog[i].Dialog = NULL;
-	}
-
+	VBI_Init();	
+	
 	Load_Program_List_ASCII();
 	Load_Country_Settings();
-
-	VTScreen[0] = NULL;
-
 
 	if (USE_MIXER == TRUE)
 	{
@@ -2104,30 +2035,9 @@ void SetMenuAnalog()
 //---------------------------------------------------------------------------
 void CleanUpMemory()
 {
-	int i;
-
 	Mixer_Exit();
-	for (i = 0; i < 800; i++)
-	{
-		if (VTFrame[i].SubPage != NULL)
-		{
-			free(VTFrame[i].SubPage);
-		}
-		VTFrame[i].SubPage = NULL;
-		VTFrame[i].SubCount = 0;
-	}
-
-	Free_DMA(&Risc_dma);
-	for(i = 0; i < 5; i++)
-	{
-		Free_DMA(&Vbi_dma[i]);
-		Free_Display_DMA(i);
-	}
-
-	for (i = 0; i < MAXVTDIALOG; i++)
-	{
-		free(VTScreen[i]);
-	}
+	VBI_Exit();
+	BT848_MemoryFree();
 }
 
 //---------------------------------------------------------------------------
@@ -2197,7 +2107,7 @@ void OSD_ShowVideoSource(HWND hWnd, int nVideoSource)
 // Show text on both OSD and statusbar
 void ShowText(HWND hWnd, LPCTSTR szText)
 {
-	StatusBar_ShowText(hwndTextField, szText);
+	StatusBar_ShowText(STATUS_TEXT, szText);
 	OSD_ShowText(hWnd, szText, 0);
 }
 

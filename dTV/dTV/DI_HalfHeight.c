@@ -33,7 +33,7 @@ BOOL HalfHeightBoth(DEINTERLACE_INFO *info)
 {
 	int nLineTarget;
 
-	for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
+	for (nLineTarget = 0; nLineTarget < info->FieldHeight; nLineTarget++)
 	{
 		// copy latest field's rows to overlay, resulting in a half-height image.
 		if (info->IsOdd)
@@ -58,7 +58,7 @@ BOOL HalfHeightEvenOnly(DEINTERLACE_INFO *info)
 
 	if (!info->IsOdd)
 	{
-		for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
+		for (nLineTarget = 0; nLineTarget < info->FieldHeight; nLineTarget++)
 		{
 			// copy latest field's rows to overlay, resulting in a half-height image.
 			memcpyMMX(info->Overlay + nLineTarget * info->OverlayPitch,
@@ -79,7 +79,7 @@ BOOL HalfHeightOddOnly(DEINTERLACE_INFO *info)
 
 	if (info->IsOdd)
 	{
-		for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
+		for (nLineTarget = 0; nLineTarget < info->FieldHeight; nLineTarget++)
 		{
 		// copy latest field's rows to overlay, resulting in a half-height image.
 			memcpyMMX(info->Overlay + nLineTarget * info->OverlayPitch,

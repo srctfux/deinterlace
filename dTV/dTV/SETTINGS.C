@@ -50,6 +50,9 @@
 #include "deinterlace.h"
 #include "AspectRatio.h"
 #include "DebugLog.h"
+#include "MixerDev.h"
+#include "dTV.h"
+#include "ProgramList.h"
 
 // MRS 9-2-00
 // Added variable in dTV.c to track which aspect mode we are currently in
@@ -229,41 +232,10 @@ void LoadSettingsFromIni()
 	BtWhiteCrushUp = GetPrivateProfileInt("Hardware", "BtWhiteCrushUp", BtWhiteCrushUp, szIniFile);
 	BtWhiteCrushDown = GetPrivateProfileInt("Hardware", "BtWhiteCrushDown", BtWhiteCrushDown, szIniFile);
 
-	ManuellAudio[0] = GetPrivateProfileInt("Hardware", "GPIO_OUT_EN", 0, szIniFile); 
-	ManuellAudio[1] = GetPrivateProfileInt("Hardware", "GPIO_DATA_TUNER", 0, szIniFile);  
-	ManuellAudio[2] = GetPrivateProfileInt("Hardware", "GPIO_DATA_RADIO", 0, szIniFile);  
-	ManuellAudio[3] = GetPrivateProfileInt("Hardware", "GPIO_DATA_EXTERN", 0, szIniFile);  
-	ManuellAudio[4] = GetPrivateProfileInt("Hardware", "GPIO_DATA_INTERN", 0, szIniFile);  
-	ManuellAudio[5] = GetPrivateProfileInt("Hardware", "GPIO_DATA_OUT", 0, szIniFile);  
-	ManuellAudio[6] = GetPrivateProfileInt("Hardware", "GPIO_DATA_IN", 0, szIniFile);  
-	ManuellAudio[7] = GetPrivateProfileInt("Hardware", "GPIO_REG_INP", 0, szIniFile);  
-
-	//Capture_VBI = (GetPrivateProfileInt("Show", "CaptureVBI", 0, szIniFile) != 0);  
-	InitialProg = GetPrivateProfileInt("Show", "LastProgram", 0, szIniFile);
+	Capture_VBI = (GetPrivateProfileInt("Show", "CaptureVBI", 0, szIniFile) != 0);  
+	CurrentProgramm = GetPrivateProfileInt("Show", "LastProgram", 0, szIniFile);
 
 	AudioSource = GetPrivateProfileInt("Sound", "AudioSource", AudioSource, szIniFile);
-	LNB.Diseq = (GetPrivateProfileInt("Sound", "DiscEqu", 0, szIniFile) != 0);  
-	for(i = 0; i < 4; i++)
-	{
-		sprintf(szKey, "LNB%d_MinFreq", i + 1);
-		LNB.Anschluss[i].MinFreq = GetPrivateProfileInt("Sound", szKey, LNB.Anschluss[i].MinFreq, szIniFile);
-		sprintf(szKey, "LNB%d_MaxFreq", i + 1);
-		LNB.Anschluss[i].MaxFreq = GetPrivateProfileInt("Sound", szKey, LNB.Anschluss[i].MaxFreq, szIniFile);
-		sprintf(szKey, "LNB%d_LofLow", i + 1);
-		LNB.Anschluss[i].LofLow = GetPrivateProfileInt("Sound", szKey, LNB.Anschluss[i].LofLow, szIniFile);
-		sprintf(szKey, "LNB%d_LofHigh", i + 1);
-		LNB.Anschluss[i].LofHigh = GetPrivateProfileInt("Sound", szKey, LNB.Anschluss[i].LofHigh, szIniFile);
-		sprintf(szKey, "LNB%d_SwitchFreq", i + 1);
-		LNB.Anschluss[i].SwitchFreq = GetPrivateProfileInt("Sound", szKey, LNB.Anschluss[i].SwitchFreq, szIniFile);
-		sprintf(szKey, "LNB%d_Power", i + 1);
-		LNB.Anschluss[i].Power = (GetPrivateProfileInt("Sound", szKey, LNB.Anschluss[i].Power, szIniFile) != 0);
-		sprintf(szKey, "LNB%d_Switch22khz", i + 1);
-		LNB.Anschluss[i].Switch22khz = (GetPrivateProfileInt("Sound", szKey, LNB.Anschluss[i].Switch22khz, szIniFile) != 0);
-		sprintf(szKey, "LNB%d_SwitchFreq", i + 1);
-		LNB.Anschluss[i].SwitchFreq = GetPrivateProfileInt("Sound", szKey, LNB.Anschluss[i].SwitchFreq, szIniFile);
-		sprintf(szKey, "LNB%d_Use", i + 1);
-		LNB.Anschluss[i].Use = (GetPrivateProfileInt("Sound", szKey, LNB.Anschluss[i].Use, szIniFile) != 0);
-	}
 	
 	bSaveSettings = (GetPrivateProfileInt("Show", "SaveSettings", 1, szIniFile) != 0);
 	CountryCode = GetPrivateProfileInt("Show", "CountryCode", 1, szIniFile);
@@ -488,41 +460,10 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("Hardware", "BtWhiteCrushUp", BtWhiteCrushUp, szIniFile);
 	WritePrivateProfileInt("Hardware", "BtWhiteCrushDown", BtWhiteCrushDown, szIniFile);
 
-	WritePrivateProfileInt("Hardware", "GPIO_OUT_EN", ManuellAudio[0], szIniFile); 
-	WritePrivateProfileInt("Hardware", "GPIO_DATA_TUNER", ManuellAudio[1], szIniFile);  
-	WritePrivateProfileInt("Hardware", "GPIO_DATA_RADIO", ManuellAudio[2], szIniFile);  
-	WritePrivateProfileInt("Hardware", "GPIO_DATA_EXTERN", ManuellAudio[3], szIniFile);  
-	WritePrivateProfileInt("Hardware", "GPIO_DATA_INTERN", ManuellAudio[4], szIniFile);  
-	WritePrivateProfileInt("Hardware", "GPIO_DATA_OUT", ManuellAudio[5], szIniFile);  
-	WritePrivateProfileInt("Hardware", "GPIO_DATA_IN", ManuellAudio[6], szIniFile);  
-	WritePrivateProfileInt("Hardware", "GPIO_REG_INP", ManuellAudio[7], szIniFile);  
-
 	WritePrivateProfileInt("Show", "CaptureVBI", Capture_VBI, szIniFile);
 	WritePrivateProfileInt("Show", "LastProgram", CurrentProgramm, szIniFile);
 
 	WritePrivateProfileInt("Sound", "AudioSource", AudioSource, szIniFile);
-	WritePrivateProfileInt("Sound", "DiscEqu", LNB.Diseq, szIniFile);
-	for(i = 0; i < 4; i++)
-	{
-		sprintf(szKey, "LNB%d_MinFreq", i + 1);
-		WritePrivateProfileInt("Sound", szKey, LNB.Anschluss[i].MinFreq, szIniFile);
-		sprintf(szKey, "LNB%d_MaxFreq", i + 1);
-		WritePrivateProfileInt("Sound", szKey, LNB.Anschluss[i].MaxFreq, szIniFile);
-		sprintf(szKey, "LNB%d_LofLow", i + 1);
-		WritePrivateProfileInt("Sound", szKey, LNB.Anschluss[i].LofLow, szIniFile);
-		sprintf(szKey, "LNB%d_LofHigh", i + 1);
-		WritePrivateProfileInt("Sound", szKey, LNB.Anschluss[i].LofHigh, szIniFile);
-		sprintf(szKey, "LNB%d_SwitchFreq", i + 1);
-		WritePrivateProfileInt("Sound", szKey, LNB.Anschluss[i].SwitchFreq, szIniFile);
-		sprintf(szKey, "LNB%d_Power", i + 1);
-		WritePrivateProfileInt("Sound", szKey, LNB.Anschluss[i].Power, szIniFile);
-		sprintf(szKey, "LNB%d_Switch22khz", i + 1);
-		WritePrivateProfileInt("Sound", szKey, LNB.Anschluss[i].Switch22khz, szIniFile);
-		sprintf(szKey, "LNB%d_SwitchFreq", i + 1);
-		WritePrivateProfileInt("Sound", szKey, LNB.Anschluss[i].SwitchFreq, szIniFile);
-		sprintf(szKey, "LNB%d_Use", i + 1);
-		WritePrivateProfileInt("Sound", szKey, LNB.Anschluss[i].Use, szIniFile);
-	}
 	
 	WritePrivateProfileInt("Show", "SaveSettings", bSaveSettings, szIniFile);
 	WritePrivateProfileInt("Show", "CountryCode", CountryCode, szIniFile);

@@ -33,6 +33,7 @@
 
 BOOL Tuner_Init(int TunerNr);
 BOOL Tuner_SetFrequency(int TunerTyp, int wFrequency);
+const char* Tuner_Status();
 void Load_Country_Settings();
 void Load_Country_Specific_Settings(int LPos);
 
@@ -61,7 +62,6 @@ typedef struct TChannels
 	unsigned long freq[512];
 };
 
-extern char TunerStatus[30];
 extern struct TCountries Countries[35];
 extern struct TChannels Channels;
 struct TCountries Countries[35];

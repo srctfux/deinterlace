@@ -71,11 +71,7 @@
 #include "DebugLog.h"
 #include "vbi.h"
 #include "Settings.h"
-
-short pPALplusCode[] = {  18,  27,  36,  45,  54,  63,  72,  81,  90, 100, 110, 120, 134, 149};
-short pPALplusData[] = { 160, 178, 196, 214, 232, 250, 268, 286, 304, 322, 340, 358, 376, 394};
-short nLevelLow      =  45;
-short nLevelHigh     = 135;
+#include "Status.h"
 
 // Thread related variables
 BOOL                bStopThread = FALSE;
@@ -105,7 +101,6 @@ BOOL                bAutoDetectMode = TRUE;
 BOOL                bFallbackToVideo = TRUE;
 
 // TRB 10/28/00 changes, parms, and new fields for sync problem fixes
-BYTE			    * lpCurOverlay;				// made static for Lock rtn, curr vid buff ptr
 DDSURFACEDESC		ddsd;						// also add a surface descriptor for Lock			
 BOOL				RunningLate = FALSE;        // Set when we are not keeping up
 HRESULT             FlipResult = 0;             // Need to try again for flip?
@@ -113,6 +108,11 @@ BOOL                Wait_For_Flip = TRUE;       // User parm, default=TRUE
 BOOL	            DoAccurateFlips = TRUE;     // User parm, default=TRUE
 BOOL	            Hurry_When_Late = FALSE;    // " , default=FALSE, skip processing if behind
 long				Sleep_Interval = 0;         // " , default=0, how long to wait for BT chip
+BOOL bIsOddField = FALSE;
+
+// FIXME: should be able to get of this variable
+long OverlayPitch = 0;
+
 
 ///////////////////////////////////////////////////////////////////////////////
 void Start_Thread()
@@ -784,7 +784,7 @@ void UpdatePulldownStatus()
 
 	if (gPulldownMode != lastPulldownMode)
 	{
-		SetWindowText(hwndPalField, DeinterlaceModeName(gPulldownMode));
+		StatusBar_ShowText(STATUS_PAL, DeinterlaceModeName(gPulldownMode));
 		lastPulldownMode = gPulldownMode;
 	}
 }
@@ -800,7 +800,6 @@ void UpdatePulldownStatus()
 //
 BYTE* LockOverlay()
 {
-
 	HRESULT ddrval;
 
 	if (FAILED(FlipResult))				// prev flip was busy?
@@ -814,7 +813,6 @@ BYTE* LockOverlay()
 	ddrval = IDirectDrawSurface_Lock(lpDDOverlayBack, NULL, &ddsd, 
 		DDLOCK_WAIT | DDLOCK_NOSYSLOCK, NULL);
 	OverlayPitch = ddsd.lPitch;			// Set new pitch, may change
-	lpCurOverlay = ddsd.lpSurface;		// Set new address, also changes
 	return ddsd.lpSurface;
 }
 
@@ -841,11 +839,10 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 	DWORD RefreshRate;
 
 	BOOL bIsPAL = TVSettings[TVTYPE].Is25fps;
-	lpCurOverlay = lpOverlayBack;		
 
 	RefreshRate = GetRefreshRate();
 
-	if (lpDDOverlay == NULL || lpDDOverlay == NULL || lpOverlayBack == NULL || lpOverlay == NULL)
+	if (lpDDOverlay == NULL || lpDDOverlayBack == NULL)
 	{
 		ExitThread(-1);
 	}
@@ -1015,7 +1012,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 
 			if (!RunningLate)
 			{
-				pDest=LockOverlay();	// Ready to access screen, Lock back buffer berfore accessing
+				pDest = LockOverlay();	// Ready to access screen, Lock back buffer berfore accessing
 										// can't do this until after Lock Call
 				info.Overlay = pDest;
 			}
@@ -1049,7 +1046,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 			// somewhere above we will have locked the buffer, unlock before flip
 			if (!RunningLate)
 			{
-				ddrval = IDirectDrawSurface_Unlock(lpDDOverlayBack, lpCurOverlay);
+				ddrval = IDirectDrawSurface_Unlock(lpDDOverlayBack, NULL);
 
 				if (bFlipNow)
 				{
@@ -1101,12 +1098,10 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 		{
 			if (dwLastSecondTicks + 1000 < GetTickCount())
 			{
-			
 				sprintf(Text, "%d DF/S", nFrame);
-				SetWindowText(hwndFPSField, Text);
+				StatusBar_ShowText(STATUS_FPS, Text);
 				nFrame = 0;
 				dwLastSecondTicks = GetTickCount();
-			
 			 }
 		}
 	}

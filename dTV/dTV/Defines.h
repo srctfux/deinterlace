@@ -38,7 +38,6 @@
 #define __DEFINES_H___
 
 #define MAXVTDIALOG 8
-#define MAXPROGS 4096
 #define VBI_DATA_SIZE 2048*39
 #define VBI_VT  1
 #define VBI_VPS 2
@@ -48,13 +47,6 @@
 #define VBI_SPL 2044
 
 #define CLEARLINES 288
-
-#define ID_STATUSBAR    1700
-#define ID_TEXTFIELD       ID_STATUSBAR+1
-#define ID_KENNUNGFFIELD   ID_STATUSBAR+2
-#define ID_CODEFIELD       ID_STATUSBAR+3
-#define ID_FPSFIELD        ID_STATUSBAR+4
-#define ID_AUDIOFIELD      ID_STATUSBAR+5
 
 #define INIT_BT              1800
 #define RESET_LIST           1802

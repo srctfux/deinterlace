@@ -39,6 +39,10 @@
 #include "structs.h"
 #include "globals.h"
 
+
+void VBI_VT_Init();
+void VBI_VT_Exit();
+
 BYTE DeHam(BYTE byte);
 BYTE ReverseDeHam(BYTE b);
 void StorePage(BYTE mag, BYTE page);
@@ -60,6 +64,7 @@ void format_page(int Page, int SubPage, BOOL reveal, struct fmt_page *pg);
 void VT_DecodeLine(BYTE* VBI_Buffer);
 void VTS_DecodeLine(BYTE* VBI_Buffer);
 
+extern unsigned short UTPages[12];
 
 
 #endif
