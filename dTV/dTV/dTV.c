@@ -454,6 +454,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 					InvalidateRect(hWnd,NULL,FALSE);
 				}
 			}
+			ProcessAspectRatioSelection(hWnd, LOWORD(wParam));
 			break;
 
 		case IDM_VT_PAGE_PLUS:
@@ -466,6 +467,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 					InvalidateRect(hWnd,NULL,FALSE);
 				}
 			}
+			ProcessAspectRatioSelection(hWnd, LOWORD(wParam));
 			break;
 
 

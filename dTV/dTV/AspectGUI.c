@@ -167,7 +167,14 @@ void AspectRatio_SetMenu(HMENU hMenu)
 	CheckMenuItem(hMenu, IDM_ASPECT_DEFER_OVERLAY, (aspectSettings.deferedSetOverlay)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_WINPOS_AUTOSIZE, (aspectSettings.autoResizeWindow)?MF_CHECKED:MF_UNCHECKED);
 
-
+	// Zoom
+	CheckMenuItem(hMenu, IDM_ZOOM_10, (aspectSettings.xZoomFactor == 1.0 && aspectSettings.yZoomFactor == 1.0)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_ZOOM_15, (aspectSettings.xZoomFactor == 1.5 && aspectSettings.yZoomFactor == 1.5)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_ZOOM_20, (aspectSettings.xZoomFactor == 2.0 && aspectSettings.yZoomFactor == 2.0)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_ZOOM_25, (aspectSettings.xZoomFactor == 2.5 && aspectSettings.yZoomFactor == 2.5)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_ZOOM_30, (aspectSettings.xZoomFactor == 3.0 && aspectSettings.yZoomFactor == 3.0)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_ZOOM_35, (aspectSettings.xZoomFactor == 3.5 && aspectSettings.yZoomFactor == 3.5)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_ZOOM_40, (aspectSettings.xZoomFactor == 4.0 && aspectSettings.yZoomFactor == 4.0)?MF_CHECKED:MF_UNCHECKED);
 }
 
 //----------------------------------------------------------------------------
@@ -325,6 +332,72 @@ BOOL ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 	// Manually-triggered one-time automatic detect of aspect ratio
 	case IDM_SASPECT_COMPUTE:
 		aspectSettings.DetectAspectNow = TRUE;
+		break;
+
+	//------------------------------------------------------------------
+	// Zoom
+	case IDM_ZOOM_10:
+		aspectSettings.xZoomFactor = aspectSettings.yZoomFactor = 1.0;
+		break;
+
+	case IDM_ZOOM_15:
+		aspectSettings.xZoomFactor = aspectSettings.yZoomFactor = 1.5;
+		break;
+
+	case IDM_ZOOM_20:
+		aspectSettings.xZoomFactor = aspectSettings.yZoomFactor = 2.0;
+		break;
+
+	case IDM_ZOOM_25:
+		aspectSettings.xZoomFactor = aspectSettings.yZoomFactor = 2.5;
+		break;
+
+	case IDM_ZOOM_30:
+		aspectSettings.xZoomFactor = aspectSettings.yZoomFactor = 3.0;
+		break;
+
+	case IDM_ZOOM_35:
+		aspectSettings.xZoomFactor = aspectSettings.yZoomFactor = 3.5;
+		break;
+
+	case IDM_ZOOM_40:
+		aspectSettings.xZoomFactor = aspectSettings.yZoomFactor = 4.0;
+		break;
+
+	case IDM_VT_PAGE_MINUS:
+		if (aspectSettings.xZoomFactor > 1.0 || aspectSettings.yZoomFactor > 1.0)
+		{
+			aspectSettings.xZoomCenter -= 0.05;
+			if (aspectSettings.xZoomCenter < 0.0) aspectSettings.xZoomCenter = 0.0;
+			ShowText(hWnd,"Pan Left");
+		}
+		break;
+
+	case IDM_VT_PAGE_PLUS:
+		if (aspectSettings.xZoomFactor > 1.0 || aspectSettings.yZoomFactor > 1.0)
+		{
+			aspectSettings.xZoomCenter += 0.05;
+			if (aspectSettings.xZoomCenter > 1.0) aspectSettings.xZoomCenter = 1.0;
+			ShowText(hWnd,"Pan Right");
+		}
+		break;
+
+	case IDM_VT_PAGE_DOWN:
+		if (aspectSettings.xZoomFactor > 1.0 || aspectSettings.yZoomFactor > 1.0)
+		{
+			aspectSettings.yZoomCenter += 0.05;
+			if (aspectSettings.yZoomCenter > 1.0) aspectSettings.yZoomCenter = 1.0;
+			ShowText(hWnd,"Pan Down");
+		}
+		break;
+
+	case IDM_VT_PAGE_UP:
+		if (aspectSettings.xZoomFactor > 1.0 || aspectSettings.yZoomFactor > 1.0)
+		{
+			aspectSettings.yZoomCenter -= 0.05;
+			if (aspectSettings.yZoomCenter < 0.0) aspectSettings.yZoomCenter = 0.0;
+			ShowText(hWnd,"Pan Up");
+		}
 		break;
 
 	//------------------------------------------------------------------

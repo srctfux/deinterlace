@@ -168,6 +168,12 @@ typedef struct _aspectsettings {
 
 	// True if we want to use whatever ratio is present on the next frame.
 	BOOL DetectAspectNow;
+
+	// Zoom
+	double xZoomFactor;
+	double yZoomFactor;
+	double xZoomCenter;
+	double yZoomCenter;
 } AspectSettingsStruct;
 extern AspectSettingsStruct aspectSettings;
 

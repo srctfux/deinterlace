@@ -91,7 +91,8 @@ int HalfHeight = FALSE;
 AspectSettingsStruct aspectSettings = {1333,0,1,0,0,30,0,FALSE,60,300,15,20,
 									2000,VERT_POS_CENTRE,HORZ_POS_CENTRE,
 									{0,0,0,0},{0,0,0,0},{0,0,0,0},TRUE,FALSE,4,TRUE,FALSE,
-									0,60*30,1000,FALSE,8,60,60,1000,FALSE,FALSE};
+									0,60*30,1000,FALSE,8,60,60,1000,FALSE,FALSE,
+									1.0,1.0,0.5,0.5};
 
 BOOL Bounce_OnChange(long NewValue); // Forward declaration to reuse this code...
 BOOL Orbit_OnChange(long NewValue); // Forward declaration to reuse this code...
@@ -172,7 +173,14 @@ AspectFilter* BuildFilterChain() {
 	// This like is where image zooming would be implemented...
 	// Sample code zooms in 2x on the center of the image
 	// See comments in AspectFilters.hpp for PanAndZoomAspectFilter details.
-	if (false) { cur->next = new PanAndZoomAspectFilter(.5,.5,2,2); cur = cur->next; }
+	if (aspectSettings.xZoomFactor > 1.0 || aspectSettings.yZoomFactor > 1.0)
+	{
+		cur->next = new PanAndZoomAspectFilter(aspectSettings.xZoomCenter,
+											   aspectSettings.yZoomCenter,
+											   aspectSettings.xZoomFactor,
+											   aspectSettings.yZoomFactor);
+		cur = cur->next;
+	}
 
 	cur->next = new ScreenSanityAspectFilter(); cur = cur->next;
 	if (aspectSettings.autoResizeWindow) { cur->next = new ResizeWindowAspectFilter(); cur = cur->next; }
