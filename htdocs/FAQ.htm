@@ -30,7 +30,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
   </tr>
   <tr> 
     <td width="160" rowspan="2"><img src="images/dtvlogotvthumb.jpg" width="160" height="140" alt="dTV Logo"></td>
-    <td colspan="2" align="right" valign="top"> <font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><font size="1"><!-- #BeginEditable "Language%20Selector" --><font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><font size="1"><font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><font size="1"><font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><font size="1"><font face="Verdana, Arial, Helvetica, sans-serif" size="5"><a href="francais/FAQ.htm"><img src="images/selector-french.gif" width="50" height="18" border="0"></a></font></font></b></font></font></b><img src="images/selector-divider.gif" width="10" height="17"><b><font size="1"><font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><font size="1"><font face="Verdana, Arial, Helvetica, sans-serif" size="5"><a href="FAQ.htm"><img src="images/selector-english.gif" width="45" height="18" border="0"></a></font></font></b></font></font></b></font></font></b></font><!-- #EndEditable --></font></b></font></td>
+    <td colspan="2" align="right" valign="top"> <font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><font size="1"><!-- #BeginEditable "Language%20Selector" --><font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><font size="1"><font face="Verdana, Arial, Helvetica, sans-serif" size="5"><a href="francais/FAQ.htm"><img src="images/selector-french.gif" width="50" height="18" border="0"></a></font></font></b><img src="images/selector-divider.gif" width="10" height="17"><b><font size="1"><font face="Verdana, Arial, Helvetica, sans-serif" size="5"><img src="images/selector-english.gif" width="45" height="18" border="0"></font></font></b></font><!-- #EndEditable --></font></b></font></td>
   </tr>
   <tr> 
     <td colspan="2" align="right" valign="bottom"><font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><!-- #BeginEditable "Page%20Title" -->FAQ&nbsp;<!-- #EndEditable -->&nbsp;</b></font></td>
@@ -42,13 +42,14 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
     <td colspan="3">&nbsp;</td>
   </tr>
   <tr> 
-    <td colspan="3"><!-- #BeginEditable "Text" --><p>Last update; January, 25, 2001
+    <td colspan="3"><!-- #BeginEditable "Text" --> 
+      <p>Last update ; January, the 24st, 2001</p>
       <p> 
       <h1>Introduction</h1>
       <p> 
       <h2>What is dTV ?</h2>
       <p> dTV is a piece of software that grabs analog, interlaced video, and 
-        deinterlaces it to make it a progressive scan feed for use on your computer 
+        deinterlace it to make it a progressive scan feed for use on your computer 
         monitor or projector.
       <p> Analog, interlaced video is what output devices like vcr, laserdisc, 
         game consoles ... 
@@ -57,8 +58,9 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <p> Unlike most existing software that tries to do the same, dTV implements 
         very sophisticated algorithms to deinterlace such sources. Using such 
         algorithms makes sure that each kind of video source is handled a different 
-        way. It provides the user with a level of image quality unknown to pc 
-        owners up to now. 
+        way. <br>
+        It provides the user with a level of image quality unknown to pc owners 
+        up to now.
       <p> Some of those techniques are ;
       <ul>
         <li>video source deinterlacing</li>
@@ -70,82 +72,12 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         with a progressive scan source that was interlaced right before.
       <p> 
       <h2>Who made what ?</h2>
-      <p> 
-      <h3>Developers</h3>
-      <p> 
-      <h3><i>John Adcock</i></h3>
-      <p>John is the founder of the project. He did huge amounts of full time 
-        development over a three-month period during a lucky work break on versions 
-        1.0 through 1.06 Beta 4. He did most of the work cleaning, translating 
-        and legalizing Multidec. He put into code, the world's first open-source 
-        real-time 3:2 pulldown software deinterlacer (based on Mark Rejhon's algorithm 
-        article). He also designed an open-source video-material deinterlacer 
-        that is superior to those in virtually any other any PC-based video software 
-        product.</p>
-      <h3><br>
-        <i> Mark Rejhon</i></h3>
-      <p>As of version 1.07, Mark is the project admin. He is also the moderator 
-        of the Internet's largest Home Theater Computers forum at <a href="http://www.avsforum.com/">AVSFORUM</a>. 
-        Mark authored the 3:2 pulldown algorithm that forms the basis of the algorithm 
-        implemented into dTV by JohnAd. He also does other programming tasks like 
-        code cleanup, merging, documenting, testing, enhancing of contributors' 
-        changes that are submitted to the project. He also enhances dTV with his 
-        own changes to certain parts of the code, including improvements to the 
-        deinterlacer modes.</p>
-      <h3><br>
-        <i> Steve Grimm</i></h3>
-      <p>Steve is contributing enhancements to the deinterlacing modes including 
-        better automatic switching between video mode and 3:2 pulldown mode, and 
-        handling of material that has bad 3:2 pulldown. He also worked on an early 
-        version of a 3:2 pulldown deinterlacing algorithm.</p>
-      <h3><br>
-        <i> Michael Samblanet</i></h3>
-      <p>Michael is continuing to upgrade his aspect ratio control code.</p>
-      <p><br>
-      </p>
-      <h3><i>Tom Barry</i></h3>
-      <p> Tom contributed the triple buffering code and synchronization fixes 
-        for version 2.0.0. Also, he has authored several MMX assembly optimizations 
-        to the video deinterlace mode and added the advanced Brooktree/Conexant 
-        chipset settings menu, both of which were included in version 1.9. <br>
-      <p><br>
-      </p>
-      <h3><i>Michael Eskin</i></h3>
-      <p> Michael works for Conexant and brings his technical expertise of the 
-        capture chipset to the dTV project. He's also contributing to various 
-        parts of the code among which, the OSD code. <br>
-      <a name="THANKS"></a>
-      <h3>Thanks to those various helping hands</h3>
-      <p> 
-      <p>See <a href="Thanks_MultiDec.txt"> MultiDec_ReadMe.txt</a> for a list 
-        of thanks for the project dTV was based upon.</p>
-      <ol>
-        <li>A big debt a gratitude is due to Mark Rejhon for his 3:2 alogirthm 
-          and his help testing, promoting dTV but particularly for his vision 
-          and his refusal to accept second best.</li>
-        <li>Thanks to Paul Samblanet, who contributed the aspect ratio control 
-          code. </li>
-        <li>Thanks to Daniel Schmelzer for his hard work creating and updating 
-          the website. Love the logo!&nbsp;</li>
-        <li>Thanks to Steve Grimm for his work on the old method of 3:2 pulldown.</li>
-        <li>Thanks to everybody on the deinterlace project mailing list</li>
-        <li>Thanks to Borg, creator of bTV, for writing the first ever computer 
-          deinterlacing program the inspiration for this project</li>
-        <li>Thanks to Yvon Quere and Ali for finding bTV and Yvon for creating 
-          and updating the FAQ.&nbsp;</li>
-        <li>Thanks to all at the AVSForums for your encouragement and help. The 
-          HTPC forum is easily the best group on the internet.</li>
-        <li>Thanks to the authors of VirtualDub for the the PAL detection algorithm.</li>
-        <li>Thanks to Gunnar Thalin for his Area based deinterlacing plug-in which 
-          was the basis for the current deinterlacing method.</li>
-        <li>Thanks to Steaphan Greene, Øyvind Aabling, Octavian Purdila, Vladimir 
-          Dergachev and Christian Lupien&#151;the GATOS developers&#151;for the 
-          screen capture code. </li>
-      </ol>
-      <p> 
+      <p> See <a href="Authors.htm">dTV -- Authors</a> for the main contributors 
+        and <a href="Thanks.htm">dTV -- Thanks</a> for a list of people who have 
+        helped make dTV a success. 
       <h2>How much does dTV cost ?</h2>
-      <p> $1000 (plus taxes) :-) Of course not, dTV is fully free of charge, freeware, 
-        coded under GPL. 
+      <p> 1000$ (plus taxes) :-) Of course not, dTV is fully free of charge, freeware, 
+        coded under GPL.
       <p> 
       <h1>General issues</h1>
       <p> 
@@ -153,45 +85,46 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <h2>Should I use dTV to deinterlace the output from my set-top dvd player 
         ?</h2>
       <p> While it's feasable and works quite fine (see the "dTV Windvd challenge" 
-        in the <a href="screenshots/index.htm">screenshots</a> section), home theater 
+        in the <a href="/screenshots.htm">screenshots</a> section), home theater 
         pc's have shown the best results while using dvd decoding software along 
-        with a dvd-rom and a modern graphic card. However, it's been used quite 
-        often for test purposes (testing of grab quality on a high quality source, 
-        testing pulldown techniques on well encoded sources etc..). 
+        with a dvd-rom and a modern graphic card.<br>
+        However, it's been used quite often for test purposes (testing of grab 
+        quality on a high quality source, testing pulldown techniques on well 
+        encoded sources etc..).
       <p> 
       <h1>Software issues</h1>
       <p> 
       <h2>Which operating system can I use dTV on ?</h2>
-      <p> Windows 95 ok <i>uses VxD running in ring-0</i><br>
-      Windows 98 ok <i>uses VxD running in ring-0</i><br>
-      Windows NT ok <i>uses sys running in ring-0</i><br>
-        Windows Me ok <i>uses VxD running in ring-0</i><br>
-        Windows 2000 ok <i>uses sys running in ring-0</i><br>
+      <p> Windows 95 ok<br>
+        Windows 98 ok<br>
+        Windows NT ok <i>requires that a VxD runs in ring-0 (nt ultra low level 
+        part of the os</i><br>
+        Windows Me ok <i>tested with an Hauppage 401 without problem</i><br>
+        Windows 2000 ok<br>
         Linux no<br>
         OS/2 definitely no ;-) 
+      <p> 
       <h2>What are all those deinterlace algorithms ?</h2>
+      <p><br>
       <h3>Video Deinterlace (Bob)</h3>
-      <p> This method is based on Gunnar Thalin's VirtualDub filter.&nbsp; If it
-      detects weaving artifacts in the current image it uses bob to get rid of
-      them.&nbsp; This method has a tendency to bob rather too much and gives
-      poor results on fine static images. 
-      <h3>Video Deinterlace (Weave)</h3>
-      <p> Similar to Video Deinterlace (Bob), however this method has a tendency
-      to weave on moving images. 
-      <h3>Video Deinterlace (2-Frame)</h3>
-      <p>This method uses the current frame and the last two to determine
-      whether to bob or weave a given pixel.&nbsp; This gives better results on
-      both stationary and moving images than the above two methods however it
-      uses more CPU. 
+      <p> This method is just a simple bob method used when dTV determines that 
+        the changes between the odd and even fields are extreme. This method will 
+        result in jitter (on static parts of the image) and jagged edges on diagonal 
+        lines. 
       <h3>Simple Weave</h3>
-      <p> This method just combines the most recent even and odd fields.&nbsp;
-      This causes motion artifacts and is provided for comparison. 
-      <h3>Simple Bob</h3>
-      <p>This uses only the most recent field and fills the lines in between
-      with interpolated pixels.&nbsp; This method has in may ways been superceded
-      by Scaler BOB. 
+      <p> This method will weave the even and odd field if dTV determines that 
+        the changes between them are not severe. Setting dTV to always use this 
+        method will result in video playback that is almost identical to viewing 
+        on interlaced displays. 
+      <h3>Video Deinterlace (Weave)</h3>
+      <p> Similar to the above Simple Weave, with an enhancement. The method is 
+        enhanced by modifying the pixels that dTV determines is different enough 
+        than the pixel above and below it. 
+      <h3>Interpolated Bob</h3>
+      <p> As far as I can read the code, I don't see this method being used at 
+        all. If any developers can rectify this, please do. 
       <h3>Blended Clip</h3>
-      <p> The BLENDED CLIP Deinterlace method is designed mostly for experimentation 
+      <p> The BLENDED CLIP DeInterlace method is designed mostly for experimentation 
         by those interested in what works for video deinterlacing. When it is 
         selected it will pop up a control panel with many controls to adjust various 
         parameters. These all correspond to Blc... parameters in the [Deinterlace] 
@@ -200,27 +133,16 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         deinterlace methods for special purposes. These can be saved in a separate 
         ini file and invoked by a command line parameter when starting dTV.exe. 
         Somewhat CPU intensive
-      <h3> Scaler Bob</h3>
-      <p> Uses the DirectDraw hardware bob feature (if available), this uses the
-      current field and lets the video card scaler size the picture to fit the
-      screen.&nbsp; Produces good results for fast moving images.
-      <h3> Even Fields Only<br>
-      Odd Fields Only</h3>
-      <p>These use only one field out of each pair and use hardware
-      scaling.&nbsp; This reduces bob artifacts at the cost of loss of
-      information.&nbsp; These were originally intended to be used with game
-      consoles.<h3>Adaptive Deinterlace</h3>
-      <p>This method uses the amount of motion detected to select the best
-      deinterlacing alogoritm.&nbsp; Currently by default it switches between
-      2-Frame and weave. 
+      <p> 
       <h3>Greedy deinterlace method</h3>
-      <p> The GREEDY Deinterlace method is designed to give good results on low 
+      <p> The GREEDY DeInterlace method is designed to give good results on low 
         motion video source, using less CPU than some others. Good on slower machines 
         but it will give awful results on high motion video material like sports. 
         Quite by accident, it can also do a decent job on poorly mastered 3:2 
         or 2:2 pull down film source material like some anime movies, regardless 
         of low or high motion. Try it if you have a movie source that is not giving 
-        good results with normal Auto Pull Down processing. 
+        good results with normal Auto Pull Down processing.
+      <p> 
       <h3>BTV Plugin</h3>
       <p> <i>Deprecated. Included initially to allow usage of video plugins that 
         could have been made for BorgTV (see <a href="#THANKS">thanks</a>)</i>
@@ -247,9 +169,8 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <p> PAL movies are made of sequences of 2:2 frames. Once such a sequence 
         is detected, the Odd and Even fields are taken, weaved to form 1 frame 
         of the 24-fps material, and displayed. 
-      <h2>When taking a snapshot, dTV outputs ppm files, what are those ?</h2>
-      <i>Deprecated ; Since version 2, dTV outputs more widely used TIFF files 
-      that are supported by many applications out there</i> 
+      <h2>When taking a snapshot, old versions of dTV outputs ppm files, what 
+        are those ?</h2>
       <p> It's called Portable PixMap. Actually, this is the only graphic file 
         code that John Adcock had when writing dTV ;-)<br>
         It's perfectly handled by several applications including 
@@ -259,11 +180,21 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         <li>Paint Shop Pro <a href="http://www.jasc.com/product.asp?pf%5Fid=001">http://www.jasc.com/product.asp?pf%5Fid=001</a> 
       </ul>
       <p> 
+      <h2> My picture jumps up and down?<br>
+        I get dropped frames?</h2>
+      <p> Both problems seems to be caused by not having a powerful enough machine 
+        to run everything all at the same time.&nbsp; The things that use up a 
+        lot of CPU time are 2-Frame and Blended Clip deinterlacing and automatic 
+        pulldown detection.&nbsp; Try moving to another pulldown method or switching 
+        off autodetection.&nbsp; The other alternative is to buy a faster PC ;-))</p>
+      <p> There is now a setting in Select Hardware which allows you to tell dTV 
+        how fast your PC is.&nbsp; Try selecting alower speed if you get either 
+        of these problems.</p>
       <h2>Can I <i>remote control</i> dTV ? <b>YES</b></h2>
       <p> Yes you can. dTV is being developped mainly by people using it as an 
         analog source scaler for their projector and they prefer for sure using 
         dTV from their remote on the sofa rather than from their desk ;-)
-      <p> dTV is thus filled with <a href="keyboard.htm">keyboard shortcuts</a> 
+      <p> dTV is thus filled with <a href="/keyboard.htm">keyboard shortcuts</a> 
         for all main options so that you can do everything quickly.<br>
         More, we suggest the use of <a href="http://www.stack.nl/~stilgar/windoze/girder.html">Girder</a> 
         from Ron Bessems as the application of choice for remote controling your 
@@ -283,9 +214,9 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         1056 megabits per second (132 megabytes per second) due to overhead. Try 
         to go bidirectional, and framerate literally gets the death penalty!"
       <p> However, experience in the last monthes showed the some users were able 
-        to use their PCI card with success and without dropped frames. In some 
-        cases however, frame rate is going down when higher and higher resolutions 
-        are tried ; 
+        to use their PCI card with success and without dropped frames.<br>
+        In some cases however, frame rate is going down when higher and higher 
+        resolutions are tried ;
       <p> IanD reported <i>I have an 8MB 3dfusion PCI on a BX mobo Celeron 566 
         64MB RAM 66MHz FSB, with Dynalink Magic TView (Conexant 878) and can only 
         execute dTV at 16 bit colour depth. When running a 1024x768 desktop, dTV 
@@ -314,9 +245,9 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         <li>Guillemot maxi video 3 <a href="http://fr.guillemot.com/brand/gamme/video/mtvvidp3/mtvvidpci3.html">http://fr.guillemot.com/brand/gamme/video/mtvvidp3/mtvvidpci3.html</a> 
         <li>The Pinacle Studio PCTV <a href="http://www.pinnaclesys.com/ProductPage.asp?Product_ID=6">http://www.pinnaclesys.com/ProductPage.asp?Product_ID=6</a> 
       </ul>
-      <p>Take a look at the <a href="card-support/index.htm">card list</a>. This will 
+      Take a look at the <a href="card_support.htm">card list</a>. This will 
       never be complete so feel free to drop us an email reporting your experience 
-      with dTV and your card.</p>
+      with dTV and your card.
       <p> <i>This list is originally based on the linux bttv driver on which the 
         program was originally based.</i>
       <p> 
@@ -324,8 +255,8 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <p> Probably not. dTV is supporting (see previous question) the Brooktree/Conexant 
         chipset. Supporting others chipsets, while feasable, means some hard work 
         and some solid knowledges of those chipsets. And <b>unfortunately, no 
-        recent vga card with video-in feature includes Brooktree/Conexant chipset</b>. 
-        Gx00, Asus Deluxe etc... are thus not supported at the moment. 
+        recent vga card with video-in feature includes Brooktree/Conexant chipset</b>.<br>
+        Gx00, Asus Deluxe etc... are thus not supported at the moment.
       <p> If you have some programming knowledge regarding the grab chipsets used 
         in those card, you might want to help us. See the "<a href="#HELP">How 
         can I help</a>" section.
@@ -333,9 +264,9 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <h2>Can I use more than one video input ?</h2>
       <p> Some "nut" people (he's admitting it himself ;-) who are playing with 
         Picture In Picture a lot have asked if dTV could drive multiple cards 
-        or multiple inputs. A card allowing at worst 4 video inputs is manufactured 
-        by Leadtek. It's the <a href="http://www.leadtek.com.tw/ewv605.htm">Winview 
-        605</a>. 
+        or multiple inputs.<br>
+        A card allowing at worst 4 video inputs is manufactured by Leadtek. It's 
+        the <a href="http://www.leadtek.com.tw/ewv605.htm">Winview 605</a>.
       <p> It is Brooktree based so it might work with dTV but clearly nothing 
         is done right now to drive multiple video inputs at the same time.
       <p> See the <a href="http://www.avsforum.com/ubb/Forum12/HTML/004431.html">associated 
@@ -372,24 +303,17 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         especially with old or nonstandard equipment. Macrovision may show up 
         as stripes of color, distortion, rolling, black & white picture, and dark/light 
         cycling. Macrovision creates problems for many line doublers."</i>
-      <p> <b>WARNING</b> This has been reported only when feeding, for test purposes, 
-        a dvd player to the computer. Problems on other type of sources have yet 
-        to be shown.
-      <p>So in common cases, you don't have to worry about this.
+      <p> Michael Eskin from Conexant found a way to limit this effet. You can 
+        modify a parameter in your ini file to do so.
       <p> 
-      <h2>Despite a very powerful system, I've still got some dropped frames ?</h2>
-      <p></p>
-      <p>Some people experienced some dropped frames (signs of a machine that has 
-      problems keeping up with the workload of dTV) even on powerful systems. 
-      An hypothesis is that some motherboard agp speed issue might be the cause 
-      of such behavior.</p>
-      <p> JackB reported <i>We looked at his BIOS settings and the only major 
-        difference is that his had a 4X AGP mode and my MB only has a 2X AGP mode 
-        <snip>We put my video card, a GeForce2 MX, in his(slower supposedly)system 
-        and it ran 0 DFS. So it's not the MX throughput that's the problem. So, 
-        I'm down to it's my motherboard not being up to speed in either AGP acceleration 
-        or I have some settings set incorrectly</i>
-      <p> 
+      <h2>I have slower system and&nbsp; I get some dropped frames ?</h2>
+      <p>Some people experienced some dropped frames or extreme jerkiness on slower 
+        machines, say less than 500 mhz. Some performance tuning parameters for 
+        this are available in the [Threads] section of the <a href="IniFile.HTM">.ini 
+        documentation</a>. Depending upon your graphics card you may also try 
+        running with a lower screen resolution or color depth. Also try to limit 
+        what else is running at the time, including System Tray applications that 
+        may cause frequent interupts. </p>
       <a name="OVERLAY"></a>
       <h2>I get "overlay update" errors</h2>
       <p> Sometimes you get this error message <br>
@@ -397,31 +321,36 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         at line 161</code><br>
         We don't have any full explanation of the problem but it happens when 
         resizing dTV or making it go from fullscreen to window mode. Also the 
-        color depth, frequency and size of the desktop might be related. The problem 
-        seems to have disappeared with dTV starting from version 2.0.0 
+        color depth, frequency and size of the desktop might be related.<br>
+        The problem seems to have disappeared with dTV starting from version 2.0.0
       <p> Some more infos on this issue in <a href="http://www.avsforum.com/ubb/Forum12/HTML/004895.html">this 
         avs topic</a>
+      <p> <b>WARNING</b> This will occur if you have an MPACT2 based card running 
+        in 24bit mode.&nbsp; To use dTV with this card you must use a 16bit desktop 
+        mode.
       <p> 
       <a name="HELP"></a>
       <h1>How can I help ?</h1>
       <p> 
       <h2>Testing</h2>
-      <p> More and more people are giving dTV a try. Why wouldn't you ? We'd like 
-        to know about your experience with it. What does (not) work ? What can 
-        be improved, what feature you'd like. Every feedback is useful. 
-      <p> Please have a look, when reporting a problem, to the <a href="bugs/Bugs_108.htm">bug 
-        list</a>. Report also the hardware you're using, especially video card 
-        and grab card. 
-      <p> 
+      <p> More and more people are giving dTV a try. Why wouldn't you ? <br>
+        We'd like to know about your experience with it. What does (not) work 
+        ? What can be improved, what feature you'd like. Every feedback is useful.
+      <p> Please report bugs on the <a href="http://www.avsforum.com/ubbcgi/Ultimate.cgi">AV 
+        Science Forum</a> after checking (using the search feature) that the problem 
+        has not already been reported. Each bug report should include the hardware 
+        you're using, especially video card, grab card and processor type and 
+        speed. 
       <h2>Coding</h2>
       <p> Any help is welcome. Despite including very complex code, there's a 
         lot of features in it that are simple or that could be easily implemented 
         without knowing anything about 3:2 pulldown detection.
       <p> If you've got an idea, or feel like to trying to implement something 
-        that is already in the <a href="Todo.htm">Todo list</a>, contact the 
+        that is already in the <a href="/Todo.htm">Todo list</a>, contact the 
         authors and join the <a href="http://sourceforge.net/mail/?group_id=7420">mailing 
-        list</a>. All relevant infos to get you started are on the <a href="developers.htm">developers 
-        page</a>. 
+        list</a>. All relevant infos to get you started are on the <a href="/developers.htm">developers 
+        page</a>.
+      <p> 
       <!-- #EndEditable --></td>
   </tr>
   <tr> 
@@ -429,7 +358,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
   </tr>
   <tr bgcolor="#FFCC00"> 
     <td colspan="3"> 
-      <div align="center"><img src="images/yellowspacer.gif" width="100%" height="2"></div>
+      <div align="center"><img src="/images/yellowspacer.gif" width="100%" height="2"></div>
     </td>
   </tr>
   <tr> 
