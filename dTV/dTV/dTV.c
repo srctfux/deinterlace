@@ -522,7 +522,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				SetDeinterlaceMode(LOWORD(wParam) - IDM_VIDEO_BOB);
 			}
 			ShowText(hWnd, DeinterlaceModeName(-1));
-			if((LOWORD(wParam) - IDM_VIDEO_BOB) == IDM_BLENDED_CLIP)
+			if(LOWORD(wParam) == IDM_BLENDED_CLIP)
 			{
 				BlendedClip_ShowDlg(hInst, hWnd);
 			}
