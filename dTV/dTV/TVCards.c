@@ -867,7 +867,7 @@ void ChangeDefaultsBasedOnHardware()
 		// User has selected 300-500 MHz and low judder
 		TVCard_ChangeDefault(OutThreads_GetSetting(HURRYWHENLATE), FALSE);
 		TVCard_ChangeDefault(OutThreads_GetSetting(WAITFORFLIP), TRUE);
-		TVCard_ChangeDefault(OutThreads_GetSetting(DOACCURATEFLIPS), TRUE);
+		TVCard_ChangeDefault(OutThreads_GetSetting(DOACCURATEFLIPS), FALSE);
 		TVCard_ChangeDefault(OutThreads_GetSetting(AUTODETECT), TRUE);
 		TVCard_ChangeDefault(OutThreads_GetSetting(PULLDOWNMODE), GREEDY);
 		TVCard_ChangeDefault(FD60_GetSetting(NTSCFILMFALLBACKMODE), GREEDY);
@@ -891,7 +891,7 @@ void ChangeDefaultsBasedOnHardware()
 		// User has selected below 300 MHz and low judder
 		TVCard_ChangeDefault(OutThreads_GetSetting(HURRYWHENLATE), FALSE);
 		TVCard_ChangeDefault(OutThreads_GetSetting(WAITFORFLIP), TRUE);
-		TVCard_ChangeDefault(OutThreads_GetSetting(DOACCURATEFLIPS), TRUE);
+		TVCard_ChangeDefault(OutThreads_GetSetting(DOACCURATEFLIPS), FALSE);
 		TVCard_ChangeDefault(OutThreads_GetSetting(AUTODETECT), FALSE);
 		TVCard_ChangeDefault(OutThreads_GetSetting(PULLDOWNMODE), GREEDY);
 		TVCard_ChangeDefault(FD60_GetSetting(NTSCFILMFALLBACKMODE), GREEDY);
@@ -915,7 +915,7 @@ void ChangeDefaultsBasedOnHardware()
 		// user has fast processor use best defaults
 		TVCard_ChangeDefault(OutThreads_GetSetting(HURRYWHENLATE), FALSE);
 		TVCard_ChangeDefault(OutThreads_GetSetting(WAITFORFLIP), TRUE);
-		TVCard_ChangeDefault(OutThreads_GetSetting(DOACCURATEFLIPS), TRUE);
+		TVCard_ChangeDefault(OutThreads_GetSetting(DOACCURATEFLIPS), FALSE);
 		TVCard_ChangeDefault(OutThreads_GetSetting(AUTODETECT), TRUE);
 		TVCard_ChangeDefault(OutThreads_GetSetting(PULLDOWNMODE), ADAPTIVE);
 		TVCard_ChangeDefault(FD60_GetSetting(NTSCFILMFALLBACKMODE), ADAPTIVE);

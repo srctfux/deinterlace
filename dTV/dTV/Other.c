@@ -469,7 +469,7 @@ void Overlay_WaitForVerticalBlank()
 
 	while(ddrval != DD_OK)
 	{
-		ddrval = IDirectDraw_WaitForVerticalBlank(lpDD, DDWAITVB_BLOCKBEGIN, NULL);
+		ddrval = IDirectDraw_WaitForVerticalBlank(lpDD, DDWAITVB_BLOCKEND, NULL);
 	}
 }
 

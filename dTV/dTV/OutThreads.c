@@ -426,6 +426,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 		BT848_Restart_RISC_Code();
 
 		dwLastSecondTicks = GetTickCount();
+		FlipAdjust = 0;
 		while(!bStopThread)
 		{
 			info.IsOdd = WaitForNextField(info.IsOdd);
@@ -442,81 +443,76 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 
 				bMissedFrame = FALSE;
 				bFlipNow = FALSE;
-				FlipAdjust = 0;
+
+				// if we are trying to do the flips properly then we may
+				// get behind on processsing and so need to be able to catch up
+				if(DoAccurateFlips && RefreshRate > 0)
+				{
+					FlipAdjust = 0;
+					if(info.IsOdd)
+					{
+						if((LastEvenFrame + 1) % 5 == CurrentFrame &&
+							(LastOddFrame + 1) % 5 == CurrentFrame)
+						{
+							info.IsOdd = FALSE;
+							LOG(" Slightly late");
+							FlipAdjust = 1;
+						}
+					}
+					else
+					{
+						if((LastEvenFrame + 1) % 5 == CurrentFrame &&
+								(LastOddFrame + 2) % 5 == CurrentFrame)
+						{
+							info.IsOdd = TRUE;
+							LOG(" Slightly late");
+							CurrentFrame = (CurrentFrame + 4) % 5;
+							info.CurrentFrame = CurrentFrame;
+							FlipAdjust = 1;
+						}
+					}
+				}
+				
 				if(info.IsOdd)
 				{
-					memmove(&info.OddLines[1], &info.OddLines[0], sizeof(info.OddLines) - sizeof(info.OddLines[0]));
-					info.OddLines[0] = ppOddLines[CurrentFrame];
-					LastOddFrame = CurrentFrame;
-					
 					// If we skipped the previous field, note the missing field in the deinterlace
 					// info structure and force this field to be bobbed.
 					if (LastEvenFrame != CurrentFrame)
 					{
-						// in film mode in the 60Hz mode
-						// we might wait quite a long time after doing a flip
-						// on the 2 field part of the 3:2 pulldown
-						// we might then get a single frame behind
-						// we need to cope with this so we fill the info struct properly
-						// rather than dropping a frame
-						if(DoAccurateFlips && DeintMethods[gPulldownMode].bIsFilmMode &&
-							(LastEvenFrame + 1) % 5 == CurrentFrame)
-						{
-							memmove(&info.EvenLines[1], &info.EvenLines[0], sizeof(info.EvenLines) - sizeof(info.EvenLines[0]));
-							info.EvenLines[0] = ppEvenLines[CurrentFrame];
-							LastEvenFrame = CurrentFrame;
-							LOG("Slightly late");
-							//FlipAdjust = 1;
-						}
-						else
-						{
-							memmove(&info.EvenLines[1], &info.EvenLines[0], sizeof(info.EvenLines) - sizeof(info.EvenLines[0]));
-							info.EvenLines[0] = NULL;
-							bMissedFrame = TRUE;
-							nFrame++;
-							LOG("Very late");
-							FlipAdjust = 1;
-						}
+						memmove(&info.EvenLines[1], &info.EvenLines[0], sizeof(info.EvenLines) - sizeof(info.EvenLines[0]));
+						info.EvenLines[0] = NULL;
+						bMissedFrame = TRUE;
+						nFrame++;
+						LOG(" Dropped Frame");
+						FlipAdjust = 5;
 					}
+					memmove(&info.OddLines[1], &info.OddLines[0], sizeof(info.OddLines) - sizeof(info.OddLines[0]));
+					info.OddLines[0] = ppOddLines[CurrentFrame];
+					LastOddFrame = CurrentFrame;
 				}
 				else
 				{
+					if(LastOddFrame != ((CurrentFrame + 4) % 5))
+					{
+						memmove(&info.OddLines[1], &info.OddLines[0], sizeof(info.OddLines) - sizeof(info.OddLines[0]));
+						info.OddLines[0] = NULL;
+						bMissedFrame = TRUE;
+						nFrame++;
+						LOG("Dropped Frame");
+						FlipAdjust = 5;
+					}
 					memmove(&info.EvenLines[1], &info.EvenLines[0], sizeof(info.EvenLines) - sizeof(info.EvenLines[0]));
 					info.EvenLines[0] = ppEvenLines[CurrentFrame];
 					LastEvenFrame = CurrentFrame;
-
-					// If we skipped the previous field, note the missing field in the deinterlace
-					// info structure and force this field to be bobbed.
-					if(LastOddFrame != ((CurrentFrame + 4) % 5))
-					{
-						// in film mode in the 60Hz mode
-						// we might wait quite a long time after doing a flip
-						// on the 2 field part of the 3:2 pulldown
-						// we might then get a single frame behind
-						// we need to cope with this so we fill the info struct properly
-						// rather than dropping a frame
-						if(DoAccurateFlips && DeintMethods[gPulldownMode].bIsFilmMode &&
-							(LastOddFrame + 2) % 5 == CurrentFrame)
-						{
-							memmove(&info.OddLines[1], &info.OddLines[0], sizeof(info.OddLines) - sizeof(info.OddLines[0]));
-							info.OddLines[0] = ppOddLines[((CurrentFrame + 4) % 5)];
-							LastOddFrame = CurrentFrame;
-							LOG("Slightly late");
-							//FlipAdjust = 1;
-						}
-						else
-						{
-							memmove(&info.OddLines[1], &info.OddLines[0], sizeof(info.OddLines) - sizeof(info.OddLines[0]));
-							info.OddLines[0] = NULL;
-							bMissedFrame = TRUE;
-							nFrame++;
-							LOG("Very late");
-							FlipAdjust = 1;
-						}
-					}
 				}
 				// update the source area
 				GetSourceRect(&info.SourceRect);
+				
+				if (RunningLate)
+				{
+					nFrame++;
+					LOG("Running Late");
+				}
 
 				if(!bMissedFrame)
 				{
@@ -613,24 +609,45 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 						// only if we have been in the same mode for at least one flip
 						if(DoAccurateFlips && PrevPulldownMode == gPulldownMode && RefreshRate > 0)
 						{
-							DWORD FlipsToWait;
+							long FlipsToWait;
+							double FPS;
 							// work out the minimum number of flips to
 							// display each screen for
 							if(bIsPAL)
 							{
-								FlipsToWait = ((int) (RefreshRate / DeintMethods[gPulldownMode].FrameRate50Hz)) - FlipAdjust;
+								FPS = DeintMethods[gPulldownMode].FrameRate50Hz;
 							}
 							else
 							{
-								FlipsToWait = ((int) (RefreshRate / DeintMethods[gPulldownMode].FrameRate60Hz)) - FlipAdjust;
+								FPS = DeintMethods[gPulldownMode].FrameRate60Hz;
+								FlipsToWait = ((long) (RefreshRate / DeintMethods[gPulldownMode].FrameRate60Hz)) - FlipAdjust;
+							}
+							if(floor((double)RefreshRate / FPS) == ceil((double)RefreshRate / FPS))
+							{
+								FlipsToWait = (long) (RefreshRate / FPS) - FlipAdjust;
+								if(FlipAdjust)
+								{
+									LOG("Putting Fast Frame in");
+								}
+							}
+							else
+							{
+								FlipsToWait = (long) (RefreshRate / FPS);
 							}
 							// wait for the flip
-							// (1000 / Refresh rate is time between each flip
-							// the - 3 is just some margin for error and should
-							// give us enough time to get to the flip call
-							if(FlipsToWait > 0)
+							// (1000 / Refresh) rate is time between each flip
+							// we then make sure the flips are not called too close together
+							// note that on some systems the flip call returns after the flip is
+							// set up (e.g. nVidia) and on others (e.g. ATI) after the flip has happened
+							// so to make sure that the flips occur at the appropriate place
+							// we must consider the worst case.  This code curertly doesn't do that and so
+							// won't work.
+							// the + 2 is just some margin for error and should
+							// give us enough time to get to the flip call before the next vsync
+							if(FlipsToWait > 1)
 							{
-								while(!bStopThread && (GetTickCount() - FlipTicks) < (DWORD)((1000.0 / RefreshRate) * FlipsToWait) - 3);
+								LOG(" Wait for flip %d %c %d", FlipsToWait, info.IsOdd?'O':'E', (GetTickCount() - FlipTicks));
+								while(!bStopThread && (GetTickCount() - FlipTicks) < (DWORD)((1000.0 / (double)RefreshRate) * (double)(FlipsToWait - 1)) + 2.0);
 							}
 						}
 
@@ -655,6 +672,12 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 						{
 							Overlay_WaitForVerticalBlank();
 						}
+						
+						// save the time of the last flip
+						FlipTicks = GetTickCount();
+						LOG(" Flipped %d %c %d", CurrentFrame, info.IsOdd?'O':'E', (FlipTicks - LastFlipTicks));
+						LastFlipTicks = FlipTicks;
+
 						if(PrevPulldownMode != gPulldownMode)
 						{
 							if(DeintMethods[gPulldownMode].bIsHalfHeight || 
@@ -662,16 +685,11 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 							{
 								if(!DoAccurateFlips || !bWaitForVsync || RefreshRate == 0)
 								{
-									Overlay_WaitForVerticalBlank();
+									//Overlay_WaitForVerticalBlank();
 								}
 								SetDeinterlaceMode(gPulldownMode);
 							}
 						}
-
-						// save the time of the last flip
-						FlipTicks = GetTickCount();
-						LOG(" Flipped %d %c %d", CurrentFrame, info.IsOdd?'O':'E', (FlipTicks - LastFlipTicks));
-						LastFlipTicks = FlipTicks;
 					}
 				}
 			}
@@ -737,7 +755,7 @@ SETTING OutThreadsSettings[OUTTHREADS_SETTING_LASTONE] =
 	},
 	{
 		"Do Accurate Flips", YESNO, 0, &DoAccurateFlips,
-		TRUE, 0, 1, 0, NULL,
+		FALSE, 0, 1, 0, NULL,
 		"Threads", "DoAccurateFlips", NULL,
 	},
 	{
