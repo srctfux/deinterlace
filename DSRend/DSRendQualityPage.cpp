@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendQualityPage.cpp,v 1.3 2002-07-06 16:38:30 tobbej Exp $
+// $Id: DSRendQualityPage.cpp,v 1.4 2002-08-01 20:28:21 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.3  2002/07/06 16:38:30  tobbej
+// fixed SetObjects to follow specification
+//
 // Revision 1.2  2002/03/08 11:14:04  tobbej
 // changed property page a bit
 // removed some debug output
@@ -373,6 +376,19 @@ void CDSRendQualityPage::updateDialog()
 }
 
 /*LRESULT CDSRendQualityPage::OnEraseBkgnd(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
+{
+	HDC hDC=(HDC)wParam;
+	HWND hParent=GetParent();
+	POINT pt={0,0};
+	MapWindowPoints(hParent, &pt, 1);
+
+	OffsetWindowOrgEx(hDC,pt.x, pt.y,&pt);
+	LRESULT lResult = SendMessage(hParent,WM_ERASEBKGND,(WPARAM)hDC, 0L);
+	SetWindowOrgEx(hDC,pt.x, pt.y,NULL);
+	return lResult;
+}
+
+LRESULT CDSRendQualityPage::OnCtlColorStatic(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
 	HDC hDC=(HDC)wParam;
 	HWND hParent=GetParent();

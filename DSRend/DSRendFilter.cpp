@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendFilter.cpp,v 1.10 2002-07-06 19:18:21 tobbej Exp $
+// $Id: DSRendFilter.cpp,v 1.11 2002-08-01 20:28:21 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.10  2002/07/06 19:18:21  tobbej
+// fixed sample scheduling, file playback shoud work now
+//
 // Revision 1.9  2002/07/06 16:42:09  tobbej
 // new field buffering
 // changed fps counter
@@ -69,7 +72,7 @@
 #include "DSRendFilter.h"
 CDSRendFilter::CDSRendFilter() :
 	m_AvgFieldRate(0),
-	m_iAvg(0),
+	m_iSumLateness(0),
 	m_iDev(0),
 	m_iJitter(0),
 	m_pGraph(NULL),
@@ -79,7 +82,7 @@ CDSRendFilter::CDSRendFilter() :
 	m_pEventSink(NULL),
 	m_tStart(0),
 	m_rtLastTime(0),
-	m_iLastDrawnFrames(0)
+	m_iLastDrawnFields(0)
 {
 	IPin *tmp=NULL;
 	HRESULT hr=m_InputPin.QueryInterface(IID_IPin,(void**)&tmp);
@@ -174,7 +177,8 @@ HRESULT CDSRendFilter::Run(REFERENCE_TIME tStart)
 	//reset stats
 	m_AvgFieldRate=0;
 	m_rtLastTime=0;
-	m_iLastDrawnFrames=0;
+	m_iLastDrawnFields=0;
+	m_iSumLateness=0;
 	m_FieldBuffer.ResetFieldCounters();
 
 	m_tStart=tStart;
@@ -367,11 +371,9 @@ HRESULT CDSRendFilter::get_AvgSyncOffset(int *piAvg)
 
 	if(piAvg==NULL)
 		return E_POINTER;
-	/*
-	*piAvg=m_iAvg;
+	
+	*piAvg=(int)m_iSumLateness/(m_FieldBuffer.GetDrawnFields()-4);
 	return S_OK;
-	*/
-	return E_FAIL;
 }
 
 HRESULT CDSRendFilter::get_DevSyncOffset(int *piDev)
@@ -493,7 +495,7 @@ STDMETHODIMP CDSRendFilter::SetFieldHistory(long cFields)
 	return m_FieldBuffer.SetFieldCount(cFields);
 }
 
-STDMETHODIMP CDSRendFilter::GetFields(FieldBuffer *ppFields, long *count,BufferInfo *pBufferInfo, DWORD dwTimeout)
+STDMETHODIMP CDSRendFilter::GetFields(FieldBuffer *ppFields, long *count,BufferInfo *pBufferInfo, DWORD dwTimeout,DWORD dwLastRenderTime)
 {
 	//ATLTRACE(_T("%s(%d) : CDSRendFilter::GetFields\n"),__FILE__,__LINE__);
 	
@@ -511,43 +513,54 @@ STDMETHODIMP CDSRendFilter::GetFields(FieldBuffer *ppFields, long *count,BufferI
 		}
 		return hr;
 	}
-	
-	//update framerate if we have a reference clock
-	if(m_pRefClk!=NULL)
-	{
-		REFERENCE_TIME now;
-		HRESULT hr=m_pRefClk->GetTime(&now);
-		if(SUCCEEDED(hr))
-		{
-			int iDrawnFrames=m_FieldBuffer.GetDrawnFields();
-			if(m_rtLastTime>=m_tStart)
-			{
-				if(iDrawnFrames-m_iLastDrawnFrames>=2)
-				{
-					double time=(now-m_rtLastTime)/(double)10000000;
-					double newfps=(iDrawnFrames-m_iLastDrawnFrames)/time;
-					m_AvgFieldRate=0.005 * newfps + (1.0-0.005)*m_AvgFieldRate;
-					
-					//ATLTRACE(_T(" newfps=%e avg=%e\n"),newfps,m_AvgFrameRate);
-					
-					//save time and frames drawn
-					m_rtLastTime=now;
-					m_iLastDrawnFrames=iDrawnFrames;
-				}
-			}
-			else
-			{
-				m_rtLastTime=now;
-				m_iLastDrawnFrames=iDrawnFrames;
-			}
-		}
-	}
-	
+
 	//wait for correct time to render
 	if(rtRenderTime!=-1 && m_pRefClk!=NULL)
 	{
 		hr=waitForTime(rtRenderTime);
 		///@todo shoud probably check hr
+	}
+	
+	//update stats if we have a reference clock
+	if(m_pRefClk!=NULL)
+	{
+		REFERENCE_TIME rtNow;
+		HRESULT hr=m_pRefClk->GetTime(&rtNow);
+		if(SUCCEEDED(hr))
+		{
+			int iDrawnFields=m_FieldBuffer.GetDrawnFields();
+			
+			//framerate
+			if(m_rtLastTime>=m_tStart)
+			{
+				//update framerate every 0.1 seconds
+				if(((rtNow-m_rtLastTime)/1000000)>=1)
+				{
+					double time=(rtNow-m_rtLastTime)/(double)10000000;
+					double newfps=(iDrawnFields-m_iLastDrawnFields)/time;
+					m_AvgFieldRate=0.005 * newfps + (1.0-0.005)*m_AvgFieldRate;
+					
+					//ATLTRACE(_T(" newfps=%e avg=%e\n"),newfps,m_AvgFieldRate);
+					
+					//save time and fields drawn
+					m_rtLastTime=rtNow;
+					m_iLastDrawnFields=iDrawnFields;
+				}
+			}
+			else
+			{
+				m_rtLastTime=rtNow;
+				m_iLastDrawnFields=iDrawnFields;
+			}
+
+			//avg sync offset
+			if(iDrawnFields>4)
+			{
+				m_iSumLateness+=dwLastRenderTime+(rtNow-(rtRenderTime+m_tStart))/10000;
+				//ATLASSERT(m_iSumLateness>0);
+				//ATLTRACE(_T(" lateness=%d\n"),dwLastRenderTime+(rtNow-(rtRenderTime+m_tStart))/10000);
+			}
+		}
 	}
 
 	return S_OK;

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendFilter.h,v 1.8 2002-07-06 16:42:09 tobbej Exp $
+// $Id: DSRendFilter.h,v 1.9 2002-08-01 20:28:21 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,10 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.8  2002/07/06 16:42:09  tobbej
+// new field buffering
+// changed fps counter
+//
 // Revision 1.7  2002/06/03 18:19:30  tobbej
 // moved CAutoLockCriticalSection
 // removed an assert failiure when running debug version of directx
@@ -107,7 +111,7 @@ END_PROP_MAP()
 
 // IDSRendFilter
 	STDMETHOD(SetFieldHistory)(long cFields);
-	STDMETHOD(GetFields)(FieldBuffer *ppFields,long *count,BufferInfo *pBufferInfo,DWORD dwTimeout);
+	STDMETHOD(GetFields)(FieldBuffer *ppFields,long *count,BufferInfo *pBufferInfo,DWORD dwTimeout,DWORD dwLastRenderTime);
 	STDMETHOD(FreeFields)();
 
 // IPersist
@@ -199,8 +203,8 @@ private:
 	//IQualProp
 	double m_AvgFieldRate;
 	REFERENCE_TIME m_rtLastTime;
-	int m_iLastDrawnFrames;
-	int m_iAvg;
+	int m_iLastDrawnFields;
+	LONGLONG m_iSumLateness;
 	int m_iDev;
 	int m_iJitter;
 	
