@@ -399,18 +399,16 @@ echo regsvr32 exec. time &gt; &quot;$(OutDir)\regsvr32.trg&quot;
 					Name="Release|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="Performing registration"
-						CommandLine="ml /c /coff /nologo /Fo&quot;$(IntDir)&quot;\&quot;$(InputName)&quot;.obj &quot;$(InputPath)&quot;
-"
+						Description="Assembling"
+						CommandLine="ml /c /coff /nologo /Fo$(IntDir)\$(InputName).obj $(InputPath)"
 						Outputs="$(IntDir)\$(InputName).obj"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="Performing registration"
-						CommandLine="ml /c /Zd /coff /nologo /Fo&quot;$(IntDir)&quot;\&quot;$(InputName)&quot;.obj &quot;$(InputPath)&quot;
-"
+						Description="Assembling"
+						CommandLine="ml /c /Zd /coff /nologo /Fo$(IntDir)\$(InputName).obj $(InputPath)"
 						Outputs="$(IntDir)\$(InputName).obj"/>
 				</FileConfiguration>
 			</File>
