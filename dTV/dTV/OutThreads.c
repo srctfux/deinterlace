@@ -87,8 +87,8 @@ BYTE			    * lpCurOverlay;				// made static for Lock rtn, curr vid buff ptr
 DDSURFACEDESC		ddsd;						// also add a surface descriptor for Lock			
 BOOL				RunningLate = FALSE;        // Set when we are not keeping up
 HRESULT             FlipResult = 0;             // Need to try again for flip?
-BOOL                Wait_For_Flip = FALSE;      // User parm, default=FALSE
-BOOL	            Hurry_When_Late = TRUE;     // " , default=TRUE, skip processing if behind
+BOOL                Wait_For_Flip = TRUE;       // User parm, default=TRUE
+BOOL	            Hurry_When_Late = FALSE;    // " , default=FALSE, skip processing if behind
 long				Sleep_Interval = 0;         // " , default=0, how long to wait for BT chip
 
 ///////////////////////////////////////////////////////////////////////////////

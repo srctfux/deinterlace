@@ -382,8 +382,6 @@ typedef enum
 #define BOOTSTATE_BUFFER_FULL	 1
 #define BOOTSTATE_BOOT_COMPLETE	 2
 
-
-
 #define DVB_ERR_NOSERVER		0
 #define DVB_ERR_NONE			1
 #define DVB_ERR_HARDWARE		2

@@ -584,6 +584,7 @@ BOOL BT848_SetVideoSource(int nInput)
 	// 2= SVideo,
 	// 3= Other 1
 	// 4= Other 2
+	// 5= Composite via SVideo
 
 	BT848_AndOrDataDword(BT848_GPIO_OUT_EN, TVCards[CardType].GPIOMuxMask, ~TVCards[CardType].GPIOMuxMask);
 	BT848_AndDataByte(BT848_IFORM, ~BT848_IFORM_MUXSEL);

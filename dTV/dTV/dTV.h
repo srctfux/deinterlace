@@ -51,7 +51,7 @@ void Init_More();
 void More_Even(int pp);
 void More_Odd();
 void ChangeChannel(int NewChannel);
-
+void ShowVideoSource(HWND hWnd, int nVideoSource);
 void SetMenuAnalog();
 
 VOID APIENTRY HandleFocusState(HWND hDlg, LPDRAWITEMSTRUCT lpdis);
@@ -66,7 +66,6 @@ void MainWndOnCreate(HWND hWnd);
 void MainWndOnInitBT(HWND hWnd);
 void SaveWindowPos(HWND hWnd);
 void CleanUpMemory();
-void OnScreenDisplay(HWND hWnd,char *szText);
 
 #define TIMER_STATUS 1
 #define TIMER_STATUS_MS 2000
@@ -76,12 +75,5 @@ void OnScreenDisplay(HWND hWnd,char *szText);
 
 #define TIMER_MSP 8
 #define TIMER_MSP_MS 10000
-
-//
-// MAE 8 Nov 2000
-// Added defines for on-screen display timer
-//
-#define TIMER_OSD 42
-#define TIMER_OSD_MS 2000
 
 #endif

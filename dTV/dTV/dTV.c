@@ -44,6 +44,7 @@
 #include "Dialogs.h"
 #include "OutThreads.h"
 #include "bTVPlugin.h"
+#include "OSD.h"
 #include "audio.h"
 #include "tuner.h"
 #include "status.h"
@@ -51,6 +52,13 @@
 
 #define WM_USER_OVERLAYSTART   (WM_USER + 101)
 #define WM_USER_OVERLAYSTOP    (WM_USER + 102)
+
+#define SOURCE_TUNER           0
+#define SOURCE_COMPOSITE       1
+#define SOURCE_SVIDEO          2
+#define SOURCE_OTHER1          3
+#define SOURCE_OTHER2          4
+#define SOURCE_COMPVIASVIDEO   5
 
 HWND hwndStatusBar;
 HWND hwndTextField;
@@ -141,7 +149,6 @@ int InitialProg=-1;
 int NumberOfProcessors=1;
 int MainProcessor=0;
 int DecodeProcessor=0;
-
 
 BOOL bShowCursor = TRUE;
 /****************************************************************************
@@ -437,7 +444,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				else
 					ChangeChannel(0);
 
-				OnScreenDisplay(hWnd,Programm[CurrentProgramm].Name);
+				OSD_ShowText(hWnd,Programm[CurrentProgramm].Name);
 			}
 
 			break;
@@ -468,7 +475,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 					}
 				}
 					
-				OnScreenDisplay(hWnd,Programm[CurrentProgramm].Name);
+				OSD_ShowText(hWnd,Programm[CurrentProgramm].Name);
 			}
 			
 			break;
@@ -674,7 +681,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 					Mixer_Mute();
 					sprintf(Text, "Mute Mixer");
 				}
-				OnScreenDisplay(hWnd,"MUTE");
+				OSD_ShowText(hWnd,"MUTE");
 			}
 			else
 			{
@@ -690,7 +697,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 					sprintf(Text, "UnMute Mixer");
 				}
 
-				OnScreenDisplay(hWnd,"UNMUTE");
+				OSD_ShowText(hWnd,"UNMUTE");
 			}
 			if (bDisplayStatusBar == TRUE)
 				SetWindowText(hwndTextField, Text);
@@ -875,7 +882,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			Start_Capture();
 			SetMenuAnalog();
 
-			OnScreenDisplay(hWnd,Programm[CurrentProgramm].Name);
+			OSD_ShowText(hWnd,Programm[CurrentProgramm].Name);
 
 			break;
 
@@ -885,31 +892,15 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_EXTERN4:
 		case IDM_EXTERN5:
 
-			// 10/16/2000 by Mark Rejhon:
-			// More guaranteed to work than mathematics with wParam
-			// 0= Tuner,
-			// 1= Composite,
-			// 2= SVideo,
-			// 3= Other 1
-			// 4= Other 2
-			VideoSource = 0;
+			VideoSource = SOURCE_TUNER;
 			switch (LOWORD(wParam)) {
-			case IDM_EXTERN1: VideoSource = 1; 
-				OnScreenDisplay(hWnd,"Composite");
-				break;
-			case IDM_EXTERN2: VideoSource = 2; 
-				OnScreenDisplay(hWnd,"S-Video");
-				break;
-			case IDM_EXTERN3: VideoSource = 3; 
-				OnScreenDisplay(hWnd,"Other 1");
-				break;
-			case IDM_EXTERN4: VideoSource = 4; 
-				OnScreenDisplay(hWnd,"Other 2");
-				break;
-			case IDM_EXTERN5: VideoSource = 5; 
-				OnScreenDisplay(hWnd,"Comp via S-V");
-				break;
+			case IDM_EXTERN1: VideoSource = SOURCE_COMPOSITE;      break;
+			case IDM_EXTERN2: VideoSource = SOURCE_SVIDEO;         break;
+			case IDM_EXTERN3: VideoSource = SOURCE_OTHER1;         break;
+			case IDM_EXTERN4: VideoSource = SOURCE_OTHER2;         break;
+			case IDM_EXTERN5: VideoSource = SOURCE_COMPVIASVIDEO;  break;
 			}
+			ShowVideoSource(hWnd, VideoSource);
 
 			AudioSource = AUDIOMUX_EXTERNAL;
 			Stop_Capture();
@@ -1135,33 +1126,12 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			if (VideoSource == 0)
 			{
 				DialogBox(hInst, "CHANNELLIST", hWnd, (DLGPROC) ProgramListProc);
-				OnScreenDisplay(hWnd,Programm[CurrentProgramm].Name);
+				OSD_ShowText(hWnd,Programm[CurrentProgramm].Name);
 			}
 			break;
 
 		case IDM_SHOW_OSD:
-			switch (VideoSource)
-			{
-				case 0:
-					OnScreenDisplay(hWnd,Programm[CurrentProgramm].Name);
-					break;
-				case 1:  
-					OnScreenDisplay(hWnd,"Composite");
-					break;
-				case 2:  
-					OnScreenDisplay(hWnd,"S-Video");
-					break;
-				case 3:  
-					OnScreenDisplay(hWnd,"Other 1");
-					break;
-				case 4:  
-					OnScreenDisplay(hWnd,"Other 2");
-					break;
-				case 5:  
-					OnScreenDisplay(hWnd,"Comp via S-V");
-					break;
-			}
-
+			ShowVideoSource(hWnd, VideoSource);
 			break;
 
 		case IDM_TREADPRIOR_0:
@@ -1385,10 +1355,9 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			ChangeChannel(i);
 			ChannelString[0] = '\0';
 		}
-		else if (wParam == TIMER_OSD)
+		else if (wParam == OSD_TIMER_ID)
 		{
-			KillTimer(hWnd, TIMER_OSD);
-			InvalidateRect(hWnd, NULL, FALSE);
+			OSD_Clear(hWnd);
 		}
 
 		break;
@@ -1454,6 +1423,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 	
 	case WM_PAINT:
 		PaintColorkey(hWnd, TRUE);
+		OSD_Redraw(hWnd);
 		break;
 
 	case WM_USER_OVERLAYSTART:
@@ -1636,11 +1606,11 @@ void MainWndOnInitBT(HWND hWnd)
 
 		AudioSource = AUDIOMUX_EXTERNAL;
 		switch (VideoSource) {
-		case 1:	sprintf(Text, "Composite");             break;
-		case 2: sprintf(Text, "S-Video");               break;
-		case 3: sprintf(Text, "Other 1");               break;
-		case 4: sprintf(Text, "Other 2");               break;
-		case 5: sprintf(Text, "Composite via S-Video"); break;
+		case SOURCE_COMPOSITE:	   sprintf(Text, "Composite");             break;
+		case SOURCE_SVIDEO:        sprintf(Text, "S-Video");               break;
+		case SOURCE_OTHER1:        sprintf(Text, "Other 1");               break;
+		case SOURCE_OTHER2:        sprintf(Text, "Other 2");               break;
+		case SOURCE_COMPVIASVIDEO: sprintf(Text, "Composite via S-Video"); break;
 		default:
 			AudioSource = AUDIOMUX_TUNER;
 			ChangeChannel(CurrentProgramm);
@@ -2061,76 +2031,17 @@ void ChangeChannel(int NewChannel)
 	}
 }
 
-//
-// void OnScreenDisplay(HWND hWnd)
-// Put up the current channel number
-//
-// 8 Nov 2000 - Michael Eskin, Conexant Systems
-//
-
-void OnScreenDisplay(HWND hWnd,char *szText)
+//---------------------------------------------------------------------------
+// Display current channel number, program name and/or current video signal
+void ShowVideoSource(HWND hWnd, int nVideoSource)
 {
-
-	HDC hdc;
-	LOGFONT lfTmp;
-	HFONT hTmp,hOSD;
-	int len,fontsize;
-	RECT winRect;
-	TEXTMETRIC tmOSDFont;
-	SIZE sizeText;
-
-	if (len = strlen(szText))
+	switch (nVideoSource)
 	{
-		InvalidateRect(hWnd,NULL,FALSE);
-
-		PaintColorkey(hWnd, TRUE);
-
-		GetWindowRect(hWnd,&winRect);
-
-		fontsize = (winRect.bottom - winRect.top) / 10;
-
-		// Get the current window size
-
-		hOSD = CreateFont(fontsize, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, VARIABLE_PITCH | FF_SWISS, "");
-
-		if (GetObject(hOSD, sizeof(LOGFONT), &lfTmp))
-		{
-			if ((lfTmp.lfPitchAndFamily & VARIABLE_PITCH) && (lfTmp.lfPitchAndFamily & FF_SWISS))
-			{
-			}
-			else
-			{
-				ErrorBox("Unable to get an unnamed variable pitch swiss font");
-				hOSD = CreateFont(fontsize, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, VARIABLE_PITCH | FF_SWISS, "Arial");
-			}
-		}
-
-		if (!hOSD)
-		{
-			ErrorBox("Failed To Create Font");
-		}
-
-		hdc = GetDC(hWnd);
-
-		hTmp = SelectObject(hdc, hOSD);
-
-		SetTextColor(hdc, RGB(0,255,0));
-
-		SetBkColor(hdc, GetNearestColor(hdc, OverlayColor));
-
-		GetTextMetrics(hdc, &tmOSDFont);
-
-		GetTextExtentPoint32(hdc, szText, strlen(szText), &sizeText);
-
-		TextOut(hdc, (8*(winRect.right-winRect.left))/9 - sizeText.cx,sizeText.cy, szText, strlen(szText));
-		
-		SelectObject(hdc, hTmp);
-
-		DeleteObject(hOSD);
-
-		ReleaseDC(hWnd, hdc);			
-
-		SetTimer(hWnd, TIMER_OSD, TIMER_OSD_MS, NULL);
+	case SOURCE_TUNER:         OSD_ShowText(hWnd,Programm[CurrentProgramm].Name); break;
+	case SOURCE_COMPOSITE:     OSD_ShowText(hWnd,"Composite");                    break;
+	case SOURCE_SVIDEO:        OSD_ShowText(hWnd,"S-Video");                      break;
+	case SOURCE_OTHER1:        OSD_ShowText(hWnd,"Other 1");                      break;
+	case SOURCE_OTHER2:        OSD_ShowText(hWnd,"Other 2");                      break;
+	case SOURCE_COMPVIASVIDEO: OSD_ShowText(hWnd,"Composite via S-Video");        break;
 	}
 }
-
