@@ -483,6 +483,22 @@ BOOL MakeTifFile(DEINTERLACE_INFO* info, char* TifFile, DEINTERLACE_METHOD* Dein
 	return TRUE;
 }
 
+void ReadFromIni(SETTING* pSetting, char* szIniFile)
+{
+	long nValue;
+
+	if(pSetting->szIniSection != NULL)
+	{
+		nValue = GetPrivateProfileInt(pSetting->szIniSection, pSetting->szIniEntry, pSetting->MinValue - 100, szIniFile);
+		if(nValue < pSetting->MinValue)
+		{
+			nValue = pSetting->Default;
+		}
+		*pSetting->pValue = nValue;
+		pSetting->OriginalValue = *pSetting->pValue;
+	}
+}
+
 int ProcessSnapShot(char* SnapshotFile, char* FilterPlugin, char* DeintPlugin, char* TifFile)
 {
 	DEINTERLACE_INFO info;
@@ -493,6 +509,11 @@ int ProcessSnapShot(char* SnapshotFile, char* FilterPlugin, char* DeintPlugin, c
 	LARGE_INTEGER TimerFrequency;
 	int OddField = -1;
 	int EvenField = -1;
+	char szIniFile[MAX_PATH];
+	int i;
+
+	GetCurrentDirectory(MAX_PATH, szIniFile);
+	strcat(szIniFile, "\\dScaler.ini");
 
 	// get the Frequency of the high resolution timer
 	QueryPerformanceFrequency(&TimerFrequency);
@@ -508,6 +529,10 @@ int ProcessSnapShot(char* SnapshotFile, char* FilterPlugin, char* DeintPlugin, c
 		if(!LoadFilterPlugin(FilterPlugin, &FilterMethod))
 		{
 			return 1;
+		}
+		for (i = 0; i < FilterMethod->nSettings; i++)
+		{
+			ReadFromIni(&(FilterMethod->pSettings[i]), szIniFile);
 		}
 	}
 
