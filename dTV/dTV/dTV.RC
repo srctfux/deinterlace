@@ -30,7 +30,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 HWINFO DIALOG DISCARDABLE  22, 17, 201, 206
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
-CAPTION "dScaler Hardware Information"
+CAPTION "DScaler Hardware Information"
 FONT 8, "MS Sans Serif"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,68,187,65,14,WS_GROUP
@@ -73,7 +73,7 @@ END
 VIDEOTEXT DIALOG DISCARDABLE  22, 17, 417, 330
 STYLE DS_MODALFRAME | DS_SETFOREGROUND | DS_3DLOOK | WS_VISIBLE | WS_CAPTION | 
     WS_SYSMENU
-CAPTION "dScaler Videotext"
+CAPTION "DScaler Videotext"
 FONT 8, "MS Sans Serif"
 BEGIN
     GROUPBOX        "",-1,4,25,406,285
@@ -103,7 +103,7 @@ END
 VIDEOTEXTSMALL DIALOG DISCARDABLE  22, 17, 277, 236
 STYLE DS_MODALFRAME | DS_SETFOREGROUND | DS_3DLOOK | WS_VISIBLE | WS_CAPTION | 
     WS_SYSMENU
-CAPTION "dScaler Videotext"
+CAPTION "DScaler Videotext"
 FONT 8, "MS Sans Serif"
 BEGIN
     GROUPBOX        "",-1,4,25,271,192
@@ -267,7 +267,7 @@ END
 VIDEOTEXTUNTERTITEL DIALOG DISCARDABLE  22, 17, 236, 222
 STYLE DS_SYSMODAL | DS_SETFOREGROUND | DS_3DLOOK | WS_VISIBLE | WS_CAPTION | 
     WS_SYSMENU | WS_THICKFRAME
-CAPTION "dScaler Sub-titles"
+CAPTION "DScaler Sub-titles"
 FONT 8, "MS Sans Serif"
 BEGIN
     EDITTEXT        IDC_EDIT1,31,7,17,12,ES_NUMBER
@@ -278,7 +278,7 @@ END
 VTSTATUS DIALOG DISCARDABLE  22, 17, 237, 135
 STYLE DS_MODALFRAME | DS_SETFOREGROUND | DS_3DLOOK | WS_VISIBLE | WS_CAPTION | 
     WS_SYSMENU
-CAPTION "dScaler Videotext Info"
+CAPTION "DScaler Videotext Info"
 FONT 8, "MS Sans Serif"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,100,120,50,15
@@ -322,7 +322,7 @@ END
 VPSSTATUS DIALOG DISCARDABLE  22, 17, 187, 66
 STYLE DS_MODALFRAME | DS_SETFOREGROUND | DS_3DLOOK | WS_VISIBLE | WS_CAPTION | 
     WS_SYSMENU
-CAPTION "dScaler VPS Info"
+CAPTION "DScaler VPS Info"
 FONT 8, "MS Sans Serif"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,70,50,50,15
@@ -335,7 +335,7 @@ END
 
 MIXERSETTINGS DIALOG DISCARDABLE  22, 17, 402, 266
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
-CAPTION "dScaler Mixer Setup"
+CAPTION "DScaler Mixer Setup"
 FONT 8, "MS Sans Serif"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,340,250,55,15
@@ -412,7 +412,7 @@ END
 
 MIXERSETUP DIALOG DISCARDABLE  22, 17, 307, 181
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
-CAPTION "dScaler Mixer Setup"
+CAPTION "DScaler Mixer Setup"
 FONT 8, "MS Sans Serif"
 BEGIN
     LTEXT           "Audio-Device",IDC_STATIC,5,30,45,10
@@ -453,11 +453,11 @@ END
 
 ABOUT DIALOGEX 22, 17, 374, 274
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
-CAPTION "About dScaler"
+CAPTION "About DScaler"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,305,9,58,19,WS_GROUP,WS_EX_CLIENTEDGE
-    CTEXT           "dScaler Version 2.x",IDC_VERSION,0,3,293,9
+    CTEXT           "DScaler Version 2.x",IDC_VERSION,0,3,293,9
     CTEXT           "Copyright (C) 2000, 2001 John Adcock",IDC_STATIC,0,24,
                     293,10
     GROUPBOX        "Based On",IDC_STATIC,6,144,364,56
@@ -471,14 +471,14 @@ BEGIN
                     IDC_STATIC,13,154,348,9
     GROUPBOX        "Authors",IDC_STATIC,6,37,180,100
     CTEXT           "()()  http://deinterlace.sourceforge.net  ()()",
-                    IDC_STATIC,0,11,293,10
+                    IDC_STATIC,0,13,293,10
     LTEXT           "bttv - Bt848 frame grabber driver Copyright (c) Ralph Metzler && Marcus Metzler",
                     IDC_STATIC,13,168,347,11
     LTEXT           "I2C Interface Copyright (c) Gerd Knorr",IDC_STATIC,13,
                     182,160,10
     GROUPBOX        "Support",IDC_STATIC,192,37,180,100
-    LTEXT           "The best place to get support for dScaler is the Home Theater Computers foum at the AV Science Forums.",
-                    IDC_STATIC,200,47,166,18
+    LTEXT           "The best place to get support for DScaler is the Home Theater Computers foum at the AV Science Forums.",
+                    IDC_STATIC,200,47,166,27
     LTEXT           "John Adcock\nMark Rejhon\nSteve Grimm\nTom Barry\nMichael Eskin\nMichael Samblanet\nLaurent Garnier\nHermes Conrad",
                     IDC_STATIC,12,52,86,77
     LTEXT           "Please read the FAQ and the appropriate release thread for the version you are using before posting",
@@ -510,7 +510,7 @@ END
 
 LISTFELDSETUP DIALOG DISCARDABLE  22, 17, 196, 63
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
-CAPTION "dScaler Listen-Parameter"
+CAPTION "DScaler Listen-Parameter"
 FONT 8, "MS Sans Serif"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,4,44,48,15
@@ -540,7 +540,7 @@ BEGIN
                     IDC_STATIC,7,7,286,25
     LTEXT           "The easiest way is by looking at the documenation that came with the card otherwise you will have to see if there is any marking oin the silver tuner box on the card.",
                     IDC_STATIC,7,34,286,22
-    LTEXT           "In order for dScaler to give the best results it needs to know how powerful your machine is.  Please select the nearest speed range to your machine.  If in doubt use the lower setting.",
+    LTEXT           "In order for DScaler to give the best results it needs to know how powerful your machine is.  Please select the nearest speed range to your machine.  If in doubt use the lower setting.",
                     IDC_STATIC,7,101,277,26
     LTEXT           "For lower spec machines there is a tradeoff between picture quality and frame rate.  Choose the option below that best matches your preferences.",
                     IDC_STATIC,7,151,286,17
@@ -958,13 +958,13 @@ BEGIN
     POPUP "&Help"
     BEGIN
         MENUITEM "&Read Me ...\tF1",            IDM_HELP_README
-        MENUITEM "dScaler &Home Page ...",      IDM_HELP_HOMEPAGE
+        MENUITEM "DScaler &Home Page ...",      IDM_HELP_HOMEPAGE
         MENUITEM "&FAQ ...",                    IDM_HELP_FAQ
         MENUITEM "&Support ...",                IDM_HELP_SUPPORT
         MENUITEM "&Keyboard ...",               IDM_HELP_KEYBOARD
         MENUITEM "&Licence ...",                IDM_HELP_GPL
         MENUITEM SEPARATOR
-        MENUITEM "&About dScaler...",           IDM_ABOUT
+        MENUITEM "&About DScaler...",           IDM_ABOUT
     END
 END
 
@@ -1311,14 +1311,14 @@ BEGIN
         BEGIN
             VALUE "Comments", "John Adcock\0"
             VALUE "CompanyName", "\0"
-            VALUE "FileDescription", "dScaler\0"
+            VALUE "FileDescription", "DScaler\0"
             VALUE "FileVersion", "2, 3, 0, 0\0"
-            VALUE "InternalName", "dScaler\0"
+            VALUE "InternalName", "DScaler\0"
             VALUE "LegalCopyright", "Copyright © 2000, 2001\0"
             VALUE "LegalTrademarks", "This Program is covered by the term of the GNU GPL\0"
-            VALUE "OriginalFilename", "dScaler.exe\0"
+            VALUE "OriginalFilename", "DScaler.exe\0"
             VALUE "PrivateBuild", "\0"
-            VALUE "ProductName", "dScaler\0"
+            VALUE "ProductName", "DScaler\0"
             VALUE "ProductVersion", "2.3.0\0"
             VALUE "SpecialBuild", "\0"
         END

@@ -509,7 +509,7 @@ int ProcessSnapShot(char* SnapshotFile, char* FilterPlugin, char* DeintPlugin, c
 	int i;
 
 	GetCurrentDirectory(MAX_PATH, szIniFile);
-	strcat(szIniFile, "\\dScaler.ini");
+	strcat(szIniFile, "\\DScaler.ini");
 
 	// get the Frequency of the high resolution timer
 	QueryPerformanceFrequency(&TimerFrequency);

@@ -59,7 +59,7 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 ddraw.lib dxguid.lib kernel32.lib user32.lib gdi32.lib advapi32.lib winmm.lib comdlg32.lib ..\driver\bin\dTVdrv.lib /nologo /subsystem:windows /profile /debug /machine:I386 /out:".\dTV.exe"
 # SUBTRACT BASE LINK32 /map /nodefaultlib
-# ADD LINK32 ..\Driver\DLL\Debug\dTVdrv.lib ddraw.lib dxguid.lib winmm.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib COMCTL32.LIB version.lib /nologo /subsystem:windows /pdb:none /debug /machine:I386 /out:"..\Debug\dScaler.exe"
+# ADD LINK32 ..\Driver\DLL\Debug\dTVdrv.lib ddraw.lib dxguid.lib winmm.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib COMCTL32.LIB version.lib /nologo /subsystem:windows /pdb:none /debug /machine:I386 /out:"..\Debug\DScaler.exe"
 # SUBTRACT LINK32 /profile /map
 
 !ELSEIF  "$(CFG)" == "dTV - Win32 Release"
@@ -94,7 +94,7 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 ddraw.lib dxguid.lib kernel32.lib user32.lib gdi32.lib advapi32.lib winmm.lib comdlg32.lib ..\driver\bin\hwiodrv.lib /nologo /subsystem:windows /incremental:yes /machine:I386
 # SUBTRACT BASE LINK32 /profile /map /debug /nodefaultlib
-# ADD LINK32 ..\Driver\DLL\Release\dTVdrv.lib ddraw.lib dxguid.lib kernel32.lib user32.lib gdi32.lib advapi32.lib shell32.lib winmm.lib comdlg32.lib COMCTL32.LIB version.lib /nologo /subsystem:windows /incremental:yes /map /machine:I386 /out:"..\Release\dScaler.exe"
+# ADD LINK32 ..\Driver\DLL\Release\dTVdrv.lib ddraw.lib dxguid.lib kernel32.lib user32.lib gdi32.lib advapi32.lib shell32.lib winmm.lib comdlg32.lib COMCTL32.LIB version.lib /nologo /subsystem:windows /incremental:yes /map /machine:I386 /out:"..\Release\DScaler.exe"
 # SUBTRACT LINK32 /profile /debug /nodefaultlib
 
 !ENDIF 
@@ -388,6 +388,10 @@ SOURCE=.\VideoSettings.h
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe"
 # Begin Source File
 
+SOURCE=.\1.ico
+# End Source File
+# Begin Source File
+
 SOURCE=.\RES\dTV.ico
 # End Source File
 # Begin Source File
@@ -505,6 +509,10 @@ SOURCE=.\READ_ME_FIRST_NOW.txt
 # End Source File
 # End Target
 # End Project
+# Section dTV : {F08DF954-8592-11D1-B16A-00C0F0283628}
+# 	2:21:DefaultSinkHeaderFile:slider.h
+# 	2:16:DefaultSinkClass:CSlider
+# End Section
 # Section dTV : {F08DF952-8592-11D1-B16A-00C0F0283628}
 # 	2:5:Class:CSlider
 # 	2:10:HeaderFile:slider.h
@@ -514,8 +522,4 @@ SOURCE=.\READ_ME_FIRST_NOW.txt
 # 	2:5:Class:CPicture
 # 	2:10:HeaderFile:picture.h
 # 	2:8:ImplFile:picture.cpp
-# End Section
-# Section dTV : {F08DF954-8592-11D1-B16A-00C0F0283628}
-# 	2:21:DefaultSinkHeaderFile:slider.h
-# 	2:16:DefaultSinkClass:CSlider
 # End Section
