@@ -50,7 +50,6 @@
 #include "AspectRatio.h"
 #include "Status.h"
 #include "OSD.h"
-#define DOLOGGING
 #include "DebugLog.h"
 
 DEINTERLACE_METHOD FilmDeintMethods[FILMPULLDOWNMODES_LAST_ONE] =

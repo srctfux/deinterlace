@@ -36,7 +36,6 @@
 #include "AspectRatio.h"
 #include "dTV.h"
 #include "OSD.h"
-#define DOLOGGING
 #include "DebugLog.h"
 
 #define	WSS_MAX_SUCCESSIVE_ERR		6

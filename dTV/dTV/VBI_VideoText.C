@@ -43,6 +43,7 @@
 #include "dTV.h"
 #include "AspectRatio.h"
 #include "Other.h"
+#include "DebugLog.h"
 
 HWND ShowVTInfo=NULL;
 TPacket30 Packet30;
@@ -856,50 +857,99 @@ void VT_Redraw(HWND hWnd, HDC hDC)
 //////////////////////////////////////////////////////////////////////
 void VT_DecodeLine(BYTE* VBI_Buffer)
 {
-	unsigned char data[45];
-	int i, p;
+    unsigned char data[45];
+	unsigned char min, max;
+    int dt[256], hi[6], lo[6];
+    int i, n, sync, thr;
 
-	// search for first 1 bit (VT always starts with 55 55 27 !!!)
-	p = 50;
-	while ((VBI_Buffer[p] < VBI_thresh) && (p < 350))
-		p++;
-	VBI_spos = (p << FPSHIFT) + vtstep / 2;
-
-	/* ignore first bit for now */
-	data[0] = VBI_Scan(VBI_Buffer, vtstep);
-	//cout << HEX(2) << (int)data[0] << endl;
-	if ((data[0] & 0xfe) == 0x54)
+    /* remove DC. edge-detector */
+    for (i = 40; i < 240; ++i)
 	{
-		data[1] = VBI_Scan(VBI_Buffer, vtstep);
-		switch (data[1])
+		dt[i] = VBI_Buffer[i + vtstep / FPFAC] - VBI_Buffer[i];	// amplifies the edges best.
+	}
+
+    /* set barrier */
+    for (i = 240; i < 256; i += 2)
+	{
+		dt[i] = 100;
+		dt[i+1] = -100;
+	}
+
+    /* find 6 rising and falling edges */
+    for (i = 40, n = 0; n < 6; ++n)
+    {
+		while (dt[i] < 32)
 		{
-		case 0xd5:			/* oops, missed first 1-bit: backup 2 bits */
-			VBI_spos -= 2 * vtstep;
-			data[1] = 0x55;
-		case 0x55:
-			data[2] = VBI_Scan(VBI_Buffer, vtstep);
-			switch (data[2])
-			{
-			case 0xd8:		/* this shows up on some channels?!?!? */
-				for (i = 3; i < 45; i++)
-				{
-					data[i] = VBI_Scan(VBI_Buffer, vtstep);
-				}
-				return;
-			case 0x27:
-				for (i = 3; i < 45; i++)
-				{
-					data[i] = VBI_Scan(VBI_Buffer, vtstep);
-				}
-				VBI_decode_vt(data);
-				return;
-			default:
-				break;
-			}
-		default:
-			break;
+		    i++;
+		}
+		hi[n] = i;
+		while (dt[i] > -32)
+		{
+			i++;
+		}
+		lo[n] = i;
+    }
+    if (i >= 240)
+	{
+		return;	// not enough periods found
+	}
+
+    i = hi[5] - hi[1];	// length of 4 periods (8 bits), normally 40.9
+    if (i < 39 || i > 42)
+	{
+		return;	// bad frequency
+	}
+
+    /* AGC and sync-reference */
+    min = 255;
+	max = 0;
+	sync = 0;
+    
+	for (i = hi[4]; i < hi[5]; ++i)
+	{
+		if (VBI_Buffer[i] > max)
+		{
+			max = VBI_Buffer[i];
+			sync = i;
 		}
 	}
+    for (i = lo[4]; i < lo[5]; ++i)
+	{
+		if (VBI_Buffer[i] < min)
+		{
+			min = VBI_Buffer[i];
+		}
+	}
+    
+	thr = (min + max) / 2;
+
+    /* search start-byte 11100100 */
+	//for (i = 4 * vtstep + vbi->pll_adj*vtstep/10; i < 16*vtstep; i += vtstep)
+    for (i = 4 * vtstep; i < (int)(16*vtstep); i += vtstep)
+	{
+		if (VBI_Buffer[sync + i/FPFAC] > thr && VBI_Buffer[sync + (i+vtstep)/FPFAC] > thr) // two ones is enough...
+		{
+			/* got it... */
+			memset(data, 0, sizeof(data));
+			data[0] = 0x55;
+			data[1] = 0x55;
+			for (n = 0; n < 43*8; ++n, i += vtstep)
+			{
+				if (VBI_Buffer[sync + i/FPFAC] > thr)
+				{
+					data[2 + n/8] |= 1 << (n % 8);
+				}
+			}
+
+			if (data[2] != 0x27)	// really 11100100? (rev order!)
+			{
+				return;
+			}
+
+			VBI_decode_vt(data);
+		}
+	}
+    return;
 }
 
 void VTS_DecodeLine(BYTE* VBI_Buffer)

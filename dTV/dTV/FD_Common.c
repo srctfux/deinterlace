@@ -42,7 +42,6 @@
 #include "stdafx.h"
 #include "OutThreads.h"
 #include "FD_Common.h"
-#define DOLOGGING
 #include "DebugLog.h"
 
 
@@ -91,7 +90,10 @@ long GetCombFactor(DEINTERLACE_INFO *pInfo)
 
 	// If one of the fields is missing, treat them as very different.
 	if (pInfo->OddLines[0] == NULL || pInfo->EvenLines[0] == NULL)
-		return 0x7fffffff;
+	{
+		pInfo->CombFactor = 0x7fffffff;
+		return pInfo->CombFactor;
+	}
 
 	qwEdgeDetect = CombEdgeDetect;
 	qwEdgeDetect += (qwEdgeDetect << 48) + (qwEdgeDetect << 32) + (qwEdgeDetect << 16);

@@ -160,7 +160,14 @@ typedef struct
 	MEMCPY_FUNC* pMemcpy;
 	// What type of CPU are we running
 	long CpuFeatureFlags;
-
+	// Are we behind with processing
+	BOOL bRunningLate;
+	// Are we behind with processing
+	BOOL bMissedFrame;
+	// Do we want to flip accuratly
+	BOOL bDoAccurateFlips;
+	// How long should we sleep for if we get the chance
+	long SleepInterval;
 } DEINTERLACE_INFO;
 
 // Deinterlace functions return true if the overlay is ready to be displayed.

@@ -86,7 +86,6 @@
 #include "VBI_CCdecode.h"
 #include "VBI_VideoText.h"
 #include "deinterlace.h"
-#define DOLOGGING
 #include "DebugLog.h"
 
 

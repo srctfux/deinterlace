@@ -44,7 +44,6 @@
 #include "OutThreads.h"
 #include "FD_60Hz.h"
 #include "FD_Common.h"
-#define DOLOGGING
 #include "DebugLog.h"
 
 // Settings

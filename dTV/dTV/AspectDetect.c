@@ -270,6 +270,11 @@ void AdjustAspectRatio(short** EvenField, short** OddField)
 	int i;
 	int haveSeenThisRatio, haveSeenSmallerRatio;
 
+	if(EvenField == NULL || OddField == NULL)
+	{
+		return;
+	}
+
 	// ADDED by Mark Rejhon: Eliminates the "tiny slit" problem in starry 
 	// scenes such as those in Star Wars or start of Toy Story 2,
 	// at least during full screen mode.

@@ -34,7 +34,6 @@
 
 #include "stdafx.h"
 #include "VBI_CCdecode.h"
-#define DOLOGGING
 #include "DebugLog.h"
 #include "dTV.h"
 #include "BT848.h"

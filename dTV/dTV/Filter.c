@@ -29,7 +29,6 @@
 #include "cpu.h"
 #include "dTV.h"
 #include "OSD.h"
-#define DOLOGGING
 #include "DebugLog.h"
 
 long NumFilters = 0;

@@ -36,7 +36,6 @@
 #include "OutThreads.h"
 #include "FD_50Hz.h"
 #include "FD_Common.h"
-#define DOLOGGING
 #include "DebugLog.h"
 
 long gPALFilmFallbackIndex = INDEX_VIDEO_2FRAME;

@@ -31,7 +31,6 @@
 #include "stdafx.h"
 #include "Splash.h"
 #include "dTV.h"
-#define DOLOGGING
 #include "DebugLog.h"
 
 HWND SplashWnd = NULL;

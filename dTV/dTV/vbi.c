@@ -45,6 +45,7 @@
 #include "VBI_VideoText.h"
 #include "VBI_CCdecode.h"
 #include "VBI_WSSdecode.h"
+#include "DebugLog.h"
 
 BOOL bStopVBI;
 HANDLE VBIThread;

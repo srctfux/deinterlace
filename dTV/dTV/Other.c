@@ -61,7 +61,6 @@
 #include "VBI_VideoText.h"
 #include "ErrorBox.h"
 #include "Splash.h"
-#define DOLOGGING
 #include "DebugLog.h"
 
 LPDIRECTDRAW lpDD = NULL;
