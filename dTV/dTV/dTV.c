@@ -718,7 +718,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_VOLUMEPLUS:
 			if (USE_MIXER == FALSE)
 			{
-				if (InitialVolume < 980)
+				if (InitialVolume < 1000)
 					InitialVolume += 20;
 				Audio_SetVolume(InitialVolume);
 				sprintf(Text, "BT-Volume %d", InitialVolume);
