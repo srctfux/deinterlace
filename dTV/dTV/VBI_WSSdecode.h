@@ -56,8 +56,12 @@ extern BOOL	WSSSurroundSound;
 extern BOOL	WSSCopyrightAsserted;
 extern BOOL	WSSCopyProtection;
 
-extern BOOL	WSSDecodeOk;	//	Status of last decoding
-extern int	WSSDecodeErr;	// Number of decoding errors
+extern BOOL	WSSDecodeOk;	// Status of last decoding
+extern int	WSSNbDecodeErr;	// Number of decoding errors
+extern int	WSSNbDecodeOk;	// Number of correct decoding
+extern int	WSSMinPos;
+extern int	WSSMaxPos;
+extern int	WSSAvgPos;
 
 int WSS_DecodeLine(BYTE* vbiline);
 

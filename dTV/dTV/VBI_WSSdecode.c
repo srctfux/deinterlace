@@ -46,7 +46,6 @@
 
 #define ROUND(d)	(int)floor((d)+0.5)
 
-extern void SwitchToRatio(int nMode, int nRatio);
 extern int decodebit(unsigned char *data, int threshold, int NumPixels);
 
 // Last WSS data decoded
@@ -60,8 +59,13 @@ BOOL	WSSSurroundSound = FALSE;
 BOOL	WSSCopyrightAsserted = FALSE;
 BOOL	WSSCopyProtection = FALSE;
 
-BOOL	WSSDecodeOk = FALSE;	//	Status of last decoding
-int		WSSDecodeErr = 0;		// Number of decoding errors
+BOOL	WSSDecodeOk = FALSE;	// Status of last decoding
+int		WSSNbDecodeErr = 0;		// Number of decoding errors
+int		WSSNbDecodeOk = 0;		// Number of correct decoding
+int		WSSMinPos = 0;
+int		WSSMaxPos = 0;
+int		WSSAvgPos = 0;
+int		WSSTotalPos = 0;
 
 // Sequence values for run-in code
 int WSS625_runin[WSS625_RUNIN_CODE_LENGTH] = { 1,1,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1 };
@@ -132,6 +136,7 @@ BOOL WSS625_DecodeLine(BYTE* vbiline)
 //	Threshold = (max - min) / 2 + min;
 	if (Threshold < 10)
 	{
+		WSSNbDecodeErr++;
 //		LOG("WSS signal threshold < 10");
 		return FALSE;
 	}
@@ -215,10 +220,26 @@ BOOL WSS625_DecodeLine(BYTE* vbiline)
 
 	if (DecodeOk)
 	{
-		packedbits = 0;
-		for (i = 0 ; i < WSS625_NB_DATA_BITS ; i++)
+		WSSNbDecodeOk++;
+		WSSTotalPos += i;
+		if (WSSNbDecodeOk == 1)
 		{
-			packedbits |= bits[i]<<i;
+			WSSMinPos = i;
+			WSSMaxPos = i;
+		}
+		else
+		{
+			if (i < WSSMinPos)
+				WSSMinPos = i;
+			if (i > WSSMaxPos)
+				WSSMaxPos = i;
+		}
+		WSSAvgPos = ROUND(((double)WSSTotalPos) / ((double)WSSNbDecodeOk));
+
+		packedbits = 0;
+		for (j = 0 ; j < WSS625_NB_DATA_BITS ; j++)
+		{
+			packedbits |= bits[j]<<j;
 		}
 
 		WSSRatio = packedbits & 0x000f;
@@ -230,6 +251,11 @@ BOOL WSS625_DecodeLine(BYTE* vbiline)
 		WSSSurroundSound = (packedbits & 0x0800) ? TRUE : FALSE;
 		WSSCopyrightAsserted = (packedbits & 0x1000) ? TRUE : FALSE;
 		WSSCopyProtection = (packedbits & 0x2000) ? TRUE : FALSE;
+	}
+	else
+	{
+		WSSNbDecodeErr++;
+//		LOG("WSS nb decoding errors = %d", WSSNbDecodeErr);
 	}
 
 	if (OldRatio != WSSRatio)
@@ -273,9 +299,9 @@ BOOL WSS625_DecodeLine(BYTE* vbiline)
 	if (OldColorPlus != WSSColorPlus)
 	{
 		if (WSSColorPlus)
-			LOG("WSS color encoding = normal Pal");
-		else
 			LOG("WSS color encoding = Motion Adaptative ColorPlus");
+		else
+			LOG("WSS color encoding = normal Pal");
 	}
 
 	if (OldHelperSignals != WSSHelperSignals)
@@ -392,8 +418,6 @@ int WSS_DecodeLine(BYTE* vbiline)
 
 	if (! WSSDecodeOk)
 	{
-		WSSDecodeErr ++;
-//		LOG("WSS nb decoding errors = %d", WSSDecodeErr);
 		return -1;
 	}
 	else
