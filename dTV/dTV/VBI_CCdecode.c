@@ -67,7 +67,7 @@ char	infochecksum;
 //ccdecode
 char    *ratings[] = {"(NOT RATED)","TV-Y","TV-Y7","TV-G","TV-PG","TV-14","TV-MA","(NOT RATED)"};
 int     rowdata[] = {10,0,0,1,2,3,11,12,13,14,4,5,6,7,8,9};
-char	*specialchar[] = {"®","°","½","¿","®","¢","£","o/~ ","à"," ","è","â","ê","î","ô","û"};
+char	*specialchar[] = {"®","°","½","¿","™","¢","£","¶ ","à"," ","è","â","ê","î","ô","û"};
 char	*modes[]={"current","future","channel","miscellanious","public service","reserved","invalid","invalid","invalid","invalid"};
 int	lastcode;
 int	ccmode=1;		//cc1 or cc2
@@ -372,28 +372,6 @@ void webtv_check(char * buf,int len)
 	}
 }
 
-void DebugScreen(CC_Screen* Screen)
-{
-	int i,j;
-	LOGD("\n");
-	if(Screen) return;
-	for(i = 0; i < 15; i++)
-	{
-		for(j = 0; j < CC_CHARS_PER_LINE; j++)
-		{
-			if(Screen->ScreenData[i][j].bIsActive)
-			{
-				LOGD("%c", Screen->ScreenData[i][j].Text);
-			}
-			else
-			{
-				//LOGD("'");
-			}
-		}
-		LOGD("\n");
-	}
-	LOGD("\n");
-}
 
 int CCdecode(int data)
 {
@@ -424,7 +402,6 @@ int CCdecode(int data)
 	if (b1&0x60 && data != lastcode) // text
 	{
 		// copy first character
-		//LOGD("%d %d %d %c%c\n", ScreenToWrite, CursorRow, CursorPos, b1, b2);
 		if(CursorPos < CC_CHARS_PER_LINE - 1)
 		{
 			memcpy(&Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos], &CurrentState, sizeof(CC_Char));
@@ -443,24 +420,27 @@ int CCdecode(int data)
 			Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos].Text = b1;
 		};
 		
-		// copy second character
-		if(CursorPos < CC_CHARS_PER_LINE - 1)
+		if(b2 > 31)
 		{
-			memcpy(&Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos], &CurrentState, sizeof(CC_Char));
-			Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos].Text = b2;
-			CursorPos++;
-		}
-		else 
-		{
-			for(x = 1; x < CC_CHARS_PER_LINE;x++)
+			// copy second character
+			if(CursorPos < CC_CHARS_PER_LINE - 1)
 			{
-				memcpy(&Screens[ScreenToWrite].ScreenData[CursorRow][x - 1], 
-					&Screens[ScreenToWrite].ScreenData[CursorRow][x], 
-					sizeof(CC_Char));
+				memcpy(&Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos], &CurrentState, sizeof(CC_Char));
+				Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos].Text = b2;
+				CursorPos++;
 			}
-			memcpy(&Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos], &CurrentState, sizeof(CC_Char));
-			Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos].Text = b2;
-		};
+			else 
+			{
+				for(x = 1; x < CC_CHARS_PER_LINE;x++)
+				{
+					memcpy(&Screens[ScreenToWrite].ScreenData[CursorRow][x - 1], 
+						&Screens[ScreenToWrite].ScreenData[CursorRow][x], 
+						sizeof(CC_Char));
+				}
+				memcpy(&Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos], &CurrentState, sizeof(CC_Char));
+				Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos].Text = b2;
+			}
+		}
 		bPaintNow = (ScreenToWrite == 0);
 	}
 	else if ((b1&0x10) && (b2>0x1F) && (data != lastcode)) //codes are always transmitted twice (apparently not, ignore the second occurance)
@@ -472,12 +452,16 @@ int CCdecode(int data)
 
 		if (b2 & 0x40)	//preamble address code (row & indent)
 		{
+			// reset state
+			memcpy(&CurrentState, &ResetState, sizeof(CC_Char));
+
 			// row inofrmation ignored in text mode
 			if(Mode != CCMODE_TEXT)
 			{
 				CursorRow = rowdata[((b1<<1)&14)|((b2>>5)&1)];
-				LOGD("Row %d\n", CursorRow);
 			}
+			
+			CursorPos = 0;
 
 			// get underline flag
 			CurrentState.bUnderline = b2&0x1;
@@ -490,12 +474,7 @@ int CCdecode(int data)
 				CursorPos = b2&0x0E << 1; 
 				// there seems to be a problem with the pop on captions
 				// when you get the second or thrid line of data
-				if(LastIndent == 0 && Mode == CCMODE_POP_ON)
-				{
-					CursorPos = 0;
-				}
 
-				LOGD("Indent %d\n", CursorPos);
 				for(x=0; x<CursorPos; x++)
 				{
 					Screens[ScreenToWrite].ScreenData[CursorRow][x].bIsActive = FALSE;
@@ -520,7 +499,10 @@ int CCdecode(int data)
 			switch (b1 & 0x07)
 			{
 				case 0x00:	//attribute
-					LOGD("<ATTRIBUTE %d %d>\n",b1,b2);
+					CurrentState.BackColor = b2&0x0E >> 1;
+					memcpy(&Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos], &CurrentState, sizeof(CC_Char));
+					Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos].Text = ' ';
+					if(CursorPos < CC_CHARS_PER_LINE - 1) CursorPos++;
 					break;
 				case 0x01:	//midrow or char
 					switch (b2&0x70)
@@ -528,18 +510,21 @@ int CCdecode(int data)
 						case 0x20: //midrow attribute change
 							switch (b2&0x0e)
 							{
-								case 0x00: //italics off
-									CurrentState.ForeColor = b2&0x0E >> 1;
-									CurrentState.bItalics = FALSE;
-									break;
 								case 0x0e: //italics on
 									CurrentState.bItalics = TRUE;
+									break;
+								default:
+									CurrentState.ForeColor = b2&0x0E >> 1;
+									CurrentState.bItalics = FALSE;
 									break;
 							}
 							if (b2&0x01) //underline
 								CurrentState.bUnderline = TRUE;
 							else
 								CurrentState.bUnderline = FALSE;
+							memcpy(&Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos], &CurrentState, sizeof(CC_Char));
+							Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos].Text = ' ';
+							if(CursorPos < CC_CHARS_PER_LINE - 1) CursorPos++;
 							break;
 						case 0x30: //special character..
 							memcpy(&Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos], &CurrentState, sizeof(CC_Char));
@@ -547,6 +532,7 @@ int CCdecode(int data)
 							if(CursorPos < CC_CHARS_PER_LINE - 1) CursorPos++;
 							break;
 					}
+
 					break;
 				case 0x04:	//misc
 				case 0x05:	//misc + F
@@ -597,6 +583,9 @@ int CCdecode(int data)
 
 						case 0x28: //flash on
 							CurrentState.bFlash = TRUE;
+							memcpy(&Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos], &CurrentState, sizeof(CC_Char));
+							Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos].Text = '\0';
+							if(CursorPos < CC_CHARS_PER_LINE - 1) CursorPos++;
 							break;
 
 						// reset screen becase we've gone into paint on mode
@@ -650,7 +639,6 @@ int CCdecode(int data)
 								}
 								memcpy(&CurrentState, &ResetState, sizeof(CC_Char));
 								CursorPos = 0;
-								DebugScreen(&Screens[0]);
 							}
 							break;
 						
@@ -661,18 +649,36 @@ int CCdecode(int data)
 							ScreenToWrite = 0;
 							CursorPos = 0;
 							CursorRow = 14;
-							DebugScreen(Screens);
 							bPaintNow = TRUE;
 							LastIndent = -1;
 							break;
 					}
 					break;
 				case 0x07:	//misc (TAB)
-					for(x=0;x<(b2&0x03);x++)
+					switch(b2)
 					{
-						memcpy(&CurrentState, &Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos], sizeof(CC_Char));
+					case 0x23:
+						Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos].bIsActive = FALSE;
+						if(CursorPos < CC_CHARS_PER_LINE - 1) CursorPos++;
+						/* FALL */
+					case 0x22:
+						Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos].bIsActive = FALSE;
+						if(CursorPos < CC_CHARS_PER_LINE - 1) CursorPos++;
+						/* FALL */
+					case 0x21:
+						Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos].bIsActive = FALSE;
+						if(CursorPos < CC_CHARS_PER_LINE - 1) CursorPos++;
+						break;
+
+					case 0x2F:
+						CurrentState.bUnderline = TRUE;
+						/* FALL */
+					case 0x2E:
+						CurrentState.ForeColor = CC_BLACK;
+						memcpy(&Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos], &CurrentState, sizeof(CC_Char));
 						Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos].Text = ' ';
 						if(CursorPos < CC_CHARS_PER_LINE - 1) CursorPos++;
+						break;
 					}
 					break;
 			}
@@ -696,45 +702,6 @@ int XDS_DecodeLine(BYTE* vbiline)
 {
 	XDSdecode(decode(vbiline));
 	return 0;
-}
-
-
-void CC_PaintLine(HWND hWnd, LPCSTR Line, HDC hDC, RECT* PaintRect, COLORREF ForeColor, COLORREF BackColor)
-{
-	HFONT		hTmp, hOSDfont;
-	int			nFontsize;
-	TEXTMETRIC	tmOSDFont;
-	SIZE		sizeText;
-	DWORD       dwQuality = 0;
-
-	if (hDC != NULL)
-	{
-		nFontsize = (PaintRect->bottom - PaintRect->top);
-
-		hOSDfont = CreateFont(nFontsize, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DEFAULT_PITCH | FF_DONTCARE, "Arial");
-		if (!hOSDfont) ErrorBox("Failed To Create OSD Font");
-
-		hTmp = SelectObject(hDC, hOSDfont);
-		if (hTmp)
-		{
-			GetTextMetrics(hDC, &tmOSDFont);
-			GetTextExtentPoint32(hDC, Line, strlen(Line), &sizeText);
-
-			SetBkMode(hDC, TRANSPARENT);
-			SetTextColor(hDC, BackColor);
-			TextOut(hDC, PaintRect->left - 2, PaintRect->top, Line, strlen(Line));
-			TextOut(hDC, PaintRect->left + 2, PaintRect->top, Line, strlen(Line));
-			TextOut(hDC, PaintRect->left, PaintRect->top - 2, Line, strlen(Line));
-			TextOut(hDC, PaintRect->left, PaintRect->top + 2, Line, strlen(Line));
-			
-			SetTextColor(hDC, ForeColor);
-			TextOut(hDC, PaintRect->left, PaintRect->top, Line, strlen(Line));
-			
-			SelectObject(hDC, hTmp);
-			DeleteObject(hOSDfont);
-		}
-	}
-
 }
 
 COLORREF CC_GetColor(CC_Color Color)
@@ -761,45 +728,159 @@ COLORREF CC_GetColor(CC_Color Color)
 	}
 }
 
+
+void CC_PaintChars(HWND hWnd, CC_Char* Char, char* szLine, HDC hDC, RECT* PaintRect, int nFontsize)
+{
+	SIZE sizeText;
+	HFONT hTmp, hOSDfont;
+
+	if (hDC != NULL)
+	{
+		hOSDfont = CreateFont(nFontsize, 0, 0, 0, 
+								(Char->bFlash)? FW_BOLD:0, 
+								Char->bItalics, 
+								Char->bUnderline, 
+								0, 0, 0, 0, 0, 
+								DEFAULT_PITCH | FF_DONTCARE, 
+								"Arial");
+		if (!hOSDfont) return;
+
+		hTmp = SelectObject(hDC, hOSDfont);
+		
+		if(hTmp)
+		{
+			GetTextExtentPoint32(hDC, szLine, strlen(szLine), &sizeText);
+
+			SetBkMode(hDC, TRANSPARENT);
+			SetTextColor(hDC, CC_GetColor(Char->BackColor));
+
+			TextOut(hDC, PaintRect->left - 2, PaintRect->top, szLine, strlen(szLine));
+			TextOut(hDC, PaintRect->left + 2, PaintRect->top, szLine, strlen(szLine));
+			TextOut(hDC, PaintRect->left, PaintRect->top - 2, szLine, strlen(szLine));
+			TextOut(hDC, PaintRect->left, PaintRect->top + 2, szLine, strlen(szLine));
+			
+			SetTextColor(hDC, CC_GetColor(Char->ForeColor));
+			TextOut(hDC, PaintRect->left, PaintRect->top, szLine, strlen(szLine));
+
+			PaintRect->left += sizeText.cx;
+
+			SelectObject(hDC, hTmp);
+			DeleteObject(hOSDfont);
+		}
+	}
+}
+
+
+void CC_PaintLine(HWND hWnd, CC_Char* Line, HDC hDC, RECT* PaintRect, int nFontsize)
+{
+	int i;
+	BOOL bAnyText = FALSE;
+	int Count = 0;
+	int LineWidth = (PaintRect->right - PaintRect->left);
+	char szString[CC_CHARS_PER_LINE + 1];
+	CC_Char* LastChar = NULL;
+	int StrPos = 0;
+
+	for(i = 0; i < CC_CHARS_PER_LINE; i++)
+	{
+		if(Line[i].bIsActive)
+		{
+			if(!bAnyText && Count == 0)
+			{
+				bAnyText = TRUE;
+				PaintRect->left = PaintRect->left + LineWidth * (i + 1) / (CC_CHARS_PER_LINE + 2);
+			}
+			
+			if(LastChar != NULL &&
+				(LastChar->BackColor != Line[i].BackColor ||
+				 LastChar->ForeColor != Line[i].ForeColor ||
+				 LastChar->bItalics != Line[i].bItalics ||
+				 LastChar->bUnderline != Line[i].bUnderline ||
+				 LastChar->bFlash != Line[i].bFlash))
+			{
+				szString[StrPos] = '\0';
+				CC_PaintChars(hWnd, LastChar, szString, hDC, PaintRect, nFontsize);
+				StrPos = 0;
+			}
+			
+			// cope with changes from straight ASCII
+			switch(Line[i].Text)
+			{
+			case '`':
+				szString[StrPos++] = 'á';
+				break;
+			case '*':
+				szString[StrPos++] = 'ú';
+				break;
+			case '\\':
+				szString[StrPos++] = 'é';
+				break;
+			case '^':
+				szString[StrPos++] = 'í';
+				break;
+			case '_':
+				szString[StrPos++] = 'ó';
+				break;
+			case '{':
+				szString[StrPos++] = 'ç';
+				break;
+			case '|':
+				szString[StrPos++] = '÷';
+				break;
+			case '}':
+				szString[StrPos++] = 'Ñ';
+				break;
+			case '~':
+				szString[StrPos++] = 'ñ';
+				break;
+			default:
+				szString[StrPos++] = Line[i].Text;
+				break;
+			}
+			LastChar = Line + i;
+			Count++;
+		}
+		else
+		{
+			if(StrPos > 0)
+			{
+				szString[StrPos] = '\0';
+				CC_PaintChars(hWnd, LastChar, szString, hDC, PaintRect, nFontsize);
+				StrPos = 0;
+			}
+			bAnyText = FALSE;
+			LastChar = NULL;
+		}
+	}
+
+	if(StrPos > 0)
+	{
+		szString[StrPos] = '\0';
+		CC_PaintChars(hWnd, LastChar, szString, hDC, PaintRect, nFontsize);
+	}
+}
+
 void CC_PaintScreen(HWND hWnd, CC_Screen* Screen, HDC hDC, RECT* PaintRect)
 {
-	int i,j;
-	char Line[CC_CHARS_PER_LINE + 1];
-	int StartPos;
-	int StrPos;
-	BOOL bAnyText;
+	int i;
 	RECT LineRect;
-	COLORREF ForeColor;
-	COLORREF BackColor;
+	int nFontsize;
 	
-	for(i = 0; i < 15; i++)
+	if (hDC != NULL)
 	{
-		StartPos = 0;
-		bAnyText = FALSE;
-		StrPos = 0;
-		for(j = 0; j < CC_CHARS_PER_LINE; j++)
+		nFontsize = (PaintRect->bottom - PaintRect->top) / 17;
+		if(nFontsize <= 1)
 		{
-			if(Screen->ScreenData[i][j].bIsActive)
-			{
-				Line[StrPos++] = Screen->ScreenData[i][j].Text;
-				if(!bAnyText)
-				{
-					bAnyText = TRUE;
-					StartPos = j;
-					ForeColor = CC_GetColor(Screen->ScreenData[i][j].ForeColor);
-					BackColor = CC_GetColor(Screen->ScreenData[i][j].BackColor);
-				}
-			}
+			return;
 		}
-		
-		if(StrPos > 0)
-		{
-			Line[StrPos] = '\0';
 
+		for(i = 0; i < 15; i++)
+		{
 			LineRect.top = PaintRect->top + ((PaintRect->bottom - PaintRect->top) * (i + 1)) / 17;
 			LineRect.bottom = PaintRect->top + ((PaintRect->bottom - PaintRect->top) * (i + 2)) / 17;
-			LineRect.left = PaintRect->left + ((PaintRect->right - PaintRect->left) * (StartPos + 1)) / (CC_CHARS_PER_LINE + 2);
-			CC_PaintLine(hWnd, Line, hDC, &LineRect, ForeColor, BackColor);
+			LineRect.left = PaintRect->left;
+			LineRect.right = PaintRect->right;
+			CC_PaintLine(hWnd, &Screen->ScreenData[i][0], hDC, &LineRect, nFontsize);
 		}
 	}
 }

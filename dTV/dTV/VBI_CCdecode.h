@@ -59,7 +59,7 @@ typedef enum
 	CCMODE_PAINT_ON,
 } CCMODE;
 
-#define CC_CHARS_PER_LINE 34
+#define CC_CHARS_PER_LINE 48
 
 typedef struct
 {

@@ -1181,14 +1181,43 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			{
 				RECT winRect;
 				HDC hDC;
+				HDC hMemDC;
+				HBITMAP hMemBM, hOldBM;
+				HBRUSH hBrush;
+    
 				GetClientRect(hWnd, &winRect);
 				if(bDisplayStatusBar == TRUE)
 				{
 					winRect.bottom -= StatusBar_Height();
 				}
 				hDC = GetDC(hWnd);
-			    PaintColorkey(hWnd, TRUE, hDC, &winRect);
-			    CC_PaintScreen(hWnd, (CC_Screen*)lParam, hDC, &winRect);
+			    hMemDC = CreateCompatibleDC(hDC);
+			    hMemBM = CreateCompatibleBitmap(hDC,
+                                    winRect.right - winRect.left,
+                                    winRect.bottom - winRect.top);
+
+
+				hOldBM = SelectObject(hMemDC, hMemBM);
+
+
+
+				hBrush = CreateSolidBrush(Overlay_GetColor());
+				FillRect(hMemDC, &winRect, hBrush);
+				DeleteObject(hBrush);
+
+			    CC_PaintScreen(hWnd, (CC_Screen*)lParam, hMemDC, &winRect);
+				BitBlt(hDC, 
+					winRect.left, 
+					winRect.top, 
+					winRect.right - winRect.left, 
+					winRect.bottom - winRect.top,
+					hMemDC, 0, 0, SRCCOPY);
+
+
+				SelectObject(hMemDC, hOldBM);
+				DeleteObject(hMemBM);
+    
+				DeleteDC(hMemDC);
 				ReleaseDC(hWnd, hDC);
 			}
 			break;
