@@ -1024,7 +1024,6 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 
 			if(!bMissedFrame)
 			{
-
 				if((bAutoDetectMode == TRUE && bIsPAL) || DeintMethods[gPulldownMode].bRequiresCombFactor)
 				{
 					info.CombFactor = GetCombFactor(info.EvenLines[0], info.OddLines[0]);
@@ -1106,7 +1105,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 			AdjustAspectRatio(ppEvenLines[LastEvenFrame], ppOddLines[LastOddFrame]);
 
 			// somewhere above we will have locked the buffer, unlock before flip
-			if (!RunningLate && RefreshRate > 0)
+			if (!RunningLate)
 			{
 				ddrval = IDirectDrawSurface_Unlock(lpDDOverlayBack, lpCurOverlay);
 
@@ -1114,7 +1113,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				{
 					// Need to wait for a good time to flip
 					// only if we have been in the same mode for at least one flip
-					if(DoAccurateFlips && PrevPulldownMode == gPulldownMode)
+					if(DoAccurateFlips && PrevPulldownMode == gPulldownMode && RefreshRate > 0)
 					{
 						if(bIsPAL)
 						{
