@@ -44,7 +44,12 @@
 //                                     So that overscan does not effect Ratio
 //                                     Fixed bug in FindBottomOfImage when
 //                                     Overscan is 0
+//
+// 21 Feb 2001   Michael Samblanet     None - just testing that check-in works
+//									   prior to beginning changes
+//
 /////////////////////////////////////////////////////////////////////////////
+
 
 #include "stdafx.h"
 #include "other.h"
