@@ -459,14 +459,14 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 						// we might then get a single frame behind
 						// we need to cope with this so we fill the info struct properly
 						// rather than dropping a frame
-						if(DoAccurateFlips && DeintMethods[gPulldownMode].bIsFilmMode && !bIsPAL &&
+						if(DoAccurateFlips && DeintMethods[gPulldownMode].bIsFilmMode &&
 							(LastEvenFrame + 1) % 5 == CurrentFrame)
 						{
 							memmove(&info.EvenLines[1], &info.EvenLines[0], sizeof(info.EvenLines) - sizeof(info.EvenLines[0]));
 							info.EvenLines[0] = ppEvenLines[CurrentFrame];
 							LastEvenFrame = CurrentFrame;
 							LOG("Slightly late");
-							FlipAdjust = 1;
+							//FlipAdjust = 1;
 						}
 						else
 						{
@@ -495,14 +495,14 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 						// we might then get a single frame behind
 						// we need to cope with this so we fill the info struct properly
 						// rather than dropping a frame
-						if(DoAccurateFlips && DeintMethods[gPulldownMode].bIsFilmMode && !bIsPAL &&
+						if(DoAccurateFlips && DeintMethods[gPulldownMode].bIsFilmMode &&
 							(LastOddFrame + 2) % 5 == CurrentFrame)
 						{
 							memmove(&info.OddLines[1], &info.OddLines[0], sizeof(info.OddLines) - sizeof(info.OddLines[0]));
 							info.OddLines[0] = ppOddLines[((CurrentFrame + 4) % 5)];
 							LastOddFrame = CurrentFrame;
 							LOG("Slightly late");
-							FlipAdjust = 1;
+							//FlipAdjust = 1;
 						}
 						else
 						{

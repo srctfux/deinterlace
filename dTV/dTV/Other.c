@@ -59,6 +59,7 @@
 #include "bt848.h"
 #include "OutThreads.h"
 #include "VBI_VideoText.h"
+#define DOLOGGING
 #include "DebugLog.h"
 
 LPDIRECTDRAW lpDD = NULL;
@@ -193,7 +194,7 @@ BOOL Overlay_Update(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL Color
 		while(ddrval == DDERR_NOOVERLAYHW)
 		{
 			Sleep(100);
-			ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, NULL, lpDDSurface, NULL, dwFlags, &DDOverlayFX);
+			ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, pSrcRect, lpDDSurface, pDestRect, dwFlags, &DDOverlayFX);
 		}
 		// just return if we get this here
 		// all DDERR_SURFACELOST will be handled by
@@ -201,6 +202,26 @@ BOOL Overlay_Update(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL Color
 		if(ddrval == DDERR_SURFACELOST)
 		{
 			return FALSE;
+		}
+		// we get unsupported error here for mpact2 cards
+		// so cope with this by not trying to update
+		// the color key value and just hoping it works
+		// with the existing one (black used to work)
+		if(ddrval == DDERR_UNSUPPORTED)
+		{
+			DDCOLORKEY ColorKey;
+
+			LOG(" Got unsupported error from Overlay Update");
+			ddrval = IDirectDrawSurface_GetColorKey(lpDDOverlay, DDCKEY_DESTOVERLAY, &ColorKey);
+			if(SUCCEEDED(ddrval))
+			{
+				OverlayColor = ColorKey.dwColorSpaceHighValue;
+				LOG(" Reset overlay color to %x", OverlayColor);
+			}
+			dwFlags &= ~DDOVER_KEYDESTOVERRIDE;
+			memset(&DDOverlayFX, 0x00, sizeof(DDOverlayFX));
+			DDOverlayFX.dwSize = sizeof(DDOverlayFX);
+			ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, pSrcRect, lpDDSurface, pDestRect, dwFlags, &DDOverlayFX);
 		}
 		if (FAILED(ddrval))
 		{
