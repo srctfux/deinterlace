@@ -135,7 +135,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         </tr>
         <tr> 
           <td> 
-            Threshold32Pulldown&nbsp;
+            Threshold32Pulldown
           </td>
           <td> 
             <p align="center">15
@@ -143,7 +143,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
           <td> 
             This is the number of pixels per field that need to be similar 
               for NTSC movie detection to detect a triplet of fields from the 
-              same movie frame.&nbsp; Higher values will cope with more video 
+              same movie frame. Higher values will cope with more video 
               noise but will not detect the movies as well.
           </td>
         </tr>
@@ -195,6 +195,49 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
             If set then it is used with DoAccurateFlips to reduce judder
           </td>
         </tr>
+
+        <tr>
+          <td>StaticImageFieldCount</td>
+          <td>16</td>
+          <td>The Adaptive video deinterlace mode considers an image to be static if it
+            stays the same (or nearly the same, subject to Threshold32Pulldown) for this
+            many fields.  In Adaptive mode, dTV will switch from LowMotionMode to
+            StaticImageMode for as long as the image remains the same.  This
+            helps reduce CPU consumption on still images such as DVD menu screens.</td>
+        </tr>
+
+        <tr>
+          <td>LowMotionFieldCount</td>
+          <td>4</td>
+          <td>The Adaptive video deinterlace mode considers an image to be
+            low-motion if its difference stays below Threshold32Pulldown for this many fields.
+            When that happens, dTV will switch from high-motion to low-motion mode.</td>
+        </tr>
+
+        <tr>
+          <td>StaticImageMode</td>
+          <td>3</td>
+          <td>Specifies the
+            <a href="#modes">video deinterlace mode</a>
+            to use in Adaptive mode for static scenes (see StaticImageFieldCount).</td>
+        </tr>
+
+        <tr>
+          <td>LowMotionMode</td>
+          <td>2</td>
+          <td>Specifies the
+            <a href="#modes">video deinterlace mode</a>
+            to use in Adaptive mode for low-motion scenes (see LowMotionFieldCount).</td>
+        </tr>
+
+        <tr>
+          <td>HighMotionMode</td>
+          <td>2</td>
+          <td>CSpecifies the
+            <a href="#modes">video deinterlace mode</a>
+            to use in Adaptive mode for high-motion scenes (see LowMotionFieldCount).</td>
+        </tr>
+
         <tr>
           <td colspan=3> 
             <h3>[Hardware]</h3>
@@ -911,6 +954,129 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         </tr>
       </table>
       <!-- #EndEditable --></td>
+  </tr>
+  <tr> 
+    <td colspan="3">&nbsp;</td>
+  </tr>
+  <tr>
+    <td colspan="3">
+
+<h2 id="modes">Deinterlace Modes</h2>
+
+<p>The following numeric codes correspond to the various deinterlace modes
+supported by dTV.  They are used in the DeinterlaceMode, LowMotionMode,
+HighMotionMode, and StillImageMode settings.
+
+<p>
+<table border="1">
+<tr>
+<th>ID</th>
+<th>Name</th>
+<th>Summary</th>
+</tr>
+
+<tr>
+<td>0</td>
+<td>Video Bob</td>
+<td>Adaptive video deinterlace with a tendency to bob rather than weave.
+Useful for high-motion scenes on slower PCs.</td>
+</tr>
+
+<tr>
+<td>1</td>
+<td>Video Weave</td>
+<td>Adaptive video deinterlace with a tendency to weave rather than bob.
+Useful for low-motion scenes on slower PCs.</td>
+</tr>
+
+<tr>
+<td>2</td>
+<td>Video 2-Frame</td>
+<td>Adaptive video deinterlace that examines more data than Video Bob or
+Video Weave.  Can handle high and low-motion scenes but requires more
+CPU horsepower.</td>
+</tr>
+
+<tr>
+<td>3</td>
+<td>Simple Weave</td>
+<td>Combines each incoming field with the previous one, with no attempt
+to eliminate visible artifacts.  Suitable for static (still) images.</td>
+</tr>
+
+<tr>
+<td>4</td>
+<td>Simple Bob</td>
+<td>Fills the whole screen with each incoming field, effectively cutting
+resolution in half.  Not generally useful, though some sports may look
+acceptable and it uses less CPU time than most of the other modes.</td>
+</tr>
+
+<tr>
+<td>5</td>
+<td>Scaler Bob</td>
+<td>Like Simple Bob, but uses the display hardware to expand the
+half-resolution image rather than doing it in software.  Uses less CPU
+time than Simple Bob and looks better on some video cards.  Switching
+to and from this mode may produce brief distortions in the picture.</td>
+</tr>
+
+<tr>
+<td>6-7</td>
+<td>2:2 Pulldown</td>
+<td>PAL film modes, each film frame corresponding to two video fields
+for a frame rate of 25FPS. Generally you will want to let dTV automatically
+detect these modes rather than setting them by hand.</td>
+</tr>
+
+<tr>
+<td>8-12</td>
+<td>3:2 Pulldown</td>
+<td>NTSC film modes, each pair of film frames corresponding to five video
+fields for a frame rate of 24FPS. Generally you will want to let dTV
+automatically detect these modes rather than setting them by hand.</td>
+</tr>
+
+<tr>
+<td>13-14</td>
+<td>Even/Odd Only</td>
+<td>Ignore the odd or even fields, respectively.  Essentially these are
+bob modes, but they may produce better results on some video cards than
+simple bobbing.  Mostly useful for older videogame systems (PlayStation,
+Nintendo64, etc.) that render games at half resolution.</td>
+</tr>
+
+<tr>
+<td>15</td>
+<td>Blended Clip</td>
+<td>Attempts to smoothly blend the results of weaving and bobbing rather
+than simply choosing one or the other outright.  This mode has a lot of
+settings that can be tweaked with a control panel.</td>
+</td>
+</tr>
+
+<tr>
+<td>16</td>
+<td>Adaptive</td>
+<td>Not exactly a mode in its own right, the adaptive algorithm switches
+between other deinterlace modes depending on the amount of motion in the
+scene.  Its exact behavior is controlled by LowMotionFieldCount,
+HighMotionMode, and related INI file settings; see the [Pulldown]
+section above.</td>
+</td>
+</tr>
+
+<tr>
+<td>17</td>
+<td>Greedy</td>
+<td>Examines several nearby pixels to determine which one will produce
+the best image.  Works well on poorly-mastered film material and on
+video with low amounts of motion.</td>
+</tr>
+
+</table>
+
+    </td>
   </tr>
   <tr> 
     <td colspan="3">&nbsp;</td>
