@@ -71,7 +71,8 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "DTVDRV95_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /Zp1 /MTd /W3 /GX /Zi /Od /I "..\common" /I "..\include" /D "_VXD_" /D "IS_32" /D DEBLEVEL=1 /D "WIN95" /D "WIN40COMPAT" /D "_DEBUG" /D "DTVDRV95_EXPORTS" /FR /YX /FD /Gs /c
+# ADD CPP /nologo /Zp1 /MTd /W3 /GX /Zi /Od /I "..\common" /I "..\include" /D "_VXD_" /D "IS_32" /D DEBLEVEL=1 /D "WIN95" /D "WIN40COMPAT" /D "_DEBUG" /D "DTVDRV95_EXPORTS" /YX /FD /Gs /c
+# SUBTRACT CPP /Fr
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /win32
 # SUBTRACT MTL /mktyplib203

@@ -44,7 +44,8 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /Gz /W3 /Z7 /Oi /Gy /I "c:\ddk" /I "..\dll" /I "..\include" /D "_DEBUG" /D "STD_CALL" /D CONDITION_HANDLING=1 /D NT_UP=1 /D NT_INST=0 /D _NT1X_=100 /D WINNT=1 /D _WIN32_WINNT=0x0400 /D WIN32_LEAN_AND_MEAN=1 /D DBG=1 /D DEVL=1 /D FPO=0 /D "NDEBUG" /D _DLL=1 /D _X86_=1 /D "_NTKERNEL_" /YX /FD /Zel -cbstring /QIfdiv- /QIf /GF /c
-# ADD CPP /nologo /Gz /W3 /Z7 /Oi /Gy /I "..\common" /I "..\include" /D "_DEBUG" /D "STD_CALL" /D CONDITION_HANDLING=1 /D NT_UP=1 /D NT_INST=0 /D _NT1X_=100 /D WINNT=1 /D _WIN32_WINNT=0x0400 /D WIN32_LEAN_AND_MEAN=1 /D DBG=1 /D DEVL=1 /D FPO=0 /D "NDEBUG" /D _DLL=1 /D _X86_=1 /D "_NTKERNEL_" /FR /YX /FD /Zel -cbstring /QIfdiv- /QIf /GF /c
+# ADD CPP /nologo /Gz /W3 /Z7 /Oi /Gy /I "..\common" /I "..\include" /D "_DEBUG" /D "STD_CALL" /D CONDITION_HANDLING=1 /D NT_UP=1 /D NT_INST=0 /D _NT1X_=100 /D WINNT=1 /D _WIN32_WINNT=0x0400 /D WIN32_LEAN_AND_MEAN=1 /D DBG=1 /D DEVL=1 /D FPO=0 /D "NDEBUG" /D _DLL=1 /D _X86_=1 /D "_NTKERNEL_" /YX /FD /Zel -cbstring /QIfdiv- /QIf /GF /c
+# SUBTRACT CPP /Fr
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD BASE RSC /l 0x409 /i "i:\ddk.nt" /d "_DEBUG"
@@ -95,109 +96,22 @@ LINK32=link.exe
 # Begin Source File
 
 SOURCE=..\common\DEBUGOUT.CPP
-DEP_CPP_DEBUG=\
-	"..\common\DEBUGOUT.H"\
-	"..\include\basetype.h"\
-	{$(INCLUDE)}"alpharef.h"\
-	{$(INCLUDE)}"basedef.h"\
-	{$(INCLUDE)}"basetsd.h"\
-	{$(INCLUDE)}"bugcodes.h"\
-	{$(INCLUDE)}"guiddef.h"\
-	{$(INCLUDE)}"ia64reg.h"\
-	{$(INCLUDE)}"ntddk.h"\
-	{$(INCLUDE)}"ntdef.h"\
-	{$(INCLUDE)}"ntiologc.h"\
-	{$(INCLUDE)}"ntstatus.h"\
-	{$(INCLUDE)}"vmm.h"\
-	{$(INCLUDE)}"vwin32.h"\
-	
 # End Source File
 # Begin Source File
 
 SOURCE=.\DRVALLOC.CPP
-DEP_CPP_DRVAL=\
-	{$(INCLUDE)}"alpharef.h"\
-	{$(INCLUDE)}"basetsd.h"\
-	{$(INCLUDE)}"bugcodes.h"\
-	{$(INCLUDE)}"guiddef.h"\
-	{$(INCLUDE)}"ia64reg.h"\
-	{$(INCLUDE)}"ntddk.h"\
-	{$(INCLUDE)}"ntdef.h"\
-	{$(INCLUDE)}"ntiologc.h"\
-	{$(INCLUDE)}"ntstatus.h"\
-	
 # End Source File
 # Begin Source File
 
 SOURCE=.\dTVdrvNT.cpp
-DEP_CPP_DTVDR=\
-	"..\common\DEBUGOUT.H"\
-	"..\common\IOCLASS.H"\
-	"..\include\basetype.h"\
-	"..\include\dTVdrv.H"\
-	{$(INCLUDE)}"alpharef.h"\
-	{$(INCLUDE)}"basedef.h"\
-	{$(INCLUDE)}"basetsd.h"\
-	{$(INCLUDE)}"bugcodes.h"\
-	{$(INCLUDE)}"devioctl.h"\
-	{$(INCLUDE)}"guiddef.h"\
-	{$(INCLUDE)}"ia64reg.h"\
-	{$(INCLUDE)}"ntddk.h"\
-	{$(INCLUDE)}"ntdef.h"\
-	{$(INCLUDE)}"ntiologc.h"\
-	{$(INCLUDE)}"ntstatus.h"\
-	{$(INCLUDE)}"vmm.h"\
-	{$(INCLUDE)}"vmmreg.h"\
-	{$(INCLUDE)}"vwin32.h"\
-	
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\IOCLASS.CPP
-DEP_CPP_IOCLA=\
-	"..\common\DEBUGOUT.H"\
-	"..\common\IOCLASS.H"\
-	"..\include\basetype.h"\
-	"..\include\dTVdrv.H"\
-	{$(INCLUDE)}"alpharef.h"\
-	{$(INCLUDE)}"basedef.h"\
-	{$(INCLUDE)}"basetsd.h"\
-	{$(INCLUDE)}"bugcodes.h"\
-	{$(INCLUDE)}"devioctl.h"\
-	{$(INCLUDE)}"guiddef.h"\
-	{$(INCLUDE)}"ia64reg.h"\
-	{$(INCLUDE)}"ntddk.h"\
-	{$(INCLUDE)}"ntdef.h"\
-	{$(INCLUDE)}"ntiologc.h"\
-	{$(INCLUDE)}"ntstatus.h"\
-	{$(INCLUDE)}"vmm.h"\
-	{$(INCLUDE)}"vmmreg.h"\
-	{$(INCLUDE)}"vwin32.h"\
-	
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\PCIENUM.CPP
-DEP_CPP_PCIEN=\
-	"..\common\DEBUGOUT.H"\
-	"..\common\IOCLASS.H"\
-	"..\include\basetype.h"\
-	"..\include\dTVdrv.H"\
-	{$(INCLUDE)}"alpharef.h"\
-	{$(INCLUDE)}"basedef.h"\
-	{$(INCLUDE)}"basetsd.h"\
-	{$(INCLUDE)}"bugcodes.h"\
-	{$(INCLUDE)}"devioctl.h"\
-	{$(INCLUDE)}"guiddef.h"\
-	{$(INCLUDE)}"ia64reg.h"\
-	{$(INCLUDE)}"ntddk.h"\
-	{$(INCLUDE)}"ntdef.h"\
-	{$(INCLUDE)}"ntiologc.h"\
-	{$(INCLUDE)}"ntstatus.h"\
-	{$(INCLUDE)}"vmm.h"\
-	{$(INCLUDE)}"vmmreg.h"\
-	{$(INCLUDE)}"vwin32.h"\
-	
 # End Source File
 # End Group
 # Begin Group "Resource Files"
