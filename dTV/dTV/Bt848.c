@@ -222,14 +222,51 @@ int VDelay = 0;
 //===========================================================================
 // Timing generator SRAM table values for CCIR601 720x480 NTSC
 //===========================================================================
-BYTE SRAMTable[ 60 ] =
+
+// For NTSC CCIR656 
+BYTE SRAMTable_NTSC[ 60 ] =
 {
-      0x33, // size of table = 51
-      0x0c, 0xc0, 0x00, 0x00, 0x90, 0xc2, 0x03, 0x10, 0x03, 0x06,
-      0x10, 0x34, 0x12, 0x12, 0x65, 0x02, 0x13, 0x24, 0x19, 0x00,
-      0x24, 0x39, 0x00, 0x96, 0x59, 0x08, 0x93, 0x83, 0x08, 0x97,
-      0x03, 0x50, 0x30, 0xc0, 0x40, 0x30, 0x86, 0x01, 0x01, 0xa6,
-      0x0d, 0x62, 0x03, 0x11, 0x61, 0x05, 0x37, 0x30, 0xac, 0x21, 0x50
+	// SRAM Timing Table for NTSC
+	0x33, 
+	0x0c, 0xc0, 0x00, 
+	0x00, 0x90, 0xc2, 
+	0x03, 0x10, 0x03, 
+	0x06, 0x10, 0x34, 
+	0x12, 0x12, 0x65, 
+	0x02, 0x13, 0x24, 
+	0x19, 0x00, 0x24, 
+	0x39, 0x00, 0x96, 
+	0x59, 0x08, 0x93, 
+	0x83, 0x08, 0x97,
+	0x03, 0x50, 0x30, 
+	0xc0, 0x40, 0x30, 
+	0x86, 0x01, 0x01, 
+	0xa6, 0x0d, 0x62, 
+	0x03, 0x11, 0x61, 
+	0x05, 0x37, 0x30, 
+	0xac, 0x21, 0x50
+};
+
+// For PAL CCIR656
+BYTE SRAMTable_PAL[ 60 ] =
+{
+	// SRAM Timing Table for PAL
+	0x2d,
+	0x36, 0x11, 0x01,
+	0x00, 0x90, 0x02,
+	0x05, 0x10, 0x04,
+	0x16, 0x14, 0x05,
+	0x11, 0x00, 0x04,
+	0x12, 0xc0, 0x00,
+	0x31, 0x00, 0x06,
+	0x51, 0x08, 0x03,
+	0x89, 0x08, 0x07,
+	0xc0, 0x44, 0x00,
+	0x81, 0x01, 0x01,
+	0xa9, 0x0d, 0x02,
+	0x02, 0x50, 0x03,
+	0x37, 0x3d, 0x00,
+	0xaf, 0x21, 0x00,
 };
 
 SETTING BT848Settings[BT848_SETTING_LASTONE];
@@ -253,6 +290,7 @@ const char* BT848_ChipType()
 	return BTChipType;
 }
 
+//-------------------------------
 BOOL BT848_FindTVCard(HWND hWnd)
 {
 	int ret;
@@ -330,6 +368,7 @@ BOOL BT848_FindTVCard(HWND hWnd)
 }
 
 
+//-------------------------------
 void BT848_SaveSettings(LPCSTR szFileName)
 {
 	FILE *SettingFile;
@@ -398,11 +437,13 @@ void BT848_SaveSettings(LPCSTR szFileName)
 	}
 }
 
+//-------------------------------
 DWORD BT848_GetSubSystemID()
 {
 	return hBT8X8->dwSubSystemID;
 }
 
+//-------------------------------
 BOOL BT848_MemoryInit(void)
 {
 	int i;
@@ -441,6 +482,7 @@ BOOL BT848_MemoryInit(void)
 	return (TRUE);
 }
 
+//-------------------------------
 void BT848_MemoryFree()
 {
 	int i;
@@ -452,7 +494,7 @@ void BT848_MemoryFree()
 	}
 }
 
-
+//-------------------------------
 void BT848_Restart_RISC_Code()
 {
 	BYTE CapCtl = BT848_ReadByte(BT848_CAP_CTL);
@@ -462,6 +504,7 @@ void BT848_Restart_RISC_Code()
 	BT848_WriteByte(BT848_CAP_CTL, CapCtl);
 }
 
+//-------------------------------
 int BT848_CCIRsource()
 {
     switch (VideoSource)
@@ -475,6 +518,34 @@ int BT848_CCIRsource()
     return FALSE;
 }
 
+//-------------------------------
+int BT848_IsPAL()
+{
+    switch (TVFormat)
+    {
+    case FORMAT_PAL_BDGHI:
+    case FORMAT_PAL_M:
+    case FORMAT_PAL_N:
+    case FORMAT_SECAM:  // Okay, this one is not PAL but has same number of scanlines
+        return TRUE;
+    }
+    return FALSE;
+}
+
+//-------------------------------
+int BT848_IsNTSC()
+{
+    switch (TVFormat)
+    {
+    case FORMAT_NTSC:
+    case FORMAT_NTSC_J:
+    case FORMAT_PAL60:  // Okay, this one is not NTSC but has same number of scanlines
+        return TRUE;
+    }
+    return FALSE;
+}
+
+//-------------------------------
 void BT848_ResetHardware()
 {
 	BT848_SetDMA(FALSE);
@@ -515,11 +586,13 @@ void BT848_ResetHardware()
 	BT848_SaturationV_OnChange(InitialSaturationV);
 }
 
+//-------------------------------
 PHYS RiscLogToPhys(DWORD * pLog)
 {
 	return (RiscBasePhysical + (pLog - RiscBaseLinear) * 4);
 }
 
+//-------------------------------
 // JA 17012001 Updated to do exactly what it says in the bt848 docs
 void BT848_SetPLL(PLLFREQ PLL)
 {
@@ -563,6 +636,7 @@ void BT848_SetPLL(PLLFREQ PLL)
 	BT848_WriteByte(BT848_DVSIF, 0x00);
 }
 
+//-------------------------------
 void BT848_SetDMA(BOOL bState)
 {
 	if (bState)
@@ -575,6 +649,7 @@ void BT848_SetDMA(BOOL bState)
 	}
 }
 
+//-------------------------------
 BOOL BT848_SetGeoSize()
 {
 	int vscale, hscale;
@@ -758,12 +833,12 @@ BOOL BT848_BDelay_OnChange(long BDelay)
         {
             // We use automatic BDelay if InitialBDelay is 0
             Reset_Capture();
-			BT848Settings[BDELAY].szDisplayName = "BDelay AUTO";
+			BT848Settings[BDELAY].szDisplayName = "Macrovision Timing AUTO";
         }
         else
         {
 			BT848_WriteByte(BT848_BDELAY, (BYTE)BDelay);
-			BT848Settings[BDELAY].szDisplayName = "BDelay";
+			BT848Settings[BDELAY].szDisplayName = "Macrovision Timing";
         }
     }
 	return FALSE;
@@ -1217,6 +1292,9 @@ BOOL BT848_Enable656()
 	CurrentX = 720;
 	CurrentY = 480;
 
+    // MAE 20Mar2001 
+    if (BT848_IsPAL()) CurrentY = 576;
+
 	// Disable TG mode
 	BT848_MaskDataByte(BT848_TGCTRL, 0, BT848_TGCTRL_TGMODE_ENABLE);
 	
@@ -1225,12 +1303,24 @@ BOOL BT848_Enable656()
 	BT848_MaskDataByte(BT848_TGCTRL, BT848_TGCTRL_TGMODE_RESET, BT848_TGCTRL_TGMODE_RESET);
 	BT848_MaskDataByte(BT848_TGCTRL, 0, BT848_TGCTRL_TGMODE_RESET);
 
-	// Load up the TG table for CCIR656
-	for (i=0;i<SRAMTable[0];++i)
-	{
-	  BT848_WriteByte(BT848_TBLG,SRAMTable[i+1]);
-	}
-	
+    // MAE 20Mar2001
+    if (BT848_IsPAL())
+    {
+	    // Load up the TG table for CCIR656
+	    for (i=0;i<SRAMTable_PAL[0];++i)
+	    {
+	        BT848_WriteByte(BT848_TBLG,SRAMTable_PAL[i+1]);
+	    }
+    }
+    else
+    {
+	    // Load up the TG table for CCIR656
+	    for (i=0;i<SRAMTable_NTSC[0];++i)
+	    {
+	        BT848_WriteByte(BT848_TBLG,SRAMTable_NTSC[i+1]);
+	    }
+    }
+    
 	// Enable TG mode
 	BT848_MaskDataByte(BT848_TGCTRL, BT848_TGCTRL_TGMODE_ENABLE, BT848_TGCTRL_TGMODE_ENABLE);
 
@@ -1243,8 +1333,17 @@ BOOL BT848_Enable656()
 	// Enable 656 Mode, bypass chroma filters
 	BT848_WriteByte(BT848_DVSIF, BT848_DVSIF_VSIF_BCF | BT848_DVSIF_CCIR656);
 	
-	// Enable NTSC mode
-	BT848_MaskDataByte(BT848_IFORM, (BT848_IFORM_NTSC | BT848_IFORM_XTBOTH), (BT848_IFORM_NORM | BT848_IFORM_XTBOTH));
+    // MAE 20Mar2001
+    if (BT848_IsPAL())
+    {
+	    // Enable PAL mode (or SECAM)
+        BT848_MaskDataByte(BT848_IFORM, (BT848_IFORM_PAL_BDGHI | BT848_IFORM_XTBOTH), (BT848_IFORM_NORM | BT848_IFORM_XTBOTH));
+    }
+    else
+    {
+        // Enable NTSC mode (or PAL60)
+    	BT848_MaskDataByte(BT848_IFORM, (BT848_IFORM_NTSC | BT848_IFORM_XTBOTH), (BT848_IFORM_NORM | BT848_IFORM_XTBOTH));
+    }
 
 	// Disable full range luma
 	BT848_WriteByte(BT848_OFORM, 0);
@@ -1471,6 +1570,7 @@ BOOL TVFormat_OnChange(long NewValue)
 	VideoSettings_Save();
 	TVFormat = NewValue;
 	VideoSettings_Load();
+    if (BT848_CCIRsource()) BT848_ResetHardware();
 	BT848_SetGeoSize();
 	WorkoutOverlaySize();
 	Start_Capture();
