@@ -181,7 +181,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	MSG msg;
 	HGLOBAL hGlobal;
 	HWND hPrevWindow;
-	int i;
 
 	hInst = hInstance;
 	CpuFeatureFlags = get_feature_flags();
@@ -207,19 +206,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 #ifndef _DEBUG
 	SetWindowPos(SplashWnd, HWND_TOPMOST, 10, 10, 20, 20, SWP_NOMOVE | SWP_NOCOPYBITS | SWP_NOSIZE);
 #endif
-
-	if (strlen(IC_BASE_DIR) > 0)
-	{
-		i = (int) CreateDirectory(IC_BASE_DIR, NULL);
-	}
-	if (strlen(VD_DIR) > 0)
-	{
-		i = (int) CreateDirectory(VD_DIR, NULL);
-	}
-	if (strlen(VT_BASE_DIR) > 0)
-	{
-		i = (int) CreateDirectory(VT_BASE_DIR, NULL);
-	}
 
 	wc.style = 0;
 	wc.lpfnWndProc = (WNDPROC) MainWndProc;
@@ -1021,32 +1007,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			}
 			break;
 
-		case IDM_VBI_VD:
-			if (VBI_Flags & VBI_VD)
-			{
-				if (BeforeVD != 7)
-				{
-					VBI_Flags -= VBI_VD;
-					VideoDat_Exit();
-					TVTYPE = BeforeVD;
-					break;
-				}
-				VBI_Flags -= VBI_VD;
-			}
-			else
-			{
-				BeforeVD = TVTYPE;
-				if (TVTYPE != 7)
-				{
-					VBI_Flags += VBI_VD;	//
-					TVTYPE = 7;
-					break;
-				}
-				VideoDat_Init();
-				VBI_Flags += VBI_VD;
-			}
-			break;
-
 		case IDM_VBI_VPS:
 			if (VBI_Flags & VBI_VPS)
 			{
@@ -1058,33 +1018,10 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			}
 			break;
 
-		case IDM_VBI_IC:
-			if (VBI_Flags & VBI_IC)
-			{
-				VBI_Flags -= VBI_IC;
-			}
-			else
-			{
-				VBI_Flags += VBI_IC;
-			}
-			break;
-
 		case IDM_UNTERTITEL:
 			VThWnd = CreateDialog(hInst, "VIDEOTEXTUNTERTITEL", NULL, VideoTextUnterTitelProc);
 			if (bAlwaysOnTop == TRUE)
 				SetWindowPos(VThWnd, HWND_TOPMOST, 10, 10, 20, 20, SWP_NOMOVE | SWP_NOCOPYBITS | SWP_NOSIZE);
-			break;
-
-		case IDM_VIDEODAT_SETUP:
-			DialogBox(hInst, "VDSETUP", hWnd, VDSettingProc);
-			break;
-
-		case IDM_VT_SETUP:
-			DialogBox(hInst, "VTSETUP", hWnd, VTSettingProc);
-			break;
-
-		case IDM_INTERCAST_SETUP:
-			DialogBox(hInst, "ICSETUP", hWnd, ICSettingProc);
 			break;
 
 		case IDM_CALL_VIDEOTEXTSMALL:
@@ -1124,17 +1061,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
 		case IDM_VPS_OUT:
 			DialogBox(hInst, "VPSSTATUS", hWnd, VPSInfoProc);
-			break;
-
-		case IDM_IC_OUT:
-			DialogBox(hInst, "ICSTATUS", hWnd, ICInfoProc);
-			break;
-
-		case IDM_VD_OUT:
-			if (VD_RAW == TRUE)
-				DialogBox(hInst, "VDSTATUSRAW", hWnd, VDInfoProcRaw);
-			else
-				DialogBox(hInst, "VDSTATUS", hWnd, VDInfoProc);
 			break;
 
 		case IDM_VT_OUT:
@@ -1807,15 +1733,8 @@ void MainWndOnCreate(HWND hWnd)
 	SetDlgItemText(SplashWnd, IDC_TEXT5, "");
 	Sleep(100);
 
-	SetDlgItemText(SplashWnd, IDC_TEXT2, "InterCast");
-	for (i = 0; i < 12; i++)
-	{
-		UTPages[i] = 0;
-	}
-	InterCast_Init();
-
 	Sleep(100);
-	SetDlgItemText(SplashWnd, IDC_TEXT3, "VideoText");
+	SetDlgItemText(SplashWnd, IDC_TEXT2, "VideoText");
 	for (i = 0; i < 800; i++)
 	{
 		VTFrame[i].SubPage = NULL;
@@ -1834,8 +1753,6 @@ void MainWndOnCreate(HWND hWnd)
 
 	VTScreen[0] = NULL;
 
-	// DIB-Bitmap VideoText erzeugen
-	SetDlgItemText(SplashWnd, IDC_TEXT4, "HQ-Color");
 
 	if (USE_MIXER == TRUE)
 	{
@@ -1969,7 +1886,6 @@ void SetMenuAnalog()
 	EnableMenuItem(GetMenu(hWnd), IDM_UNTERTITEL, MF_GRAYED);
 	EnableMenuItem(GetMenu(hWnd), IDM_PDC_OUT, MF_GRAYED);
 	EnableMenuItem(GetMenu(hWnd), IDM_VT_OUT, MF_GRAYED);
-	EnableMenuItem(GetMenu(hWnd), IDM_IC_OUT, MF_GRAYED);
 	EnableMenuItem(GetMenu(hWnd), IDM_VPS_OUT, MF_GRAYED);
 
 	CheckMenuItem(GetMenu(hWnd), IDM_VBI, Capture_VBI?MF_CHECKED:MF_UNCHECKED);
@@ -1980,34 +1896,24 @@ void SetMenuAnalog()
 		EnableMenuItem(GetMenu(hWnd), IDM_CALL_VIDEOTEXT, (VBI_Flags & VBI_VT)?MF_ENABLED:MF_GRAYED);
 		EnableMenuItem(GetMenu(hWnd), IDM_VT_RESET, (VBI_Flags & VBI_VT)?MF_ENABLED:MF_GRAYED);
 		EnableMenuItem(GetMenu(hWnd), IDM_UNTERTITEL, (VBI_Flags & VBI_VT)?MF_ENABLED:MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_PDC_OUT, (VBI_Flags & VBI_VT)?MF_ENABLED:MF_GRAYED);
 		EnableMenuItem(GetMenu(hWnd), IDM_VT_OUT, (VBI_Flags & VBI_VT)?MF_ENABLED:MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_IC_OUT, (VBI_Flags & VBI_IC)?MF_ENABLED:MF_GRAYED);
 		EnableMenuItem(GetMenu(hWnd), IDM_VPS_OUT, (VBI_Flags & VBI_VPS)?MF_ENABLED:MF_GRAYED);
 		EnableMenuItem(GetMenu(hWnd), IDM_VBI_VT, MF_ENABLED);
-		EnableMenuItem(GetMenu(hWnd), IDM_VBI_IC, MF_ENABLED);
 		EnableMenuItem(GetMenu(hWnd), IDM_VBI_VPS, MF_ENABLED);
-		EnableMenuItem(GetMenu(hWnd), IDM_VBI_VD, MF_ENABLED);
 		EnableMenuItem(GetMenu(hWnd), IDM_CLOSEDCAPTION, MF_ENABLED);
 		CheckMenuItem(GetMenu(hWnd), IDM_VBI_VT, (VBI_Flags & VBI_VT)?MF_CHECKED:MF_UNCHECKED);
-		CheckMenuItem(GetMenu(hWnd), IDM_VBI_IC, (VBI_Flags & VBI_IC)?MF_CHECKED:MF_UNCHECKED);
 		CheckMenuItem(GetMenu(hWnd), IDM_VBI_VPS, (VBI_Flags & VBI_VPS)?MF_CHECKED:MF_UNCHECKED);
-		CheckMenuItem(GetMenu(hWnd), IDM_VBI_VD, (VBI_Flags & VBI_VD)?MF_CHECKED:MF_UNCHECKED);
 		CheckMenuItem(GetMenu(hWnd), IDM_CLOSEDCAPTION, (VBI_Flags & VBI_CC)?MF_CHECKED:MF_UNCHECKED);
 	}
 	else
 	{
 		EnableMenuItem(GetMenu(hWnd), IDM_VBI_VT, MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_VBI_IC, MF_GRAYED);
 		EnableMenuItem(GetMenu(hWnd), IDM_VBI_VPS, MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_VBI_VD, MF_GRAYED);
 		EnableMenuItem(GetMenu(hWnd), IDM_CALL_VIDEOTEXTSMALL, MF_GRAYED);
 		EnableMenuItem(GetMenu(hWnd), IDM_CALL_VIDEOTEXT, MF_GRAYED);
 		EnableMenuItem(GetMenu(hWnd), IDM_VT_RESET, MF_GRAYED);
 		EnableMenuItem(GetMenu(hWnd), IDM_UNTERTITEL, MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_PDC_OUT, MF_GRAYED);
 		EnableMenuItem(GetMenu(hWnd), IDM_VT_OUT, MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_IC_OUT, MF_GRAYED);
 		EnableMenuItem(GetMenu(hWnd), IDM_VPS_OUT, MF_GRAYED);
 		EnableMenuItem(GetMenu(hWnd), IDM_CLOSEDCAPTION, MF_GRAYED);
 	}
@@ -2134,8 +2040,6 @@ void CleanUpMemory()
 	int i;
 
 	Mixer_Exit();
-	InterCast_Exit();
-	VideoDat_Exit();
 	for (i = 0; i < 800; i++)
 	{
 		if (VTFrame[i].SubPage != NULL)

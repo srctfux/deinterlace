@@ -42,8 +42,6 @@
 #define VBI_DATA_SIZE 2048*39
 #define VBI_VT  1
 #define VBI_VPS 2
-#define VBI_IC  8
-#define VBI_VD  16
 #define VBI_CC  32
 #define FPSHIFT 16
 #define FPFAC (1<<FPSHIFT)

@@ -158,32 +158,15 @@ void LoadSettingsFromIni()
 	{
 		VBI_Flags += VBI_VT;
 	}
-	if(GetPrivateProfileInt("VBI", "IC", 0, szIniFile) != 0)
-	{
-		VBI_Flags += VBI_IC;
-	}
 	if(GetPrivateProfileInt("VBI", "VPS", 0, szIniFile) != 0)
 	{
 		VBI_Flags += VBI_VPS;
-	}
-	if(GetPrivateProfileInt("VBI", "VD", 0, szIniFile) != 0)
-	{
-		VBI_Flags += VBI_VD;
 	}
 	if(GetPrivateProfileInt("VBI", "CC", 0, szIniFile) != 0)
 	{
 		VBI_Flags += VBI_CC;
 	}
 
-	i = GetCurrentDirectory(sizeof(IC_BASE_DIR), IC_BASE_DIR);
-	strcat(IC_BASE_DIR, "\\I_Cast");
-	GetPrivateProfileString("Files", "VBIDir", IC_BASE_DIR, IC_BASE_DIR, MAX_PATH, szIniFile);
-
-	i = GetCurrentDirectory(sizeof(VD_DIR), VD_DIR);
-	strcat(VD_DIR, "\\VideoDat");
-	GetPrivateProfileString("Files", "VDDir", VD_DIR, VD_DIR, MAX_PATH, szIniFile);
-	GetPrivateProfileString("Files", "VDFilename", "VD-RAW.Dat", VDat.RawName, MAX_PATH, szIniFile);
-	VD_RAW = (GetPrivateProfileInt("Files", "VDRaw", 0, szIniFile) != 0);
 	GetPrivateProfileString("Files", "DebugLogFilename", DebugLogFilename, DebugLogFilename, MAX_PATH, szIniFile);
 	DebugLogEnabled = GetPrivateProfileInt("Files", "DebugLogEnabled", DebugLogEnabled, szIniFile);
 
@@ -274,15 +257,6 @@ void LoadSettingsFromIni()
 	
 	bSaveSettings = (GetPrivateProfileInt("Show", "SaveSettings", 1, szIniFile) != 0);
 	CountryCode = GetPrivateProfileInt("Show", "CountryCode", 1, szIniFile);
-
-	i = GetCurrentDirectory(sizeof(VT_BASE_DIR), VT_BASE_DIR);
-	strcat(VT_BASE_DIR, "\\VideoText");
-	GetPrivateProfileString("VT", "VTDir", VT_BASE_DIR, VT_BASE_DIR, MAX_PATH, szIniFile);
-	VT_ALWAYS_EXPORT = (GetPrivateProfileInt("VT", "VTAlwayExport", 0, szIniFile) != 0);
-	VT_NL = (GetPrivateProfileInt("VT", "VT_NL", 0, szIniFile) != 0);
-	VT_HEADERS = (GetPrivateProfileInt("VT", "VT_Headers", 1, szIniFile) != 0);
-	VT_STRIPPED = (GetPrivateProfileInt("VT", "VT_Stripped", 1, szIniFile) != 0);
-	VT_REVEAL = (GetPrivateProfileInt("VT", "VT_Reveal", 0, szIniFile) != 0);
 
 	for(i = 0; i < 9; i++)
 	{
@@ -443,15 +417,9 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("Show", "Menu", Show_Menu, szIniFile);
 
 	WritePrivateProfileInt("VBI", "VT", VBI_Flags & VBI_VT, szIniFile);
-	WritePrivateProfileInt("VBI", "IC", VBI_Flags & VBI_IC, szIniFile);
 	WritePrivateProfileInt("VBI", "VPS", VBI_Flags & VBI_VPS, szIniFile);
-	WritePrivateProfileInt("VBI", "VD", VBI_Flags & VBI_VD, szIniFile);
 	WritePrivateProfileInt("VBI", "CC", VBI_Flags & VBI_CC, szIniFile);
 
-	WritePrivateProfileString("Files", "VBIDir", IC_BASE_DIR, szIniFile);
-	WritePrivateProfileString("Files", "VDDir", VD_DIR, szIniFile);
-	WritePrivateProfileString("Files", "VDFilename", VDat.RawName, szIniFile);
-	WritePrivateProfileInt("Files", "VDRaw", VD_RAW, szIniFile);
 	WritePrivateProfileString("Files", "DebugLogFilename", DebugLogFilename, szIniFile);
 	WritePrivateProfileInt("Files", "DebugLogEnabled", DebugLogEnabled, szIniFile);
 
@@ -529,13 +497,6 @@ void WriteSettingsToIni()
 	
 	WritePrivateProfileInt("Show", "SaveSettings", bSaveSettings, szIniFile);
 	WritePrivateProfileInt("Show", "CountryCode", CountryCode, szIniFile);
-
-	WritePrivateProfileString("VT", "VTDir", VT_BASE_DIR, szIniFile);
-	WritePrivateProfileInt("VT", "VTAlwayExport", VT_ALWAYS_EXPORT, szIniFile);
-	WritePrivateProfileInt("VT", "VT_NL", VT_NL, szIniFile);
-	WritePrivateProfileInt("VT", "VT_Headers", VT_HEADERS, szIniFile);
-	WritePrivateProfileInt("VT", "VT_Stripped", VT_STRIPPED, szIniFile);
-	WritePrivateProfileInt("VT", "VT_Reveal", VT_REVEAL, szIniFile);
 
 	for(i = 0; i < 9; i++)
 	{

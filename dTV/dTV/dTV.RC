@@ -113,7 +113,6 @@ BEGIN
     CTEXT           "",IDC_TEXT,190,5,65,8,SS_CENTERIMAGE
     CTEXT           "",IDC_TEXT20,190,16,65,8,SS_CENTERIMAGE
     ICON            "VTUPDOWN",-1,116,3,20,20
-    PUSHBUTTON      "Export",IDC_EXPORT,5,315,65,15
     DEFPUSHBUTTON   "Cancel",IDCANCEL,345,315,65,15
 END
 
@@ -147,7 +146,6 @@ BEGIN
     ICON            "VTHOME",-1,96,3,20,20
     ICON            "VTUPDOWN",-1,116,3,20,20
     CTEXT           "",IDC_TEXT21,220,5,55,8,SS_CENTERIMAGE
-    PUSHBUTTON      "Export",IDC_EXPORT,5,220,65,15
     DEFPUSHBUTTON   "Cancel",IDCANCEL,210,220,65,15
 END
 
@@ -252,68 +250,6 @@ BEGIN
     CONTROL         "Activate Superbass",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,95,195,125,10
     CTEXT           "(+/-)",IDC_STATIC,10,20,33,10
-END
-
-IFORMINFO DIALOG DISCARDABLE  22, 17, 319, 195
-STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
-CAPTION "dTV IFORM Parameters"
-FONT 8, "MS Sans Serif"
-BEGIN
-    CONTROL         "Bit 7 = 0 ",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,20,
-                    30,105,10
-    CONTROL         "Bit 7 = 1",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,20,40,
-                    105,10
-    LTEXT           "Bit 7 should be according to Docs 0",IDC_STATIC,5,15,
-                    120,10
-    LTEXT           "Use Bits 5 and 6 for video input",IDC_STATIC,5,70,160,
-                    10
-    CONTROL         "(00)  MUX3 after MUXOUT ",IDC_RADIO3,"Button",
-                    BS_AUTORADIOBUTTON,20,80,95,10
-    CONTROL         "(01)  MUX2 after MUXOUT",IDC_RADIO4,"Button",
-                    BS_AUTORADIOBUTTON,20,90,95,10
-    CONTROL         "(10)  MUX0 after MUXOUT",IDC_RADIO5,"Button",
-                    BS_AUTORADIOBUTTON,20,100,100,10
-    CONTROL         "(11)  MUX1 after MUXOUT ",IDC_RADIO6,"Button",
-                    BS_AUTORADIOBUTTON,20,110,100,10
-    LTEXT           "Bit 3 und 4  Format recognition.",IDC_STATIC,165,15,115,
-                    10
-    CONTROL         "(00) Reserved",IDC_RADIO7,"Button",BS_AUTORADIOBUTTON,
-                    180,25,105,10
-    CONTROL         "(01)  Only XT0 Format",IDC_RADIO8,"Button",
-                    BS_AUTORADIOBUTTON,180,35,110,10
-    CONTROL         "(01)  Only XT1 Format",IDC_RADIO9,"Button",
-                    BS_AUTORADIOBUTTON,180,45,105,10
-    CONTROL         "(11) Automatic XT - Recognition",IDC_RADIO10,"Button",
-                    BS_AUTORADIOBUTTON,180,55,125,10
-    LTEXT           "Bit 0, 1 und 2  Videoformat ",IDC_STATIC,165,70,150,10
-    CONTROL         "(000) Automatic Format Recognotion",IDC_RADIO11,"Button",
-                    BS_AUTORADIOBUTTON,180,80,135,10
-    CONTROL         "(001) NTSC (M) ",IDC_RADIO12,"Button",
-                    BS_AUTORADIOBUTTON,180,90,85,10
-    CONTROL         "(010) NTSC Japan",IDC_RADIO13,"Button",
-                    BS_AUTORADIOBUTTON,180,100,90,10
-    CONTROL         "(011) PAL ( B, D G, H, I)",IDC_RADIO14,"Button",
-                    BS_AUTORADIOBUTTON,180,110,90,10
-    CONTROL         "(100) PAL (M)",IDC_RADIO15,"Button",BS_AUTORADIOBUTTON,
-                    180,120,85,10
-    CONTROL         "(101) PAL (N)",IDC_RADIO16,"Button",BS_AUTORADIOBUTTON,
-                    180,130,85,10
-    CONTROL         "(110) SECAM",IDC_RADIO17,"Button",BS_AUTORADIOBUTTON,
-                    180,140,85,10
-    CONTROL         "(111) Reserved",IDC_RADIO18,"Button",BS_AUTORADIOBUTTON,
-                    180,150,85,10
-    PUSHBUTTON      "IFORM Store ",IDC_BUTTON1,5,175,65,15
-    DEFPUSHBUTTON   "OK",IDOK,260,175,55,15
-    PUSHBUTTON      "IFORM delete",IDC_BUTTON2,80,175,60,15,WS_DISABLED
-    LTEXT           "Default Value",IDC_STATIC,10,5,50,10
-    LTEXT           "",IDC_TEXT1,65,5,65,10
-    LTEXT           "",IDC_TEXT2,170,5,30,10
-    LTEXT           "HEX",IDC_STATIC,145,5,20,10
-    PUSHBUTTON      "Cancel",IDCANCEL,195,175,55,15
-    LTEXT           "(Ext. 2)",IDC_STATIC,120,80,40,10
-    LTEXT           "(Ext. 3)",IDC_STATIC,120,90,40,10
-    LTEXT           "(Tuner)",IDC_STATIC,120,100,35,10
-    LTEXT           "(Ext. 1)",IDC_STATIC,120,110,35,10
 END
 
 AUDIOEINSTELLUNGEN1 DIALOG DISCARDABLE  0, 0, 257, 175
@@ -424,57 +360,6 @@ BEGIN
     LTEXT           "VBI-FPS",IDC_STATIC,120,0,30,10
     EDITTEXT        IDT_VBI_FPS,155,0,25,12,ES_RIGHT | ES_AUTOHSCROLL | 
                     ES_READONLY
-END
-
-ICSTATUS DIALOG DISCARDABLE  22, 17, 202, 156
-STYLE DS_MODALFRAME | DS_SETFOREGROUND | DS_3DLOOK | WS_VISIBLE | WS_CAPTION | 
-    WS_SYSMENU
-CAPTION "dTV InterCast Info"
-FONT 8, "MS Sans Serif"
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,75,140,50,15
-    LTEXT           "File name",IDC_STATIC,10,20,35,10
-    EDITTEXT        TEXT1,50,20,145,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_READONLY
-    LTEXT           "Size",IDC_STATIC,10,35,40,10
-    EDITTEXT        TEXT2,165,35,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_READONLY
-    EDITTEXT        TEXT10,10,120,185,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_READONLY
-    LTEXT           "Packet Number",IDC_STATIC,10,60,55,10
-    EDITTEXT        TEXT3,100,60,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_READONLY
-    LTEXT           "of",IDC_STATIC,140,60,15,10
-    EDITTEXT        TEXT4,165,60,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_READONLY
-    LTEXT           "Packetsize",IDC_STATIC,10,75,55,10
-    EDITTEXT        TEXT5,100,75,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_READONLY
-    LTEXT           "of",IDC_STATIC,140,90,15,10
-    EDITTEXT        TEXT6,165,90,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_READONLY
-    EDITTEXT        TEXT9,100,90,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_READONLY
-    GROUPBOX        "Last File",IDC_STATIC,5,10,195,40
-    LTEXT           "Bytes received",IDC_STATIC,10,90,80,10
-    GROUPBOX        "Last error",IDC_STATIC,5,105,195,30
-    GROUPBOX        "Current receive",IDC_STATIC,5,50,195,55
-    LTEXT           "VBI-FPS",IDC_STATIC,135,0,30,10
-    EDITTEXT        IDT_VBI_FPS,171,0,25,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_READONLY
-END
-
-ICSETUP DIALOG DISCARDABLE  22, 17, 157, 55
-STYLE DS_MODALFRAME | DS_SETFOREGROUND | DS_3DLOOK | WS_VISIBLE | WS_CAPTION | 
-    WS_SYSMENU
-CAPTION "dTV InterCast Setup"
-FONT 8, "MS Sans Serif"
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,5,40,50,15
-    LTEXT           "Path for Intercast files data files",IDC_STATIC,5,5,150,
-                    10
-    EDITTEXT        IDC_EDIT1,5,20,150,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "Cancel",IDCANCEL,105,40,50,15
 END
 
 PLLINFO DIALOG DISCARDABLE  22, 17, 187, 90
@@ -644,103 +529,6 @@ BEGIN
                     IDC_STATIC,0,11,293,10
 END
 
-VDSETUP DIALOG DISCARDABLE  22, 17, 157, 130
-STYLE DS_MODALFRAME | DS_SETFOREGROUND | DS_3DLOOK | WS_VISIBLE | WS_CAPTION | 
-    WS_SYSMENU
-CAPTION "dTV VideoData Setup"
-FONT 8, "MS Sans Serif"
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,4,112,40,15
-    LTEXT           "Base Path for Datafiles",IDC_STATIC,10,5,130,10
-    EDITTEXT        IDC_EDIT1,10,15,135,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "Cancel",IDCANCEL,110,112,40,15
-    LTEXT           "File name",IDC_STATIC,10,55,130,10
-    EDITTEXT        IDC_EDIT2,10,65,135,12,ES_AUTOHSCROLL
-    GROUPBOX        "Raw-Data",IDC_STATIC,5,45,145,60
-    CONTROL         "Only as RAW file placing",IDC_CHECK1,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,10,35,130,10
-    PUSHBUTTON      "Now converting",IDC_BUTTON1,45,85,65,15
-END
-
-VDSTATUSRAW DIALOG DISCARDABLE  22, 17, 152, 146
-STYLE DS_MODALFRAME | DS_SETFOREGROUND | DS_3DLOOK | WS_VISIBLE | WS_CAPTION | 
-    WS_SYSMENU
-CAPTION "dTV VideoData Info"
-FONT 8, "MS Sans Serif"
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,49,128,50,15
-    LTEXT           "Pfad",IDC_STATIC,10,20,35,10
-    EDITTEXT        TEXT1,50,20,90,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_READONLY
-    EDITTEXT        TEXT10,10,105,130,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_READONLY
-    LTEXT           "Blocks ohne Fehler",IDC_STATIC,10,60,70,10
-    EDITTEXT        TEXT3,110,60,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_READONLY
-    LTEXT           "Blocks mit Fehler",IDC_STATIC,10,75,55,10
-    EDITTEXT        TEXT5,110,75,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_READONLY
-    GROUPBOX        "Datei",IDC_STATIC,5,10,140,40
-    GROUPBOX        "Letzter Fehler",IDC_STATIC,5,95,140,30
-    GROUPBOX        "Aktueller Empfamg",IDC_STATIC,5,50,140,40
-    LTEXT           "Datei",IDC_STATIC,10,35,35,10
-    EDITTEXT        TEXT2,50,35,90,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_READONLY
-    LTEXT           "VBI-FPS",IDC_STATIC,80,0,30,10
-    EDITTEXT        IDT_VBI_FPS,115,0,25,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_READONLY
-END
-
-VDSTATUS DIALOG DISCARDABLE  22, 17, 204, 231
-STYLE DS_MODALFRAME | DS_SETFOREGROUND | DS_3DLOOK | WS_VISIBLE | WS_CAPTION | 
-    WS_SYSMENU
-CAPTION "dTV Videodat-Info"
-FONT 8, "MS Sans Serif"
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,75,213,50,15
-    LTEXT           "Dateiname",IDC_STATIC,10,81,35,10
-    EDITTEXT        TEXT1,50,81,145,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_READONLY
-    LTEXT           "Größe",IDC_STATIC,10,95,40,10
-    EDITTEXT        TEXT2,165,95,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_READONLY
-    EDITTEXT        TEXT10,10,190,185,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_READONLY
-    LTEXT           "Packet Nummer",IDC_STATIC,10,140,55,10
-    EDITTEXT        TEXT4,165,140,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_READONLY
-    LTEXT           "Packetgrösse",IDC_STATIC,10,150,55,10
-    EDITTEXT        TEXT5,165,150,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_READONLY
-    EDITTEXT        TEXT6,165,130,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_READONLY
-    GROUPBOX        "Datei",IDC_STATIC,7,70,195,40
-    LTEXT           "Block-CRC-Fehler",IDC_STATIC,10,130,80,10
-    GROUPBOX        "Letzter Fehler",IDC_STATIC,7,177,195,30
-    GROUPBOX        "Aktueller Empfamg",IDC_STATIC,7,110,195,65
-    LTEXT           "VBI-FPS",IDC_STATIC,135,0,30,10
-    EDITTEXT        IDT_VBI_FPS,171,0,25,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_READONLY
-    EDITTEXT        TEXT7,165,161,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_READONLY
-    LTEXT           "Packet KEY",IDC_STATIC,10,161,80,10
-    EDITTEXT        TEXT8,165,121,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_READONLY
-    LTEXT           "Blöcke bis jetzt",IDC_STATIC,10,121,80,10
-    LTEXT           "Kennung",IDC_STATIC,10,15,35,10,SS_CENTERIMAGE
-    EDITTEXT        TEXT3,50,15,145,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_READONLY
-    LTEXT           "Kommentar",IDC_STATIC,10,30,35,10,SS_CENTERIMAGE
-    EDITTEXT        TEXT11,50,30,145,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_READONLY
-    EDITTEXT        TEXT9,165,55,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_READONLY
-    LTEXT           "Anzahl Dateien",IDC_STATIC,10,55,80,10
-    EDITTEXT        TEXT13,165,45,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_READONLY
-    LTEXT           "SendeDatums-ID",IDC_STATIC,10,45,80,10
-END
-
 ANALOGSCAN DIALOG DISCARDABLE  22, 17, 266, 117
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
 CAPTION "Analog Scan"
@@ -775,41 +563,6 @@ BEGIN
     LTEXT           "Position",IDC_STATIC,8,28,58,12
     EDITTEXT        IDC_EDIT1,152,26,38,12,ES_AUTOHSCROLL | ES_NUMBER
     PUSHBUTTON      "Delete",IDDEL,76,46,48,15
-END
-
-KANALNUMMER DIALOG DISCARDABLE  22, 17, 150, 39
-STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
-CAPTION "dTV New Channel"
-FONT 8, "MS Sans Serif"
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,4,22,44,15
-    PUSHBUTTON      "Cancel",IDCANCEL,104,22,44,15
-    LTEXT           "Programme Place",-1,20,6,58,10
-    EDITTEXT        IDC_EDIT1,86,4,38,12,ES_AUTOHSCROLL | ES_NUMBER | NOT 
-                    WS_TABSTOP
-    PUSHBUTTON      "Delete",IDDEL,54,22,44,15
-END
-
-VTSETUP DIALOG DISCARDABLE  22, 17, 162, 126
-STYLE DS_MODALFRAME | DS_SETFOREGROUND | DS_3DLOOK | WS_VISIBLE | WS_CAPTION | 
-    WS_SYSMENU
-CAPTION "dTV VT Export Setup"
-FONT 8, "MS Sans Serif"
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,5,110,50,15
-    LTEXT           "Base path for VT-files",IDC_STATIC,5,5,150,10
-    EDITTEXT        IDC_EDIT1,5,20,150,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "Cancel",IDCANCEL,105,110,50,15
-    CONTROL         "HTML-Header insert",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,10,55,115,10
-    CONTROL         "HTML-Strip",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,10,65,115,10
-    CONTROL         "HTML with CR/NL",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,10,76,115,10
-    CONTROL         "HTML invisible fields output",IDC_CHECK4,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,10,86,135,10
-    CONTROL         "Automatic Export",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,5,35,135,10
 END
 
 SELECTCARD DIALOG DISCARDABLE  0, 0, 298, 122
@@ -1168,9 +921,7 @@ BEGIN
         MENUITEM "Capture VBI-&Data",           IDM_VBI
         MENUITEM SEPARATOR
         MENUITEM "Video&Text",                  IDM_VBI_VT, GRAYED
-        MENUITEM "&InterCast",                  IDM_VBI_IC, GRAYED
         MENUITEM "V&PS-Data",                   IDM_VBI_VPS, GRAYED
-        MENUITEM "Video&Data",                  IDM_VBI_VD, GRAYED
         MENUITEM "&Closed Captions",            IDM_CLOSEDCAPTION, GRAYED
         MENUITEM SEPARATOR
         MENUITEM "&Small VideoText Window",     IDM_CALL_VIDEOTEXTSMALL
@@ -1180,15 +931,8 @@ BEGIN
         MENUITEM "&Videotext Reset (After switch over Composite)  ", 
                                                 IDM_VT_RESET, GRAYED
         MENUITEM SEPARATOR
-        MENUITEM "PDC-Inf&os",                  IDM_PDC_OUT, GRAYED
         MENUITEM "Videotext-Infos",             IDM_VT_OUT, GRAYED
-        MENUITEM "Intercast-Infos",             IDM_IC_OUT, GRAYED
         MENUITEM "VPS-Infos",                   IDM_VPS_OUT, GRAYED
-        MENUITEM "VideoDa&ta-Info",             IDM_VD_OUT, GRAYED
-        MENUITEM SEPARATOR
-        MENUITEM "VideoText Setup",             IDM_VT_SETUP
-        MENUITEM "InterCast Setup",             IDM_INTERCAST_SETUP
-        MENUITEM "VideoDat Setup",              IDM_VIDEODAT_SETUP
     END
     POPUP "Adva&nced"
     BEGIN
@@ -1231,8 +975,8 @@ SLIDER                  BITMAP  DISCARDABLE     "res\\slider1.bmp"
 SLIDER1                 BITMAP  DISCARDABLE     "res\\slider.bmp"
 VTCHARLARGE             BITMAP  DISCARDABLE     "res\\Vtx15x18.bmp"
 VTCHARSMALL             BITMAP  DISCARDABLE     "res\\VTx10x12.bmp"
-GREENBULB               BITMAP  DISCARDABLE     "res\\redbulb.bmp"
-REDBULB                 BITMAP  DISCARDABLE     "res\\greenbulb.bmp"
+REDBULB                 BITMAP  DISCARDABLE     "res\\redbulb.bmp"
+GREENBULB               BITMAP  DISCARDABLE     "res\\greenbulb.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1286,12 +1030,6 @@ BEGIN
         BOTTOMMARGIN, 229
     END
 
-    "IFORMINFO", DIALOG
-    BEGIN
-        RIGHTMARGIN, 312
-        BOTTOMMARGIN, 152
-    END
-
     "AUDIOEINSTELLUNGEN1", DIALOG
     BEGIN
         LEFTMARGIN, 7
@@ -1317,18 +1055,6 @@ BEGIN
         BOTTOMMARGIN, 63
     END
 
-    "ICSTATUS", DIALOG
-    BEGIN
-        RIGHTMARGIN, 200
-        BOTTOMMARGIN, 153
-    END
-
-    "ICSETUP", DIALOG
-    BEGIN
-        RIGHTMARGIN, 37
-        BOTTOMMARGIN, 52
-    END
-
     "PLLINFO", DIALOG
     BEGIN
         RIGHTMARGIN, 180
@@ -1352,40 +1078,10 @@ BEGIN
         RIGHTMARGIN, 372
     END
 
-    "VDSETUP", DIALOG
-    BEGIN
-        LEFTMARGIN, 4
-        RIGHTMARGIN, 150
-        BOTTOMMARGIN, 127
-    END
-
-    "VDSTATUSRAW", DIALOG
-    BEGIN
-        RIGHTMARGIN, 150
-        BOTTOMMARGIN, 143
-    END
-
-    "VDSTATUS", DIALOG
-    BEGIN
-        RIGHTMARGIN, 202
-        BOTTOMMARGIN, 228
-    END
-
     "LISTFELDSETUP", DIALOG
     BEGIN
         RIGHTMARGIN, 189
         BOTTOMMARGIN, 20
-    END
-
-    "KANALNUMMER", DIALOG
-    BEGIN
-        RIGHTMARGIN, 143
-    END
-
-    "VTSETUP", DIALOG
-    BEGIN
-        RIGHTMARGIN, 155
-        BOTTOMMARGIN, 123
     END
 
     "SELECTCARD", DIALOG

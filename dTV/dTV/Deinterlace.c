@@ -64,15 +64,15 @@ DEINTERLACE_METHOD DeintMethods[PULLDOWNMODES_LAST_ONE] =
 	// FILM_22_PULLDOWN_EVEN
 	{"2:2 Pulldown Flip on Even", FALSE, FALSE, FALSE, TRUE, FilmMode, 25, 30},
 	// FILM_32_PULLDOWN_0
-	{"3:2 Pulldown Skip 1st Full Frame", FALSE, FALSE, FALSE, TRUE, FilmMode, 0, 24},
+	{"3:2 Pulldown Skip 1st Full Frame", FALSE, FALSE, FALSE, TRUE, FilmMode, 1000, 24},
 	// FILM_32_PULLDOWN_1
-	{"3:2 Pulldown Skip 2nd Full Frame", FALSE, FALSE, FALSE, TRUE, FilmMode, 0, 24},
+	{"3:2 Pulldown Skip 2nd Full Frame", FALSE, FALSE, FALSE, TRUE, FilmMode, 1000, 24},
 	// FILM_32_PULLDOWN_2
-	{"3:2 Pulldown Skip 3rd Full Frame", FALSE, FALSE, FALSE, TRUE, FilmMode, 0, 24},
+	{"3:2 Pulldown Skip 3rd Full Frame", FALSE, FALSE, FALSE, TRUE, FilmMode, 1000, 24},
 	// FILM_32_PULLDOWN_3
-	{"3:2 Pulldown Skip 4th Full Frame", FALSE, FALSE, FALSE, TRUE, FilmMode, 0, 24},
+	{"3:2 Pulldown Skip 4th Full Frame", FALSE, FALSE, FALSE, TRUE, FilmMode, 1000, 24},
 	// FILM_32_PULLDOWN_4
-	{"3:2 Pulldown Skip 5th Full Frame", FALSE, FALSE, FALSE, TRUE, FilmMode, 0, 24},
+	{"3:2 Pulldown Skip 5th Full Frame", FALSE, FALSE, FALSE, TRUE, FilmMode, 1000, 24},
 	// EVEN_ONLY
 	{"Even Scanlines Only", FALSE, FALSE, TRUE, FALSE, HalfHeightEvenOnly, 25, 30},
 	// ODD_ONLY

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// vt.c
+// VBI.c
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2000 John Adcock.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -55,7 +55,7 @@ void VBI_DecodeLine(unsigned char *VBI_Buffer, int line)
 	VBI_AGC(VBI_Buffer, 120, 450, 1);
 
 	/* all kinds of data with videotext data format: videotext, intercast, ... */
-	if (((VBI_Flags & VBI_VT) || (VBI_Flags & VBI_IC)))
+	if (VBI_Flags & VBI_VT)
 	{
 		VT_DecodeLine(VBI_Buffer);
 	}
@@ -73,12 +73,6 @@ void VBI_DecodeLine(unsigned char *VBI_Buffer, int line)
 	if ((VBI_Flags & VBI_VPS) && (line == 9))
 	{
 		VTS_DecodeLine(VBI_Buffer);
-	}
-
-	/* Video_Dat_Stuff  */
-	if ((VBI_Flags & VBI_VD) && ((line == 17) || (line == 18)))
-	{
-		VDAT_DecodeLine(VBI_Buffer);
 	}
 }
 

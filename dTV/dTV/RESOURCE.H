@@ -41,7 +41,6 @@
 #define IDM_PDC_OUT                     385
 #define IDM_VBI_IC                      386
 #define IDM_VT_OUT                      387
-#define IDM_IC_OUT                      388
 #define IDM_VPS_OUT                     389
 #define IDM_INTERCAST_SETUP             392
 #define IDM_AUDIO_MIXER                 400
@@ -60,11 +59,9 @@
 #define IDM_KEEP_LOADED                 430
 #define IDM_TPSCAN                      431
 #define IDM_VBI_VD                      435
-#define IDM_VD_OUT                      436
 #define IDM_VIDEODAT_SETUP              437
 #define IDM_PROGRAMPARAM                441
 #define IDM_ANALOGSCAN                  444
-#define IDM_VT_SETUP                    450
 #define IDM_EVENT_INFO                  451
 #define IDM_SPACEBAR                    477
 #define IDM_FULL_SCREEN                 480
@@ -726,7 +723,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        155
+#define _APS_NEXT_RESOURCE_VALUE        156
 #define _APS_NEXT_COMMAND_VALUE         768
 #define _APS_NEXT_CONTROL_VALUE         1812
 #define _APS_NEXT_SYMED_VALUE           108

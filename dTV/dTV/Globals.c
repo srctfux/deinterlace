@@ -206,8 +206,6 @@ struct TProgramm Programm[MAXPROGS+1];
 
 HFONT currFont = NULL;
 
-BOOL VD_RAW=FALSE;
-
 
 struct SOTREC SOTInfoRec;
 
