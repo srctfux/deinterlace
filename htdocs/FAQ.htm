@@ -100,7 +100,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         Windows Me ok <i>uses VxD running in ring-0</i><br>
         Windows 2000 ok <i>uses sys running in ring-0</i><br>
         Windows XP ok <i>uses sys running in ring-0</i><br>
-        Linux no <i>if you want to do a port contact the mailing list</i><br>
+        Linux no <i>if you want to do a port <a href="#HELP">contact us</a></i><br>
         OS/2 definitely no ;-) 
       <h2>What are all those deinterlace algorithms ?</h2>
       <h3>Video Deinterlace (Bob)</h3>
@@ -239,7 +239,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <h2>Which capture card can I use ?</h2>
       <p> Almost any card (and that means A LOT) based of former Brooktree (now 
         Conexant) chips including bt848/878/879 will work for video only. Why 
-        those ? These chipss are easy to program (there has been A LOT of software 
+        those ? These chips are easy to program (there has been A LOT of software 
         based on those) and very cheap. Side effect ; a great number of manufacturers 
         have (and are still) produced cards based on those chips. 
       <p> Sound from the tuner is not always supported and adding this for a lot 
@@ -270,7 +270,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <p> If you have some programming knowledge regarding the grab chipsets used 
         in those card, you might want to help us. See the "<a href="#HELP">How 
         can I help</a>" section. 
-      <h2>Can I use more than one video card ?</h2>
+      <h2>Can I use more than one video input ?</h2>
       <p> Some "nut" people (he's admitting it himself ;-) who are playing with 
         Picture In Picture a lot have asked if DScaler could drive multiple cards 
         or multiple inputs. A card allowing at worst 4 video inputs has been manufactured 
@@ -282,6 +282,9 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <p> However, you can easily use your a/v receiver to switch between multiple 
         video inputs. Connect the monitor out of your equipement to your grab 
         card and all your video devices to video in connectors. 
+      <p>Also, some cards come with one, sometimes two composite input that you 
+        can use separately from within DScaler. An svideo connection is also quite 
+        common, allowing you to switch easily from 2 or 3 sources.
       <p> <a name="TROUBLE"></a> 
       <h1>Troubleshooting</h1>
       <h2> I have problems with sound?</h2>
@@ -330,18 +333,6 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         a dvd player to the computer. Problems on other type of sources have yet 
         to be shown. 
       <p>So in common cases, you don't have to worry about this. 
-      <h2>Despite having a very powerful system, I still get some dropped frames?</h2>
-      <p>Some people experienced some dropped frames (signs of a machine that 
-        has problems keeping up with the workload of DScaler) even on powerful 
-        systems. An hypothesis is that some motherboard agp speed issue might 
-        be the cause of such behavior.</p>
-      <p> JackB reported <i>We looked at his BIOS settings and the only major 
-        difference is that his had a 4X AGP mode and my MB only has a 2X AGP mode 
-        <snip>We put my video card, a GeForce2 MX, in his(slower supposedly)system 
-        and it ran 0 DFS. So it's not the MX throughput that's the problem. So, 
-        I'm down to it's my motherboard not being up to speed in either AGP acceleration 
-        or I have some settings set incorrectly</i> 
-      <p> <a name="OVERLAY"></a> 
       <h2>I get "overlay update" errors</h2>
       <p> Sometimes you get this error message <br>
         <code>Error calling overlay update. D:/source/deinterlace/DScaler/other.c 
