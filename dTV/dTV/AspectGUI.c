@@ -338,30 +338,37 @@ BOOL ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 	// Zoom
 	case IDM_ZOOM_10:
 		aspectSettings.xZoomFactor = aspectSettings.yZoomFactor = 1.0;
+		ShowText(hWnd,"Zoom Off");
 		break;
 
 	case IDM_ZOOM_15:
 		aspectSettings.xZoomFactor = aspectSettings.yZoomFactor = 1.5;
+		ShowText(hWnd,"Zoom 1.5x");
 		break;
 
 	case IDM_ZOOM_20:
 		aspectSettings.xZoomFactor = aspectSettings.yZoomFactor = 2.0;
+		ShowText(hWnd,"Zoom 2x");
 		break;
 
 	case IDM_ZOOM_25:
 		aspectSettings.xZoomFactor = aspectSettings.yZoomFactor = 2.5;
+		ShowText(hWnd,"Zoom 2.5x");
 		break;
 
 	case IDM_ZOOM_30:
 		aspectSettings.xZoomFactor = aspectSettings.yZoomFactor = 3.0;
+		ShowText(hWnd,"Zoom 3x");
 		break;
 
 	case IDM_ZOOM_35:
 		aspectSettings.xZoomFactor = aspectSettings.yZoomFactor = 3.5;
+		ShowText(hWnd,"Zoom 3.5x");
 		break;
 
 	case IDM_ZOOM_40:
 		aspectSettings.xZoomFactor = aspectSettings.yZoomFactor = 4.0;
+		ShowText(hWnd,"Zoom 4x");
 		break;
 
 	case IDM_VT_PAGE_MINUS:

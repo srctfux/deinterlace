@@ -350,12 +350,12 @@ class PanAndZoomAspectFilter : public AspectFilter {
 		
 		virtual BOOL adjustAspect(AspectRectangles &ar) {
 			
-			int width = ar.rCurrentOverlaySrc.width();
-			int height = ar.rCurrentOverlaySrc.height();
+			int dx = (int)floor(ar.rCurrentOverlaySrc.width() * (1.0 - 1.0/xZoom));
+			int dy = (int)floor(ar.rCurrentOverlaySrc.height() * (1.0 - 1.0/yZoom));
 
-			ar.rCurrentOverlaySrc.shrink(0, (int)floor(width/xZoom), 0, (int)floor(height/yZoom));
-			ar.rCurrentOverlaySrc.shift((int)floor((width-ar.rCurrentOverlaySrc.width())*xPos),
-										(int)floor((height-ar.rCurrentOverlaySrc.height())*yPos));
+			ar.rCurrentOverlaySrc.shrink(0,dx,0,dy);
+			ar.rCurrentOverlaySrc.shift((int)floor(dx*xPos),
+										(int)floor(dy*yPos));
 
 			return FALSE;
 		}
