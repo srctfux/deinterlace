@@ -470,6 +470,10 @@ BOOL BT848_SetGeoSize(int width, int height)
 	{
 		BT848_SetPLL(TVCards[CardType].pll);
 	}
+	else
+	{
+		BT848_SetPLL(0);
+	}
 
 	BT848_WriteByte(BT848_ADELAY, TVSettings[TVTYPE].bDelayA);
 	BT848_WriteByte(BT848_BDELAY, TVSettings[TVTYPE].bDelayB);

@@ -31,6 +31,7 @@
 #include "vbi.h"
 #include "bTVPlugin.h"
 #include "OutThreads.h"
+#include "deinterlace.h"
 
 void LoadSettingsFromIni(LPSTR Name)
 {
@@ -72,6 +73,8 @@ void LoadSettingsFromIni(LPSTR Name)
 	PulldownThresholdHigh = GetPrivateProfileInt("Pulldown", "PulldownThresholdHigh", PulldownThresholdHigh, szIniFile);
 	PulldownRepeatCount = GetPrivateProfileInt("Pulldown", "PulldownRepeatCount", PulldownRepeatCount, szIniFile);
 	Threshold32Pulldown  = GetPrivateProfileInt("Pulldown", "Threshold32Pulldown", PulldownRepeatCount, szIniFile);
+	bAutoDetectMode = (GetPrivateProfileInt("Pulldown", "bAutoDetectMode", bAutoDetectMode, szIniFile) != 0);
+	BitShift = GetPrivateProfileInt("Pulldown", "BitShift", BitShift, szIniFile);
 
 	VBI_Flags = 0;
 	if(GetPrivateProfileInt("VBI", "VT", 0, szIniFile) != 0)
@@ -281,6 +284,8 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("Pulldown", "PulldownThresholdHigh", PulldownThresholdHigh, szIniFile);
 	WritePrivateProfileInt("Pulldown", "PulldownRepeatCount", PulldownRepeatCount, szIniFile);
 	WritePrivateProfileInt("Pulldown", "Threshold32Pulldown", PulldownRepeatCount, szIniFile);
+	WritePrivateProfileInt("Pulldown", "bAutoDetectMode", bAutoDetectMode, szIniFile);
+	WritePrivateProfileInt("Pulldown", "BitShift", BitShift, szIniFile);
 
 	WritePrivateProfileInt("Show", "StatusBar", bDisplayStatusBar, szIniFile);
 	WritePrivateProfileInt("Show", "Menu", Show_Menu, szIniFile);

@@ -400,7 +400,7 @@ void SaveStill()
 		ddsd.dwSize = sizeof(ddsd);
 
 		ddrval = IDirectDrawSurface_Lock(lpDDOverlay, NULL, &ddsd, DDLOCK_WAIT, NULL);
-		if (ddrval != DD_OK)
+		if (FAILED(ddrval))
 		{
 			ErrorBox("Error Locking Overlay");
 			return;
@@ -415,7 +415,12 @@ void SaveStill()
 		if(n == 100)
 		{
 			ErrorBox("Could not create a file.  You may have too many captures already.");
-			ddrval = IDirectDrawSurface_Unlock(lpDDSurface, ddsd.lpSurface);
+			ddrval = IDirectDrawSurface_Unlock(lpDDOverlay, ddsd.lpSurface);
+			if (FAILED(ddrval))
+			{
+				ErrorBox("Error Unlocking Overlay");
+				return;
+			}
 			return;
 		}
 
@@ -423,7 +428,12 @@ void SaveStill()
 		if (!file)
 		{ 
 			ErrorBox("Could not open file in SaveStill"); 
-			ddrval = IDirectDrawSurface_Unlock(lpDDSurface, ddsd.lpSurface);
+			ddrval = IDirectDrawSurface_Unlock(lpDDOverlay, ddsd.lpSurface);
+			if (FAILED(ddrval))
+			{
+				ErrorBox("Error Unlocking Overlay");
+				return;
+			}
 			return;
 		}
 		fprintf(file,"P6\n%d %d\n255\n",CurrentX, CurrentY) ;
@@ -459,7 +469,12 @@ void SaveStill()
 			}
 		}
 		fclose(file);
-		ddrval = IDirectDrawSurface_Unlock(lpDDSurface, ddsd.lpSurface);
+		ddrval = IDirectDrawSurface_Unlock(lpDDOverlay, ddsd.lpSurface);
+		if (FAILED(ddrval))
+		{
+			ErrorBox("Error Unlocking Overlay");
+			return;
+		}
 	}
 	return;
 }

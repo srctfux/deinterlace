@@ -35,5 +35,8 @@ void DeinterlaceOdd(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay);
 long GetCombFactor(short** pLines1, short** pLines2);
 long CompareFields(short** pLines1, short** pLines2);
 
+extern long BitShift;
+
+
 
 #endif

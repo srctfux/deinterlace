@@ -311,7 +311,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 	char Text[128];
 	char Text1[128];
 	int i, j, k;
-	static BOOL Capture_Pause = FALSE;
 
 	switch (message)
 	{
@@ -445,6 +444,15 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_TOGGLE_MENU:
 			Show_Menu = !Show_Menu;
 			WorkoutOverlaySize();
+			break;
+
+		case IDM_AUTODETECT:
+			bAutoDetectMode = !bAutoDetectMode;
+			if(bAutoDetectMode == TRUE)
+			{
+				gPulldownMode = VIDEO_MODE;
+			}
+			SetMenuAnalog();
 			break;
 
 		case IDM_ABOUT:
@@ -713,7 +721,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			}
 			break;
 
-		case IDM_ENDE:
+		case IDM_END:
 			PostMessage(hWnd, WM_DESTROY, wParam, lParam);
 			break;
 
@@ -971,17 +979,8 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_CAPTURE_PAUSE:
-			if (Capture_Pause == FALSE)
-			{
-				Capture_Pause = TRUE;
-				Stop_Capture();
-			}
-			else
-			{
-				Capture_Pause = FALSE;
-				Start_Capture();
-			}
-			CheckMenuItem(GetMenu(hWnd), IDM_CAPTURE_PAUSE, Capture_Pause?MF_CHECKED:MF_UNCHECKED);
+			bIsPaused = !bIsPaused;
+			CheckMenuItem(GetMenu(hWnd), IDM_CAPTURE_PAUSE, bIsPaused?MF_CHECKED:MF_UNCHECKED);
 			break;
 
 		case IDM_AUDIO_MIXER:
@@ -1009,12 +1008,12 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_ANALOGSCAN:
-			SendMessage(hWnd, WM_COMMAND, IDM_TUNER, IDM_TUNER);
+			SendMessage(hWnd, WM_COMMAND, IDM_TUNER, 0);
 			DialogBox(hInst, "ANALOGSCAN", hWnd, (DLGPROC) AnalogScanProc);
 			break;
 
-		case IDM_KANAL_LISTE:
-			DialogBox(hInst, "KANALLISTE", hWnd, (DLGPROC) ProgramListProc);
+		case IDM_CHANNEL_LIST:
+			DialogBox(hInst, "CHANNELLIST", hWnd, (DLGPROC) ProgramListProc);
 			break;
 
 		case IDM_TREADPRIOR_0:
@@ -1071,17 +1070,20 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_SPACEBAR:
-			gPulldownMode++;
-			// if we can't use a bTV plug-in the skip it
-			if(gPulldownMode == BTV_PLUGIN && bUseBTVPlugin == FALSE)
+			if(bAutoDetectMode == FALSE)
 			{
 				gPulldownMode++;
+				// if we can't use a bTV plug-in then skip it
+				if(gPulldownMode == BTV_PLUGIN && bUseBTVPlugin == FALSE)
+				{
+					gPulldownMode++;
+				}
+				else if(gPulldownMode == PULLDOWNMODES_LAST_ONE)
+				{
+					gPulldownMode = VIDEO_MODE;
+				}
+				UpdatePulldownStatus();
 			}
-			else if(gPulldownMode == PULLDOWNMODES_LAST_ONE)
-			{
-				gPulldownMode = VIDEO_MODE;
-			}
-			UpdatePulldownStatus();
 			break;
 
 		case IDM_FULL_SCREEN:
@@ -1112,9 +1114,11 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_TAKESTILL:
-			Stop_Capture();
+			bIsPaused = TRUE;
+			Sleep(100);
 			SaveStill();
-			Start_Capture();
+			bIsPaused = FALSE;
+			Sleep(100);
 			break;
 
 		default:
@@ -1131,7 +1135,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		break;
 
 	case WM_LBUTTONUP:
-		PostMessage(hWnd, WM_COMMAND, IDM_FULL_SCREEN, IDM_FULL_SCREEN);
+		SendMessage(hWnd, WM_COMMAND, IDM_FULL_SCREEN, 0);
 		break;
 
 	case WM_RBUTTONUP:
@@ -1747,6 +1751,8 @@ void SetMenuAnalog()
 	CheckMenuItem(GetMenu(hWnd), IDM_STATUSBAR, bDisplayStatusBar?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_ON_TOP, bAlwaysOnTop?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_AUTOSTEREO, AutoStereoSelect?MF_CHECKED:MF_UNCHECKED);
+
+	CheckMenuItem(GetMenu(hWnd), IDM_AUTODETECT, bAutoDetectMode?MF_CHECKED:MF_UNCHECKED);
 }
 
 void CleanUpMemory()

@@ -28,6 +28,8 @@
 #include "deinterlace.h"
 #include "globals.h"
 
+long BitShift = 5;
+
 /////////////////////////////////////////////////////////////////////////////
 // memcpyMMX
 // Uses MMX instructions to move memory around
@@ -35,6 +37,7 @@
 // using MMX instructions
 // then copies any extra bytes
 // assumes there will be at least 64 bytes to copy
+// This code was originally from Borg's bTV plugin SDK 
 /////////////////////////////////////////////////////////////////////////////
 void memcpyMMX(void *Dest, void *Src, size_t nBytes)
 {
@@ -164,10 +167,12 @@ EndCopyLoop:
 // uses MMX instructions
 // assumes there will be at least 32 bytes to copy
 // Dest: This is the pointer to the middle line
+// The algoritm comes from Borg's bTV deinterlace plug-in
+// with key1 enabled
 /////////////////////////////////////////////////////////////////////////////
 void VideoDeinterlaceMMX(void *Dest, void *SrcUp, void *SrcSame, void *SrcDown, size_t nBytes)
 {
-	__int64 Mask = 0x7f7f7f7f7f7f7f7f;
+	const __int64 Mask = 0x7f7f7f7f7f7f7f7f;
 	__asm
 	{
 		mov		esi, dword ptr[SrcUp]
@@ -297,32 +302,14 @@ EndCopyLoop:
 	}
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// DeinterlaceOdd
+//
+// The algorithm for this was taken from the VirtualDub Deinterlace class
+///////////////////////////////////////////////////////////////////////////////
 void DeinterlaceOdd(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay)
 {
-	int nLineTarget;
-	short* pSource;
-	BYTE* ScreenPtr;
-
-	for (nLineTarget = 1; nLineTarget < CurrentY / 2 - 1; nLineTarget++)
-	{
-		pSource = pOddLines[nLineTarget];
-		ScreenPtr = lpCurOverlay + (nLineTarget * 2 + 1) * OverlayPitch;
-		memcpyMMX(ScreenPtr, pSource, CurrentX * 2);
-
-		pSource = pEvenLines[nLineTarget];
-		ScreenPtr = lpCurOverlay + (nLineTarget * 2) * OverlayPitch;
-		memcpyMMX(ScreenPtr, pSource, CurrentX * 2);
-	}
-	ScreenPtr = lpCurOverlay + CurrentY * OverlayPitch;
-	memcpyMMX(ScreenPtr, pEvenLines[CurrentY / 2], CurrentX * 2);
-}
-
-void DeinterlaceEven(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay)
-{
 	int Line;
-	int Column;
-	short* pSource;
-	BYTE* ScreenPtr;
 	short* YVal1;
 	short* YVal2;
 	short* YVal3;
@@ -330,96 +317,211 @@ void DeinterlaceEven(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay)
 	
 	const __int64 YMask    = 0x00ff00ff00ff00ff;
 	const __int64 UVMask    = 0xff00ff00ff00ff00;
-	__int64 qwEdgeDetect;
-	__int64 qwThreshold;
+	const __int64 qwEdgeDetect = 0x0019001900190019;
+	const __int64 qwThreshold = 0x001B001B001B001B;
+	const __int64 Mask = 0x7f7f7f7f7f7f7f7f;
 
-	qwEdgeDetect = (25 << 48) + (25 << 32) + (25 << 16) + 100;
-	qwThreshold = (27 << 48) + (27 << 32) + (27 << 16) + 100;
 
 	// copy first even and odd line anyway
 	memcpyMMX(lpCurOverlay, pEvenLines[0], CurrentX * 2);
 	memcpyMMX(lpCurOverlay + OverlayPitch, pOddLines[0], CurrentX * 2);
-	for (Line = 1; Line < (CurrentY / 2 - 1); ++Line)
+	for (Line = 0; Line < (CurrentY / 2 - 1); ++Line)
 	{
 		YVal1 = pOddLines[Line];
 		YVal2 = pEvenLines[Line + 1];
 		YVal3 = pOddLines[Line + 1];
-		Dest = lpCurOverlay + (Line * 2 + 1) * OverlayPitch;
-		for(Column = 0; Column < CurrentY /2; Column++)
+		Dest = lpCurOverlay + (Line * 2 + 2) * OverlayPitch;
+		_asm
 		{
-			_asm
-			{
-				mov edi,dword ptr [Dest]
-				movq mm7,qword ptr[YMask]  
-				movq mm6,qword ptr[qwEdgeDetect]  
+			mov ecx, CurrentX
+			mov eax,dword ptr [YVal1]
+			mov ebx,dword ptr [YVal2]
+			mov edx,dword ptr [YVal3]
+			mov edi, dword ptr [Dest]
+			movq mm7, YMask  
+			movq mm6, qwEdgeDetect
+			shr ecx, 2       // there are ActiveX * 2 / 8 qwords
 
-				movq mm0, qword ptr[YVal1] 
-				movq mm1, qword ptr[YVal2] 
-				movq mm2, qword ptr[YVal3]
+align 8
+DoNext8Bytes:			
+			add edi, OverlayPitch
 
-				// copy the odd line to destination
-				movq mm2, qword ptr[edi]
-				sub edi, OverlayPitch
+			movq mm0, qword ptr[eax] 
+			movq mm1, qword ptr[ebx] 
+			movq mm2, qword ptr[edx]
 
-				// get intensities in mm3 - 4
-				movq mm3, mm1
-				movq mm4, mm2
-				movq mm5, mm3
+			// copy the odd line to destination
+			movq qword ptr[edi], mm2
 
-				pand mm3, mm7
-				pand mm4, mm7
-				pand mm5, mm7
+			// get intensities in mm3 - 4
+			movq mm3, mm1
+			movq mm4, mm2
+			movq mm5, mm3
 
-				// work out (O1 - E) * (O2 - E) - EdgeDetect * (O1 - O2) ^ 2 >> 12
-				// result will be in mm0
+			sub edi, OverlayPitch
 
-				movq mm0, mm3
-				psubw mm0, mm4		//mm0 = O1 - E
+			pand mm3, YMask
+			pand mm4, YMask
+			pand mm5, YMask
 
-				movq mm1, mm5
-				psubw mm1, mm4		//mm0 = O2 - e
+			// get average in mm0
+			psrlw mm0, 01
+			psrlw mm2, 01
+			pand  mm0, Mask
+			pand  mm2, Mask
+			paddw mm0, mm2
 
-				pmullw mm0, mm1		// mm0 = (O1 - E) * (O2 - E)
+			// work out (O1 - E) * (O2 - E) - EdgeDetect * (O1 - O2) ^ 2 >> 12
+			// result will be in mm6
 
-				movq mm1, mm3
-				psubw mm1, mm5		// mm1 = (O1 - O2)
-				pmullw mm1, mm1		// mm1 = (O1 - O2) ^ 2
-				psrlw mm1, 12		// mm1 = (O1 - O2) ^ 2 >> 12
-				pmullw mm1, mm6		// mm1  = EdgeDetect * (O1 - O2) ^ 2 >> 12
+			movq mm6, mm3
+			psubw mm6, mm4		//mm6 = O1 - E
 
-				psubw mm0, mm1      // mm1 is what we want
+			movq mm7, mm5
+			psubw mm7, mm4		//mm7 = O2 - E
 
-				
-				pcmpgtw mm0, qword ptr[qwThreshold]
-				
-				paddw mm3, mm4
-				pand mm6, mm1
-				paddw mm3, mm6
-				
-				add eax, 8
-				pmaddwd mm3, mm3
-				add ebx, 8
-				paddd mm0, mm3
-				add edx, 8
+			pmullw mm6, mm7		// mm0 = (O1 - E) * (O2 - E)
 
+			movq mm7, mm3
+			psubw mm7, mm5		// mm7 = (O1 - O2)
+			pmullw mm7, mm7		// mm7 = (O1 - O2) ^ 2
+			psrlw mm7, 12		// mm7 = (O1 - O2) ^ 2 >> 12
+			pmullw mm7, qwEdgeDetect		// mm1  = EdgeDetect * (O1 - O2) ^ 2 >> 12
 
-				movd eax, mm0
-				psrlq mm0,32
-				movd ecx, mm0
-				add ecx, eax
-				emms
-			}
+			psubw mm6, mm7      // mm6 is what we want
+
+			pcmpgtw mm6, qwThreshold
+
+			movq mm7, mm6
+
+			pandn mm7, mm1
+
+			pand mm0, mm6
+
+			paddw mm7, mm0
+
+			movq qword ptr[edi], mm7
+	
+			add eax, 8
+			add ebx, 8
+			add edx, 8
+			add edi, 8
+			dec ecx
+			jne near DoNext8Bytes
+			emms
 		}
-		pSource = pOddLines[Line];
-		ScreenPtr = lpCurOverlay + (Line * 2 + 1) * OverlayPitch;
-		memcpyMMX(ScreenPtr, pSource, CurrentX * 2);
-
-		pSource = pEvenLines[Line];
-		ScreenPtr = lpCurOverlay + (Line * 2) * OverlayPitch;
-		memcpyMMX(ScreenPtr, pSource, CurrentX * 2);
 	}
-	ScreenPtr = lpCurOverlay + CurrentY * OverlayPitch;
-	memcpyMMX(ScreenPtr, pEvenLines[CurrentY / 2], CurrentX * 2);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// DeinterlaceEven
+//
+// The algorithm for this was taken from the VirtualDub Deinterlace class
+///////////////////////////////////////////////////////////////////////////////
+void DeinterlaceEven(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay)
+{
+	int Line;
+	short* YVal1;
+	short* YVal2;
+	short* YVal3;
+	BYTE* Dest;
+	
+	const __int64 YMask    = 0x00ff00ff00ff00ff;
+	const __int64 UVMask    = 0xff00ff00ff00ff00;
+	const __int64 qwEdgeDetect = 0x0019001900190019;
+	const __int64 qwThreshold = 0x001B001B001B001B;
+	const __int64 Mask = 0x7f7f7f7f7f7f7f7f;
+
+
+	// copy first even line
+	memcpyMMX(lpCurOverlay, pEvenLines[0], CurrentX * 2);
+	for (Line = 0; Line < (CurrentY / 2 - 1); ++Line)
+	{
+		YVal1 = pEvenLines[Line];
+		YVal2 = pOddLines[Line];
+		YVal3 = pEvenLines[Line + 1];
+		Dest = lpCurOverlay + (Line * 2 + 1) * OverlayPitch;
+		_asm
+		{
+			mov ecx, CurrentX
+			mov eax,dword ptr [YVal1]
+			mov ebx,dword ptr [YVal2]
+			mov edx,dword ptr [YVal3]
+			mov edi, dword ptr [Dest]
+			movq mm7, YMask  
+			movq mm6, qwEdgeDetect
+			shr ecx, 2       // there are ActiveX * 2 / 8 qwords
+
+align 8
+DoNext8Bytes:			
+			add edi, OverlayPitch
+
+			movq mm0, qword ptr[eax] 
+			movq mm1, qword ptr[ebx] 
+			movq mm2, qword ptr[edx]
+
+			// copy the odd line to destination
+			movq qword ptr[edi], mm2
+
+			// get intensities in mm3 - 4
+			movq mm3, mm1
+			movq mm4, mm2
+			movq mm5, mm3
+
+			sub edi, OverlayPitch
+
+			pand mm3, YMask
+			pand mm4, YMask
+			pand mm5, YMask
+
+			// get average in mm0
+			psrlw mm0, 01
+			psrlw mm2, 01
+			pand  mm0, Mask
+			pand  mm2, Mask
+			paddw mm0, mm2
+
+			// work out (O1 - E) * (O2 - E) - EdgeDetect * (O1 - O2) ^ 2 >> 12
+			// result will be in mm6
+
+			movq mm6, mm3
+			psubw mm6, mm4		//mm6 = O1 - E
+
+			movq mm7, mm5
+			psubw mm7, mm4		//mm7 = O2 - E
+
+			pmullw mm6, mm7		// mm0 = (O1 - E) * (O2 - E)
+
+			movq mm7, mm3
+			psubw mm7, mm5		// mm7 = (O1 - O2)
+			pmullw mm7, mm7		// mm7 = (O1 - O2) ^ 2
+			psrlw mm7, 12		// mm7 = (O1 - O2) ^ 2 >> 12
+			pmullw mm7, qwEdgeDetect		// mm1  = EdgeDetect * (O1 - O2) ^ 2 >> 12
+
+			psubw mm6, mm7      // mm6 is what we want
+
+			pcmpgtw mm6, qwThreshold
+
+			movq mm7, mm6
+
+			pandn mm7, mm1
+
+			pand mm0, mm6
+
+			paddw mm7, mm0
+
+			movq qword ptr[edi], mm7
+	
+			add eax, 8
+			add ebx, 8
+			add edx, 8
+			add edi, 8
+			dec ecx
+			jne near DoNext8Bytes
+			emms
+		}
+	}
+	memcpyMMX(lpCurOverlay + (CurrentY - 1) * OverlayPitch, pOddLines[CurrentY / 2 - 1], CurrentX * 2);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -434,6 +536,9 @@ void DeinterlaceEven(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay)
 // will be visible in the black and white image
 // the relative sizes of the returns from this function will be used to 
 // determine the best ordering of the fields
+// This function only works on the area displayed so will perform better if any
+// VBI lines are off screen
+// the BitShift value is used to filter out noise and quantization error
 ///////////////////////////////////////////////////////////////////////////////
 long GetCombFactor(short** pLines1, short** pLines2)
 {
@@ -443,43 +548,61 @@ long GetCombFactor(short** pLines1, short** pLines2)
 	short* YVal1;
 	short* YVal2;
 	short* YVal3;
-
+	long ActiveX = CurrentX - 2 * InitialOverscan;
 	const __int64 YMask    = 0x00ff00ff00ff00ff;
+	const __int64 qwEdgeDetect = 0x0019001900190019;
+	const __int64 qwThreshold = 0x001B001B001B001B;
+	const __int64 qwOnes = 0x0001000100010001;
+	__int64 wBitShift    = BitShift;
 
-	for (Line = 1; Line < (CurrentY / 2 - 2); ++Line, ++Line)
+	for (Line = 100; Line < ((CurrentY - 100) / 2); ++Line)
 	{
-		YVal1 = pLines1[Line];
-		YVal2 = pLines2[Line];
-		YVal3 = pLines1[Line + 1];
+		YVal1 = pLines1[Line] + InitialOverscan;
+		YVal2 = pLines2[Line] + InitialOverscan;
+		YVal3 = pLines1[Line + 1] + InitialOverscan;
 		_asm
 		{
-			mov ecx, CurrentX
+			mov ecx, ActiveX
 			mov eax,dword ptr [YVal1]
 			mov ebx,dword ptr [YVal2]
 			mov edx,dword ptr [YVal3]
-			shr ecx, 1
-		    movq mm1,qword ptr[YMask]  
+			shr ecx, 2       // there are ActiveX * 2 / 8 qwords
+		    movq mm1, YMask
 			pxor mm0, mm0    // mm0 = 0
 align 8
 Next8Bytes:
-			movq mm5, qword ptr[ebx] 
-			pxor mm3, mm3    // mm3 = 0
-			pand mm5, mm1
-			movq mm4, qword ptr[eax] 
-			psubw mm3, mm5
-			pand mm4, mm1
-			psubw mm3, mm5
+			movq mm3, qword ptr[eax] 
+			movq mm4, qword ptr[ebx] 
+			movq mm5, qword ptr[edx]
 
-			movq mm6, qword ptr[edx]
-			paddw mm3, mm4
-			pand mm6, mm1
-			paddw mm3, mm6
-			
-			add eax, 8
-			pmaddwd mm3, mm3
-			add ebx, 8
-			paddd mm0, mm3
-			add edx, 8
+			pand mm3, YMask
+			pand mm4, YMask
+			pand mm5, YMask
+
+			// work out (O1 - E) * (O2 - E) - EdgeDetect * (O1 - O2) ^ 2 >> 12
+			// result will be in mm6
+
+			movq mm6, mm3
+			psubw mm6, mm4		//mm6 = O1 - E
+
+			movq mm7, mm5
+			psubw mm7, mm4		//mm7 = O2 - E
+
+			pmullw mm6, mm7		// mm0 = (O1 - E) * (O2 - E)
+
+			movq mm7, mm3
+			psubw mm7, mm5		// mm7 = (O1 - O2)
+			pmullw mm7, mm7		// mm7 = (O1 - O2) ^ 2
+			psrlw mm7, 12		// mm7 = (O1 - O2) ^ 2 >> 12
+			pmullw mm7, qwEdgeDetect		// mm1  = EdgeDetect * (O1 - O2) ^ 2 >> 12
+
+			psubw mm6, mm7      // mm6 is what we want
+
+			pcmpgtw mm6, qwThreshold
+
+			pand mm6, qwOnes
+
+			paddw mm0, mm6
 
 			dec ecx
 			jne near Next8Bytes
@@ -491,7 +614,8 @@ Next8Bytes:
 			mov dword ptr[LineFactor], ecx
 			emms
 		}
-		CombFactor += (long)sqrt(LineFactor);
+		CombFactor += (LineFactor & 0xFFFF);
+		CombFactor += (LineFactor >> 16);
 	}
 	return CombFactor;
 }
@@ -505,7 +629,9 @@ Next8Bytes:
 // we will use this to dect the times when we get three fields in a row from
 // the same frame
 // the result is the total average diffrence between the Y components of each pixel
-// in the middle section of the screen, I'll ignore the the first and last few lines
+// This function only works on the area displayed so will perform better if any
+// VBI lines are off screen
+// the BitShift value is used to filter out noise and quantization error
 ///////////////////////////////////////////////////////////////////////////////
 long CompareFields(short** pLines1, short** pLines2)
 {
@@ -514,20 +640,22 @@ long CompareFields(short** pLines1, short** pLines2)
 	long DiffFactor = 0;
 	short* YVal1;
 	short* YVal2;
-
+	long ActiveX = CurrentX - 2 * InitialOverscan;
 	const __int64 YMask    = 0x00ff00ff00ff00ff;
+	__int64 wBitShift    = BitShift;
 
-	for (Line = 2; Line < (CurrentY / 2 - 3); ++Line, ++Line)
+	for (Line = 80; Line < ((CurrentY - 80) / 2); ++Line)
 	{
-		YVal1 = pLines1[Line];
-		YVal2 = pLines2[Line];
+		YVal1 = pLines1[Line] + InitialOverscan;
+		YVal2 = pLines2[Line] + InitialOverscan;
 		_asm
 		{
-			mov ecx, CurrentX
+			mov ecx, ActiveX
 			mov eax,dword ptr [YVal1]
 			mov ebx,dword ptr [YVal2]
-			shr ecx, 1
-		    movq mm1,qword ptr[YMask]  
+			shr ecx, 2		 // there are ActiveX * 2 / 8 qwords
+		    movq mm1, YMask
+			movq mm7, wBitShift
 			pxor mm0, mm0    // mm0 = 0  this is running total
 align 8
 Next8Bytes:
@@ -538,6 +666,7 @@ Next8Bytes:
 
 			psubw mm4, mm5   // mm4 = Y1 - Y2
 			pmaddwd mm4, mm4 // mm4 = (Y1 - Y2) ^ 2
+			psrld mm4, mm7   // divide mm4 by 2 ^ Bitshift
 			paddd mm0, mm4   // keep total in mm0
 
 			add eax, 8

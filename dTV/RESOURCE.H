@@ -6,7 +6,6 @@
 #define IDDEL                           3
 #define IDSET                           3
 #define IDSTART                         3
-#define IDKONFIG                        3
 #define IDBEFORE                        3
 #define IDTEST                          4
 #define IDNEXT                          4
@@ -19,7 +18,7 @@
 #define IDM_STATUSBAR                   133
 #define IDM_VBI                         231
 #define IDM_CAPTURE_PAUSE               232
-#define IDM_KANAL_LISTE                 242
+#define IDM_CHANNEL_LIST                242
 #define IDM_CALL_VIDEOTEXT              245
 #define IDM_CALL_VIDEOTEXTSMALL         252
 #define IDM_VT_RESET                    261
@@ -65,7 +64,6 @@
 #define IDM_CLOSE_VT                    422
 #define IDM_SWAPMODE                    425
 #define IDM_KEEP_LOADED                 430
-#define IDENDE                          431
 #define IDM_TPSCAN                      431
 #define IDM_VBI_VD                      435
 #define IDM_VD_OUT                      436
@@ -83,7 +81,8 @@
 #define IDM_TAKESTILL                   485
 #define IDM_OVERSCAN_MINUS              486
 #define IDM_OVERSCAN_PLUS               487
-#define IDM_ENDE                        1032
+#define IDM_AUTODETECT                  488
+#define IDM_END                         1032
 #define IDM_TUNER                       1089
 #define IDM_EXTERN1                     1090
 #define IDM_EXTERN2                     1091
@@ -615,7 +614,7 @@
 #define _APS_NO_MFC                     1
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        153
-#define _APS_NEXT_COMMAND_VALUE         488
+#define _APS_NEXT_COMMAND_VALUE         489
 #define _APS_NEXT_CONTROL_VALUE         1773
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

@@ -72,5 +72,7 @@ extern long PulldownThresholdHigh;
 extern long PulldownRepeatCount;
 
 extern long Threshold32Pulldown;
+extern BOOL bAutoDetectMode;
+extern BOOL bIsPaused;
 
 #endif
