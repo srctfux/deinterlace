@@ -1053,15 +1053,9 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				}
 				else
 				{
-					pDest += OverlayPitch;
-					for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
-					{
-						// copy latest data to destination buffer
-						memcpyMMX(pDest, 
-							ppOddLines[CurrentFrame][nLineTarget], 
-							CurrentX * 2);
-						pDest += 2 * OverlayPitch;
-					}
+					// Pulldown mode.  If we have an entire new frame, display it.
+					if (DoWeWantToFlip(TRUE, bIsOddField))
+						Weave(ppOddLines[CurrentFrame], ppEvenLines[LastEvenFrame], pDest);
 				}
 				LastOddFrame = CurrentFrame;
 			}
@@ -1164,14 +1158,9 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				}
 				else
 				{
-					for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
-					{
-						// copy latest data to destination buffer
-						memcpyMMX(pDest, 
-									ppEvenLines[CurrentFrame][nLineTarget], 
-									CurrentX  * 2);
-						pDest += 2 * OverlayPitch;
-					}
+					// Pulldown mode.  If we have an entire new frame, display it.
+					if (DoWeWantToFlip(TRUE, bIsOddField))
+						Weave(ppOddLines[LastOddFrame], ppEvenLines[CurrentFrame], pDest);
 				}
 				LastEvenFrame = CurrentFrame;
 			}
