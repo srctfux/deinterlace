@@ -42,9 +42,6 @@
 
 #include "deinterlace.h"
 
-#define MAXMODESWITCHES 50	// Maximum number of switches to track in TrackModeSwitches()
-
-
 void Start_Capture();
 void Stop_Capture();
 void Reset_Capture();
@@ -56,10 +53,6 @@ void SetupCaptureFlags();
 
 DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter);
 
-void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField);
-void UpdateNTSCPulldownMode(long FieldDiff, BOOL OnOddField, short **evenField, short **oddField);
-
-BOOL DoWeWantToFlip(BOOL bIsOddField);
 void UpdatePulldownStatus();
 BOOL WaitForNextField(BOOL LastField);
 void SetDeinterlaceMode(int mode);
@@ -67,30 +60,14 @@ char *DeinterlaceModeName(int mode);
 BYTE * LockOverlay();		// Lock overlay, returns ptr to buffer
 
 extern ePULLDOWNMODES gPulldownMode;
-extern ePULLDOWNMODES gPALFilmFallbackMode;
-extern ePULLDOWNMODES gNTSCFilmFallbackMode;
 extern ePULLDOWNMODES StaticImageMode;
 extern ePULLDOWNMODES LowMotionMode;
 extern ePULLDOWNMODES HighMotionMode;
 
-extern long PulldownThresholdLow;
-extern long PulldownThresholdHigh;
-extern long PulldownRepeatCount;
-extern long PulldownRepeatCount2;
-extern DWORD dwLastFlipTicks;
 
-extern long PulldownSwitchInterval;
-extern long PulldownSwitchMax;
-
-extern long Threshold32Pulldown;
-extern long ThresholdPulldownMismatch;
-extern long ThresholdPulldownComb;
-extern long LowMotionFieldCount;
-extern long StaticImageFieldCount;
-extern BOOL bAutoDetectMode;
-extern BOOL bFallbackToVideo;
 extern BOOL bIsPaused;
 
+extern DWORD dwLastFlipTicks;
 extern BOOL	Wait_For_Flip;          // User parm, default=TRUE
 extern BOOL	DoAccurateFlips;        // User parm, default=TRUE
 extern BOOL	Hurry_When_Late;        // " , default=FALSE, skip processing if behind

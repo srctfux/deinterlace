@@ -77,8 +77,8 @@ typedef struct
 	BOOL bHasChanged;
 	void* pValue;
 	long Default;
-	long MaxValue;
 	long MinValue;
+	long MaxValue;
 	long StepValue;
 	long PrevValue;
 	char** pszList;
@@ -90,7 +90,7 @@ typedef struct
 typedef struct
 {
    char* szDisplayName;
-   SETTING Elements[SETTINGS_PER_MENU];
+   SETTING* Elements[SETTINGS_PER_MENU];
 } UI_SUBMENU;
 
 void DisplayUISubMenuAsDialog(UI_SUBMENU* pSubMenu);

@@ -28,6 +28,8 @@
 #include "deinterlace.h"
 #include "cpu.h"
 
+void memcpyBOBMMX(void *Dest1, void *Dest2, void *Src, size_t nBytes);
+
 ///////////////////////////////////////////////////////////////////////////////
 // DeinterlaceFieldBob
 //

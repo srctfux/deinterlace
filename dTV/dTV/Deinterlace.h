@@ -78,8 +78,14 @@ typedef struct {
 	// Current overlay buffer pointer.
 	BYTE *Overlay;
 
+	// The part of the overlay that we actually show
+	RECT SourceRect;
+
 	// True if the most recent field is an odd one; false if it was even.
 	BOOL IsOdd;
+
+	// which frame are we on
+	int CurrentFrame;
 
 	// Overlay pitch (number of bytes between scanlines).
 	DWORD OverlayPitch;
@@ -140,14 +146,16 @@ DEINTERLACE_FUNC BlendedClipping;
 DEINTERLACE_FUNC HalfHeightBoth;
 DEINTERLACE_FUNC HalfHeightEvenOnly;
 DEINTERLACE_FUNC HalfHeightOddOnly;
-DEINTERLACE_FUNC FilmMode;
+DEINTERLACE_FUNC FilmModePAL;
+DEINTERLACE_FUNC FilmModeNTSC;
 DEINTERLACE_FUNC AdaptiveDeinterlace;
 
 
 void memcpyMMX(void *Dest, void *Src, size_t nBytes);
-void memcpyBOBMMX(void *Dest1, void *Dest2, void *Src, size_t nBytes);
-long GetCombFactor(short** pPrimaryLines, short** pSecondaryLines, BOOL IsPrimaryOdd);
-long CompareFields(short** pLines1, short** pLines2, RECT *rect);
+
+#ifdef USE_SSE
+void memcpySSE(void *Dest, void *Src, size_t nBytes);
+#endif
 
 extern long BitShift;
 extern long EdgeDetect;

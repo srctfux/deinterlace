@@ -468,35 +468,34 @@ END
 ABOUT DIALOGEX 22, 17, 374, 274
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
 CAPTION "About dTV"
-FONT 8, "MS Sans Serif", 0, 0, 0x1
+FONT 8, "MS Sans Serif"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,305,9,58,19,WS_GROUP,WS_EX_CLIENTEDGE
     CTEXT           "dTV Version 2.x",IDC_VERSION,0,3,293,9
-    CTEXT           "Copyright (C) 2000 John Adcock (johnadcock@hotmail.com)",
-                    IDC_STATIC,0,24,293,10
-    GROUPBOX        "Based On Multi-Dec 5.6",IDC_STATIC,5,101,364,43
-    GROUPBOX        "Parts From Linux",IDC_STATIC,5,148,364,51
-    LTEXT           "bttv - Bt848 frame grabber driver\nCopyright (C) 1996,97,98 Ralph  Metzler && Marcus Metzler",
-                    IDC_STATIC,11,159,172,24
-    LTEXT           "I2C Interface\nCopyright (C)  1998 Gerd Knorr",
-                    IDC_STATIC,203,159,160,18
-    LTEXT           "programming the msp34* sound processor family\nCopyright (C)  1997,1998 Gerd Knorr",
-                    IDC_STATIC,203,176,160,18
+    CTEXT           "Copyright (C) 2000 John Adcock",IDC_STATIC,0,24,293,10
+    GROUPBOX        "Based On",IDC_STATIC,6,144,364,56
     GROUPBOX        "GPL Information && Open Source Policy",IDC_STATIC,5,203,
                     364,65
     LTEXT           "This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.",
                     IDC_STATIC,11,214,354,24
     LTEXT           "This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.",
                     IDC_STATIC,11,238,351,24
-    LTEXT           "MultiDec Source (C) Espresso (echter_espresso@hotmail.com)\nChilli for several Bugfixes and VT Improvements\nSebastian for the  Videodata Info",
-                    IDC_STATIC,11,112,348,27
-    GROUPBOX        "Thanks",IDC_STATIC,5,37,364,60
-    LTEXT           "Ron Bass for help with 95 vxd\nAll at the AVScience HT PC Forum - www.avsforum.com\nMathias Ellinger for most of the hardware driver\nTimecop for the Closed Caption decoder\nMichael Samblanet for Aspect Ratio Control",
-                    IDC_STATIC,12,49,186,42
-    LTEXT           "Mark Rejhon for 3:2 pulldown algorithm\nThe developers of VirtualDub\nBorg for the deinterlacing plug-in\nDaniel Schmelzer for the great website\nAnd countless others, including beta testers, etc.",
-                    IDC_STATIC,203,48,162,43
+    LTEXT           "MultiDec Source (c) Espresso (echter_espresso@hotmail.com)",
+                    IDC_STATIC,13,154,348,9
+    GROUPBOX        "Authors",IDC_STATIC,6,37,180,100
+    LTEXT           "John Adcock\nMark Rejhon\nSteve Grimm\nTom Barry\nMichael Eskin\nMichael Samblanet",
+                    IDC_STATIC,11,49,86,69
     CTEXT           ">>>   http://deinterlace.sourceforge.net   <<<",
                     IDC_STATIC,0,11,293,10
+    LTEXT           "bttv - Bt848 frame grabber driver Copyright (c) Ralph  Metzler && Marcus Metzler",
+                    IDC_STATIC,13,168,347,11
+    LTEXT           "I2C Interface Copyright (c) Gerd Knorr",IDC_STATIC,13,
+                    182,160,10
+    GROUPBOX        "Support",IDC_STATIC,192,37,180,100
+    LTEXT           "The best place to get support for dTV is the Home Theater Computers foum at the AV Science Forums.\n\nhttp:\\\\www.avsforum.com\\\n\nPlease read the FAQ and the appropriate release thread for the version your using before posting here",
+                    IDC_STATIC,200,47,166,58
+    LTEXT           "John Adcock\nMark Rejhon\nSteve Grimm\nTom Barry\nMichael Eskin\nMichael Samblanet",
+                    IDC_STATIC,30,66,86,69
 END
 
 ANALOGSCAN DIALOG DISCARDABLE  22, 17, 266, 117
@@ -663,36 +662,36 @@ BEGIN
 END
 
 UI_SUB_MENU DIALOG DISCARDABLE  0, 0, 376, 223
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Dialog"
 FONT 8, "MS Sans Serif"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,7,202,32,14
     PUSHBUTTON      "Cancel",IDCANCEL,47,202,32,14
-    CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,200,20,170,18
-    CONTROL         "Slider1",IDC_SLIDER2,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,200,40,170,18
-    CONTROL         "Slider1",IDC_SLIDER3,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,200,60,170,18
-    CONTROL         "Slider1",IDC_SLIDER4,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,200,80,170,18
-    CONTROL         "Slider1",IDC_SLIDER5,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,200,100,170,18
-    CONTROL         "Slider1",IDC_SLIDER6,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,200,120,170,18
-    CONTROL         "Slider1",IDC_SLIDER7,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,200,140,170,18
-    CONTROL         "Slider1",IDC_SLIDER8,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,200,160,170,18
-    LTEXT           "Static",IDC_STATIC1,10,20,186,10
-    LTEXT           "Static",IDC_STATIC2,10,40,186,10
-    LTEXT           "Static",IDC_STATIC3,10,60,186,10
-    LTEXT           "Static",IDC_STATIC4,10,80,186,10
-    LTEXT           "Static",IDC_STATIC5,10,100,186,10
-    LTEXT           "Static",IDC_STATIC6,10,120,186,10
-    LTEXT           "Static",IDC_STATIC7,10,140,186,10
-    LTEXT           "Static",IDC_STATIC8,10,160,186,10
+    CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_TOP | 
+                    TBS_TOOLTIPS | WS_TABSTOP,200,20,170,18
+    CONTROL         "Slider2",IDC_SLIDER2,"msctls_trackbar32",TBS_TOP | 
+                    TBS_TOOLTIPS | WS_TABSTOP,200,40,170,18
+    CONTROL         "Slider3",IDC_SLIDER3,"msctls_trackbar32",TBS_TOP | 
+                    TBS_TOOLTIPS | WS_TABSTOP,200,60,170,18
+    CONTROL         "Slider4",IDC_SLIDER4,"msctls_trackbar32",TBS_TOP | 
+                    TBS_TOOLTIPS | WS_TABSTOP,200,80,170,18
+    CONTROL         "Slider5",IDC_SLIDER5,"msctls_trackbar32",TBS_TOP | 
+                    TBS_TOOLTIPS | WS_TABSTOP,200,100,170,18
+    CONTROL         "Slider6",IDC_SLIDER6,"msctls_trackbar32",TBS_TOP | 
+                    TBS_TOOLTIPS | WS_TABSTOP,200,120,170,18
+    CONTROL         "Slider7",IDC_SLIDER7,"msctls_trackbar32",TBS_TOP | 
+                    TBS_TOOLTIPS | WS_TABSTOP,200,140,170,18
+    CONTROL         "Slider8",IDC_SLIDER8,"msctls_trackbar32",TBS_TOP | 
+                    TBS_TOOLTIPS | WS_TABSTOP,200,160,170,18
+    LTEXT           "Static1",IDC_STATIC1,10,20,186,10
+    LTEXT           "Static2",IDC_STATIC2,10,40,186,10
+    LTEXT           "Static3",IDC_STATIC3,10,60,186,10
+    LTEXT           "Static4",IDC_STATIC4,10,80,186,10
+    LTEXT           "Static5",IDC_STATIC5,10,100,186,10
+    LTEXT           "Static6",IDC_STATIC6,10,120,186,10
+    LTEXT           "Static7",IDC_STATIC7,10,140,186,10
+    LTEXT           "Static8",IDC_STATIC8,10,160,186,10
     CONTROL         "",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,200,
                     20,166,17
     CONTROL         "",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,200,
@@ -1304,8 +1303,8 @@ CSIZEX                  CURSOR  DISCARDABLE     "res\\sizex.cur"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,5,1
- PRODUCTVERSION 1,0,5,1
+ FILEVERSION 3,0,0,0
+ PRODUCTVERSION 3,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -1323,14 +1322,14 @@ BEGIN
             VALUE "Comments", "John Adcock\0"
             VALUE "CompanyName", "\0"
             VALUE "FileDescription", "dTV\0"
-            VALUE "FileVersion", "1, 0, 5, 1\0"
+            VALUE "FileVersion", "3, 0, 0, 0\0"
             VALUE "InternalName", "dTV\0"
             VALUE "LegalCopyright", "Copyright © 2000\0"
             VALUE "LegalTrademarks", "This Program is covered by the term of the GNU GPL\0"
             VALUE "OriginalFilename", "dTV.exe\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "dTV\0"
-            VALUE "ProductVersion", "1, 0, 5, 1\0"
+            VALUE "ProductVersion", "3, 0, 0, 0\0"
             VALUE "SpecialBuild", "\0"
         END
     END

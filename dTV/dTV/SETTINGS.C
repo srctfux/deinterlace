@@ -61,6 +61,9 @@
 #include "ProgramList.h"
 #include "DI_BlendedClip.h"
 #include "other.h"
+#include "FD_50Hz.h"
+#include "FD_60Hz.h"
+#include "FD_Common.h"
 
 // MRS 9-2-00
 // Added variable in dTV.c to track which aspect mode we are currently in
@@ -568,7 +571,7 @@ void SetControlVisibility(HWND hDlg, int ControlID, BOOL IsVisible)
 	}
 }
 
-long GetUIValue(SETTING* pSetting)
+long GetSettingValue(SETTING* pSetting)
 {
 	switch(pSetting->Type)
 	{
@@ -612,7 +615,7 @@ long GetUIValue(SETTING* pSetting)
 	}
 }
 
-BOOL SetUIValue(SETTING* pSetting, long Value)
+BOOL SetSettingValue(SETTING* pSetting, long Value)
 {
 	switch(pSetting->Type)
 	{
@@ -666,6 +669,137 @@ BOOL SetUIValue(SETTING* pSetting, long Value)
 	}
 }
 
+#define Slider_GetPos(hwndCtl)            ((int)(DWORD)SNDMSG((hwndCtl), TBM_GETPOS, 0L, 0L))
+#define Slider_SetPos(hwndCtl, pos)     ((void)SNDMSG((hwndCtl), TBM_SETPOS, (WPARAM)TRUE, (LPARAM)(LONG)(pos)))
+#define Slider_SetRange(hwndCtl, min, max)     ((void)SNDMSG((hwndCtl), TBM_SETRANGE, (WPARAM)TRUE, (LPARAM)MAKELONG((int)min, (int)max)))
+#define Slider_SetRangeMax(hwndCtl, max)     ((void)SNDMSG((hwndCtl), TBM_SETRANGEMAX, (WPARAM)TRUE, (LPARAM)(LONG)(max)))
+#define Slider_GetRangeMax(hwndCtl)            ((int)(DWORD)SNDMSG((hwndCtl), TBM_GETRANGEMAX, 0L, 0L))
+#define Slider_SetRangeMin(hwndCtl, min)     ((void)SNDMSG((hwndCtl), TBM_SETRANGEMIN, (WPARAM)TRUE, (LPARAM)(LONG)(min)))
+#define Slider_GetRangeMin(hwndCtl)            ((int)(DWORD)SNDMSG((hwndCtl), TBM_GETRANGEMIN, 0L, 0L))
+#define Slider_SetLineSize(hwndCtl, linesize)     ((void)SNDMSG((hwndCtl), TBM_SETLINESIZE, 0L, (LPARAM)(LONG)(linesize)))
+#define Slider_SetPageSize(hwndCtl, pagesize)     ((void)SNDMSG((hwndCtl), TBM_SETPAGESIZE, 0L, (LPARAM)(LONG)(pagesize)))
+#define Slider_SetTicFreq(hwndCtl, tickfreq)     ((void)SNDMSG((hwndCtl), TBM_SETTICFREQ, (WPARAM)(tickfreq), (LPARAM)0L))
+#define Slider_SetTic(hwndCtl, tickpos)     ((void)SNDMSG((hwndCtl), TBM_SETTIC, 0L, (LPARAM)(LONG)(tickpos)))
+
+void SetupSlider(HWND hDlg, SETTING** ppSettings, int nControl)
+{
+	Slider_SetRangeMax(GetDlgItem(hDlg, IDC_SLIDER1 + nControl), ppSettings[nControl]->MaxValue);
+	Slider_SetRangeMin(GetDlgItem(hDlg, IDC_SLIDER1 + nControl), ppSettings[nControl]->MinValue);
+	Slider_SetPageSize(GetDlgItem(hDlg, IDC_SLIDER1 + nControl), ppSettings[nControl]->StepValue);
+	Slider_SetLineSize(GetDlgItem(hDlg, IDC_SLIDER1 + nControl), 1);
+	Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER1 + nControl), ppSettings[nControl]->Default);
+}
+
+void SetControlValue(HWND hDlg, SETTING** ppSettings, int nControl)
+{
+	char szBuffer[15];
+
+	switch(ppSettings[nControl]->Type)
+	{
+	case YESNO:
+		Button_SetCheck(GetDlgItem(hDlg, IDC_CHECK1 + nControl), *(BOOL*)ppSettings[nControl]->pValue);
+		break;
+	case ITEMFROMLIST:
+		ComboBox_SetCurSel(GetDlgItem(hDlg, IDC_COMBO1 + nControl), *(int*) ppSettings[nControl]->pValue);
+		break;
+
+	case SLIDER_UCHAR:
+		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER1 + nControl), *(UCHAR*)ppSettings[nControl]->pValue);
+		break;
+
+	case NUMBER_UCHAR:
+		Edit_SetText(GetDlgItem(hDlg, IDC_TEXT1 + nControl), _itoa(*(UCHAR*)ppSettings[nControl]->pValue, szBuffer, 10));
+		break;
+
+	case SLIDER_CHAR:
+		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER1 + nControl), *(CHAR*)ppSettings[nControl]->pValue);
+		break;
+	
+	case NUMBER_CHAR:
+		Edit_SetText(GetDlgItem(hDlg, IDC_TEXT1 + nControl), _itoa(*(CHAR*)ppSettings[nControl]->pValue, szBuffer, 10));
+		break;
+
+	case SLIDER_INT:
+		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER1 + nControl), *(INT*)ppSettings[nControl]->pValue);
+		break;
+	
+	case NUMBER_INT:
+		Edit_SetText(GetDlgItem(hDlg, IDC_TEXT1 + nControl), _itoa(*(INT*)ppSettings[nControl]->pValue, szBuffer, 10));
+		break;
+
+	case SLIDER_UINT:
+		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER1 + nControl), *(INT*)ppSettings[nControl]->pValue);
+		break;
+	
+	case NUMBER_UINT:
+		Edit_SetText(GetDlgItem(hDlg, IDC_TEXT1 + nControl), _itoa(*(UINT*)ppSettings[nControl]->pValue, szBuffer, 10));
+		break;
+
+	case SLIDER_ULONG:
+		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER1 + nControl), *(ULONG*)ppSettings[nControl]->pValue);
+		break;
+	
+	case NUMBER_ULONG:
+		Edit_SetText(GetDlgItem(hDlg, IDC_TEXT1 + nControl), _itoa(*(ULONG*)ppSettings[nControl]->pValue, szBuffer, 10));
+		break;
+
+	case SLIDER_LONG:
+		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER1 + nControl), *(LONG*)ppSettings[nControl]->pValue);
+		break;
+	
+	case NUMBER_LONG:
+		Edit_SetText(GetDlgItem(hDlg, IDC_TEXT1 + nControl), _itoa(*(LONG*)ppSettings[nControl]->pValue, szBuffer, 10));
+		break;
+	
+	default:
+		break;
+	}
+}
+
+void SetupControl(HWND hDlg, SETTING** ppSettings, int nControl)
+{
+	int i;
+
+	if(ppSettings[nControl] == NULL)
+	{
+		SetControlVisibility(hDlg, IDC_STATIC1 + nControl, FALSE);
+		SetControlVisibility(hDlg, IDC_CHECK1 + nControl, FALSE);
+		SetControlVisibility(hDlg, IDC_SLIDER1 + nControl, FALSE);
+		SetControlVisibility(hDlg, IDC_COMBO1 + nControl, FALSE);
+		return;
+	}
+	SetDlgItemText(hDlg, IDC_STATIC1 + nControl, ppSettings[nControl]->szDisplayName);
+
+	SetControlVisibility(hDlg, IDC_CHECK1 + nControl, (ppSettings[nControl]->Type == YESNO));
+	SetControlVisibility(hDlg, IDC_SLIDER1 + nControl, (ppSettings[nControl]->Type >= SLIDER_UCHAR && ppSettings[nControl]->Type <= SLIDER_LONG));
+	SetControlVisibility(hDlg, IDC_COMBO1 + nControl, (ppSettings[nControl]->Type == ITEMFROMLIST));
+	ppSettings[nControl]->PrevValue = GetSettingValue(ppSettings[nControl]);
+	SetControlValue(hDlg, ppSettings, nControl);
+
+	switch(ppSettings[nControl]->Type)
+	{
+	case ITEMFROMLIST:
+		i = 0;
+		while(ppSettings[nControl]->pszList[i] != NULL)
+		{
+			ComboBox_InsertString(GetDlgItem(hDlg, IDC_COMBO1 + nControl), nControl, ppSettings[nControl]->pszList[i]);
+		}
+		break;
+
+	case SLIDER_UCHAR:
+	case SLIDER_CHAR:
+	case SLIDER_INT:
+	case SLIDER_ULONG:
+	case SLIDER_UINT:
+	case SLIDER_LONG:
+		SetupSlider(hDlg, ppSettings, nControl);
+		break;
+	default:
+		break;
+	}
+	SetControlValue(hDlg, ppSettings, nControl);
+}
+
 BOOL APIENTRY UISubMenuProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 {
 	static UI_SUBMENU* pSubMenu;
@@ -675,17 +809,15 @@ BOOL APIENTRY UISubMenuProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 	{
 	case WM_INITDIALOG:
 		pSubMenu = (UI_SUBMENU*)lParam;
+		SetWindowText(hDlg, pSubMenu->szDisplayName);
 		for(i = 0;i < 8;i++)
 		{
-			SetDlgItemText(hDlg, IDC_STATIC1 + i, pSubMenu->Elements[i].szDisplayName);
-			SetControlVisibility(hDlg, IDC_CHECK1 + i, (pSubMenu->Elements[i].Type == YESNO));
-			SetControlVisibility(hDlg, IDC_SLIDER1 + i, (pSubMenu->Elements[i].Type >= SLIDER_UCHAR && pSubMenu->Elements[i].Type <= SLIDER_LONG));
-			SetControlVisibility(hDlg, IDC_COMBO1 + i, (pSubMenu->Elements[i].Type == ITEMFROMLIST));
-			pSubMenu->Elements[i].PrevValue = GetUIValue(pSubMenu->Elements + i);
+			SetupControl(hDlg, pSubMenu->Elements, i);
 		}
 		break;
 
 	case WM_COMMAND:
+	case WM_NOTIFY:
 		switch LOWORD(wParam)
 		{
 		case IDOK:
@@ -694,9 +826,9 @@ BOOL APIENTRY UISubMenuProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 
 		case IDCANCEL:
 			// revert to old value
-			for(i = 0;i < 8;i++)
+			for(i = 0;i < 8 && pSubMenu->Elements[i] != NULL;i++)
 			{
-				SetUIValue(pSubMenu->Elements + i, pSubMenu->Elements[i].PrevValue);
+				SetSettingValue(pSubMenu->Elements[i], pSubMenu->Elements[i]->PrevValue);
 			}
 			EndDialog(hDlg, FALSE);
 			break;
@@ -719,6 +851,8 @@ BOOL APIENTRY UISubMenuProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 		case IDC_SLIDER6:
 		case IDC_SLIDER7:
 		case IDC_SLIDER8:
+			i = LOWORD(wParam) - IDC_SLIDER1;
+			SetSettingValue(pSubMenu->Elements[i], Slider_GetPos(GetDlgItem(hDlg, LOWORD(wParam))));
 			break;
 
 		case IDC_COMBO1:

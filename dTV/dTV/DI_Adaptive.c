@@ -30,6 +30,7 @@
 #include "DebugLog.h"
 #include "OutThreads.h"
 #include "Status.h"
+#include "FD_60Hz.h"
 
 long				StaticImageFieldCount = 100;
 long				LowMotionFieldCount = 4;

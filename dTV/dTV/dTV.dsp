@@ -59,7 +59,7 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 ddraw.lib dxguid.lib kernel32.lib user32.lib gdi32.lib advapi32.lib winmm.lib comdlg32.lib ..\driver\bin\dTVdrv.lib /nologo /subsystem:windows /profile /debug /machine:I386 /out:".\dTV.exe"
 # SUBTRACT BASE LINK32 /map /nodefaultlib
-# ADD LINK32 ..\Driver\DLL\Debug\dTVdrv.lib ddraw.lib dxguid.lib winmm.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib COMCTL32.LIB /nologo /subsystem:windows /pdb:none /map:"dTV.map" /debug /machine:I386 /out:"..\Debug\dTV.exe"
+# ADD LINK32 ..\Driver\DLL\Debug\dTVdrv.lib ddraw.lib dxguid.lib winmm.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib COMCTL32.LIB version.lib /nologo /subsystem:windows /pdb:none /map:"dTV.map" /debug /machine:I386 /out:"..\Debug\dTV.exe"
 # SUBTRACT LINK32 /profile
 
 !ELSEIF  "$(CFG)" == "dTV - Win32 Release"
@@ -93,7 +93,7 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 ddraw.lib dxguid.lib kernel32.lib user32.lib gdi32.lib advapi32.lib winmm.lib comdlg32.lib ..\driver\bin\hwiodrv.lib /nologo /subsystem:windows /incremental:yes /machine:I386
 # SUBTRACT BASE LINK32 /profile /map /debug /nodefaultlib
-# ADD LINK32 ..\Driver\DLL\Release\dTVdrv.lib ddraw.lib dxguid.lib kernel32.lib user32.lib gdi32.lib advapi32.lib winmm.lib comdlg32.lib COMCTL32.LIB /nologo /subsystem:windows /incremental:yes /machine:I386 /out:"..\Release\dTV.exe"
+# ADD LINK32 ..\Driver\DLL\Release\dTVdrv.lib ddraw.lib dxguid.lib kernel32.lib user32.lib gdi32.lib advapi32.lib winmm.lib comdlg32.lib COMCTL32.LIB  version.lib /nologo /subsystem:windows /incremental:yes /machine:I386 /out:"..\Release\dTV.exe"
 # SUBTRACT LINK32 /profile /map /debug /nodefaultlib
 
 !ENDIF 
@@ -164,6 +164,18 @@ SOURCE=.\dTV.RC
 # Begin Source File
 
 SOURCE=.\ErrorBox.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\FD_50Hz.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\FD_60Hz.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\FD_Common.c
 # End Source File
 # Begin Source File
 
@@ -260,6 +272,18 @@ SOURCE=.\dTV.H
 # Begin Source File
 
 SOURCE=.\ErrorBox.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\FD_50Hz.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\FD_60Hz.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\FD_Common.h
 # End Source File
 # Begin Source File
 

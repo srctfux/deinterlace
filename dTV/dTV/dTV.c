@@ -67,6 +67,8 @@
 #include "status.h"
 #include "vbi.h"
 #include "DI_BlendedClip.H"
+#include "FD_60Hz.H"
+#include "FD_50Hz.H"
 
 
 HWND hWnd = NULL;
@@ -153,6 +155,7 @@ int AudioSource = AUDIOMUX_MUTE;
 HFONT currFont = NULL;
 
 UINT CpuFeatureFlags;		// TRB 12/20/00 Processor capability flags
+
 
 /****************************************************************************
 

@@ -885,10 +885,74 @@ BOOL APIENTRY SplashProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 
 BOOL APIENTRY AboutProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 {
+	DWORD   dwVerInfoSize;		// Size of version information block
+	LPSTR   lpVersion;			// String pointer to 'version' text
+	DWORD   dwVerHnd=0;			// An 'ignored' parameter, always '0'
+	UINT    uVersionLen;		// Current length of full version string
+	WORD    wRootLen;			// length of the 'root' portion of string
+	char    szFullPath[MAX_PATH];	// full path of module
+	char    szResult[256];		// Temporary result string
+	char    szGetName[256];		// String to use for extracting version info
 
 	switch (message)
 	{
 	case WM_INITDIALOG:
+			// Now lets dive in and pull out the version information:
+			GetModuleFileName (hInst, szFullPath, sizeof(szFullPath));
+			dwVerInfoSize = GetFileVersionInfoSize(szFullPath, &dwVerHnd);
+			if (dwVerInfoSize)
+			{
+				LPSTR   lpstrVffInfo;
+				HANDLE  hMem;
+				hMem = GlobalAlloc(GMEM_MOVEABLE, dwVerInfoSize);
+				lpstrVffInfo  = GlobalLock(hMem);
+				GetFileVersionInfo(szFullPath, dwVerHnd, dwVerInfoSize, lpstrVffInfo);
+				// The below 'hex' value looks a little confusing, but
+				// essentially what it is, is the hexidecimal representation
+				// of a couple different values that represent the language
+				// and character set that we are wanting string values for.
+				// 040904E4 is a very common one, because it means:
+				//   US English, Windows MultiLingual characterset
+				// Or to pull it all apart:
+				// 04------        = SUBLANG_ENGLISH_USA
+				// --09----        = LANG_ENGLISH
+				// ----04BO        = Codepage
+				lstrcpy(szGetName, "\\StringFileInfo\\040904B0\\");	 
+				wRootLen = lstrlen(szGetName); // Save this position
+				
+				// Set the title of the dialog:
+				lstrcat (szGetName, "ProductName");
+				if(VerQueryValue((LPVOID)lpstrVffInfo,
+					(LPSTR)szGetName,
+					(LPVOID)&lpVersion,
+					(UINT *)&uVersionLen))
+				{
+					lstrcpy(szResult, "About ");
+					lstrcat(szResult, lpVersion);
+					SetWindowText (hDlg, szResult);
+
+					lstrcpy(szResult, lpVersion);
+					lstrcat(szResult, " Version ");
+
+					szGetName[wRootLen] = (char)0;
+					lstrcat (szGetName, "ProductVersion");
+
+					if(VerQueryValue((LPVOID)lpstrVffInfo,
+						(LPSTR)szGetName,
+						(LPVOID)&lpVersion,
+						(UINT *)&uVersionLen))
+					{
+						lstrcat(szResult, lpVersion);
+						lstrcat(szResult, " Compiled ");
+						lstrcat(szResult, __DATE__);
+						lstrcat(szResult, " ");
+						lstrcat(szResult, __TIME__);
+
+						SetWindowText (GetDlgItem(hDlg, IDC_VERSION), szResult);
+					}
+				}
+			} // if (dwVerInfoSize)
+
 		break;
 	case WM_COMMAND:
 		if ((LOWORD(wParam) == IDOK) || (LOWORD(wParam) == IDCANCEL))
