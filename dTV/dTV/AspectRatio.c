@@ -1090,8 +1090,24 @@ BOOL TargetAspect_OnChange(long NewValue)
 	return FALSE;
 }
 
+BOOL CustomTargetAspect_OnChange(long NewValue)
+{
+	target_aspect = NewValue;
+	custom_target_aspect = NewValue;
+	WorkoutOverlaySize();
+	return FALSE;
+}
+
 BOOL SourceAspect_OnChange(long NewValue)
 {
+	source_aspect = NewValue;
+	WorkoutOverlaySize();
+	return FALSE;
+}
+
+BOOL CustomSourceAspect_OnChange(long NewValue)
+{
+	custom_source_aspect = NewValue;
 	source_aspect = NewValue;
 	WorkoutOverlaySize();
 	return FALSE;
@@ -1131,7 +1147,7 @@ SETTING AspectSettings[ASPECT_SETTING_LASTONE] =
 	{
 		"Custom Source Aspect", SLIDER, 0, &custom_source_aspect,
 		1333, 1000, 3000, 1, NULL,
-		"ASPECT", "CustomSourceAspect", NULL,
+		"ASPECT", "CustomSourceAspect", CustomSourceAspect_OnChange,
 	},
 	{
 		"Screen Aspect", NUMBER, 0, &target_aspect,
@@ -1141,7 +1157,7 @@ SETTING AspectSettings[ASPECT_SETTING_LASTONE] =
 	{
 		"Custom Screen Aspect", SLIDER, 0, &custom_target_aspect,
 		1333, 1000, 3000, 1, NULL,
-		"ASPECT", "CustomTargetAspect", NULL,
+		"ASPECT", "CustomTargetAspect", CustomTargetAspect_OnChange,
 	},
 	{
 		"Aspect Mode", NUMBER, 0, &aspect_mode,
