@@ -47,8 +47,7 @@ void Stop_Thread();
 
 void SetupCaptureFlags();
 
-DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter);
-DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter);
+DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter);
 
 void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField);
 void UpdateNTSCPulldownMode(long FieldDiff, BOOL OnOddField, short **evenField, short **oddField);

@@ -100,24 +100,12 @@ void Start_Thread()
 
 	bStopThread = FALSE;
 
-	if(TVSettings[TVTYPE].Is25fps)
-	{
-		OutThread = CreateThread((LPSECURITY_ATTRIBUTES) NULL,	// No security.
-								 (DWORD) 0,	                    // Same stack size.
-								 YUVOutThreadPAL,	            // Thread procedure.
-								 NULL,	                        // Parameter.
-								 (DWORD) 0,	                    // Start immediatly.
-								 (LPDWORD) & LinkThreadID);	    // Thread ID.
-	}
-	else
-	{
-		OutThread = CreateThread((LPSECURITY_ATTRIBUTES) NULL,	// No security.
-								 (DWORD) 0,	                    // Same stack size.
-								 YUVOutThreadNTSC,	            // Thread procedure.
-								 NULL,	                        // Parameter.
-								 (DWORD) 0,	                    // Start immediatly.
-								 (LPDWORD) & LinkThreadID);	    // Thread ID.
-	}
+	OutThread = CreateThread((LPSECURITY_ATTRIBUTES) NULL,	// No security.
+							 (DWORD) 0,	                    // Same stack size.
+							 YUVOutThread,		            // Thread procedure.
+							 NULL,	                        // Parameter.
+							 (DWORD) 0,	                    // Start immediatly.
+							 (LPDWORD) & LinkThreadID);	    // Thread ID.
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -786,8 +774,7 @@ void Weave(short** pOddLines, short** pEvenLines, BYTE* lpOverlay)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
+DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 {
 	char Text[128];
 	int i, j;
@@ -795,6 +782,7 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 	int nFrame = 0;
 	DWORD dwLastSecondTicks;
 	BYTE* lpCurOverlay = lpOverlayBack;
+	long CompareResult;
 	long CombFactor;
 	short* ppEvenLines[5][CLEARLINES];
 	short* ppOddLines[5][CLEARLINES];
@@ -804,7 +792,8 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 	int CombNum = 0;
 	BOOL bFlipNow = TRUE;
 	BOOL bIsOddField = FALSE;
-
+	BOOL bIsPAL = TVSettings[TVTYPE].Is25fps;
+	
 	if (lpDDOverlay == NULL || lpDDOverlay == NULL || lpOverlayBack == NULL || lpOverlay == NULL)
 	{
 		ExitThread(-1);
@@ -812,9 +801,6 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 
 	// Sets processor Affinity and Thread priority according to menu selection
 	SetupProcessorAndThread();
-
-	// reset the static variables in the detection code
-	UpdatePALPulldownMode(-1, FALSE);
 
 	// Set up 5 sets of pointers to the start of odd and even lines
 	// we will always go up to the limit so that we can use bTV
@@ -827,12 +813,18 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 		}
 	}
 
-	// start the capture off
-	BT848_Restart_RISC_Code();
+	// reset the static variables in the detection code
+	if (bIsPAL)
+		UpdatePALPulldownMode(-1, FALSE);
+	else
+		UpdateNTSCPulldownMode(-1, FALSE, NULL, NULL);
 
 	// display the current pulldown mode
 	UpdatePulldownStatus();
 	
+	// start the capture off
+	BT848_Restart_RISC_Code();
+
 	dwLastSecondTicks = GetTickCount();
 
 	while(!bStopThread)
@@ -845,9 +837,21 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 			{
 				if(bAutoDetectMode == TRUE)
 				{
-					CombFactor = GetCombFactor(ppEvenLines[CurrentFrame], ppOddLines[CurrentFrame]);
-					UpdatePALPulldownMode(CombFactor, TRUE);
-					LOG(" Frame %d O CF = %d", CurrentFrame, CombFactor);
+					if (bIsPAL)
+					{
+						CombFactor = GetCombFactor(ppEvenLines[CurrentFrame], ppOddLines[CurrentFrame]);
+						UpdatePALPulldownMode(CombFactor, TRUE);
+						LOG(" Frame %d O CF = %d", CurrentFrame, CombFactor);
+					}
+					else
+					{
+						CompareResult = CompareFields(ppOddLines[(CurrentFrame + 4) % 5], ppOddLines[CurrentFrame]);
+						LOG(" Frame %d O CR = %d", CurrentFrame, CompareResult);
+						UpdateNTSCPulldownMode(CompareResult, 
+											   TRUE,
+											   ppEvenLines[LastEvenFrame],
+											   ppOddLines[CurrentFrame]);
+					}
 				}
 
 				if (Capture_VBI == TRUE)
@@ -923,12 +927,24 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 			{
 				if(bAutoDetectMode == TRUE)
 				{
-					// need to add one to the even lines
-					// so that the top line is between the
-					// top two even lines
-					CombFactor = GetCombFactor(ppEvenLines[CurrentFrame], ppOddLines[(CurrentFrame + 4) % 5]);
-					UpdatePALPulldownMode(CombFactor, FALSE);
-					LOG(" Frame %d E CF = %d", CurrentFrame, CombFactor);
+					if (bIsPAL)
+					{
+						// need to add one to the even lines
+						// so that the top line is between the
+						// top two even lines
+						CombFactor = GetCombFactor(ppEvenLines[CurrentFrame], ppOddLines[(CurrentFrame + 4) % 5]);
+						UpdatePALPulldownMode(CombFactor, FALSE);
+						LOG(" Frame %d E CF = %d", CurrentFrame, CombFactor);
+					}
+					else
+					{
+						CompareResult = CompareFields(ppEvenLines[(CurrentFrame + 4) % 5], ppEvenLines[CurrentFrame]);
+						LOG(" Frame %d E CR = %d", CurrentFrame, CompareResult);
+						UpdateNTSCPulldownMode(CompareResult,
+											   FALSE,
+											   ppEvenLines[CurrentFrame],
+											   ppOddLines[LastOddFrame]);
+					}
 				}
 
 				if (Capture_VBI == TRUE)
@@ -1028,255 +1044,7 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 			}
 		}
 	}
-	ExitThread(0);
-	return 0;
-}
 
-///////////////////////////////////////////////////////////////////////////////
-DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
-{
-	char Text[128];
-	int i, j;
-	int nLineTarget;
-	int nFrame = 0;
-	DWORD dwLastCount;
-	BYTE* lpCurOverlay = lpOverlayBack;
-	long CompareResult;
-	short* ppEvenLines[5][CLEARLINES];
-	short* ppOddLines[5][CLEARLINES];
-	BYTE* pDest;
-	int LastEvenFrame = 0;
-	int LastOddFrame = 0;
-	int CombNum = 0;
-	BOOL bFlipNow = TRUE;
-	BOOL bIsOddField = FALSE;
-
-	if (lpDDOverlay == NULL || lpDDOverlay == NULL || lpOverlayBack == NULL || lpOverlay == NULL)
-	{
-		ExitThread(-1);
-	}
-
-	// Sets processor Affinity and Thread priority according to menu selection
-	SetupProcessorAndThread();
-
-	// start the capture off
-	BT848_Restart_RISC_Code();
-
-	// Set up 5 sets of pointers to the start of odd and even lines
-	// we will always go up to the limit so that we can use bTV
-	for (j = 0; j < 5; j++)
-	{
-		for (i = 0; i < BTV_VER1_HEIGHT; i += 2)
-		{
-			ppOddLines[j][i / 2] = (short *) pDisplay[j] + (i + 1) * 1024;
-			ppEvenLines[j][i / 2] = (short *) pDisplay[j] + i * 1024;
-		}
-	}
-
-	// reset the static variables in the detection code
-	UpdateNTSCPulldownMode(-1, FALSE, NULL, NULL);
-
-	// display the current pulldown mode
-	UpdatePulldownStatus();
-	
-	dwLastCount = GetTickCount();
-
-	while(!bStopThread)
-	{
-		bIsOddField = WaitForNextField(bIsOddField);
-		if(bIsPaused == FALSE)
-		{
-			pDest = lpCurOverlay;
-			if(bIsOddField)
-			{
-				if(bAutoDetectMode == TRUE)
-				{
-					CompareResult = CompareFields(ppOddLines[(CurrentFrame + 4) % 5], ppOddLines[CurrentFrame]);
-					LOG(" Frame %d O CR = %d", CurrentFrame, CompareResult);
-					UpdateNTSCPulldownMode(CompareResult, 
-										   TRUE,
-						                   ppEvenLines[LastEvenFrame],
-										   ppOddLines[CurrentFrame]);
-				}
-
-				if (Capture_VBI == TRUE)
-				{
-					BYTE * pVBI = (LPBYTE) Vbi_dma[CurrentFrame]->dwUser;
-					for (nLineTarget = VBI_lpf; nLineTarget < 2 * VBI_lpf ; nLineTarget++)
-					{
-						VBI_DecodeLine(pVBI + nLineTarget * 2048, nLineTarget - VBI_lpf);
-					}
-				}
-
-				// if we have dropped a field then do BOB 
-				if(LastEvenFrame != CurrentFrame || gPulldownMode == INTERPOLATE_BOB)
-				{
-					for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
-					{
-						memcpyBOBMMX(pDest,
-									ppOddLines[CurrentFrame][nLineTarget], 
-									CurrentX * 2);
-						pDest += 2 * OverlayPitch;
-					}
-					bFlipNow = TRUE;
-					if(LastEvenFrame != CurrentFrame)
-					{
-						nFrame++;
-					}
-				}
-				else if(gPulldownMode == VIDEO_MODE)
-				{
-					DeinterlaceOdd(ppOddLines[CurrentFrame], ppEvenLines[LastEvenFrame], lpCurOverlay);
-				}
-				else if(gPulldownMode == SIMPLE_WEAVE)
-				{
-					Weave(ppOddLines[CurrentFrame], ppEvenLines[LastEvenFrame], lpCurOverlay);
-				}
-				else if(gPulldownMode == BTV_PLUGIN)
-				{
-					BYTE* pDestEven[CLEARLINES];
-					BYTE* pDestOdd[CLEARLINES];
-					
-					// set up desination pointers
-					// may need to optimize this later
-					for (i = 0; i < BTV_VER1_HEIGHT; i += 2)
-					{
-						pDestEven[i / 2] = pDest;
-						pDest += OverlayPitch;
-						pDestOdd[i / 2] = pDest;
-						pDest += OverlayPitch;
-					}
-					
-					BTVParams.IsOddField = 1;
-					BTVParams.ppCurrentField = ppOddLines[CurrentFrame];
-					BTVParams.ppLastField = ppEvenLines[LastEvenFrame];
-					BTVParams.ppEvenDest = pDestEven;
-					BTVParams.ppOddDest = pDestOdd;
-					bFlipNow = BTVPluginDoField(&BTVParams);
-				}
-				else
-				{
-					pDest += OverlayPitch;
-					for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
-					{
-						// copy latest data to destination buffer
-						memcpyMMX(pDest, 
-							ppOddLines[CurrentFrame][nLineTarget], 
-							CurrentX * 2);
-						pDest += 2 * OverlayPitch;
-					}
-				}
-				LastOddFrame = CurrentFrame;
-			}
-			else
-			{
-				if(bAutoDetectMode == TRUE)
-				{
-					CompareResult = CompareFields(ppEvenLines[(CurrentFrame + 4) % 5], ppEvenLines[CurrentFrame]);
-					LOG(" Frame %d E CR = %d", CurrentFrame, CompareResult);
-					UpdateNTSCPulldownMode(CompareResult,
-										   FALSE,
-										   ppEvenLines[CurrentFrame],
-										   ppOddLines[LastOddFrame]);
-				}
-
-				if (Capture_VBI == TRUE)
-				{
-					BYTE * pVBI = (LPBYTE) Vbi_dma[CurrentFrame]->dwUser;
-					for (nLineTarget = 0; nLineTarget < VBI_lpf ; nLineTarget++)
-					{
-						VBI_DecodeLine(pVBI + nLineTarget * 2048, nLineTarget);
-					}
-				}
-
-				// if we have dropped a field then do BOB
-				if(LastOddFrame != ((CurrentFrame + 4) % 5) || gPulldownMode == INTERPOLATE_BOB)
-				{
-					for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
-					{
-						// copy latest field data to both odd and even rows
-						memcpyBOBMMX(pDest, 
-									ppEvenLines[CurrentFrame][nLineTarget],
-									CurrentX * 2);
-						pDest += 2 * OverlayPitch;
-					}
-					bFlipNow = TRUE;
-					if(LastOddFrame != ((CurrentFrame + 4) % 5))
-					{
-						nFrame++;
-					}
-				}
-				else if(gPulldownMode == VIDEO_MODE)
-				{
-					DeinterlaceEven(ppOddLines[LastOddFrame], ppEvenLines[CurrentFrame], lpCurOverlay);
-				}
-				else if(gPulldownMode == SIMPLE_WEAVE)
-				{
-					Weave(ppOddLines[LastOddFrame], ppEvenLines[CurrentFrame], lpCurOverlay);
-				}
-				else if(gPulldownMode == BTV_PLUGIN)
-				{
-					BYTE* pDestEven[CLEARLINES];
-					BYTE* pDestOdd[CLEARLINES];
-					
-					// set up desination pointers
-					// may need to optimize this later
-					for (i = 0; i < BTV_VER1_HEIGHT; i += 2)
-					{
-						pDestEven[i / 2] = pDest;
-						pDest += OverlayPitch;
-						pDestOdd[i / 2] = pDest;
-						pDest += OverlayPitch;
-					}
-					
-					BTVParams.IsOddField = 1;
-					BTVParams.ppCurrentField = ppOddLines[CurrentFrame];
-					BTVParams.ppLastField = ppEvenLines[LastEvenFrame];
-					BTVParams.ppEvenDest = pDestEven;
-					BTVParams.ppOddDest = pDestOdd;
-					bFlipNow = BTVPluginDoField(&BTVParams);
-				}
-				else
-				{
-					for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
-					{
-						// copy latest data to destination buffer
-						memcpyMMX(pDest, 
-									ppEvenLines[CurrentFrame][nLineTarget], 
-									CurrentX  * 2);
-						pDest += 2 * OverlayPitch;
-					}
-				}
-				LastEvenFrame = CurrentFrame;
-			}
-
-			if(DoWeWantToFlip(bFlipNow, bIsOddField))
-			{
-				AdjustAspectRatio();
-				IDirectDrawSurface_Flip(lpDDOverlay, lpDDOverlayBack, DDFLIP_WAIT);
-				dwLastFlipTicks = GetTickCount();
-				if(lpCurOverlay == lpOverlay)
-				{
-					lpCurOverlay = lpOverlayBack;
-				}
-				else
-				{
-					lpCurOverlay = lpOverlay;
-				}
-			}
-		}
-
-		if (bDisplayStatusBar == TRUE)
-		{
-			if (dwLastCount + 1000 < GetTickCount())
-			{
-				sprintf(Text, "%d DF/S", nFrame);
-				SetWindowText(hwndFPSField, Text);
-				nFrame = 0;
-				dwLastCount = GetTickCount();
-			}
-		}
-	}
 	BT848_SetDMA(FALSE);
 	ExitThread(0);
 	return 0;
