@@ -2,8 +2,6 @@
 
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
-<meta name="ProgId" content="FrontPage.Editor.Document">
 <title>dTV.ini Settings</title>
 </head>
 
@@ -15,63 +13,243 @@ Some advanced settings and functions in beta test will require changes to this
 ini file to work properly.&nbsp; All the settings used by the program are stored
 here and no changes are made to the registry.</p>
 
-<h3>[Pulldown]</h3>
+<p>
+<table border="1">
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
 
-<p><b>PulldownThresholdLow </b>Determines when PAL pulldown detection will
+<tr>
+<td colspan=3><h3>[Pulldown]</h3></td>
+</tr>
+
+<tr>
+<td>PulldownThresholdLow</td>
+<td>-2000</td>
+<td>Determines when PAL pulldown detection will
 detect a noticable improvement in combing.&nbsp; Lower values (more negative)
 will make detection require more combing to change.&nbsp; Change this if PAL
-detection is not working for you.</p>
+detection is not working for you.</td>
+</tr>
 
-<p><b>PulldownThresholdHigh </b>Determines when PAL pulldown detection will go
+<tr>
+<td>PulldownThresholdHigh</td>
+<td>2000</td>
+<td>Determines when PAL pulldown detection will go
 back from movie mode to video mode.&nbsp; This value copes with certain types of
 video noise, if it is set too low then it will flip back on static movie images,
-if set too high it will remain in movie mode for too long.</p>
+if set too high it will remain in movie mode for too long.</td>
+</tr>
 
-<p><b>PulldownRepeatCount </b>This is the number of times the pulldown pattern
-must be detected before switching.</p>
+<tr>
+<td>PulldownRepeatCount</td>
+<td>4</td>
+<td>This is the number of times the pulldown pattern
+must be detected before switching.</td>
+</tr>
 
-<p><b>Threshold32Pulldown&nbsp;</b> This is the number of pixels per field that
+<tr>
+<td>Threshold32Pulldown&nbsp;</td>
+<td>15</td>
+<td>This is the number of pixels per field that
 need to be similar for NTSC movie detection to detect a triplet of fields from
-the smae movie frame.&nbsp; Higher values will cope with more video noise but
-will not detect the movies as well.</p>
+the same movie frame.&nbsp; Higher values will cope with more video noise but
+will not detect the movies as well.</td>
+</tr>
 
-<p><b>BitShift </b>This is used by the NTSC detection code to limit what
+<tr>
+<td>BitShift</td>
+<td>13</td>
+<td>This is used by the NTSC detection code to limit what
 pixels are the same.&nbsp; This should allow for noise in source.&nbsp; The
 value is applied to the square of the pixel difference with the results
-bitshifted right by this amount.</p>
+bitshifted right by this amount.</td>
+</tr>
 
-<p><b>DiffThreshold </b>.Not Used</p>
+<tr>
+<td>DiffThreshold</td>
+<td>224</td>
+<td>No longer used</td>
+</tr>
 
-<p><b>PulldownRepeatCount2 </b>The number of times an unexpected pattern can
-occur before switching back to video video mode from a film mode.&nbsp;</p>
+<tr>
+<td>PulldownRepeatCount2</td>
+<td>2</td>
+<td>The number of times an unexpected pattern can
+occur before switching back to video video mode from a film mode.&nbsp;</td>
+</tr>
 
+<tr>
+<td colspan=3>
 <h3>[BTVPlugin]</h3>
+</td>
+</tr>
 
-<p><b>Name </b>Which bTV plug-in to load, the dll should be in the path or in
-the dTV directory.</p>
+<tr>
+<td>Name</td>
+<td><i>none</i></td>
+<td>Which bTV plug-in to load, the dll should be in the path or in
+the dTV directory.</td>
+</tr>
 
-<p><b>Level1 </b>Parameter passed to the plug-in</p>
+<tr>
+<td>Level1</td>
+<td><i>none</i></td>
+<td>Parameter passed to the plug-in</td>
+</tr>
 
-<p><b>Level2 </b>Parameter passed to the plug-in</p>
+<tr>
+<td>Level2</td>
+<td><i>none</i></td>
+<td>Parameter passed to the plug-in</td>
+</tr>
 
-<p><b>x</b> Parameter passed to the plug-in</p>
+<tr>
+<td>x</td>
+<td><i>none</i></td>
+<td>Parameter passed to the plug-in</td>
+</tr>
 
-<p><b>y</b> Parameter passed to the plug-in</p>
+<tr>
+<td>y</td>
+<td><i>none</i></td>
+<td>Parameter passed to the plug-in</td>
+</tr>
 
-<p><b>UseKey1</b> Parameter passed to the plug-in</p>
+<tr>
+<td>UseKey1</td>
+<td><i>none</i></td>
+<td>Parameter passed to the plug-in</td>
+</tr>
 
-<p><b>UseKey2</b> Parameter passed to the plug-in</p>
+<tr>
+<td>UseKey2</td>
+<td><i>none</i></td>
+<td>Parameter passed to the plug-in</td>
+</tr>
 
-<h3>[Deinterlace]</h3>
+<tr>
+<td colspan=3><h3>[Deinterlace]</h3></td>
+</tr>
 
-<p><b>EdgeDetect</b> This values governs the strength of edge detection, use
-higher values if you think that the video deinterlacing is occurring too often.</p>
+<tr>
+<td>EdgeDetect</td>
+<td>625</td>
+<td>This values governs the strength of edge detection, use
+higher values if you think that the video deinterlacing is occurring too often.</td>
+</tr>
 
-<p><b>JaggieThreshold</b> This values governs the threshold for fine line
-dtection, use higher values if you get problems with small text</p>
+<tr>
+<td>JaggieThreshold</td>
+<td>73</td>
+<td>This values governs the threshold for fine line
+dtection, use higher values if you get problems with small text</td>
+</tr>
 
-<p><br>
-</p>
+<tr>
+<td colspan=3><h3>[ASPECT]</h3></td>
+</tr>
+
+<tr>
+<td>source_aspect</td>
+<td>0</td>
+<td>The most recent aspect ratio used.  This is the ratio multiplied by
+1000, e.g. a 4:3 ratio is (4 / 3 * 1000) or 1333.  A value of 0 means to
+use the aspect ratio of the source material, either 4:3 or 16:9 depending
+on <tt>aspect_mode</tt>.  This is settable via various menu items in the
+Aspect menu, and may also be modified by the aspect ratio autodetect
+option.</td>
+</tr>
+
+<tr>
+<td>custom_source_aspect</td>
+<td>0</td>
+<td>Allows you to specify a custom aspect ratio which may be accessed from
+the Aspect menu.  Normally unused.</td>
+</tr>
+
+<tr>
+<td>target_aspect</td>
+<td>0</td>
+<td>The aspect ratio of the display screen.  If 0, the screen is assumed
+to have square pixels and its resolution is used as the aspect ratio.
+This is settable via various menu items in the Aspect menu.</td>
+</tr>
+
+<tr>
+<td>custom_target_aspect</td>
+<td>0</td>
+<td>Allows you to specify a custom screen aspect ratio which may be accessed
+from the Aspect menu.  Normally unused.</td>
+</tr>
+
+<tr>
+<td>aspect_mode</td>
+<td>0</td>
+<td>1 if the source is a 4:3 image (even a letterboxed one), 2 if it's an
+anamorphic 16:9 image, or 0 to stretch the source to the current window size.
+This is settable via various menu items in the Aspect menu.</td>
+</tr>
+
+<tr>
+<td>AutoDetectAspect</td>
+<td>0</td>
+<td>Controls whether the code analyzes each frame to detect the current aspect
+ratio.  This may be toggled using the "Autodetect" Aspect menu option.  If
+deactivated, you can get dTV to detect the aspect ratio of the current frame
+using the "Compute" Aspect menu option.</td>
+</tr>
+
+<tr>
+<td>LuminanceThreshold</td>
+<td>15</td>
+<td>Controls how bright letterbox bars are allowed to get.  Valid values are
+0 through 127.  Any pixel with lower luminance than this is considered black
+by the aspect ratio detection code.  Lowering this value will allow dTV to
+detect letterbox modes on darker scenes, at the cost of increasing the chance
+that video noise in the letterbox bars will be treated as part of the
+picture.  <em>If all your letterboxed material is from a clean signal
+source, you'll probably want to lower this.</em></td>
+</tr>
+
+<tr>
+<td>IgnoreNonBlackPixels</td>
+<td>0</td>
+<td>When detecting aspect ratios, we often want to ignore TV station logos
+that extend into the letterbox area.  This setting controls how many non-black
+pixels (see LuminanceThreshold) must be present on a line before it's no
+longer considered part of a letterbox bar.  A value of 0 means 20% of the
+width of the screen, more than big enough to cover most logos.  <em>If you never
+watch letterboxed material with station logos, e.g. if all your letterboxed
+material is on laserdisc or DVD, set this to 1.</em></td>
+</tr>
+
+<tr>
+<td>AspectConsistencyTime</td>
+<td>15</td>
+<td>This many seconds must pass without a narrower frame appearing before
+the autodetect code will switch to a wide ratio it hasn't seen before.</td>
+</tr>
+
+<tr>
+<td>AspectHistoryTime</td>
+<td>300</td>
+<td>The autodetect module will remember previous aspect ratios it's switched
+to for this many seconds.  Ratios that last for less than a second aren't
+remembered since they're assumed to have been erroneous.</td>
+</tr>
+
+<tr>
+<td>ZoomInFrameCount</td>
+<td>60</td>
+<td>When autodetecting aspect ratios, if a ratio we've used before (within
+the past <tt>AspectHistoryTime</tt> seconds) reappears and is consistent for
+this many frames, switch back to it.</td>
+</tr>
+
+</table>
 
 </body>
 
