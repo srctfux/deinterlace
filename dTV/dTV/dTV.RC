@@ -1116,6 +1116,8 @@ BEGIN
         END
         MENUITEM "&Advanced Video Flags ...",   IDM_ADV_VIDEOSETTINGS
         MENUITEM "&Splash Screen on Startup",   IDM_SPLASH_ON_STARTUP
+        MENUITEM "Stop Video Overlay",          IDM_STOP
+        MENUITEM "Start Video Overlay",         IDM_START
     END
     POPUP "&Help"
     BEGIN

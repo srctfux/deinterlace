@@ -316,15 +316,22 @@ int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 //----------------------------------------------------------------------------
 // Repaints the overlay colorkey, optionally with black borders around it
 // during aspect ratio control
-void PaintOverlay(HWND hWnd)
+void PaintColorkey(HWND hWnd, BOOL bEnable)
 {
 	PAINTSTRUCT sPaint;
 	// MRS 9-9-00
 	HBRUSH black = CreateSolidBrush(RGB(0,0,0));
 	HBRUSH overlay;
 	BeginPaint(hWnd, &sPaint);
-	overlay = CreateSolidBrush(GetNearestColor(sPaint.hdc, OverlayColor));
-	//FillRect(sPaint.hdc, &sPaint.rcPaint, CreateSolidBrush(OverlayColor));
+
+	if (bEnable && OverlayActive())
+	{
+		overlay = CreateSolidBrush(GetNearestColor(sPaint.hdc, OverlayColor));
+	}
+	else
+	{
+		overlay = CreateSolidBrush(RGB(0,0,0));
+	}
 
 	if (destinationRectangle.right > destinationRectangle.left) {
 		RECT r;
@@ -400,12 +407,18 @@ double GetActualSourceFrameAspect()
 // you want to update the window everytime you have enabled/disabled the 
 // statusbar, menus, full screen state, etc.
 //
+// This allows for more cosmetic handling - including the ability to 
+// startup directly to maximized without any intermediate cosmetic
+// glitches during startup.
+//
 void UpdateWindowState()
 {
 	if(bIsFullScreen == TRUE)
 	{
+		ShowWindow(hWnd, SW_HIDE);
 		SetWindowLong(hWnd, GWL_STYLE, WS_VISIBLE);
-
+		SetMenu(hWnd, NULL);
+		ShowWindow(hwndStatusBar, SW_HIDE);
 		SetWindowPos(hWnd,
 					HWND_TOPMOST,
 					0,
@@ -413,17 +426,12 @@ void UpdateWindowState()
 					GetSystemMetrics(SM_CXSCREEN),
 					GetSystemMetrics(SM_CYSCREEN),
 					SWP_SHOWWINDOW);
-		ShowWindow(hwndStatusBar, SW_HIDE);
-		SetMenu(hWnd, NULL);
 	}
 	else
 	{
 		SetWindowLong(hWnd, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_VISIBLE);
-
 		SetMenu(hWnd, (Show_Menu == TRUE)?hMenu:NULL);
-
 		ShowWindow(hwndStatusBar, bDisplayStatusBar?SW_SHOW:SW_HIDE);
-
 		SetWindowPos(hWnd,bAlwaysOnTop?HWND_TOPMOST:HWND_NOTOPMOST,
 					0,0,0,0,
 					SWP_NOSIZE | SWP_NOMOVE | SWP_SHOWWINDOW);

@@ -49,6 +49,9 @@
 #include "status.h"
 #include "vbi.h"
 
+#define WM_USER_OVERLAYSTART   (WM_USER + 101)
+#define WM_USER_OVERLAYSTOP    (WM_USER + 102)
+
 HWND hwndStatusBar;
 HWND hwndTextField;
 HWND hwndPalField;
@@ -213,16 +216,15 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		return FALSE;
 	}
 	hMenu = LoadMenu(hInstance, "ANALOGMENU");
-	hWnd = CreateWindow("dTV", "dTV", WS_VISIBLE, emstartx, emstarty, emsizex, emsizey, NULL, NULL, hInstance, NULL);
 
-	if (!hWnd)
-		return (FALSE);
-
+	// 2000-10-31 Added by Mark: Changed to WS_POPUP for more cosmetic direct-to-full-screen startup,
+	// let UpdateWindowState() handle initialization of windowed dTV instead.
+	hWnd = CreateWindow("dTV", "dTV", WS_POPUP, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), NULL, NULL, hInstance, NULL);
+	if (!hWnd) return FALSE;
+	if (!bIsFullScreen) SetWindowPos(hWnd, 0, emstartx, emstarty, emsizex, emsizey, SWP_SHOWWINDOW);
+	
 	statusbar = hInst;
-	if (!StatusBar_Init(statusbar))
-	{
-		return FALSE;
-	}
+	if (!StatusBar_Init(statusbar)) return FALSE;
 
 	if (StatusBar_Create(hWnd, statusbar, ID_STATUSBAR))
 	{
@@ -320,6 +322,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 	{
 
 	case WM_COMMAND:
+
 		switch (LOWORD(wParam))
 		{
 		case IDM_SETUPCARD:
@@ -1195,6 +1198,14 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			Sleep(100);
 			break;
 
+		case IDM_STOP:
+			SendMessage(hWnd, WM_USER_OVERLAYSTOP, 0, 0);
+			break;
+
+		case IDM_START:
+			SendMessage(hWnd, WM_USER_OVERLAYSTART, 0, 0);
+			break;
+
 		default:
 			// Check whether menu ID is an aspect ratio related item
 			ProcessAspectRatioSelection(hWnd, LOWORD(wParam));
@@ -1210,6 +1221,31 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 	case INIT_BT:
 		MainWndOnInitBT(hWnd);
 		break;
+
+// 2000-10-31 Added by Mark Rejhon
+// This was an attempt to allow dTV to run properly through
+// computer resolution changes.  Alas, dTV still crashes and burns
+// in a fiery dive if you try to change resolution while dTV is
+// running.  We need to somehow capture a message that comes right
+// before a resolution change, so we can destroy the video overlay
+// on time beforehand.   This message seems to happen right after
+// a resolution change.
+//
+//	case WM_DISPLAYCHANGE:
+//		// Windows resolution changed while software running
+//		Stop_Capture();
+//		Overlay_Destroy();
+//		Sleep(100);
+//		Overlay_Create();
+//		Overlay_Clean();
+//		BT848_ResetHardware();
+//		BT848_SetGeoSize();
+//		WorkoutOverlaySize();
+//		Start_Capture();
+//		Sleep(100);
+//		Audio_SetSource(AudioSource);
+//		break;
+
 
 	case WM_LBUTTONUP:
 		SendMessage(hWnd, WM_COMMAND, IDM_FULL_SCREEN, 0);
@@ -1328,15 +1364,39 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		break;
 	
 	case WM_PAINT:
-		PaintOverlay(hWnd);
+		PaintColorkey(hWnd, TRUE);
+		break;
+
+	case WM_USER_OVERLAYSTART:
+		// 2000-10-31 Added by Mark Rejhon
+		// This rinitializes the video overlay to continue operation, 
+		// so that end users can write scripts that sends this special message 
+		// to safely restart the video after a resolution or timings change.
+		Overlay_Create();
+		Overlay_Clean();
+		BT848_ResetHardware();
+		BT848_SetGeoSize();
+		WorkoutOverlaySize();
+		Start_Capture();
+		Sleep(100);
+		Audio_SetSource(AudioSource);
+		break;
+
+	case WM_USER_OVERLAYSTOP:
+		// 2000-10-31 Added by Mark Rejhon
+		// This ends the video overlay from operating, so that end users can
+		// write scripts that sends this special message to safely stop the video
+		// before switching computer resolutions or timings.
+		InvalidateRect(hWnd, NULL, FALSE);
+		PaintColorkey(hWnd, FALSE);
+		Stop_Capture();
+		Overlay_Destroy();
 		break;
 
 	case WM_QUERYENDSESSION:
 	case WM_DESTROY:
-		Stop_Thread();
-		Audio_SetSource(AUDIOMUX_MUTE);
 		Stop_Capture();
-
+		Audio_SetSource(AUDIOMUX_MUTE);
 		CleanUpMemory();
 
 		if(bIsFullScreen == FALSE)

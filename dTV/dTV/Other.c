@@ -69,26 +69,16 @@ DWORD SrcSizeAlign;
 COLORREF OverlayColor = RGB(255, 0, 255);
 DWORD PhysicalOverlayColor = RGB(255, 0, 255);
 int Back_Buffers = 2;		// Make new user parm, TRB 10/28/00
-void ExitDD(void)
+
+//-----------------------------------------------------------------------------
+// Tells whether or not video overlay is active
+BOOL OverlayActive()
 {
-	if (lpDD != NULL)
-	{
-		if (lpDDOverlay != NULL)
-		{
-			Overlay_Update(NULL, NULL, DDOVER_HIDE, FALSE);
-			IDirectDrawSurface_Release(lpDDOverlay);
-		}
-		lpDDOverlay = NULL;
-		if (lpDDSurface != NULL)
-		{
-			IDirectDrawSurface_Release(lpDDSurface);
-		}
-		lpDDSurface = NULL;
-		IDirectDraw_Release(lpDD);
-		lpDD = NULL;
-	}
+	return (lpDDOverlay != NULL);
 }
 
+//-----------------------------------------------------------------------------
+// Blank out video overlay
 void Overlay_Clean()
 {
 	int nPixel;
@@ -130,6 +120,8 @@ void Overlay_Clean()
 	}
 }
 
+//-----------------------------------------------------------------------------
+// Update video overlay with new rectangle
 BOOL Overlay_Update(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL ColorKey)
 {
 	HRESULT		ddrval;
@@ -184,12 +176,35 @@ BOOL Overlay_Update(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL Color
 	return TRUE;
 }
 
+//-----------------------------------------------------------------------------
+// Create new video overlay
 BOOL Overlay_Create()
 {
 	DDSURFACEDESC ddsd;
 	DDPIXELFORMAT PixelFormat;
 	HRESULT ddrval;
 	DDSCAPS caps;
+
+	if (lpDDOverlay) 
+	{
+		return FALSE;
+	}
+
+	// 2000-10-31 Moved by Mark Rejhon
+	// Attempt to create primary surface before overlay, in this module,
+	// because we may have destroyed the primary surface during a computer 
+	// resolution change.
+	memset(&ddsd, 0x00, sizeof(ddsd));
+	ddsd.dwSize = sizeof(ddsd);
+	ddsd.dwFlags = DDSD_CAPS;
+	ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
+	if (IDirectDraw_CreateSurface(lpDD, &ddsd, &lpDDSurface, NULL) != DD_OK)
+	{
+		ErrorBox("Error Creating Primary surface");
+		return (FALSE);
+	}
+	ddrval = IDirectDrawSurface_Lock(lpDDSurface, NULL, &ddsd, DDLOCK_WAIT, NULL);
+	ddrval = IDirectDrawSurface_Unlock(lpDDSurface, ddsd.lpSurface);
 
 	memset(&PixelFormat, 0x00, sizeof(PixelFormat));
 	PixelFormat.dwSize = sizeof(DDPIXELFORMAT);
@@ -316,12 +331,43 @@ DWORD Overlay_ColorMatch(LPDIRECTDRAWSURFACE pdds, COLORREF rgb)
     return dw;
 }
 
+//-----------------------------------------------------------------------------
+// Deinitialize video overlay
+//
+// 2000-10-31 Added by Mark Rejhon
+// Provide a way to destroy the video overlay and primary, which should
+// be done right before a computer resolution change.
+// 
+BOOL Overlay_Destroy()
+{
+	if (lpDD != NULL)
+	{
+		if (lpDDOverlay != NULL)
+		{
+			// Destroy the video overlay
+			Overlay_Update(NULL, NULL, DDOVER_HIDE, FALSE);
+			IDirectDrawSurface_Release(lpDDOverlay);
+			lpDDOverlay = NULL;
+			lpDDOverlayBack = NULL;
 
+			// Now destroy the primary surface
+			if (lpDDSurface != NULL) 
+			{
+				IDirectDrawSurface_Release(lpDDSurface);
+				lpDDSurface = NULL;
+			}
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+//-----------------------------------------------------------------------------
+// Initialize DirectDraw
 BOOL InitDD(HWND hWnd)
 {
 	HRESULT ddrval;
 	DDCAPS DriverCaps;
-	DDSURFACEDESC ddsd;
 
 	if (DirectDrawCreate(NULL, &lpDD, NULL) != DD_OK)
 	{
@@ -383,7 +429,7 @@ BOOL InitDD(HWND hWnd)
 		ErrorBox("SetCooperativeLevel failed");
 		return (FALSE);
 	}
-
+/*
 	memset(&ddsd, 0x00, sizeof(ddsd));
 	ddsd.dwSize = sizeof(ddsd);
 	ddsd.dwFlags = DDSD_CAPS;
@@ -397,11 +443,26 @@ BOOL InitDD(HWND hWnd)
 
 	ddrval = IDirectDrawSurface_Lock(lpDDSurface, NULL, &ddsd, DDLOCK_WAIT, NULL);
 	ddrval = IDirectDrawSurface_Unlock(lpDDSurface, ddsd.lpSurface);
+*/
 	return TRUE;
+}
+
+//-----------------------------------------------------------------------------
+// Deinitialize DirectDraw
+void ExitDD(void)
+{
+	if (lpDD != NULL)
+	{
+		Overlay_Destroy();
+		IDirectDraw_Release(lpDD);
+		lpDD = NULL;
+	}
 }
 
 #define LIMIT(x) (((x)<0)?0:((x)>255)?255:(x))
 
+//-----------------------------------------------------------------------------
+// Save still image snapshot as PPM format to disk
 void SaveStill()
 {
 	int y, cr, cb, r, g, b, i, j, n = 0;

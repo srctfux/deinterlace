@@ -41,9 +41,11 @@
 
 void ExitDD(void);
 BOOL InitDD(HWND hWnd);
+BOOL OverlayActive();
 BOOL Overlay_Update(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL ColorKey);
 BOOL Overlay_Create();
 void Overlay_Clean();
+BOOL Overlay_Destroy();
 DWORD Overlay_ColorMatch(LPDIRECTDRAWSURFACE pdds, COLORREF rgb);
 void SaveStill();
 
