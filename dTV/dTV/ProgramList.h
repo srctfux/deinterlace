@@ -33,6 +33,8 @@
 // 08 Jan 2001   John Adcock           Global Variable Tidy up
 //                                     Got rid of global.h structs.h defines.h
 //
+// 11 Mar 2001   Laurent Garnier       Previous Channel feature added
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __PROGRAMLIST_H___
@@ -100,5 +102,6 @@ void ChangeChannel(int NewChannel);
 extern struct TProgramm Programm[MAXPROGS+1];
 extern int CountryCode;
 extern long CurrentProgramm;
+extern long PreviousProgramm;
 
 #endif

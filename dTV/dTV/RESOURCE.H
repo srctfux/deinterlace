@@ -53,6 +53,7 @@
 #define IDM_VT_PAGE_PLUS                418
 #define IDM_VT_PAGE_UP                  419
 #define IDM_VT_PAGE_DOWN                420
+#define IDM_CLOSE_VT                    422
 #define IDM_SWAPMODE                    425
 #define IDM_KEEP_LOADED                 430
 #define IDM_TPSCAN                      431
@@ -196,6 +197,7 @@
 #define IDM_ASPECT_DEFER_OVERLAY        810
 #define IDM_WINPOS_ORBIT                811
 #define IDM_WINPOS_AUTOSIZE             812
+#define IDM_CHANNEL_PREVIOUS            813
 #define IDM_END                         1032
 #define IDM_SOURCE_TUNER                1089
 #define IDM_SOURCE_COMPOSITE            1090
@@ -791,7 +793,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        158
-#define _APS_NEXT_COMMAND_VALUE         813
+#define _APS_NEXT_COMMAND_VALUE         814
 #define _APS_NEXT_CONTROL_VALUE         1879
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

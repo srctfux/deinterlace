@@ -377,6 +377,17 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
 			break;
 
+		case IDM_CHANNEL_PREVIOUS:
+			if (Setting_GetValue(BT848_GetSetting(VIDEOSOURCE)) == SOURCE_TUNER)
+			{
+				if (Programm[PreviousProgramm].freq != 0)
+					ChangeChannel(PreviousProgramm);
+
+				StatusBar_ShowText(STATUS_KEY, Programm[CurrentProgramm].Name);
+				OSD_ShowText(hWnd,Programm[CurrentProgramm].Name, 0);
+			}
+			break;
+
 		case IDM_RESET:
             Reset_Capture();
 	        Sleep(100);

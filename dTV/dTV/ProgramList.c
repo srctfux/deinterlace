@@ -36,6 +36,8 @@
 // 08 Jan 2001   John Adcock           Global Variable Tidy up
 //                                     Got rid of global.h structs.h defines.h
 //
+// 11 Mar 2001   Laurent Garnier       Previous Channel feature added
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -60,6 +62,7 @@ struct TProgramm Programm[MAXPROGS+1];
 int CountryCode = 1;
 
 long CurrentProgramm = 0;
+long PreviousProgramm = 0;
 
 BOOL APIENTRY ProgramListProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 {
@@ -623,6 +626,7 @@ void ChangeChannel(int NewChannel)
 			if (Programm[NewChannel].freq != 0)
 			{
 				Audio_SetSource(AUDIOMUX_MUTE);
+				PreviousProgramm = CurrentProgramm;
 				CurrentProgramm = NewChannel;
 				Tuner_SetFrequency(MulDiv(Programm[CurrentProgramm].freq * 1000, 16, 1000000));
 				Sleep(20);

@@ -1250,6 +1250,7 @@ BEGIN
                                                     NOINVERT
     VK_ADD,         IDM_VOLUMEPLUS,         VIRTKEY, NOINVERT
     VK_BACK,        IDM_HIDE_OSD,           VIRTKEY, NOINVERT
+    VK_BACK,        IDM_CHANNEL_PREVIOUS,   VIRTKEY, CONTROL, NOINVERT
     VK_DOWN,        IDM_VT_PAGE_DOWN,       VIRTKEY, NOINVERT
     VK_ESCAPE,      IDM_END,                VIRTKEY, NOINVERT
     VK_F1,          IDM_HELP_README,        VIRTKEY, NOINVERT
