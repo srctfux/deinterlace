@@ -12,8 +12,9 @@
 
 #Instructions for initial run...
 #cvs -d:pserver:anonymous@cvs1:/cvsroot/deinterlace login <Enter> (See below for discussion)
-#cp /home/groups/deinterlace/htdocs/scripts/zipmodule.sh /home/users/yourusername/ <Enter>
-#cd /home/users/yourusername/ <Enter>
+#cp /home/groups/d/de/deinterlace/htdocs/scripts/zipmodule.sh
+#   /home/users/1stletterusername/1sttwolettersusername/yourusername/ <Enter>
+#cd /home/users/1stletterusername/1sttwolettersusername/yourusername/ <Enter>
 #sh zipmodule.sh <Enter>
 
 #Instructions for subsequent runs...
@@ -34,7 +35,7 @@ rm -f /home/groups/ftp/pub/deinterlace/dtvmodule.zip
 
 #Do the remaining work from the dTV subdirectory
 
-cd /home/groups/deinterlace/
+cd /home/groups/d/de/deinterlace/
 
 
 #Check out the dTV module to temporary space from the dTV CVS using pserver.
@@ -45,17 +46,78 @@ cd /home/groups/deinterlace/
 cvs -d:pserver:anonymous@cvs1:/cvsroot/deinterlace co dTV>/dev/null
 
 
+
+#todos doesn't have a recursive function, so you have to work with each directory individually.
+
+cd /home/groups/d/de/deinterlace/dTV/dTV
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
+cd /home/groups/d/de/deinterlace/dTV/Driver/COMMON
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
+cd /home/groups/d/de/deinterlace/dTV/Driver/DLL
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
+cd /home/groups/d/de/deinterlace/dTV/Driver/INCLUDE
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
+cd /home/groups/d/de/deinterlace/dTV/Driver/SYS
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
+cd /home/groups/d/de/deinterlace/dTV/Driver/VXD
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
+cd /home/groups/d/de/deinterlace/dTV/Debug
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
+cd /home/groups/d/de/deinterlace/dTV/Release
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
+cd /home/groups/d/de/deinterlace/dTV/Release/Docs
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
+cd /home/groups/d/de/deinterlace/dTV/Plugins/DI_Adaptive
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
+cd /home/groups/d/de/deinterlace/dTV/Plugins/DI_BlendedClip
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
+cd /home/groups/d/de/deinterlace/dTV/Plugins/DI_Bob
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
+cd /home/groups/d/de/deinterlace/dTV/Plugins/DI_EvenOnly
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
+cd /home/groups/d/de/deinterlace/dTV/Plugins/DI_Greedy
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
+cd /home/groups/d/de/deinterlace/dTV/Plugins/DI_Greedy2Frame
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
+cd /home/groups/d/de/deinterlace/dTV/Plugins/DI_OddOnly
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
+cd /home/groups/d/de/deinterlace/dTV/Plugins/DI_ScalerBob
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
+cd /home/groups/d/de/deinterlace/dTV/Plugins/DI_TwoFrame
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
+cd /home/groups/d/de/deinterlace/dTV/Plugins/DI_VideoBob
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
+cd /home/groups/d/de/deinterlace/dTV/Plugins/DI_VideoWeave
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
+cd /home/groups/d/de/deinterlace/dTV/Plugins/DI_Weave
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
+cd /home/groups/d/de/deinterlace/dTV/Plugins/FLT_Gamma
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
+cd /home/groups/d/de/deinterlace/dTV/Plugins/FLT_TNoise
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
+cd /home/groups/d/de/deinterlace/dTV/Plugins/FLT_LinearCorrection
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
+cd /home/groups/d/de/deinterlace/dTV/PlugTest
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
+cd /home/groups/d/de/deinterlace/dTV/Api
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
+
+
+
+cd /home/groups/d/de/deinterlace/
+
+
 #Zip up the module
 
-zip -r dtvmodule.zip /home/groups/deinterlace/dTV/*
+zip -r dtvmodule.zip dTV
 
 
 #Give the zip file group permissions in case somebody else needs to delete it
 
-chmod 775 dtvmodule.zip
+chmod 777 dtvmodule.zip
 
 
-#Then move it to the anonymous FTP space
+#Then move it to the site space
 
 mv dtvmodule.zip /home/groups/ftp/pub/deinterlace/
 
@@ -66,3 +128,10 @@ rm -rf dTV
 
 
 #Joy
+
+
+
+
+
+
+

@@ -7,8 +7,8 @@
 
 #Instructions for initial run...
 #cvs -d:pserver:anonymous@cvs1:/cvsroot/deinterlace login <Enter> (See below for discussion)
-#cp /home/groups/deinterlace/htdocs/scripts/webup.sh /home/users/yourusername/ <Enter>
-#cd /home/users/yourusername/ <Enter>
+#cp /home/groups/d/de/deinterlace/htdocs/scripts/webup.sh /home/users/yourusername/ <Enter>
+#cd /home/users/firstletterofyourusername/firsttwolettersofusername/yourusername/ <Enter>
 #sh webup.sh <Enter>
 
 #Instructions for subsequent runs...
@@ -29,7 +29,7 @@
 
 #Do the work from the dTV subdirectory
 
-cd /home/groups/deinterlace/
+cd /home/groups/d/de/deinterlace/
 
 
 #Delete the previous live site.
@@ -67,7 +67,7 @@ cvs -d:pserver:anonymous@cvs1:/cvsroot/deinterlace co htdocs>/dev/null
 #so a way of cheating is putting them on a remote site and wgetting them every time
 #you do a web update.  Elegance be damned.
 
-cd /home/groups/deinterlace/htdocs/distributions
+cd /home/groups/d/de/deinterlace/htdocs/distributions
 wget -q http://www.schmelzer.org/dtvupload/dTV18exe.zip
 wget -q http://www.schmelzer.org/dtvupload/dTV18src.zip
 
@@ -75,8 +75,8 @@ wget -q http://www.schmelzer.org/dtvupload/dTV18src.zip
 #Then change the file permissions so that anyone in the deinterlace administrative group
 #can delete the directories and files
 
-cd /home/groups/deinterlace/htdocs/
-chmod 775 -R *
+cd /home/groups/d/de/deinterlace/htdocs/
+chmod 777 -R *
 
 
 #Joy
