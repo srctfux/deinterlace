@@ -22,6 +22,8 @@
 // 24 Jul 2000   John Adcock           Put all my deinterlacing code into this
 //                                     file
 //
+// 05 Jan 2001   John Adcock           Added flip frequencies to DeintMethods
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __DEINTERLACE_H___
@@ -114,6 +116,10 @@ typedef struct
 	BOOL bIsFilmMode;
     // Pointer to Algorithm function (cannot be NULL)
     DEINTERLACE_FUNC* pfnAlgorithm;
+	// flip frequency in 50Hz mode
+	unsigned long FrameRate50Hz;
+	// flip frequency in 60Hz mode
+	unsigned long FrameRate60Hz;
 } DEINTERLACE_METHOD;
 
 extern DEINTERLACE_METHOD DeintMethods[PULLDOWNMODES_LAST_ONE];

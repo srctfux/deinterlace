@@ -29,6 +29,9 @@
 //
 // 26 Dec 2000   Eric Schmidt          Fixed remember-last-channel-on-startup.
 //
+// 05 Jan 2001   John Adcock           Added GetRefreshRate function
+//                                     Added DoAccurateFlips parameter
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -95,6 +98,7 @@ void LoadSettingsFromIni()
 	// Added new performance related parms to Threads group - TRB 10/28/00
 	Hurry_When_Late = (GetPrivateProfileInt("Threads", "Hurry_When_Late", Hurry_When_Late, szIniFile) != 0);
 	Wait_For_Flip = (GetPrivateProfileInt("Threads", "Wait_For_Flip", Wait_For_Flip, szIniFile) != 0);
+	DoAccurateFlips = (GetPrivateProfileInt("Threads", "DoAccurateFlips", DoAccurateFlips, szIniFile) != 0);
 	Sleep_Interval = GetPrivateProfileInt("Threads", "Sleep_Interval", Sleep_Interval, szIniFile);
 
     // Mark Rejhon 01/01/01 - New Overlay section and OverlayColor setting
@@ -385,6 +389,7 @@ void WriteSettingsToIni()
 	// Added new performance related parms to Threads group - TRB 10/28/00
 	WritePrivateProfileInt("Threads", "Hurry_When_Late", Hurry_When_Late, szIniFile);
 	WritePrivateProfileInt("Threads", "Wait_For_Flip", Wait_For_Flip, szIniFile);
+	WritePrivateProfileInt("Threads", "DoAccurateFlips", DoAccurateFlips, szIniFile);
 	WritePrivateProfileInt("Threads", "Sleep_Interval", Sleep_Interval, szIniFile);
 
     // Mark Rejhon 01/01/01 - New Overlay section and OverlayColor setting
@@ -606,4 +611,9 @@ void WritePrivateProfileInt(LPCTSTR lpAppName,  LPCTSTR lpKeyName,  int nValue, 
 	char szValue[128];
 	sprintf(szValue, "%d", nValue);
 	WritePrivateProfileString(lpAppName,  lpKeyName,  szValue, lpFileName);
+}
+
+DWORD GetRefreshRate()
+{
+	return GetPrivateProfileInt("Pulldown", "RefreshRate", 0, szIniFile);	
 }

@@ -414,7 +414,6 @@ BOOL InitDD(HWND hWnd)
 			{
 				DestSizeAlign = 1;
 			}
-
 		}
 		else
 		{

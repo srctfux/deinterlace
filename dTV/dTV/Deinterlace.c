@@ -27,6 +27,8 @@
 // 30 Dec 2000   Mark Rejhon           Split out deinterlace routines
 //                                     into separate modules
 //
+// 05 Jan 2001   John Adcock           Added flip frequencies to DeintMethods
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -46,37 +48,37 @@ long SimilarityThreshold = 25;
 DEINTERLACE_METHOD DeintMethods[PULLDOWNMODES_LAST_ONE] =
 {
 	// VIDEO_MODE_BOB
-	{"Video Deinterlace (Bob)", FALSE, FALSE, FALSE, FALSE, DeinterlaceFieldBob},
+	{"Video Deinterlace (Bob)", FALSE, FALSE, FALSE, FALSE, DeinterlaceFieldBob, 50, 60},
 	// VIDEO_MODE_WEAVE
-	{"Video Deinterlace (Weave)", FALSE, FALSE, FALSE, FALSE, DeinterlaceFieldWeave},
+	{"Video Deinterlace (Weave)", FALSE, FALSE, FALSE, FALSE, DeinterlaceFieldWeave, 50, 60},
 	// VIDEO_MODE_2FRAME
-	{"Video Deinterlace (2-Frame)", FALSE, FALSE, FALSE, FALSE, DeinterlaceFieldTwoFrame},
+	{"Video Deinterlace (2-Frame)", FALSE, FALSE, FALSE, FALSE, DeinterlaceFieldTwoFrame, 50, 60},
 	// SIMPLE_WEAVE
-	{"Sipmle Weave", FALSE, FALSE, FALSE, FALSE, Weave},
+	{"Sipmle Weave", FALSE, FALSE, FALSE, FALSE, Weave, 50, 60},
 	// SIMPLE_BOB
-	{"Sipmle Bob", FALSE, FALSE, FALSE, FALSE, Bob},
+	{"Sipmle Bob", FALSE, FALSE, FALSE, FALSE, Bob, 50, 60},
 	// SCALER_BOB
-	{"Scaler Bob", FALSE, FALSE, TRUE, FALSE, HalfHeightBoth},
+	{"Scaler Bob", FALSE, FALSE, TRUE, FALSE, HalfHeightBoth, 50, 60},
 	// FILM_22_PULLDOWN_ODD
-	{"2:2 Pulldown Flip on Odd", FALSE, FALSE, FALSE, TRUE, FilmMode},
+	{"2:2 Pulldown Flip on Odd", FALSE, FALSE, FALSE, TRUE, FilmMode, 25, 30},
 	// FILM_22_PULLDOWN_EVEN
-	{"2:2 Pulldown Flip on Even", FALSE, FALSE, FALSE, TRUE, FilmMode},
+	{"2:2 Pulldown Flip on Even", FALSE, FALSE, FALSE, TRUE, FilmMode, 25, 30},
 	// FILM_32_PULLDOWN_0
-	{"3:2 Pulldown Skip 1st Full Frame", FALSE, FALSE, FALSE, TRUE, FilmMode},
+	{"3:2 Pulldown Skip 1st Full Frame", FALSE, FALSE, FALSE, TRUE, FilmMode, 0, 24},
 	// FILM_32_PULLDOWN_1
-	{"3:2 Pulldown Skip 2nd Full Frame", FALSE, FALSE, FALSE, TRUE, FilmMode},
+	{"3:2 Pulldown Skip 2nd Full Frame", FALSE, FALSE, FALSE, TRUE, FilmMode, 0, 24},
 	// FILM_32_PULLDOWN_2
-	{"3:2 Pulldown Skip 3rd Full Frame", FALSE, FALSE, FALSE, TRUE, FilmMode},
+	{"3:2 Pulldown Skip 3rd Full Frame", FALSE, FALSE, FALSE, TRUE, FilmMode, 0, 24},
 	// FILM_32_PULLDOWN_3
-	{"3:2 Pulldown Skip 4th Full Frame", FALSE, FALSE, FALSE, TRUE, FilmMode},
+	{"3:2 Pulldown Skip 4th Full Frame", FALSE, FALSE, FALSE, TRUE, FilmMode, 0, 24},
 	// FILM_32_PULLDOWN_4
-	{"3:2 Pulldown Skip 5th Full Frame", FALSE, FALSE, FALSE, TRUE, FilmMode},
+	{"3:2 Pulldown Skip 5th Full Frame", FALSE, FALSE, FALSE, TRUE, FilmMode, 0, 24},
 	// EVEN_ONLY
-	{"Even Scanlines Only", FALSE, FALSE, TRUE, FALSE, HalfHeightEvenOnly},
+	{"Even Scanlines Only", FALSE, FALSE, TRUE, FALSE, HalfHeightEvenOnly, 25, 30},
 	// ODD_ONLY
-	{"Odd Scanlines Only", FALSE, FALSE, TRUE, FALSE, HalfHeightOddOnly},
+	{"Odd Scanlines Only", FALSE, FALSE, TRUE, FALSE, HalfHeightOddOnly, 25, 30},
 	// BLENDED_CLIP
-	{"Blended Clip", FALSE, FALSE, FALSE, FALSE, BlendedClipping},
+	{"Blended Clip", FALSE, FALSE, FALSE, FALSE, BlendedClipping, 18, 15},
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -32,6 +32,8 @@
 //
 // 21 Dec 2000   John Adcock           Added function to setup ini file name
 //
+// 05 Jan 2001   John Adcock           Added GetRefreshRate
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __SETTINGS_H___
@@ -45,6 +47,7 @@ void SetIniFileForSettings(LPSTR Name);
 void LoadSettingsFromIni();
 void WriteSettingsToIni();
 void WritePrivateProfileInt(LPCTSTR lpAppName,  LPCTSTR lpKeyName,  int nValue, LPCTSTR lpFileName);
+DWORD GetRefreshRate();
 
 #define INIFILE "dTV.ini"
 

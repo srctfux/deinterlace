@@ -681,7 +681,6 @@ int BT848_GetRISCPosAsInt()
 	return CurrentPos;
 }
 
-
 void BT848_Close()
 {
 	if(hBT8X8 != NULL)

@@ -45,6 +45,10 @@
 //                                     Removed bTV plug-in
 //                                     Added Scaled BOB method
 //
+// 05 Jan 2001   John Adcock           First attempt at judder fix
+//                                     Added loop to make sure that we are never
+//                                     too early for a flip
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -59,6 +63,7 @@
 #define DOLOGGING
 #include "DebugLog.h"
 #include "vbi.h"
+#include "Settings.h"
 
 short pPALplusCode[] = {  18,  27,  36,  45,  54,  63,  72,  81,  90, 100, 110, 120, 134, 149};
 short pPALplusData[] = { 160, 178, 196, 214, 232, 250, 268, 286, 304, 322, 340, 358, 376, 394};
@@ -101,6 +106,7 @@ DDSURFACEDESC		ddsd;						// also add a surface descriptor for Lock
 BOOL				RunningLate = FALSE;        // Set when we are not keeping up
 HRESULT             FlipResult = 0;             // Need to try again for flip?
 BOOL                Wait_For_Flip = TRUE;       // User parm, default=TRUE
+BOOL	            DoAccurateFlips = TRUE;     // User parm, default=TRUE
 BOOL	            Hurry_When_Late = FALSE;    // " , default=FALSE, skip processing if behind
 long				Sleep_Interval = 0;         // " , default=0, how long to wait for BT chip
 
@@ -877,8 +883,6 @@ BYTE* LockOverlay()
 	return ddsd.lpSurface;
 }
 
-
-
 DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 {
 	char Text[128];
@@ -897,9 +901,14 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 	BOOL bMissedFrame;
 	HRESULT ddrval;
 	DEINTERLACE_INFO info;
+	DWORD FlipFlag;
+	ePULLDOWNMODES PrevPulldownMode;
+	DWORD RefreshRate;
 
 	BOOL bIsPAL = TVSettings[TVTYPE].Is25fps;
 	lpCurOverlay = lpOverlayBack;		
+
+	RefreshRate = GetRefreshRate();
 
 	if (lpDDOverlay == NULL || lpDDOverlay == NULL || lpOverlayBack == NULL || lpOverlay == NULL)
 	{
@@ -958,10 +967,26 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				// info structure and force this field to be bobbed.
 				if (LastEvenFrame != CurrentFrame)
 				{
-					memmove(&info.EvenLines[1], &info.EvenLines[0], sizeof(info.EvenLines) - sizeof(info.EvenLines[0]));
-					info.EvenLines[0] = NULL;
-					bMissedFrame = TRUE;
-					nFrame++;
+					// in film mode in the 60Hz mode
+					// we might wait quite a long time after doing a flip
+					// on the 2 field part of the 3:2 pulldown
+					// we might then get a single frame behind
+					// we need to cope with this so we fill the info struct properly
+					// rather than dropping a frame
+					if(DoAccurateFlips && DeintMethods[gPulldownMode].bIsFilmMode && !bIsPAL &&
+						(LastEvenFrame + 1) % 5 == CurrentFrame)
+					{
+						memmove(&info.EvenLines[1], &info.EvenLines[0], sizeof(info.EvenLines) - sizeof(info.EvenLines[0]));
+						info.EvenLines[0] = ppEvenLines[CurrentFrame];
+						LastEvenFrame = CurrentFrame;
+					}
+					else
+					{
+						memmove(&info.EvenLines[1], &info.EvenLines[0], sizeof(info.EvenLines) - sizeof(info.EvenLines[0]));
+						info.EvenLines[0] = NULL;
+						bMissedFrame = TRUE;
+						nFrame++;
+					}
 				}
 			}
 			else
@@ -974,10 +999,26 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				// info structure and force this field to be bobbed.
 				if(LastOddFrame != ((CurrentFrame + 4) % 5))
 				{
-					memmove(&info.OddLines[1], &info.OddLines[0], sizeof(info.OddLines) - sizeof(info.OddLines[0]));
-					info.OddLines[0] = NULL;
-					bMissedFrame = TRUE;
-					nFrame++;
+					// in film mode in the 60Hz mode
+					// we might wait quite a long time after doing a flip
+					// on the 2 field part of the 3:2 pulldown
+					// we might then get a single frame behind
+					// we need to cope with this so we fill the info struct properly
+					// rather than dropping a frame
+					if(DoAccurateFlips && DeintMethods[gPulldownMode].bIsFilmMode && !bIsPAL &&
+						(LastOddFrame + 2) % 5 == CurrentFrame)
+					{
+						memmove(&info.OddLines[1], &info.OddLines[0], sizeof(info.OddLines) - sizeof(info.OddLines[0]));
+						info.OddLines[0] = ppOddLines[((CurrentFrame + 4) % 5)];
+						LastOddFrame = CurrentFrame;
+					}
+					else
+					{
+						memmove(&info.OddLines[1], &info.OddLines[0], sizeof(info.OddLines) - sizeof(info.OddLines[0]));
+						info.OddLines[0] = NULL;
+						bMissedFrame = TRUE;
+						nFrame++;
+					}
 				}
 			}
 
@@ -1003,7 +1044,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 					
 					LOG(" Frame %d %c CR = %d", CurrentFrame, info.IsOdd ? 'O' : 'E', info.CompareResult);
 				}
-
+				PrevPulldownMode = gPulldownMode;				
 				if(bAutoDetectMode == TRUE && bIsPAL)
 				{
 					UpdatePALPulldownMode(info.CombFactor, TRUE);
@@ -1050,6 +1091,13 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 			{
 				bFlipNow = Bob(&info);
 			}
+			// When we first detect film mode we will be on the right flip mode in PAL
+			// and at the end of a three series in NTSC this will be the starting point for
+			// our 2.5 field timings
+			else if(PrevPulldownMode != gPulldownMode && DeintMethods[gPulldownMode].bIsFilmMode)
+			{
+				bFlipNow = Weave(&info);
+			}
 			else
 			{
 				bFlipNow = DeintMethods[gPulldownMode].pfnAlgorithm(&info);
@@ -1058,22 +1106,42 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 			AdjustAspectRatio(ppEvenLines[LastEvenFrame], ppOddLines[LastOddFrame]);
 
 			// somewhere above we will have locked the buffer, unlock before flip
-			if (!RunningLate)
+			if (!RunningLate && RefreshRate > 0)
 			{
 				ddrval = IDirectDrawSurface_Unlock(lpDDOverlayBack, lpCurOverlay);
 
 				if (bFlipNow)
 				{
-					if (Wait_For_Flip)			// user parm
+					// Need to wait for a good time to flip
+					// only if we have been in the same mode for at least one flip
+					if(DoAccurateFlips && PrevPulldownMode == gPulldownMode)
 					{
-						FlipResult =
-							IDirectDrawSurface_Flip(lpDDOverlay, NULL, DDFLIP_WAIT); 
+						if(bIsPAL)
+						{
+							if(RefreshRate % DeintMethods[gPulldownMode].FrameRate50Hz == 0)
+							{
+								while((GetTickCount() - FlipTicks) < (1000 / DeintMethods[gPulldownMode].FrameRate50Hz - 3));
+							}
+						}
+						else
+						{
+							if(RefreshRate % DeintMethods[gPulldownMode].FrameRate60Hz == 0)
+							{
+								while((GetTickCount() - FlipTicks) < (1000/DeintMethods[gPulldownMode].FrameRate60Hz - 3));
+							}
+						}
 					}
-					else 
+
+					// setup flip flag
+					// the odd and even flags may help the scaled bob
+					// on some cards
+					FlipFlag = (Wait_For_Flip)?DDFLIP_WAIT:DDFLIP_DONOTWAIT;
+					if(gPulldownMode == SCALER_BOB)
 					{
-						FlipResult =
-							IDirectDrawSurface_Flip(lpDDOverlay, NULL, DDFLIP_DONOTWAIT);   
+						FlipFlag |= (info.IsOdd)?DDFLIP_ODD:DDFLIP_EVEN;
 					}
+					FlipResult = IDirectDrawSurface_Flip(lpDDOverlay, NULL, FlipFlag); 
+					LOG(" Flip ms (%dms)", timeGetTime() % 1000);
 					FlipTicks = GetTickCount();
 					if (dwLastFlipTicks > -1 && FlipTicks - dwLastFlipTicks > (1000 / 23))
 					{

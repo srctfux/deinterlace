@@ -41,6 +41,8 @@
 //
 // 02 Jan 2001   John Adcock           Added CurrentVBILines and removed BurstDMA
 //
+// 05 Jan 2001   John Adcock           Added DoAccurateFlips
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __GLOBALS_H___
@@ -222,8 +224,9 @@ extern char BTVendorID[10];
 extern char BTDeviceID[10];
 extern char MSPVersion[16];
 
-extern BOOL	Wait_For_Flip;          // User parm, default=FALSE
-extern BOOL	Hurry_When_Late;        // " , default=TRUE, skip processing if behind
+extern BOOL	Wait_For_Flip;          // User parm, default=TRUE
+extern BOOL	DoAccurateFlips;        // User parm, default=TRUE
+extern BOOL	Hurry_When_Late;        // " , default=FALSE, skip processing if behind
 extern long	Sleep_Interval;         // " , default=0, how long to wait for BT chip
 extern int	Back_Buffers;			// " , nuber of video back buffers
 extern COLORREF OverlayColor;
