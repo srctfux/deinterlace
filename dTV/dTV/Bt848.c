@@ -136,7 +136,7 @@ TTVFORMAT TVFormats[FORMAT_LASTONE] =
 {
 	/* PAL-BDGHI */
 	{ 
-		"PAL DBGHI", 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_BDGHI|BT848_IFORM_XT1),
+		"PAL", 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_BDGHI|BT848_IFORM_XT1),
 	    186, 922, 0x20, 0, TRUE, 511, 19,
 		4.43361875, TRUE, 0.5
 	},
@@ -160,7 +160,7 @@ TTVFORMAT TVFormats[FORMAT_LASTONE] =
 	},
     /* PAL-N */
     {
-		"PAL-M", 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_N|BT848_IFORM_XT1),
+		"PAL-N", 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_N|BT848_IFORM_XT1),
         186, 922, 0x20, 0, TRUE, 511, 19,
 		4.43361875, TRUE,  0.5
 	},
@@ -172,7 +172,7 @@ TTVFORMAT TVFormats[FORMAT_LASTONE] =
 	},
     /* PAL-60 */
 	{
-		"PAL 60", 480, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_BDGHI|BT848_IFORM_XT1),
+		"PAL60", 480, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_BDGHI|BT848_IFORM_XT1),
 	    186, 922, 0x1a, 0, FALSE, 400, 13,
 		4.43361875, TRUE, 0.5035,
 	},
@@ -865,15 +865,14 @@ BOOL BT848_IsVideoPresent()
 void BT848_CreateRiscCode(int nFlags)
 {
 	DWORD *pRiscCode;
-	int nField;
-	int nLine;
+	WORD nField;
+	WORD nLine;
 	LPBYTE pUser;
 	PHYS pPhysical;
 	DWORD GotBytesPerLine;
 	DWORD BytesPerLine = 0;
 
 	pRiscCode = Risc_dma->dwUser;
-
 	// we create the RISC code for 10 fields
 	// the first one (0) is even
 	// last one (9) is odd
@@ -886,7 +885,7 @@ void BT848_CreateRiscCode(int nFlags)
 		}
 		else
 		{
-			*(pRiscCode++) = (DWORD) (BT848_RISC_SYNC | BT848_RISC_RESYNC | BT848_FIFO_STATUS_VRE  | ((0xF1 + nField / 2) << 16));
+			*(pRiscCode++) = (DWORD) (BT848_RISC_SYNC | BT848_RISC_RESYNC | BT848_FIFO_STATUS_VRE);
 		}
 		*(pRiscCode++) = 0;
 
@@ -909,7 +908,7 @@ void BT848_CreateRiscCode(int nFlags)
 				{
 					return;
 				}
-				*(pRiscCode++) = BT848_RISC_WRITE | BT848_RISC_SOL | BT848_RISC_EOL | BytesPerLine;
+				*(pRiscCode++) = BT848_RISC_WRITE | BT848_RISC_SOL | BT848_RISC_EOL | VBI_SPL;
 				*(pRiscCode++) = pPhysical;
 				pUser += 2048;
 			}
@@ -1744,12 +1743,12 @@ SETTING BT848Settings[BT848_SETTING_LASTONE] =
 	},
 	{
 		"Sharpness", SLIDER, 0, &CurrentX,
-		720, 0, DTV_MAX_WIDTH, 2, NULL,
+		720, 64, DTV_MAX_WIDTH, 2, NULL,
 		"MainWindow", "CurrentX", CurrentX_OnChange,
 	},
 	{
 		"CustomPixelWidth", SLIDER, 0, &CustomPixelWidth,
-		754, 0, DTV_MAX_WIDTH, 2, NULL,
+		754, 64, DTV_MAX_WIDTH, 2, NULL,
 		"MainWindow", "CustomPixelWidth", NULL,
 	},
 	{
