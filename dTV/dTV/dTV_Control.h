@@ -101,6 +101,20 @@
 #define IDM_SASPECT_235A                724
 #define IDM_SASPECT_COMPUTE             731
 
+// Messages for the Video Format Menu
+#define IDM_TYPEFORMAT_PAL              1120
+#define IDM_TYPEFORMAT_NTSC             1121
+#define IDM_TYPEFORMAT_SECAM            1122
+#define IDM_TYPEFORMAT_PAL_M            1123
+#define IDM_TYPEFORMAT_PAL_N            1124
+#define IDM_TYPEFORMAT_NTSC_JAPAN       1125
+#define IDM_TYPEFORMAT_PAL60            1126
+
+// Messages for the Input Select Menu
+#define IDM_COMPOSITE                   1090
+#define IDM_SVIDEO                      1091
+#define IDM_COMPONENT                   1095
+
 // Messages for the Screen Aspect Ratio Menu
 #define IDM_TASPECT_0                   740
 #define IDM_TASPECT_133                 741
