@@ -37,6 +37,8 @@
 // 08 Jan 2001   John Adcock           Global Variable Tidy up
 //                                     Got rid of global.h structs.h defines.h
 //
+// 11 Mar 2001   Laurent Garnier       Added WSS_Line in TTVFORMAT structure
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __BT848_H___
@@ -91,6 +93,7 @@ typedef struct
 	WORD CC_Clock;
 	WORD CC_Gap;
 	WORD CC_Line;
+	WORD WSS_Line;
 } TTVFORMAT;
 
 

@@ -255,6 +255,10 @@ SOURCE=.\VBI_VideoText.C
 # End Source File
 # Begin Source File
 
+SOURCE=.\VBI_WSSdecode.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\VideoSettings.c
 # End Source File
 # End Group
@@ -416,6 +420,10 @@ SOURCE=.\VBI_CCdecode.h
 # Begin Source File
 
 SOURCE=.\VBI_VideoText.H
+# End Source File
+# Begin Source File
+
+SOURCE=.\VBI_WSSdecode.h
 # End Source File
 # Begin Source File
 

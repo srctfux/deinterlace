@@ -35,6 +35,8 @@
 // 08 Jan 2001   John Adcock           Global Variable Tidy up
 //                                     Got rid of global.h structs.h defines.h
 //
+// 11 Mar 2001   Laurent Garnier       Added WSS decoding
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -42,6 +44,7 @@
 #include "bt848.h"
 #include "VBI_VideoText.h"
 #include "VBI_CCdecode.h"
+#include "VBI_WSSdecode.h"
 
 BOOL bStopVBI;
 HANDLE VBIThread;
@@ -54,6 +57,7 @@ int vpsstep;
 BOOL Capture_VBI = FALSE;
 BOOL DoTeletext = FALSE;
 BOOL DoVPS = FALSE;
+BOOL DoWSS = FALSE;
 CCMODE CCMode = CCMODE_OFF;
 
 HWND ShowVPSInfo=NULL;
@@ -95,6 +99,12 @@ void VBI_DecodeLine(unsigned char *VBI_Buffer, int line, BOOL IsOdd)
 	if (DoVPS && (line == 9))
 	{
 		VTS_DecodeLine(VBI_Buffer);
+	}
+
+	/* WSS information with source aspect ratio. */
+	if (DoWSS && (line == BT848_GetTVFormat()->WSS_Line))
+	{
+		WSS_DecodeLine(VBI_Buffer);
 	}
 }
 
@@ -146,6 +156,12 @@ SETTING VBISettings[VBI_SETTING_LASTONE] =
 		FALSE, 0, 1, 1, 1,
 		NULL,
 		"VBI", "DoVPS", NULL,
+	},
+	{
+		"WSS", ONOFF, 0, &DoWSS,
+		FALSE, 0, 1, 1, 1,
+		NULL,
+		"VBI", "DoWSS", NULL,
 	},
 };
 
