@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: Deinterlace.h,v 1.2 2001-09-19 17:50:07 tobbej Exp $
+// $Id: Deinterlace.h,v 1.3 2001-09-22 13:00:47 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2001 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.2  2001/09/19 17:50:07  tobbej
+// start of new input mode selection (fix for field/frame differences)
+//
 // Revision 1.1  2001/08/08 15:37:02  tobbej
 // moved dmo filter to new directory
 //
@@ -64,7 +67,7 @@ class CDeinterlace :
 	public ISpecifyPropertyPagesImpl<CDeinterlace>
 {
 public:
-	CDeinterlace():m_DIPlugin(NULL),m_InputSize(0),m_LastFrameProcessed(true),m_mode(DI_FIELDINPUT)
+	CDeinterlace():m_DIPlugin(NULL),m_InputSize(0),m_LastFrameProcessed(true),m_mode(DI_ALWAYS_EVEN)
 	{
 		m_pUnkMarshaler = NULL;
 		CPU_SetupFeatureFlag();

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: Deinterlace.cpp,v 1.2 2001-09-19 17:50:07 tobbej Exp $
+// $Id: Deinterlace.cpp,v 1.3 2001-09-22 13:00:47 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2001 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.2  2001/09/19 17:50:07  tobbej
+// start of new input mode selection (fix for field/frame differences)
+//
 // Revision 1.1  2001/08/08 15:37:02  tobbej
 // moved dmo filter to new directory
 //
@@ -788,12 +791,15 @@ STDMETHODIMP CDeinterlace::put_Mode(FieldFrameMode newVal)
 	{
 	case DI_ALWAYS_ODD:
 	case DI_ALWAYS_EVEN:
-	case DI_FIELDINPUT:
 		m_mode=newVal;
 		break;
+	case DI_FIELDINPUT:
 	case DI_FRAMEINPUT:
-		CreateErrorInfoObj("This mode is not yet implemented");
+		CreateErrorInfoObj("This mode dont work yet");
 		return E_NOTIMPL;
+	default:
+		CreateErrorInfoObj("Unknown mode");
+		return E_FAIL;
 	}
 	return S_OK;
 }
