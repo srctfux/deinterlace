@@ -659,7 +659,7 @@ ANALOGMENU MENU DISCARDABLE
 BEGIN
     POPUP "&File"
     BEGIN
-        MENUITEM "E&xit\tEsc",                  IDM_END
+        MENUITEM "E&xit\tAlt+F4",               IDM_END
     END
     POPUP "&Channels"
     BEGIN
@@ -1226,7 +1226,7 @@ BEGIN
     VK_BACK,        IDM_HIDE_OSD,           VIRTKEY, NOINVERT
     VK_BACK,        IDM_CHANNEL_PREVIOUS,   VIRTKEY, CONTROL, NOINVERT
     VK_DOWN,        IDM_VT_PAGE_DOWN,       VIRTKEY, NOINVERT
-    VK_ESCAPE,      IDM_END,                VIRTKEY, NOINVERT
+    VK_ESCAPE,      IDM_RETURN_TO_WINDOW,   VIRTKEY, NOINVERT
     VK_F1,          IDM_HELP_README,        VIRTKEY, NOINVERT
     VK_F1,          IDM_SOURCE_TUNER,       VIRTKEY, CONTROL, ALT, NOINVERT
     VK_F1,          IDM_AUDIO_0,            VIRTKEY, SHIFT, CONTROL, 
@@ -1240,6 +1240,7 @@ BEGIN
     VK_F3,          IDM_AUDIO_2,            VIRTKEY, SHIFT, CONTROL, 
                                                     NOINVERT
     VK_F3,          IDM_TYPEFORMAT_2,       VIRTKEY, SHIFT, ALT, NOINVERT
+    VK_F4,          IDM_END,                VIRTKEY, ALT, NOINVERT
     VK_F4,          IDM_SOURCE_COMPVIASVIDEO, VIRTKEY, CONTROL, ALT, 
                                                     NOINVERT
     VK_F4,          IDM_AUDIO_3,            VIRTKEY, SHIFT, CONTROL, 

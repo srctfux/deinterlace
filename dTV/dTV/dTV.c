@@ -1261,6 +1261,17 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_FULL_SCREEN:
 			IsFullScreen_OnChange(!bIsFullScreen);
 			break;
+		
+		case IDM_RETURN_TO_WINDOW:
+			if(bIsFullScreen)
+			{
+				IsFullScreen_OnChange(FALSE);
+			}
+			else
+			{
+				ShowWindow(hWnd, SW_MINIMIZE);
+			}
+			break;
 
 		case IDM_TAKESTILL:
 			Pause_Capture();
