@@ -1,16 +1,46 @@
+
+************* This is the DScaler FAQ log 
+
+
+
+It contains, and kept in cvs repository, all updates made to the *MASTER ENGLISH VERSION* off the FAQ.
+
+Every translated version should be upated according to, AND ONLY FROM, this log and the english FAQ.
+
+I repeat ; any update should be done first on the MASTER version which is the english one.
+
+The "last update" comment is added to any FAQ version on the site as soon as it's modified and committed into cvs.
+Use this info to check what are the changes that you still haven't reported on the version you maintain.
+
+Please add your name to your updates.
+
+Any questions regarding the FAQ should go to me, Yvonus, at yvonus@removethis_bigfoot.com
+
+
+--8<----------------
+
+
+
+
+
+4/6 again .. Yvonus
+. Renamed part "Can I use more than one video card" => ".. more than one video input"
+. Added in this part something about cards with multiples connectors (1 or 2 composite, 1 Svhs)
+. In the "OS" part, changed the link for the linux port "contact us" linking to "#HELP" anchor
+. Removed "Depiste a very powerful .." and include into "picture jumps + dropped frames"
+
 4/6 Yvonus
 . Remaining dTV changed into DSCaler (with the 2 first letters in capital)
 . Broken link on Screenshots
 . Broken link on Girder site
 . Updated "Can I use any vga card.." ; YUY2 -> YUV2
 . Broken link on Zoltrix Genie TV
-. Broken link on supported pages
+. Broken link on supported cards
 . Update "Can I use more than one ..". The Leadtek card now shown as outdated product. Link to AVS
 topic updated (now in archives)
 . Broken link on one AVS thread "Macrovision side effect"
 . In "Overlay update". Removal of the info that the bug has disappeared, it's still there :-(
 Removed also the avs topic because it's too outdated
-
 
 
 22/5
