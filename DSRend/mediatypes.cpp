@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: mediatypes.cpp,v 1.2 2002-05-11 12:26:37 tobbej Exp $
+// $Id: mediatypes.cpp,v 1.3 2002-06-03 18:22:17 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.2  2002/05/11 12:26:37  tobbej
+// fixed bug that caused the same mediatype to be freed multiple times
+//
 // Revision 1.1.1.1  2002/02/03 10:52:53  tobbej
 // First import of new direct show renderer filter
 //
@@ -79,7 +82,7 @@ bool copyMediaType(AM_MEDIA_TYPE *pDest,const AM_MEDIA_TYPE *pSource)
 	ATLASSERT(pDest!=NULL && pSource!=NULL);
 	
 	//dealocate format block of the destination mediatype
-	freeMediaType(pDest);
+	//freeMediaType(pDest);
 	
 	*pDest=*pSource;
 

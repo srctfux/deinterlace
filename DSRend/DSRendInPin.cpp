@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendInPin.cpp,v 1.6 2002-05-09 17:24:11 tobbej Exp $
+// $Id: DSRendInPin.cpp,v 1.7 2002-06-03 18:22:03 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.6  2002/05/09 17:24:11  tobbej
+// reject connection if width not a multiple of 16 (alignment problems in dscaler)
+//
 // Revision 1.5  2002/05/09 14:48:53  tobbej
 // dont accept connections with field input since that is not implemented yet
 //
@@ -83,7 +86,9 @@ HRESULT CDSRendInPin::FinalRelease()
 HRESULT CDSRendInPin::Connect(IPin *pReceivePin,const AM_MEDIA_TYPE *pmt)
 {
 	ATLTRACE(_T("%s(%d) : CDSRendInPin::Connect\n"),__FILE__,__LINE__);
-	CAutoLockCriticalSection lock(&m_Lock);
+	return E_NOTIMPL;
+	
+	/*CAutoLockCriticalSection lock(&m_Lock);
 	HRESULT hr;
 
 	//dont know if this is realy needed in the renderer, it seems like the Connect method
@@ -115,6 +120,7 @@ HRESULT CDSRendInPin::Connect(IPin *pReceivePin,const AM_MEDIA_TYPE *pmt)
 			if(SUCCEEDED(hr))
 			{
 				m_pConnected=pReceivePin;
+				freeMediaType(&m_mt);
 				copyMediaType(&m_mt,pmt);
 			}
 			return hr;
@@ -127,7 +133,7 @@ HRESULT CDSRendInPin::Connect(IPin *pReceivePin,const AM_MEDIA_TYPE *pmt)
 		return VFW_E_TYPE_NOT_ACCEPTED;
 	}
 
-	return S_OK;
+	return S_OK;*/
 }
 
 HRESULT CDSRendInPin::ReceiveConnection(IPin *pConnector,const AM_MEDIA_TYPE *pmt)
@@ -156,6 +162,7 @@ HRESULT CDSRendInPin::ReceiveConnection(IPin *pConnector,const AM_MEDIA_TYPE *pm
 	}
 
 	m_pConnected=pConnector;
+	freeMediaType(&m_mt);
 	copyMediaType(&m_mt,pmt);
 
 	return S_OK;
@@ -171,6 +178,7 @@ HRESULT CDSRendInPin::Disconnect()
 	}
 	HRESULT hr=m_pConnected==NULL ? S_FALSE : S_OK;
 	m_pConnected=NULL;
+	freeMediaType(&m_mt);
 	return hr;
 }
 
@@ -378,6 +386,15 @@ HRESULT CDSRendInPin::QueryDirection(PIN_DIRECTION *pPinDir)
 HRESULT CDSRendInPin::GetAllocator(IMemAllocator **ppAllocator)
 {
 	ATLTRACE(_T("%s(%d) : CDSRendInPin::GetAllocator\n"),__FILE__,__LINE__);
+	
+	/*CComPtr<IMemAllocator> pAlloc;
+	HRESULT hr=pAlloc.CoCreateInstance(CLSID_MemoryAllocator);
+	if(FAILED(hr))
+		return hr;
+	
+	pAlloc->AddRef();
+	*ppAllocator=pAlloc;
+	return S_OK;*/
 
 	//return VFW_E_NO_ALLOCATOR since we dont have any allocator
 	//the upstream filter will provide one for us.
@@ -470,7 +487,7 @@ HRESULT CDSRendInPin::Receive(IMediaSample *pSample)
 	//if the filter is paused, block
 	if(state==State_Paused)
 	{
-		m_resumePauseEvent.wait(INFINITE);
+		m_resumePauseEvent.Wait(INFINITE);
 	}
 	return hr;
 }

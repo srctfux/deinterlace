@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendInPin.h,v 1.4 2002-03-11 19:26:01 tobbej Exp $
+// $Id: DSRendInPin.h,v 1.5 2002-06-03 18:22:04 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.4  2002/03/11 19:26:01  tobbej
+// fixed pause so it blocks properly
+//
 // Revision 1.3  2002/02/07 13:08:20  tobbej
 // fixed some syncronization problems
 //
@@ -118,7 +121,7 @@ public:
 	/// @return true if connected
 	bool isConnected() {return m_pConnected!=NULL;};
 	
-	void resumePause() {m_resumePauseEvent.setEvent();}
+	void resumePause() {m_resumePauseEvent.SetEvent();}
 
 private:
 	/**
@@ -145,7 +148,7 @@ private:
 	///mediatype of pin connection.
 	AM_MEDIA_TYPE m_mt;
 
-	///number of buffers we need from the allocator. for now it is always set to 2 in the constructor
+	///number of buffers we need from the allocator. for now it is always set to 1 in the constructor
 	long m_cAllocBuffers;
 	
 	///flag to signal flushing.
