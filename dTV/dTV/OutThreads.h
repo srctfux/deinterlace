@@ -59,6 +59,7 @@ void Deinterlace(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay);
 void Weave(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay);
 BOOL WaitForNextField(BOOL LastField);
 void SetDeinterlaceMode(int mode);
+char *DeinterlaceModeName(int mode);
 BYTE * LockOverlay();		// Lock overlay, returns ptr to buffer
 
 extern ePULLDOWNMODES gPulldownMode;

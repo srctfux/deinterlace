@@ -530,7 +530,9 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_VIDEO_BOB:
 		case IDM_EVEN_ONLY:
 		case IDM_ODD_ONLY:
+		case IDM_VIDEO_2FRAME:
 			SetDeinterlaceMode(LOWORD(wParam) - IDM_VIDEO_BOB);
+			ShowText(hWnd, DeinterlaceModeName(-1));
 			break;
 
 		case IDM_BLENDED_CLIP:
@@ -1191,6 +1193,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 					NewPulldownMode = VIDEO_MODE_BOB;
 				}
 				SetDeinterlaceMode(NewPulldownMode);
+				ShowText(hWnd, DeinterlaceModeName(-1));
 			}
 			break;
 
@@ -1207,6 +1210,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 					NewPulldownMode--;
 
 				SetDeinterlaceMode(NewPulldownMode);
+				ShowText(hWnd, DeinterlaceModeName(-1));
 			}
 			break;
 
@@ -1953,6 +1957,7 @@ void SetMenuAnalog()
 	CheckMenuItem(GetMenu(hWnd), IDM_FALLBACK, bFallbackToVideo?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_VIDEO_BOB, (gPulldownMode == VIDEO_MODE_BOB && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_VIDEO_WEAVE, (gPulldownMode == VIDEO_MODE_WEAVE && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_VIDEO_2FRAME, (gPulldownMode == VIDEO_MODE_2FRAME && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_WEAVE, (gPulldownMode == SIMPLE_WEAVE && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_BOB, (gPulldownMode == INTERPOLATE_BOB && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_BTV, (gPulldownMode == BTV_PLUGIN && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);

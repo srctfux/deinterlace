@@ -39,6 +39,7 @@ typedef enum
 {
 	VIDEO_MODE_BOB = 0,
 	VIDEO_MODE_WEAVE,
+	VIDEO_MODE_2FRAME,
 	SIMPLE_WEAVE,
 	INTERPOLATE_BOB,
 	BTV_PLUGIN,
@@ -63,7 +64,8 @@ typedef enum
 							 (x) == FILM_32_PULLDOWN_3 || \
 							 (x) == FILM_32_PULLDOWN_4)
 #define IS_VIDEO_MODE(x) ((x) == VIDEO_MODE_WEAVE || \
-                          (x) == VIDEO_MODE_BOB)
+                          (x) == VIDEO_MODE_BOB || \
+						  (x) == VIDEO_MODE_2FRAME)
 #define IS_HALF_HEIGHT(x) ((x) == EVEN_ONLY || \
 						   (x) == ODD_ONLY)
 

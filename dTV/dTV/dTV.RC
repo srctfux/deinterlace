@@ -1051,6 +1051,7 @@ BEGIN
             MENUITEM SEPARATOR
             MENUITEM "&Video Deinterlace (Bob)",    IDM_VIDEO_BOB
             MENUITEM "V&ideo Deinterlace (Weave)",  IDM_VIDEO_WEAVE
+            MENUITEM "Video Dei&nterlace (2-Frame)", IDM_VIDEO_2FRAME
             MENUITEM "Simple &Weave",               IDM_WEAVE
             MENUITEM "Interpolated &Bob",           IDM_BOB
             MENUITEM "Blended &Clip ...",           IDM_BLENDED_CLIP
@@ -1500,6 +1501,7 @@ BEGIN
     VK_RETURN,      IDM_FULL_SCREEN,        VIRTKEY, ALT, NOINVERT
     VK_RIGHT,       IDM_VT_PAGE_PLUS,       VIRTKEY, NOINVERT
     VK_SPACE,       IDM_SPACEBAR,           VIRTKEY, NOINVERT
+    VK_SPACE,       IDM_SHIFT_SPACEBAR,     VIRTKEY, SHIFT, NOINVERT
     VK_SUBTRACT,    IDM_VOLUMEMINUS,        VIRTKEY, NOINVERT
     VK_TAB,         IDM_TOGGLE_MENU,        VIRTKEY, NOINVERT
     VK_UP,          IDM_VT_PAGE_UP,         VIRTKEY, NOINVERT
@@ -1518,18 +1520,6 @@ END
 //
 
 CSIZEX                  CURSOR  DISCARDABLE     "res\\sizex.cur"
-#endif    // English (U.S.) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// English (U.K.) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
-#ifdef _WIN32
-LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
-#pragma code_page(1252)
-#endif //_WIN32
 
 #ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
@@ -1576,7 +1566,7 @@ END
 
 #endif    // !_MAC
 
-#endif    // English (U.K.) resources
+#endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

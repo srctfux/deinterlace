@@ -759,6 +759,7 @@ BOOL DoWeWantToFlip(BOOL bFlipNow, BOOL bIsOddField)
 	{
 	case VIDEO_MODE_WEAVE:       RetVal = TRUE;  break;
 	case VIDEO_MODE_BOB:         RetVal = TRUE;  break;
+	case VIDEO_MODE_2FRAME:      RetVal = TRUE;  break;
 	case SIMPLE_WEAVE:           RetVal = TRUE;  break;
 	case INTERPOLATE_BOB:        RetVal = TRUE;  break;
 	case BLENDED_CLIP:			 RetVal = BlcWantsToFlip;  break;
@@ -825,6 +826,53 @@ BOOL DoWeWantToFlip(BOOL bFlipNow, BOOL bIsOddField)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Translates a deinterlace mode name to human-readable form.
+// Parameter: mode to translate, or -1 to return name of current mode.
+char *DeinterlaceModeName(int mode)
+{
+	if (mode == -1)
+		mode = gPulldownMode;
+
+	switch(mode)
+	{
+	case VIDEO_MODE_WEAVE:
+		return "Video Deinterlace (Weave)";
+	case VIDEO_MODE_BOB:
+		return "Video Deinterlace (Bob)";
+	case VIDEO_MODE_2FRAME:
+		return "Video Deinterlace (2-Frame)";
+	case SIMPLE_WEAVE:
+		return "Simple Weave";
+	case INTERPOLATE_BOB:
+		return "Interpolated BOB";
+	case BLENDED_CLIP:
+		return "Blended Clip";
+	case BTV_PLUGIN:
+		return "Using bTV Plugin";
+	case FILM_22_PULLDOWN_ODD:
+		return "2:2 Pulldown Flip on Odd";
+	case FILM_22_PULLDOWN_EVEN:
+		return "2:2 Pulldown Flip on Even";
+	case FILM_32_PULLDOWN_0:
+		return "3:2 Pulldown Skip 1st Full Frame";
+	case FILM_32_PULLDOWN_1:
+		return "3:2 Pulldown Skip 2nd Full Frame";
+	case FILM_32_PULLDOWN_2:
+		return "3:2 Pulldown Skip 3rd Full Frame";
+	case FILM_32_PULLDOWN_3:
+		return "3:2 Pulldown Skip 4th Full Frame";
+	case FILM_32_PULLDOWN_4:
+		return "3:2 Pulldown Skip 5th Full Frame";
+	case EVEN_ONLY:
+		return "Even Scanlines Only";
+	case ODD_ONLY:
+		return "Odd Scanlines Only";
+	}
+
+	return "Unknown Pulldown Mode";
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Updates the pulldown mode status indicator in the window footer if the mode
 // is different than the one currently listed there.
 void UpdatePulldownStatus()
@@ -833,58 +881,7 @@ void UpdatePulldownStatus()
 
 	if (gPulldownMode != lastPulldownMode)
 	{
-		switch(gPulldownMode)
-		{
-		case VIDEO_MODE_WEAVE:
-			SetWindowText(hwndPalField, "Video Deinterlace (Weave)");
-			break;
-		case VIDEO_MODE_BOB:
-			SetWindowText(hwndPalField, "Video Deinterlace (Bob)");
-			break;
-		case SIMPLE_WEAVE:
-			SetWindowText(hwndPalField, "Simple Weave");
-			break;
-		case INTERPOLATE_BOB:
-			SetWindowText(hwndPalField, "Interpolated BOB");
-			break;
-		case BLENDED_CLIP:
-			SetWindowText(hwndPalField, "Blended Clip");
-			break;
-		case BTV_PLUGIN:
-			SetWindowText(hwndPalField, "Using bTV Plugin");
-			break;
-		case FILM_22_PULLDOWN_ODD:
-			SetWindowText(hwndPalField, "2:2 Pulldown Flip on Odd");
-			break;
-		case FILM_22_PULLDOWN_EVEN:
-			SetWindowText(hwndPalField, "2:2 Pulldown Flip on Even");
-			break;
-		case FILM_32_PULLDOWN_0:
-			SetWindowText(hwndPalField, "3:2 Pulldown Skip 1st Full Frame");
-			break;
-		case FILM_32_PULLDOWN_1:
-			SetWindowText(hwndPalField, "3:2 Pulldown Skip 2nd Full Frame");
-			break;
-		case FILM_32_PULLDOWN_2:
-			SetWindowText(hwndPalField, "3:2 Pulldown Skip 3rd Full Frame");
-			break;
-		case FILM_32_PULLDOWN_3:
-			SetWindowText(hwndPalField, "3:2 Pulldown Skip 4th Full Frame");
-			break;
-		case FILM_32_PULLDOWN_4:
-			SetWindowText(hwndPalField, "3:2 Pulldown Skip 5th Full Frame");
-			break;
-		case EVEN_ONLY:
-			SetWindowText(hwndPalField, "Even Scanlines Only");
-			break;
-		case ODD_ONLY:
-			SetWindowText(hwndPalField, "Odd Scanlines Only");
-			break;
-		default:
-			SetWindowText(hwndPalField, "Unknown Pulldown Mode");
-			break;
-		}
-
+		SetWindowText(hwndPalField, DeinterlaceModeName(gPulldownMode));
 		lastPulldownMode = gPulldownMode;
 	}
 }
@@ -1065,6 +1062,15 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 					DeinterlaceFieldBob(ppOddLines[CurrentFrame], ppEvenLines[LastEvenFrame],
 										ppOddLines[(CurrentFrame + 4) % 5], lpCurOverlay, TRUE);
 				}
+				else if (gPulldownMode == VIDEO_MODE_2FRAME)
+				{
+					DeinterlaceFieldTwoFrame(ppOddLines[CurrentFrame],
+											 ppEvenLines[LastEvenFrame],
+											 ppOddLines[(CurrentFrame + 4) % 5],
+											 ppEvenLines[(LastEvenFrame + 4) % 5],
+											 lpCurOverlay,
+											 TRUE);
+				}
 				else if(gPulldownMode == SIMPLE_WEAVE)
 				{
 					Weave(ppOddLines[CurrentFrame], ppEvenLines[LastEvenFrame], lpCurOverlay);
@@ -1195,6 +1201,15 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				{
 					DeinterlaceFieldBob(ppOddLines[LastOddFrame], ppEvenLines[CurrentFrame],
 										ppEvenLines[(CurrentFrame + 4) % 5], lpCurOverlay, FALSE);
+				}
+				else if (gPulldownMode == VIDEO_MODE_2FRAME)
+				{
+					DeinterlaceFieldTwoFrame(ppOddLines[LastOddFrame],
+						                     ppEvenLines[CurrentFrame],
+											 ppOddLines[(LastOddFrame + 4) % 5],
+											 ppEvenLines[(CurrentFrame + 4) % 5],
+											 lpCurOverlay,
+											 FALSE);
 				}
 				else if(gPulldownMode == SIMPLE_WEAVE)
 				{

@@ -466,6 +466,7 @@ void ExitDD(void)
 void SaveStill()
 {
 	int y, cr, cb, r, g, b, i, j, n = 0;
+	int minY = 256, maxY = -16;
 	FILE *file;
 	BYTE rgb[3];
 	BYTE* buf;
@@ -526,6 +527,10 @@ void SaveStill()
 				cb = buf[1] - 128;
 				cr = buf[3] - 128;
 				y = buf[0] - 16;
+				if (y < minY)
+					minY = y;
+				if (y > maxY)
+					maxY = y;
 
 				r = ( 76284*y + 104595*cr             )>>16;
 				g = ( 76284*y -  53281*cr -  25624*cb )>>16;
@@ -537,6 +542,11 @@ void SaveStill()
 				fwrite(rgb,3,1,file) ;
 
 				y = buf[2] - 16;
+				if (y < minY)
+					minY = y;
+				if (y > maxY)
+					maxY = y;
+
 				r = ( 76284*y + 104595*cr             )>>16;
 				g = ( 76284*y -  53281*cr -  25624*cb )>>16;
 				b = ( 76284*y             + 132252*cb )>>16;
