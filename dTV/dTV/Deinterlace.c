@@ -359,7 +359,7 @@ void DeinterlaceField(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay,
 		else
 		{
 			YVal1 = pEvenLines[Line];
-			YVal2 = pOddLines[Line + 1];
+			YVal2 = pOddLines[Line];
 			YVal3 = pEvenLines[Line + 1];
 			Dest = lpCurOverlay + (Line * 2 + 1) * OverlayPitch;
 		}
