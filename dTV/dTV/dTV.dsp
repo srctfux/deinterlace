@@ -123,11 +123,23 @@ SOURCE=.\bTVPlugin.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\CPU.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\DebugLog.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\Deinterlace.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\DI_BlendedClip.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\DI_BobAndWeave.c
 # End Source File
 # Begin Source File
 
