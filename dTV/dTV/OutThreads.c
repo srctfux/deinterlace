@@ -634,10 +634,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				
 				// do any filters that operarate on the input
 				// only
-				if(!RunningLate && !bMissedFrame)
-				{
-					Filter_DoInput(&info);
-				}
+				Filter_DoInput(&info, (RunningLate || bMissedFrame));
 
 				if(!bMissedFrame)
 				{
@@ -729,7 +726,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 					if (bFlipNow)
 					{
 						// Do any filters that run on the output
-						Filter_DoOutput(&info);
+						Filter_DoOutput(&info, (RunningLate || bMissedFrame));
 
 						// setup flip flag
 						// the odd and even flags may help the scaled bob

@@ -37,6 +37,7 @@ FILTER_METHOD Filters[FILTERS_LAST_ONE] =
 		TRUE,
 		Filter_Gamma,
 		IDM_GAMMA_FILTER,
+		TRUE,
 	},
 	{
 		"Temporal Noise Filter",
@@ -44,29 +45,36 @@ FILTER_METHOD Filters[FILTERS_LAST_ONE] =
 		TRUE,
 		NoiseFilter_Temporal,
 		IDM_NOISE_FILTER,
+		FALSE,
 	},
 };
 
-void Filter_DoInput(DEINTERLACE_INFO *pInfo)
+void Filter_DoInput(DEINTERLACE_INFO *pInfo, BOOL HurryUp)
 {
 	int i;
 	for(i = 0; i < FILTERS_LAST_ONE; i++)
 	{
 		if(Filters[i].bActive && Filters[i].bOnInput)
 		{
-			Filters[i].pfnAlgorithm(pInfo);
+			if(!HurryUp || Filters[i].bAlwaysRun)
+			{
+				Filters[i].pfnAlgorithm(pInfo);
+			}
 		}
 	}
 }
 
-void Filter_DoOutput(DEINTERLACE_INFO *pInfo)
+void Filter_DoOutput(DEINTERLACE_INFO *pInfo, BOOL HurryUp)
 {
 	int i;
 	for(i = 0; i < FILTERS_LAST_ONE; i++)
 	{
 		if(Filters[i].bActive && !Filters[i].bOnInput)
 		{
-			Filters[i].pfnAlgorithm(pInfo);
+			if(!HurryUp || Filters[i].bAlwaysRun)
+			{
+				Filters[i].pfnAlgorithm(pInfo);
+			}
 		}
 	}
 }

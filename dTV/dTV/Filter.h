@@ -55,10 +55,12 @@ typedef struct
     DEINTERLACE_FUNC* pfnAlgorithm;
 	// id of menu to display status
 	int MenuId;
+	// Always run - do we run if there has been an overrun
+	BOOL bAlwaysRun;
 } FILTER_METHOD;
 
 
-void Filter_DoInput(DEINTERLACE_INFO *info);
-void Filter_DoOutput(DEINTERLACE_INFO *info);
+void Filter_DoInput(DEINTERLACE_INFO *info, BOOL HurryUp);
+void Filter_DoOutput(DEINTERLACE_INFO *info, BOOL HurryUp);
 
 #endif
