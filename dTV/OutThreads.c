@@ -700,7 +700,7 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 	}
 
 	// make sure we start with a clean sheet of paper
-	Clean_Overlays();
+	Overlay_Clean();
 
 	// display the current pulldown mode
 	UpdatePulldownStatus();
@@ -942,7 +942,7 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 	}
 
 	// make sure we start with a clean sheet of paper
-	Clean_Overlays();
+	Overlay_Clean();
 
 	// display the current pulldown mode
 	UpdatePulldownStatus();

@@ -73,7 +73,7 @@ void ExitDD(void)
 	{
 		if (lpDDOverlay != NULL)
 		{
-			OverlayUpdate(NULL, NULL, DDOVER_HIDE, FALSE);
+			Overlay_Update(NULL, NULL, DDOVER_HIDE, FALSE);
 			IDirectDrawSurface_Release(lpDDOverlay);
 		}
 		lpDDOverlay = NULL;
@@ -87,7 +87,7 @@ void ExitDD(void)
 	}
 }
 
-void Clean_Overlays()
+void Overlay_Clean()
 {
 	int nPixel;
 	int nLine;
@@ -128,7 +128,7 @@ void Clean_Overlays()
 	}
 }
 
-BOOL OverlayUpdate(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL ColorKey)
+BOOL Overlay_Update(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL ColorKey)
 {
 	HRESULT ddrval;
 	DDOVERLAYFX DDOverlayFX;
@@ -152,20 +152,20 @@ BOOL OverlayUpdate(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL ColorK
 	}
 
 	dwFlags |= DDOVER_KEYDESTOVERRIDE;
-	DDOverlayFX.dckDestColorkey.dwColorSpaceHighValue = OverlayColor;
-	DDOverlayFX.dckDestColorkey.dwColorSpaceLowValue = OverlayColor;
+	DDOverlayFX.dckDestColorkey.dwColorSpaceHighValue = Overlay_ColorMatch(lpDDSurface, OverlayColor);
+	DDOverlayFX.dckDestColorkey.dwColorSpaceLowValue = DDOverlayFX.dckDestColorkey.dwColorSpaceHighValue;
 
 	ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, pSrcRect, lpDDSurface, pDestRect, dwFlags, &DDOverlayFX);
 	if (ddrval != DD_OK)
 	{
-		ErrorBox("Error calling OverlayUpdate");
+		ErrorBox("Error calling Overlay_Update");
 		return (FALSE);
 	}
 
 	return TRUE;
 }
 
-BOOL CreateOverlay()
+BOOL Overlay_Create()
 {
 	DDSURFACEDESC ddsd;
 	DDPIXELFORMAT PixelFormat;
@@ -198,12 +198,14 @@ BOOL CreateOverlay()
 		return FALSE;
 	}
 
-	ddrval = IDirectDrawSurface_Lock(lpDDOverlay, NULL, &ddsd, 0, NULL);
+	ddrval = IDirectDrawSurface_Lock(lpDDOverlay, NULL, &ddsd, DDLOCK_WAIT, NULL);
 	if (FAILED(ddrval))
 	{
 		ErrorBox("Can't Lock Surface");
+		ddrval = DDERR_WASSTILLDRAWING;
 		return (FALSE);
 	}
+	ddrval = DDERR_WASSTILLDRAWING;
 	OverlayPitch = ddsd.lPitch;
 	lpOverlay = ddsd.lpSurface;
 	
@@ -224,12 +226,13 @@ BOOL CreateOverlay()
 	}
 	else
 	{
-		ddrval = IDirectDrawSurface_Lock(lpDDOverlayBack, NULL, &ddsd, 0, NULL);
+		ddrval = IDirectDrawSurface_Lock(lpDDOverlayBack, NULL, &ddsd, DDLOCK_WAIT, NULL);
 		if (FAILED(ddrval))
 		{
 			ErrorBox("Can't Lock Back Surface");
 			return (FALSE);
 		}
+		ddrval = DDERR_WASSTILLDRAWING;
 		lpOverlayBack = ddsd.lpSurface;
 		ddrval = IDirectDrawSurface_Unlock(lpDDOverlayBack, ddsd.lpSurface);
 		if (FAILED(ddrval))
@@ -241,6 +244,57 @@ BOOL CreateOverlay()
 
 	return (TRUE);
 }
+
+//-----------------------------------------------------------------------------
+// Name: DDColorMatch()
+// Desc: Convert a RGB color to a pysical color.
+//       We do this by leting GDI SetPixel() do the color matching
+//       then we lock the memory and see what it got mapped to.
+//-----------------------------------------------------------------------------
+DWORD Overlay_ColorMatch(LPDIRECTDRAWSURFACE pdds, COLORREF rgb)
+{
+    COLORREF rgbT;
+    HDC hdc;
+    DWORD dw = CLR_INVALID;
+    DDSURFACEDESC ddsd;
+    HRESULT hres;
+
+    //
+    //  Use GDI SetPixel to color match for us
+    //
+	hres = IDirectDrawSurface_GetDC(pdds, &hdc);
+    if (SUCCEEDED(hres))
+    {
+        rgbT = GetPixel(hdc, 0, 0);     // Save current pixel value
+        SetPixel(hdc, 0, 0, rgb);       // Set our value
+        IDirectDrawSurface_ReleaseDC(pdds, hdc);
+    }
+    //
+    // Now lock the surface so we can read back the converted color
+    //
+    ddsd.dwSize = sizeof(ddsd);
+    hres = IDirectDrawSurface_Lock(pdds, NULL, &ddsd, DDLOCK_WAIT, NULL);
+    if (SUCCEEDED(hres))
+    {
+        dw = *(DWORD *) ddsd.lpSurface;                 // Get DWORD
+        if (ddsd.ddpfPixelFormat.dwRGBBitCount < 32)
+		{
+            dw &= (1 << ddsd.ddpfPixelFormat.dwRGBBitCount) - 1;  // Mask it to bpp
+		}
+        IDirectDrawSurface_Unlock(pdds, NULL);
+    }
+    //
+    //  Now put the color that was there back.
+    //
+	hres = IDirectDrawSurface_GetDC(pdds, &hdc);
+    if (SUCCEEDED(hres))
+    {
+        SetPixel(hdc, 0, 0, rgbT);
+        IDirectDrawSurface_ReleaseDC(pdds, hdc);
+    }
+    return dw;
+}
+
 
 BOOL InitDD(HWND hWnd)
 {
@@ -320,8 +374,91 @@ BOOL InitDD(HWND hWnd)
 		return (FALSE);
 	}
 
-	ddrval = IDirectDrawSurface_Lock(lpDDSurface, NULL, &ddsd, 0, NULL);
+	ddrval = IDirectDrawSurface_Lock(lpDDSurface, NULL, &ddsd, DDLOCK_WAIT, NULL);
 	ddrval = IDirectDrawSurface_Unlock(lpDDSurface, ddsd.lpSurface);
 
 	return TRUE;
+}
+
+#define LIMIT(x) (((x)<0)?0:((x)>255)?255:(x))
+
+void SaveStill()
+{
+	int y, cr, cb, r, g, b, i, j, n = 0;
+	FILE *file;
+	BYTE rgb[3];
+	BYTE* buf;
+	char name[13];
+	struct stat st;
+	DDSURFACEDESC ddsd;
+	HRESULT ddrval;
+
+	if (lpDDOverlay != NULL)
+	{
+		memset(&ddsd, 0x00, sizeof(ddsd));
+		ddsd.dwSize = sizeof(ddsd);
+
+		ddrval = IDirectDrawSurface_Lock(lpDDOverlay, NULL, &ddsd, DDLOCK_WAIT, NULL);
+		if (ddrval != DD_OK)
+		{
+			ErrorBox("Error Locking Overlay");
+			return;
+		}
+
+		while (n < 100)
+		{
+			sprintf(name,"tv%06d.ppm",++n) ;
+			if (stat(name, &st))
+				break;
+		}
+		if(n == 100)
+		{
+			ErrorBox("Could not create a file.  You may have too many captures already.");
+			ddrval = IDirectDrawSurface_Unlock(lpDDSurface, ddsd.lpSurface);
+			return;
+		}
+
+		file = fopen(name,"wb");
+		if (!file)
+		{ 
+			ErrorBox("Could not open file in SaveStill"); 
+			ddrval = IDirectDrawSurface_Unlock(lpDDSurface, ddsd.lpSurface);
+			return;
+		}
+		fprintf(file,"P6\n%d %d\n255\n",CurrentX, CurrentY) ;
+
+		for (i = 0; i < CurrentY; i++ )
+		{
+			buf = (BYTE*)ddsd.lpSurface + i * ddsd.lPitch;
+			for (j = 0; j < CurrentX ; j+=2)
+			{
+				cb = buf[1] - 128;
+				cr = buf[3] - 128;
+				y = buf[0] - 16;
+
+				r = ( 76284*y + 104595*cr             )>>16;
+				g = ( 76284*y -  53281*cr -  25624*cb )>>16;
+				b = ( 76284*y             + 132252*cb )>>16;
+				rgb[0] = LIMIT(r);
+				rgb[1] = LIMIT(g);
+				rgb[2] = LIMIT(b);
+			
+				fwrite(rgb,3,1,file) ;
+
+				y = buf[2] - 16;
+				r = ( 76284*y + 104595*cr             )>>16;
+				g = ( 76284*y -  53281*cr -  25624*cb )>>16;
+				b = ( 76284*y             + 132252*cb )>>16;
+				rgb[0] = LIMIT(r);
+				rgb[1] = LIMIT(g);
+				rgb[2] = LIMIT(b);
+				fwrite(rgb,3,1,file);
+				
+				buf += 4;
+			}
+		}
+		fclose(file);
+		ddrval = IDirectDrawSurface_Unlock(lpDDSurface, ddsd.lpSurface);
+	}
+	return;
 }

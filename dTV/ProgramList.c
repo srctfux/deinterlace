@@ -36,6 +36,7 @@
 #include "ProgramList.h"
 #include "tuner.h"
 #include "bt848.h"
+#include "dTV.h"
 
 int CurSel;
 unsigned short SelectButton;
@@ -46,7 +47,6 @@ HWND ProgList;
 
 BOOL APIENTRY ProgramListProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 {
-	char Text[128];
 	int i, j, k, p;
 	char zeile[140];
 	struct TProgramm save;
@@ -396,22 +396,9 @@ BOOL APIENTRY ProgramListProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 
 				if ((i >= 0) && (i < MAXPROGS))
 				{
-					CurSel = i;
 					if (i != CurrentProgramm)
 					{
-						if (ValidModes(Programm[i].Typ) == TRUE)
-						{
-							CurrentProgramm = i;
-
-							if (bDisplayStatusBar == TRUE)
-							{
-								sprintf(Text, "%04d. %s ", CurrentProgramm + 1, Programm[CurrentProgramm].Name);
-								SetWindowText(hwndKeyField, Text);
-							}
-
-							if (Programm[CurrentProgramm].Typ == 'A')
-								Tuner_SetFrequency(TunerType, MulDiv(Programm[CurrentProgramm].freq * 1000, 16, 1000000));
-						}
+						ChangeChannel(i);
 					}
 				}
 			}
@@ -870,12 +857,6 @@ void GetFeldName(short id, char *zeile)
 	}
 }
 
-BOOL ValidModes(char Mode)
-{
-	return (Mode == 'A');
-}
-
-
 BOOL APIENTRY AnalogScanProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 {
 	char zeile[80];
@@ -1047,7 +1028,7 @@ BOOL APIENTRY AnalogScanProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 					Freq = Freq + 500;
 					if (!Tuner_SetFrequency(TunerType, MulDiv((Freq * 1000), 16, 1000000)))
 					{
-						sprintf(Text, "Frequency %10.2f Mhz not adjusted ", (float) Freq / 1000);
+						sprintf(Text, "Set Frequency %10.2f Mhz failed", (float) Freq / 1000);
 						SetWindowText(hwndTextField, Text);
 						return (TRUE);
 					}
@@ -1059,7 +1040,9 @@ BOOL APIENTRY AnalogScanProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 					EnableWindow(GetDlgItem(hDlg, IDOK), TRUE);
 					EnableWindow(GetDlgItem(hDlg, IDSTART), TRUE);
 					if (FirstFreq != 0)
+					{
 						(void) Tuner_SetFrequency(TunerType, MulDiv((FirstFreq * 1000), 16, 1000000));
+					}
 				}
 			}
 		}
@@ -1095,11 +1078,10 @@ BOOL APIENTRY AnalogScanProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 
 			if (!Tuner_SetFrequency(TunerType, MulDiv((Freq * 1000), 16, 1000000)))
 			{
-				sprintf(Text, "Frequenz %10.2f Mhz nicht eingestellt ", (float) Freq / 1000);
+				sprintf(Text, "Set Frequency %10.2f Mhz fialed", (float) Freq / 1000);
 				SetWindowText(hwndTextField, Text);
 			}
 
-			KillTimer(hWnd, 1);
 			PostMessage(hDlg, WM_USER, 0x101, 0);
 			EnableWindow(GetDlgItem(hDlg, IDSTART), FALSE);
 			EnableWindow(GetDlgItem(hDlg, IDOK), FALSE);
@@ -1116,10 +1098,8 @@ BOOL APIENTRY AnalogScanProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 		{
 			STOP = TRUE;
 			Load_Program_List();
-			SetTimer(hWnd, 1, 2000, NULL);
 			EndDialog(hDlg, TRUE);
 		}
-
 		break;
 	}
 	return (FALSE);

@@ -39,18 +39,18 @@
 #include "structs.h"
 #include "globals.h"
 
-void Exit_Mixer(void);
 MMRESULT Set_Control_Values(MIXERCONTROLDETAILS * Setting, int Device);
 MMRESULT Get_Control_Values(MIXERCONTROLDETAILS * Setting, int Device);
-BOOL Open_HMixer(UINT uMxId);
 BOOL APIENTRY MixerSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 BOOL APIENTRY MixerSetupProc(HWND hDlg,UINT message,UINT wParam,LONG lParam);
 int Get_Access_Slot(int C1, int C2, int C3, int C4);
+BOOL Mixer_Open(UINT uMxId);
 void Mixer_UnMute(void);
 void Mixer_Mute(void);
 void Mixer_Set_Defaults(void);
 void Mixer_Set_Volume(int Links, int Rechts);
 void Mixer_Get_Volume(int *Links, int *Rechts);
+void Mixer_Exit(void);
 void Get_Volume_Param(void);
 void Get_Mixer_SignedValue(MIXERCONTROLDETAILS * Setting, int Device, MIXERCONTROLDETAILS_SIGNED * Set);
 void Set_Mixer_SignedValue(MIXERCONTROLDETAILS * Setting, int Device, MIXERCONTROLDETAILS_SIGNED * Set);
@@ -60,7 +60,6 @@ void Get_Mixer_BoolValue(MIXERCONTROLDETAILS * Setting, int Device, MIXERCONTROL
 void Set_Mixer_BoolValue(MIXERCONTROLDETAILS * Setting, int Device, MIXERCONTROLDETAILS_BOOLEAN * Set);
 MMRESULT Get_Control_Values(MIXERCONTROLDETAILS * Setting, int Device);
 MMRESULT Set_Control_Values(MIXERCONTROLDETAILS * Setting, int Device);
-BOOL Open_HMixer(UINT uMxId);
 void Enumerate_Sound_SubSystem(void);
 
 

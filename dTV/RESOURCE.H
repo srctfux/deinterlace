@@ -80,6 +80,9 @@
 #define IDM_FULL_SCREEN                 480
 #define IDM_CLOSEDCAPTION               482
 #define IDM_SETUPCARD                   483
+#define IDM_TAKESTILL                   485
+#define IDM_OVERSCAN_MINUS              486
+#define IDM_OVERSCAN_PLUS               487
 #define IDM_ENDE                        1032
 #define IDM_TUNER                       1089
 #define IDM_EXTERN1                     1090
@@ -612,7 +615,7 @@
 #define _APS_NO_MFC                     1
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        153
-#define _APS_NEXT_COMMAND_VALUE         485
+#define _APS_NEXT_COMMAND_VALUE         488
 #define _APS_NEXT_CONTROL_VALUE         1773
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

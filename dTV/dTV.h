@@ -50,6 +50,7 @@ void Init_Screen_Struct();
 void Init_More();
 void More_Even(int pp);
 void More_Odd();
+void ChangeChannel(int NewChannel);
 
 void SetMenuAnalog();
 
@@ -66,5 +67,13 @@ void MainWndOnInitBT(HWND hWnd);
 void SaveWindowPos(HWND hWnd);
 void CleanUpMemory();
 
+#define TIMER_STATUS 1
+#define TIMER_STATUS_MS 2000
+
+#define TIMER_KEYNUMBER 99
+#define TIMER_KEYNUMBER_MS 1000
+
+#define TIMER_MSP 8
+#define TIMER_MSP_MS 10000
 
 #endif

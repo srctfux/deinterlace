@@ -48,7 +48,6 @@ BOOL APIENTRY KanalNummerProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 VOID APIENTRY HandleFocusStateKanalListe(HWND hDlg, LPDRAWITEMSTRUCT lpdis);
 VOID APIENTRY DrawEntireItemKanalListe(HWND hDlg, LPDRAWITEMSTRUCT lpdis, INT Typ);
 void GetFeldName(short id, char *zeile);
-BOOL ValidModes(char Mode);
 BOOL APIENTRY AnalogScanProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 
 #endif

@@ -51,7 +51,7 @@ void BT848_MakeVBITable(int VBI_Lines);
 void BT848_SetPLL(PLLFREQ PLL);
 void BT848_SetRiscJumpsDecode(int nFlags);
 BOOL BT848_SetGeoSize(int wWidth, int wHeight);
-BOOL BT848_SetBrightness(unsigned char bBrightness);
+BOOL BT848_SetBrightness(char bBrightness);
 BOOL BT848_SetHue(char bHue);
 BOOL BT848_SetContrast(int wContrast);
 BOOL BT848_SetSaturationU(int wData);
@@ -83,7 +83,6 @@ void MakeVideoTableForDisplay();
 void Free_Display_DMA(int NR);
 
 BOOL Alloc_DMA(DWORD dwSize, PMemStruct * dma, int Option);
-BOOL Alloc_Display_DMA(DWORD dwSize, int NR);
 void Free_DMA(PMemStruct * dma);
 PHYS GetPhysicalAddress(PMemStruct dma, LPBYTE pLinear, DWORD dwSizeWanted, DWORD * pdwSizeAvailable);
 

@@ -41,9 +41,11 @@
 
 void ExitDD(void);
 BOOL InitDD(HWND hWnd);
-BOOL OverlayUpdate(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL ColorKey);
-BOOL CreateOverlay();
-void Clean_Overlays();
+BOOL Overlay_Update(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL ColorKey);
+BOOL Overlay_Create();
+void Overlay_Clean();
+DWORD Overlay_ColorMatch(LPDIRECTDRAWSURFACE pdds, COLORREF rgb);
+void SaveStill();
 
 extern DWORD DestSizeAlign;
 extern DWORD SrcSizeAlign;

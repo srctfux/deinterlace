@@ -52,16 +52,35 @@ char VTtoAscii[96] =
  " !##$%&´()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜß#-abcdefghijklmnopqrstuvwxyzäöüß#"
 };
 
+void SetSliderInt(HWND hDlgItem, int xPos, int Value, int nMin, int nMax)
+{
+	int y = (int)(235 - ((double) (Value - nMin) / (nMax - nMin) * 160));
+	MoveWindow(hDlgItem, xPos, y - 4, 22, 8, TRUE);
+}
+
+int GetSliderInt(int MouseY, int nMin, int nMax)
+{
+	int i;
+	i = nMin - (int) ((double) (MouseY - 235) / 160 * (nMax - nMin));
+	if (i < nMin)
+		i = nMin;
+	else if (i > nMax)
+		i = nMax;
+	return i;
+}
+
+
 BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 {
-	static unsigned char THue;
-	static unsigned char TBrightness;
+	static char THue;
+	static char TBrightness;
 	static int TContrast;
 	static int TSaturationU;
 	static int TSaturationV;
+	static int TOverscan;
 	static int LastSaturation;
 	
-	int x, y, i, j;
+	int x, y, j;
 
 	switch (message)
 	{
@@ -72,48 +91,23 @@ BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 		THue = InitialHue;
 		TSaturationU = InitialSaturationU;
 		TSaturationV = InitialSaturationV;
-		if (TBrightness < 128)
-			i = TBrightness;
-		else
-			i = -(256 - TBrightness);
-		SetDlgItemInt(hDlg, IDC_D1, i, TRUE);
+		TOverscan = InitialOverscan;
+		SetDlgItemInt(hDlg, IDC_D1, TBrightness, TRUE);
 		SetDlgItemInt(hDlg, IDC_D2, TContrast, FALSE);
-		if (THue < 128)
-			i = THue;
-		else
-			i = -(256 - THue);
-		SetDlgItemInt(hDlg, IDC_D3, i, TRUE);
+		SetDlgItemInt(hDlg, IDC_D3, THue, TRUE);
 		LastSaturation = (TSaturationU + TSaturationV) / 2;
 		SetDlgItemInt(hDlg, IDC_D4, LastSaturation, FALSE);
 		SetDlgItemInt(hDlg, IDC_D5, TSaturationU, FALSE);
 		SetDlgItemInt(hDlg, IDC_D6, TSaturationV, FALSE);
+		SetDlgItemInt(hDlg, IDC_D7, TOverscan, FALSE);
 
-		if (TBrightness < 128)
-			i = TBrightness;
-		else
-			i = -(256 - TBrightness);
-		y = (int) (157 - ((double) i / 256 * 160));
-		MoveWindow(GetDlgItem(hDlg, IDC_S1), 33, y - 4, 22, 8, FALSE);
-
-		y = (int) (235 - ((double) TContrast / 256 * 160));
-		MoveWindow(GetDlgItem(hDlg, IDC_S2), 109, y - 4, 22, 8, FALSE);
-
-		if (THue < 128)
-			i = THue;
-		else
-			i = -(256 - THue);
-		y = (int) (157 - ((double) i / 256 * 160));
-		MoveWindow(GetDlgItem(hDlg, IDC_S3), 183, y - 4, 22, 8, FALSE);
-
-		y = (int) (235 - ((double) LastSaturation / 256 * 160));
-		MoveWindow(GetDlgItem(hDlg, IDC_S4), 258, y - 4, 22, 8, FALSE);
-
-		y = (int) (235 - ((double) TSaturationU / 256 * 160));
-		MoveWindow(GetDlgItem(hDlg, IDC_S5), 334, y - 4, 22, 8, FALSE);
-
-		y = (int) (235 - ((double) TSaturationV / 256 * 160));
-		MoveWindow(GetDlgItem(hDlg, IDC_S6), 410, y - 4, 22, 8, FALSE);
-
+		SetSliderInt(GetDlgItem(hDlg, IDC_S1), 33, TBrightness,  -128, 127);
+		SetSliderInt(GetDlgItem(hDlg, IDC_S2), 109, TContrast,  0, 255);
+		SetSliderInt(GetDlgItem(hDlg, IDC_S3), 183, THue, -128, 127);
+		SetSliderInt(GetDlgItem(hDlg, IDC_S4), 258, LastSaturation, 0, 255);
+		SetSliderInt(GetDlgItem(hDlg, IDC_S5), 334, TSaturationU, 0, 255);
+		SetSliderInt(GetDlgItem(hDlg, IDC_S6), 410, TSaturationV, 0, 255);
+		SetSliderInt(GetDlgItem(hDlg, IDC_S7), 482, TOverscan, 0, 128);
 		break;
 
 	case WM_MOUSEMOVE:
@@ -126,72 +120,37 @@ BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 			{
 				if ((x >= 33) && (x <= 55))
 				{
-					i = (int) ((double) (y - 155) / 160 * 255);
-					if (i < -127)
-						i = -127;
-					else if (i > 127)
-						i = 127;
-					i = -i;
 					MoveWindow(GetDlgItem(hDlg, IDC_S1), 33, y - 2, 22, 8, TRUE);
-					TBrightness = i;
-					if (TBrightness < 128)
-						i = TBrightness;
-					else
-						i = -(256 - TBrightness);
-					SetDlgItemInt(hDlg, IDC_D1, i, TRUE);
+					TBrightness = GetSliderInt(y, -127, 127);
+					SetDlgItemInt(hDlg, IDC_D1, TBrightness, TRUE);
 					BT848_SetBrightness(TBrightness);
 				}
-				if ((x >= 109) && (x <= 131))
+				else if ((x >= 109) && (x <= 131))
 				{
-					i = (int) ((double) (y - 235) / 160 * 255);
-					i = -i;
-					if (i < 0)
-						i = 0;
-					else if (i > 255)
-						i = 255;
 					MoveWindow(GetDlgItem(hDlg, IDC_S2), 109, y - 2, 22, 8, TRUE);
-					TContrast = i;
+					TContrast = GetSliderInt(y, 0, 255);
 					SetDlgItemInt(hDlg, IDC_D2, TContrast, FALSE);
 					BT848_SetContrast(TContrast);
 				}
-
-				if ((x >= 183) && (x <= 205))
+				else if ((x >= 183) && (x <= 205))
 				{
-					i = (int) ((double) (y - 155) / 160 * 255);
-					if (i < -127)
-						i = -127;
-					else if (i > 127)
-						i = 127;
-					i = -i;
 					MoveWindow(GetDlgItem(hDlg, IDC_S3), 183, y - 2, 22, 8, TRUE);
-					THue = i;
-					if (THue < 128)
-						i = THue;
-					else
-						i = -(256 - THue);
-					SetDlgItemInt(hDlg, IDC_D3, i, TRUE);
+					THue = GetSliderInt(y, -127, 127);
+					SetDlgItemInt(hDlg, IDC_D3, THue, TRUE);
 					BT848_SetHue(THue);
 				}
-				if ((x >= 258) && (x <= 280))
+				else if ((x >= 258) && (x <= 280))
 				{
-					i = (int) ((double) (y - 235) / 160 * 255);
-					i = -i;
-					if (i < 0)
-						i = 0;
-					else if (i > 255)
-						i = 255;
-					j = i - LastSaturation;
+					j = GetSliderInt(y, 0, 255) - LastSaturation;
 
 					if ((j + TSaturationV <= 255) && (j + TSaturationU <= 255) && (j + TSaturationV >= 0) && (j + TSaturationU >= 0))
 					{
 
 						MoveWindow(GetDlgItem(hDlg, IDC_S4), 258, y - 2, 22, 8, TRUE);
 						TSaturationU += j;
-						y = (int) (235 - ((double) TSaturationU / 256 * 160));
-						MoveWindow(GetDlgItem(hDlg, IDC_S5), 334, y - 2, 22, 8, TRUE);
+						SetSliderInt(GetDlgItem(hDlg, IDC_S5), 334, TSaturationU, 0, 255);
 						TSaturationV += j;
-						y = (int) (235 - ((double) TSaturationV / 256 * 160));
-						MoveWindow(GetDlgItem(hDlg, IDC_S6), 410, y - 2, 22, 8, TRUE);
+						SetSliderInt(GetDlgItem(hDlg, IDC_S6), 410, TSaturationV, 0, 255);
 						LastSaturation = (TSaturationU + TSaturationV) / 2;
 						SetDlgItemInt(hDlg, IDC_D5, TSaturationU, FALSE);
 						SetDlgItemInt(hDlg, IDC_D6, TSaturationV, FALSE);
@@ -200,43 +159,32 @@ BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 						BT848_SetSaturationV(TSaturationV);
 					}
 				}
-				if ((x >= 334) && (x <= 356))
+				else if ((x >= 334) && (x <= 356))
 				{
-					i = (int) ((double) (y - 235) / 160 * 255);
-					i = -i;
-					if (i < 0)
-						i = 0;
-					else if (i > 255)
-						i = 255;
 					MoveWindow(GetDlgItem(hDlg, IDC_S5), 334, y - 2, 22, 8, TRUE);
-					TSaturationU = i;
+					TSaturationU = GetSliderInt(y, 0, 255);
 					LastSaturation = (TSaturationU + TSaturationV) / 2;
 					SetDlgItemInt(hDlg, IDC_D4, LastSaturation, FALSE);
-					y = (int) (235 - ((double) LastSaturation / 256 * 160));
-					MoveWindow(GetDlgItem(hDlg, IDC_S4), 258, y - 4, 22, 8, TRUE);
-
+					SetSliderInt(GetDlgItem(hDlg, IDC_S4), 258, LastSaturation, 0, 255);
 					SetDlgItemInt(hDlg, IDC_D5, TSaturationU, FALSE);
 					BT848_SetSaturationU(TSaturationU);
 				}
-				if ((x >= 410) && (x <= 432))
+				else if ((x >= 410) && (x <= 432))
 				{
-					i = (int) ((double) (y - 235) / 160 * 255);
-					i = -i;
-					if (i < 0)
-						i = 0;
-					else if (i > 255)
-						i = 255;
 					MoveWindow(GetDlgItem(hDlg, IDC_S6), 410, y - 2, 22, 8, TRUE);
-					TSaturationV = i;
+					TSaturationV = GetSliderInt(y, 0, 255);
 					LastSaturation = (TSaturationU + TSaturationV) / 2;
 					SetDlgItemInt(hDlg, IDC_D4, LastSaturation, FALSE);
-					y = (int) (235 - ((double) LastSaturation / 256 * 160));
-					MoveWindow(GetDlgItem(hDlg, IDC_S4), 258, y - 4, 22, 8, TRUE);
-
+					SetSliderInt(GetDlgItem(hDlg, IDC_S4), 258, LastSaturation, 0, 255);
 					SetDlgItemInt(hDlg, IDC_D6, TSaturationV, FALSE);
 					BT848_SetSaturationV(TSaturationV);
 				}
-
+				else if ((x >= 482) && (x <= 504))
+				{
+					MoveWindow(GetDlgItem(hDlg, IDC_S7), 482, y - 2, 22, 8, TRUE);
+					TOverscan = GetSliderInt(y, 0, 128);
+					SetDlgItemInt(hDlg, IDC_D7, TOverscan, TRUE);
+				}
 			}
 		}
 		return (FALSE);
@@ -248,6 +196,7 @@ BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 			InitialHue = THue;
 			InitialSaturationU = TSaturationU;
 			InitialSaturationV = TSaturationV;
+			InitialOverscan = TOverscan;
 			EndDialog(hDlg, TRUE);
 		}
 
@@ -258,7 +207,6 @@ BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 			BT848_SetHue(InitialHue);
 			BT848_SetSaturationU(InitialSaturationU);
 			BT848_SetSaturationV(InitialSaturationV);
-
 			EndDialog(hDlg, TRUE);
 		}
 
@@ -269,44 +217,30 @@ BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 			TContrast = 0xd8;
 			TSaturationU = 0xfe;
 			TSaturationV = 0xb4;
+			TOverscan = 4;
 			BT848_SetBrightness(TBrightness);
 			BT848_SetContrast(TContrast);
 			BT848_SetHue(THue);
 			BT848_SetSaturationU(TSaturationU);
 			BT848_SetSaturationV(TSaturationV);
-			if (TBrightness < 128)
-				i = TBrightness;
-			else
-				i = -(256 - TBrightness);
-			SetDlgItemInt(hDlg, IDC_D1, i, TRUE);
+			SetDlgItemInt(hDlg, IDC_D1, TBrightness, TRUE);
 			SetDlgItemInt(hDlg, IDC_D2, TContrast, FALSE);
-			if (THue < 128)
-				i = THue;
-			else
-				i = -(256 - THue);
-			SetDlgItemInt(hDlg, IDC_D3, i, TRUE);
+			SetDlgItemInt(hDlg, IDC_D3, THue, TRUE);
 			SetDlgItemInt(hDlg, IDC_D4, ((TSaturationU + TSaturationV) / 2), FALSE);
 			SetDlgItemInt(hDlg, IDC_D5, TSaturationU, FALSE);
 			SetDlgItemInt(hDlg, IDC_D6, TSaturationV, FALSE);
-			y = (int) (157 - ((double) TBrightness / 256 * 160));
-			MoveWindow(GetDlgItem(hDlg, IDC_S1), 33, y - 4, 22, 8, TRUE);
-			y = (int) (235 - ((double) TContrast / 256 * 160));
-			MoveWindow(GetDlgItem(hDlg, IDC_S2), 109, y - 4, 22, 8, TRUE);
-			y = (int) (157 - ((double) THue / 256 * 160));
-			MoveWindow(GetDlgItem(hDlg, IDC_S3), 183, y - 4, 22, 8, TRUE);
-			y = (int) (235 - ((double) ((TSaturationU + TSaturationV) / 2) / 256 * 160));
-			MoveWindow(GetDlgItem(hDlg, IDC_S4), 258, y - 4, 22, 8, TRUE);
-			y = (int) (235 - ((double) TSaturationU / 256 * 160));
-			MoveWindow(GetDlgItem(hDlg, IDC_S5), 334, y - 4, 22, 8, TRUE);
-			y = (int) (235 - ((double) TSaturationV / 256 * 160));
-			MoveWindow(GetDlgItem(hDlg, IDC_S6), 410, y - 4, 22, 8, TRUE);
+			SetDlgItemInt(hDlg, IDC_D7, TOverscan, FALSE);
+			SetSliderInt(GetDlgItem(hDlg, IDC_S1), 33, TBrightness,  -128, 127);
+			SetSliderInt(GetDlgItem(hDlg, IDC_S2), 109, TContrast,  0, 255);
+			SetSliderInt(GetDlgItem(hDlg, IDC_S3), 183, THue, -128, 127);
+			SetSliderInt(GetDlgItem(hDlg, IDC_S4), 258, LastSaturation, 0, 255);
+			SetSliderInt(GetDlgItem(hDlg, IDC_S5), 334, TSaturationU, 0, 255);
+			SetSliderInt(GetDlgItem(hDlg, IDC_S6), 410, TSaturationV, 0, 255);
+			SetSliderInt(GetDlgItem(hDlg, IDC_S7), 482, TOverscan, 0, 128);
 			break;
-
 		}
-
 		break;
 	}
-
 	return (FALSE);
 }
 

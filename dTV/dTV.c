@@ -425,95 +425,11 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			return (TRUE);
 
 		case IDM_CHANNELPLUS:
-			if (TunerType != TUNER_ABSENT)
-			{
-				Audio_SetSource(AUDIOMUX_MUTE);
-
-				i = CurrentProgramm + 1;
-				CurrentProgramm = -1;
-				while (i < MAXPROGS)
-				{
-					if ((Programm[i].freq != 0) && (ValidModes(Programm[i].Typ) == TRUE))
-					{
-						CurrentProgramm = i;
-						break;
-					}
-					i++;
-				}
-
-				if (CurrentProgramm == -1)
-				{
-					i = 0;
-					while (i < MAXPROGS)
-					{
-						if ((Programm[i].freq != 0) && (ValidModes(Programm[i].Typ) == TRUE))
-						{
-							CurrentProgramm = i;
-							break;
-						}
-						i++;
-					}
-				}
-
-				if (CurrentProgramm >= 0)
-				{
-					Tuner_SetFrequency(TunerType, MulDiv(Programm[CurrentProgramm].freq * 1000, 16, 1000000));
-
-					if (bDisplayStatusBar == TRUE)
-					{
-						sprintf(Text, "%04d. %s ", CurrentProgramm + 1, Programm[CurrentProgramm].Name);
-						SetWindowText(hwndKeyField, Text);
-					}
-					VT_ChannelChange();
-				}
-				Audio_SetSource(AudioSource);
-			}
+			ChangeChannel(CurrentProgramm + 1);
 			break;
 
 		case IDM_CHANNELMINUS:
-			if (TunerType != TUNER_ABSENT)
-			{
-				Audio_SetSource(AUDIOMUX_MUTE);
-				i = CurrentProgramm - 1;
-				CurrentProgramm = -1;
-				while (i >= 0)
-				{
-					if ((Programm[i].freq != 0) && (ValidModes(Programm[i].Typ) == TRUE))
-					{
-						CurrentProgramm = i;
-						break;
-					}
-					i--;
-				}
-
-				if (CurrentProgramm == -1)
-				{
-					i = MAXPROGS - 1;
-					while (i >= 0)
-					{
-						if ((Programm[i].freq != 0) && (ValidModes(Programm[i].Typ) == TRUE))
-						{
-							CurrentProgramm = i;
-							break;
-						}
-						i--;
-					}
-				}
-
-				if (CurrentProgramm >= 0)
-				{
-
-					Tuner_SetFrequency(TunerType, MulDiv(Programm[CurrentProgramm].freq * 1000, 16, 1000000));
-
-					if (bDisplayStatusBar == TRUE)
-					{
-						sprintf(Text, "%04d. %s ", CurrentProgramm + 1, Programm[CurrentProgramm].Name);
-						SetWindowText(hwndKeyField, Text);
-					}
-					VT_ChannelChange();
-				}
-				Audio_SetSource(AudioSource);
-			}
+			ChangeChannel(CurrentProgramm - 1);
 			break;
 
 		case IDM_RESET:
@@ -537,38 +453,25 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_BRIGHTNESSPLUS:
-			if (InitialBrightness < 128)
-				i = InitialBrightness;
-			else
-				i = -(256 - InitialBrightness);
-
-			if ((i > -127) && (i < 127))
-				i++;
-			if (i < 0)
-				InitialBrightness = 256 + i;
-			else
-				InitialBrightness = i;
+			if (InitialBrightness < 127)
+				InitialBrightness++;
 			BT848_SetBrightness(InitialBrightness);
-			sprintf(Text, "Brightness %d", i);
 			if (bDisplayStatusBar == TRUE)
+			{
+				sprintf(Text, "Brightness %d", InitialBrightness);
 				SetWindowText(hwndTextField, Text);
+			}
 			break;
 
 		case IDM_BRIGHTNESSMINUS:
-			if (InitialBrightness < 128)
-				i = InitialBrightness;
-			else
-				i = -(256 - InitialBrightness);
-			if ((i > -127) && (i < 127))
-				i--;
-			if (i < 0)
-				InitialBrightness = 256 + i;
-			else
-				InitialBrightness = i;
+			if (InitialBrightness > -127)
+				InitialBrightness--;
 			BT848_SetBrightness(InitialBrightness);
-			sprintf(Text, "Brightness %d", i);
 			if (bDisplayStatusBar == TRUE)
+			{
+				sprintf(Text, "Brightness %d", InitialBrightness);
 				SetWindowText(hwndTextField, Text);
+			}
 			break;
 
 		case IDM_COLORPLUS:
@@ -576,11 +479,13 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			{
 				InitialSaturationU++;
 				InitialSaturationV++;
-				sprintf(Text, "Colour U %d V %d", InitialSaturationU, InitialSaturationV);
-				if (bDisplayStatusBar == TRUE)
-					SetWindowText(hwndTextField, Text);
 				BT848_SetSaturationU(InitialSaturationU);
 				BT848_SetSaturationV(InitialSaturationV);
+				if (bDisplayStatusBar == TRUE)
+				{
+					sprintf(Text, "Colour U %d V %d", InitialSaturationU, InitialSaturationV);
+					SetWindowText(hwndTextField, Text);
+				}
 			}
 			break;
 
@@ -589,11 +494,13 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			{
 				InitialSaturationU--;
 				InitialSaturationV--;
-				sprintf(Text, "Colour U %d V %d", InitialSaturationU, InitialSaturationV);
-				if (bDisplayStatusBar == TRUE)
-					SetWindowText(hwndTextField, Text);
 				BT848_SetSaturationU(InitialSaturationU);
 				BT848_SetSaturationV(InitialSaturationV);
+				if (bDisplayStatusBar == TRUE)
+				{
+					sprintf(Text, "Colour U %d V %d", InitialSaturationU, InitialSaturationV);
+					SetWindowText(hwndTextField, Text);
+				}
 			}
 			break;
 
@@ -601,10 +508,12 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			if ((InitialHue > -127))
 			{
 				InitialHue--;
-				sprintf(Text, "Hue %d", InitialHue);
-				if (bDisplayStatusBar == TRUE)
-					SetWindowText(hwndTextField, Text);
 				BT848_SetHue(InitialHue);
+				if (bDisplayStatusBar == TRUE)
+				{
+					sprintf(Text, "Hue %d", InitialHue);
+					SetWindowText(hwndTextField, Text);
+				}
 			}
 			break;
 
@@ -612,9 +521,11 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			if ((InitialHue < 127))
 			{
 				InitialHue++;
-				sprintf(Text, "Hue %d", InitialHue);
 				if (bDisplayStatusBar == TRUE)
+				{
+					sprintf(Text, "Hue %d", InitialHue);
 					SetWindowText(hwndTextField, Text);
+				}
 				BT848_SetHue(InitialHue);
 			}
 			break;
@@ -623,18 +534,52 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			if (InitialContrast < 256)
 				InitialContrast++;
 			BT848_SetContrast(InitialContrast);
-			sprintf(Text, "Contrast %d", InitialContrast);
 			if (bDisplayStatusBar == TRUE)
+			{
+				sprintf(Text, "Contrast %d", InitialContrast);
 				SetWindowText(hwndTextField, Text);
+			}
 			break;
 
 		case IDM_KONTRASTMINUS:
 			if (InitialContrast > 0)
 				InitialContrast--;
 			BT848_SetContrast(InitialContrast);
-			sprintf(Text, "Contrast %d", InitialContrast);
 			if (bDisplayStatusBar == TRUE)
+			{
+				sprintf(Text, "Contrast %d", InitialContrast);
 				SetWindowText(hwndTextField, Text);
+			}
+			break;
+
+		case IDM_OVERSCAN_PLUS:
+			if(InitialOverscan < 127)
+			{
+				InitialOverscan++;
+				Stop_Capture();
+				Init_Screen_Struct();
+				Start_Capture();
+				if (bDisplayStatusBar == TRUE)
+				{
+					sprintf(Text, "Overscan %d", InitialOverscan);
+					SetWindowText(hwndTextField, Text);
+				}
+			}
+			break;
+
+		case IDM_OVERSCAN_MINUS:
+			if(InitialOverscan > 0)
+			{
+				InitialOverscan--;
+				Stop_Capture();
+				Init_Screen_Struct();
+				Start_Capture();
+				if (bDisplayStatusBar == TRUE)
+				{
+					sprintf(Text, "Overscan %d", InitialOverscan);
+					SetWindowText(hwndTextField, Text);
+				}
+			}
 			break;
 
 		case IDM_MUTE:
@@ -849,6 +794,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			Start_Capture();
 			SetMenuAnalog();
 			break;
+
 		case IDM_EXTERN1:
 		case IDM_EXTERN2:
 		case IDM_EXTERN3:
@@ -1008,7 +954,10 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_VIDEOSETTINGS:
-			DialogBox(hInst, "VIDEOEINSTELLUNGEN", hWnd, VideoSettingProc);
+			DialogBox(hInst, "VIDEOSETTINGS", hWnd, VideoSettingProc);
+			Stop_Capture();
+			Init_Screen_Struct();
+			Start_Capture();
 			break;
 
 		case IDM_VPS_OUT:
@@ -1059,13 +1008,11 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			bDisplayStatusBar = !bDisplayStatusBar;
 			if(bDisplayStatusBar == TRUE)
 			{
-				SetTimer(hWnd, 1, 2000, NULL);
-				ShowWindow(hwndStatusBar, SW_SHOW);
+				SetTimer(hWnd, TIMER_STATUS, TIMER_STATUS_MS, NULL);
 			}
 			else
 			{
-				KillTimer(hWnd, 1);
-				ShowWindow(hwndStatusBar, SW_HIDE);
+				KillTimer(hWnd, TIMER_STATUS);
 			}
 			Stop_Capture();
 			Init_Screen_Struct();
@@ -1167,6 +1114,10 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				{
 					ShowCursor(TRUE);
 				}
+				if (bDisplayStatusBar == TRUE)
+				{
+					SetTimer(hWnd, TIMER_STATUS, TIMER_STATUS_MS, NULL);
+				}
 			}
 			else
 			{
@@ -1181,16 +1132,26 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			Start_Capture();
 			bDoResize = TRUE;
 			break;
+
+		case IDM_TAKESTILL:
+			Stop_Capture();
+			SaveStill();
+			Init_Screen_Struct();
+			Start_Capture();
+			break;
+
+		default:
+			break;
 		}
 		break;
 
 	case WM_CREATE:
 		MainWndOnCreate(hWnd);
-		return TRUE;
+		break;
 
 	case INIT_BT:
 		MainWndOnInitBT(hWnd);
-		return TRUE;
+		break;
 
 	case WM_LBUTTONUP:
 		PostMessage(hWnd, WM_COMMAND, IDM_FULL_SCREEN, IDM_FULL_SCREEN);
@@ -1205,99 +1166,95 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		break;
 
 	case WM_TIMER:
-		if (wParam >= 200)
-		{
-			KillTimer(hWnd, wParam);
-		}
-
-		if (wParam == 22)
-		{
-			return (TRUE);
-		}
-
-		if (wParam == 8)
+		if (wParam == TIMER_MSP)
 		{
 			if (bDisplayStatusBar == TRUE)
 				Audio_MSP_Print_Mode();
 			if (AutoStereoSelect == TRUE)
 				Audio_MSP_Watch_Mode();
-			return (TRUE);
 		}
-
-		if (wParam == 1)
+		else if (wParam == TIMER_STATUS)
 		{
 			if (!BT848_IsVideoPresent())
 			{
-				SetWindowText(hwndTextField, " No Video Signal Found");
-				return (TRUE);
+				SetWindowText(hwndTextField, "No Video Signal Found");
 			}
-
-			Text[0] = 0x00;
-			if (Packet30.Identifier[0] != 0x00)
+			else
 			{
-				sprintf(Text, "%s ", Packet30.Identifier);
-				Packet30.Identifier[0] = 0x00;
-			}
-			else if (VPS_lastname[0] != 0x00)
-			{
-				sprintf(Text, "%s ", VPS_lastname);
-				VPS_lastname[0] = 0x00;
-			}
-
-			strcpy(Text1, Text);
-
-			if (System_In_Mute == TRUE)
-				sprintf(Text1, "Volume Mute");
-			SetWindowText(hwndTextField, Text1);
-			return (TRUE);
-		}
-
-		if (wParam == 99)
-		{
-			KillTimer(hWnd, 99);
-			i = atoi(ChannelString);
-			ChannelString[0] = 0x00;
-			i = i - 1;
-			Audio_SetSource(AUDIOMUX_MUTE);
-
-			if ((i >= 0) && (i < MAXPROGS))
-			{
-
-				if ((Programm[i].freq != 0) && (ValidModes(Programm[i].Typ) == TRUE))
+				Text[0] = 0x00;
+				if (Packet30.Identifier[0] != 0x00)
 				{
-					CurrentProgramm = i;
-					if (Programm[CurrentProgramm].Typ == 'A')
-					{
-						Tuner_SetFrequency(TunerType, MulDiv(Programm[CurrentProgramm].freq * 1000, 16, 1000000));
-					}
-					if (bDisplayStatusBar == TRUE)
-					{
-						sprintf(Text, "%04d. %s ", CurrentProgramm + 1, Programm[CurrentProgramm].Name);
-						SetWindowText(hwndKeyField, Text);
-					}
+					sprintf(Text, "%s ", Packet30.Identifier);
+					Packet30.Identifier[0] = 0x00;
+				}
+				else if (VPS_lastname[0] != 0x00)
+				{
+					sprintf(Text, "%s ", VPS_lastname);
+					VPS_lastname[0] = 0x00;
 				}
 
-				VT_ChannelChange();
-				Sleep(20);
-				Audio_SetSource(AudioSource);
-			}
+				strcpy(Text1, Text);
 
+				if (System_In_Mute == TRUE)
+					sprintf(Text1, "Volume Mute");
+				SetWindowText(hwndTextField, Text1);
+			}
 		}
-		return (TRUE);
+		else if (wParam == TIMER_KEYNUMBER)
+		{
+			KillTimer(hWnd, TIMER_KEYNUMBER);
+			i = atoi(ChannelString);
+			i = i - 1;
+			ChangeChannel(i);
+			ChannelString[0] = '\0';
+		}
+		break;
 
 	case WM_SYSCOMMAND:
 		switch (wParam & 0xFFF0)
 		{
 		case SC_SCREENSAVE:
 		case SC_MONITORPOWER:
-			return 0;
+			return FALSE;
 			break;
 		}
 
 	case WM_SIZE:
-	case WM_MOVE:
 		StatusBar_Adjust(hWnd);
 		if (bDoResize == TRUE)
+		{
+			switch(wParam)
+			{
+			case SIZE_MAXIMIZED:
+				if(bIsFullScreen == FALSE)
+				{
+					bIsFullScreen = TRUE;
+					if(bShowCursor)
+					{
+						ShowCursor(FALSE);
+					}
+					Stop_Capture();
+					Init_Screen_Struct();
+					Start_Capture();
+				}
+				break;
+			case SIZE_MINIMIZED:
+				Overlay_Update(NULL, NULL, DDOVER_HIDE, FALSE);
+				break;
+			case SIZE_RESTORED:
+				Stop_Capture();
+				Init_Screen_Struct();
+				Start_Capture();
+				break;
+			default:
+				break;
+			}
+		}
+		break;
+
+	case WM_MOVE:
+		StatusBar_Adjust(hWnd);
+		if (bDoResize == TRUE && !IsIconic(hWnd) && !IsZoomed(hWnd))
 		{
 			Stop_Capture();
 			Init_Screen_Struct();
@@ -1310,11 +1267,15 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		{
 			sprintf(Text, "%c", wParam);
 			strcat(ChannelString, Text);
-			if (strlen(ChannelString) >= 4)
-				SetTimer(hWnd, 99, 100, NULL);
-			SetTimer(hWnd, 99, 1000, NULL);
+			if (strlen(ChannelString) >= 3)
+			{
+				SetTimer(hWnd, TIMER_KEYNUMBER, 1, NULL);
+			}
+			else
+			{
+				SetTimer(hWnd, TIMER_KEYNUMBER, TIMER_KEYNUMBER_MS, NULL);
+			}
 		}
-
 		break;
 	
 	case WM_PAINT:
@@ -1340,14 +1301,14 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		{
 			SaveWindowPos(hWnd);
 		}
-
 		BT848_Close();
-
 		PostQuitMessage(0);
-		return (TRUE);
-	}
+		break;
 
-	return (DefWindowProc(hWnd, message, wParam, lParam));
+	default:
+		break;
+	}
+	return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
 void SaveWindowPos(HWND hWnd)
@@ -1373,7 +1334,7 @@ void MainWndOnInitBT(HWND hWnd)
 	{
 		if(InitDD(hWnd) == TRUE)
 		{
-			if(CreateOverlay() == TRUE)
+			if(Overlay_Create() == TRUE)
 			{
 				if (BT848_MemoryInit() == TRUE)
 				{
@@ -1441,11 +1402,6 @@ void MainWndOnInitBT(HWND hWnd)
 		if (Tuner_Init(TunerType) == TRUE)
 		{
 			sprintf(Text, "Tuner OK");
-			if (CurrentProgramm >= 0)
-			{
-				if ((Programm[CurrentProgramm].Typ == 'A'))
-					Tuner_SetFrequency(TunerType, MulDiv(Programm[CurrentProgramm].freq * 1000, 16, 1000000));
-			}
 		}
 		SetDlgItemText(SplashWnd, IDC_TEXT4, Text);
 
@@ -1467,7 +1423,7 @@ void MainWndOnInitBT(HWND hWnd)
 
 		if (Has_MSP == TRUE)
 		{
-			SetTimer(hWnd, 8, 10000, NULL);
+			SetTimer(hWnd, TIMER_MSP, TIMER_MSP_MS, NULL);
 		}
 
 		AudioSource = AUDIOMUX_EXTERNAL;
@@ -1481,15 +1437,14 @@ void MainWndOnInitBT(HWND hWnd)
 			sprintf(Text, "Other 2");
 		else
 		{
-			if ((CurrentProgramm >= 0) && (CurrentProgramm < MAXPROGS))
-				sprintf(Text, "%04d. %s ", CurrentProgramm + 1, Programm[CurrentProgramm].Name);
 			AudioSource = AUDIOMUX_TUNER;
+			ChangeChannel(CurrentProgramm);
 		}
 
-		Audio_SetSource(AudioSource);
-
 		if (bDisplayStatusBar == TRUE)
+		{
 			SetWindowText(hwndKeyField, Text);
+		}
 
 		for (i = 0; i < 5; i++)
 		{
@@ -1503,8 +1458,6 @@ void MainWndOnInitBT(HWND hWnd)
 		SetMenuAnalog();
 
 		SetTimer(hWnd, 10, 5000, NULL);
-		SetTimer(hWnd, 22, 1000, NULL);
-		SetTimer(hWnd, 1, 2500, NULL);
 		bDoResize = TRUE;
 	}
 	else
@@ -1515,6 +1468,7 @@ void MainWndOnInitBT(HWND hWnd)
 		PostQuitMessage(0);
 	}
 }
+
 
 void MainWndOnCreate(HWND hWnd)
 {
@@ -1678,6 +1632,13 @@ void MainWndOnCreate(HWND hWnd)
 		SaveWindowPos(hWnd);
 		ShowCursor(FALSE);
 	}
+	else
+	{
+		if (bDisplayStatusBar == TRUE)
+		{
+			SetTimer(hWnd, TIMER_STATUS, TIMER_STATUS_MS, NULL);
+		}
+	}
 
 	PostMessage(hWnd, INIT_BT, 0, 0);
 }
@@ -1701,25 +1662,14 @@ void Init_Screen_Struct()
 					GetSystemMetrics(SM_CYSCREEN),
 					SWP_SHOWWINDOW);
 		ShowWindow(hwndStatusBar, SW_HIDE);
-
-		KillTimer(hWnd, 1);
 		SetMenu(hWnd, NULL);
 	}
 	else
 	{
 		SetWindowLong(hWnd, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_VISIBLE);
 
-		if (Show_Menu == TRUE)
-		{
-			SetTimer(hWnd, 1, 2500, NULL);
-			SetMenu(hWnd, hMenu);
-		}
-		else
-		{
-			KillTimer(hWnd, 1);
-			SetMenu(hWnd, NULL);
-		}
-		
+		SetMenu(hWnd, (Show_Menu == TRUE)?hMenu:NULL);
+
 		ShowWindow(hwndStatusBar, bDisplayStatusBar?SW_SHOW:SW_HIDE);
 
 		SetWindowPos(hWnd,bAlwaysOnTop?HWND_TOPMOST:HWND_NOTOPMOST,
@@ -1730,13 +1680,11 @@ void Init_Screen_Struct()
 	CurrentX = TVSettings[TVTYPE].wCropWidth;
 	CurrentY = TVSettings[TVTYPE].wCropHeight;
 
-	// to start off with we will display the whole
-	// input area less a little bit
-	// use the alignment restrictions for this
-	rOverlaySrc.left = SrcSizeAlign;
-	rOverlaySrc.top  = SrcSizeAlign;
-	rOverlaySrc.right = CurrentX - SrcSizeAlign;
-	rOverlaySrc.bottom = CurrentY - SrcSizeAlign;
+	// Do overscan
+	rOverlaySrc.left = InitialOverscan;
+	rOverlaySrc.top  = InitialOverscan;
+	rOverlaySrc.right = CurrentX - InitialOverscan;
+	rOverlaySrc.bottom = CurrentY - InitialOverscan;
 
 	// get main window client area
 	// and convert to screen coordinates
@@ -1798,9 +1746,9 @@ void Init_Screen_Struct()
 		rOverlayDest.bottom -= rOverlayDest.bottom % DestSizeAlign;
 	}
 
-	OverlayUpdate(&rOverlaySrc, &rOverlayDest, DDOVER_SHOW, TRUE);
+	Overlay_Update(&rOverlaySrc, &rOverlayDest, DDOVER_SHOW, TRUE);
 
-	Clean_Overlays();
+	Overlay_Clean();
 
 	BT848_SetGeoSize(CurrentX, CurrentY);
 	return;
@@ -1944,7 +1892,7 @@ void CleanUpMemory()
 {
 	int i;
 
-	Exit_Mixer();
+	Mixer_Exit();
 	InterCast_Exit();
 	VideoDat_Exit();
 	for (i = 0; i < 800; i++)
@@ -1968,5 +1916,34 @@ void CleanUpMemory()
 	for (i = 0; i < MAXVTDIALOG; i++)
 	{
 		free(VTScreen[i]);
+	}
+}
+
+void ChangeChannel(int NewChannel)
+{
+	char Text[128];
+
+	if (TunerType != TUNER_ABSENT)
+	{
+		if(NewChannel >= 0 && NewChannel < MAXPROGS)
+		{
+			if (Programm[NewChannel].freq != 0)
+			{
+				Audio_SetSource(AUDIOMUX_MUTE);
+
+				CurrentProgramm = NewChannel;
+
+				Tuner_SetFrequency(TunerType, MulDiv(Programm[CurrentProgramm].freq * 1000, 16, 1000000));
+
+				if (bDisplayStatusBar == TRUE)
+				{
+					sprintf(Text, "%04d. %s ", CurrentProgramm + 1, Programm[CurrentProgramm].Name);
+					SetWindowText(hwndKeyField, Text);
+				}
+				VT_ChannelChange();
+				Sleep(20);
+				Audio_SetSource(AudioSource);
+			}
+		}
 	}
 }

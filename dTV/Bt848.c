@@ -222,17 +222,17 @@ BOOL BT848_MemoryInit(void)
 	
 	for (i = 0; i < 5; i++)
 	{
-		if (!Alloc_DMA(VBI_DATA_SIZE, &Vbi_dma[i], i))
+		if (!Alloc_DMA(VBI_DATA_SIZE, &Vbi_dma[i], 0))
 		{
 			ErrorBox("VideoText Memory ( 77 KB ) for DMA not allocated");
 			return (FALSE);
 		}
-		if (!Alloc_Display_DMA(1024 * 576 * 2, i))
+		if (!Alloc_DMA(1024 * 576 * 2, &Display_dma[i], 0))
 		{
 			ErrorBox("Display Memory (1 MB) for DMA not allocated");
 			return (FALSE);
 		}
-		if (!Alloc_DMA(256, &Burst_dma[i], i))
+		if (!Alloc_DMA(256, &Burst_dma[i], 0))
 		{
 			ErrorBox("Burst Memory (256 Bytes) for DMA not allocated");
 			return (FALSE);
@@ -499,44 +499,8 @@ BOOL BT848_SetGeoSize(int width, int height)
 	return TRUE;
 }
 
-BOOL BT848_SetBrightness(unsigned char bBrightness)
+BOOL BT848_SetBrightness(char bBrightness)
 {
-	short Low;
-	unsigned short *Lowptr;
-	__int64 CurrentLowValue = 0x002d002d002d002d;
-
-	Lowptr = (short *) &CurrentLowValue;
-	Low = InitialLow;
-	nLevelHigh = 135;
-	if (bBrightness < 128)
-	{
-		Low = Low + bBrightness;
-		nLevelHigh = nLevelHigh + bBrightness;
-		nLevelLow = 45 + bBrightness;
-
-	}
-	else
-	{
-		Low = Low - (256 - bBrightness);
-		nLevelHigh = nLevelHigh - (256 - bBrightness);
-		nLevelLow = 45 - (256 - bBrightness);
-	}
-
-	if (Low < 2)
-	{
-		Low = 0x02;
-	}
-	if (nLevelHigh > 225)
-	{
-		nLevelHigh = 225;
-	}
-	*Lowptr = Low;
-	Lowptr++;
-	*Lowptr = Low;
-	Lowptr++;
-	*Lowptr = Low;
-	Lowptr++;
-	*Lowptr = Low;
 	BT848_WriteByte(BT848_BRIGHT, bBrightness);
 	return TRUE;
 }
@@ -1022,17 +986,6 @@ BOOL Alloc_DMA(DWORD dwSize, PMemStruct * dma, int Option)
 	{
 		return (FALSE);
 	}
-	return TRUE;
-}
-
-BOOL Alloc_Display_DMA(DWORD dwSize, int NR)
-{
-	memoryAlloc(dwSize, 0, &Display_dma[NR]);
-	if(Display_dma[NR] == NULL)
-	{
-		return (FALSE);
-	}
-	pDisplay[NR] = Display_dma[NR]->dwUser;
 	return TRUE;
 }
 

@@ -52,6 +52,11 @@ int VBIProcessor = 0;
 void VBI_Start()
 {
 	DWORD LinkThreadID;
+
+	if (VBIThread != NULL)
+	{
+		VBI_Stop();
+	}
 	
 	bStopVBI = FALSE;
 	VBI_Event = CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -96,8 +101,9 @@ void VBI_Stop()
 		Sleep(50);
 		CloseHandle(VBIThread);
 		VBIThread = NULL;
+		CloseHandle(VBI_Event);
+		VBI_Event = NULL;
 	}
-	CloseHandle(VBI_Event);
 }
 
 DWORD WINAPI VBI_DecodeThread(LPVOID lpThreadParameter)

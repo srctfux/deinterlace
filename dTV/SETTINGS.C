@@ -102,9 +102,6 @@ void LoadSettingsFromIni(LPSTR Name)
 	GetPrivateProfileString("Files", "VDFilename", "VD-RAW.Dat", VDat.RawName, MAX_PATH, szIniFile);
 	VD_RAW = (GetPrivateProfileInt("Files", "VDRaw", 0, szIniFile) != 0);
 
-
-	InitialLow  = GetPrivateProfileInt("Show", "BlackThreshold", 45, szIniFile);
-	
 	CardType = GetPrivateProfileInt("Hardware", "CardType", TVCARD_UNKNOWN, szIniFile);
 	VideoSource = GetPrivateProfileInt("Hardware", "VideoSource", 1, szIniFile);
 	TunerType = GetPrivateProfileInt("Hardware", "TunerType", TUNER_ABSENT, szIniFile); 
@@ -114,6 +111,7 @@ void LoadSettingsFromIni(LPSTR Name)
 	InitialBrightness = GetPrivateProfileInt("Hardware", "InitialBrightness", 0, szIniFile); 
 	InitialSaturationU = GetPrivateProfileInt("Hardware", "InitialSaturationU", 0xfe, szIniFile); 
 	InitialSaturationV = GetPrivateProfileInt("Hardware", "InitialSaturationV", 0xb4, szIniFile); 
+	InitialOverscan = GetPrivateProfileInt("Hardware", "InitialOverscan", 4, szIniFile); 
 
 	ManuellAudio[0] = GetPrivateProfileInt("Hardware", "GPIO_OUT_EN", 0, szIniFile); 
 	ManuellAudio[1] = GetPrivateProfileInt("Hardware", "GPIO_DATA_TUNER", 0, szIniFile);  
@@ -294,8 +292,6 @@ void WriteSettingsToIni()
 	WritePrivateProfileString("Files", "VDFilename", VDat.RawName, szIniFile);
 	WritePrivateProfileInt("Files", "VDRaw", VD_RAW, szIniFile);
 
-	WritePrivateProfileInt("Show", "BlackThreshold", InitialLow, szIniFile);
-	
 	WritePrivateProfileInt("Hardware", "CardType", CardType, szIniFile);
 	WritePrivateProfileInt("Hardware", "VideoSource", VideoSource, szIniFile);
 	WritePrivateProfileInt("Hardware", "TunerType", TunerType, szIniFile); 
@@ -305,6 +301,7 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("Hardware", "InitialBrightness", InitialBrightness, szIniFile); 
 	WritePrivateProfileInt("Hardware", "InitialSaturationU", InitialSaturationU, szIniFile); 
 	WritePrivateProfileInt("Hardware", "InitialSaturationV", InitialSaturationV, szIniFile); 
+	WritePrivateProfileInt("Hardware", "InitialOverscan", InitialOverscan, szIniFile); 
 
 	WritePrivateProfileInt("Hardware", "GPIO_OUT_EN", ManuellAudio[0], szIniFile); 
 	WritePrivateProfileInt("Hardware", "GPIO_DATA_TUNER", ManuellAudio[1], szIniFile);  

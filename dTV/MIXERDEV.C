@@ -61,7 +61,7 @@ void Enumerate_Sound_SubSystem(void)
 	{
 		mmresult = mixerGetDevCaps(SoundSystemLoop, &SoundSystem.MixerDev[SoundSystemLoop], sizeof(MIXERCAPS));
 
-		if (Open_HMixer(SoundSystemLoop) == TRUE)
+		if (Mixer_Open(SoundSystemLoop) == TRUE)
 		{
 			// Enumerate Destinations
 			SoundSystem.To_Lines[SoundSystemLoop].LinesCount = SoundSystem.MixerDev[SoundSystemLoop].cDestinations;
@@ -398,7 +398,7 @@ void Enumerate_Sound_SubSystem(void)
 	}
 }
 
-BOOL Open_HMixer(UINT uMxId)
+BOOL Mixer_Open(UINT uMxId)
 {
 	MMRESULT mmresult;
 
@@ -426,7 +426,7 @@ BOOL Open_HMixer(UINT uMxId)
 	return (TRUE);
 }
 
-void Exit_Mixer(void)
+void Mixer_Exit(void)
 {
 	MMRESULT mmresult;
 	int SoundSystemLoop;
@@ -482,7 +482,7 @@ MMRESULT Set_Control_Values(MIXERCONTROLDETAILS * Setting, int Device)
 	if (SoundSystem.DeviceCount == 0)
 		return (-1);
 
-	Open_HMixer(Device);
+	Mixer_Open(Device);
 	return (mixerSetControlDetails((HMIXEROBJ) hMixer, Setting, MIXER_SETCONTROLDETAILSF_VALUE | MIXER_OBJECTF_HMIXER));
 }
 
@@ -491,7 +491,7 @@ MMRESULT Get_Control_Values(MIXERCONTROLDETAILS * Setting, int Device)
 	if (SoundSystem.DeviceCount == 0)
 		return (-1);
 
-	Open_HMixer(Device);
+	Mixer_Open(Device);
 	return (mixerGetControlDetails((HMIXEROBJ) hMixer, Setting, MIXER_GETCONTROLDETAILSF_VALUE | MIXER_OBJECTF_HMIXER));
 }
 

@@ -164,12 +164,12 @@ unsigned short VTColourTable[9] =
 	32767,	//Transparent
 };
 
-unsigned char InitialHue=0x00;
-unsigned char InitialBrightness=0x00;
-int InitialContrast=0xd8;
-int InitialSaturationU=0xfe;
-int InitialSaturationV=0xb4;
-int InitialLow=45;
+char InitialHue = 0x00;
+char InitialBrightness = 0x00;
+int InitialContrast = 0xd8;
+int InitialSaturationU = 0xfe;
+int InitialSaturationV = 0xb4;
+int InitialOverscan = 4;
 
 BOOL Has_MSP=FALSE;
 

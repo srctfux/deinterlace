@@ -153,50 +153,56 @@ BEGIN
     DEFPUSHBUTTON   "Cancel",IDCANCEL,210,220,65,15
 END
 
-VIDEOEINSTELLUNGEN DIALOG DISCARDABLE  0, 0, 307, 181
+VIDEOSETTINGS DIALOG DISCARDABLE  0, 0, 358, 183
 STYLE DS_SYSMODAL | DS_SETFOREGROUND | DS_3DLOOK | WS_POPUP | WS_VISIBLE | 
     WS_CAPTION | WS_SYSMENU
-CAPTION "Video-Setup (Analog)"
+CAPTION "Video Settings"
 FONT 8, "MS Sans Serif"
 BEGIN
-    CTEXT           "Brightness",IDC_STATIC,10,10,33,10
-    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME,5,5,45,150
-    DEFPUSHBUTTON   "OK",IDOK,255,160,45,15
-    PUSHBUTTON      "Default",IDDEFAULT,130,160,45,15
-    CONTROL         "SLIDER",IDC_STATIC,"Static",SS_BITMAP,20,40,15,13
-    PUSHBUTTON      "",IDC_S1,20,55,15,10,WS_DISABLED
-    EDITTEXT        IDC_D1,10,30,35,10,ES_CENTER | ES_AUTOHSCROLL | 
+    CTEXT           "Brightness",IDC_STATIC,11,9,33,10
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME,6,5,45,150
+    DEFPUSHBUTTON   "OK",IDOK,305,161,45,15
+    PUSHBUTTON      "Default",IDDEFAULT,154,161,45,15
+    CONTROL         "SLIDER",IDC_STATIC,"Static",SS_BITMAP,19,41,15,13
+    PUSHBUTTON      "",IDC_S1,18,50,15,10,WS_DISABLED
+    EDITTEXT        IDC_D1,10,25,35,12,ES_CENTER | ES_AUTOHSCROLL | 
                     WS_DISABLED
-    CTEXT           "Contrast",IDC_STATIC,60,10,33,10
+    CTEXT           "Contrast",IDC_STATIC,60,9,33,10
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME,55,5,45,150
-    CONTROL         "SLIDER",IDC_STATIC,"Static",SS_BITMAP,70,40,15,13
-    PUSHBUTTON      "",IDC_S2,70,55,15,10,WS_DISABLED
-    EDITTEXT        IDC_D2,60,30,35,10,ES_CENTER | ES_AUTOHSCROLL | 
+    CONTROL         "SLIDER",IDC_STATIC,"Static",SS_BITMAP,70,41,15,13
+    PUSHBUTTON      "",IDC_S2,70,50,15,10,WS_DISABLED
+    EDITTEXT        IDC_D2,60,25,35,12,ES_CENTER | ES_AUTOHSCROLL | 
                     WS_DISABLED
-    CTEXT           "Hue",IDC_STATIC,110,10,33,10
+    CTEXT           "Hue",IDC_STATIC,110,9,33,10
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME,105,5,45,150
-    CONTROL         "SLIDER",IDC_STATIC,"Static",SS_BITMAP,120,40,15,13
-    PUSHBUTTON      "",IDC_S3,120,55,15,10,WS_DISABLED
-    EDITTEXT        IDC_D3,110,30,35,10,ES_CENTER | ES_AUTOHSCROLL | 
+    CONTROL         "SLIDER",IDC_STATIC,"Static",SS_BITMAP,120,41,15,13
+    PUSHBUTTON      "",IDC_S3,120,50,15,10,WS_DISABLED
+    EDITTEXT        IDC_D3,110,25,35,12,ES_CENTER | ES_AUTOHSCROLL | 
                     WS_DISABLED
-    CTEXT           "Color",IDC_STATIC,160,10,33,10
-    PUSHBUTTON      "Cancel",IDCANCEL,5,160,45,15
+    CTEXT           "Color",IDC_STATIC,160,9,33,10
+    PUSHBUTTON      "Cancel",IDCANCEL,6,161,45,15
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME,155,5,45,150
-    CONTROL         "SLIDER",IDC_STATIC,"Static",SS_BITMAP,170,40,15,13
-    PUSHBUTTON      "",IDC_S4,170,55,15,10,WS_DISABLED
-    CTEXT           "Color U",IDC_STATIC,210,10,33,10
-    EDITTEXT        IDC_D4,160,30,35,10,ES_CENTER | ES_AUTOHSCROLL | 
+    CONTROL         "SLIDER",IDC_STATIC,"Static",SS_BITMAP,170,41,15,13
+    PUSHBUTTON      "",IDC_S4,170,50,15,10,WS_DISABLED
+    CTEXT           "Color U",IDC_STATIC,210,9,33,10
+    EDITTEXT        IDC_D4,160,25,35,12,ES_CENTER | ES_AUTOHSCROLL | 
                     WS_DISABLED
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME,205,5,45,150
-    CONTROL         "SLIDER",IDC_STATIC,"Static",SS_BITMAP,220,40,15,13
-    PUSHBUTTON      "",IDC_S5,220,55,15,10,WS_DISABLED
-    EDITTEXT        IDC_D5,210,30,35,10,ES_CENTER | ES_AUTOHSCROLL | 
+    CONTROL         "SLIDER",IDC_STATIC,"Static",SS_BITMAP,220,41,15,13
+    PUSHBUTTON      "",IDC_S5,220,50,15,10,WS_DISABLED
+    EDITTEXT        IDC_D5,210,25,35,12,ES_CENTER | ES_AUTOHSCROLL | 
                     WS_DISABLED
-    CTEXT           "Color V",IDC_STATIC,260,10,33,10
+    CTEXT           "Color V",IDC_STATIC,260,9,33,10
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME,255,5,45,150
-    CONTROL         "SLIDER",IDC_STATIC,"Static",SS_BITMAP,270,40,15,13
-    PUSHBUTTON      "",IDC_S6,270,55,15,10,WS_DISABLED
-    EDITTEXT        IDC_D6,260,30,35,10,ES_CENTER | ES_AUTOHSCROLL | 
+    CONTROL         "SLIDER",IDC_STATIC,"Static",SS_BITMAP,270,41,15,13
+    PUSHBUTTON      "",IDC_S6,270,50,15,10,WS_DISABLED
+    EDITTEXT        IDC_D6,260,25,35,12,ES_CENTER | ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    CTEXT           "Overscan",IDC_STATIC,311,9,33,10
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME,305,5,45,150
+    CONTROL         "SLIDER",IDC_STATIC,"Static",SS_BITMAP,319,42,15,13
+    PUSHBUTTON      "",IDC_S7,319,50,15,10,WS_DISABLED
+    EDITTEXT        IDC_D7,309,26,35,12,ES_CENTER | ES_AUTOHSCROLL | 
                     WS_DISABLED
 END
 
@@ -552,9 +558,9 @@ BEGIN
     LTEXT           "Internet ID",IDC_STATIC,15,215,35,10
     LTEXT           "",TEXT20,61,215,74,10
     LTEXT           "Control",IDC_STATIC,15,60,80,10
-    CONTROL         "With program start in such a way set",IDC_CHECK1,"Button",
+    CONTROL         "Set at Program start",IDC_CHECK1,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,15,230,120,10
-    CONTROL         "As MUTE",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | 
+    CONTROL         "As Mute",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,155,230,100,10
     CONTROL         "As Volume/Balance",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,155,220,100,10
@@ -612,7 +618,7 @@ CAPTION "About dTV"
 FONT 8, "MS Sans Serif"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,149,272,65,14,WS_GROUP
-    CTEXT           "dTV Version 1.3",IDC_STATIC,4,3,352,10
+    CTEXT           "dTV Version 1.4",IDC_STATIC,4,3,352,10
     CTEXT           "Copyright (c) 2000 John Adcock (johnadcock@hotmail.com)",
                     IDC_STATIC,4,15,352,10
     LTEXT           "Sebastian for the  Videodata Info",IDC_STATIC,5,143,170,
@@ -643,10 +649,12 @@ BEGIN
     LTEXT           "Mark Rejhon for 3:2 pulldown algorithm",IDC_STATIC,186,
                     39,172,10
     LTEXT           "The developers of VirtualDub",IDC_STATIC,186,52,171,9
-    LTEXT           "Borg for the deinterlacing plug-in",IDC_STATIC,186,65,
+    LTEXT           "Borg for the deinterlacing plug-in",IDC_STATIC,187,65,
                     165,9
     LTEXT           "Timecop for the Closed Caption decoder",IDC_STATIC,5,79,
                     158,9
+    LTEXT           "Daniel Schmelzer for the cool website",IDC_STATIC,187,
+                    78,174,9
 END
 
 VDSETUP DIALOG DISCARDABLE  22, 17, 157, 130
@@ -902,16 +910,26 @@ BEGIN
     POPUP "&View"
     BEGIN
         MENUITEM "Toggle &Menu\tF4",            IDM_TOGGLE_MENU
-        MENUITEM "Toggle Stat&us Bar\tS",       IDM_STATUSBAR, CHECKED
+        MENUITEM "Toggle &Status Bar\tS",       IDM_STATUSBAR, CHECKED
         MENUITEM "&Full Screen\tF6",            IDM_FULL_SCREEN
         MENUITEM "&Always on Top",              IDM_ON_TOP
-        MENUITEM "&Pause\tp",                   IDM_CAPTURE_PAUSE
+        MENUITEM "&Pause\tP",                   IDM_CAPTURE_PAUSE
         MENUITEM "Toggle Show &Cursor\tF5",     IDM_TOGGLECURSOR
+        MENUITEM "Take Sti&ll Picture\tL",      IDM_TAKESTILL
     END
     POPUP "&Settings"
     BEGIN
         MENUITEM "&Video Adjustments ...",      IDM_VIDEOSETTINGS
-        POPUP "&Video Input"
+        POPUP "&Audio Input"
+        BEGIN
+            MENUITEM "&Tuner",                      IDM_AUDIO_0
+            MENUITEM "&MSP/Radio",                  IDM_AUDIO_1
+            MENUITEM "&External",                   IDM_AUDIO_2
+            MENUITEM "&Internal",                   IDM_AUDIO_3
+            MENUITEM "M&ute",                       IDM_AUDIO_4
+            MENUITEM "&Stereo",                     IDM_AUDIO_5
+        END
+        POPUP "Video &Input"
         BEGIN
             MENUITEM "&Tuner",                      IDM_TUNER
             MENUITEM "&Composite",                  IDM_EXTERN1
@@ -928,6 +946,24 @@ BEGIN
             MENUITEM "PA&L-N",                      IDM_TYPEFORMAT_4
             MENUITEM "NTSC Japan",                  IDM_TYPEFORMAT_5
         END
+        POPUP "Thread &Priorities"
+        BEGIN
+            POPUP "Program"
+            BEGIN
+                MENUITEM "NORMAL_PRIORITY_CLASS",       IDM_PRIORCLASS_0
+                MENUITEM "HIGH_PRIORITY_CLASS",         IDM_PRIORCLASS_1
+                MENUITEM "REALTIME_PRIORITY_CLASS",     IDM_PRIORCLASS_2
+            END
+            POPUP "Decoding and output"
+            BEGIN
+                MENUITEM "THREAD_PRIORITY_BELOW_NORMAL", IDM_TREADPRIOR_0
+                MENUITEM "THREAD_PRIORITY_NORMAL",      IDM_TREADPRIOR_1
+                MENUITEM "THREAD_PRIORITY_ABOVE_NORMAL", IDM_TREADPRIOR_2
+                MENUITEM "THREAD_PRIORITY_HIGHEST",     IDM_TREADPRIOR_3
+                MENUITEM "THREAD_PRIORITY_TIME_CRITICAL", IDM_TREADPRIOR_4
+            END
+        END
+        MENUITEM "Capture VBI-&Data",           IDM_VBI
     END
     POPUP "&Hardware"
     BEGIN
@@ -971,38 +1007,7 @@ BEGIN
             MENUITEM "Automatic Stereo Adjustment", IDM_AUTOSTEREO
         END
         MENUITEM "BT Reset",                    IDM_RESET
-    END
-    POPUP "A&dvanced"
-    BEGIN
-        POPUP "&Audio"
-        BEGIN
-            MENUITEM "&Tuner",                      IDM_AUDIO_0
-            MENUITEM "&MSP/Radio",                  IDM_AUDIO_1
-            MENUITEM "&External",                   IDM_AUDIO_2
-            MENUITEM "&Internal",                   IDM_AUDIO_3
-            MENUITEM SEPARATOR
-            MENUITEM "&Audio out",                  IDM_AUDIO_4
-            MENUITEM "Audio on",                    IDM_AUDIO_5
-        END
         MENUITEM "Audio-Mi&xer Setup",          IDM_AUDIO_MIXER
-        MENUITEM "Capture VBI-&Data",           IDM_VBI
-        POPUP "Thread &Priorities"
-        BEGIN
-            POPUP "Program"
-            BEGIN
-                MENUITEM "NORMAL_PRIORITY_CLASS",       IDM_PRIORCLASS_0
-                MENUITEM "HIGH_PRIORITY_CLASS",         IDM_PRIORCLASS_1
-                MENUITEM "REALTIME_PRIORITY_CLASS",     IDM_PRIORCLASS_2
-            END
-            POPUP "Decoding and output"
-            BEGIN
-                MENUITEM "THREAD_PRIORITY_BELOW_NORMAL", IDM_TREADPRIOR_0
-                MENUITEM "THREAD_PRIORITY_NORMAL",      IDM_TREADPRIOR_1
-                MENUITEM "THREAD_PRIORITY_ABOVE_NORMAL", IDM_TREADPRIOR_2
-                MENUITEM "THREAD_PRIORITY_HIGHEST",     IDM_TREADPRIOR_3
-                MENUITEM "THREAD_PRIORITY_TIME_CRITICAL", IDM_TREADPRIOR_4
-            END
-        END
     END
     POPUP "Video&Data"
     BEGIN
@@ -1081,12 +1086,12 @@ BEGIN
         BOTTOMMARGIN, 233
     END
 
-    "VIDEOEINSTELLUNGEN", DIALOG
+    "VIDEOSETTINGS", DIALOG
     BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 300
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 174
+        LEFTMARGIN, 6
+        RIGHTMARGIN, 350
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 176
     END
 
     "AUDIOEINSTELLUNGEN", DIALOG
@@ -1225,8 +1230,11 @@ BEGIN
     "H",            IDM_HUE_UP,             VIRTKEY, SHIFT, NOINVERT
     "K",            IDM_KONTRASTMINUS,      VIRTKEY, NOINVERT
     "K",            IDM_KONTRASTPLUS,       VIRTKEY, SHIFT, NOINVERT
+    "L",            IDM_TAKESTILL,          VIRTKEY, NOINVERT
     "M",            IDM_MUTE,               VIRTKEY, NOINVERT
     "M",            IDM_MUTE,               VIRTKEY, SHIFT, NOINVERT
+    "O",            IDM_OVERSCAN_MINUS,     VIRTKEY, NOINVERT
+    "O",            IDM_OVERSCAN_PLUS,      VIRTKEY, SHIFT, NOINVERT
     "P",            IDM_CAPTURE_PAUSE,      VIRTKEY, NOINVERT
     "S",            IDM_STATUSBAR,          VIRTKEY, NOINVERT
     "T",            IDM_CALL_VIDEOTEXTSMALL, VIRTKEY, NOINVERT
@@ -1279,8 +1287,8 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,3,1
- PRODUCTVERSION 1,0,3,1
+ FILEVERSION 1,0,4,1
+ PRODUCTVERSION 1,0,4,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -1298,14 +1306,14 @@ BEGIN
             VALUE "Comments", "John Adcock\0"
             VALUE "CompanyName", "\0"
             VALUE "FileDescription", "dTV\0"
-            VALUE "FileVersion", "1, 0, 3, 1\0"
+            VALUE "FileVersion", "1, 0, 4, 1\0"
             VALUE "InternalName", "dTV\0"
             VALUE "LegalCopyright", "Copyright © 2000\0"
             VALUE "LegalTrademarks", "This Program is covered by the term of the GNU GPL\0"
             VALUE "OriginalFilename", "dTV.exe\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "dTV\0"
-            VALUE "ProductVersion", "1, 0, 3, 1\0"
+            VALUE "ProductVersion", "1, 0, 4, 1\0"
             VALUE "SpecialBuild", "\0"
         END
     END
