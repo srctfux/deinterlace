@@ -57,8 +57,8 @@ void UpdLinearFilterTables(int Width)
 {
 	int i, j;
 	double Start, End;
-	double pos;
-	double pixel_before, pixel_after;
+	double pixel, pixel_before, pixel_after;
+//	short pixel1Y, pixel2Y, pixel1UV, pixel2UV;
 
 	for (i=0 ; i<=Width ; i++)
 	{
@@ -79,14 +79,70 @@ void UpdLinearFilterTables(int Width)
 			{
 				if (i > 1)
 				{
-					pos = ((double)j - Start) / (double)i * (double)Width;
+					pixel = ((double)j - Start) / (double)i * (double)Width;
 				}
 				else
 				{
-					pos = (double)(Width - 1) / 2.0;
+					pixel = (double)(Width - 1) / 2.0;
 				}
-				pixel_before = floor(pos);
-				pixel_after = ceil(pos);
+				pixel_before = floor(pixel);
+				pixel_after = ceil(pixel);
+
+				/*
+				pixel1Y = (short)pixel_before;
+				pixel2Y = (short)pixel_after;
+
+				if (pixel1Y == pixel2Y)
+				{
+					if ((j % 2) == (pixel1Y % 2))
+					{
+						pixel1UV = pixel1Y;
+					}
+					else if ((j % 2) == 0)
+					{
+						pixel1UV = pixel1Y - 1;
+					}
+					else
+					{
+						pixel1UV = pixel1Y + 1;
+					}
+					pixel2UV = pixel1UV;
+				}
+				else
+				{
+					if ((j % 2) == (pixel1Y % 2))
+					{
+						if ((j % 2) == 0)
+						{
+							pixel1UV = pixel1Y;
+							pixel2UV = pixel1Y;
+						}
+						else
+						{
+							pixel1UV = pixel1Y;
+							pixel2UV = pixel2Y + 1;
+						}
+					}
+					else if ((j % 2) == (pixel2Y % 2))
+					{
+						if ((j % 2) == 0)
+						{
+							pixel1UV = pixel1Y - 1;
+							pixel2UV = pixel2Y;
+						}
+						else
+						{
+							pixel1UV = pixel2Y;
+							pixel2UV = pixel2Y;
+						}
+					}
+				}
+
+				LinearFilterTab[i][j].pixel1Y = pixel1Y;
+				LinearFilterTab[i][j].pixel2Y = pixel2Y;
+				LinearFilterTab[i][j].pixel1UV = pixel1UV;
+				LinearFilterTab[i][j].pixel2UV = pixel2UV;
+				*/
 
 				LinearFilterTab[i][j].pixel1Y = (short)pixel_before;
 				LinearFilterTab[i][j].pixel2Y = (short)pixel_after;
@@ -139,13 +195,13 @@ void UpdLinearFilterTables(int Width)
 
 				if (pixel_before < pixel_after)
 				{
-					LinearFilterTab[i][j].coef1 = (short)ceil((pixel_after - pos) * 1000.0 - 0.5);
-					LinearFilterTab[i][j].coef2 = (short)ceil((pos - pixel_before) * 1000.0 - 0.5);
+					LinearFilterTab[i][j].coef1 = (short)ceil((pixel_after - pixel) * 1024.0 - 0.5);
+					LinearFilterTab[i][j].coef2 = (short)ceil((pixel - pixel_before) * 1024.0 - 0.5);
 				}
 				else
 				{
-					LinearFilterTab[i][j].coef1 = 500;
-					LinearFilterTab[i][j].coef2 = 500;
+					LinearFilterTab[i][j].coef1 = 512;	// 0.5 * 1024
+					LinearFilterTab[i][j].coef2 = 512;	// 0.5 * 1024
 				}
 			}
 		}
@@ -207,39 +263,43 @@ void UpdNbPixelsPerLineTable(int Height, int Width)
 void ApplyLinearFilter(BYTE* pLine, int NewWidth, MEMCPY_FUNC *pCopy)
 {
 	int i;
+	BYTE *t;
+	BlendStruct *tab = LinearFilterTab[NewWidth];
 
-	for (i=0 ; i<PictureWidth ; i++)
+	if (DoOnlyMasking)
 	{
-		if (LinearFilterTab[NewWidth][i].pixel1Y == -1)
+		t = pLine;
+		for (i=0 ; i<PictureWidth ; i++,t+=2,tab++)
 		{
-			// Color the pixel in black
-			if (!DoOnlyMasking)
+			if (tab->pixel1Y == -1)
 			{
-				// Build temporary new line
-				TmpBuf[i*2] = Y_BLACK;
-				TmpBuf[i*2+1] = UV_BLACK;
-			}
-			else
-			{
-				// Modify line
-				pLine[i*2] = Y_BLACK;
-				pLine[i*2+1] = UV_BLACK;
-			}
-		}
-		else
-		{
-			if (!DoOnlyMasking)
-			{
-				// Build temporary new line
-				TmpBuf[i*2] = (pLine[LinearFilterTab[NewWidth][i].pixel1Y*2] * LinearFilterTab[NewWidth][i].coef1 + pLine[LinearFilterTab[NewWidth][i].pixel2Y*2] * LinearFilterTab[NewWidth][i].coef2) / 1000;
-//				TmpBuf[i*2+1] = pLine[LinearFilterTab[NewWidth][i].pixel1UV*2+1];
-				TmpBuf[i*2+1] = (pLine[LinearFilterTab[NewWidth][i].pixel1UV*2+1] * LinearFilterTab[NewWidth][i].coef1 + pLine[LinearFilterTab[NewWidth][i].pixel2UV*2+1] * LinearFilterTab[NewWidth][i].coef2) / 1000;
+				// Color the pixel in black
+				t[0] = Y_BLACK;
+				t[1] = UV_BLACK;
 			}
 		}
 	}
-
-	if (!DoOnlyMasking)
+	else
 	{
+		// Build the new line
+		t = TmpBuf;
+		for (i=0 ; i<PictureWidth ; i++,t+=2,tab++)
+		{
+			if (tab->pixel1Y == -1)
+			{
+				// Color the pixel in black
+				t[0] = Y_BLACK;
+				t[1] = UV_BLACK;
+			}
+			else
+			{
+				t[0] = (pLine[tab->pixel1Y*2] * tab->coef1 + pLine[tab->pixel2Y*2] * tab->coef2) / 1024;
+				t[1] = (pLine[tab->pixel1UV*2+1] * tab->coef1 + pLine[tab->pixel2UV*2+1] * tab->coef2) / 1024;
+//				t[0] = (pLine[tab->pixel1Y] * tab->coef1 + pLine[tab->pixel2Y] * tab->coef2) / 1024;
+//				t[1] = (pLine[tab->pixel1UV] * tab->coef1 + pLine[tab->pixel2UV] * tab->coef2) / 1024;
+			}
+		}
+
 		// Replace the old line by the new line
 		pCopy(pLine, TmpBuf, PictureWidth*2);
 	}
