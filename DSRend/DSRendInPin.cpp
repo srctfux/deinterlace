@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendInPin.cpp,v 1.3 2002-02-07 13:08:20 tobbej Exp $
+// $Id: DSRendInPin.cpp,v 1.4 2002-03-11 19:26:57 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.3  2002/02/07 13:08:20  tobbej
+// fixed some syncronization problems
+//
 // Revision 1.2  2002/02/06 15:01:24  tobbej
 // fixed race condition betwen stop and recive
 // updated some comments
@@ -270,7 +273,7 @@ HRESULT CDSRendInPin::EnumMediaTypes(IEnumMediaTypes **ppEnum)
 	HRESULT hr=CComObject<CComEnum<IEnumMediaTypes,&IID_IEnumMediaTypes,AM_MEDIA_TYPE*,CopyMT > >::CreateInstance(&pEnum);
 	if(FAILED(hr))
 		return hr;
-
+	
 	AM_MEDIA_TYPE mt;
 	memset(&mt,0,sizeof(mt));
 	mt.majortype=MEDIATYPE_Video;
@@ -326,6 +329,8 @@ HRESULT CDSRendInPin::BeginFlush()
 	CAutoLockCriticalSection lock(&m_Lock);
 	m_bFlushing=true;
 	
+	resumePause();
+
 	//need to free our mediasamples here so we dont lock upstream filters
 	//beginFlush in the filter will take care of that
 	m_pFilter->beginFlush();
@@ -424,9 +429,14 @@ HRESULT CDSRendInPin::Receive(IMediaSample *pSample)
 	{
 		return E_POINTER;
 	}
+	
+	FILTER_STATE state;
+	HRESULT hr=m_pFilter->GetState(0,&state);
+	if(FAILED(hr))
+		return hr;
 	//isStopped must be synced with streaming thread,
 	//but we cant hold the render lock here since that might cause a deadlock with stop
-	if(m_pFilter->isStopped())
+	if(state==State_Stopped)
 	{
 		return VFW_E_WRONG_STATE;
 	}
@@ -437,11 +447,10 @@ HRESULT CDSRendInPin::Receive(IMediaSample *pSample)
 		return S_FALSE;
 	}
 	
-	
-	//wait for corect time to render the sample (blocking if paused)
+	//wait for corect time to render the sample
 	REFERENCE_TIME rtStart;
 	REFERENCE_TIME rtEnd;
-	HRESULT hr=pSample->GetTime(&rtStart,&rtEnd);
+	hr=pSample->GetTime(&rtStart,&rtEnd);
 	if(SUCCEEDED(hr))
 	{
 		hr=m_pFilter->waitForTime(rtStart);
@@ -450,7 +459,12 @@ HRESULT CDSRendInPin::Receive(IMediaSample *pSample)
 
 	//render the sample
 	hr=m_pFilter->renderSample(pSample);
-
+	
+	//if the filter is paused, block
+	if(state==State_Paused)
+	{
+		m_resumePauseEvent.wait(INFINITE);
+	}
 	return hr;
 }
 
@@ -501,10 +515,27 @@ HRESULT CDSRendInPin::CheckMediaType(const AM_MEDIA_TYPE *pmt)
 	//for example check the source and target rects
 	if(pmt->majortype==MEDIATYPE_Video && pmt->subtype==MEDIASUBTYPE_YUY2)
 	{
-		if(pmt->formattype==FORMAT_VideoInfo || pmt->formattype==FORMAT_VideoInfo2)
+		BITMAPINFOHEADER *pBmi=NULL;
+		if(pmt->formattype==FORMAT_VideoInfo)
 		{
-			return S_OK;
+			if(pmt->cbFormat>0)
+			{
+				VIDEOINFOHEADER *pHeader=(VIDEOINFOHEADER*)pmt->pbFormat;
+				pBmi=&(pHeader->bmiHeader);
+			}
 		}
+		else if(pmt->formattype==FORMAT_VideoInfo2)
+		{
+			if(pmt->cbFormat>0)
+			{
+				VIDEOINFOHEADER2 *pHeader=(VIDEOINFOHEADER2*)pmt->pbFormat;
+				pBmi=&(pHeader->bmiHeader);
+			}
+		}
+
+		//check that there is a size specified in the media type
+		if(pBmi!=NULL && pBmi->biWidth!=0 && pBmi->biHeight!=0)
+			return S_OK;
 	}
 	return E_FAIL;
 }
