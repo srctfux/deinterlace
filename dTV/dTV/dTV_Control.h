@@ -110,8 +110,6 @@
 #define IDM_TASPECT_200                 745
 #define IDM_TASPECT_235                 746
 
-#endif
-
 /////////////////////////////////////////////////////////////////////////////
 // For setting of certain values
 //
@@ -137,6 +135,9 @@ typedef enum
 	FORMAT_PAL60,
     FORMAT_LASTONE,
 } VIDEOFORMAT;
+
+#endif
+
 
 /////////////////////////////////////////////////////////////////////////////
 // Constants for WM_????_CHANGEVALUE messages
@@ -192,13 +193,13 @@ typedef enum
 
 typedef enum
 {
-	V_BRIGHTNESS = 0,
-	V_CONTRAST,
-	V_HUE,
-	V_SATURATION,
-	V_SATURATIONU,
-	V_SATURATIONV,
-	V_BDELAY,
+	BRIGHTNESS = 0,
+	CONTRAST,
+	HUE,
+	SATURATION,
+	SATURATIONU,
+	SATURATIONV,
+	BDELAY,
 	BTAGCDISABLE,
 	BTCRUSH,
 	BTEVENCHROMAAGC,
@@ -218,12 +219,12 @@ typedef enum
 	BTCOLORKILL,
 	BTWHITECRUSHUP,
 	BTWHITECRUSHDOWN,
-	V_CURRENTX,
-	V_CUSTOMPIXELWIDTH,
-	V_VIDEOSOURCE,
-	V_TVFORMAT,
-	V_HDELAY,
-	V_VDELAY,
+	CURRENTX,
+	CUSTOMPIXELWIDTH,
+	VIDEOSOURCE,
+	TVFORMAT,
+	HDELAY,
+	VDELAY,
 	BT848_SETTING_LASTONE,
 } BT848_SETTING;
 
