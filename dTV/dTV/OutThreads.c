@@ -64,8 +64,7 @@ HANDLE              OutThread;
 // Dynamically updated variables
 ePULLDOWNMODES      gPulldownMode = VIDEO_MODE;
 int                 CurrentFrame=0;
-//DWORD               dwLastTicks = -1;     // Guessing this should be dwLastFlipTicks
-DWORD               dwLastFlipTicks = -1;   // TRB 10/28/00
+DWORD               dwLastFlipTicks = -1;
 DWORD				ModeSwitchTimestamps[MAXMODESWITCHES];
 long				NextPulldownRepeatCount = 0;    // for temporary increases of PullDownRepeatCount
 
@@ -352,14 +351,12 @@ void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField)
 						gPulldownMode = FILM_22_PULLDOWN_ODD;
 						UpdatePulldownStatus();
 						LOG("Gone to Odd");
-						dwLastFlipTicks = -1;
 					}
 					if(IsOddField == FALSE)
 					{
 						gPulldownMode = FILM_22_PULLDOWN_EVEN;
 						UpdatePulldownStatus();
 						LOG("Gone to Even");
-						dwLastFlipTicks = -1;
 					}
 				}
 			}
@@ -412,7 +409,6 @@ void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField)
 			UpdatePulldownStatus();
 			LOG("Back To Video Mode");
 			LastPolarity = -1;
-			dwLastFlipTicks = -1;
 		}
 	}
 
@@ -535,7 +531,6 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 			MOVIE_FIELD_CYCLE = 0;
 			UpdatePulldownStatus();
 			LOG(" Back to Video, comb factor %d", CombFactor);
-			dwLastFlipTicks = -1;
 		}
 		else
 		{
@@ -582,7 +577,6 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 					case 4:  gPulldownMode = FILM_32_PULLDOWN_1;  break;
 					}
 					UpdatePulldownStatus();
-					dwLastFlipTicks = -1;
 				}
 				else
 				{
@@ -595,7 +589,6 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 					case 4:  gPulldownMode = FILM_32_PULLDOWN_3;  break;
 					}
 					UpdatePulldownStatus();
-					dwLastFlipTicks = -1;
 				}
 
 				if (OldPulldownMode != gPulldownMode)
@@ -882,6 +875,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 	DWORD dwLastSecondTicks;
 	long CompareResult;
 	long CombFactor;
+	long FlipTicks;
 	short* ppEvenLines[5][CLEARLINES];
 	short* ppOddLines[5][CLEARLINES];
 	BYTE* pDest;
@@ -962,15 +956,16 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 						VBI_DecodeLine(pVBI + nLineTarget * 2048, nLineTarget - VBI_lpf);
 					}
 				}
+
 				if (!RunningLate)
 				{
 					pDest=LockOverlay();	// Ready to access screen, Lock back buffer berfore accessing
 											// can't do this until after Lock Call
 				}
-				
+
 				if (RunningLate)
 				{
-				// do nothing
+					// do nothing
 				}
 				// if we have dropped a field then do BOB 
 				else if(LastEvenFrame != CurrentFrame || gPulldownMode == INTERPOLATE_BOB)
@@ -1141,11 +1136,11 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				}
 				LastEvenFrame = CurrentFrame;
 			}
+
 			// somewhere above we will have locked the buffer, unlock before flip
 			if (!RunningLate)
 			{
 				ddrval = IDirectDrawSurface_Unlock(lpDDOverlayBack, lpCurOverlay);
-//					IDirectDrawSurface_Flip(lpDDOverlay, lpDDOverlayBack, DDFLIP_WAIT);
 
 				if(DoWeWantToFlip(bFlipNow, bIsOddField) )
 				{
@@ -1160,10 +1155,18 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 						FlipResult =
 							IDirectDrawSurface_Flip(lpDDOverlay, NULL, DDFLIP_DONOTWAIT);   
 					}
-					dwLastFlipTicks = GetTickCount();		
+					FlipTicks = GetTickCount();
+					if (dwLastFlipTicks > -1 && FlipTicks - dwLastFlipTicks > (1000 / 23))
+					{
+						// We should always be running at 24fps or greater.  Check for
+						// 23fps instead to allow some wiggle room, but if more than
+						// 1/23 of a second has passed since the last flip, something's
+						// screwy.
+						LOG(" Long time since last flip (%dms)", dwLastFlipTicks - FlipTicks);
+					}
+					dwLastFlipTicks = FlipTicks;
 				}
 			}
-
 		}
 
 		if (bDisplayStatusBar == TRUE)

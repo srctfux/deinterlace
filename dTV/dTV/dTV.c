@@ -446,7 +446,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
 		case IDM_AUTODETECT:
 			bAutoDetectMode = !bAutoDetectMode;
-			dwLastFlipTicks = -1;
 			if(bAutoDetectMode == TRUE)
 			{
 				gPulldownMode = VIDEO_MODE;
@@ -1113,7 +1112,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			if(bAutoDetectMode == FALSE)
 			{
 				gPulldownMode++;
-				dwLastFlipTicks = -1;
 				// if we can't use a bTV plug-in then skip it
 				if(gPulldownMode == BTV_PLUGIN && bUseBTVPlugin == FALSE)
 				{
