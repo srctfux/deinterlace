@@ -1040,19 +1040,44 @@ SETTING* OSD_GetSetting(OSD_SETTING Setting)
 void OSD_ReadSettingsFromIni()
 {
 	int i;
+	char szScreenSel[16];
+	char szIniKey[16];
+	int	NbScreens = sizeof (ActiveScreens) / sizeof (ActiveScreens[0]);
+
 	for(i = 0; i < OSD_SETTING_LASTONE; i++)
 	{
 		Setting_ReadFromIni(&(OSDSettings[i]));
 	}
 	GetPrivateProfileString("OSD", "FontName", "Arial", szFontName, sizeof(szFontName) , GetIniFileForSettings());
+	for(i = 0; i < NbScreens; i++)
+	{
+		sprintf(szIniKey, "Screen%uSelected", i+1);
+		GetPrivateProfileString("OSD", szIniKey, "undefined", szScreenSel, sizeof(szScreenSel) , GetIniFileForSettings());
+		if (!strcmp(szScreenSel, "0"))
+		{
+			ActiveScreens[i].active = FALSE;
+		}
+		else if (!strcmp(szScreenSel, "1"))
+		{
+			ActiveScreens[i].active = TRUE;
+		}
+	}
 }
 
 void OSD_WriteSettingsToIni()
 {
 	int i;
+	char szIniKey[16];
+	int	NbScreens = sizeof (ActiveScreens) / sizeof (ActiveScreens[0]);
+
 	for(i = 0; i < OSD_SETTING_LASTONE; i++)
 	{
 		Setting_WriteToIni(&(OSDSettings[i]));
 	}
 	WritePrivateProfileString("OSD", "FontName", szFontName, GetIniFileForSettings());
+	for(i = 0; i < NbScreens; i++)
+	{
+		sprintf(szIniKey, "Screen%uSelected", i+1);
+		WritePrivateProfileString("OSD", szIniKey, ActiveScreens[i].active ? "1" : "0", GetIniFileForSettings());
+	}
 }
