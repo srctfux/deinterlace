@@ -223,7 +223,79 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	}
 	hMenu = LoadMenu(hInstance, "ANALOGMENU");
 
-	hMenuPopup = GetSubMenu(hMenu, 4); 
+	hMenuPopup = LoadMenu(hInstance, "CONTEXTMENU");
+	if (hMenuPopup != NULL)
+		hMenuPopup = GetSubMenu(hMenuPopup,0);
+	if (hMenuPopup != NULL && hMenu != NULL)
+	{
+		MENUITEMINFO MenuItemInfo;
+		HMENU hSubMenu;
+
+		MenuItemInfo.cbSize = sizeof (MenuItemInfo);
+		MenuItemInfo.fMask = MIIM_SUBMENU;
+
+		hSubMenu = GetSubMenu(hMenu, 4);
+		if(hSubMenu != NULL)
+			hSubMenu = GetSubMenu(hSubMenu, 3);
+		if(hSubMenu != NULL)
+		{
+			MenuItemInfo.hSubMenu = hSubMenu;
+			SetMenuItemInfo(hMenuPopup,0,TRUE,&MenuItemInfo);
+		}
+
+		hSubMenu = GetSubMenu(hMenu, 4);
+		if(hSubMenu != NULL)
+			hSubMenu = GetSubMenu(hSubMenu, 2);
+		if(hSubMenu != NULL)
+		{
+			MenuItemInfo.hSubMenu = hSubMenu;
+			SetMenuItemInfo(hMenuPopup,1,TRUE,&MenuItemInfo);
+		}
+
+		hSubMenu = GetSubMenu(hMenu, 4);
+		if(hSubMenu != NULL)
+			hSubMenu = GetSubMenu(hSubMenu, 4);
+		if(hSubMenu != NULL)
+		{
+			MenuItemInfo.hSubMenu = hSubMenu;
+			SetMenuItemInfo(hMenuPopup,2,TRUE,&MenuItemInfo);
+		}
+
+		hSubMenu = GetChannelsSubmenu();
+		if(hSubMenu != NULL)
+		{
+			MenuItemInfo.hSubMenu = hSubMenu;
+			SetMenuItemInfo(hMenuPopup,3,TRUE,&MenuItemInfo);
+		}
+		
+		hSubMenu = GetVideoDeinterlaceSubmenu();
+		if(hSubMenu != NULL)
+		{
+			MenuItemInfo.hSubMenu = hSubMenu;
+			SetMenuItemInfo(hMenuPopup,4,TRUE,&MenuItemInfo);
+		}
+
+		hSubMenu = GetSubMenu(hMenu, 3);
+		if(hSubMenu != NULL)
+		{
+			MenuItemInfo.hSubMenu = hSubMenu;
+			SetMenuItemInfo(hMenuPopup,5,TRUE,&MenuItemInfo);
+		}
+
+		hSubMenu = GetFiltersSubmenu();
+		if(hSubMenu != NULL)
+		{
+			MenuItemInfo.hSubMenu = hSubMenu;
+			SetMenuItemInfo(hMenuPopup,6,TRUE,&MenuItemInfo);
+		}
+
+		hSubMenu = GetSubMenu(hMenu, 6);
+		if(hSubMenu != NULL)
+		{
+			MenuItemInfo.hSubMenu = hSubMenu;
+			SetMenuItemInfo(hMenuPopup,7,TRUE,&MenuItemInfo);
+		}
+	}
 
 	// 2000-10-31 Added by Mark: Changed to WS_POPUP for more cosmetic direct-to-full-screen startup,
 	// let UpdateWindowState() handle initialization of windowed dTV instead.
@@ -1160,7 +1232,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
 
 		case IDM_SHOW_OSD:
-//			OSD_ShowText(hWnd, GetSourceName(Setting_GetValue(BT848_GetSetting(VIDEOSOURCE))), 0);
 			OSD_ShowInfosScreen(hWnd, 0);
 			break;
 
