@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSGraph.cpp,v 1.1 2001-08-08 16:01:04 tobbej Exp $
+// $Id: DSGraph.cpp,v 1.2 2001-08-08 16:13:28 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2001 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1  2001/08/08 16:01:04  tobbej
+// new test app for playing movie files thru dmo filter
+//
 //
 //////////////////////////////////////////////////////////////////////////////
 
@@ -195,9 +198,11 @@ void CDSGraph::stop()
 
 void CDSGraph::setupVideoWindow()
 {
+	//get IVideoWindow interface
 	if(FAILED(m_pGraph.QueryInterface(&m_pVidWin)))
 	{}
 	
+	//setup videowindow to be a child window
 	m_pVidWin->put_AutoShow(OAFALSE);
 	m_pVidWin->put_Owner((OAHWND)m_parentWnd);
 	m_pVidWin->put_WindowStyle(WS_CHILD | WS_CLIPSIBLINGS);
