@@ -36,5 +36,7 @@ BOOL StatusBar_Create(HWND, HANDLE, int);
 BOOL StatusBar_Adjust(HWND);
 HWND StatusBar_AddField(HANDLE, int, int, int, BOOL);
 BOOL StatusBar_Destry(void);
+void StatusBar_ShowText(HWND hwndTextField, LPCTSTR szText);
+
 
 #endif

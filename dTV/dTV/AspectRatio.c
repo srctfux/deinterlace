@@ -43,9 +43,14 @@
 #include "resource.h"
 #include "DebugLog.h"
 
+#define AR_STRETCH    0
+#define AR_LETTERBOX  1
+#define AR_ANAMORPHIC 2
+
 // From dtv.c .... We really need to reduce reliance on globals by going C++!
 // Perhaps in the meantime, it could be passed as a parameter to WorkoutOverlay()
 extern HMENU hMenu;
+extern void ShowText(HWND hWnd, LPCTSTR szText);
 
 // Added variable in dTV.c to track which aspect mode we are currently in
 // Use aspect * 1000 (1.66 = 1660, 2.35 = 2350, etc)
@@ -120,11 +125,13 @@ RECT destinationRectangle = {0,0,0,0};
 
 //----------------------------------------------------------------------------
 // Switch to a new aspect ratio and record it in the ratio history list.
-void SwitchToRatio(int ratio)
+void SwitchToRatio(int nMode, int nRatio)
 {
 	int now = GetTickCount();
 
-	LOG("Switching to ratio %d", ratio);
+	LOG("Switching to ratio %d", nRatio);
+
+	aspect_mode = nMode;
 
 	// If the most recent ratio switch just happened, don't remember it since it
 	// was probably a transient ratio due to improperly locking onto a dark scene.
@@ -134,9 +141,9 @@ void SwitchToRatio(int ratio)
 		memmove(&ratio_time[1], &ratio_time[0], sizeof(ratio_time[0]) * (RATIO_HISTORY_CHANGES - 1));
 	}
 
-	ratio_used[0] = ratio;
+	ratio_used[0] = nRatio;
 	ratio_time[0] = GetTickCount();
-	source_aspect = ratio;
+	source_aspect = nRatio;
 	WorkoutOverlaySize();
 }
 
@@ -265,41 +272,123 @@ int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 		
 		switch (wMenuID) {
 			// Easily Accessible Aspect Ratios
-			case IDM_ASPECT_FULLSCREEN:  aspect_mode = 1;  SwitchToRatio(1333);  break;
-			case IDM_ASPECT_LETTERBOX:   aspect_mode = 1;  SwitchToRatio(1778);  break;
-			case IDM_ASPECT_ANAMORPHIC:  aspect_mode = 2;  SwitchToRatio(1778);  break;
+			case IDM_ASPECT_FULLSCREEN:
+				SwitchToRatio(AR_LETTERBOX, 1333);
+				ShowText(hWnd, "4:3 Fullscreen Signal");
+				break;
+			case IDM_ASPECT_LETTERBOX:
+				SwitchToRatio(AR_LETTERBOX, 1778);
+				ShowText(hWnd, "1.78:1 Letterbox Signal");
+				break;
+			case IDM_ASPECT_ANAMORPHIC:
+				SwitchToRatio(AR_ANAMORPHIC, 1778);
+				ShowText(hWnd, "1.78:1 Anamorphic Signal");
+				break;
 
 			// Advanced Aspect Ratios
-			case IDM_SASPECT_0:       aspect_mode = 0;  SwitchToRatio(0);     break;
-			case IDM_SASPECT_133:     aspect_mode = 1;  SwitchToRatio(1333);  break;
-			case IDM_SASPECT_166:     aspect_mode = 1;  SwitchToRatio(1667);  break;
-			case IDM_SASPECT_178:     aspect_mode = 1;  SwitchToRatio(1778);  break;
-			case IDM_SASPECT_185:     aspect_mode = 1;  SwitchToRatio(1850);  break;
-			case IDM_SASPECT_200:     aspect_mode = 1;  SwitchToRatio(2000);  break;
-			case IDM_SASPECT_235:     aspect_mode = 1;  SwitchToRatio(2350);  break;
-			case IDM_SASPECT_166A:    aspect_mode = 2;  SwitchToRatio(1667);  break;
-			case IDM_SASPECT_178A:    aspect_mode = 2;  SwitchToRatio(1778);  break;
-			case IDM_SASPECT_185A:    aspect_mode = 2;  SwitchToRatio(1850);  break;
-			case IDM_SASPECT_200A:    aspect_mode = 2;  SwitchToRatio(2000);  break;
-			case IDM_SASPECT_235A:    aspect_mode = 2;  SwitchToRatio(2350);  break;
-			case IDM_SASPECT_CUSTOM:  aspect_mode = 2;  SwitchToRatio(custom_source_aspect);  break;
-			case IDM_SASPECT_COMPUTE: DetectAspectNow = TRUE; break;
+			case IDM_SASPECT_0:
+				SwitchToRatio(AR_STRETCH, 0);
+				ShowText(hWnd, "Stretch Video");
+				break;
+			case IDM_SASPECT_133:
+				SwitchToRatio(AR_LETTERBOX, 1333);
+				ShowText(hWnd, "4:3 Fullscreen Signal");
+				break;
+			case IDM_SASPECT_166:
+				SwitchToRatio(AR_LETTERBOX, 1667);
+				ShowText(hWnd, "1.66:1 Letterbox Signal");
+				break;
+			case IDM_SASPECT_178:
+				SwitchToRatio(AR_LETTERBOX, 1778);
+				ShowText(hWnd, "1.78:1 Letterbox Signal");
+				break;
+			case IDM_SASPECT_185:
+				SwitchToRatio(AR_LETTERBOX, 1850);
+				ShowText(hWnd, "1.85:1 Letterbox Signal");
+				break;
+			case IDM_SASPECT_200:
+				SwitchToRatio(AR_LETTERBOX, 2000);
+				ShowText(hWnd, "2.00:1 Letterbox Signal");
+				break;
+			case IDM_SASPECT_235:
+				SwitchToRatio(AR_LETTERBOX, 2350);
+				ShowText(hWnd, "2.35:1 Letterbox Signal");
+				break;
+			case IDM_SASPECT_166A:
+				SwitchToRatio(AR_ANAMORPHIC, 1667);
+				ShowText(hWnd, "1.66:1 Anamorphic Signal");
+				break;
+			case IDM_SASPECT_178A:
+				SwitchToRatio(AR_ANAMORPHIC, 1778);
+				ShowText(hWnd, "1.78:1 Anamorphic Signal");
+				break;
+			case IDM_SASPECT_185A:
+				SwitchToRatio(AR_ANAMORPHIC, 1850);
+				ShowText(hWnd, "1.85:1 Anamorphic Signal");
+				break;
+			case IDM_SASPECT_200A:
+				SwitchToRatio(AR_ANAMORPHIC, 2000);
+				ShowText(hWnd, "2.00:1 Anamorphic Signal");
+				break;
+			case IDM_SASPECT_235A:
+				SwitchToRatio(AR_ANAMORPHIC, 2350);
+				ShowText(hWnd, "2.35:1 Anamorphic Signal");
+				break;
+			case IDM_SASPECT_CUSTOM:
+				SwitchToRatio(AR_ANAMORPHIC, custom_source_aspect);
+				ShowText(hWnd, "Custom Aspect Ratio Signal");
+				break;
+			case IDM_SASPECT_COMPUTE:
+				DetectAspectNow = TRUE;
+				break;
 
 			case IDM_SASPECT_AUTO:
 				AutoDetectAspect = ! AutoDetectAspect;
+				if (AutoDetectAspect)
+				{
+					ShowText(hWnd, "Auto Aspect Detect ON");
+				}
+				else
+				{
+					ShowText(hWnd, "Auto Aspect Detect OFF");
+				}
 				break;
 
 			// Output Display Aspect Ratios
-			case IDM_TASPECT_0:       target_aspect = 0;     break;
-			case IDM_TASPECT_133:     target_aspect = 1330;  break;
-			case IDM_TASPECT_166:     target_aspect = 1667;  break;
-			case IDM_TASPECT_178:     target_aspect = 1778;  break;
-			case IDM_TASPECT_185:     target_aspect = 1850;  break;
-			case IDM_TASPECT_200:     target_aspect = 2000;  break;
-			case IDM_TASPECT_235:     target_aspect = 2350;  break;
-			case IDM_TASPECT_CUSTOM:  target_aspect = custom_target_aspect;  break;
-
-			default:  break;
+			case IDM_TASPECT_0:
+				target_aspect = 0;
+				ShowText(hWnd, "Aspect Ratio From Current Resolution");
+				break;
+			case IDM_TASPECT_133:
+				target_aspect = 1330;
+				ShowText(hWnd, "1.33:1 Screen");
+				break;
+			case IDM_TASPECT_166:
+				target_aspect = 1667;
+				ShowText(hWnd, "1.66:1 Screen");
+				break;
+			case IDM_TASPECT_178:
+				target_aspect = 1778;
+				ShowText(hWnd, "1.78:1 Screen");
+				break;
+			case IDM_TASPECT_185:
+				target_aspect = 1850;
+				ShowText(hWnd, "1.85:1 Screen");
+				break;
+			case IDM_TASPECT_200:
+				target_aspect = 2000;
+				ShowText(hWnd, "2.00:1 Screen");
+				break;
+			case IDM_TASPECT_235:
+				target_aspect = 2350;
+				ShowText(hWnd, "2.35:1 Screen");
+				break;
+			case IDM_TASPECT_CUSTOM:
+				target_aspect = custom_target_aspect;
+				ShowText(hWnd, "Custom Aspect Ratio Screen");
+				break;
+			default:
+				break;
 		}
 		WorkoutOverlaySize();
 		SetMenuAspectRatio(hWnd);
@@ -804,7 +893,7 @@ void AdjustAspectRatio(short** EvenField, short** OddField)
 	if (DetectAspectNow)
 	{
 		newRatio = FindAspectRatio(EvenField, OddField);
-		SwitchToRatio(newRatio);
+		SwitchToRatio(aspect_mode, newRatio);
 		newRatioFrameCount = 0;
 		DetectAspectNow = FALSE;
 		return;
@@ -831,7 +920,7 @@ void AdjustAspectRatio(short** EvenField, short** OddField)
 		// avoid cutting the image off.
 		if (newRatio < source_aspect)
 		{
-			SwitchToRatio(newRatio);
+			SwitchToRatio(aspect_mode, newRatio);
 			newRatioFrameCount = 0;
 		}
 		else if (ABS(newRatio - source_aspect) > AspectEqualFudgeFactor && newRatio == lastNewRatio)
@@ -872,7 +961,7 @@ void AdjustAspectRatio(short** EvenField, short** OddField)
 					(haveSeenThisRatio && newRatioFrameCount >= ZoomInFrameCount) ||
 					! haveSeenSmallerRatio)
 				{
-					SwitchToRatio(newRatio);
+					SwitchToRatio(aspect_mode, newRatio);
 				}
 			}
 		}

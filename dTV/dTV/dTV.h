@@ -51,7 +51,6 @@ void Init_More();
 void More_Even(int pp);
 void More_Odd();
 void ChangeChannel(int NewChannel);
-void ShowVideoSource(HWND hWnd, int nVideoSource);
 void SetMenuAnalog();
 
 VOID APIENTRY HandleFocusState(HWND hDlg, LPDRAWITEMSTRUCT lpdis);
@@ -66,6 +65,9 @@ void MainWndOnCreate(HWND hWnd);
 void MainWndOnInitBT(HWND hWnd);
 void SaveWindowPos(HWND hWnd);
 void CleanUpMemory();
+
+void ShowText(HWND hWnd, LPCTSTR szText);
+void OSD_ShowVideoSource(HWND hWnd, int nVideoSource);
 
 #define TIMER_STATUS 1
 #define TIMER_STATUS_MS 2000

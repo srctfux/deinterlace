@@ -34,7 +34,6 @@
 #define OSD_TIMER_ID			42
 #define OSD_TIMER_DELAY			4000
 
-void OSD_ShowText(HWND hWnd,char *szText);
+void OSD_ShowText(HWND hWnd, LPCTSTR szText);
 void OSD_Redraw(HWND hWnd);
 void OSD_Clear(HWND hWnd);
-void OSD_ShowVideoSource(HWND hWnd, int nVideoSource);

@@ -444,6 +444,8 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				else
 					ChangeChannel(0);
 
+				sprintf(Text, "    Channel %s ",Programm[CurrentProgramm].Name);
+				StatusBar_ShowText(hwndTextField, Text);
 				OSD_ShowText(hWnd,Programm[CurrentProgramm].Name);
 			}
 
@@ -475,6 +477,8 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 					}
 				}
 					
+				sprintf(Text, "    Channel %s ",Programm[CurrentProgramm].Name);
+				StatusBar_ShowText(hwndTextField, Text);
 				OSD_ShowText(hWnd,Programm[CurrentProgramm].Name);
 			}
 			
@@ -500,14 +504,27 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			bAutoDetectMode = !bAutoDetectMode;
 			if(bAutoDetectMode == TRUE)
 			{
+				ShowText(hWnd, "Auto Pulldown Detect ON");
 				gPulldownMode = VIDEO_MODE_BOB;
 				UpdatePulldownStatus();
+			}
+			else
+			{
+				ShowText(hWnd, "Auto Pulldown Detect OFF");
 			}
 			SetMenuAnalog();
 			break;
 
 		case IDM_FALLBACK:
 			bFallbackToVideo = !bFallbackToVideo;
+			if(bFallbackToVideo)
+			{
+				ShowText(hWnd, "Fallback on Bad Pulldown ON");
+			}
+			else
+			{
+				ShowText(hWnd, "Fallback on Bad Pulldown OFF");
+			}
 			SetMenuAnalog();
 			break;
 
@@ -542,25 +559,17 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_BRIGHTNESSPLUS:
-			if (InitialBrightness < 127)
-				InitialBrightness++;
+			if (InitialBrightness < 127) InitialBrightness++;
 			BT848_SetBrightness(InitialBrightness);
-			if (bDisplayStatusBar == TRUE)
-			{
-				sprintf(Text, "Brightness %d", InitialBrightness);
-				SetWindowText(hwndTextField, Text);
-			}
+			sprintf(Text, "Brightness %d", InitialBrightness);
+			ShowText(hWnd, Text);
 			break;
 
 		case IDM_BRIGHTNESSMINUS:
-			if (InitialBrightness > -127)
-				InitialBrightness--;
+			if (InitialBrightness > -127) InitialBrightness--;
 			BT848_SetBrightness(InitialBrightness);
-			if (bDisplayStatusBar == TRUE)
-			{
-				sprintf(Text, "Brightness %d", InitialBrightness);
-				SetWindowText(hwndTextField, Text);
-			}
+			sprintf(Text, "Brightness %d", InitialBrightness);
+			ShowText(hWnd, Text);
 			break;
 
 		case IDM_COLORPLUS:
@@ -568,14 +577,11 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			{
 				InitialSaturationU++;
 				InitialSaturationV++;
-				BT848_SetSaturationU(InitialSaturationU);
-				BT848_SetSaturationV(InitialSaturationV);
-				if (bDisplayStatusBar == TRUE)
-				{
-					sprintf(Text, "Colour U %d V %d", InitialSaturationU, InitialSaturationV);
-					SetWindowText(hwndTextField, Text);
-				}
 			}
+			BT848_SetSaturationU(InitialSaturationU);
+			BT848_SetSaturationV(InitialSaturationV);
+			sprintf(Text, "Colour U %d V %d", InitialSaturationU, InitialSaturationV);
+			ShowText(hWnd, Text);
 			break;
 
 		case IDM_COLORMINUS:
@@ -583,62 +589,39 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			{
 				InitialSaturationU--;
 				InitialSaturationV--;
-				BT848_SetSaturationU(InitialSaturationU);
-				BT848_SetSaturationV(InitialSaturationV);
-				if (bDisplayStatusBar == TRUE)
-				{
-					sprintf(Text, "Colour U %d V %d", InitialSaturationU, InitialSaturationV);
-					SetWindowText(hwndTextField, Text);
-				}
 			}
+			BT848_SetSaturationU(InitialSaturationU);
+			BT848_SetSaturationV(InitialSaturationV);
+			sprintf(Text, "Colour U %d V %d", InitialSaturationU, InitialSaturationV);
+			ShowText(hWnd, Text);
 			break;
 
 		case IDM_HUE_DOWN:
-			if ((InitialHue > -127))
-			{
-				InitialHue--;
-				BT848_SetHue(InitialHue);
-				if (bDisplayStatusBar == TRUE)
-				{
-					sprintf(Text, "Hue %d", InitialHue);
-					SetWindowText(hwndTextField, Text);
-				}
-			}
+			if (InitialHue > -127) InitialHue--;
+			BT848_SetHue(InitialHue);
+			sprintf(Text, "Hue %d", InitialHue);
+			ShowText(hWnd, Text);
 			break;
 
 		case IDM_HUE_UP:
-			if ((InitialHue < 127))
-			{
-				InitialHue++;
-				if (bDisplayStatusBar == TRUE)
-				{
-					sprintf(Text, "Hue %d", InitialHue);
-					SetWindowText(hwndTextField, Text);
-				}
-				BT848_SetHue(InitialHue);
-			}
+			if (InitialHue < 127) InitialHue++;
+			BT848_SetHue(InitialHue);
+			sprintf(Text, "Hue %d", InitialHue);
+			ShowText(hWnd, Text);
 			break;
 
 		case IDM_KONTRASTPLUS:
-			if (InitialContrast < 256)
-				InitialContrast++;
+			if (InitialContrast < 256) InitialContrast++;
 			BT848_SetContrast(InitialContrast);
-			if (bDisplayStatusBar == TRUE)
-			{
-				sprintf(Text, "Contrast %d", InitialContrast);
-				SetWindowText(hwndTextField, Text);
-			}
+			sprintf(Text, "Contrast %d", InitialContrast);
+			ShowText(hWnd, Text);
 			break;
 
 		case IDM_KONTRASTMINUS:
-			if (InitialContrast > 0)
-				InitialContrast--;
+			if (InitialContrast > 0) InitialContrast--;
 			BT848_SetContrast(InitialContrast);
-			if (bDisplayStatusBar == TRUE)
-			{
-				sprintf(Text, "Contrast %d", InitialContrast);
-				SetWindowText(hwndTextField, Text);
-			}
+			sprintf(Text, "Contrast %d", InitialContrast);
+			ShowText(hWnd, Text);
 			break;
 
 		case IDM_OVERSCAN_PLUS:
@@ -646,12 +629,9 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			{
 				InitialOverscan++;
 				WorkoutOverlaySize();
-				if (bDisplayStatusBar == TRUE)
-				{
-					sprintf(Text, "Overscan %d", InitialOverscan);
-					SetWindowText(hwndTextField, Text);
-				}
 			}
+			sprintf(Text, "Overscan %d", InitialOverscan);
+			ShowText(hWnd, Text);
 			break;
 
 		case IDM_OVERSCAN_MINUS:
@@ -659,12 +639,9 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			{
 				InitialOverscan--;
 				WorkoutOverlaySize();
-				if (bDisplayStatusBar == TRUE)
-				{
-					sprintf(Text, "Overscan %d", InitialOverscan);
-					SetWindowText(hwndTextField, Text);
-				}
 			}
+			sprintf(Text, "Overscan %d", InitialOverscan);
+			ShowText(hWnd, Text);
 			break;
 
 		case IDM_MUTE:
@@ -679,9 +656,8 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				if (USE_MIXER == TRUE)
 				{
 					Mixer_Mute();
-					sprintf(Text, "Mute Mixer");
 				}
-				OSD_ShowText(hWnd,"MUTE");
+				ShowText(hWnd,"MUTE");
 			}
 			else
 			{
@@ -694,13 +670,9 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				if (USE_MIXER == TRUE)
 				{
 					Mixer_UnMute();
-					sprintf(Text, "UnMute Mixer");
 				}
-
-				OSD_ShowText(hWnd,"UNMUTE");
+				ShowText(hWnd,"UNMUTE");
 			}
-			if (bDisplayStatusBar == TRUE)
-				SetWindowText(hwndTextField, Text);
 			break;
 
 		case IDM_L_BALANCE:
@@ -720,9 +692,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				Mixer_Set_Volume(MIXER_LINKER_KANAL, MIXER_RECHTER_KANAL);
 				sprintf(Text, "Balance L %d R %d", MIXER_LINKER_KANAL, MIXER_RECHTER_KANAL);
 			}
-
-			if (bDisplayStatusBar == TRUE)
-				SetWindowText(hwndTextField, Text);
+			ShowText(hWnd, Text);
 			break;
 
 		case IDM_R_BALANCE:
@@ -742,9 +712,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				Mixer_Set_Volume(MIXER_LINKER_KANAL, MIXER_RECHTER_KANAL);
 				sprintf(Text, "Balance L %d R %d", MIXER_LINKER_KANAL, MIXER_RECHTER_KANAL);
 			}
-
-			if (bDisplayStatusBar == TRUE)
-				SetWindowText(hwndTextField, Text);
+			ShowText(hWnd, Text);
 			break;
 
 		case IDM_VOLUMEPLUS:
@@ -767,9 +735,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				Mixer_Set_Volume(MIXER_LINKER_KANAL, MIXER_RECHTER_KANAL);
 				sprintf(Text, "Volume L %d R %d", MIXER_LINKER_KANAL, MIXER_RECHTER_KANAL);
 			}
-
-			if (bDisplayStatusBar == TRUE)
-				SetWindowText(hwndTextField, Text);
+			ShowText(hWnd, Text);
 			break;
 		case IDM_VOLUMEMINUS:
 			if (USE_MIXER == FALSE)
@@ -792,9 +758,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				sprintf(Text, "Volume L %d R %d", MIXER_LINKER_KANAL, MIXER_RECHTER_KANAL);
 
 			}
-
-			if (bDisplayStatusBar == TRUE)
-				SetWindowText(hwndTextField, Text);
+			ShowText(hWnd, Text);
 			break;
 
 		case IDM_TOGGLECURSOR:
@@ -870,11 +834,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			AudioSource = AUDIOMUX_TUNER;
 			Stop_Capture();
 			BT848_SetVideoSource(VideoSource);
-			if (bDisplayStatusBar == TRUE)
-			{
-				sprintf(Text, "Channel %s ", Programm[CurrentProgramm].Name);
-				SetWindowText(hwndKeyField, Text);
-			}
 			if(!System_In_Mute)
 			{
 				Audio_SetSource(AudioSource);
@@ -882,8 +841,9 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			Start_Capture();
 			SetMenuAnalog();
 
+			sprintf(Text, "Channel %s", Programm[CurrentProgramm].Name);
+			StatusBar_ShowText(hwndTextField, Text);
 			OSD_ShowText(hWnd,Programm[CurrentProgramm].Name);
-
 			break;
 
 		case IDM_EXTERN1:
@@ -900,7 +860,9 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			case IDM_EXTERN4: VideoSource = SOURCE_OTHER2;         break;
 			case IDM_EXTERN5: VideoSource = SOURCE_COMPVIASVIDEO;  break;
 			}
-			ShowVideoSource(hWnd, VideoSource);
+			OSD_ShowVideoSource(hWnd, VideoSource);
+			sprintf(Text, "Extern %d", VideoSource);
+			StatusBar_ShowText(hwndTextField, Text);
 
 			AudioSource = AUDIOMUX_EXTERNAL;
 			Stop_Capture();
@@ -908,11 +870,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			BT848_SetGeoSize();
 			WorkoutOverlaySize();
 			BT848_SetVideoSource(VideoSource);
-			if (bDisplayStatusBar == TRUE)
-			{
-				sprintf(Text, "Extern %d", VideoSource);
-				SetWindowText(hwndKeyField, Text);
-			}
 			if(!System_In_Mute)
 			{
 				Audio_SetSource(AudioSource);
@@ -1131,7 +1088,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_SHOW_OSD:
-			ShowVideoSource(hWnd, VideoSource);
+			OSD_ShowVideoSource(hWnd, VideoSource);
 			break;
 
 		case IDM_TREADPRIOR_0:
@@ -1165,7 +1122,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				if (SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS) == TRUE)
 					strcpy(Text, "Real-Time Priority");
 			}
-			SetWindowText(hwndTextField, Text);
+			ShowText(hWnd, Text);
 			SetMenuAnalog();
 			break;
 
@@ -1247,6 +1204,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			bIsPaused = TRUE;
 			Sleep(100);
 			SaveStill();
+			ShowText(hWnd, "Snapshot");
 			bIsPaused = FALSE;
 			Sleep(100);
 			break;
@@ -1324,7 +1282,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		{
 			if (!BT848_IsVideoPresent())
 			{
-				SetWindowText(hwndTextField, "No Video Signal Found");
+				StatusBar_ShowText(hwndTextField, "No Video Signal Found");
 			}
 			else
 			{
@@ -1344,7 +1302,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
 				if (System_In_Mute == TRUE)
 					sprintf(Text1, "Volume Mute");
-				SetWindowText(hwndTextField, Text1);
+				StatusBar_ShowText(hwndTextField, Text1);
 			}
 		}
 		else if (wParam == TIMER_KEYNUMBER)
@@ -2004,8 +1962,6 @@ void CleanUpMemory()
 
 void ChangeChannel(int NewChannel)
 {
-	char Text[128];
-
 	if (TunerType != TUNER_ABSENT)
 	{
 		if(NewChannel >= 0 && NewChannel < MAXPROGS)
@@ -2013,16 +1969,9 @@ void ChangeChannel(int NewChannel)
 			if (Programm[NewChannel].freq != 0)
 			{
 				Audio_SetSource(AUDIOMUX_MUTE);
-
 				CurrentProgramm = NewChannel;
-
 				Tuner_SetFrequency(TunerType, MulDiv(Programm[CurrentProgramm].freq * 1000, 16, 1000000));
 
-				if (bDisplayStatusBar == TRUE)
-				{
-					sprintf(Text, "    Channel %s ",Programm[CurrentProgramm].Name);
-					SetWindowText(hwndKeyField, Text);
-				}
 				VT_ChannelChange();
 				Sleep(20);
 				Audio_SetSource(AudioSource);
@@ -2033,7 +1982,7 @@ void ChangeChannel(int NewChannel)
 
 //---------------------------------------------------------------------------
 // Display current channel number, program name and/or current video signal
-void ShowVideoSource(HWND hWnd, int nVideoSource)
+void OSD_ShowVideoSource(HWND hWnd, int nVideoSource)
 {
 	switch (nVideoSource)
 	{
@@ -2044,4 +1993,12 @@ void ShowVideoSource(HWND hWnd, int nVideoSource)
 	case SOURCE_OTHER2:        OSD_ShowText(hWnd,"Other 2");                      break;
 	case SOURCE_COMPVIASVIDEO: OSD_ShowText(hWnd,"Composite via S-Video");        break;
 	}
+}
+
+//---------------------------------------------------------------------------
+// Show text on both OSD and statusbar
+void ShowText(HWND hWnd, LPCTSTR szText)
+{
+	StatusBar_ShowText(hwndTextField, szText);
+	OSD_ShowText(hWnd, szText);
 }

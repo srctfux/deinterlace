@@ -43,7 +43,7 @@ char		gszOSD[512] = "";
 
 //---------------------------------------------------------------------------
 // Put up the current channel number
-void OSD_ShowText(HWND hWnd,char *szText)
+void OSD_ShowText(HWND hWnd, LPCTSTR szText)
 {
 	if (strlen(szText))
 	{
@@ -87,13 +87,15 @@ void OSD_Redraw(HWND hWnd)
 		GetWindowRect(hWnd,&winRect);
 		nFontsize = (winRect.bottom - winRect.top) / 10;
 
-		// Get the current window size
+		// Set specified font
 		hOSDfont = CreateFont(nFontsize, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, VARIABLE_PITCH | FF_SWISS, OSD_FONT);
 		if (!hOSDfont)
 		{
+			// Fallback to Arial
 			hOSDfont = CreateFont(nFontsize, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, VARIABLE_PITCH | FF_SWISS, "Arial");
 			if (!hOSDfont)
 			{
+				// Otherwise, fallback to any available font
 				hOSDfont = CreateFont(nFontsize, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, VARIABLE_PITCH | FF_SWISS, "");
 			}
 		}

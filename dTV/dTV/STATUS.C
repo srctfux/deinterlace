@@ -405,3 +405,13 @@ LONG APIENTRY StatusFieldProc(HWND hwnd, UINT msg, UINT wParam, LONG lParam)
 	}
 	return 0L;
 }
+
+//---------------------------------------------------------------------------
+// Show text in statusbar only, if statusbar is enabled
+void StatusBar_ShowText(HWND hwndTextField, LPCTSTR szText)
+{
+	if (IsWindowVisible(hwndTextField))
+	{
+		SetWindowText(hwndTextField, szText);
+	}
+}
