@@ -238,7 +238,7 @@ BOOL LoadDeintPlugin(LPCSTR szFileName, DEINTERLACE_METHOD** DeintMethod)
 		pMethod->hModule = hPlugInMod;
 		if(pMethod->pfnPluginStart != NULL)
 		{
-			pMethod->pfnPluginStart(0, NULL);
+			pMethod->pfnPluginStart(0, NULL, NULL);
 		}
 		return TRUE;
 	}

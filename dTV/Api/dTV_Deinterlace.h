@@ -29,8 +29,8 @@
 
 struct _DEINTERLACE_METHOD;
 
-typedef void (__stdcall DEINTERLACEPLUGINSTART)(long NumPlugIns, struct _DEINTERLACE_METHOD** OtherPlugins);
-typedef void (__stdcall DEINTERLACEPLUGINSHOWUI)(HWND hwndMain, HWND hwndStatus);
+typedef void (__stdcall DEINTERLACEPLUGINSTART)(long NumPlugIns, struct _DEINTERLACE_METHOD** OtherPlugins, HWND hwndStatus);
+typedef void (__stdcall DEINTERLACEPLUGINSHOWUI)(HWND hwndMain);
 typedef void (__stdcall DEINTERLACEPLUGINEXIT)(void);
 
 // list of supported plugin versions

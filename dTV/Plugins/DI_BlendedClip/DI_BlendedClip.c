@@ -801,7 +801,7 @@ BOOL APIENTRY BlendedClipProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 	return (FALSE);
 }
 
-void __stdcall BlendedClipShowUI(HWND hwndMain, HWND hwndStatus)
+void __stdcall BlendedClipShowUI(HWND hwndMain)
 {
 	if(ghDlg == NULL)
 	{

@@ -155,15 +155,15 @@ BOOL DeinterlaceAdaptive(DEINTERLACE_INFO *info)
 	}
 }
 
-void __stdcall AdaptiveShowUI(HWND hwndMain, HWND hwndStatus)
+void __stdcall AdaptiveShowUI(HWND hwndMain)
 {
-	ghwndStatus = hwndStatus;
 }
 
-void __stdcall AdaptiveStart(long NumPlugIns, DEINTERLACE_METHOD** OtherPlugins)
+void __stdcall AdaptiveStart(long NumPlugIns, DEINTERLACE_METHOD** OtherPlugins, HWND hwndStatus)
 {
 	DeintMethods = OtherPlugins;
 	NumVideoModes = NumPlugIns;
+	ghwndStatus = hwndStatus;
 }
 
 ////////////////////////////////////////////////////////////////////////////

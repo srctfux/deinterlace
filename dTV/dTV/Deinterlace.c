@@ -163,7 +163,7 @@ void ShowVideoModeUI()
 {
 	if(VideoDeintMethods[gVideoPulldownMode]->pfnPluginShowUI != NULL)
 	{
-		VideoDeintMethods[gVideoPulldownMode]->pfnPluginShowUI(hWnd, StatusBar_GetHWnd(STATUS_PAL));
+		VideoDeintMethods[gVideoPulldownMode]->pfnPluginShowUI(hWnd);
 	}
 }
 
@@ -518,7 +518,7 @@ BOOL LoadDeinterlacePlugins()
 		{
 			if(VideoDeintMethods[i]->pfnPluginStart != NULL)
 			{
-				VideoDeintMethods[i]->pfnPluginStart(NumVideoModes, VideoDeintMethods);
+				VideoDeintMethods[i]->pfnPluginStart(NumVideoModes, VideoDeintMethods, StatusBar_GetHWnd(STATUS_PAL));
 			}
 			AddUIForDeintPlugin(hMenu, VideoDeintMethods[i]);
 		}
