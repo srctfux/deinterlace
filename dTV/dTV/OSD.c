@@ -39,17 +39,43 @@
 #include "AspectRatio.h"
 #include "Other.h"
 
-char		gszOSD[512] = "";
+//---------------------------------------------------------------------------
+// Global OSD Information structure
+OSD_INFO  grOSD = {""};
 
 //---------------------------------------------------------------------------
-// Put up the current channel number
-void OSD_ShowText(HWND hWnd, LPCTSTR szText)
+// Display specified OSD text with autohide
+void OSD_ShowText(HWND hWnd, LPCTSTR szText, double dfSize)
 {
 	if (strlen(szText))
 	{
-		strncpy(gszOSD, szText, sizeof(gszOSD));
+        grOSD.dfSize = dfSize;
+        grOSD.dfXpos = 0.9;
+        grOSD.dfYpos = 0.1;
+		strncpy(grOSD.szText, szText, sizeof(grOSD.szText));
 		OSD_Redraw(hWnd);
 		SetTimer(hWnd, OSD_TIMER_ID, OSD_TIMER_DELAY, NULL);
+	}
+	else
+	{
+		// If OSD message is blank, kill previous OSD message
+		OSD_Clear(hWnd);
+	}
+}
+
+//---------------------------------------------------------------------------
+// Displayed specified OSD text without autohide timer.
+// Stays on screen until a new OSD message replaces current OSD message.
+void OSD_ShowTextPersistent(HWND hWnd, LPCTSTR szText, double dfSize)
+{
+	KillTimer(hWnd, OSD_TIMER_ID);
+	if (strlen(szText))
+	{
+        grOSD.dfSize = dfSize;
+        grOSD.dfXpos = 0.9;
+        grOSD.dfYpos = 0.1;
+		strncpy(grOSD.szText, szText, sizeof(grOSD.szText));
+		OSD_Redraw(hWnd);
 	}
 	else
 	{
@@ -63,7 +89,7 @@ void OSD_ShowText(HWND hWnd, LPCTSTR szText)
 void OSD_Clear(HWND hWnd)
 {
 	KillTimer(hWnd, OSD_TIMER_ID);
-	lstrcpy(gszOSD, "");
+	lstrcpy(grOSD.szText, "");
 	InvalidateRect(hWnd, NULL, FALSE);
 }
 
@@ -75,17 +101,20 @@ void OSD_Redraw(HWND hWnd)
 	HFONT		hTmp, hOSDfont;
 	int			nLen, nFontsize;
 	int			nXpos, nYpos;
+    int         nXWinSize, nYWinSize;
 	RECT		winRect;
 	TEXTMETRIC	tmOSDFont;
 	SIZE		sizeText;
 
-	nLen = strlen(gszOSD);
+	nLen = strlen(grOSD.szText);
 	if (nLen)
 	{
+        if (grOSD.dfSize == 0) grOSD.dfSize = OSD_DEFAULT_SIZE_PERC;
+
 		InvalidateRect(hWnd,NULL,FALSE);
 		PaintColorkey(hWnd, TRUE);
 		GetWindowRect(hWnd,&winRect);
-		nFontsize = (winRect.bottom - winRect.top) / 10;
+		nFontsize = (int)((double)(winRect.bottom - winRect.top) * (grOSD.dfSize / 100.00));
 
 		// Set specified font
 		hOSDfont = CreateFont(nFontsize, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, VARIABLE_PITCH | FF_SWISS, OSD_FONT);
@@ -109,21 +138,24 @@ void OSD_Redraw(HWND hWnd)
 			{
 				SetBkMode(hdc, TRANSPARENT);
 				GetTextMetrics(hdc, &tmOSDFont);
-				GetTextExtentPoint32(hdc, gszOSD, strlen(gszOSD), &sizeText);
+				GetTextExtentPoint32(hdc, grOSD.szText, strlen(grOSD.szText), &sizeText);
 
-				nXpos = 8 * (winRect.right - winRect.left) / 9 - sizeText.cx;
-				nYpos = sizeText.cy;
+                nXWinSize = winRect.right  - winRect.left;
+                nYWinSize = winRect.bottom - winRect.top;
+
+				nXpos = (int)((double)nXWinSize * grOSD.dfXpos) - sizeText.cx;
+				nYpos = (int)((double)nYWinSize * grOSD.dfYpos);
 
 				// Draw OSD outline
 				SetTextColor(hdc, OSD_COLOR_OUTLINE);
-				TextOut(hdc, nXpos - 2, nYpos, gszOSD, strlen(gszOSD));
-				TextOut(hdc, nXpos + 2, nYpos, gszOSD, strlen(gszOSD));
-				TextOut(hdc, nXpos, nYpos - 2, gszOSD, strlen(gszOSD));
-				TextOut(hdc, nXpos, nYpos + 2, gszOSD, strlen(gszOSD));
+				TextOut(hdc, nXpos - 2, nYpos, grOSD.szText, strlen(grOSD.szText));
+				TextOut(hdc, nXpos + 2, nYpos, grOSD.szText, strlen(grOSD.szText));
+				TextOut(hdc, nXpos, nYpos - 2, grOSD.szText, strlen(grOSD.szText));
+				TextOut(hdc, nXpos, nYpos + 2, grOSD.szText, strlen(grOSD.szText));
 
 				// Draw OSD text
 				SetTextColor(hdc, OSD_COLOR_FILL);
-				TextOut(hdc, nXpos, nYpos, gszOSD, strlen(gszOSD));
+				TextOut(hdc, nXpos, nYpos, grOSD.szText, strlen(grOSD.szText));
 				
 				SelectObject(hdc, hTmp);
 				DeleteObject(hOSDfont);

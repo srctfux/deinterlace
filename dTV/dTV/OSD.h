@@ -31,9 +31,21 @@
 #define OSD_FONT				"Arial"
 #define	OSD_COLOR_OUTLINE		RGB(0,0,0)
 #define OSD_COLOR_FILL			RGB(0,255,0)
+#define OSD_DEFAULT_SIZE_PERC   10
+
+// Make sure that the timer ID does not conflict with those in DTV.H
 #define OSD_TIMER_ID			42
 #define OSD_TIMER_DELAY			4000
 
-void OSD_ShowText(HWND hWnd, LPCTSTR szText);
+typedef struct OSD_INFO_TAG
+{
+    char            szText[512];       // Text of OSD
+    double          dfSize;            // Size of OSD as percentage of screen height
+    double          dfXpos;            // X position (0 = left, 1 = right)
+    double          dfYpos;            // Y position (0 = top, 1 = bottom)
+} OSD_INFO;
+
+void OSD_ShowText(HWND hWnd, LPCTSTR szText, double dfSize);
+void OSD_ShowTextPersistent(HWND hWnd, LPCTSTR szText, double dfSize);
 void OSD_Redraw(HWND hWnd);
 void OSD_Clear(HWND hWnd);
