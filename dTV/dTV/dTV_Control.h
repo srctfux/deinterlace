@@ -477,8 +477,7 @@ typedef enum
 
 typedef enum
 {
-	USETEMPORALNOISEFILTER = 0,
-	TEMPORALLUMINANCETHRESHOLD,
+	TEMPORALLUMINANCETHRESHOLD = 0,
 	TEMPORALCHROMATHRESHOLD,
 	FLT_TNOISE_SETTING_LASTONE,
 } FLT_TNOISE_SETTING;
@@ -541,5 +540,20 @@ typedef enum
 #define WM_OSD_GETVALUE		(WM_USER + 18)
 #define WM_OSD_SETVALUE		(WM_USER + 118)
 #define WM_OSD_CHANGEVALUE	(WM_USER + 218)
+
+/////////////////////////////////////////////////////////////////////////////
+// Control settings contained in Filter.c
+/////////////////////////////////////////////////////////////////////////////
+
+typedef enum
+{
+	USETEMPORALNOISEFILTER = 0,
+	USEGAMMAFILTER,
+	FILTER_SETTING_LASTONE,
+} FILTER_SETTING;
+
+#define WM_FILTER_GETVALUE		(WM_USER + 19)
+#define WM_FILTER_SETVALUE		(WM_USER + 119)
+#define WM_FILTER_CHANGEVALUE	(WM_USER + 219)
 
 #endif

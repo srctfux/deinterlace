@@ -69,7 +69,7 @@
 #include "DI_BlendedClip.H"
 #include "FD_60Hz.H"
 #include "FD_50Hz.H"
-#include "FLT_TNoise.h"
+#include "Filter.h"
 #include "Splash.h"
 #include "VideoSettings.h"
 #include "VBI_CCdecode.h"
@@ -535,15 +535,28 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_NOISE_FILTER:
-			if (Setting_GetValue(FLT_TNoise_GetSetting(USETEMPORALNOISEFILTER)))
+			if (Setting_GetValue(Filter_GetSetting(USETEMPORALNOISEFILTER)))
 			{
 				ShowText(hWnd, "Noise Filter OFF");
-				Setting_SetValue(FLT_TNoise_GetSetting(USETEMPORALNOISEFILTER), FALSE);
+				Setting_SetValue(Filter_GetSetting(USETEMPORALNOISEFILTER), FALSE);
 			}
 			else
 			{
 				ShowText(hWnd, "Noise Filter ON");
-				Setting_SetValue(FLT_TNoise_GetSetting(USETEMPORALNOISEFILTER), TRUE);
+				Setting_SetValue(Filter_GetSetting(USETEMPORALNOISEFILTER), TRUE);
+			}
+			break;
+
+		case IDM_GAMMA_FILTER:
+			if (Setting_GetValue(Filter_GetSetting(USEGAMMAFILTER)))
+			{
+				ShowText(hWnd, "Gamma Filter OFF");
+				Setting_SetValue(Filter_GetSetting(USEGAMMAFILTER), FALSE);
+			}
+			else
+			{
+				ShowText(hWnd, "Gamma Filter ON");
+				Setting_SetValue(Filter_GetSetting(USEGAMMAFILTER), TRUE);
 			}
 			break;
 
@@ -1958,7 +1971,7 @@ void SetMenuAnalog()
 	FD60_SetMenu(hMenu);
 	OutThreads_SetMenu(hMenu);
 	Deinterlace_SetMenu(hMenu);
-	FLT_TNoise_SetMenu(hMenu);
+	Filter_SetMenu(hMenu);
 	BT848_SetMenu(hMenu);
 	TVCard_SetMenu(hMenu);
 }

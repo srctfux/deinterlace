@@ -183,6 +183,14 @@ SOURCE=.\FD_Common.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\Filter.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\FLT_Gamma.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\FLT_TNoise.c
 # End Source File
 # Begin Source File
@@ -320,6 +328,14 @@ SOURCE=.\FD_60Hz.h
 # Begin Source File
 
 SOURCE=.\FD_Common.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\Filter.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\FLT_Gamma.h
 # End Source File
 # Begin Source File
 

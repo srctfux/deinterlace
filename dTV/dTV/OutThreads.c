@@ -77,7 +77,7 @@
 #include "DebugLog.h"
 #include "vbi.h"
 #include "Settings.h"
-#include "FLT_TNoise.h"
+#include "Filter.h"
 #include "Status.h"
 #include "FD_60Hz.h"
 #include "FD_50Hz.h"
@@ -630,6 +630,13 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 					nFrame++;
 					LOG("Running Late");
 				}
+				
+				// do any filters that operarate on the input
+				// only
+				if(!RunningLate && !bMissedFrame)
+				{
+					Filter_DoInput(&info);
+				}
 
 				if(!bMissedFrame)
 				{
@@ -672,8 +679,6 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 							return 0;
 						}
 						info.Overlay = pDest;
-
-						NoiseFilter_Temporal(&info);
 					}
 
 					if (RunningLate)
@@ -722,6 +727,9 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 
 					if (bFlipNow)
 					{
+						// Do any filters that run on the output
+						Filter_DoOutput(&info);
+
 						// setup flip flag
 						// the odd and even flags may help the scaled bob
 						// on some cards

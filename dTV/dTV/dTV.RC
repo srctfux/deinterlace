@@ -877,6 +877,7 @@ BEGIN
         POPUP "&Filters"
         BEGIN
             MENUITEM "Noise Reduction (Temporal)\tN", IDM_NOISE_FILTER
+            MENUITEM "&Gamma",                      IDM_GAMMA_FILTER
         END
     END
     POPUP "&Hardware"

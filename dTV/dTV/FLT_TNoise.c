@@ -21,7 +21,6 @@
 #include "cpu.h"
 #include "FLT_TNoise.h"
 
-BOOL UseTemporalNoiseFilter = FALSE;
 long TemporalLuminanceThreshold = 10;	// Pixel luminance differences below this are considered noise.
 long TemporalChromaThreshold = 12;		// Pixel chroma differences below this are considered noise.
 
@@ -41,9 +40,6 @@ BOOL NoiseFilter_Temporal(DEINTERLACE_INFO *info)
 	int y;
 	int Cycles;
 	__int64 qwNoiseThreshold;
-
-	if (! UseTemporalNoiseFilter)
-		return TRUE;
 
 	// Need to have the current and next-to-previous fields to do the filtering.
 	if ((info->IsOdd && (info->OddLines[0] == NULL || info->OddLines[1] == NULL)) ||
@@ -99,11 +95,6 @@ BOOL NoiseFilter_Temporal(DEINTERLACE_INFO *info)
 SETTING FLT_TNoiseSettings[FLT_TNOISE_SETTING_LASTONE] =
 {
 	{
-		"Temporal Noise Filter", ONOFF, 0, &UseTemporalNoiseFilter,
-		FALSE, 0, 1, 1, NULL,
-		"NoiseFilter", "UseTemporalNoiseFilter", NULL,
-	},
-	{
 		"Temporal Luminance Threshold", SLIDER, 0, &TemporalLuminanceThreshold,
 		10, 0, 255, 1, NULL,
 		"NoiseFilter", "TemporalLuminanceThreshold", NULL,
@@ -145,8 +136,3 @@ void FLT_TNoise_WriteSettingsToIni()
 	}
 }
 
-
-void FLT_TNoise_SetMenu(HMENU hMenu)
-{
-	CheckMenuItem(hMenu, IDM_NOISE_FILTER, UseTemporalNoiseFilter ? MF_CHECKED : MF_UNCHECKED);
-}

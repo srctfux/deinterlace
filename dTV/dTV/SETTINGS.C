@@ -74,6 +74,7 @@
 #include "OSD.h"
 #include "TVCards.h"
 #include "VideoSettings.h"
+#include "Filter.h"
 
 char szIniFile[MAX_PATH] = "dTV.ini";
 
@@ -125,6 +126,7 @@ void LoadSettingsFromIni()
 	Deinterlace_ReadSettingsFromIni();
 	FLT_TNoise_ReadSettingsFromIni();
 	OSD_ReadSettingsFromIni();
+	Filter_ReadSettingsFromIni();
 
 	VBI_Flags = 0;
 	if(GetPrivateProfileInt("VBI", "VT", 0, szIniFile) != 0)
@@ -276,6 +278,9 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 		case WM_OSD_GETVALUE:		
 			return Setting_GetValue(OSD_GetSetting((OSD_SETTING)wParam));
 			break;
+		case WM_FILTER_GETVALUE:		
+			return Setting_GetValue(Filter_GetSetting((FILTER_SETTING)wParam));
+			break;
 
 		case WM_ASPECT_SETVALUE:
 			Setting_SetValue(Aspect_GetSetting((ASPECT_SETTING)wParam), lParam);
@@ -330,6 +335,9 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 			break;
 		case WM_OSD_SETVALUE:		
 			Setting_SetValue(OSD_GetSetting((OSD_SETTING)wParam), lParam);
+			break;
+		case WM_FILTER_SETVALUE:		
+			Setting_SetValue(Filter_GetSetting((FILTER_SETTING)wParam), lParam);
 			break;
 
 		case WM_ASPECT_CHANGEVALUE:
@@ -386,6 +394,9 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 		case WM_OSD_CHANGEVALUE:		
 			Setting_ChangeValue(OSD_GetSetting((OSD_SETTING)wParam), lParam);
 			break;
+		case WM_FILTER_CHANGEVALUE:		
+			Setting_ChangeValue(Filter_GetSetting((FILTER_SETTING)wParam), lParam);
+			break;
 		
 		default:
 			break;
@@ -428,6 +439,7 @@ void WriteSettingsToIni()
 	TVCard_WriteSettingsToIni();
 	VideoSettings_WriteSettingsToIni();
 	OSD_WriteSettingsToIni();
+	Filter_WriteSettingsToIni();
 
 	WritePrivateProfileInt("VBI", "VT", VBI_Flags & VBI_VT, szIniFile);
 	WritePrivateProfileInt("VBI", "VPS", VBI_Flags & VBI_VPS, szIniFile);
