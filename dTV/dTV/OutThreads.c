@@ -208,61 +208,61 @@ void SaveStreamSnapshot(DEINTERLACE_INFO *info)
 {
 	FILE *file;
 	char name[13];
-   int n = 0;
-   int i = 0;
-   int j;
+	int n = 0;
+	int i = 0;
+	int j;
 	struct stat st;
 
-   while (n < 100)
+	while (n < 100)
 	{
 		sprintf(name,"sn%06d.dtv",++n) ;
 		if (stat(name, &st))
 			break;
 	}
 
-   if(n == 100)
+	if(n == 100)
 	{
 		ErrorBox("Could not create a file.  You may have too many snapshots already.");
 		return;
 	}
 
-   file = fopen(name,"wb");
+	file = fopen(name,"wb");
 	if (!file)
 	{
 		ErrorBox("Could not open file in SaveStreamSnapshot");
 		return;
 	}
 
-   // just save the info struct
-   // most of the data is pointers which will be useless
-   // to anyone else
-   // but NULLs will be useful in determining how many
-   // fields we have.
-   // The rest will contain all the data we need to use
-   // the data in a test program
+	// just save the info struct
+	// most of the data is pointers which will be useless
+	// to anyone else
+	// but NULLs will be useful in determining how many
+	// fields we have.
+	// The rest will contain all the data we need to use
+	// the data in a test program
 	fwrite(info, sizeof(DEINTERLACE_INFO), 1, file);
 
-   // save all the Odd fields first
-   i = 0;
-   while(i < MAX_FIELD_HISTORY && info->OddLines[i] != NULL)
-   {
-      for(j = 0; j < info->FieldHeight; ++j)
-      {
-      	fwrite(info->OddLines[i][j], info->LineLength, 1, file);
-      }
-      i++;      
-   }
+	// save all the Odd fields first
+	i = 0;
+	while(i < MAX_FIELD_HISTORY && info->OddLines[i] != NULL)
+	{
+		for(j = 0; j < info->FieldHeight; ++j)
+		{
+			fwrite(info->OddLines[i][j], info->LineLength, 1, file);
+		}
+		i++;      
+	}
 
-   // then all the even frames
-   i = 0;
-   while(i < MAX_FIELD_HISTORY && info->EvenLines[i] != NULL)
-   {
-      for(j = 0; j < info->FieldHeight; ++j)
-      {
-      	fwrite(info->OddLines[i][j], info->LineLength, 1, file);
-      }
-      i++;      
-   }
+	// then all the even frames
+	i = 0;
+	while(i < MAX_FIELD_HISTORY && info->EvenLines[i] != NULL)
+	{
+		for(j = 0; j < info->FieldHeight; ++j)
+		{
+			fwrite(info->OddLines[i][j], info->LineLength, 1, file);
+		}
+	i++;      
+	}
 	fclose(file);
 }
 
@@ -907,6 +907,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
          if(bRequestStreamSnap == TRUE)
          {
             SaveStreamSnapshot(&info);
+			bRequestStreamSnap = FALSE;
          }
 
 			// save the last pulldown mode so that we know if its changed
