@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendFilter.h,v 1.6 2002-04-16 15:38:27 tobbej Exp $
+// $Id: DSRendFilter.h,v 1.7 2002-06-03 18:19:30 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.6  2002/04/16 15:38:27  tobbej
+// added support for waiting for next field in last recived frame
+//
 // Revision 1.5  2002/03/11 19:25:58  tobbej
 // fixed pause so it blocks properly
 //
@@ -53,26 +56,7 @@
 
 #include "resource.h"       // main symbols
 #include "DSRendInPin.h"
-
-/**
- * Class for automaticly lock a critical section.
- */
-class CAutoLockCriticalSection
-{
-public:
-	CAutoLockCriticalSection(CComAutoCriticalSection *pLock)
-	{
-		m_pLock=pLock;
-		m_pLock->Lock();
-	}
-	~CAutoLockCriticalSection()
-	{
-		m_pLock->Unlock();
-	}
-private:
-	///the critical section
-	CComAutoCriticalSection *m_pLock;
-};
+#include "AutoLockCriticalSection.h"
 
 /**
  * The filter itself.

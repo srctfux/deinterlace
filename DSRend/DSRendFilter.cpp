@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendFilter.cpp,v 1.7 2002-04-16 15:38:27 tobbej Exp $
+// $Id: DSRendFilter.cpp,v 1.8 2002-06-03 18:19:30 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.7  2002/04/16 15:38:27  tobbej
+// added support for waiting for next field in last recived frame
+//
 // Revision 1.6  2002/03/11 19:25:47  tobbej
 // fixed pause so it blocks properly
 //
@@ -119,10 +122,10 @@ HRESULT CDSRendFilter::Stop()
 	//free buffered sample and sync with rendering thread
 	m_InputPin.resumePause();
 	stopWait();
-	CAutoLockCriticalSection rendLock(&m_renderLock);
+	/*CAutoLockCriticalSection rendLock(&m_renderLock);
 	m_sampleLock.Lock();
 	m_pSample=NULL;
-	m_sampleLock.Unlock();
+	m_sampleLock.Unlock();*/
 
 	m_filterState=State_Stopped;
 	return S_OK;
@@ -184,7 +187,7 @@ bool CDSRendFilter::isStopped()
 
 HRESULT CDSRendFilter::GetState(DWORD dwMilliSecsTimeout,FILTER_STATE *State)
 {
-	ATLTRACE(_T("%s(%d) : CDSRendFilter::GetState\n"),__FILE__,__LINE__);
+	//ATLTRACE(_T("%s(%d) : CDSRendFilter::GetState\n"),__FILE__,__LINE__);
 	CAutoLockCriticalSection lock(&m_Lock);
 
 	*State=m_filterState;
@@ -445,11 +448,15 @@ HRESULT CDSRendFilter::waitForTime(REFERENCE_TIME rtStreamTime)
 	{
 		return VFW_E_NO_CLOCK;
 	}
-	HRESULT hr=m_pRefClk->AdviseTime(m_tStart,rtStreamTime,(HEVENT)m_refClockEvent.getHandle(),&m_refClockCookie);
+	//dont call AdviceTime if event is already set, stopWait() has probably been called
+	if(m_refClockEvent.Check())
+		return S_OK;
+
+	HRESULT hr=m_pRefClk->AdviseTime(m_tStart,rtStreamTime,(HEVENT)m_refClockEvent.GetHandle(),&m_refClockCookie);
 	if(FAILED(hr))
 		return hr;
 
-	if(m_refClockEvent.wait(INFINITE))
+	if(m_refClockEvent.Wait(INFINITE))
 		return S_OK;
 
 	return E_FAIL;
@@ -459,7 +466,7 @@ void CDSRendFilter::stopWait()
 {
 	ATLTRACE(_T("%s(%d) : CDSRendFilter::stopWait\n"),__FILE__,__LINE__);
 	
-	m_refClockEvent.setEvent();
+	m_refClockEvent.SetEvent();
 	if(m_pRefClk!=NULL)
 	{
 		HRESULT hr=m_pRefClk->Unadvise(m_refClockCookie);
@@ -483,14 +490,14 @@ HRESULT CDSRendFilter::renderSample(IMediaSample *pSample)
 	//input pins holds the render lock
 
 	//is the old sample retrieved?
-	if(m_nextSampleReady.wait(0))
+	if(m_nextSampleReady.Check())
 	{
 		m_cFramesDropped++;
 	}
 	m_sampleLock.Lock();
 	m_pSample=pSample;
 	m_sampleLock.Unlock();
-	m_nextSampleReady.setEvent();
+	m_nextSampleReady.SetEvent();
 
 	return S_OK;
 }
@@ -502,66 +509,91 @@ STDMETHODIMP CDSRendFilter::GetNextSample(IMediaSample **ppSample,DWORD dwTimeou
 	{
 		return E_POINTER;
 	}
-	
-	if(!m_nextSampleReady.wait(dwTimeout))
+
+	//if the filter is not running, return the same sample all the time
+	FILTER_STATE state;
+	HRESULT hr=GetState(0,&state);
+	if(FAILED(hr))
+		return hr;
+
+
+
+	if(state!=State_Running)
 	{
-		*ppSample=NULL;
-		return VFW_E_TIMEOUT;
-	}
-	m_sampleLock.Lock();
-	if(m_pSample==NULL)
-	{
+		m_sampleLock.Lock();
+		if(m_pSample==NULL)
+		{
+			m_sampleLock.Unlock();
+			*ppSample=NULL;
+			return E_FAIL;
+		}
+		*ppSample=m_pSample;
+		(*ppSample)->AddRef();
+		m_rtNextFieldStart=-1;
 		m_sampleLock.Unlock();
-		*ppSample=NULL;
-		return E_FAIL;
-	}
-	m_cFramesDrawn++;
-	*ppSample=m_pSample;
-	
-	REFERENCE_TIME rtStart;
-	REFERENCE_TIME rtStop;
-	if(SUCCEEDED(m_pSample->GetTime(&rtStart,&rtStop)))
-	{
-		m_rtNextFieldStart=rtStart+(rtStop-rtStart)/2;
 	}
 	else
 	{
-		m_rtNextFieldStart=-1;
+		if(!m_nextSampleReady.Wait(dwTimeout))
+		{
+			*ppSample=NULL;
+			m_sampleLock.Unlock();
+			return VFW_E_TIMEOUT;
+		}
+		m_sampleLock.Lock();
+		if(m_pSample==NULL)
+		{
+			m_sampleLock.Unlock();
+			*ppSample=NULL;
+			return E_FAIL;
+		}
+		*ppSample=m_pSample;
+		(*ppSample)->AddRef();
+		m_cFramesDrawn++;
+		
+		REFERENCE_TIME rtStart;
+		REFERENCE_TIME rtStop;
+		if(SUCCEEDED(m_pSample->GetTime(&rtStart,&rtStop)))
+		{
+			m_rtNextFieldStart=rtStart+(rtStop-rtStart)/2;
+		}
+		else
+		{
+			m_rtNextFieldStart=-1;
+		}
+
+		//release our buffered sample,
+		//this is nessesary if the upstream filter only provides one singel IMediaSample
+		m_pSample=NULL;
+		m_sampleLock.Unlock();
 	}
-
-
-	//addref the returned sample and release our buffered sample,
-	//this is nessesary if the upstream filter only provides one singel IMediaSample
-	(*ppSample)->AddRef();
-	m_pSample=NULL;
-	m_sampleLock.Unlock();
 	return S_OK;
 }
 
 STDMETHODIMP CDSRendFilter::WaitForNextField(DWORD dwTimeout)
 {
-	ATLTRACE(_T("%s(%d) : CDSRendFilter::WaitForNextField\n"),__FILE__,__LINE__);
+	//ATLTRACE(_T("%s(%d) : CDSRendFilter::WaitForNextField\n"),__FILE__,__LINE__);
 	if(m_pRefClk==NULL)
 	{
-		ATLTRACE(_T("%s(%d) :  No Reference clock\n"),__FILE__,__LINE__);
+		//ATLTRACE(_T("%s(%d) :  No Reference clock\n"),__FILE__,__LINE__);
 		return VFW_E_NO_CLOCK;
 	}
 	if(m_rtNextFieldStart==-1)
 	{
-		ATLTRACE(_T("%s(%d) :  No time to wait for\n"),__FILE__,__LINE__);
+		//ATLTRACE(_T("%s(%d) :  No time to wait for\n"),__FILE__,__LINE__);
 		return E_FAIL;
 	}
 	
 	CEvent clockEvent;
 	DWORD clockCookie;
-	HRESULT hr=m_pRefClk->AdviseTime(m_tStart,m_rtNextFieldStart,(HEVENT)clockEvent.getHandle(),&clockCookie);
+	HRESULT hr=m_pRefClk->AdviseTime(m_tStart,m_rtNextFieldStart,(HEVENT)clockEvent.GetHandle(),&clockCookie);
 	if(FAILED(hr))
 	{
 		ATLTRACE(_T("%s(%d) :  AdviseTime failed\n"),__FILE__,__LINE__);
 		return hr;
 	}
 
-	if(clockEvent.wait(dwTimeout))
+	if(clockEvent.Wait(dwTimeout))
 	{
 		return S_OK;
 	}
