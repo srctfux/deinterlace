@@ -26,6 +26,8 @@
 //
 // 08 Jan 2001   John Adcock           Maybe fixed crashing bug
 //
+// 26 Feb 2001   Hermes Conrad         Sound Fixes
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -42,9 +44,8 @@ int CAudioSource=0;
 BOOL Has_MSP = FALSE;
 char MSPStatus[40] = "";
 char MSPVersion[16] = "";
-BOOL MSPToneControl = FALSE;
 
-int InitialVolume = 1000;
+int InitialVolume = 900;  // HC 26/Feb/2001 Changed to avoid digital clipping
 char InitialBalance = 0x00;
 char InitialLoudness = 0x00;
 char InitialBass = 0x00;
@@ -118,6 +119,11 @@ static struct MSP_INIT_DATA_DEM
 	{ {  2, 4, -6, -4, 40, 94 }, {  3, 18, 27, 48, 66, 72 },
 	  MSP_CARRIER(6.0), MSP_CARRIER(6.0),
 	  0x00d0, 0x0040,   0x0120, 0x3000, 0},
+
+	 /* NICAM/AM -- L (6.5/5.85) */
+	{ {  -2, -8, -10, 10, 50, 86 }, {  -4, -12, -9, 23, 79, 126 },
+	  MSP_CARRIER(6.5), MSP_CARRIER(6.5),
+	  0x00c6, 0x0140,   0x0120, 0x7c03},
 };
 
 
@@ -262,7 +268,6 @@ BOOL Audio_MSP_Init(BYTE DWrite, BYTE DRead)
 		Sleep(4);
 	}
 
-	MSPToneControl = TRUE;
 	Audio_SetVolume(InitialVolume);
 	Audio_SetBalance(InitialBalance);
 	Audio_SetSuperBass(InitialSuperBass);
@@ -329,7 +334,7 @@ WORD Audio_ReadMSP(BYTE bSubAddr, WORD wAddr)
 
 BOOL Audio_SetVolume(int nVolume)
 {
-	Audio_SetToneControl(TRUE);
+	Audio_SetToneControl();
 	if (nVolume < 0 || nVolume > 1000)
 		return FALSE;
 	InitialVolume = nVolume;
@@ -343,7 +348,7 @@ BOOL Audio_SetVolume(int nVolume)
 
 BOOL Audio_SetBalance(char nBalance)
 {
-	Audio_SetToneControl(TRUE);
+	Audio_SetToneControl();
 	InitialBalance = nBalance;
 	WriteDSP(1, nBalance << 8);
 	WriteDSP(0x30, nBalance << 8);
@@ -352,7 +357,7 @@ BOOL Audio_SetBalance(char nBalance)
 
 BOOL Audio_SetBass(char nBass)
 {
-	Audio_SetToneControl(TRUE);
+	Audio_SetToneControl();
 	if (nBass < -96)
 		return FALSE;
 	InitialBass = nBass;
@@ -363,7 +368,7 @@ BOOL Audio_SetBass(char nBass)
 
 BOOL Audio_SetTreble(char nTreble)
 {
-	Audio_SetToneControl(TRUE);
+	Audio_SetToneControl();
 	if (nTreble < -96)
 		return FALSE;
 	InitialTreble = nTreble;
@@ -374,7 +379,7 @@ BOOL Audio_SetTreble(char nTreble)
 
 BOOL Audio_SetLoudness(BYTE nLoudness)
 {
-	Audio_SetToneControl(TRUE);
+	Audio_SetToneControl();
 	if (nLoudness > 68)
 		return FALSE;
 	InitialLoudness = nLoudness;
@@ -385,7 +390,7 @@ BOOL Audio_SetLoudness(BYTE nLoudness)
 
 BOOL Audio_SetSuperBass(BOOL bSuperBass)
 {
-	Audio_SetToneControl(TRUE);
+	Audio_SetToneControl();
 	InitialSuperBass = bSuperBass;
 	WriteDSP(4, (InitialLoudness << 8) + (bSuperBass ? 0x4 : 0));
 	WriteDSP(0x33, (InitialLoudness << 8) + (bSuperBass ? 0x4 : 0));
@@ -394,7 +399,7 @@ BOOL Audio_SetSuperBass(BOOL bSuperBass)
 
 BOOL Audio_SetSpatial(char nSpatial)
 {
-	Audio_SetToneControl(TRUE);
+	Audio_SetToneControl();
 	InitialSpatial = nSpatial;
 	WriteDSP(0x5, (nSpatial << 8) + 0x8);	// Mode A, Automatic high pass gain
 	return TRUE;
@@ -402,7 +407,7 @@ BOOL Audio_SetSpatial(char nSpatial)
 
 BOOL Audio_SetEqualizer(int nIndex, char nLevel)
 {
-	Audio_SetToneControl(FALSE);
+	Audio_SetToneControl();
 	if (nLevel < -96 || nLevel > 96)
 		return FALSE;
 	InitialEqualizer[nIndex] = nLevel;
@@ -410,37 +415,19 @@ BOOL Audio_SetEqualizer(int nIndex, char nLevel)
 	return TRUE;
 }
 
-void Audio_SetToneControl(BOOL nMode)
+void Audio_SetToneControl()
 {
 	int i;
 
-	if (nMode == MSPToneControl)
-		return;
-	MSPToneControl = nMode;
-	if (MSPToneControl == TRUE)
+	WriteDSP(2, InitialBass << 8);	// Bass
+	WriteDSP(0x31, InitialBass << 8);
+	WriteDSP(3, InitialTreble << 8);	// Treble
+	WriteDSP(0x32, InitialTreble << 8);
+	for(i = 0; i < 5; i++)
 	{
-		WriteDSP(2, InitialBass << 8);	// Bass
-		WriteDSP(0x31, InitialBass << 8);
-		WriteDSP(3, InitialTreble << 8);	// Treble
-		WriteDSP(0x32, InitialTreble << 8);
-		for(i = 0; i < 5; i++)
-		{
-			WriteDSP(0x21 + i, InitialEqualizer[i]);	// Eq
-		}
-		WriteDSP(0x20, 0);		// Mode control here (need eq=0)
+		WriteDSP(0x21 + i, InitialEqualizer[i]);	// Eq
 	}
-	else
-	{
-		WriteDSP(0x20, 0xFF << 8);	// Mode control here (need eq=0)
-		WriteDSP(2, 0);			// Bass
-		WriteDSP(0x31, 0);
-		WriteDSP(3, 0);			// Treble
-		WriteDSP(0x32, 0);
-		for(i = 0; i < 5; i++)
-		{
-			WriteDSP(0x21 + i, InitialEqualizer[i]);	// Eq
-		}
-	}
+	WriteDSP(0x20, 0);		// Mode control here (need eq=0)
 }
 
 BOOL Audio_MSP_Reset()
@@ -473,6 +460,7 @@ void Audio_MSP_SetCarrier(int cdo1, int cdo2)
 	WriteDem(0x9b, cdo1 >> 12);
 	WriteDem(0xa3, cdo2 & 0xfff);
 	WriteDem(0xab, cdo2 >> 12);
+	WriteDem(0x56, 0);
 }
 
 void Audio_MSP_SetMode(int type)
@@ -497,7 +485,6 @@ void Audio_MSP_SetMode(int type)
 
 	Audio_MSP_SetCarrier(MSP_init_data[type].cdo1, MSP_init_data[type].cdo2);
 
-	// MAE WriteDem(0x60, 0);			/* LOAD_REG_1/2 */
 	WriteDSP(0x08, MSP_init_data[type].dfp_src);
 	WriteDSP(0x09, MSP_init_data[type].dfp_src);
 	WriteDSP(0x0a, MSP_init_data[type].dfp_src);
@@ -505,13 +492,14 @@ void Audio_MSP_SetMode(int type)
 
 // msp3410 needs some more initialization
 	if (MSPNicam)
-		WriteDSP(0x10, 0x3000);
+		WriteDSP(0x10, 0x5a00);
 
 }
 
 void Audio_MSP_SetStereo(int MajorMode, int MinorMode, int mode)
 {
 	int nicam = 0;
+	int src = 0;
 
 	MSPStereo = mode;
 
@@ -519,14 +507,13 @@ void Audio_MSP_SetStereo(int MajorMode, int MinorMode, int mode)
 	switch (MSPMode)
 	{
 	case MSP_MODE_FM_TERRA:
+		Audio_MSP_SetCarrier(carrier_detect[MinorMode], carrier_detect_main[MajorMode]);
 		switch (MSPStereo)
 		{
 		case VIDEO_SOUND_STEREO:
-			//WriteDSP(0x0e, 0x2402); // MAE 8 Dec 2000
-			WriteDSP(0x0e, 0x2403); // MAE 8 Dec 2000
-			//WriteDSP(0x08, 0x0320); // MAE 8 Dec 2000
-			//WriteDSP(0x00, 0x7300); // MAE 8 Dec 2000
-
+			WriteDSP(0x15, 0x0000); // HC 22/Feb/2001 Identification Mode B/G
+			WriteDSP(0x0e, 0x3001); // HC 22/Feb/2001 
+			WriteDSP(0xbb, 0x00d0); // HC 22/Feb/2001 AGC On
 			break;
 		case VIDEO_SOUND_MONO:
 		case VIDEO_SOUND_LANG1:
@@ -566,25 +553,19 @@ void Audio_MSP_SetStereo(int MajorMode, int MinorMode, int mode)
 	switch (MSPStereo)
 	{
 	case VIDEO_SOUND_STEREO:
-		WriteDSP(0x08, 0x0320 | nicam);
-		WriteDSP(0x09, 0x0320 | nicam);
-		WriteDSP(0x0a, 0x0320 | nicam);
-		WriteDSP(0x05, 0x4000);
+		src = 0x0020 | nicam;
 		break;
 	case VIDEO_SOUND_MONO:
 	case VIDEO_SOUND_LANG1:
-		WriteDSP(0x08, 0x0000 | nicam);
-		WriteDSP(0x09, 0x0000 | nicam);
-		WriteDSP(0x0a, 0x0000 | nicam);
-		WriteDSP(0x05, 0x0000);
+		src = 0x0000 | nicam;
 		break;
 	case VIDEO_SOUND_LANG2:
-		WriteDSP(0x08, 0x0010 | nicam);
-		WriteDSP(0x09, 0x0010 | nicam);
-		WriteDSP(0x0a, 0x0010 | nicam);
-		WriteDSP(0x05, 0x0000);
+		src = 0x0010 | nicam;
 		break;
 	}
+	WriteDSP(0x08, src);
+	WriteDSP(0x09, src);
+	WriteDSP(0x0a, src);
 }
 
 BOOL Audio_MSP_Version()

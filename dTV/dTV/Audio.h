@@ -54,7 +54,7 @@ BOOL Audio_SetTreble(char nTreble);
 BOOL Audio_SetLoudness(BYTE nLoudness);
 BOOL Audio_SetSpatial(char nSpatial);
 BOOL Audio_SetSuperBass(BOOL bSuperBass);
-void Audio_SetToneControl(BOOL nMode);
+void Audio_SetToneControl();
 BOOL Audio_SetEqualizer(int nIndex, char nLevel);
 int Audio_GetStereoMode(BOOL bHardwareMode);
 BOOL Audio_Mute(void); // MAE 8 Dec 2000
