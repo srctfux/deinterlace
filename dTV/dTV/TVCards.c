@@ -560,7 +560,7 @@ const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 	// MAE 5 Dec 2000 Start of change
 	{
 		"Conexant Foghorn NTSC/ATSC-A",
-		3, 1, 0, 2, 0xFFFFB7,
+		3, 1, 0, 2, 0xFF00F8,
 		{ 2, 3, 1, 1, 0, 0, 0, 0},
 		{ 0x000048, 0x000048, 0x000048, 0x000048, 0x000048, 0x000048},
 		0,
@@ -570,7 +570,7 @@ const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 	},
 	{
 		"Conexant Foghorn NTSC/ATSC-B",
-		3, 1, 0, 2, 0xFFFFB7,
+		3, 1, 0, 2, 0xFF00F8,
 		{ 2, 3, 1, 1, 0, 0, 0, 0},
 		{ 0x000048, 0x000048, 0x000048, 0x000048, 0x000048, 0x000048},
 		0,
@@ -580,7 +580,7 @@ const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 	},
 	{
 		"Conexant Foghorn NTSC/ATSC-C",
-		3, 1, 0, 2, 0xFFFFB7,
+		3, 1, 0, 2, 0xFF00F8,
 		{ 2, 3, 1, 1, 0, 0, 0, 0},
 		{ 0x000048, 0x000048, 0x000048, 0x000048, 0x000048, 0x000048},
 		0,

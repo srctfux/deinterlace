@@ -164,7 +164,7 @@ BOOL Audio_SetSource(AUDIOMUXTYPE nChannel)
 	}
 
 	/* select direct input */
-	BT848_WriteWord(BT848_GPIO_REG_INP, 0x00); // MAE 14 Dec 2000 disabled
+	//BT848_WriteWord(BT848_GPIO_REG_INP, 0x00); // MAE 14 Dec 2000 disabled
 	BT848_AndOrDataDword(BT848_GPIO_DATA, MuxSelect, ~TVCards[CardType].GPIOMask); 
 	return TRUE;
 }
