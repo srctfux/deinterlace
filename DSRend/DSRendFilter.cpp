@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendFilter.cpp,v 1.8 2002-06-03 18:19:30 tobbej Exp $
+// $Id: DSRendFilter.cpp,v 1.9 2002-07-06 16:42:09 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,12 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.8  2002/06/03 18:19:30  tobbej
+// moved CAutoLockCriticalSection
+// removed an assert failiure when running debug version of directx
+// return the same sample all the time if filter is stopped or paused
+// renamed a few members in CEvent
+//
 // Revision 1.7  2002/04/16 15:38:27  tobbej
 // added support for waiting for next field in last recived frame
 //
@@ -58,18 +64,18 @@
 #include "DSRend.h"
 #include "DSRendFilter.h"
 CDSRendFilter::CDSRendFilter() :
-	m_iAvgFrameRate(0),
+	m_AvgFieldRate(0),
 	m_iAvg(0),
 	m_iDev(0),
-	m_cFramesDrawn(0),
-	m_cFramesDropped(0),
 	m_iJitter(0),
 	m_pGraph(NULL),
 	m_pFilterName(NULL),
 	m_InputPin(this),
 	m_filterState(State_Stopped),
 	m_pEventSink(NULL),
-	m_tStart(0)
+	m_tStart(0),
+	m_rtLastTime(0),
+	m_iLastDrawnFrames(0)
 {
 	IPin *tmp=NULL;
 	HRESULT hr=m_InputPin.QueryInterface(IID_IPin,(void**)&tmp);
@@ -119,14 +125,10 @@ HRESULT CDSRendFilter::Stop()
 		return S_OK;
 	}
 	
-	//free buffered sample and sync with rendering thread
+	//free buffered samples and sync with rendering thread
 	m_InputPin.resumePause();
 	stopWait();
-	/*CAutoLockCriticalSection rendLock(&m_renderLock);
-	m_sampleLock.Lock();
-	m_pSample=NULL;
-	m_sampleLock.Unlock();*/
-
+	m_FieldBuffer.RemoveFields(INFINITE);
 	m_filterState=State_Stopped;
 	return S_OK;
 }
@@ -166,9 +168,10 @@ HRESULT CDSRendFilter::Run(REFERENCE_TIME tStart)
 	}
 	
 	//reset stats
-	m_iAvgFrameRate=0;
-	m_cFramesDrawn=0;
-	m_cFramesDropped=0;
+	m_AvgFieldRate=0;
+	m_rtLastTime=0;
+	m_iLastDrawnFrames=0;
+	m_FieldBuffer.ResetFieldCounters();
 
 	m_tStart=tStart;
 	
@@ -349,18 +352,7 @@ HRESULT CDSRendFilter::get_AvgFrameRate(int *piAvgFrameRate)
 	if(piAvgFrameRate==NULL)
 		return E_POINTER;
 	
-	//update framerate if we have a reference clock
-	if(m_pRefClk!=NULL)
-	{
-		REFERENCE_TIME now;
-		HRESULT hr=m_pRefClk->GetTime(&now);
-		if(SUCCEEDED(hr))
-		{
-			m_iAvgFrameRate=m_cFramesDrawn*10000/((now-m_tStart)/100000);
-		}
-	}
-	
-	*piAvgFrameRate=m_iAvgFrameRate;
+	*piAvgFrameRate=(int)((m_AvgFieldRate*100)/2);
 	return S_OK;
 }
 
@@ -399,7 +391,7 @@ HRESULT CDSRendFilter::get_FramesDrawn(int *pcFramesDrawn)
 
 	if(pcFramesDrawn==NULL)
 		return E_POINTER;
-	*pcFramesDrawn=m_cFramesDrawn;
+	*pcFramesDrawn=m_FieldBuffer.GetDrawnFields()/2;
 	return S_OK;
 }
 
@@ -410,7 +402,7 @@ HRESULT CDSRendFilter::get_FramesDroppedInRenderer(int *pcFrames)
 
 	if(pcFrames==NULL)
 		return E_POINTER;
-	*pcFrames=m_cFramesDropped;
+	*pcFrames=m_FieldBuffer.GetDroppedFields()/2;
 	return S_OK;
 }
 
@@ -479,8 +471,7 @@ HRESULT CDSRendFilter::beginFlush()
 	ATLTRACE(_T("%s(%d) : CDSRendFilter::beginFlush\n"),__FILE__,__LINE__);
 	stopWait();
 	
-	CAutoLockCriticalSection lock(&m_sampleLock);
-	m_pSample=NULL;
+	m_FieldBuffer.RemoveFields(INFINITE);
 	
 	return S_OK;
 }
@@ -488,119 +479,73 @@ HRESULT CDSRendFilter::beginFlush()
 HRESULT CDSRendFilter::renderSample(IMediaSample *pSample)
 {
 	//input pins holds the render lock
-
-	//is the old sample retrieved?
-	if(m_nextSampleReady.Check())
-	{
-		m_cFramesDropped++;
-	}
-	m_sampleLock.Lock();
-	m_pSample=pSample;
-	m_sampleLock.Unlock();
-	m_nextSampleReady.SetEvent();
-
-	return S_OK;
+	
+	return m_FieldBuffer.InsertSample(pSample);
 }
 
-STDMETHODIMP CDSRendFilter::GetNextSample(IMediaSample **ppSample,DWORD dwTimeout)
+STDMETHODIMP CDSRendFilter::SetFieldHistory(long cFields)
 {
-	//ATLTRACE(_T("%s(%d) : CDSRendFilter::GetNextSample\n"),__FILE__,__LINE__);
-	if(ppSample==NULL)
+	ATLTRACE(_T("%s(%d) : CDSRendFilter::SetFieldHistory\n"),__FILE__,__LINE__);
+	return m_FieldBuffer.SetFieldCount(cFields);
+}
+
+STDMETHODIMP CDSRendFilter::GetFields(FieldBuffer *ppFields, long *count,BufferInfo *pBufferInfo, DWORD dwTimeout)
+{
+	//ATLTRACE(_T("%s(%d) : CDSRendFilter::GetFields\n"),__FILE__,__LINE__);
+	
+	if(ppFields==NULL || count==NULL || pBufferInfo==NULL)
 	{
 		return E_POINTER;
 	}
 
-	//if the filter is not running, return the same sample all the time
-	FILTER_STATE state;
-	HRESULT hr=GetState(0,&state);
+	HRESULT hr=m_FieldBuffer.GetFields(dwTimeout,count,ppFields,pBufferInfo);
 	if(FAILED(hr))
+	{
+		if(hr==E_UNEXPECTED)
+		{
+			m_FieldBuffer.FreeFields();
+		}
 		return hr;
-
-
-
-	if(state!=State_Running)
-	{
-		m_sampleLock.Lock();
-		if(m_pSample==NULL)
-		{
-			m_sampleLock.Unlock();
-			*ppSample=NULL;
-			return E_FAIL;
-		}
-		*ppSample=m_pSample;
-		(*ppSample)->AddRef();
-		m_rtNextFieldStart=-1;
-		m_sampleLock.Unlock();
 	}
-	else
+	
+	//update framerate if we have a reference clock
+	if(m_pRefClk!=NULL)
 	{
-		if(!m_nextSampleReady.Wait(dwTimeout))
+		REFERENCE_TIME now;
+		HRESULT hr=m_pRefClk->GetTime(&now);
+		if(SUCCEEDED(hr))
 		{
-			*ppSample=NULL;
-			m_sampleLock.Unlock();
-			return VFW_E_TIMEOUT;
+			int iDrawnFrames=m_FieldBuffer.GetDrawnFields();
+			if(m_rtLastTime>=m_tStart)
+			{
+				if(iDrawnFrames-m_iLastDrawnFrames>=2)
+				{
+					double time=(now-m_rtLastTime)/(double)10000000;
+					double newfps=(iDrawnFrames-m_iLastDrawnFrames)/time;
+					m_AvgFieldRate=0.005 * newfps + (1.0-0.005)*m_AvgFieldRate;
+					
+					//ATLTRACE(_T(" newfps=%e avg=%e\n"),newfps,m_AvgFrameRate);
+					
+					//save time and frames drawn
+					m_rtLastTime=now;
+					m_iLastDrawnFrames=iDrawnFrames;
+				}
+			}
+			else
+			{
+				m_rtLastTime=now;
+				m_iLastDrawnFrames=iDrawnFrames;
+			}
 		}
-		m_sampleLock.Lock();
-		if(m_pSample==NULL)
-		{
-			m_sampleLock.Unlock();
-			*ppSample=NULL;
-			return E_FAIL;
-		}
-		*ppSample=m_pSample;
-		(*ppSample)->AddRef();
-		m_cFramesDrawn++;
-		
-		REFERENCE_TIME rtStart;
-		REFERENCE_TIME rtStop;
-		if(SUCCEEDED(m_pSample->GetTime(&rtStart,&rtStop)))
-		{
-			m_rtNextFieldStart=rtStart+(rtStop-rtStart)/2;
-		}
-		else
-		{
-			m_rtNextFieldStart=-1;
-		}
-
-		//release our buffered sample,
-		//this is nessesary if the upstream filter only provides one singel IMediaSample
-		m_pSample=NULL;
-		m_sampleLock.Unlock();
 	}
+
 	return S_OK;
 }
 
-STDMETHODIMP CDSRendFilter::WaitForNextField(DWORD dwTimeout)
+STDMETHODIMP CDSRendFilter::FreeFields()
 {
-	//ATLTRACE(_T("%s(%d) : CDSRendFilter::WaitForNextField\n"),__FILE__,__LINE__);
-	if(m_pRefClk==NULL)
-	{
-		//ATLTRACE(_T("%s(%d) :  No Reference clock\n"),__FILE__,__LINE__);
-		return VFW_E_NO_CLOCK;
-	}
-	if(m_rtNextFieldStart==-1)
-	{
-		//ATLTRACE(_T("%s(%d) :  No time to wait for\n"),__FILE__,__LINE__);
-		return E_FAIL;
-	}
-	
-	CEvent clockEvent;
-	DWORD clockCookie;
-	HRESULT hr=m_pRefClk->AdviseTime(m_tStart,m_rtNextFieldStart,(HEVENT)clockEvent.GetHandle(),&clockCookie);
-	if(FAILED(hr))
-	{
-		ATLTRACE(_T("%s(%d) :  AdviseTime failed\n"),__FILE__,__LINE__);
-		return hr;
-	}
-
-	if(clockEvent.Wait(dwTimeout))
-	{
-		return S_OK;
-	}
-	else
-	{
-		return VFW_E_TIMEOUT;
-	}
+	ATLTRACE(_T("%s(%d) : CDSRendFilter::FreeFields\n"),__FILE__,__LINE__);
+	return m_FieldBuffer.FreeFields();
 }
 
 // IMediaSeeking

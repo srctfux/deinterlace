@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendFilter.h,v 1.7 2002-06-03 18:19:30 tobbej Exp $
+// $Id: DSRendFilter.h,v 1.8 2002-07-06 16:42:09 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,12 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.7  2002/06/03 18:19:30  tobbej
+// moved CAutoLockCriticalSection
+// removed an assert failiure when running debug version of directx
+// return the same sample all the time if filter is stopped or paused
+// renamed a few members in CEvent
+//
 // Revision 1.6  2002/04/16 15:38:27  tobbej
 // added support for waiting for next field in last recived frame
 //
@@ -57,13 +63,12 @@
 #include "resource.h"       // main symbols
 #include "DSRendInPin.h"
 #include "AutoLockCriticalSection.h"
+#include "FieldBufferHandler.h"
 
 /**
  * The filter itself.
  * @todo add quality-control management
  * @todo add more statistics on IQualProp, not all data is updated
- * @todo add buffering of IMediaSamples, might need a IMemAllocator first
- * @todo add support for field input
  * @todo maybe create a new mediatype enumerator object
  */
 class ATL_NO_VTABLE CDSRendFilter : 
@@ -101,8 +106,9 @@ BEGIN_PROP_MAP(CDSRendFilter)
 END_PROP_MAP()
 
 // IDSRendFilter
-	STDMETHOD(GetNextSample)(IMediaSample **ppSample,DWORD dwTimeout);
-	STDMETHOD(WaitForNextField)(DWORD dwTimeout);
+	STDMETHOD(SetFieldHistory)(long cFields);
+	STDMETHOD(GetFields)(FieldBuffer *ppFields,long *count,BufferInfo *pBufferInfo,DWORD dwTimeout);
+	STDMETHOD(FreeFields)();
 
 // IPersist
 	STDMETHOD(GetClassID(CLSID *pClassID));
@@ -151,7 +157,6 @@ END_PROP_MAP()
 	STDMETHOD(GetPreroll(LONGLONG *pllPreroll));
 
 public:
-	
 	/**
 	 *
 	 * @param pSample sample to render
@@ -176,9 +181,11 @@ public:
 	
 	/// unblock a call to waitForTime.
 	void stopWait();
-	
+
 	///rendering lock
 	CComAutoCriticalSection m_renderLock;
+
+	CFieldBufferHandler m_FieldBuffer;
 
 private:
 	/**
@@ -190,11 +197,11 @@ private:
 	HRESULT getMediaSeeking(CComPtr<IMediaSeeking> &pSeeking);
 
 	//IQualProp
-	int m_iAvgFrameRate;
+	double m_AvgFieldRate;
+	REFERENCE_TIME m_rtLastTime;
+	int m_iLastDrawnFrames;
 	int m_iAvg;
 	int m_iDev;
-	int m_cFramesDrawn;
-	int m_cFramesDropped;
 	int m_iJitter;
 	
 	//IBaseFilter
@@ -221,12 +228,6 @@ private:
 	///The input pin
 	CCustomComObject<CDSRendInPin,CDSRendFilter*> m_InputPin;
 
-	CComPtr<IMediaSample> m_pSample;
-	CComAutoCriticalSection m_sampleLock;
-	REFERENCE_TIME m_rtNextFieldStart;
-
-	///This event is used to signal that there is a new sample to be retrived.
-	CEvent m_nextSampleReady;
 };
 
 #endif //__DSRENDFILTER_H_
