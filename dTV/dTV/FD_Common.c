@@ -483,7 +483,7 @@ BOOL Bob(DEINTERLACE_INFO *info)
 		{
 			for (i = 0; i < info->FieldHeight; i++)
 			{
-				memcpyBOBMMX(lpOverlay, lpOverlay + info->OverlayPitch,
+				memcpyBOBSSE(lpOverlay, lpOverlay + info->OverlayPitch,
 					lines[i], info->LineLength);
 				lpOverlay += 2 * info->OverlayPitch;
 			}
@@ -492,7 +492,7 @@ BOOL Bob(DEINTERLACE_INFO *info)
 		{
 			for (i = 0; i < info->FieldHeight; i++)
 			{
-				memcpyBOBSSE(lpOverlay, lpOverlay + info->OverlayPitch,
+				memcpyBOBMMX(lpOverlay, lpOverlay + info->OverlayPitch,
 					lines[i], info->LineLength);
 				lpOverlay += 2 * info->OverlayPitch;
 			}

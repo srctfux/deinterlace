@@ -298,7 +298,7 @@ MAINLOOP_LABEL:
 	if (!info->IsOdd)
 	{
 		info->pMemcpy(info->Overlay + (info->FrameHeight - 1) * info->OverlayPitch,
-				  info->OddLines[info->FieldHeight - 1],
+				  info->OddLines[0][info->FieldHeight - 1],
 				  info->LineLength);
 	}
 
