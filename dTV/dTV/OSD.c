@@ -84,6 +84,10 @@
 #define	OSD_SCREEN_9	9
 #define	OSD_SCREEN_10	10
 
+#define	OSD_COLOR_TITLE		RGB(255,150,150)
+#define	OSD_COLOR_SECTION	RGB(150,150,255)
+#define	OSD_COLOR_CURRENT	RGB(200,150,0)
+
 char szFontName[128] = "Arial";
 long OutlineColor = RGB(0,0,0);
 long TextColor = RGB(0,255,0);
@@ -639,11 +643,11 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 	// WSS DATA DECODING SCREEN
 	case OSD_SCREEN_2:
 		// Title
-		OSD_AddText("WSS data decoding", dfSize*1.5, RGB(255,150,150), OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (1, dfMargin, dfSize*1.5));
+		OSD_AddText("WSS data decoding", dfSize*1.5, OSD_COLOR_TITLE, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (1, dfMargin, dfSize*1.5));
 
 		nLine = 3;
 
-		OSD_AddText("Status", dfSize, RGB(150,150,255), OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+		OSD_AddText("Status", dfSize, OSD_COLOR_SECTION, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 
 		sprintf (szInfo, "Decoding errors : %d", WSSNbDecodeErr);
 		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
@@ -660,7 +664,7 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 
 			if (WSSDecodeOk)
 			{
-				OSD_AddText("Data", dfSize, RGB(150,150,255), OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+				OSD_AddText("Data", dfSize, OSD_COLOR_SECTION, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 
 				// WSS data
 				if (WSSAspectRatio > 0)
@@ -708,7 +712,7 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 			}
 
-			OSD_AddText("Debug", dfSize, RGB(150,150,255), OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+			OSD_AddText("Debug", dfSize, OSD_COLOR_SECTION, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 
 			// Debug informations
 			sprintf (szInfo, "Errors searching start position : %d", WSSNbErrPos);
@@ -725,11 +729,11 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 
 	case OSD_SCREEN_3:
 		// Title
-		OSD_AddText("Statistics", dfSize*1.5, RGB(255,150,150), OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (1, dfMargin, dfSize*1.5));
+		OSD_AddText("Statistics", dfSize*1.5, OSD_COLOR_TITLE, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (1, dfMargin, dfSize*1.5));
 
 		nLine = 3;
 
-		OSD_AddText("Dropped frames", dfSize, RGB(150,150,255), OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+		OSD_AddText("Dropped frames", dfSize, OSD_COLOR_SECTION, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 
 		sprintf (szInfo, "Number : %ld", nTotalDropFrames);
 		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
@@ -740,23 +744,26 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 
 		nLine = 3;
 
-		OSD_AddText("Deinterlace modes", dfSize, RGB(150,150,255), OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+		OSD_AddText("Deinterlace modes", dfSize, OSD_COLOR_SECTION, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 
 		sprintf (szInfo, "Number of changes : %ld", nTotalDeintModeChanges);
 		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 		OSD_AddText("changes - % of time - mode", dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 		for (i = 0 ; i < PULLDOWNMODES_LAST_ONE ; i++)
 		{
-			if (i == gPulldownMode)
+			if (nDeintModeChanges[i] > 0)
 			{
-				Color = RGB(200,150,0);
+				if (i == gPulldownMode)
+				{
+					Color = OSD_COLOR_CURRENT;
+				}
+				else
+				{
+					Color = 0;
+				}
+				sprintf (szInfo, "%04d - %05.1f %% - %s", nDeintModeChanges[i], nDeintModeTicks[i] * 100 / (double)(nLastTicks - nInitialTicks), DeintModeNames[i]);
+				OSD_AddText(szInfo, dfSize, Color, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 			}
-			else
-			{
-				Color = 0;
-			}
-			sprintf (szInfo, "%04d - %05.1f %% - %s", nDeintModeChanges[i], nDeintModeTicks[i] * 100 / (double)(nLastTicks - nInitialTicks), DeintModeNames[i]);
-			OSD_AddText(szInfo, dfSize, Color, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 		}
 		break;
 
