@@ -409,7 +409,10 @@ void UnloadDeinterlacePlugins()
 	int i;
 	for(i = 0; i < NumVideoModes; i++)
 	{
-		VideoDeintMethods[i]->pfnPluginExit();
+		if(VideoDeintMethods[i]->pfnPluginExit!=NULL)
+		{
+			VideoDeintMethods[i]->pfnPluginExit();
+		}
 		FreeLibrary(VideoDeintMethods[i]->hModule);
 		VideoDeintMethods[i] = NULL;
 	}

@@ -103,7 +103,10 @@ void UnloadFilterPlugins()
 	int i;
 	for(i = 0; i < NumFilters; i++)
 	{
-		Filters[i]->pfnPluginExit();
+		if(Filters[i]->pfnPluginExit!=NULL)
+		{
+			Filters[i]->pfnPluginExit();
+		}
 		FreeLibrary(Filters[i]->hModule);
 		Filters[i] = NULL;
 	}
