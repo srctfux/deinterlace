@@ -885,8 +885,8 @@ BEGIN
         END
         POPUP "&Filters"
         BEGIN
-            MENUITEM "Filters",                     ID_SETTINGS_FILTERS_FILTERS
-            , INACTIVE
+            MENUITEM "___Filters___",               ID_SETTINGS_FILTERS_FILTERS
+            , GRAYED
         END
     END
     POPUP "&Hardware"

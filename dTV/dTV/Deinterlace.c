@@ -49,6 +49,7 @@
 #include "FD_60Hz.h"
 #include "AspectRatio.h"
 #include "Status.h"
+#include "OSD.h"
 
 DEINTERLACE_METHOD FilmDeintMethods[FILMPULLDOWNMODES_LAST_ONE] =
 {
@@ -216,6 +217,8 @@ void SetVideoDeinterlaceIndex(int index)
 			return;
 		}
 	}
+	//must set it to something
+	SetVideoDeinterlaceMode(0);
 }
 
 char* GetDeinterlaceModeName()
@@ -318,6 +321,7 @@ BOOL ProcessDeinterlaceSelection(HWND hWnd, WORD wMenuID)
 		if(wMenuID == VideoDeintMethods[i]->MenuId)
 		{
 			SetVideoDeinterlaceMode(i);
+			OSD_ShowText(hWnd, GetDeinterlaceModeName(), 0);
 			return TRUE;
 		}
 	}

@@ -448,40 +448,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			ShowText(hWnd, GetDeinterlaceModeName());
 			break;
 
-		case IDM_WEAVE:
-		case IDM_BOB:
-		case IDM_VIDEO_WEAVE:
-		case IDM_VIDEO_BOB:
-		case IDM_EVEN_ONLY:
-		case IDM_ODD_ONLY:
-		case IDM_VIDEO_2FRAME:
-		case IDM_SCALER_BOB:
-		case IDM_BLENDED_CLIP:
-		case IDM_ADAPTIVE:
-		case IDM_VIDEO_GREEDY:
-		case IDM_VIDEO_GREEDY2FRAME:
-			if(Setting_GetValue(OutThreads_GetSetting(AUTODETECT)))
-			{
-				if(BT848_GetTVFormat()->Is25fps)
-				{
-					Setting_SetValue(FD50_GetSetting(PALFILMFALLBACKMODE), LOWORD(wParam) - IDM_VIDEO_BOB);
-				}
-				else
-				{
-					Setting_SetValue(FD60_GetSetting(NTSCFILMFALLBACKMODE), LOWORD(wParam) - IDM_VIDEO_BOB);
-				}
-				if(!IsFilmMode())
-				{
-					SetVideoDeinterlaceIndex(LOWORD(wParam) - IDM_VIDEO_BOB);
-				}
-			}
-			else
-			{
-				SetVideoDeinterlaceIndex(LOWORD(wParam) - IDM_VIDEO_BOB);
-			}
-			ShowText(hWnd, GetDeinterlaceModeName());
-			break;
-
 		case IDM_ABOUT:
 			DialogBox(hInst, "ABOUT", hWnd, AboutProc);
 			break;
