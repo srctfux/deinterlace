@@ -29,6 +29,8 @@
 // 24 Jul 2000   John Adcock           Original dTV Release
 //                                     Added Memory Alloc functions
 //
+// 05 Jan 2001   John Adcock           Added SetCurrentDirectoryCall
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "KernelDriver.h"
@@ -620,6 +622,11 @@ DWORD CdTVDriver::dTVdrvStartDriver(void)
 	{
 		*pszName-- = 0;
 	}
+
+	// JA 05/01/2001
+	// changes directory to be the same as the exe file
+	// should cure problems with shortcuts and macros
+	SetCurrentDirectory(szDriverPath);
 
 	dwResult = start( pszDriverName );
 	if (dwResult != ERROR_SUCCESS && !bWindows95)
