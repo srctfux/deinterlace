@@ -25,10 +25,19 @@
 
 FILTER_METHOD LinearCorrMethod;
 
+typedef struct _BlendStruct
+{
+	int		pixel1;
+	double	coef1;
+	int		pixel2;
+	double	coef2;
+	int		pixel3;	// Temporary
+} BlendStruct;
+
 int PictureWidth = -1;
 int PictureHeight = -1;
 int NbPixelsPerLineTab[MAX_HEIGHT];
-int LinearFilterTab[MAX_WIDTH+2][MAX_WIDTH];
+BlendStruct LinearFilterTab[MAX_WIDTH+2][MAX_WIDTH];
 BYTE TmpBuf[MAX_WIDTH*2];
 
 BOOL DoOnlyMasking = FALSE;
@@ -43,7 +52,7 @@ void UpdLinearFilterTables(int Width)
 	int i, j, k;
 	int Start, End;
 	double pos;
-	double pos_before, pos_after;
+	double pixel_before, pixel_after;
 
 	for (i=0 ; i<=Width ; i++)
 	{
@@ -53,7 +62,10 @@ void UpdLinearFilterTables(int Width)
 		{
 			if ((j < Start) || (j > End))
 			{
-				LinearFilterTab[i][j] = -1;
+				LinearFilterTab[i][j].pixel1 = -1;
+				LinearFilterTab[i][j].pixel2 = -1;
+				// Temporary
+				LinearFilterTab[i][j].pixel3 = -1;
 			}
 			else
 			{
@@ -61,17 +73,23 @@ void UpdLinearFilterTables(int Width)
 					pos = (double)(j - Start) / (double)(i - 1) * (double)(Width - 1);
 				else
 					pos = (double)(Width - 1) / 2.0;
-				pos_before = floor(pos);
-				pos_after = ceil(pos);
+				pixel_before = floor(pos);
+				pixel_after = ceil(pos);
+				LinearFilterTab[i][j].pixel1 = (int)pixel_before;
+				LinearFilterTab[i][j].coef1 = pos - pixel_before;
+				LinearFilterTab[i][j].pixel2 = (int)pixel_after;
+				LinearFilterTab[i][j].coef2 = pixel_after - pos;
+
+				// Temporary
 				k = (int)ceil(pos - 0.5);
 				if ((j % 2) != (k % 2))
 				{
-					if ((pos - pos_before) <= (pos_after - pos))
+					if ((pos - pixel_before) <= (pixel_after - pos))
 						k++;
 					else
 						k--;
 				}
-				LinearFilterTab[i][j] = k;
+				LinearFilterTab[i][j].pixel3 = k;
 			}
 		}
 	}
@@ -134,7 +152,7 @@ void ApplyLinearFilter(BYTE* pLine, int NewWidth, MEMCPY_FUNC *pCopy)
 
 	for (i=0 ; i<PictureWidth ; i++)
 	{
-		j = LinearFilterTab[NewWidth][i];
+		j = LinearFilterTab[NewWidth][i].pixel3;
 		if (j == -1)
 		{
 			// Color the pixel in black
