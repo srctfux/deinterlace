@@ -82,6 +82,16 @@ occur before switching back to video video mode from a film mode.&nbsp;</td>
 </tr>
 
 <tr>
+<td>StaticImageFieldCount</td>
+<td>16</td>
+<td>dTV considers an image to be static if it stays the same (or nearly
+the same, subject to Threshold32Pulldown) for this many fields.  If
+auto pulldown detect is turned on, dTV will switch from video deinterlace
+to simple weave mode for as long as the image remains the same.  This
+helps stabilize still images such as DVD menu screens.</td>
+</tr>
+ 
+<tr>
 <td colspan=3>
 <h3>[BTVPlugin]</h3>
 </td>

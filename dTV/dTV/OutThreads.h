@@ -72,6 +72,7 @@ extern long PulldownSwitchMax;
 extern long Threshold32Pulldown;
 extern long ThresholdPulldownMismatch;
 extern long ThresholdPulldownComb;
+extern long StaticImageFieldCount;
 extern BOOL bAutoDetectMode;
 extern BOOL bFallbackToVideo;
 extern BOOL bIsPaused;

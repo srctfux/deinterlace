@@ -78,6 +78,7 @@ long                ThresholdPulldownMismatch = 900;
 long                ThresholdPulldownComb = 150;
 long                PulldownSwitchInterval = 3000;
 long                PulldownSwitchMax = 4;
+long				StaticImageFieldCount = 16;
 BOOL                bAutoDetectMode = TRUE;
 BOOL                bFallbackToVideo = TRUE;
 
@@ -431,6 +432,7 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 	static long MISMATCH_COUNT = 0;
 	static long MOVIE_FIELD_CYCLE = 0;
 	static long MOVIE_VERIFY_CYCLE = 0;
+	static long MATCH_COUNT = 0;
 	static ePULLDOWNMODES OldPulldownMode = VIDEO_MODE;
 
 	// Call with FieldDiff -1 is an initialization call.
@@ -442,6 +444,7 @@ void UpdateNTSCPulldownMode(long FieldDiff,
         MOVIE_VERIFY_CYCLE = 0;
         MOVIE_FIELD_CYCLE = 0;
 		MISMATCH_COUNT = 0;
+		MATCH_COUNT = 0;
 		gPulldownMode = VIDEO_MODE;
 		UpdatePulldownStatus();
 		dwLastFlipTicks = -1;
@@ -456,6 +459,15 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 	//
     if(FieldDiff > Threshold32Pulldown)
 	{
+		MATCH_COUNT = 0;
+
+		if (gPulldownMode == SIMPLE_WEAVE)
+		{
+			// We're in weave mode and the image is no longer static.  Go
+			// back to video mode immediately.
+			SwitchToVideo = TRUE;
+		}
+
 		if (MISMATCH_COUNT > PulldownRepeatCount2 * 5)
 		{
 			// There have been no duplicate fields lately.
@@ -500,6 +512,8 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 	}
     else
 	{
+		MATCH_COUNT++;
+
 		// It's either a stationary image OR a duplicate field in a movie
 		if(MISMATCH_COUNT == 4)
 		{
@@ -637,9 +651,22 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 			// problems during a movie, such as a spurious field added
 			// or dropped. Reset MISMATCH_COUNT to 0 below and let
 			// detection cycle happen again in order to re-synchronize.
-			// Keep the MODE variable the way it currently is.
+			//
+			// If we've seen matching fields for a while and we're in
+			// video mode, switch to weave mode since we're probably
+			// looking at a static image and video mode can introduce
+			// flickering.  But don't switch out of film mode when we
+			// hit a static image.
 		}
 		MISMATCH_COUNT = 0;
+
+		if (MATCH_COUNT >= StaticImageFieldCount &&
+			gPulldownMode == VIDEO_MODE)
+		{
+			gPulldownMode = SIMPLE_WEAVE;
+			LOG(" Match count %ld, switching to weave", MATCH_COUNT);
+			UpdatePulldownStatus();
+		}
 	}
 }
 
@@ -716,46 +743,55 @@ BOOL DoWeWantToFlip(BOOL bFlipNow, BOOL bIsOddField)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Updates the pulldown mode status indicator in the window footer if the mode
+// is different than the one currently listed there.
 void UpdatePulldownStatus()
 {
-	switch(gPulldownMode)
+	static ePULLDOWNMODES lastPulldownMode = PULLDOWNMODES_LAST_ONE;
+
+	if (gPulldownMode != lastPulldownMode)
 	{
-	case VIDEO_MODE:
-		SetWindowText(hwndPalField, "Video Deinterlace");
-		break;
-	case SIMPLE_WEAVE:
-		SetWindowText(hwndPalField, "Simple Weave");
-		break;
-	case INTERPOLATE_BOB:
-		SetWindowText(hwndPalField, "Interpolated BOB");
-		break;
-	case BTV_PLUGIN:
-		SetWindowText(hwndPalField, "Using bTV Plugin");
-		break;
-	case FILM_22_PULLDOWN_ODD:
-		SetWindowText(hwndPalField, "2:2 Pulldown Flip on Odd");
-		break;
-	case FILM_22_PULLDOWN_EVEN:
-		SetWindowText(hwndPalField, "2:2 Pulldown Flip on Even");
-		break;
-	case FILM_32_PULLDOWN_0:
-		SetWindowText(hwndPalField, "3:2 Pulldown Skip 1st Full Frame");
-		break;
-	case FILM_32_PULLDOWN_1:
-		SetWindowText(hwndPalField, "3:2 Pulldown Skip 2nd Full Frame");
-		break;
-	case FILM_32_PULLDOWN_2:
-		SetWindowText(hwndPalField, "3:2 Pulldown Skip 3rd Full Frame");
-		break;
-	case FILM_32_PULLDOWN_3:
-		SetWindowText(hwndPalField, "3:2 Pulldown Skip 4th Full Frame");
-		break;
-	case FILM_32_PULLDOWN_4:
-		SetWindowText(hwndPalField, "3:2 Pulldown Skip 5th Full Frame");
-		break;
-	default:
-		SetWindowText(hwndPalField, "Unknown Pulldown Mode");
-		break;
+		switch(gPulldownMode)
+		{
+		case VIDEO_MODE:
+			SetWindowText(hwndPalField, "Video Deinterlace");
+			break;
+		case SIMPLE_WEAVE:
+			SetWindowText(hwndPalField, "Simple Weave");
+			break;
+		case INTERPOLATE_BOB:
+			SetWindowText(hwndPalField, "Interpolated BOB");
+			break;
+		case BTV_PLUGIN:
+			SetWindowText(hwndPalField, "Using bTV Plugin");
+			break;
+		case FILM_22_PULLDOWN_ODD:
+			SetWindowText(hwndPalField, "2:2 Pulldown Flip on Odd");
+			break;
+		case FILM_22_PULLDOWN_EVEN:
+			SetWindowText(hwndPalField, "2:2 Pulldown Flip on Even");
+			break;
+		case FILM_32_PULLDOWN_0:
+			SetWindowText(hwndPalField, "3:2 Pulldown Skip 1st Full Frame");
+			break;
+		case FILM_32_PULLDOWN_1:
+			SetWindowText(hwndPalField, "3:2 Pulldown Skip 2nd Full Frame");
+			break;
+		case FILM_32_PULLDOWN_2:
+			SetWindowText(hwndPalField, "3:2 Pulldown Skip 3rd Full Frame");
+			break;
+		case FILM_32_PULLDOWN_3:
+			SetWindowText(hwndPalField, "3:2 Pulldown Skip 4th Full Frame");
+			break;
+		case FILM_32_PULLDOWN_4:
+			SetWindowText(hwndPalField, "3:2 Pulldown Skip 5th Full Frame");
+			break;
+		default:
+			SetWindowText(hwndPalField, "Unknown Pulldown Mode");
+			break;
+		}
+
+		lastPulldownMode = gPulldownMode;
 	}
 }
 
