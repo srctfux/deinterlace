@@ -174,6 +174,8 @@ typedef struct _aspectsettings {
 	double yZoomFactor;
 	double xZoomCenter;
 	double yZoomCenter;
+	// Image inversion
+	BOOL invertX, invertY;
 } AspectSettingsStruct;
 extern AspectSettingsStruct aspectSettings;
 

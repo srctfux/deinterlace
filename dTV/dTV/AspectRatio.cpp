@@ -59,6 +59,8 @@
 // 10 Mar 2001   Michael Samblanet     Added first draft auto-resize window code
 // 11 Mar 2001   Michael Samblanet     Converted to C++ file, initial pass at reworking the aspect calculation code
 // 23 Mar 2001   Michael Samblanet     Reworked code to use filter chain, major testing and debugging
+// 03 May 2001   Michael Samblanet     Moved half-height logic to correct location in aspect code
+//                                     Expieremental inversion code (invert source rect if options are enabled)
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -92,7 +94,9 @@ AspectSettingsStruct aspectSettings = {1333,0,1,0,0,30,0,FALSE,60,300,15,20,
 									2000,VERT_POS_CENTRE,HORZ_POS_CENTRE,
 									{0,0,0,0},{0,0,0,0},{0,0,0,0},TRUE,FALSE,4,TRUE,FALSE,
 									0,60*30,1000,FALSE,8,60,60,1000,FALSE,FALSE,
-									1.0,1.0,0.5,0.5};
+									1.0,1.0,0.5,0.5,
+									FALSE,FALSE, // invertX, invertY
+									};
 
 BOOL Bounce_OnChange(long NewValue); // Forward declaration to reuse this code...
 BOOL Orbit_OnChange(long NewValue); // Forward declaration to reuse this code...
@@ -205,9 +209,6 @@ void _WorkoutOverlaySize(BOOL allowResize)
 			ar.rOriginalOverlaySrc.right = CurrentX;
 			ar.rOriginalOverlaySrc.top = 0;
 			ar.rOriginalOverlaySrc.bottom = CurrentY;
-			// If we're in half-height mode, squish the source rectangle accordingly.  This
-			// allows the overlay hardware to do our bobbing for us.
-			if (HalfHeight)	{ ar.rOriginalOverlaySrc.top /= 2; ar.rOriginalOverlaySrc.bottom /= 2; }
 			// Set the aspect adjustment factor...
 			ar.rOriginalOverlaySrc.setAspectAdjust((double)CurrentX/(double)CurrentY,
 										 GetActualSourceFrameAspect());
@@ -234,18 +235,39 @@ void _WorkoutOverlaySize(BOOL allowResize)
 			return;
 		} else delete head;
 
+	// If we're in half-height mode, squish the source rectangle accordingly.  This
+	// allows the overlay hardware to do our bobbing for us.
+	// Note: this could be put in a filter but it seems more approproiate to use a part
+	// of setting the overlay...
+		if (HalfHeight)	{ ar.rOriginalOverlaySrc.top /= 2; ar.rOriginalOverlaySrc.bottom /= 2; }
+
 	// Save the settings....
 		aspectSettings.destinationRectangle = ar.rCurrentOverlayDest;
-		aspectSettings.destinationRectangleWindow = ar.rCurrentOverlayDest; 
-		if (!aspectSettings.deferedSetOverlay) // MRS 2-22-01 - Defered overlay set
-			Overlay_Update(&ar.rCurrentOverlaySrc, &ar.rCurrentOverlayDest, DDOVER_SHOW, TRUE);
-		else aspectSettings.overlayNeedsSetting = TRUE;
-
-	// Save the Overlay Destination and force a repaint 
-		aspectSettings.sourceRectangle = ar.rCurrentOverlaySrc;
 		ScreenToClient(hWnd,((PPOINT)&aspectSettings.destinationRectangle));
 		ScreenToClient(hWnd,((PPOINT)&aspectSettings.destinationRectangle)+1);
 
+		aspectSettings.destinationRectangleWindow = ar.rCurrentOverlayDest; 
+		
+		ar.rCurrentOverlaySrc.normalize(); aspectSettings.sourceRectangle = ar.rCurrentOverlaySrc;
+		
+	// Invert the rectangle if necessary...
+		if (aspectSettings.invertX) {
+			int t = aspectSettings.sourceRectangle.right;
+			aspectSettings.sourceRectangle.right = aspectSettings.sourceRectangle.left;
+			aspectSettings.sourceRectangle.left = t;
+		}
+		if (!aspectSettings.invertY) {
+			int t = aspectSettings.sourceRectangle.top;
+			aspectSettings.sourceRectangle.top = aspectSettings.sourceRectangle.bottom;
+			aspectSettings.sourceRectangle.bottom = t;
+		}
+	
+	// Set or defer the overlay...
+		if (!aspectSettings.deferedSetOverlay) // MRS 2-22-01 - Defered overlay set
+			Overlay_Update(&aspectSettings.sourceRectangle, &aspectSettings.destinationRectangleWindow, DDOVER_SHOW, TRUE);
+		else aspectSettings.overlayNeedsSetting = TRUE;
+
+	// Save the Overlay Destination and force a repaint 
 		// MRS 2-23-01 Only invalidate if we changed something
 		if (memcmp(&ar.rPrevDest,&aspectSettings.destinationRectangle,sizeof(ar.rPrevDest))) { 
 			// MRS 2-22-01 Invalidate just the union of the old region and the new region - no need to invalidate all of the window.
@@ -254,7 +276,7 @@ void _WorkoutOverlaySize(BOOL allowResize)
 			InvalidateRect(hWnd,&invalidate,FALSE);
 		} else if (aspectSettings.overlayNeedsSetting) {
 			// If not invalidating, we need to update the overlay now...
-			Overlay_Update(&ar.rCurrentOverlaySrc, &ar.rCurrentOverlayDest, DDOVER_SHOW, TRUE);
+			Overlay_Update(&aspectSettings.sourceRectangle, &aspectSettings.destinationRectangleWindow, DDOVER_SHOW, TRUE);
 			aspectSettings.overlayNeedsSetting = FALSE;
 		}
 

@@ -793,6 +793,8 @@
 #define IDM_ZOOM_40                     2006
 #define IDM_ZOOM_MINUS                  2007
 #define IDM_ZOOM_PLUS                   2008
+#define IDM_XINVERT                     2009
+#define IDM_YINVERT                     2010
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -800,7 +802,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        159
-#define _APS_NEXT_COMMAND_VALUE         2009
+#define _APS_NEXT_COMMAND_VALUE         2011
 #define _APS_NEXT_CONTROL_VALUE         1879
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

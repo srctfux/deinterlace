@@ -845,6 +845,8 @@ BEGIN
             MENUITEM "3.5x",                        IDM_ZOOM_35
             MENUITEM "4x",                          IDM_ZOOM_40
         END
+        MENUITEM "X-Axis Inversion (Expieremental)", IDM_XINVERT
+        MENUITEM "Y-Axis Inversion (Expieremental)", IDM_YINVERT
     END
     POPUP "&Settings"
     BEGIN
