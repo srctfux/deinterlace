@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: FieldBufferHandler.cpp,v 1.3 2002-07-06 19:18:22 tobbej Exp $
+// $Id: FieldBufferHandler.cpp,v 1.4 2002-07-15 18:19:43 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.3  2002/07/06 19:18:22  tobbej
+// fixed sample scheduling, file playback shoud work now
+//
 // Revision 1.2  2002/07/06 18:36:58  tobbej
 // fixed crashing with aligned_free
 //
@@ -51,7 +54,9 @@ m_DroppedFields(0),
 m_DrawnFields(0),
 m_bOneFieldPerSample(false),
 m_bFlushing(false),
-m_pfnMemcpy(NULL)
+m_pfnMemcpy(NULL),
+m_bNeedConv(false),
+m_bSwapFields(false)
 {
 	//clear mediatype
 	memset(&m_Mt,0,sizeof(AM_MEDIA_TYPE));
@@ -114,6 +119,22 @@ HRESULT CFieldBufferHandler::SetMediaType(const AM_MEDIA_TYPE *pMt)
 
 	if(pMt->majortype==MEDIATYPE_Video && pMt->cbFormat>0 && pMt->pbFormat!=NULL)
 	{
+		//check if color conversion is needed
+		m_bNeedConv=false;
+		if(pMt->subtype!=MEDIASUBTYPE_YUY2)
+		{
+			if(!m_ColorConv.CanCovert(pMt))
+			{
+				return VFW_E_INVALIDMEDIATYPE;
+			}
+			
+			m_bNeedConv=true;
+			if(!m_ColorConv.SetFormat(pMt))
+			{
+				return VFW_E_INVALIDMEDIATYPE;
+			}
+		}
+
 		//check if the samples contain fields or frames
 		if(pMt->formattype==FORMAT_VideoInfo)
 		{
@@ -182,17 +203,11 @@ HRESULT CFieldBufferHandler::InsertSample(CComPtr<IMediaSample> pSample)
 		bTimeValid=true;
 	}
 	
-	ATLASSERT(!m_bOneFieldPerSample ? m_FieldCount%2==0 : true);
-
-	//find out if there is enough space in the buffer
-	if(m_Fields.GetSize()<m_FieldCount)
-	{
-		
-	}
-	else
+	if(m_Fields.GetSize()>=m_FieldCount)
 	{
 		if(m_Fields[0].bInUse==true)
 		{
+			//wait for an empty buffer to use
 			m_BufferReleased.ResetEvent();
 			m_Lock.Unlock();
 			while(true)
@@ -201,7 +216,7 @@ HRESULT CFieldBufferHandler::InsertSample(CComPtr<IMediaSample> pSample)
 				{
 					m_DroppedFields++;
 
-					//dont return failiure, if we do we wont get any more samples
+					//dont return failure, if we do we wont get any more samples
 					return S_OK;
 				}
 				m_Lock.Lock();
@@ -223,7 +238,7 @@ HRESULT CFieldBufferHandler::InsertSample(CComPtr<IMediaSample> pSample)
 	{
 		//one frame per sample
 
-		long LineSize=bmiHeader.biWidth*bmiHeader.biBitCount/8;
+		long LineSize=bmiHeader.biWidth*2;
 		size_t FieldSize=(bmiHeader.biHeight/2)*LineSize;
 		
 		//first field
@@ -235,33 +250,21 @@ HRESULT CFieldBufferHandler::InsertSample(CComPtr<IMediaSample> pSample)
 			m_Fields.RemoveAt(0);
 			///@todo m_DroppedFields++ but only if the buffer was never used
 		}
-		if(field1.pSample!=NULL)
+
+		field1.flags=m_bSwapFields ? BUFFER_FLAGS_FIELD_ODD : BUFFER_FLAGS_FIELD_EVEN;
+		
+		//split the field
+		if(m_bNeedConv)
 		{
-			//since we have frame input this shoud never be called
-			field1.pSample=NULL;
-			field1.pBuffer=(BYTE*)aligned_malloc(FieldSize,0x10);
-			field1.cbSize=FieldSize;
+			m_ColorConv.Convert(field1.GetBufferSetSize(FieldSize),pSampleBuffer,CColorConverter::COVERSION_FORMAT::CNV_EVEN);
 		}
 		else
 		{
-			//check if it is posibel to reuse the old buffer
-			if(field1.cbSize<FieldSize)
+			field1.GetBufferSetSize(FieldSize);
+			for(int i=0;i<bmiHeader.biHeight/2;i++)
 			{
-				if(field1.pBuffer!=NULL)
-				{
-					aligned_free((void*)field1.pBuffer);
-				}
-				field1.pSample=NULL;
-				field1.pBuffer=(BYTE*)aligned_malloc(FieldSize,0x10);
-				field1.cbSize=FieldSize;
+				m_pfnMemcpy(field1.pBuffer+i*LineSize,pSampleBuffer+(2*i)*LineSize,LineSize);
 			}
-		}
-		field1.flags=BUFFER_FLAGS_FIELD_EVEN;
-
-		//split the field
-		for(int i=0;i<bmiHeader.biHeight/2;i++)
-		{
-			m_pfnMemcpy(field1.pBuffer+i*LineSize,pSampleBuffer+(2*i)*LineSize,LineSize);
 		}
 		ATLASSERT(field1.bInUse==false);
 
@@ -290,7 +293,7 @@ HRESULT CFieldBufferHandler::InsertSample(CComPtr<IMediaSample> pSample)
 					{
 						m_DroppedFields++;
 
-						//dont return failiure, if we do we wont get any more samples
+						//dont return failure, if we do we wont get any more samples
 						return S_OK;
 					}
 					m_Lock.Lock();
@@ -310,32 +313,20 @@ HRESULT CFieldBufferHandler::InsertSample(CComPtr<IMediaSample> pSample)
 			m_Fields.RemoveAt(0);
 			///@todo m_DroppedFields++ but only if the buffer was never used
 		}
-		if(field2.pSample!=NULL)
+
+		field2.flags= m_bSwapFields ? BUFFER_FLAGS_FIELD_EVEN : BUFFER_FLAGS_FIELD_ODD;
+		//split the field
+		if(m_bNeedConv)
 		{
-			//since we have frame input this shoud never be called
-			field2.pSample=NULL;
-			field2.pBuffer=(BYTE*)aligned_malloc(FieldSize,0x10);
-			field2.cbSize=FieldSize;
+			m_ColorConv.Convert(field2.GetBufferSetSize(FieldSize),pSampleBuffer,CColorConverter::COVERSION_FORMAT::CNV_ODD);
 		}
 		else
 		{
-			//check if it is posibel to reuse the old buffer
-			if(field2.cbSize<FieldSize)
+			field2.GetBufferSetSize(FieldSize);
+			for(int i=0;i<bmiHeader.biHeight/2;i++)
 			{
-				if(field2.pBuffer!=NULL)
-				{
-					aligned_free((void*)field2.pBuffer);
-				}
-				field2.pSample=NULL;
-				field2.pBuffer=(BYTE*)aligned_malloc(FieldSize,0x10);
-				field2.cbSize=FieldSize;
+				m_pfnMemcpy(field2.pBuffer+i*LineSize,pSampleBuffer+(2*i+1)*LineSize,LineSize);
 			}
-		}
-		field2.flags=BUFFER_FLAGS_FIELD_ODD;
-		//split the field
-		for(i=0;i<bmiHeader.biHeight/2;i++)
-		{
-			m_pfnMemcpy(field2.pBuffer+i*LineSize,pSampleBuffer+(2*i+1)*LineSize,LineSize);
 		}
 		ATLASSERT(field2.bInUse==false);
 		
@@ -371,47 +362,23 @@ HRESULT CFieldBufferHandler::InsertSample(CComPtr<IMediaSample> pSample)
 		}
 
 		//check if this sample needs to be copied
-		if(cMediaSamples>=m_MaxMediaSamples)
+		if(m_bNeedConv || cMediaSamples>=m_MaxMediaSamples)
 		{
 			//copy IMediaSample to a new buffer
-
-			if(field.pSample!=NULL)
+			if(m_bNeedConv)
 			{
-				field.pSample=NULL;
-				field.pBuffer=(BYTE*)aligned_malloc(sampleSize,0x10);
-				field.cbSize=sampleSize;
+				m_ColorConv.Convert(field.GetBufferSetSize(sampleSize),pSampleBuffer,CColorConverter::COVERSION_FORMAT::CNV_ALL);
 			}
 			else
 			{
-				//check if the old buffer is large enough
-				if(field.cbSize<sampleSize)
-				{
-					if(field.pBuffer!=NULL)
-					{
-						aligned_free(field.pBuffer);
-					}
-					field.pBuffer=(BYTE*)aligned_malloc(sampleSize,0x10);
-					field.cbSize=sampleSize;
-				}
+				m_pfnMemcpy(field.GetBufferSetSize(sampleSize),pSampleBuffer,sampleSize);
 			}
 			ATLASSERT(field.cbSize>=sampleSize);
-
-			m_pfnMemcpy(field.pBuffer,pSampleBuffer,sampleSize);
 		}
 		else
 		{
 			//buffer IMediaSample directly
-
-			if(field.pSample==NULL && field.pBuffer!=NULL)
-			{
-				aligned_free(field.pBuffer);
-				field.pBuffer=NULL;
-				field.cbSize=0;
-			}
-
-			field.pSample=pSample;
-			field.cbSize=sampleSize;
-			field.pBuffer=pSampleBuffer;
+			field.InsertSample(pSample,pSampleBuffer,sampleSize);
 		}
 
 		//get even/odd flag
@@ -427,10 +394,10 @@ HRESULT CFieldBufferHandler::InsertSample(CComPtr<IMediaSample> pSample)
 				switch(prop.dwTypeSpecificFlags&AM_VIDEO_FLAG_FIELD_MASK)
 				{
 				case AM_VIDEO_FLAG_FIELD1:
-					field.flags=BUFFER_FLAGS_FIELD_EVEN;
+					field.flags=m_bSwapFields ? BUFFER_FLAGS_FIELD_ODD : BUFFER_FLAGS_FIELD_EVEN;
 					break;
 				case AM_VIDEO_FLAG_FIELD2:
-					field.flags=BUFFER_FLAGS_FIELD_ODD;
+					field.flags=m_bSwapFields ? BUFFER_FLAGS_FIELD_EVEN : BUFFER_FLAGS_FIELD_ODD;
 					break;
 				}
 			}
@@ -707,4 +674,66 @@ void CFieldBufferHandler::ResetFieldCounters()
 {
 	m_DroppedFields=0;
 	m_DrawnFields=0;
+}
+
+void CFieldBufferHandler::SetSwapFields(bool bSwap)
+{
+	m_bSwapFields=bSwap;
+}
+
+bool CFieldBufferHandler::GetSwapFields()
+{
+	return m_bSwapFields;
+}
+
+HRESULT CFieldBufferHandler::GetStatus(DSRendStatus &status)
+{
+	BITMAPINFOHEADER bmi;
+	HRESULT hr=GetBitmapInfoHeader(bmi);
+	if(SUCCEEDED(hr))
+	{
+		status.Height=bmi.biHeight;
+		status.Width=bmi.biWidth;
+		status.bFieldInput=m_bOneFieldPerSample;
+		status.bNeedConv=m_bNeedConv;
+	}
+	return hr;
+}
+
+void CFieldBufferHandler::CFieldInfo::InsertSample(CComPtr<IMediaSample> sample,BYTE *buffer,ULONG size)
+{
+	if(pSample==NULL && pBuffer!=NULL)
+	{
+		aligned_free(pBuffer);
+		pBuffer=NULL;
+		cbSize=0;
+	}
+
+	pSample=sample;
+	cbSize=size;
+	pBuffer=buffer;
+}
+
+BYTE* CFieldBufferHandler::CFieldInfo::GetBufferSetSize(ULONG size)
+{
+	if(pSample!=NULL)
+	{
+		pSample=NULL;
+		pBuffer=(BYTE*)aligned_malloc(size,0x10);
+		cbSize=size;
+	}
+	else
+	{
+		//check if the old buffer is large enough
+		if(cbSize<size)
+		{
+			if(pBuffer!=NULL)
+			{
+				aligned_free(pBuffer);
+			}
+			pBuffer=(BYTE*)aligned_malloc(size,0x10);
+			cbSize=size;
+		}
+	}
+	return pBuffer;
 }

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendInPin.cpp,v 1.9 2002-07-06 19:18:22 tobbej Exp $
+// $Id: DSRendInPin.cpp,v 1.10 2002-07-15 18:21:37 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.9  2002/07/06 19:18:22  tobbej
+// fixed sample scheduling, file playback shoud work now
+//
 // Revision 1.8  2002/07/06 16:40:52  tobbej
 // new field buffering
 // support for field input
@@ -68,7 +71,7 @@
 #include <dvdmedia.h>
 
 CDSRendInPin::CDSRendInPin(CDSRendFilter *pFilter)
-:m_pFilter(pFilter),m_bFlushing(false)
+:m_pFilter(pFilter),m_bFlushing(false),m_bForceYUY2(FALSE),m_FieldFormat(DSREND_FIELD_FORMAT_AUTO)
 {
 	//clear mediatype
 	memset(&m_mt,0,sizeof(m_mt));
@@ -87,6 +90,72 @@ HRESULT CDSRendInPin::FinalRelease()
 	{
 		m_pFilter=NULL;
 	}
+	return S_OK;
+}
+
+// IDSRendSettings
+STDMETHODIMP CDSRendInPin::get_Status(DSRendStatus * pVal)
+{
+	ATLTRACE(_T("%s(%d) : CDSRendInPin::get_GetStatus\n"),__FILE__,__LINE__);
+	if (pVal == NULL)
+		return E_POINTER;
+	
+	if(!isConnected())
+	{
+		return VFW_E_NOT_CONNECTED;
+	}
+	else
+	{
+		return m_pFilter->m_FieldBuffer.GetStatus(*pVal);
+	}
+}
+
+STDMETHODIMP CDSRendInPin::get_SwapFields(BOOL * pVal)
+{
+	ATLTRACE(_T("%s(%d) : CDSRendInPin::get_SwapFields\n"),__FILE__,__LINE__);
+	if (pVal == NULL)
+		return E_POINTER;
+	*pVal=m_pFilter->m_FieldBuffer.GetSwapFields();
+	return S_OK;
+}
+
+STDMETHODIMP CDSRendInPin::put_SwapFields(BOOL pVal)
+{
+	ATLTRACE(_T("%s(%d) : CDSRendInPin::put_SwapFields\n"),__FILE__,__LINE__);
+	m_pFilter->m_FieldBuffer.SetSwapFields(pVal==TRUE);
+	return S_OK;
+}
+
+STDMETHODIMP CDSRendInPin::get_ForceYUY2(BOOL * pVal)
+{
+	ATLTRACE(_T("%s(%d) : CDSRendInPin::get_ForceYUY2\n"),__FILE__,__LINE__);
+	if (pVal == NULL)
+		return E_POINTER;
+	
+	*pVal=m_bForceYUY2;
+	return S_OK;
+}
+
+STDMETHODIMP CDSRendInPin::put_ForceYUY2(BOOL pVal)
+{
+	ATLTRACE(_T("%s(%d) : CDSRendInPin::put_ForceYUY2\n"),__FILE__,__LINE__);
+	m_bForceYUY2=pVal;
+	return S_OK;
+}
+
+STDMETHODIMP CDSRendInPin::get_FieldFormat(DSREND_FIELD_FORMAT * pVal)
+{
+	ATLTRACE(_T("%s(%d) : CDSRendInPin::get_FieldFormat\n"),__FILE__,__LINE__);
+	if (pVal == NULL)
+		return E_POINTER;
+	*pVal=m_FieldFormat;
+	return S_OK;
+}
+
+STDMETHODIMP CDSRendInPin::put_FieldFormat(DSREND_FIELD_FORMAT pVal)
+{
+	ATLTRACE(_T("%s(%d) : CDSRendInPin::put_FieldFormat\n"),__FILE__,__LINE__);
+	m_FieldFormat=pVal;
 	return S_OK;
 }
 
@@ -303,19 +372,27 @@ HRESULT CDSRendInPin::EnumMediaTypes(IEnumMediaTypes **ppEnum)
 	if(FAILED(hr))
 		return hr;
 	
-	AM_MEDIA_TYPE mt;
-	memset(&mt,0,sizeof(mt));
-	mt.majortype=MEDIATYPE_Video;
-	mt.subtype=MEDIASUBTYPE_YUY2;
-	mt.lSampleSize=1;
-	mt.bFixedSizeSamples=TRUE;
+	AM_MEDIA_TYPE mt1;
+	memset(&mt1,0,sizeof(mt1));
+	mt1.majortype=MEDIATYPE_Video;
+	mt1.subtype=MEDIASUBTYPE_YUY2;
+	mt1.lSampleSize=1;
+	mt1.bFixedSizeSamples=TRUE;
 
-	AM_MEDIA_TYPE *mediaTypes[1];
-	mediaTypes[0]=&mt;
+	AM_MEDIA_TYPE mt2;
+	memset(&mt2,0,sizeof(mt2));
+	mt2.majortype=MEDIATYPE_Video;
+	mt2.subtype=MEDIASUBTYPE_RGB24;
+	mt2.lSampleSize=1;
+	mt2.bFixedSizeSamples=TRUE;
+
+	AM_MEDIA_TYPE *mediaTypes[2];
+	mediaTypes[0]=&mt1;
+	mediaTypes[1]=&mt2;
 
 	//maybe the GetUnknown() call is the cause for the problems with _ATL_DEBUG_INTERFACES ?
 	//GetUnknown() doesnt addref the returned pointer
-	hr=pEnum->Init(&mediaTypes[0],&mediaTypes[1],GetUnknown(),AtlFlagCopy);
+	hr=pEnum->Init(&mediaTypes[0],&mediaTypes[2],GetUnknown(),AtlFlagCopy);
 	if(FAILED(hr))
 	{
 		delete pEnum;
@@ -462,7 +539,7 @@ HRESULT CDSRendInPin::GetAllocatorRequirements(ALLOCATOR_PROPERTIES *pProps)
 
 	/**
 	 * @todo the number of extra buffers to request shod be user
-	 * configurable if we dont request a few extra buffers and doing field
+	 * configurable. if we dont request a few extra buffers and doing field
 	 * input, there will be a lot of dropped fields.
 	 * Maybe also check with CFieldBuffer if it can buffer samples directly
 	 * and only request extra fields if it can (field input)
@@ -578,8 +655,17 @@ HRESULT CDSRendInPin::CheckMediaType(const AM_MEDIA_TYPE *pmt)
 
 	//we shoud probably make some more checks here
 	//for example check the source and target rects
-	if(pmt->majortype==MEDIATYPE_Video && pmt->subtype==MEDIASUBTYPE_YUY2)
+	if(pmt->majortype==MEDIATYPE_Video)
 	{
+		if(pmt->subtype!=MEDIASUBTYPE_YUY2)
+		{
+			if(m_bForceYUY2 || pmt->subtype!=MEDIASUBTYPE_RGB24)
+			{
+				return E_FAIL;
+			}
+		}
+
+		bool bFieldInput;
 		BITMAPINFOHEADER *pBmi=NULL;
 		if(pmt->formattype==FORMAT_VideoInfo)
 		{
@@ -588,6 +674,7 @@ HRESULT CDSRendInPin::CheckMediaType(const AM_MEDIA_TYPE *pmt)
 				VIDEOINFOHEADER *pHeader=(VIDEOINFOHEADER*)pmt->pbFormat;
 				pBmi=&(pHeader->bmiHeader);
 			}
+			bFieldInput=false;
 		}
 		else if(pmt->formattype==FORMAT_VideoInfo2)
 		{
@@ -598,6 +685,7 @@ HRESULT CDSRendInPin::CheckMediaType(const AM_MEDIA_TYPE *pmt)
 				
 				if(pHeader->dwInterlaceFlags&AMINTERLACE_1FieldPerSample)
 				{
+					bFieldInput=true;
 					//must have both fields
 					switch(pHeader->dwInterlaceFlags&AMINTERLACE_FieldPatternMask)
 					{
@@ -612,8 +700,15 @@ HRESULT CDSRendInPin::CheckMediaType(const AM_MEDIA_TYPE *pmt)
 					}*/
 					//return E_FAIL;
 				}
+				else
+				{
+					bFieldInput=false;
+				}
 			}
-			
+		}
+		if((m_FieldFormat==DSREND_FIELD_FORMAT_FIELD && bFieldInput==false) || (m_FieldFormat==DSREND_FIELD_FORMAT_FRAME && bFieldInput==true))
+		{
+			return E_FAIL;
 		}
 
 		//check that there is a size specified in the media type

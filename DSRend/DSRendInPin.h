@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendInPin.h,v 1.6 2002-07-06 16:40:52 tobbej Exp $
+// $Id: DSRendInPin.h,v 1.7 2002-07-15 18:21:37 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,11 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.6  2002/07/06 16:40:52  tobbej
+// new field buffering
+// support for field input
+// handle format change in Recive
+//
 // Revision 1.5  2002/06/03 18:22:04  tobbej
 // changed mediatype handling a bit
 //
@@ -65,9 +70,11 @@ class CDSRendFilter;
 class ATL_NO_VTABLE CDSRendInPin : 
 	public CComObjectRootEx<CComMultiThreadModel>,
 	public CComCoClass<CDSRendInPin, &CLSID_DSRendInPin>,
+	public ISpecifyPropertyPagesImpl<CDSRendInPin>,
 	public IPin,
 	public IMemInputPin,
-	public IAMFilterMiscFlags
+	public IAMFilterMiscFlags,
+	public IDSRendSettings
 {
 public:
 	CDSRendInPin(CDSRendFilter *pFilter);
@@ -87,11 +94,26 @@ BEGIN_COM_MAP(CDSRendInPin)
 	COM_INTERFACE_ENTRY(IPin)
 	COM_INTERFACE_ENTRY(IMemInputPin)
 	COM_INTERFACE_ENTRY(IAMFilterMiscFlags)
+	COM_INTERFACE_ENTRY(IDSRendSettings)
+	COM_INTERFACE_ENTRY(ISpecifyPropertyPages)
 END_COM_MAP()
-	
+
+BEGIN_PROP_MAP(CDSRendFilter)
+	PROP_PAGE(CLSID_SettingsPage)
+END_PROP_MAP()
+
 	//allow CCustomComObject to access m_pFilter
 	friend class CCustomComObject<CDSRendInPin,CDSRendFilter*>;
 
+// IDSRendSettings
+	STDMETHOD(get_Status)(DSRendStatus *pVal);
+	STDMETHOD(get_SwapFields)(BOOL *pVal);
+	STDMETHOD(put_SwapFields)(BOOL pVal);
+	STDMETHOD(get_ForceYUY2)(BOOL *pVal);
+	STDMETHOD(put_ForceYUY2)(BOOL pVal);
+	STDMETHOD(get_FieldFormat)(DSREND_FIELD_FORMAT *pVal);
+	STDMETHOD(put_FieldFormat)(DSREND_FIELD_FORMAT pVal);
+	
 // IPin
 	STDMETHOD(Connect(IPin *pReceivePin,const AM_MEDIA_TYPE *pmt));
 	STDMETHOD(ReceiveConnection(IPin *pConnector,const AM_MEDIA_TYPE *pmt));
@@ -153,6 +175,9 @@ private:
 
 	///flag to signal flushing.
 	bool m_bFlushing;
+
+	BOOL m_bForceYUY2;
+	DSREND_FIELD_FORMAT m_FieldFormat;
 };
 
 #endif //__DSRENDINPIN_H_

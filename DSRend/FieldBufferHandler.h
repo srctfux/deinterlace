@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: FieldBufferHandler.h,v 1.2 2002-07-06 19:18:22 tobbej Exp $
+// $Id: FieldBufferHandler.h,v 1.3 2002-07-15 18:19:43 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.2  2002/07/06 19:18:22  tobbej
+// fixed sample scheduling, file playback shoud work now
+//
 // Revision 1.1  2002/07/06 16:38:56  tobbej
 // new field buffering
 //
@@ -44,6 +47,7 @@
 #include "Event.h"
 #include "DSRend.h"
 #include "mem.h"
+#include "ColorConverter.h"
 
 /**
  * Class that takes care of buffering IMediaSamples.
@@ -85,7 +89,7 @@ public:
 
 	/**
 	 * Inserts a new IMediaSample and updates the buffer as needed.
-	 * pSample MUST have the same type as used in SetBufferCount()
+	 * pSample MUST have the same type as used in SetMediaType()
 	 * @param pSample media sample
 	 */
 	HRESULT InsertSample(CComPtr<IMediaSample> pSample);
@@ -93,8 +97,9 @@ public:
 	/**
 	 * Returns an array of field buffers.
 	 * @param dwTimeout timeout in miliseconds
-	 * @param count in/out
-	 * @param ppBuffers 
+	 * @param count in/out, size of ppBuffers
+	 * @param ppBuffers the fields
+	 * @param rtRenderTime time when the newest field in the buffer shoud be rendered
 	 */
 	HRESULT GetFields(DWORD dwTimeOut,long *count,FieldBuffer *ppBuffer,BufferInfo *pBufferInfo,REFERENCE_TIME &rtRenderTime);
 
@@ -116,6 +121,10 @@ public:
 	int GetDrawnFields();
 	void ResetFieldCounters();
 
+	void SetSwapFields(bool bSwap);
+	bool GetSwapFields();
+	HRESULT GetStatus(DSRendStatus &status);
+
 private:
 	HRESULT IsField(AM_MEDIA_TYPE *pMt);
 	///@return true if atleast one buffer in m_Fields is marked as inuse
@@ -130,6 +139,9 @@ private:
 			:pBuffer(NULL),cbSize(0),bInUse(false),rtRenderTime(-1)
 		{
 		}
+		void InsertSample(CComPtr<IMediaSample> sample,BYTE *buffer,ULONG size);
+		BYTE* GetBufferSetSize(ULONG cbSize);
+
 		CComPtr<IMediaSample> pSample;
 		BYTE *pBuffer;
 		ULONG cbSize;
@@ -168,7 +180,12 @@ private:
 	///field/frame indicator
 	bool m_bOneFieldPerSample;
 
+	///function pointer to optimized memcopy
 	MEMCPY_FUNC* m_pfnMemcpy;
+	
+	bool m_bNeedConv;
+	CColorConverter m_ColorConv;
+	bool m_bSwapFields;
 };
 
 #endif // !defined(AFX_FIELDBUFFERHANDLER_H__7D741E3E_2A1D_43FA_9BC4_4582BF590BC0__INCLUDED_)
