@@ -62,6 +62,7 @@
 // From dtv.c .... We really need to reduce reliance on globals by going C++!
 // Perhaps in the meantime, it could be passed as a parameter to WorkoutOverlay()
 extern HMENU hMenu;
+extern BOOL  bIsFullScreen;
 extern void ShowText(HWND hWnd, LPCTSTR szText);
 
 // Added variable in dTV.c to track which aspect mode we are currently in
@@ -105,10 +106,10 @@ long AspectConsistencyTime = 15;
 // For aspect autodetect, consider two ratios to be equal if they're within
 // this amount of each other.  This is not in pixels, but in aspect*1000
 // units.
-long AspectEqualFudgeFactor = 10;
+long AspectEqualFudgeFactor = 20;
 
 // Don't remember aspect ratios that lasted less than this many milliseconds.
-long ShortRatioIgnoreMs = 1000;
+long ShortRatioIgnoreMs = 2000;
 
 //---------
 // Internal variables used by auto aspect ratio detect code.
@@ -290,6 +291,7 @@ void AspectRatio_SetMenu(HMENU hMenu)
 int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 {
 	switch (wMenuID) {
+	//------------------------------------------------------------------
 	// Easily Accessible Aspect Ratios
 	case IDM_ASPECT_FULLSCREEN:
         if (AutoDetectAspect)
@@ -336,6 +338,7 @@ int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
         }
 		break;
 
+	//------------------------------------------------------------------
 	// Image position settings
 	case IDM_WINPOS_VERT_CENTRE:
 	case IDM_WINPOS_VERT_TOP:
@@ -351,6 +354,7 @@ int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 		WorkoutOverlaySize();
 		break;
 
+	//------------------------------------------------------------------
 	// Autodetect aspect ratio toggles
 	case IDM_SASPECT_AUTO_ON:
 		AutoDetectAspect = TRUE;
@@ -371,79 +375,8 @@ int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 			ShowText(hWnd, "Auto Aspect Detect OFF");
 		}
 		break;
+
 	//------------------------------------------------------------------
-	default:
-		// At this point, we want to reset the automatic aspect 
-		// because the end user selected an "Advanced Aspect Ratio"
-		// In this case, turn off automatic aspect ratio detect.
-
-		AutoDetectAspect = FALSE;
-		break;
-	}
-	// Now, restart the 'switch' statement because we may have 
-	// disabled the automatic aspect ratio detect in the 
-	// above 'default' clause.
-	//--------------------------------------------------------------
-
-	// Advanced Aspect Ratios
-	switch (wMenuID) {
-	case IDM_SASPECT_0:
-		SwitchToRatio(AR_STRETCH, 0);
-		ShowText(hWnd, "Stretch Video");
-		break;
-	case IDM_SASPECT_133:
-		SwitchToRatio(AR_NONANAMORPHIC, 1333);
-		ShowText(hWnd, "4:3 Fullscreen Signal");
-		break;
-	case IDM_SASPECT_166:
-		SwitchToRatio(AR_NONANAMORPHIC, 1667);
-		ShowText(hWnd, "1.66:1 Letterbox Signal");
-		break;
-	case IDM_SASPECT_178:
-		SwitchToRatio(AR_NONANAMORPHIC, 1778);
-		ShowText(hWnd, "1.78:1 Letterbox Signal");
-		break;
-	case IDM_SASPECT_185:
-		SwitchToRatio(AR_NONANAMORPHIC, 1850);
-		ShowText(hWnd, "1.85:1 Letterbox Signal");
-		break;
-	case IDM_SASPECT_200:
-		SwitchToRatio(AR_NONANAMORPHIC, 2000);
-		ShowText(hWnd, "2.00:1 Letterbox Signal");
-		break;
-	case IDM_SASPECT_235:
-		SwitchToRatio(AR_NONANAMORPHIC, 2350);
-		ShowText(hWnd, "2.35:1 Letterbox Signal");
-		break;
-	case IDM_SASPECT_166A:
-		SwitchToRatio(AR_ANAMORPHIC, 1667);
-		ShowText(hWnd, "1.66:1 Anamorphic Signal");
-		break;
-	case IDM_SASPECT_178A:
-		SwitchToRatio(AR_ANAMORPHIC, 1778);
-		ShowText(hWnd, "1.78:1 Anamorphic Signal");
-		break;
-	case IDM_SASPECT_185A:
-		SwitchToRatio(AR_ANAMORPHIC, 1850);
-		ShowText(hWnd, "1.85:1 Anamorphic Signal");
-		break;
-	case IDM_SASPECT_200A:
-		SwitchToRatio(AR_ANAMORPHIC, 2000);
-		ShowText(hWnd, "2.00:1 Anamorphic Signal");
-		break;
-	case IDM_SASPECT_235A:
-		SwitchToRatio(AR_ANAMORPHIC, 2350);
-		ShowText(hWnd, "2.35:1 Anamorphic Signal");
-		break;
-	case IDM_SASPECT_CUSTOM:
-		SwitchToRatio(AR_ANAMORPHIC, custom_source_aspect);
-		ShowText(hWnd, "Custom Aspect Ratio Signal");
-		break;
-	case IDM_SASPECT_COMPUTE:
-		DetectAspectNow = TRUE;
-		break;
-
-
 	// Output Display Aspect Ratios
 	case IDM_TASPECT_0:
 		target_aspect = 0;
@@ -477,9 +410,80 @@ int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 		target_aspect = custom_target_aspect;
 		ShowText(hWnd, "Custom Aspect Ratio Screen");
 		break;
+
+	// Manually-triggered one-time automatic detect of aspect ratio
+	case IDM_SASPECT_COMPUTE:
+		DetectAspectNow = TRUE;
+		break;
+
+	//------------------------------------------------------------------
 	default:
-		// It's not an aspect ratio related menu selection
-		return 0;
+		// At this point, we want to reset the automatic aspect 
+		// because the end user selected an "Advanced Source Aspect Ratio"
+		// In this case, turn off automatic aspect ratio detect.
+		// Then restart the 'switch' statement.
+
+		AutoDetectAspect = FALSE;
+
+		//--------------------------------------------------------------
+		// Advanced Source Aspect Ratios
+		switch (wMenuID) {
+		case IDM_SASPECT_0:
+			SwitchToRatio(AR_STRETCH, 0);
+			ShowText(hWnd, "Stretch Video");
+			break;
+		case IDM_SASPECT_133:
+			SwitchToRatio(AR_NONANAMORPHIC, 1333);
+			ShowText(hWnd, "4:3 Fullscreen Signal");
+			break;
+		case IDM_SASPECT_166:
+			SwitchToRatio(AR_NONANAMORPHIC, 1667);
+			ShowText(hWnd, "1.66:1 Letterbox Signal");
+			break;
+		case IDM_SASPECT_178:
+			SwitchToRatio(AR_NONANAMORPHIC, 1778);
+			ShowText(hWnd, "1.78:1 Letterbox Signal");
+			break;
+		case IDM_SASPECT_185:
+			SwitchToRatio(AR_NONANAMORPHIC, 1850);
+			ShowText(hWnd, "1.85:1 Letterbox Signal");
+			break;
+		case IDM_SASPECT_200:
+			SwitchToRatio(AR_NONANAMORPHIC, 2000);
+			ShowText(hWnd, "2.00:1 Letterbox Signal");
+			break;
+		case IDM_SASPECT_235:
+			SwitchToRatio(AR_NONANAMORPHIC, 2350);
+			ShowText(hWnd, "2.35:1 Letterbox Signal");
+			break;
+		case IDM_SASPECT_166A:
+			SwitchToRatio(AR_ANAMORPHIC, 1667);
+			ShowText(hWnd, "1.66:1 Anamorphic Signal");
+			break;
+		case IDM_SASPECT_178A:
+			SwitchToRatio(AR_ANAMORPHIC, 1778);
+			ShowText(hWnd, "1.78:1 Anamorphic Signal");
+			break;
+		case IDM_SASPECT_185A:
+			SwitchToRatio(AR_ANAMORPHIC, 1850);
+			ShowText(hWnd, "1.85:1 Anamorphic Signal");
+			break;
+		case IDM_SASPECT_200A:
+			SwitchToRatio(AR_ANAMORPHIC, 2000);
+			ShowText(hWnd, "2.00:1 Anamorphic Signal");
+			break;
+		case IDM_SASPECT_235A:
+			SwitchToRatio(AR_ANAMORPHIC, 2350);
+			ShowText(hWnd, "2.35:1 Anamorphic Signal");
+			break;
+		case IDM_SASPECT_CUSTOM:
+			SwitchToRatio(AR_ANAMORPHIC, custom_source_aspect);
+			ShowText(hWnd, "Custom Aspect Ratio Signal");
+			break;
+		default:
+			// It's not an aspect ratio related menu selection
+			return 0;
+		}
 	}
 
     WorkoutOverlaySize();
@@ -971,20 +975,31 @@ void AdjustAspectRatio(short** EvenField, short** OddField)
 	int i;
 	int haveSeenThisRatio, haveSeenSmallerRatio;
 
+	// ADDED by Mark Rejhon: Eliminates the "tiny slit" problem in starry 
+	// scenes such as those in Star Wars or start of Toy Story 2,
+	// at least during full screen mode.
+	// FIXME: Would be nice to access 'AdjustedWindowAspect' in WorkoutOverlaySize()
+	// so that I can also do this for windowed mode too.
+	if (DetectAspectNow || AutoDetectAspect)
+	{
+		newRatio = FindAspectRatio(EvenField, OddField);
+		if (bIsFullScreen && target_aspect && (newRatio > target_aspect))
+		{
+			newRatio = target_aspect;
+		}
+	}
+
 	// If the user told us to detect the current ratio, do it.
 	if (DetectAspectNow)
 	{
-		newRatio = FindAspectRatio(EvenField, OddField);
+
 		SwitchToRatio(aspect_mode, newRatio);
 		newRatioFrameCount = 0;
 		DetectAspectNow = FALSE;
 		return;
 	}
-
-	if (AutoDetectAspect)
+	else if (AutoDetectAspect)
 	{
-		newRatio = FindAspectRatio(EvenField, OddField);
-
 		// If we've just crossed a 1-second boundary, scroll the aspect ratio
 		// histories.  If not, update the max ratio found in the current second.
 		if (tick_count / 1000 != min_ratio_tick_count / 1000)
@@ -993,7 +1008,8 @@ void AdjustAspectRatio(short** EvenField, short** OddField)
 			memmove(&min_ratio_found[1], &min_ratio_found[0], sizeof(min_ratio_found[0]) * (RATIO_HISTORY_SECONDS - 1));
 			min_ratio_found[0] = newRatio;
 		}
-		else if (newRatio < min_ratio_found[0]) {
+		else if (newRatio < min_ratio_found[0])
+		{
 			min_ratio_found[0] = newRatio;
 		}
 
@@ -1190,7 +1206,7 @@ SETTING AspectSettings[ASPECT_SETTING_LASTONE] =
 		"ASPECT", "Mode", AspectMode_OnChange,
 	},
 	{
-		"Luminance Threshold", SLIDER, 0, &LuminanceThreshold,
+		"Aspect Autodetect Sensitivity", SLIDER, 0, &LuminanceThreshold,
 		30, 0, 2000, 1, 1,
 		NULL,
 		"ASPECT", "LuminanceThreshold", NULL,
