@@ -43,7 +43,7 @@ int CAudioSource=0;
 5		Audio_On,
 0x80	Audio_Mute = 0x80,
 0x81	Audio_UnMute = 0x81
-*/	
+*/
 
 #define WriteDem(wAddr,wData) Audio_WriteMSP(MSP_WR_DEM,wAddr,wData) // I2C_MSP3400C_DEM
 #define WriteDSP(wAddr,wData) Audio_WriteMSP(MSP_WR_DSP,wAddr,wData) // I2C_MSP3400C_DEM
@@ -60,7 +60,7 @@ static struct MSP_INIT_DATA_DEM
 	int mode_reg;
 	int dfp_src;
 	int dfp_matrix;
-} MSP_init_data[] = 
+} MSP_init_data[] =
 {
 	/* AM (for carrier detect / msp3400) */
 	{ { 75, 19, 36, 35, 39, 40 }, { 75, 19, 36, 35, 39, 40 },
@@ -101,9 +101,9 @@ static struct MSP_INIT_DATA_DEM
 
 int carrier_detect_main[4] = {
 	/* main carrier */
-	 MSP_CARRIER(4.5),   // 4.5   NTSC                 
-	 MSP_CARRIER(5.5),   // 5.5   PAL B/G              
-	 MSP_CARRIER(6.0),   // 6.0   PAL I                
+	 MSP_CARRIER(4.5),   // 4.5   NTSC
+	 MSP_CARRIER(5.5),   // 5.5   PAL B/G
+	 MSP_CARRIER(6.0),   // 6.0   PAL I
 	 MSP_CARRIER(6.5),   // 6.5   PAL D/K + SAT + SECAM
 };
 
@@ -382,9 +382,9 @@ BOOL Audio_MSP_Reset()
 	I2CBus_SendByte(0x00, 0);
 	I2CBus_Stop();
 	I2CBus_Start();
-	if ((I2CBus_SendByte(AudioDeviceWrite, 5) == FALSE) || 
-		(I2CBus_SendByte(0x00, 0) == FALSE) || 
-		(I2CBus_SendByte(0x00, 0) == FALSE) || 
+	if ((I2CBus_SendByte(AudioDeviceWrite, 5) == FALSE) ||
+		(I2CBus_SendByte(0x00, 0) == FALSE) ||
+		(I2CBus_SendByte(0x00, 0) == FALSE) ||
 		(I2CBus_SendByte(0x00, 0) == FALSE))
 		ret = FALSE;
 
@@ -429,7 +429,7 @@ void Audio_MSP_SetMode(int type)
 	WriteDSP(0x0a, MSP_init_data[type].dfp_src);
 	WriteDSP(0x0e, MSP_init_data[type].dfp_matrix);
 
-// msp3410 needs some more initialization 
+// msp3410 needs some more initialization
 	if (MSPNicam)
 		WriteDSP(0x10, 0x3000);
 
@@ -441,7 +441,7 @@ void Audio_MSP_SetStereo(int MajorMode, int MinorMode, int mode)
 
 	MSPStereo = mode;
 
-	// switch demodulator 
+	// switch demodulator
 	switch (MSPMode)
 	{
 	case MSP_MODE_FM_TERRA:
@@ -481,11 +481,11 @@ void Audio_MSP_SetStereo(int MajorMode, int MinorMode, int mode)
 		nicam = 0x0100;
 		break;
 	default:
-		// can't do stereo - abort here 
+		// can't do stereo - abort here
 		return;
 	}
 
-	// switch audio 
+	// switch audio
 	switch (MSPStereo)
 	{
 	case VIDEO_SOUND_STEREO:
@@ -539,16 +539,16 @@ void Audio_MSP_Set_MajorMinor_Mode(int MajorMode, int MinorMode)
 
 	switch (MajorMode)
 	{
-	case 1:					// 5.5 
+	case 1:					// 5.5
 		if (MinorMode == 0)
 		{
-			// B/G FM-stereo 
+			// B/G FM-stereo
 //              Audio_MSP_SetMode(Audio_MSP_MODE_FM_TERRA);
 			Audio_MSP_SetStereo(MajorMode, MinorMode, VIDEO_SOUND_MONO);
 		}
 		else if (MinorMode == 1 && MSPNicam)
 		{
-			// B/G NICAM 
+			// B/G NICAM
 //              Audio_MSP_SetMode(Audio_MSP_MODE_FM_NICAM1);
 			Audio_MSP_SetCarrier(carrier_detect[MinorMode], carrier_detect_main[MajorMode]);
 		}
@@ -558,21 +558,21 @@ void Audio_MSP_Set_MajorMinor_Mode(int MajorMode, int MinorMode)
 			Audio_MSP_SetCarrier(carrier_detect[MinorMode], carrier_detect_main[MajorMode]);
 		}
 		break;
-	case 2:					// 6.0 
-		// PAL I NICAM 
+	case 2:					// 6.0
+		// PAL I NICAM
 //          Audio_MSP_SetMode(Audio_MSP_MODE_FM_NICAM2);
 		Audio_MSP_SetCarrier(MSP_CARRIER(6.552), carrier_detect_main[MajorMode]);
 		break;
-	case 3:					// 6.5 
+	case 3:					// 6.5
 		if (MinorMode == 1 || MinorMode == 2)
 		{
-			// D/K FM-stereo 
+			// D/K FM-stereo
 //              Audio_MSP_SetMode( Audio_MSP_MODE_FM_TERRA);
 			Audio_MSP_SetStereo(MajorMode, MinorMode, VIDEO_SOUND_MONO);
 		}
 		else if (MinorMode == 0 && MSPNicam)
 		{
-			// D/K NICAM 
+			// D/K NICAM
 //              Audio_MSP_SetMode(Audio_MSP_MODE_FM_NICAM1);
 			Audio_MSP_SetCarrier(carrier_detect[MinorMode], carrier_detect_main[MajorMode]);
 		}
@@ -582,7 +582,7 @@ void Audio_MSP_Set_MajorMinor_Mode(int MajorMode, int MinorMode)
 			Audio_MSP_SetCarrier(carrier_detect[MinorMode], carrier_detect_main[MajorMode]);
 		}
 		break;
-	case 0:					// 4.5 
+	case 0:					// 4.5
 	default:
 //          Audio_MSP_SetMode(Audio_MSP_MODE_FM_TERRA);
 		Audio_MSP_SetCarrier(carrier_detect[MinorMode], carrier_detect_main[MajorMode]);

@@ -18,23 +18,23 @@
 //
 // This software was based on Multidec 5.6 Those portions are
 // Copyright (C) 1999/2000 Espresso (echter_espresso@hotmail.com)
-//                                                                  
+//
 // This was in turn based on  Linux code by:
-//                                                                  
-// BT-Parts                                                         
-//                                                                  
-// Copyright (C) 1996,97,98 Ralph  Metzler (rjkm@thp.uni-koeln.de)  
-//                         & Marcus Metzler (mocm@thp.uni-koeln.de) 
-// msp34XX                                                          
-//                                                                  
+//
+// BT-Parts
+//
+// Copyright (C) 1996,97,98 Ralph  Metzler (rjkm@thp.uni-koeln.de)
+//                         & Marcus Metzler (mocm@thp.uni-koeln.de)
+// msp34XX
+//
 // Copyright (C) 1997,1998 Gerd Knorr <kraxel@goldbach.in-berlin.de>
-//                                                                  
-// Copyright (C) 1996,97,98 Ralph  Metzler (rjkm@thp.uni-koeln.de)  
-//                         & Marcus Metzler (mocm@thp.uni-koeln.de) 
-// msp34XX                                                          
-//                                                                  
+//
+// Copyright (C) 1996,97,98 Ralph  Metzler (rjkm@thp.uni-koeln.de)
+//                         & Marcus Metzler (mocm@thp.uni-koeln.de)
+// msp34XX
+//
 // Copyright (C) 1997,1998 Gerd Knorr <kraxel@goldbach.in-berlin.de>
-//                                                                  
+//
 /////////////////////////////////////////////////////////////////////////////
 // Change Log
 //
@@ -53,10 +53,10 @@
 #include "dTV.h"
 #include "bt848.h"
 #include "OutThreads.h"
-#include "vt.h"
+#include "VBI_VideoText.h"
 
 LPDIRECTDRAWSURFACE     lpDDSurface = NULL;
-// OverLay 
+// OverLay
 LPDIRECTDRAWSURFACE     lpDDOverlay = NULL;
 LPDIRECTDRAWSURFACE     lpDDOverlayBack = NULL;
 BYTE* lpOverlay = NULL;
@@ -184,7 +184,7 @@ BOOL Overlay_Create()
 	ddsd.ddsCaps.dwCaps = DDSCAPS_OVERLAY | DDSCAPS_VIDEOMEMORY | DDSCAPS_FLIP | DDSCAPS_COMPLEX;
 
 	// create a much bigger surface than we need
-	// this ensures that we can use the bTV plugin 
+	// this ensures that we can use the bTV plugin
 	ddsd.dwWidth = BTV_VER1_WIDTH;
 	ddsd.dwHeight = BTV_VER1_HEIGHT;
 	ddsd.dwBackBufferCount = 1;
@@ -208,14 +208,14 @@ BOOL Overlay_Create()
 	ddrval = DDERR_WASSTILLDRAWING;
 	OverlayPitch = ddsd.lPitch;
 	lpOverlay = ddsd.lpSurface;
-	
+
 	ddrval = IDirectDrawSurface_Unlock(lpDDOverlay, ddsd.lpSurface);
 	if (FAILED(ddrval))
 	{
 		ErrorBox("Can't Unlock Surface");
 		return (FALSE);
 	}
-	
+
 	caps.dwCaps = DDSCAPS_BACKBUFFER;
 	ddrval = IDirectDrawSurface_GetAttachedSurface(lpDDOverlay, &caps, &lpDDOverlayBack);
 	if (FAILED(ddrval))
@@ -324,7 +324,7 @@ BOOL InitDD(HWND hWnd)
 				ErrorBox("Can't Strech Overlay");
 				return FALSE;
 			}
-			
+
 			if (!(DriverCaps.dwCKeyCaps & DDCKEYCAPS_DESTOVERLAY))
 			{
 				ErrorBox("Can't ColorKey Overlay");
@@ -426,8 +426,8 @@ void SaveStill()
 
 		file = fopen(name,"wb");
 		if (!file)
-		{ 
-			ErrorBox("Could not open file in SaveStill"); 
+		{
+			ErrorBox("Could not open file in SaveStill");
 			ddrval = IDirectDrawSurface_Unlock(lpDDOverlay, ddsd.lpSurface);
 			if (FAILED(ddrval))
 			{
@@ -453,7 +453,7 @@ void SaveStill()
 				rgb[0] = LIMIT(r);
 				rgb[1] = LIMIT(g);
 				rgb[2] = LIMIT(b);
-			
+
 				fwrite(rgb,3,1,file) ;
 
 				y = buf[2] - 16;
@@ -464,7 +464,7 @@ void SaveStill()
 				rgb[1] = LIMIT(g);
 				rgb[2] = LIMIT(b);
 				fwrite(rgb,3,1,file);
-				
+
 				buf += 4;
 			}
 		}

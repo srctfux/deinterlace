@@ -16,6 +16,7 @@
 //	GNU General Public License for more details
 /////////////////////////////////////////////////////////////////////////////
 //
+// Refminements made by Mark Rejhon and Steve Grimm
 // This software was based on Multidec 5.6 Those portions are
 // Copyright (C) 1999/2000 Espresso (echter_espresso@hotmail.com)
 //
@@ -24,12 +25,14 @@
 //
 // Date          Developer             Changes
 //
+// 17 Sep 2000   Mark Rejhon           Implemented Steve Grimm's changes
+//                                     Some cleanup done.
+//                                     Made refinements to Steve Grimm's changes
 // 24 Jul 2000   John Adcock           Original Release
 //                                     Translated most code from German
 //                                     Combined Header files
 //                                     Cut out all decoding
 //                                     Cut out digital hardware stuff
-//
 // 09 Aug 2000   John Adcock           Fixed bug at end of GetCombFactor assember
 //
 /////////////////////////////////////////////////////////////////////////////
@@ -39,7 +42,7 @@
 #include "other.h"
 #include "bt848.h"
 #include "bTVPlugin.h"
-#include "vt.h"
+#include "VBI_VideoText.h"
 #include "vbi.h"
 #include "deinterlace.h"
 #define DOLOGGING
@@ -52,20 +55,33 @@ short pPALplusData[] = { 160, 178, 196, 214, 232, 250, 268, 286, 304, 322, 340, 
 short nLevelLow      =  45;
 short nLevelHigh     = 135;
 
-BOOL bStopThread = FALSE;
-BOOL bIsPaused = FALSE;
-HANDLE OutThread;
+// Thread related variables
+BOOL                bStopThread = FALSE;
+BOOL                bIsPaused = FALSE;
+HANDLE              OutThread;
 
-ePULLDOWNMODES gPulldownMode = VIDEO_MODE;
+// Dynamically updated variables
+ePULLDOWNMODES      gPulldownMode = VIDEO_MODE;
+int                 CurrentFrame=0;
+DWORD               dwLastFlipTicks = -1;
+DWORD				ModeSwitchTimestamps[MAXMODESWITCHES];
+long				NextPulldownRepeatCount = 0;    // for temporary increases of PullDownRepeatCount
 
-long PulldownThresholdLow = -2000;
-long PulldownThresholdHigh = 2000;
-long PulldownRepeatCount = 4;
-long PulldownRepeatCount2 = 2;
-long Threshold32Pulldown = 15;
-BOOL bAutoDetectMode = TRUE;
-DWORD dwLastFlipTicks = -1;
+// Default values which can be overwritten by the INI file
+long                PulldownThresholdLow = -2000;
+long                PulldownThresholdHigh = 2000;
+long                PulldownRepeatCount = 4;
+long                PulldownRepeatCount2 = 2;
+long                Threshold32Pulldown = 15;
+long                ThresholdPulldownMismatch = 900;
+long                ThresholdPulldownComb = 150;
+long                PulldownSwitchInterval = 3000;
+long                PulldownSwitchMax = 4;
+BOOL                bAutoDetectMode = TRUE;
+BOOL                bFallbackToVideo = TRUE;
 
+
+///////////////////////////////////////////////////////////////////////////////
 void Start_Thread()
 {
 	int i;
@@ -86,23 +102,24 @@ void Start_Thread()
 	if(TVSettings[TVTYPE].Is25fps)
 	{
 		OutThread = CreateThread((LPSECURITY_ATTRIBUTES) NULL,	// No security.
-								 (DWORD) 0,	// Same stack size.
-								 YUVOutThreadPAL,	// Thread procedure.
-								 NULL,	// Parameter.
-								 (DWORD) 0,	// Start immediatly.
-								 (LPDWORD) & LinkThreadID);	// Thread ID.
+								 (DWORD) 0,	                    // Same stack size.
+								 YUVOutThreadPAL,	            // Thread procedure.
+								 NULL,	                        // Parameter.
+								 (DWORD) 0,	                    // Start immediatly.
+								 (LPDWORD) & LinkThreadID);	    // Thread ID.
 	}
 	else
 	{
 		OutThread = CreateThread((LPSECURITY_ATTRIBUTES) NULL,	// No security.
-								 (DWORD) 0,	// Same stack size.
-								 YUVOutThreadNTSC,	// Thread procedure.
-								 NULL,	// Parameter.
-								 (DWORD) 0,	// Start immediatly.
-								 (LPDWORD) & LinkThreadID);	// Thread ID.
+								 (DWORD) 0,	                    // Same stack size.
+								 YUVOutThreadNTSC,	            // Thread procedure.
+								 NULL,	                        // Parameter.
+								 (DWORD) 0,	                    // Start immediatly.
+								 (LPDWORD) & LinkThreadID);	    // Thread ID.
 	}
 }
 
+///////////////////////////////////////////////////////////////////////////////
 void Stop_Thread()
 {
 	DWORD ExitCode;
@@ -141,6 +158,7 @@ void Stop_Thread()
 	}
 }
 
+///////////////////////////////////////////////////////////////////////////////
 void Start_Capture()
 {
 	int nFlags = BT848_CAP_CTL_CAPTURE_EVEN | BT848_CAP_CTL_CAPTURE_ODD;
@@ -160,14 +178,13 @@ void Start_Capture()
 	InterCast.lastci = 0xff;
 
 	BT848_SetRiscJumpsDecode(nFlags);
-
 	BT848_MaskDataByte(BT848_CAP_CTL, (BYTE) nFlags, (BYTE) 0x0f);
-
 	BT848_SetDMA(TRUE);
 
 	Start_Thread();
 }
 
+///////////////////////////////////////////////////////////////////////////////
 void Stop_Capture()
 {
 	//  Stop The Output Thread
@@ -177,6 +194,7 @@ void Stop_Capture()
 	BT848_MaskDataByte(BT848_CAP_CTL, 0, 0x0f);
 }
 
+///////////////////////////////////////////////////////////////////////////////
 BOOL WaitForNextField(BOOL LastField)
 {
 	BOOL bIsOddField;
@@ -192,29 +210,20 @@ BOOL WaitForNextField(BOOL LastField)
 
 	switch(stat >> 28)
 	{
-	case 1:
-		CurrentFrame = 0;
-		break;
-	case 2:
-		CurrentFrame = 1;
-		break;
-	case 3:
-		CurrentFrame = 2;
-		break;
-	case 4:
-		CurrentFrame = 3;
-		break;
-	case 5:
-		CurrentFrame = 4;
-		break;
-	default:
-		break;
+	case 1:  CurrentFrame = 0;  break;
+	case 2:  CurrentFrame = 1;  break;
+	case 3:  CurrentFrame = 2;  break;
+	case 4:  CurrentFrame = 3;  break;
+	case 5:  CurrentFrame = 4;  break;
+	default: break;
 	}
 
 	BT848_WriteDword(BT848_INT_STAT, (DWORD) 0x0fffffff);
 
 // taken out for testing may still have to use BT rest to recover from overruns
-
+// Note: I don't think it is necessary for overruns.
+// FIXME: We should blank out old video overlay buffers during overruns.
+//
 /*	if(stat & (BT848_INT_PPERR | BT848_INT_SCERR | BT848_INT_FBUS | BT848_INT_FTRGT | BT848_INT_RIPERR))
 	{
 		BT848_Restart_RISC_Code();
@@ -222,10 +231,13 @@ BOOL WaitForNextField(BOOL LastField)
 		bIsOddField = TRUE;
 		UpdatePALPulldownMode(-1, FALSE);
 		UpdateNTSCPulldownMode(-1, FALSE);
-	} */
+	}
+*/
+
 	return bIsOddField;
 }
 
+///////////////////////////////////////////////////////////////////////////////
 void SetupProcessorAndThread()
 {
 	DWORD rc;
@@ -246,6 +258,40 @@ void SetupProcessorAndThread()
 		SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// TrackModeSwitches
+//
+// Called whenever we switch to a new film mode.  Keeps track of the frequency
+// of mode switches; if we switch too often, we want to drop down to video
+// mode since it means we're having trouble locking onto a particular film
+// mode.
+//
+// The settings PulldownSwitchInterval and PulldownSwitchMax control the
+// sensitivity of this algorithm.  To trigger video mode there need to be
+// PulldownSwitchMax mode switches in PulldownSwitchInterval milliseconds.
+///////////////////////////////////////////////////////////////////////////////
+static int TrackModeSwitches()
+{
+	// Scroll the list of timestamps.  Most recent is first in the list.
+	memmove(&ModeSwitchTimestamps[1], &ModeSwitchTimestamps[0], sizeof(ModeSwitchTimestamps) - sizeof(DWORD));
+	ModeSwitchTimestamps[0] = GetTickCount();
+	
+	if (PulldownSwitchMax > 1 && PulldownSwitchInterval > 0 &&	// if the user wants to track switches
+		ModeSwitchTimestamps[PulldownSwitchMax - 1] > 0)		// and there have been enough of them
+	{
+		int ticks = ModeSwitchTimestamps[0] - ModeSwitchTimestamps[PulldownSwitchMax - 1];
+		if (ticks <= PulldownSwitchInterval)
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// UpdatePALPulldownMode
+//
+// This is the 2:2 pulldown detection for PAL.
+///////////////////////////////////////////////////////////////////////////////
 void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField)
 {
 	static long LastCombFactor;
@@ -356,24 +402,50 @@ void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField)
 ///////////////////////////////////////////////////////////////////////////////
 // UpdateNTSCPulldownMode
 //
-// OK mark I've given up ;-)
-// this is my attempt to implement Mark Rejhon's 3:2 pulldown code
-// the alogoritm and comments below are taken from Mark's post to the AVS
-// Home Computer Forum reproduced in the file 32Spec.htm that should be with
-// this source.
-// the key to getting this to work will be choosing the right value for the 
-// Threshold32Pulldown variable
-// this should probably vary depending on the input source, higher for video
-// lower for TV and cable and very low for laserdisk
+// This gem is where our software competes with the big boys - you know
+// the expensive settop scaler boxes that detect 3:2 pulldown mode!
+//
+// Original Programmer: JohnAd 
+// Other maintainers: Mark Rejhon and Steve Grimm
+//
+// His attempt to implement Mark Rejhon's 3:2 pulldown code.
+// This is an advanced descendant of Mark Rejhon's 3:2 algorithm designed 
+// completely from scratch on paper in May 1999 at the following URL:
+// http://www.avsforum.com/ubb/Forum12/HTML/000071.html
+//
+// There are numerous refinements contributed by Mark Rejhon and Steve Grimm.
+// Mark Rejhon can be reached at dtv@marky.com
+// Discussion forum is http://www.avsforum.com - AVSCIENCE HTPC Forum
+//
+// The alogoritm and comments below are taken from Mark's post to the AVSCIENCE
+// Home Theater Computer Forum reproduced in the file 32Spec.htm that should be
+// with this source.  The key to getting this to work will be choosing the right 
+// value for the Threshold32Pulldown variable and others.  This should probably 
+// vary depending on the input source, higher for video lower for TV and cable 
+// and very low for laserdisk or DVD.
+//
+// In addition, we have a sanity check for poorly-transfered material.  If a
+// field that will be woven with the previous field is dramatically different
+// than the field before the previous one, we check the comb factor of the
+// woven-together frame.  If it's too high, we immediately switch to video
+// deinterlace mode to prevent weave artifacts from appearing.
+//
+// This function normally gets called 60 times per second.
 ///////////////////////////////////////////////////////////////////////////////
-void UpdateNTSCPulldownMode(long FieldDiff, BOOL OnOddField)
+void UpdateNTSCPulldownMode(long FieldDiff,
+							BOOL OnOddField,
+							short **EvenField,
+							short **OddField)
 {
+	int CombFactor = 0;
 	static long MISMATCH_COUNT = 0;
 	static long MOVIE_FIELD_CYCLE = 0;
 	static long MOVIE_VERIFY_CYCLE = 0;
 	
-	// call with FieldDiff -1 to reset static variables when we start the thread
-	// each time
+	// Call with FieldDiff -1 is an initialization call.
+	// This resets static variables when we start the thread each time.
+	// This probably should be done in an .Initialize() member function
+	// when we port to C++
 	if(FieldDiff == -1)
 	{
         MOVIE_VERIFY_CYCLE = 0;
@@ -382,58 +454,68 @@ void UpdateNTSCPulldownMode(long FieldDiff, BOOL OnOddField)
 		gPulldownMode = VIDEO_MODE;
 		UpdatePulldownStatus();
 		dwLastFlipTicks = -1;
+		memset(&ModeSwitchTimestamps[0], 0, sizeof(ModeSwitchTimestamps));
 		return;
 	}
 
+	// If the field difference is bigger than the threshold, then
+	// the current field is very different from the field two fields ago.
+	// Threshold32Pulldown probably should be changed to be automatically
+	// compensating depending on the material.
+	//
     if(FieldDiff > Threshold32Pulldown)
 	{
-		// 2000-09-11: Commented by Mark Rejhon
-		// Suggested by Steve Grimm to eliminate combing artifacts
-		// during scene changes where 3/2 pulldown sequences changes.
-		// This code is unused at the moment, for experimenting.
-		//
-		// if ((FieldDiff < ThresholdForceVideo) &&
-		// 	(MISMATCH_COUNT <= PulldownRepeatCount2 * 5)
-		//
+		if (MISMATCH_COUNT > PulldownRepeatCount2 * 5 ||
+			(bFallbackToVideo &&
+			 ThresholdPulldownMismatch > 0 &&		    // only do video-force check if there's a threshold
+			 FieldDiff >= ThresholdPulldownMismatch &&	// only force video if this field is very different,
+			 DoWeWantToFlip(TRUE, OnOddField) &&	    // and we would weave it with the previous field,
+			 (CombFactor = GetCombFactor(EvenField, OddField)) > ThresholdPulldownComb)) // and it'd produce artifacts
+		{
+			// Either we're forcing video mode thanks to a pulldown
+			// mismatch, OR...
+			//
+			// There has been no duplicate fields lately.
+			// It's probably video source.
+			//
+			// MAX_MISMATCH should be a reasonably high value so
+			// that we do not have an oversensitive hair-trigger
+			// in switching to video source everytime there is
+			// video noise or a single spurious field added/dropped
+			// during a movie causing mis-synchronization problems. 
 
-		if(MISMATCH_COUNT <= PulldownRepeatCount2 * 5)
+			gPulldownMode = VIDEO_MODE;
+			MOVIE_VERIFY_CYCLE = 0;
+			MOVIE_FIELD_CYCLE = 0;
+			UpdatePulldownStatus();
+			LOG(" Back to Video, comb factor %d", CombFactor);
+			dwLastFlipTicks = -1;
+		}
+		else
 		{
 			MISMATCH_COUNT++;
 		}
-        else
-		{
-            //
-            // There has been no duplicate fields lately.
-            // It's probably video source.
-            //
-            // MAX_MISMATCH should be a reasonably high value so
-            // that we do not have an oversensitive hair-trigger
-            // in switching to video source everytime there is
-            // video noise or a single spurious field added/dropped
-            // during a movie causing mis-synchronization problems. 
-            gPulldownMode = VIDEO_MODE;
-            MOVIE_VERIFY_CYCLE = 0;
-            MOVIE_FIELD_CYCLE = 0;
-			UpdatePulldownStatus();
-			LOG(" Back to Video");
-			dwLastFlipTicks = -1;
-        }
 	}
     else
 	{
 		// It's either a stationary image OR a duplicate field in a movie
 		if(MISMATCH_COUNT == 4)
 		{
-			//
 			// 3:2 pulldown is a cycle of 5 fields where there is only
 			// one duplicate field pair, and 4 mismatching pairs.
 			// We need to continue detection for at least 2 cycles
 			// to be very certain that it is actually 3:2 pulldown
 			// This would mean a latency of 10 fields.
 			//
-			if(MOVIE_VERIFY_CYCLE >= PulldownRepeatCount)
+			if(MOVIE_VERIFY_CYCLE >= PulldownRepeatCount &&
+			   MOVIE_VERIFY_CYCLE >= NextPulldownRepeatCount)
 			{
-				//
+				ePULLDOWNMODES OldPulldownMode = gPulldownMode;
+
+				// If the pulldown repeat count was temporarily increased, get
+				// rid of the temporary setting.
+				NextPulldownRepeatCount = 0;
+
 				// This executes regardless whether we've just entered or
 				// if we're *already* in 3:2 pulldown. Either way, we are
 				// currently now (re)synchronized to 3:2 pulldown and that
@@ -443,21 +525,11 @@ void UpdateNTSCPulldownMode(long FieldDiff, BOOL OnOddField)
 				{
 					switch(CurrentFrame)
 					{
-					case 0:
-			            gPulldownMode = FILM_32_PULLDOWN_2;
-						break;
-					case 1:
-			            gPulldownMode = FILM_32_PULLDOWN_3;
-						break;
-					case 2:
-			            gPulldownMode = FILM_32_PULLDOWN_4;
-						break;
-					case 3:
-			            gPulldownMode = FILM_32_PULLDOWN_0;
-						break;
-					case 4:
-			            gPulldownMode = FILM_32_PULLDOWN_1;
-						break;
+					case 0:  gPulldownMode = FILM_32_PULLDOWN_2;  break;
+					case 1:  gPulldownMode = FILM_32_PULLDOWN_3;  break;
+					case 2:  gPulldownMode = FILM_32_PULLDOWN_4;  break;
+					case 3:  gPulldownMode = FILM_32_PULLDOWN_0;  break;
+					case 4:  gPulldownMode = FILM_32_PULLDOWN_1;  break;
 					}
 					UpdatePulldownStatus();
 					dwLastFlipTicks = -1;
@@ -466,35 +538,83 @@ void UpdateNTSCPulldownMode(long FieldDiff, BOOL OnOddField)
 				{
 					switch(CurrentFrame)
 					{
-					case 0:
-			            gPulldownMode = FILM_32_PULLDOWN_4;
-						break;
-					case 1:
-			            gPulldownMode = FILM_32_PULLDOWN_0;
-						break;
-					case 2:
-			            gPulldownMode = FILM_32_PULLDOWN_1;
-						break;
-					case 3:
-			            gPulldownMode = FILM_32_PULLDOWN_2;
-						break;
-					case 4:
-			            gPulldownMode = FILM_32_PULLDOWN_3;
-						break;
+					case 0:  gPulldownMode = FILM_32_PULLDOWN_4;  break;
+					case 1:  gPulldownMode = FILM_32_PULLDOWN_0;  break;
+					case 2:  gPulldownMode = FILM_32_PULLDOWN_1;  break;
+					case 3:  gPulldownMode = FILM_32_PULLDOWN_2;  break;
+					case 4:  gPulldownMode = FILM_32_PULLDOWN_3;  break;
 					}
 					UpdatePulldownStatus();
 					dwLastFlipTicks = -1;
 				}
+
+				if (OldPulldownMode != gPulldownMode)
+				{
+					// A mode switch.  If we've done a lot of them recently,
+					// force video mode since it means we're having trouble
+					// locking onto a reliable film mode.   
+					// 
+					// This stuff happens during these situations
+					// - Time compressed movies, which ruins 3:2 sequence 
+					// - Poorly telecined movies
+					// - Erratic framerates during transfers of old movies
+					// - TV commercials that vary framerates
+					// - Cartoons using nonstandard pulldown
+					// - Super-noisy video
+					//
+					// Therefore, we should switch to video mode and ignore
+					// switching back to movie mode for at least a certain
+					// amount of time.
+					//
+					if (bFallbackToVideo && TrackModeSwitches(gPulldownMode))
+					{
+						gPulldownMode = VIDEO_MODE;
+						MOVIE_VERIFY_CYCLE = 0;
+						MOVIE_FIELD_CYCLE = 0;
+						UpdatePulldownStatus();
+						LOG(" Too much film mode cycling, switching to video");
+						
+						// Require pulldown mode to be consistent for the
+						// rapid-mode-switch interval before we'll lock onto
+						// film mode again.  This is probably too long in most
+						// cases, but making it shorter than the interval would
+						// run the risk of switching back to film mode just in
+						// time to hit a rapid sequence of mode changes.
+						//
+						// 83 is (5 fields/cycle) / (60 fields/sec) * (1000 ms/sec).
+						//
+						// FIXME: Eliminate hardcoded values
+						//
+						NextPulldownRepeatCount = PulldownSwitchInterval / 83;
+					}
+				}
+
 			}
 			else
 			{
+				// We've detected possible 3:2 pulldown.  However, we need
+				// to keep watching the 3:2 pulldown for at least a few 5-field
+				// cycles before jumping to conclusion that it's really 3:2
+				// pulldown and not a false alarm
+				//
 				MOVIE_VERIFY_CYCLE++;
 				LOG(" Found Pulldown Match");
 			}
 		}
 		else
 		{
+			// If we've just seen rapid-fire pulldown mode switches,
+			// require all the duplicate fields to be at the same point
+			// in the pulldown sequence.  Getting here means a duplicate
+			// field happened in a different place than in the previous
+			// cycle, so reset the count of pulldown matches.
 			//
+			// As noted below, this will mean that it takes a long time to
+			// switch back to film mode if we hit a bunch of still frames
+			// after a rapid-fire mode switch sequence.
+			if (NextPulldownRepeatCount > 0) MOVIE_VERIFY_CYCLE = 0;
+
+			// Normally,
 			// If execution point hits here, it is probably just
 			// stationary video. That would produce lots of duplicate
 			// field pairs. We can't determine whether it's video or
@@ -512,127 +632,69 @@ void UpdateNTSCPulldownMode(long FieldDiff, BOOL OnOddField)
 	}
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Returns true if the current field has given us a complete frame.
+// If we're still waiting for another field, returns false.
+///////////////////////////////////////////////////////////////////////////////
 BOOL DoWeWantToFlip(BOOL bFlipNow, BOOL bIsOddField)
 {
 	BOOL RetVal;
 	switch(gPulldownMode)
 	{
-	case VIDEO_MODE:
-		RetVal = TRUE;
-		break;
-	case SIMPLE_WEAVE:
-		RetVal = TRUE;
-		break;
-	case INTERPOLATE_BOB:
-		RetVal = TRUE;
-		break;
-	case BTV_PLUGIN:
-		RetVal = bFlipNow;
-		break;
-	case FILM_22_PULLDOWN_ODD:
-		RetVal = bIsOddField;
-		break;
-	case FILM_22_PULLDOWN_EVEN:
-		RetVal = !bIsOddField;
-		break;
+	case VIDEO_MODE:             RetVal = TRUE;  break;
+	case SIMPLE_WEAVE:           RetVal = TRUE;  break;
+	case INTERPOLATE_BOB:        RetVal = TRUE;  break;
+	case BTV_PLUGIN:             RetVal = bFlipNow;  break;
+	case FILM_22_PULLDOWN_ODD:   RetVal = bIsOddField;  break;
+	case FILM_22_PULLDOWN_EVEN:  RetVal = !bIsOddField;  break;
 	case FILM_32_PULLDOWN_0:
 		switch(CurrentFrame)
 		{
-		case 0:
-			RetVal = FALSE;
-			break;
-		case 1:
-			RetVal = !bIsOddField;
-			break;
-		case 2:
-			RetVal = !bIsOddField;
-			break;
-		case 3:
-			RetVal = bIsOddField;
-			break;
-		case 4:
-			RetVal = bIsOddField;
-			break;
+		case 0:  RetVal = FALSE;         break;
+		case 1:  RetVal = !bIsOddField;  break;
+		case 2:  RetVal = !bIsOddField;  break;
+		case 3:  RetVal = bIsOddField;   break;
+		case 4:  RetVal = bIsOddField;   break;
 		}
 		break;
 	case FILM_32_PULLDOWN_1:
 		switch(CurrentFrame)
 		{
-		case 0:
-			RetVal = bIsOddField;
-			break;
-		case 1:
-			RetVal = FALSE;
-			break;
-		case 2:
-			RetVal = !bIsOddField;
-			break;
-		case 3:
-			RetVal = !bIsOddField;
-			break;
-		case 4:
-			RetVal = bIsOddField;
-			break;
+		case 0:  RetVal = bIsOddField;   break;
+		case 1:  RetVal = FALSE;         break;
+		case 2:  RetVal = !bIsOddField;  break;
+		case 3:  RetVal = !bIsOddField;  break;
+		case 4:  RetVal = bIsOddField;   break;
 		}
 		break;
 	case FILM_32_PULLDOWN_2:
 		switch(CurrentFrame)
 		{
-		case 0:
-			RetVal = bIsOddField;
-			break;
-		case 1:
-			RetVal = bIsOddField;
-			break;
-		case 2:
-			RetVal = FALSE;
-			break;
-		case 3:
-			RetVal = !bIsOddField;
-			break;
-		case 4:
-			RetVal = !bIsOddField;
-			break;
+		case 0:  RetVal = bIsOddField;   break;
+		case 1:  RetVal = bIsOddField;   break;
+		case 2:  RetVal = FALSE;         break;
+		case 3:  RetVal = !bIsOddField;  break;
+		case 4:  RetVal = !bIsOddField;  break;
 		}
 		break;
 	case FILM_32_PULLDOWN_3:
 		switch(CurrentFrame)
 		{
-		case 0:
-			RetVal = !bIsOddField;
-			break;
-		case 1:
-			RetVal = bIsOddField;
-			break;
-		case 2:
-			RetVal = bIsOddField;
-			break;
-		case 3:
-			RetVal = FALSE;
-			break;
-		case 4:
-			RetVal = !bIsOddField;
-			break;
+		case 0:  RetVal = !bIsOddField;  break;
+		case 1:  RetVal = bIsOddField;   break;
+		case 2:  RetVal = bIsOddField;   break;
+		case 3:  RetVal = FALSE;         break;
+		case 4:  RetVal = !bIsOddField;  break;
 		}
 		break;
 	case FILM_32_PULLDOWN_4:
 		switch(CurrentFrame)
 		{
-		case 0:
-			RetVal = !bIsOddField;
-			break;
-		case 1:
-			RetVal = !bIsOddField;
-			break;
-		case 2:
-			RetVal = bIsOddField;
-			break;
-		case 3:
-			RetVal = bIsOddField;
-			break;
-		case 4:
-			RetVal = FALSE;
-			break;
+		case 0:  RetVal = !bIsOddField;  break;
+		case 1:  RetVal = !bIsOddField;  break;
+		case 2:  RetVal = bIsOddField;   break;
+		case 3:  RetVal = bIsOddField;   break;
+		case 4:  RetVal = FALSE;         break;
 		}
 		break;
 	default:
@@ -642,6 +704,7 @@ BOOL DoWeWantToFlip(BOOL bFlipNow, BOOL bIsOddField)
 	return RetVal;
 }
 
+///////////////////////////////////////////////////////////////////////////////
 void UpdatePulldownStatus()
 {
 	switch(gPulldownMode)
@@ -685,6 +748,7 @@ void UpdatePulldownStatus()
 	}
 }
 
+///////////////////////////////////////////////////////////////////////////////
 void Weave(short** pOddLines, short** pEvenLines, BYTE* lpOverlay)
 {
 	int i;
@@ -699,6 +763,7 @@ void Weave(short** pOddLines, short** pEvenLines, BYTE* lpOverlay)
 	}
 }
 
+///////////////////////////////////////////////////////////////////////////////
 DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 {
 	char Text[128];
@@ -943,6 +1008,7 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 	return 0;
 }
 
+///////////////////////////////////////////////////////////////////////////////
 DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 {
 	char Text[128];
@@ -984,7 +1050,7 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 	}
 
 	// reset the static variables in the detection code
-	UpdateNTSCPulldownMode(-1, FALSE);
+	UpdateNTSCPulldownMode(-1, FALSE, NULL, NULL);
 
 	// display the current pulldown mode
 	UpdatePulldownStatus();
@@ -1003,7 +1069,10 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 				{
 					CompareResult = CompareFields(ppOddLines[(CurrentFrame + 4) % 5], ppOddLines[CurrentFrame]);
 					LOG(" Frame %d O CR = %d", CurrentFrame, CompareResult);
-					UpdateNTSCPulldownMode(CompareResult, TRUE);
+					UpdateNTSCPulldownMode(CompareResult, 
+										   TRUE,
+						                   ppEvenLines[LastEvenFrame],
+										   ppOddLines[CurrentFrame]);
 				}
 
 				if (Capture_VBI == TRUE)
@@ -1081,7 +1150,10 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 				{
 					CompareResult = CompareFields(ppEvenLines[(CurrentFrame + 4) % 5], ppEvenLines[CurrentFrame]);
 					LOG(" Frame %d E CR = %d", CurrentFrame, CompareResult);
-					UpdateNTSCPulldownMode(CompareResult, FALSE);
+					UpdateNTSCPulldownMode(CompareResult,
+										   FALSE,
+										   ppEvenLines[CurrentFrame],
+										   ppOddLines[LastOddFrame]);
 				}
 
 				if (Capture_VBI == TRUE)
@@ -1184,4 +1256,3 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 	ExitThread(0);
 	return 0;
 }
-

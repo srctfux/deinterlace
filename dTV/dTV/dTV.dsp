@@ -123,10 +123,6 @@ SOURCE=.\bTVPlugin.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ccdecode.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\DebugLog.c
 # End Source File
 # Begin Source File
@@ -191,11 +187,15 @@ SOURCE=.\TVCards.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\vbi.c
+SOURCE=.\VBI.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\vt.c
+SOURCE=.\VBI_CCdecode.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\VBI_VideoText.C
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -216,10 +216,6 @@ SOURCE=.\bt848.h
 # Begin Source File
 
 SOURCE=.\bTVPlugin.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\ccdecode.h
 # End Source File
 # Begin Source File
 
@@ -303,7 +299,11 @@ SOURCE=.\vbi.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\vt.h
+SOURCE=.\VBI_CCdecode.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\VBI_VideoText.H
 # End Source File
 # End Group
 # Begin Group "Resource Files"
@@ -387,7 +387,7 @@ SOURCE=..\Release\Docs\COPYING.html
 # End Source File
 # Begin Source File
 
-SOURCE=..\Release\Docs\Developer.htm
+SOURCE=.\Developer.htm
 # End Source File
 # Begin Source File
 
@@ -419,7 +419,7 @@ SOURCE=..\Release\Docs\Thanks_MultiDec.txt
 # End Source File
 # Begin Source File
 
-SOURCE=..\Release\Docs\Todo.htm
+SOURCE=.\Todo.htm
 # End Source File
 # End Group
 # Begin Source File

@@ -60,7 +60,7 @@ BOOL Tuner_Init(int TunerNr)
 }
 
 /*
- *	Set TSA5522 synthesizer frequency 
+ *	Set TSA5522 synthesizer frequency
  */
 BOOL Tuner_SetFrequency(int TunerTyp, int wFrequency)
 {

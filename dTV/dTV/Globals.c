@@ -56,7 +56,7 @@ struct TTVSetting TVSettings[10] =
 	/* PAL-BDGHI */
 	{ 768, 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_BDGHI|BT848_IFORM_XT1),
 	    944, 768, 186, 922, 0x20, 0, TRUE, 511},
-	/* NTSC CCIR601 */ 
+	/* NTSC CCIR601 */
 	{ 720, 480,  910, 0x68, 0x5d, (BT848_IFORM_NTSC|BT848_IFORM_XT0),
 	    858, 720, 137, 754, 0x1a, 0, FALSE, 400},
 	/* SECAM */
@@ -77,18 +77,18 @@ struct TTVSetting TVSettings[10] =
 	/* NTSC Full Pixel */
 	{ 754, 480,  910, 0x70, 0x5d, (BT848_IFORM_NTSC|BT848_IFORM_XT0),
 	    910, 754, 135, 754, 0x1a, 0, FALSE, 400},
-	/* NTSC Square Pixel */ 
+	/* NTSC Square Pixel */
 	{ 640, 480,  910, 0x68, 0x5d, (BT848_IFORM_NTSC|BT848_IFORM_XT0),
 	    780, 640, 135, 754, 0x1a, 0, FALSE, 400},
 };
 
 
 unsigned int ManuellAudio[8] =
-{ 
-	0x0000, 
-	0x0000, 
-	0x0000, 
-	0x0000, 
+{
+	0x0000,
+	0x0000,
+	0x0000,
+	0x0000,
 	0x0000,
 	0x0000,
 	0x0000,
@@ -111,7 +111,7 @@ struct TMixerAccess Mute={-1,0,0,0};
 
 struct TMixerLoad MixerLoad[64];
 
-struct TLNB LNB = 
+struct TLNB LNB =
 {
 	FALSE,
 	10700, 12750, 9750, 10600, 11700, TRUE, TRUE,
@@ -160,7 +160,7 @@ unsigned short VTColourTable[9] =
 	31,		//Blue
 	15375,	//Invisible
 	15871,	//Cyan
-	32767,	//White 
+	32767,	//White
 	32767,	//Transparent
 };
 

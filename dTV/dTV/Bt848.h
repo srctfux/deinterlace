@@ -98,7 +98,7 @@ PHYS GetPhysicalAddress(PMemStruct dma, LPBYTE pLinear, DWORD dwSizeWanted, DWOR
 #define BT848_DSTATUS_LOF      (1<<1)
 #define BT848_DSTATUS_COF      (1<<0)
 
-#define BT848_IFORM            0x004  
+#define BT848_IFORM            0x004
 #define BT848_IFORM_HACTIVE    (1<<7)
 #define BT848_IFORM_MUXSEL     (3<<5)
 #define BT848_IFORM_MUX0       (2<<5)
@@ -124,11 +124,11 @@ PHYS GetPhysicalAddress(PMemStruct dma, LPBYTE pLinear, DWORD dwSizeWanted, DWOR
 #define BT848_PLL_F_HI         0x0F4
 #define BT848_PLL_XCI          0x0F8
 
-#define BT848_TGCTRL           0x084  
+#define BT848_TGCTRL           0x084
 #define BT848_TGCTRL_TGCKI_PLL 0x08
 #define BT848_TGCTRL_TGCKI_NOPLL 0x00
 
-#define BT848_TDEC             0x008  
+#define BT848_TDEC             0x008
 #define BT848_TDEC_DEC_FIELD   (1<<7)
 #define BT848_TDEC_FLDALIGN    (1<<6)
 #define BT848_TDEC_DEC_RAT     (0x1f)

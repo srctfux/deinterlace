@@ -33,47 +33,47 @@
 #include "bt848.h"
 #include "i2c.h"
 
-const TVCARDSETUP TVCards[TVCARD_LASTONE] = 
+const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 {
-	{ 
+	{
 		"Unknown Card",
-		3, 1, 0, 2, 0, 
-		{ 2, 3, 1, 1, 0, 0, 0, 0}, 
+		3, 1, 0, 2, 0,
+		{ 2, 3, 1, 1, 0, 0, 0, 0},
 		{ 0, 0, 0, 0, 0, 0},
 		0,
-		1,1,1,1,0,0,0,1,  
-		PLL_NONE, 
-		TUNER_USER_SETUP 
+		1,1,1,1,0,0,0,1,
+		PLL_NONE,
+		TUNER_USER_SETUP
 	},
 	{
 		"MIRO PCTV",
-		4, 1, 0, 2, 15, 
-		{ 2, 3, 1, 1, 0, 0, 0, 0}, 
+		4, 1, 0, 2, 15,
+		{ 2, 3, 1, 1, 0, 0, 0, 0},
 		{ 2, 0, 0, 0, 10, 0},
 		0,
 		1,1,1,1,0,0,0,1,
-		PLL_NONE, 
+		PLL_NONE,
 		TUNER_AUTODETECT
 	},
 	{
 		"Hauppauge old",
-		4, 1, 0, 2, 7, 
-		{ 2, 3, 1, 1, 0, 0, 0, 0}, 
+		4, 1, 0, 2, 7,
+		{ 2, 3, 1, 1, 0, 0, 0, 0},
 		{ 0, 1, 2, 3, 4, 0},
 		0,
-		1,1,0,1,0,0,0,1,  
-		PLL_NONE, 
-		TUNER_USER_SETUP 
+		1,1,0,1,0,0,0,1,
+		PLL_NONE,
+		TUNER_USER_SETUP
 	},
 	{
 		"STB",
-		3, 1, 0, 2, 7, 
-		{ 2, 3, 1, 1, 0, 0, 0, 0}, 
+		3, 1, 0, 2, 7,
+		{ 2, 3, 1, 1, 0, 0, 0, 0},
 		{ 4, 0, 2, 3, 1, 0},
 		0,
 		0,1,1,1,1,0,0,1,
-		PLL_NONE, 
-		TUNER_USER_SETUP 
+		PLL_NONE,
+		TUNER_USER_SETUP
 	},
 	{
 		"Intel",
@@ -82,79 +82,79 @@ const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 		{ 0, 1, 2, 3, 4, 0},
 		0,
 		1,1,1,1,0,0,0,1,
-		PLL_NONE, 
-		TUNER_USER_SETUP 
+		PLL_NONE,
+		TUNER_USER_SETUP
 	},
 	{
 		"Diamond DTV2000",
-		3, 1, 0, 2, 3, 
+		3, 1, 0, 2, 3,
 		{ 2, 3, 1, 1, 0, 0, 0, 0},
 		{ 0, 1, 0, 1, 3, 0},
 		0,
 		1,1,1,1,0,0,0,1,
-		PLL_NONE, 
-		TUNER_USER_SETUP 
+		PLL_NONE,
+		TUNER_USER_SETUP
 	},
 	{
 		"AVerMedia TVPhone",
-		3, 1, 0, 3, 15, 
+		3, 1, 0, 3, 15,
 		{ 2, 3, 1, 1, 0, 0, 0, 0},
 		{12, 4, 11, 11, 0, 0},
 		0,
 		1,1,1,1,0,0,0,1,
-		PLL_NONE, 
-		TUNER_USER_SETUP 
+		PLL_NONE,
+		TUNER_USER_SETUP
 	},
 	{
 		"MATRIX-Vision MV-Delta",
 		5, 1, -1, 3, 0,
 		{ 2, 3, 1, 0, 0, 0, 0, 0},
-		{0, 0, 0, 0, 0, 0}, 
+		{0, 0, 0, 0, 0, 0},
 		0,
-		1,1,1,1,0,0,0,1,  
-		PLL_NONE, 
-		TUNER_USER_SETUP 
+		1,1,1,1,0,0,0,1,
+		PLL_NONE,
+		TUNER_USER_SETUP
 	},
 	/* 0x08 */
 	{
 		"Fly Video II",
-		3, 1, 0, 2, 0xc00, 
+		3, 1, 0, 2, 0xc00,
 		{ 2, 3, 1, 1, 0, 0, 0, 0},
 		{ 0, 0xc00, 0x800, 0x400, 0xc00, 0},
 		0,
 		1,1,1,1,0,0,0,1,
-		PLL_NONE, 
-		TUNER_USER_SETUP 
+		PLL_NONE,
+		TUNER_USER_SETUP
 	},
-	{ 
+	{
 		"TurboTV",
-		3, 1, 0, 2, 3, 
+		3, 1, 0, 2, 3,
 		{ 2, 3, 1, 1, 0, 0, 0, 0},
 		{ 1, 1, 2, 3, 0, 0},
 		0,
 		1,1,1,1,0,0,0,1,
-		PLL_NONE, 
-		TUNER_USER_SETUP 
+		PLL_NONE,
+		TUNER_USER_SETUP
 	},
 	{
 		"Standard BT878",
-		4, 1, 0, 2, 7, 
+		4, 1, 0, 2, 7,
 		{ 2, 0, 1, 1, 0, 0, 0, 0},
 		{ 0, 1, 2, 3, 4, 0},
 		0,
 		1,1,0,1,0,0,0,1,
 		PLL_28,
-		TUNER_USER_SETUP 
+		TUNER_USER_SETUP
 	},
 	{
 		"MIRO PCTV pro",
-		3, 1, 0, 2, 65551, 
+		3, 1, 0, 2, 65551,
 		{ 2, 3, 1, 1, 0, 0, 0, 0},
 		{1, 65537, 0, 0, 10, 0},
 		0,
 		1,1,1,1,0,0,0,1,
-		PLL_NONE, 
-		TUNER_AUTODETECT 
+		PLL_NONE,
+		TUNER_AUTODETECT
 	},
 	{
 		"ADS Technologies Channel Surfer TV",
@@ -163,8 +163,8 @@ const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 		{ 13, 14, 11, 7, 0, 0},
 		0,
 		1,1,1,1,0,0,0,1,
-		PLL_NONE, 
-		TUNER_USER_SETUP 
+		PLL_NONE,
+		TUNER_USER_SETUP
 	},
 	{
 		"AVerMedia TVCapture 98",
@@ -174,17 +174,17 @@ const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 		0,
 		1,1,1,1,0,0,0,1,
 		PLL_28,
-		TUNER_USER_SETUP 
+		TUNER_USER_SETUP
 	},
 	{
 		"Aimslab VHX",
-		3, 1, 0, 2, 7, 
+		3, 1, 0, 2, 7,
 		{ 2, 3, 1, 1, 0, 0, 0, 0},
 		{ 0, 1, 2, 3, 4, 0},
 		0,
 		1,1,1,1,0,0,0,1,
 		PLL_NONE,
-		TUNER_USER_SETUP 
+		TUNER_USER_SETUP
 	},
 	{
 		"Zoltrix TV-Max",
@@ -194,7 +194,7 @@ const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 		0,
 		1,1,1,1,0,0,0,1,
 		PLL_NONE,
-		TUNER_USER_SETUP 
+		TUNER_USER_SETUP
 	},
 	/* 0x10 */
 	{
@@ -209,22 +209,22 @@ const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 	},
 	{
 		"Leadtek WinView 601",
-		3, 1, 0, 2, 0x8300f8, 
+		3, 1, 0, 2, 0x8300f8,
 		{ 2, 3, 1, 1, 0, 0, 0, 0},
 		{ 0x4fa007,0xcfa007,0xcfa007,0xcfa007,0xcfa007,0xcfa007},
 		0,
 		1,1,1,1,0,0,0,1,
-		PLL_NONE, 
-		TUNER_USER_SETUP 
+		PLL_NONE,
+		TUNER_USER_SETUP
 	},
 	{
 		"AVEC Intercapture",
-		3, 2, 0, 2, 0, 
+		3, 2, 0, 2, 0,
 		{2, 3, 1, 1, 0, 0, 0, 0},
 		{1, 0, 0, 0, 0, 0},
 		0,
 		1,1,1,1,0,0,0,1,
-		PLL_NONE, 
+		PLL_NONE,
 		TUNER_USER_SETUP
 	},
 	{
@@ -234,8 +234,8 @@ const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 		{ 0, 0, 0, 0, 0},
 		0,
 		0,0,0,0,0,0,0,1,
-		PLL_NONE, 
-		TUNER_USER_SETUP 
+		PLL_NONE,
+		TUNER_USER_SETUP
 	},
 
 	{
@@ -245,8 +245,8 @@ const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 		{0, 0, 0, 0 ,0, 0},
 		0,
 		1,1,1,1,0,0,0,1,
-		PLL_NONE, 
-		TUNER_USER_SETUP 
+		PLL_NONE,
+		TUNER_USER_SETUP
 	},
 	{
 		"Lucky Star Image World ConferenceTV",
@@ -255,39 +255,39 @@ const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 		{ 131072, 1, 1638400, 3, 4, 0},
 		0,
 		1,1,1,1,0,0,0,1,
-		PLL_28, 
+		PLL_28,
 		TUNER_PHILIPS_PAL_I
 	},
 	{
 		"Phoebe Tv Master + FM",
-		3, 1, 0, 2, 0xc00, 
+		3, 1, 0, 2, 0xc00,
 		{ 2, 3, 1, 1, 0, 0, 0, 0},
 		{0, 1, 0x800, 0x400, 0xc00, 0},
 		0,
-		1,1,1,1,0,0,0,1,  
-		PLL_NONE, 
-		TUNER_USER_SETUP 
+		1,1,1,1,0,0,0,1,
+		PLL_NONE,
+		TUNER_USER_SETUP
 	},
 	{
 		"Modular Technology MM205 PCTV, bt878",
-		2, 1, 0, -1, 7, 
+		2, 1, 0, -1, 7,
 		{ 2, 3 , 0, 0, 0, 0, 0, 0},
 		{0, 0, 0, 0, 0, 0},
 		0,
 		1,1,1,1,0,0,0,1,
-		PLL_NONE, 
-		TUNER_USER_SETUP 
+		PLL_NONE,
+		TUNER_USER_SETUP
 	},
 	/* 0x18 */
 	{
 		"Askey/Typhoon/Anubis Magic TView CPH051/061 (bt878)",
-		3, 1, 0, 2, 0xe00, 
+		3, 1, 0, 2, 0xe00,
 		{ 2, 3, 1, 1, 0, 0, 0, 0},
 		{0x400, 0x400, 0x400, 0x400, 0},
 		0,
 		1,1,1,1,0,0,0,1,
-		PLL_28,   
-		TUNER_USER_SETUP 
+		PLL_28,
+		TUNER_USER_SETUP
 	},
 	{
 		"Terratec/Vobis TV-Boostar",
@@ -296,74 +296,74 @@ const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 		{131072, 1, 1638400, 3, 4, 0},
 		0,
 		1,1,1,1,0,0,0,1,
-		PLL_NONE, 
-		TUNER_USER_SETUP 
+		PLL_NONE,
+		TUNER_USER_SETUP
 	},
-	{ 
+	{
 		"Newer Hauppauge WinCam (bt878)",
-		4, 1, 0, 3, 7, 
-		{ 2, 0, 1, 1, 0, 0, 0, 0}, 
+		4, 1, 0, 3, 7,
+		{ 2, 0, 1, 1, 0, 0, 0, 0},
 		{ 0, 1, 2, 3, 4, 0},
 		0,
-		1,1,1,1,0,0,0,1,  
-		PLL_NONE, 
+		1,1,1,1,0,0,0,1,
+		PLL_NONE,
 		TUNER_USER_SETUP
 	},
 	{
 		"MAXI TV Video PCI2",
-		3, 1, 0, 2, 0xffff, 
+		3, 1, 0, 2, 0xffff,
 		{ 2, 3, 1, 1, 0, 0, 0, 0},
 		{ 0, 1, 2, 3, 0xc00, 0},
 		0,
 		1,1,1,1,0,0,0,1,
-		PLL_NONE, 
-		TUNER_PHILIPS_SECAM 
+		PLL_NONE,
+		TUNER_PHILIPS_SECAM
 	},
 	{
 		"Terratec TerraTV+",
-		3, 1, 0, 2, 0x70000, 
-		{ 2, 3, 1, 1, 0, 0, 0, 0}, 
+		3, 1, 0, 2, 0x70000,
+		{ 2, 3, 1, 1, 0, 0, 0, 0},
 		{ 0x20000, 0x30000, 0x00000, 0x10000, 0x40000, 0x00000},
 		0,
 		1,1,1,1,0,0,0,1,
-		PLL_NONE, 
-		TUNER_USER_SETUP 
+		PLL_NONE,
+		TUNER_USER_SETUP
 	},
 	{
 		"Imagenation PXC200",
-		5, 1, -1, 4, 0, 
+		5, 1, -1, 4, 0,
 		{ 2, 3, 1, 0, 0, 0, 0, 0},
-		{ 0, 0, 0, 0, 0, 0}, 
+		{ 0, 0, 0, 0, 0, 0},
 		0,
-		1,1,1,1,0,0,0,1,  
-		PLL_NONE, 
-		TUNER_USER_SETUP 
+		1,1,1,1,0,0,0,1,
+		PLL_NONE,
+		TUNER_USER_SETUP
 	},
 	{
 		"FlyVideo 98",
-		3, 1, 0, 2, 0x8dff00, 
-		{2, 3, 1, 1, 0, 0, 0, 0}, 
+		3, 1, 0, 2, 0x8dff00,
+		{2, 3, 1, 1, 0, 0, 0, 0},
 		{ 0, 0x8dff00, 0x8df700, 0x8de700, 0x8dff00, 0 },
 		0,
-		1,1,1,1,0,0,0,1,  
-		PLL_NONE, 
+		1,1,1,1,0,0,0,1,
+		PLL_NONE,
 		TUNER_USER_SETUP
 	},
 	{
 		"iProTV",
-		3, 1, 0, 2, 1, 
+		3, 1, 0, 2, 1,
 		{ 2, 3, 1, 1, 0, 0, 0, 0},
 		{ 1, 0, 0, 0, 0, 0},
 		0,
 		1,1,1,1,0,0,0,1,
-		PLL_NONE, 
+		PLL_NONE,
 		TUNER_USER_SETUP
 	},
 	/* 0x20 */
 	{
 		"Intel Create and Share PCI",
 		4, 1, 0, 2, 7,
-		{ 2, 3, 1, 1, 0, 0, 0, 0}, 
+		{ 2, 3, 1, 1, 0, 0, 0, 0},
 		{ 4, 4, 4, 4, 4, 4},
 		0,
 		1,1,1,1,0,0,0,1,
@@ -378,17 +378,17 @@ const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 		0,
 		1,1,1,1,0,0,0,1,
 		PLL_NONE,
-		TUNER_USER_SETUP 
+		TUNER_USER_SETUP
 	},
 	{
 		"Leadtek WinFast 2000",
-		3, 1, 0, 2, 0xfff000, 
+		3, 1, 0, 2, 0xfff000,
 		{ 2, 3, 1, 1, 0, 0, 0, 0},
 		{ 0x621000,0x620100,0x621100,0x620000,0xE210000,0x620000},
 		0,
 		1,1,1,1,1,0,0,1,
 		PLL_28,
-		TUNER_USER_SETUP 
+		TUNER_USER_SETUP
 	},
 	{
 		"Chronos Video Shuttle II",
@@ -407,7 +407,7 @@ const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 		{ 0, 0x800, 0, 0, 0x1800, 0 },
 		0,
 		1,1,1,1,0,0,0,1,
-		PLL_28, 
+		PLL_28,
 		TUNER_USER_SETUP
 	},
 	{
@@ -417,17 +417,17 @@ const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 		{ 0x21, 0x20, 0x24, 0x2c, 0x29, 0x29 },
 		0,
 		0,0,0,0,0,0,0,1,
-		PLL_28, 
-		TUNER_USER_SETUP 
+		PLL_28,
+		TUNER_USER_SETUP
 	},
 	{
 		"TView99 CPH063",
 		3, 1, 0, 2, 0x551e00,
 		{ 2, 3, 1, 1, 0, 0, 0, 0},
-		{ 0x551400, 0x551200, 0, 0, 0, 0x551200 }, 
+		{ 0x551400, 0x551200, 0, 0, 0, 0x551200 },
 		0,
-		1,1,1,1,0,0,0,1,  
-		PLL_28, 
+		1,1,1,1,0,0,0,1,
+		PLL_28,
 		TUNER_USER_SETUP
 	},
 	{
@@ -437,7 +437,7 @@ const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 		{ 2, 0, 0, 0, 1, 0},
 		0,
 		1,1,1,1,0,0,0,1,
-		PLL_28, 
+		PLL_28,
 		TUNER_USER_SETUP
 	},
 	/* 0x28 */
@@ -448,7 +448,7 @@ const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 		{ 4, 0, 2, 3, 1, 0},
 		0,
 		0,1,1,1,0,1,1,1,
-		PLL_NONE, 
+		PLL_NONE,
 		TUNER_USER_SETUP
 	},
 	{
@@ -463,13 +463,13 @@ const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 	},
 	{
 		"ProVideo PV951", /* pic16c54 */
-		3, 1, 0, 2, 0, 
+		3, 1, 0, 2, 0,
 		{ 2, 3, 1, 1, 0, 0, 0, 0},
 		{ 0, 0, 0, 0, 0, 0},
 		0,
-		0,0,0,0,0,0,0,0, 
+		0,0,0,0,0,0,0,0,
 		PLL_28,
-		TUNER_PHILIPS_PAL_I 
+		TUNER_PHILIPS_PAL_I
 	},
 	{
 		"Little OnAir TV",
@@ -478,7 +478,7 @@ const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 		{0xff9ff6, 0xff9ff6, 0xff1ff7, 0, 0xff3ffc, 0},
 		0,
 		0,0,0,0,0,0,0,0,
-		PLL_NONE, 
+		PLL_NONE,
 		TUNER_USER_SETUP
 	},
 	{
@@ -488,27 +488,27 @@ const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 		{1, 1, 0, 2, 3, 0},
 		0,
 		0,0,0,0,0,0,0,0,
-		PLL_NONE, 
+		PLL_NONE,
 		TUNER_USER_SETUP
-	},	
+	},
 	{
 		"MATRIX-Vision MV-Delta 2",
 		5, 1, -1, 3, 0,
 		{ 2, 3, 1, 0, 0, 0, 0, 0},
-		{0, 0, 0, 0, 0, 0}, 
+		{0, 0, 0, 0, 0, 0},
 		0,
 		0,0,0,0,0,0,0,0,
-		PLL_28, 
+		PLL_28,
 		TUNER_USER_SETUP
 	},
 	{
 		"Zoltrix Genie TV",
 		3, 1, 0, 2, 0xbcf03f,
 		{ 2, 3, 1, 1, 0, 0, 0, 0},
-		{ 0xbc803f, 0, 0xbcb03f, 0, 0xbcb03f, 0}, 
+		{ 0xbc803f, 0, 0xbcb03f, 0, 0xbcb03f, 0},
 		0,
 		0,0,0,0,0,0,0,0,
-		PLL_28, 
+		PLL_28,
 		TUNER_PHILIPS_PAL
 	},
 	{
@@ -519,7 +519,7 @@ const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 		0,
 		0,0,0,0,0,0,0,0,
 		PLL_35,
-		TUNER_PHILIPS_PAL_I 
+		TUNER_PHILIPS_PAL_I
 	},
 	/* 0x30 */
 	{
@@ -577,7 +577,7 @@ const TVTUNERSETUP Tuners[TUNER_LASTONE] =
 	{ "Alps TSBE5", Alps, PAL, 2132, 5620, 0x01, 0x02, 0x08, 0x8e, 0xc2, 622, 0x00},
 	/* untested - data sheet guess. Only IF differs. */
 	{ "Alps TSBC5", Alps, PAL, 2132, 5620, 0x01, 0x02, 0x08, 0x8e, 0xc2, 608, 0x00},
-	{ "Temic 4006FH5", TEMIC, PAL_I, 2720, 7200, 0xa0, 0x90, 0x30, 0x8e, 0xc2, 623, 0x00}, 
+	{ "Temic 4006FH5", TEMIC, PAL_I, 2720, 7200, 0xa0, 0x90, 0x30, 0x8e, 0xc2, 623, 0x00},
 };
 
 TVCARDID CardType = TVCARD_UNKNOWN;
@@ -603,8 +603,8 @@ void Card_Init(TVCARDID CardType)
 
 /* ----------------------------------------------------------------------- */
 /*  Imagenation L-Model PXC200 Framegrabber */
-/*  This is basically the same procedure as 
- *  used by Alessandro Rubini in his pxc200 
+/*  This is basically the same procedure as
+ *  used by Alessandro Rubini in his pxc200
  *  driver, but using BTTV functions */
 
 void init_PXC200()
@@ -622,7 +622,7 @@ void init_PXC200()
 	BT848_WriteWord(BT848_GPIO_DATA, 0);
 	Sleep(30);
 	BT848_WriteWord(BT848_GPIO_DATA, 1<<13);
-	/* GPIO inputs are pulled up, so no need to drive 
+	/* GPIO inputs are pulled up, so no need to drive
 	 * reset pin any longer */
 	BT848_WriteWord(BT848_GPIO_OUT_EN, 0);
 
@@ -634,13 +634,13 @@ void init_PXC200()
 	    tboult@eecs.lehigh.edu
 	*/
 	BT848_WriteByte(BT848_ADC, BT848_ADC_RESERVED|BT848_ADC_AGC_EN);
-	
+
 	/*	Initialise MAX517 DAC */
 	I2CBus_Lock();
 	I2CBus_Write(0x5E, 0, 0x80, 1);
-	
+
 	/*	Initialise 12C508 PIC */
-	/*	The I2CWrite and I2CRead commmands are actually to the 
+	/*	The I2CWrite and I2CRead commmands are actually to the
 	 *	same chips - but the R/W bit is included in the address
 	 *	argument so the numbers are different */
 	for (i = 0; i < sizeof(vals)/sizeof(int); i++)

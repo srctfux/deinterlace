@@ -57,9 +57,9 @@ BOOL APIENTRY ProgramListProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 	LPMEASUREITEMSTRUCT lpmis;
 	RECT ptrtoWndPos;
 	static int currX, currY;
-	int fwKeys = wParam;		// key flags 
-	int xPos;					// horizontal position of cursor 
-	int yPos;					// vertical position of cursor 
+	int fwKeys = wParam;		// key flags
+	int xPos;					// horizontal position of cursor
+	int yPos;					// vertical position of cursor
 	static HCURSOR hSaveCursor = NULL;
 	static HCURSOR hsizex;
 	static int distance = -9999;
@@ -75,12 +75,12 @@ BOOL APIENTRY ProgramListProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 		hsizex = LoadCursor(hInst, "Csizex");
 
 		ProgList = CreateWindow("LISTBOX", NULL, WS_BORDER | WS_CHILD | WS_VISIBLE |
-								// LBS_NOINTEGRALHEIGHT | 
+								// LBS_NOINTEGRALHEIGHT |
 								LBS_NOTIFY |
-								// LBS_HASSTRINGS | 
+								// LBS_HASSTRINGS |
 								LBS_OWNERDRAWVARIABLE | WS_VSCROLL | WS_HSCROLL,
 								//    WS_HSCROLL |
-								//    LBS_SORT , 
+								//    LBS_SORT ,
 								//       LBS_DISABLENOSCROLL ,
 								0, 0, 0, 0, hDlg, NULL, hInst, NULL);
 		EnableWindow(GetDlgItem(hDlg, IDC_BUTTON1), FALSE);
@@ -198,8 +198,8 @@ BOOL APIENTRY ProgramListProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 		break;
 
 	case WM_LBUTTONUP:
-		xPos = LOWORD(lParam);	// horizontal position of cursor 
-		yPos = HIWORD(lParam);	// vertical position of cursor 
+		xPos = LOWORD(lParam);	// horizontal position of cursor
+		yPos = HIWORD(lParam);	// vertical position of cursor
 		if ((yPos >= 2) && (yPos <= 21))
 		{
 			if ((distance == -9999) && (hSaveCursor == NULL))
@@ -229,9 +229,9 @@ BOOL APIENTRY ProgramListProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 		break;
 
 	case WM_MOUSEMOVE:
-		fwKeys = wParam;		// key flags 
-		xPos = LOWORD(lParam);	// horizontal position of cursor 
-		yPos = HIWORD(lParam);	// vertical position of cursor 
+		fwKeys = wParam;		// key flags
+		xPos = LOWORD(lParam);	// horizontal position of cursor
+		yPos = HIWORD(lParam);	// vertical position of cursor
 		SetOK = FALSE;
 		if ((yPos >= 2) && (yPos <= 21))
 		{

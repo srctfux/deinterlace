@@ -34,11 +34,11 @@ void _ErrorBox(HWND hwndParent, LPCSTR szFile, int Line, LPCSTR szMessage)
 	_snprintf(szDispMessage,1024, "%s\nThe error occured in %s at line %d", szMessage, szFile, Line);
 	if(hwndParent == NULL)
 	{
-		MessageBox(hWnd, szDispMessage, "dTV Error", MB_ICONSTOP | MB_OK); 
+		MessageBox(hWnd, szDispMessage, "dTV Error", MB_ICONSTOP | MB_OK);
 	}
 	else
 	{
-		MessageBox(hwndParent, szDispMessage, "dTV Error", MB_ICONSTOP | MB_OK); 
+		MessageBox(hwndParent, szDispMessage, "dTV Error", MB_ICONSTOP | MB_OK);
 	}
 }
 

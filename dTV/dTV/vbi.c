@@ -33,10 +33,10 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "vbi.h"
+#include "VBI.h"
 #include "bt848.h"
-#include "vt.h"
-#include "ccdecode.h"
+#include "VBI_VideoText.h"
+#include "VBI_CCdecode.h"
 
 BOOL bStopVBI;
 HANDLE VBIThread;

@@ -81,9 +81,14 @@ void LoadSettingsFromIni(LPSTR Name)
 	PulldownRepeatCount = GetPrivateProfileInt("Pulldown", "PulldownRepeatCount", PulldownRepeatCount, szIniFile);
 	PulldownRepeatCount2 = GetPrivateProfileInt("Pulldown", "PulldownRepeatCount2", PulldownRepeatCount2, szIniFile);
 	Threshold32Pulldown  = GetPrivateProfileInt("Pulldown", "Threshold32Pulldown", Threshold32Pulldown, szIniFile);
+	ThresholdPulldownMismatch  = GetPrivateProfileInt("Pulldown", "ThresholdPulldownMismatch", ThresholdPulldownMismatch, szIniFile);
+	ThresholdPulldownComb  = GetPrivateProfileInt("Pulldown", "ThresholdPulldownComb", ThresholdPulldownComb, szIniFile);
 	bAutoDetectMode = (GetPrivateProfileInt("Pulldown", "bAutoDetectMode", bAutoDetectMode, szIniFile) != 0);
+	bFallbackToVideo = (GetPrivateProfileInt("Pulldown", "bFallbackToVideo", bFallbackToVideo, szIniFile) != 0);
 	BitShift = GetPrivateProfileInt("Pulldown", "BitShift", BitShift, szIniFile);
 	DiffThreshold = GetPrivateProfileInt("Pulldown", "DiffThreshold", DiffThreshold, szIniFile);
+	PulldownSwitchInterval = GetPrivateProfileInt("Pulldown", "PulldownSwitchInterval", PulldownSwitchInterval, szIniFile);
+	PulldownSwitchMax = GetPrivateProfileInt("Pulldown", "PulldownSwitchMax", PulldownSwitchMax, szIniFile);
 
 	EdgeDetect = GetPrivateProfileInt("Deinterlace", "EdgeDetect", EdgeDetect, szIniFile);
 	JaggieThreshold = GetPrivateProfileInt("Deinterlace", "JaggieThreshold", JaggieThreshold, szIniFile);
@@ -305,9 +310,14 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("Pulldown", "PulldownRepeatCount", PulldownRepeatCount, szIniFile);
 	WritePrivateProfileInt("Pulldown", "PulldownRepeatCount2", PulldownRepeatCount2, szIniFile);
 	WritePrivateProfileInt("Pulldown", "Threshold32Pulldown", Threshold32Pulldown, szIniFile);
+	WritePrivateProfileInt("Pulldown", "ThresholdPulldownMismatch", ThresholdPulldownMismatch, szIniFile);
+	WritePrivateProfileInt("Pulldown", "ThresholdPulldownComb", ThresholdPulldownComb, szIniFile);
 	WritePrivateProfileInt("Pulldown", "bAutoDetectMode", bAutoDetectMode, szIniFile);
+	WritePrivateProfileInt("Pulldown", "bFallbackToVideo", bFallbackToVideo, szIniFile);
 	WritePrivateProfileInt("Pulldown", "BitShift", BitShift, szIniFile);
 	WritePrivateProfileInt("Pulldown", "DiffThreshold", DiffThreshold, szIniFile);
+	WritePrivateProfileInt("Pulldown", "PulldownSwitchInterval", PulldownSwitchInterval, szIniFile);
+	WritePrivateProfileInt("Pulldown", "PulldownSwitchMax", PulldownSwitchMax, szIniFile);
 
 	WritePrivateProfileInt("Deinterlace", "EdgeDetect", EdgeDetect, szIniFile);
 	WritePrivateProfileInt("Deinterlace", "JaggieThreshold", JaggieThreshold, szIniFile);

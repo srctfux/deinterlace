@@ -112,7 +112,7 @@ void Enumerate_Sound_SubSystem(void)
 							{
 								if (mmresult == ERROR_SUCCESS)
 								{
-									// Detail Controls 
+									// Detail Controls
 									SoundSystem.To_Lines[SoundSystemLoop].To_Connection[DestinationLoop].To_Control[ConnectionLoop].MixerDetail[ControlLoop].cbDetails = 0;
 									SoundSystem.To_Lines[SoundSystemLoop].To_Connection[DestinationLoop].To_Control[ConnectionLoop].MixerDetail[ControlLoop].paDetails = NULL;
 
@@ -225,7 +225,7 @@ void Enumerate_Sound_SubSystem(void)
 												if (SoundSystem.To_Lines[SoundSystemLoop].To_Connection[DestinationLoop].To_Control[ConnectionLoop].MixerControl[ControlLoop].szName[0] == 0x00)
 												{
 													strcpy(&SoundSystem.To_Lines[SoundSystemLoop].To_Connection[DestinationLoop].To_Control[ConnectionLoop].MixerControl[ControlLoop].szName[0],
-														   "SLIDER ID gefunden");							
+														   "SLIDER ID gefunden");
 												}
 												break;
 											case MIXERCONTROL_CONTROLTYPE_PAN:
@@ -413,7 +413,7 @@ BOOL Mixer_Open(UINT uMxId)
 		mmresult = mixerOpen(&hMixer, uMxId, 0, (DWORD) hInst, MIXER_OBJECTF_AUX);
 		if (mmresult != MMSYSERR_NOERROR)
 		{
-			// Ohhps kein auxiliary device 
+			// Ohhps kein auxiliary device
 			mmresult = mixerOpen(&hMixer, uMxId, 0, (DWORD) hInst, MIXER_OBJECTF_MIXER);
 		}
 		if (mmresult == MMSYSERR_NOERROR)

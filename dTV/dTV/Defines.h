@@ -89,8 +89,9 @@ typedef enum
 #define NEUNIT 96
 #define MAXFILTER 64
 
+#define MAXMODESWITCHES 50	// Maximum number of switches to track in TrackModeSwitches()
 
-// Nagravision Stuff 
+// Nagravision Stuff
 #define TESTPIXEL             32
 #define ZEILENZAHL           287
 
@@ -243,7 +244,7 @@ typedef enum
 #define BASE_ODD3         0x30  /* Video DMA 3 registers */
 #define BASE_EVEN3        0x34
 #define PROT_ADDR3        0x38
-#define PITCH3            0x3C         
+#define PITCH3            0x3C
 #define BASE_PAGE3        0x40  /* Video DMA 3 base page */
 #define NUM_LINE_BYTE3    0x44
 
@@ -265,15 +266,15 @@ typedef enum
 #define DEBI_CONFIG       0x7C
 #define DEBI_COMMAND      0x80
 #define DEBI_PAGE         0x84
-#define DEBI_AD           0x88	
+#define DEBI_AD           0x88
 
-#define I2C_TRANSFER      0x8C	
-#define I2C_STATUS        0x90	
+#define I2C_TRANSFER      0x8C
+#define I2C_STATUS        0x90
 
 #define BASE_A1_IN        0x94	/* Audio 1 input DMA */
 #define PROT_A1_IN        0x98
 #define PAGE_A1_IN        0x9C
-  
+
 #define BASE_A1_OUT       0xA0  /* Audio 1 output DMA */
 #define PROT_A1_OUT       0xA4
 #define PAGE_A1_OUT       0xA8
@@ -313,12 +314,12 @@ typedef enum
 #define RPS_ADDR0         0x104  /* RPS task 0 address register */
 #define RPS_ADDR1         0x108  /* RPS task 1 address register */
 
-#define ISR               0x10C  /* Interrupt status register */                                                             
+#define ISR               0x10C  /* Interrupt status register */
 #define PSR               0x110  /* Primary status register */
 #define SSR               0x114  /* Secondary status register */
 
 #define EC1R              0x118  /* Event counter set 1 register */
-#define EC2R              0x11C  /* Event counter set 2 register */         
+#define EC2R              0x11C  /* Event counter set 2 register */
 
 #define LEVEL_REP         0x140,
 #define A_TIME_SLOT1      0x180,  /* from 180 - 1BC */
@@ -389,7 +390,7 @@ typedef enum
 #define	OSDQFull	0x0010			//OSD Queue Full
 #define	OSDQOver	0x0020
 
-#define DATA_TELETEXT            0x00 
+#define DATA_TELETEXT            0x00
 #define DATA_FSECTION            0x01
 #define DATA_IPMPE               0x02
 #define DATA_MPEG_RECORD         0x03
@@ -457,7 +458,7 @@ typedef enum
 #define DVB_SYNC_FSYNC         8
 #define DVB_SYNC_FRONT        16
 
-#define FRONT_TP_CHANGED  1 
+#define FRONT_TP_CHANGED  1
 #define FRONT_FREQ_CHANGED 2
 #define FRONT_RATE_CHANGED 4
 

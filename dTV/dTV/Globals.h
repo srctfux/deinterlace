@@ -16,6 +16,15 @@
 //	GNU General Public License for more details
 /////////////////////////////////////////////////////////////////////////////
 //
+// ########### IMPORTANT ###########
+//
+// Globals are ugly and complicates keeping track of code.
+// If you see variables that are used by only one module, please 
+// delete it from here, and declare the variable at the top of the module 
+// and then delete the 'extern' declaration.  Your Computer Science class
+// should have taught you to avoid excessive global variables ;-)
+// It will also make it easier to rewrite to C++ as well in the future.
+//
 // This software was based on Multidec 5.6 Those portions are
 // Copyright (C) 1999/2000 Espresso (echter_espresso@hotmail.com)
 //
@@ -37,6 +46,15 @@
 
 #include "defines.h"
 #include "structs.h"
+
+//------------------------------------------------------------------------
+// ######### IMPORTANT! READ ME FIRST! ##########
+//
+// Only put variables here IF it is necessary to share the same variable
+// between multiple modules.  If it is not necessary, please instead
+// put your variable declaration at the top of the module you are editing.
+// This makes other programmers' lives easier keeping track of variables.
+//------------------------------------------------------------------------
 
 extern BITMAPINFO *VTCharSetLarge ;
 extern BITMAPINFO *VTCharSetSmall;
@@ -122,9 +140,6 @@ extern int MSPMajorMode;
 extern int MSPMinorMode;
 extern int MSPMode;
 extern int MSPStereo;
-extern int CurrentFrame;
-extern int nPALplusData ;
-extern int nPALplusZeile ;
 extern int TVTYPE;
 extern int VideoSource;
 extern int VT_Cache;
@@ -198,6 +213,15 @@ extern BOOL bIsFullScreen;
 extern char BTVendorID[10];
 extern char BTDeviceID[10];
 extern char MSPVersion[16];
+
+//------------------------------------------------------------------------
+// ######### IMPORTANT! READ ME FIRST! ##########
+//
+// Only put variables here IF it is necessary to share the same variable
+// between multiple modules.  If it is not necessary, please instead
+// put your variable declaration at the top of the module you are editing.
+// This makes other programmers' lives easier keeping track of variables.
+//------------------------------------------------------------------------
 
 #endif
 

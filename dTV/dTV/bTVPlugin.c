@@ -49,7 +49,7 @@ char szBTVPluginName[MAX_PATH];
 
 BOOL bUseBTVPlugin = FALSE;
 
-BTV_V1_PARAMS BTVParams = 
+BTV_V1_PARAMS BTVParams =
 {
 	NULL,
 	NULL,
@@ -121,18 +121,18 @@ BOOL BTVPluginLoad(const char * szPluginName)
 	}
 
 	BTVPlugin.plugin_Initialize();
-	
+
 	//Props.szLongName = LongName;
 	//Props.szShortName = ShortName;
 	//Props.Flags = 0;
 	BTVPlugin.plugin_GetProps(&Props, 0);
 	if(Props.Flags | 0x00000002)
 	{
-		bWantsToFlip = TRUE;		
+		bWantsToFlip = TRUE;
 	}
 	else
 	{
-		bWantsToFlip = FALSE;		
+		bWantsToFlip = FALSE;
 	}
 
 	return TRUE;

@@ -36,7 +36,7 @@
 #include "other.h"
 #include "bt848.h"
 #include "mixerdev.h"
-#include "vt.h"
+#include "VBI_VideoText.h"
 #include "AspectRatio.h"
 #include "dTV.h"
 #include "settings.h"
@@ -115,12 +115,7 @@ unsigned char *pBurstLine[5];
 int FORMAT_MASK = 0x0F;
 int PalFormat = 0;
 
-int  nPALplusZeile  = -10;
-int  nPALplusData   =  0;
-
 BOOL  BlackSet[288];
-
-int CurrentFrame=0;
 
 LOGFONT lf = {16,0,0,0,400,0,0,0,0,0,0,0,0,"MS Sans Serif"};   
 
@@ -455,7 +450,29 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			if(bAutoDetectMode == TRUE)
 			{
 				gPulldownMode = VIDEO_MODE;
+				UpdatePulldownStatus();
 			}
+			SetMenuAnalog();
+			break;
+
+		case IDM_FALLBACK:
+			bFallbackToVideo = !bFallbackToVideo;
+			SetMenuAnalog();
+			break;
+
+		case IDM_32PULL1:
+		case IDM_32PULL2:
+		case IDM_32PULL3:
+		case IDM_32PULL4:
+		case IDM_32PULL5:
+		case IDM_22PULLODD:
+		case IDM_22PULLEVEN:
+		case IDM_WEAVE:
+		case IDM_BOB:
+		case IDM_VIDEO:
+			bAutoDetectMode = FALSE;
+			gPulldownMode = LOWORD(wParam) - IDM_VIDEO;
+			UpdatePulldownStatus();
 			SetMenuAnalog();
 			break;
 
@@ -1770,6 +1787,18 @@ void SetMenuAnalog()
 	CheckMenuItem(GetMenu(hWnd), IDM_AUTOSTEREO, AutoStereoSelect?MF_CHECKED:MF_UNCHECKED);
 
 	CheckMenuItem(GetMenu(hWnd), IDM_AUTODETECT, bAutoDetectMode?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_FALLBACK, bFallbackToVideo?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_VIDEO, (gPulldownMode == VIDEO_MODE && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_WEAVE, (gPulldownMode == SIMPLE_WEAVE && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_BOB, (gPulldownMode == INTERPOLATE_BOB && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_BTV, (gPulldownMode == BTV_PLUGIN && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_22PULLODD, (gPulldownMode == FILM_22_PULLDOWN_ODD && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_22PULLEVEN, (gPulldownMode == FILM_22_PULLDOWN_EVEN && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_32PULL1, (gPulldownMode == FILM_32_PULLDOWN_0 && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_32PULL2, (gPulldownMode == FILM_32_PULLDOWN_1 && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_32PULL3, (gPulldownMode == FILM_32_PULLDOWN_2 && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_32PULL4, (gPulldownMode == FILM_32_PULLDOWN_3 && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_32PULL5, (gPulldownMode == FILM_32_PULLDOWN_4 && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
 
 	SetMenuAspectRatio(hWnd);
 }

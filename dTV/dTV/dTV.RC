@@ -618,7 +618,7 @@ CAPTION "About dTV"
 FONT 8, "MS Sans Serif"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,305,9,58,19,WS_GROUP,WS_EX_CLIENTEDGE
-    CTEXT           "dTV Version 1.7",IDC_TEXT1,0,3,293,9
+    CTEXT           "dTV Version 1.8",IDC_TEXT1,0,3,293,9
     CTEXT           "Copyright (C) 2000 John Adcock (johnadcock@hotmail.com)",
                     IDC_STATIC,0,24,293,10
     GROUPBOX        "Based On Multi-Dec 5.6",IDC_STATIC,5,101,364,43
@@ -908,37 +908,57 @@ BEGIN
     END
     POPUP "&AspectRatio"
     BEGIN
-        MENUITEM "Disabled (Stretch video to window)\tCtrl-0", 
-                                                IDM_ASPECT_NONE
-        MENUITEM "4:3 or Letterboxed Non-Anamorphic Source\tCtrl-1", 
-                                                IDM_ASPECT_LETTERBOX
-        MENUITEM "16:9 Anamorphic Source\tCtrl-2", IDM_ASPECT_ANAMORPHIC_177
-        POPUP "Aspect Ratio Of Image Within Source"
+        MENUITEM "4:3 Fullscreen\t1",           IDM_ASPECT_FULLSCREEN
+        MENUITEM "Letterboxed\t2",              IDM_ASPECT_LETTERBOX
+        MENUITEM "16:9 Anamorphic\t3",          IDM_ASPECT_ANAMORPHIC
+        POPUP "Advanced Image Aspect Ratios"
         BEGIN
-            MENUITEM "Same as Destination Window\t0", IDM_SASPECT_0
-            MENUITEM "1.33  (4:3)\t1",              IDM_SASPECT_133
-            MENUITEM "1.66\t2",                     IDM_SASPECT_166
-            MENUITEM "1.77  (16:9)\t3",             IDM_SASPECT_177
-            MENUITEM "1.85\t4",                     IDM_SASPECT_185
-            MENUITEM "2.33  (21:9)\t5",             IDM_SASPECT_233
-            MENUITEM "2.35\t6",                     IDM_SASPECT_235
-            MENUITEM "Custom  (from .INI file)\t7", IDM_SASPECT_CUSTOM
+            MENUITEM "Stretch to Window\tCtrl+0",   IDM_SASPECT_0
+            MENUITEM "1.33\tCtrl+1",                IDM_SASPECT_133
+            MENUITEM "1.66   Letterboxed\tCtrl+2",  IDM_SASPECT_166
+            MENUITEM "1.78   Letterboxed\tCtrl+3",  IDM_SASPECT_178
+            MENUITEM "1.85   Letterboxed\tCtrl+4",  IDM_SASPECT_185
+            MENUITEM "2.00   Letterboxed\tCtrl+5",  IDM_SASPECT_200
+            MENUITEM "2.35   Letterboxed\tCtrl+6",  IDM_SASPECT_235
+            MENUITEM "1.66   Anamorphic\tCtrl+Shift+2", IDM_SASPECT_166A
+            MENUITEM "1.78   Anamorphic\tCtrl+Shift+3", IDM_SASPECT_178A
+            MENUITEM "1.85   Anamorphic\tCtrl+Shift+4", IDM_SASPECT_185A
+            MENUITEM "2.00   Anamorphic\tCtrl+Shift+5", IDM_SASPECT_200A
+            MENUITEM "2.35   Anamorphic\tCtrl+Shift+6", IDM_SASPECT_235A
+            MENUITEM "Custom  (from .INI file)\tCtrl+9", IDM_SASPECT_CUSTOM
         END
-        POPUP "Display Screen Aspect Ratio"
+        POPUP "Aspect Ratio of Display Screen"
         BEGIN
-            MENUITEM "Same as Computer Resolution", IDM_TASPECT_0
-            MENUITEM "1.33  (4:3)",                 IDM_TASPECT_133
-            MENUITEM "1.66",                        IDM_TASPECT_166
-            MENUITEM "1.77  (16:9)",                IDM_TASPECT_177
-            MENUITEM "1.85",                        IDM_TASPECT_185
-            MENUITEM "2.33  (21:9)",                IDM_TASPECT_233
-            MENUITEM "2.35",                        IDM_TASPECT_235
-            MENUITEM "Custom  (from .INI file)",    IDM_TASPECT_CUSTOM
+            MENUITEM "Same as Computer Resolution\tAlt+0", IDM_TASPECT_0
+            MENUITEM "1.33 - TVs, monitors\tAlt+1", IDM_TASPECT_133
+            MENUITEM "1.66\tAlt+2",                 IDM_TASPECT_166
+            MENUITEM "1.78 - HDTV displays\tAlt+3", IDM_TASPECT_178
+            MENUITEM "1.85\tAlt+4",                 IDM_TASPECT_185
+            MENUITEM "2.00\tAlt+5",                 IDM_TASPECT_200
+            MENUITEM "2.35\tAlt+6",                 IDM_TASPECT_235
+            MENUITEM "Custom  (from .INI file)\tAlt+9", IDM_TASPECT_CUSTOM
         END
     END
     POPUP "&Settings"
     BEGIN
         MENUITEM "&Video Adjustments ...",      IDM_VIDEOSETTINGS
+        POPUP "&Deinterlace"
+        BEGIN
+            MENUITEM "&Automatic Pulldown Detect",  IDM_AUTODETECT
+            MENUITEM "&Fall Back to Video on Bad Pulldown", IDM_FALLBACK
+            MENUITEM SEPARATOR
+            MENUITEM "&Video Deinterlace",          IDM_VIDEO
+            MENUITEM "Simple &Weave",               IDM_WEAVE
+            MENUITEM "Interpolated &Bob",           IDM_BOB
+            MENUITEM "B&TV Plugin",                 IDM_BTV
+            MENUITEM "3:2 Pulldown, Skip Field &1", IDM_32PULL1
+            MENUITEM "3:2 Pulldown, Skip Field &2", IDM_32PULL2
+            MENUITEM "3:2 Pulldown, Skip Field &3", IDM_32PULL3
+            MENUITEM "3:2 Pulldown, Skip Field &4", IDM_32PULL4
+            MENUITEM "3:2 Pulldown, Skip Field &5", IDM_32PULL5
+            MENUITEM "2:2 Pulldown, Flip on &Odd",  IDM_22PULLODD
+            MENUITEM "2:2 Pulldown, Flip on &Even", IDM_22PULLEVEN
+        END
         POPUP "&Audio Input"
         BEGIN
             MENUITEM "&Tuner",                      IDM_AUDIO_0
@@ -983,7 +1003,6 @@ BEGIN
             END
         END
         MENUITEM "Capture VBI-&Data",           IDM_VBI
-        MENUITEM "Automatic Pu&lldown Detect",  IDM_AUTODETECT
     END
     POPUP "&Hardware"
     BEGIN
@@ -1242,17 +1261,35 @@ END
 
 ANALOGACCEL ACCELERATORS DISCARDABLE 
 BEGIN
-    "0",            IDM_SASPECT_0,          VIRTKEY, NOINVERT
-    "0",            IDM_ASPECT_NONE,        VIRTKEY, CONTROL, NOINVERT
-    "1",            IDM_SASPECT_133,        VIRTKEY, NOINVERT
-    "1",            IDM_ASPECT_LETTERBOX,   VIRTKEY, CONTROL, NOINVERT
-    "2",            IDM_SASPECT_166,        VIRTKEY, NOINVERT
-    "2",            IDM_ASPECT_ANAMORPHIC_177, VIRTKEY, CONTROL, NOINVERT
-    "3",            IDM_SASPECT_177,        VIRTKEY, NOINVERT
-    "4",            IDM_SASPECT_185,        VIRTKEY, NOINVERT
-    "5",            IDM_SASPECT_233,        VIRTKEY, NOINVERT
-    "6",            IDM_SASPECT_235,        VIRTKEY, NOINVERT
-    "7",            IDM_SASPECT_CUSTOM,     VIRTKEY, NOINVERT
+    "0",            IDM_SASPECT_0,          VIRTKEY, CONTROL, NOINVERT
+    "0",            IDM_TASPECT_0,          VIRTKEY, ALT, NOINVERT
+    "1",            IDM_ASPECT_FULLSCREEN,  VIRTKEY, NOINVERT
+    "1",            IDM_SASPECT_133,        VIRTKEY, CONTROL, NOINVERT
+    "1",            IDM_TASPECT_133,        VIRTKEY, ALT, NOINVERT
+    "2",            IDM_ASPECT_LETTERBOX,   VIRTKEY, NOINVERT
+    "2",            IDM_SASPECT_166,        VIRTKEY, CONTROL, NOINVERT
+    "2",            IDM_TASPECT_166,        VIRTKEY, ALT, NOINVERT
+    "2",            IDM_SASPECT_166A,       VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "3",            IDM_ASPECT_ANAMORPHIC,  VIRTKEY, NOINVERT
+    "3",            IDM_SASPECT_178,        VIRTKEY, CONTROL, NOINVERT
+    "3",            IDM_TASPECT_178,        VIRTKEY, ALT, NOINVERT
+    "3",            IDM_SASPECT_178A,       VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "4",            IDM_SASPECT_185,        VIRTKEY, CONTROL, NOINVERT
+    "4",            IDM_TASPECT_185,        VIRTKEY, ALT, NOINVERT
+    "4",            IDM_SASPECT_185A,       VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "5",            IDM_SASPECT_200,        VIRTKEY, CONTROL, NOINVERT
+    "5",            IDM_TASPECT_200,        VIRTKEY, ALT, NOINVERT
+    "5",            IDM_SASPECT_200A,       VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "6",            IDM_SASPECT_235,        VIRTKEY, CONTROL, NOINVERT
+    "6",            IDM_TASPECT_235,        VIRTKEY, ALT, NOINVERT
+    "6",            IDM_SASPECT_235A,       VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "9",            IDM_SASPECT_CUSTOM,     VIRTKEY, CONTROL, NOINVERT
+    "9",            IDM_TASPECT_CUSTOM,     VIRTKEY, ALT, NOINVERT
     "B",            IDM_BRIGHTNESSMINUS,    VIRTKEY, NOINVERT
     "B",            IDM_BRIGHTNESSPLUS,     VIRTKEY, SHIFT, NOINVERT
     "C",            IDM_COLORMINUS,         VIRTKEY, NOINVERT

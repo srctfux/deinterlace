@@ -37,7 +37,7 @@
 #include "bt848.h"
 #include "dTV.h"
 #include "OutThreads.h"
-#include "vt.h"
+#include "VBI_VideoText.h"
 #include "audio.h"
 #include "tuner.h"
 #include "vbi.h"
@@ -48,7 +48,7 @@ int UTPage=150;
 HWND UTList;
 
 char VTtoAscii[96] =
-{ 
+{
  " !##$%&´()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜß#-abcdefghijklmnopqrstuvwxyzäöüß#"
 };
 
@@ -79,7 +79,7 @@ BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 	static int TSaturationV;
 	static int TOverscan;
 	static int LastSaturation;
-	
+
 	int x, y, j;
 
 	switch (message)
@@ -1021,13 +1021,13 @@ BOOL APIENTRY VideoTextUnterTitelProc(HWND hDlg, UINT message, UINT wParam, LONG
 	case WM_INITDIALOG:
 		SetDlgItemInt(hDlg, IDC_EDIT1, UTPage, TRUE);
 		UTList = CreateWindow("LISTBOX", NULL, WS_BORDER | WS_CHILD | WS_VISIBLE |
-							  // LBS_NOINTEGRALHEIGHT | 
+							  // LBS_NOINTEGRALHEIGHT |
 							  LBS_NOTIFY |
-							  // LBS_HASSTRINGS | 
+							  // LBS_HASSTRINGS |
 							  // LBS_WANTKEYBOARDINPUT |
 							  LBS_OWNERDRAWVARIABLE | WS_VSCROLL,
 							  //    WS_HSCROLL |
-							  //    LBS_SORT , 
+							  //    LBS_SORT ,
 							  //       LBS_DISABLENOSCROLL ,
 							  0, 0, 0, 0, hDlg, NULL, hInst, NULL);
 
@@ -1108,7 +1108,7 @@ BOOL APIENTRY VideoTextUnterTitelProc(HWND hDlg, UINT message, UINT wParam, LONG
 				VTFrame[UTPage].SubPage[0].LineUpdate[row] = 0;
 				bGraph = bHoldGraph = bSepGraph = bBox = bFlash = bDouble = bConceal = bHasDouble = FALSE;
 				nLastGraph = 32;
-				Black = VTColourTable[0];	// 
+				Black = VTColourTable[0];	//
 				ForceTransparent = VTColourTable[8];
 				ForceBlack = VTColourTable[0];
 
@@ -1372,7 +1372,7 @@ BOOL APIENTRY CardSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 			ManuellAudio[5] = GetDlgItemInt(hDlg, IDC_EDIT6, NULL, FALSE);
 			ManuellAudio[6] = GetDlgItemInt(hDlg, IDC_EDIT7, NULL, FALSE);
 			ManuellAudio[7] = GetDlgItemInt(hDlg, IDC_EDIT8, NULL, FALSE);
-			
+
 			SetMenuAnalog();
 			EndDialog(hDlg, TRUE);
 		}

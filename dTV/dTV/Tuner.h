@@ -38,12 +38,12 @@ void Load_Country_Specific_Settings(int LPos);
 
 struct TTunerType
 {
-	WORD thresh1; /* frequency Range for UHF,VHF-L, VHF_H */   
-	WORD thresh2;  
+	WORD thresh1; /* frequency Range for UHF,VHF-L, VHF_H */
+	WORD thresh2;
 	BYTE VHF_L;
 	BYTE VHF_H;
 	BYTE UHF;
-	BYTE config; 
+	BYTE config;
 	BYTE I2C;
 	WORD IFPCoff;
 };

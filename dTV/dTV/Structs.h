@@ -106,13 +106,13 @@ struct TVDatBlockz
 
 
 //Struktur für den Block SOT - Start of Transmission   !!SF
-typedef struct SOTREC 
+typedef struct SOTREC
 {
 	unsigned int  date;   //Datum der Ausstrahlung...
     unsigned short fanz;          //Anzahl der übertragenden Dateien.
- 	char           GeneralName[512];  
-	char           ExecCommand[512];  
-    char           Kommentar[512];    
+ 	char           GeneralName[512];
+	char           ExecCommand[512];
+    char           Kommentar[512];
 };
 
 typedef struct TVTDialog
@@ -148,12 +148,12 @@ typedef struct TProgramm
 	int afc;
 	int ttk;               /* 22KHz */
 	int diseqc;            /* Diseqc input select */
-	unsigned int srate;         
-	int qam;               
-	int fec;   
+	unsigned int srate;
+	int qam;
+	int fec;
 	int norm;
-	unsigned short  tp_id;        
-	unsigned short  Video_pid;        
+	unsigned short  tp_id;
+	unsigned short  Video_pid;
 	unsigned short  Audio_pid;
     unsigned short  TeleText_pid;          /* Teletext PID */
 	unsigned short  PMT_pid;
@@ -163,7 +163,7 @@ typedef struct TProgramm
 	unsigned short  AC3_pid;
 	unsigned short  EMM_pid;
 	unsigned short  ECM_pid;
-	unsigned char   TVType; //  == 00 PAL ; 11 == NTSC    
+	unsigned char   TVType; //  == 00 PAL ; 11 == NTSC
 	unsigned char   ServiceTyp;
     unsigned char   CA_ID;
 	unsigned short  Temp_Audio;
@@ -196,7 +196,7 @@ struct TPacket30
 	char Identifier[21];
 
 	// Type 2 data
-	
+
 	struct
 	{
 		unsigned LCI:2;
@@ -264,7 +264,7 @@ struct TMixerValues
 };
 
 
-struct TMixerLoad 
+struct TMixerLoad
 {
 	struct TMixerAccess MixerAccess;
 	struct TMixerValues MixerValues;
@@ -292,7 +292,7 @@ struct TMixerConnections
 	struct TMixerControls *To_Control;
 };
 
-struct TMixerLines 
+struct TMixerLines
 {
 	int LinesCount;
 	MIXERLINE *MixerLine;
@@ -307,7 +307,7 @@ struct TSoundSystem
 };
 
 
-typedef struct OTLNB 
+typedef struct OTLNB
 {
 	BOOL Use;
 	BOOL Power;
