@@ -153,6 +153,8 @@ BOOL Audio_SetSource(AUDIOMUXTYPE nChannel)
 		MuxSelect = TVCards[CardType].AudioMuxSelect[nChannel];
 	}
 
+	/* select direct input */
+	BT848_WriteWord(BT848_GPIO_REG_INP, 0x00);
 	BT848_AndOrDataDword(BT848_GPIO_DATA, MuxSelect, ~TVCards[CardType].GPIOMask);
 	return TRUE;
 }

@@ -322,8 +322,8 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_SETUPCARD:
 			Stop_Capture();
 			DialogBox(hInst, "SELECTCARD", hWnd, (DLGPROC) SelectCardProc);
-			//Card_Init(CardType);
-			//Tuner_Init(TunerType);
+			Card_Init(CardType);
+			Tuner_Init(TunerType);
 			Init_Screen_Struct();
 			Start_Capture();
 			break;
@@ -1082,6 +1082,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_ANALOGSCAN:
+			SendMessage(hWnd, WM_COMMAND, IDM_TUNER, IDM_TUNER);
 			DialogBox(hInst, "ANALOGSCAN", hWnd, (DLGPROC) AnalogScanProc);
 			break;
 
@@ -1364,6 +1365,7 @@ void MainWndOnInitBT(HWND hWnd)
 	int i;
 	BOOL bInitOK = FALSE;
 	MSPStatus[0] = 0x00;
+	
 	CurrentProgramm = InitialProg;
 
 	if (BT848_FindTVCard(hWnd) == TRUE)
@@ -1404,6 +1406,7 @@ void MainWndOnInitBT(HWND hWnd)
 				DialogBox(hInst, "SELECTCARD", hWnd, (DLGPROC) SelectCardProc);
 			}
 		}
+		
 		BT848_MakeVBITable(VBI_lpf);
 		
 		WStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
@@ -1434,7 +1437,7 @@ void MainWndOnInitBT(HWND hWnd)
 		sprintf(TunerStatus, "No Device on I2C-Bus");
 
 		sprintf(Text, "No Tuner");
-		if (TunerType != TUNER_ABSENT && Tuner_Init(TunerType) == TRUE)
+		if (Tuner_Init(TunerType) == TRUE)
 		{
 			sprintf(Text, "Tuner OK");
 			if (CurrentProgramm >= 0)

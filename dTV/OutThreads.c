@@ -705,7 +705,7 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 				{
 					VideoDeinterlaceMMX(pDest, 
 									ppOddLines[CurrentFrame][nLineTarget - 1], 
-									ppEvenLines[CurrentFrame][nLineTarget], 
+									ppEvenLines[LastEvenFrame][nLineTarget], 
 									ppOddLines[CurrentFrame][nLineTarget], 
 									CurrentX * 2);
 					pDest += 2 * OverlayPitch;
@@ -771,25 +771,20 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 			}
 			else if(gPulldownMode == VIDEO_MODE)
 			{
-				// copy first line
-				memcpyMMX(pDest, 
-						ppEvenLines[CurrentFrame][0], 
-						CurrentX * 2);
-				pDest += OverlayPitch;
+				// copy first line in bob way
+				memcpyBOBMMX(pDest,
+							ppOddLines[LastOddFrame][0], 
+							CurrentX * 2);
 				// copy each middle odd line and interpolate even lines
 				for (nLineTarget = 1; nLineTarget < CurrentY / 2; nLineTarget++)
 				{
 					VideoDeinterlaceMMX(pDest, 
-									ppEvenLines[CurrentFrame][nLineTarget - 1], 
-									ppOddLines[CurrentFrame][nLineTarget - 1], 
+									ppOddLines[LastOddFrame][nLineTarget - 1], 
 									ppEvenLines[CurrentFrame][nLineTarget], 
+									ppOddLines[LastOddFrame][nLineTarget], 
 									CurrentX * 2);
 					pDest += 2 * OverlayPitch;
 				}
-				// copy last line in a bob way
-				memcpyMMX(pDest, 
-						ppEvenLines[CurrentFrame][CurrentY / 2 - 1], 
-						CurrentX * 2);
 			}
 			else if(gPulldownMode == SIMPLE_WEAVE)
 			{

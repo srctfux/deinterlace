@@ -277,9 +277,9 @@ void BT848_ResetHardware()
 	BT848_WriteByte(BT848_SRESET, 0);
 
 	BT848_WriteDword(BT848_RISC_STRT_ADD, RiscLogToPhys(m_pRiscJump + 2));
-	BT848_WriteByte(BT848_CAP_CTL, BT848_CAP_CTL_DITH_FRAME);
+	BT848_WriteByte(BT848_CAP_CTL, 0x00);
 	BT848_WriteByte(BT848_VBI_PACK_SIZE, (VBI_SPL / 4) & 0xff);
-	BT848_WriteByte(BT848_VBI_PACK_DEL, 0x03);
+	BT848_WriteByte(BT848_VBI_PACK_DEL, (VBI_SPL / 4) >> 8);
 	BT848_WriteWord(BT848_GPIO_DMA_CTL, 0xfc);
 	BT848_WriteByte(BT848_IFORM, BT848_IFORM_MUX1 | BT848_IFORM_XTAUTO | BT848_IFORM_PAL_BDGHI);
 
@@ -311,9 +311,6 @@ void BT848_ResetHardware()
 	BT848_SetSaturationU(InitialSaturationU);
 	BT848_SetSaturationV(InitialSaturationV);
 	BT848_SetVideoSource(VideoSource);
-
-	/* select direct input */
-	BT848_WriteWord(BT848_GPIO_REG_INP, 0x00);
 }
 
 PHYS RiscLogToPhys(DWORD * pLog)

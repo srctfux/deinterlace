@@ -55,7 +55,7 @@ struct TTVSetting TVSettings[10] =
 {
 	/* PAL-BDGHI */
 	{ 768, 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_BDGHI|BT848_IFORM_XT1),
-	    944, 768, 186, 922, 0x1c, 0, TRUE, 511},
+	    944, 768, 186, 922, 0x1e, 0, TRUE, 511},
 	/* NTSC Square Pixel */ 
 	{ 640, 480,  910, 0x68, 0x5d, (BT848_IFORM_NTSC|BT848_IFORM_XT0),
 	    780, 640, 135, 754, 0x1a, 0, FALSE, 400},
