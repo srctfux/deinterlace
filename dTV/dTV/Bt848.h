@@ -207,7 +207,7 @@ PHYS GetPhysicalAddress(PMemStruct dma, LPBYTE pLinear, DWORD dwSizeWanted, DWOR
 #define BT848_BDELAY           0x064
 
 #define BT848_ADC              0x068
-#define BT848_ADC_RESERVED     (2<<6)
+#define BT848_ADC_RESERVED     (1<<6)
 #define BT848_ADC_SYNC_T       (1<<5)
 #define BT848_ADC_AGC_EN       (1<<4)
 #define BT848_ADC_CLK_SLEEP    (1<<3)
