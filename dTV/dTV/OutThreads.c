@@ -354,7 +354,7 @@ void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField)
 		LastCombFactor = 0;
 		RepeatCount = 0;
 		LastPolarity = -1;
-		gPulldownMode = VIDEO_MODE_BOB;
+//		gPulldownMode = VIDEO_MODE_BOB;     // TRB 12-23-00 allow parm
 		LastDiff = 0;
 		UpdatePulldownStatus();
 		dwLastFlipTicks = -1;
