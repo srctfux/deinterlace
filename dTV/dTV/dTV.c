@@ -1185,7 +1185,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_HELP_FAQ:
-			ShellExecute(hWnd, "open", "http://deinterlace.sourceforge.net/FAQ.htm", NULL, NULL, SW_SHOWNORMAL);
+			ShellExecute(hWnd, "open", ".\\Docs\\FAQ.htm", NULL, NULL, SW_SHOWNORMAL);
 			break;
 
 		case IDM_HELP_SUPPORT:
