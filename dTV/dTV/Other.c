@@ -140,7 +140,11 @@ BOOL Overlay_Update(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL Color
 		ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, NULL, lpDDSurface, NULL, dwFlags, &DDOverlayFX);
 		if (ddrval != DD_OK)
 		{
-			ErrorBox("Error hiding Overlay");
+			// 2001-01-06 John Adcock
+			// Now show return code
+			char szErrorMsg[200];
+			sprintf(szErrorMsg, "Error %x calling UpdateOverlay (Hide)", ddrval);
+			ErrorBox(szErrorMsg);
 		}
 		return (TRUE);
 	}
@@ -167,7 +171,11 @@ BOOL Overlay_Update(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL Color
 			// Display error message only if rectangle dimensions are positive.
 			// Negative rectangle dimensions are frequently caused by the user
 			// resizing the window smaller than the video size.
-			ErrorBox("Error calling Overlay_Update");
+			// 2001-01-06 John Adcock
+			// Now show return code
+			char szErrorMsg[200];
+			sprintf(szErrorMsg, "Error %x calling UpdateOverlay (Show)", ddrval);
+			ErrorBox(szErrorMsg);
 		}
 		lpDDOverlay = NULL;
 		return (FALSE);
