@@ -104,6 +104,7 @@ long				Sleep_Interval = 0;         // " , default=0, how long to wait for BT ch
 long				RefreshRate = 0;
 BOOL bIsOddField = FALSE;
 BOOL bWaitForVsync = FALSE;
+BOOL bReversePolarity = FALSE;
 
 // FIXME: should be able to get of this variable
 long OverlayPitch = 0;
@@ -444,12 +445,26 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				if(info.IsOdd)
 				{
 					memmove(&info.OddLines[1], &info.OddLines[0], sizeof(info.OddLines) - sizeof(info.OddLines[0]));
-					info.OddLines[0] = ppOddLines[info.CurrentFrame];
+					if(bReversePolarity == FALSE)
+					{
+						info.OddLines[0] = ppOddLines[info.CurrentFrame];
+					}
+					else
+					{
+						info.OddLines[0] = ppEvenLines[info.CurrentFrame];
+					}
 				}
 				else
 				{
 					memmove(&info.EvenLines[1], &info.EvenLines[0], sizeof(info.EvenLines) - sizeof(info.EvenLines[0]));
-					info.EvenLines[0] = ppEvenLines[info.CurrentFrame];
+					if(bReversePolarity == FALSE)
+					{
+						info.EvenLines[0] = ppEvenLines[info.CurrentFrame];
+					}
+					else
+					{
+						info.EvenLines[0] = ppOddLines[(info.CurrentFrame + 4) % 5];
+					}
 				}
 
 				// update the source area
@@ -726,6 +741,12 @@ SETTING OutThreadsSettings[OUTTHREADS_SETTING_LASTONE] =
 		FALSE, 0, 1, 1, 1,
 		NULL,
 		"Threads", "bWaitForVsync", NULL,
+	},
+	{
+		"Reverse Polarity", ONOFF, 0, &bReversePolarity,
+		FALSE, 0, 1, 1, 1,
+		NULL,
+		"Threads", "bReversePolarity", NULL,
 	},
 };
 
