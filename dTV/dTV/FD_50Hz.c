@@ -95,16 +95,15 @@ void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 					}
 					else
 					{
-						LOG(" Film Detect Gap %d", (GetTickCount() - StartFilmTicks));
 						if((GetTickCount() - StartFilmTicks) < 100)
 						{
+							LOG(" Upped RepeatCount %d Gap %d", RepeatCount, (GetTickCount() - StartFilmTicks));
 							RepeatCount++;
-							LOG(" Upped RepeatCount %d", RepeatCount);
 						}
 						else
 						{
+							LOG(" Reset RepeatCount - Gap %d Too long", (GetTickCount() - StartFilmTicks));
 							RepeatCount = 1;					
-							LOG(" Upped RepeatCount - Too long");
 						}
 					}
 				}

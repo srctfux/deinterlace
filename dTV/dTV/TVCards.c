@@ -993,7 +993,7 @@ SETTING TVCardSettings[TVCARD_SETTING_LASTONE] =
 	},
 	{
 		"Tuner Type", NUMBER, 0, &TunerType,
-		 TUNER_ABSENT, TUNER_ABSENT, TUNER_LASTONE - 1, 0, NULL,
+		 TUNER_ABSENT, TUNER_TEMIC_PAL, TUNER_LASTONE - 1, 0, NULL,
 		"Hardware", "TunerType", NULL,
 	},
 	{

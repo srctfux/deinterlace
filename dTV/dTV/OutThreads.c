@@ -655,6 +655,18 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 						{
 							Overlay_WaitForVerticalBlank();
 						}
+						if(PrevPulldownMode != gPulldownMode)
+						{
+							if(DeintMethods[gPulldownMode].bIsHalfHeight || 
+								DeintMethods[PrevPulldownMode].bIsHalfHeight)
+							{
+								if(!DoAccurateFlips || !bWaitForVsync || RefreshRate == 0)
+								{
+									Overlay_WaitForVerticalBlank();
+								}
+								SetDeinterlaceMode(gPulldownMode);
+							}
+						}
 
 						// save the time of the last flip
 						FlipTicks = GetTickCount();
