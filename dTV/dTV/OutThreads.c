@@ -86,11 +86,12 @@ BOOL                bFallbackToVideo = TRUE;
 // TRB 10/28/00 changes, parms, and new fields for sync problem fixes
 BYTE			    * lpCurOverlay;				// made static for Lock rtn, curr vid buff ptr
 DDSURFACEDESC		ddsd;						// also add a surface descriptor for Lock			
-BOOL				RunningLate=FALSE;          // Set when we are not keeping up
+BOOL				RunningLate = FALSE;        // Set when we are not keeping up
 HRESULT             FlipResult = 0;             // Need to try again for flip?
-BOOL                Wait_For_Flip;              // User parm, default=FALSE
-BOOL	            Hurry_When_Late;            // " , default=TRUE, skip processing if behind
-long				Sleep_Interval;             // " , default=0, how long to wait for BT chip
+BOOL                Wait_For_Flip = FALSE;      // User parm, default=FALSE
+BOOL	            Hurry_When_Late = TRUE;     // " , default=TRUE, skip processing if behind
+long				Sleep_Interval = 0;         // " , default=0, how long to wait for BT chip
+
 ///////////////////////////////////////////////////////////////////////////////
 void Start_Thread()
 {

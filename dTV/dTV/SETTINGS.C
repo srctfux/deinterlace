@@ -87,13 +87,13 @@ void LoadSettingsFromIni(LPSTR Name)
 	DecodeProcessor = GetPrivateProfileInt("Threads", "DecodeProcessor", 0, szIniFile);
 
 	// Added new performance related parms to Threads group - TRB 10/28/00
-	Hurry_When_Late = (GetPrivateProfileInt("Threads", "Hurry_When_Late", 1, szIniFile) != 0);
-	Wait_For_Flip = (GetPrivateProfileInt("Threads", "Wait_For_Flip", 0, szIniFile) != 0);
-	Back_Buffers = GetPrivateProfileInt("Threads", "Back_Buffers", 2, szIniFile);
-	Sleep_Interval = GetPrivateProfileInt("Threads", "Sleep_Interval", 0, szIniFile);
+	Hurry_When_Late = (GetPrivateProfileInt("Threads", "Hurry_When_Late", Hurry_When_Late, szIniFile) != 0);
+	Wait_For_Flip = (GetPrivateProfileInt("Threads", "Wait_For_Flip", Wait_For_Flip, szIniFile) != 0);
+	Back_Buffers = GetPrivateProfileInt("Threads", "Back_Buffers", Back_Buffers, szIniFile);
+	Sleep_Interval = GetPrivateProfileInt("Threads", "Sleep_Interval", Sleep_Interval, szIniFile);
 
-	bDisplayStatusBar = (GetPrivateProfileInt("Show", "StatusBar", 1, szIniFile) != 0);
-	Show_Menu = (GetPrivateProfileInt("Show", "Menu", 1, szIniFile) != 0);
+	bDisplayStatusBar = (GetPrivateProfileInt("Show", "StatusBar", bDisplayStatusBar, szIniFile) != 0);
+	Show_Menu = (GetPrivateProfileInt("Show", "Menu", Show_Menu, szIniFile) != 0);
 
 	PulldownThresholdLow = GetPrivateProfileInt("Pulldown", "PulldownThresholdLow", PulldownThresholdLow, szIniFile);
 	PulldownThresholdHigh = GetPrivateProfileInt("Pulldown", "PulldownThresholdHigh", PulldownThresholdHigh, szIniFile);
