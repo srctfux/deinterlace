@@ -71,4 +71,16 @@ wget -q http://www.schmelzer.org/dtvupload/dTV18exe.zip
 wget -q http://www.schmelzer.org/dtvupload/dTV18src.zip
 
 
+#Then change the file permissions so that anyone in the deinterlace administrative group
+#can delete the directories and files
+
+cd /home/groups/deinterlace/htdocs/
+chmod 775 -R *
+
+
 #Joy
+
+
+
+
+
