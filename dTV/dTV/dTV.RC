@@ -1464,6 +1464,14 @@ BEGIN
     "T",            IDM_CALL_VIDEOTEXTSMALL, VIRTKEY, NOINVERT
     "T",            IDM_CLOSE_VT,           VIRTKEY, CONTROL, NOINVERT
     "T",            IDM_CALL_VIDEOTEXT,     VIRTKEY, SHIFT, NOINVERT
+    "U",            IDM_USATURATION_MINUS,  VIRTKEY, NOINVERT
+    "U",            IDM_USATURATION_PLUS,   VIRTKEY, SHIFT, NOINVERT
+    "U",            IDM_USATURATION_CURRENT, VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "V",            IDM_VSATURATION_MINUS,  VIRTKEY, NOINVERT
+    "V",            IDM_VSATURATION_PLUS,   VIRTKEY, SHIFT, NOINVERT
+    "V",            IDM_VSATURATION_CURRENT, VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
     VK_ADD,         IDM_VOLUMEPLUS,         VIRTKEY, NOINVERT
     VK_BACK,        IDM_HIDE_OSD,           VIRTKEY, NOINVERT
     VK_DOWN,        IDM_VT_PAGE_DOWN,       VIRTKEY, NOINVERT
