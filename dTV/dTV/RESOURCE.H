@@ -105,6 +105,7 @@
 #define IDC_COMBO10                     1572
 #define IDC_COMBO11                     1573
 #define IDC_COMBO12                     1574
+#define IDC_CPU_TYPE                    1872
 #define IDC_CRUSH                       1775
 #define IDC_D1                          1700
 #define IDC_D2                          1701
@@ -741,7 +742,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        157
 #define _APS_NEXT_COMMAND_VALUE         769
-#define _APS_NEXT_CONTROL_VALUE         1840
+#define _APS_NEXT_CONTROL_VALUE         1873
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

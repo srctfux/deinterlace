@@ -33,7 +33,10 @@
 // 08 Jan 2001   John Adcock           Global Variable Tidy up
 //                                     Got rid of global.h structs.h defines.h
 //
+// 09 Jan 2001   Tom Barry             Added Chip type to hardware dialog
+//
 /////////////////////////////////////////////////////////////////////////////
+
 #include "stdafx.h"
 #include "dialogs.h"
 #include "bt848.h"
@@ -43,6 +46,7 @@
 #include "audio.h"
 #include "tuner.h"
 #include "vbi.h"
+#include "cpu.h"
 
 int UTLoop=0;
 int UTPage=150;
@@ -1054,6 +1058,33 @@ BOOL APIENTRY ChipSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 		SetDlgItemText(hDlg, IDC_TEXT16, Audio_MSP_VersionString());
 
 		SetDlgItemText(hDlg, IDC_TEXT18, "YUV2");
+		
+		// TB 20010109 added Chip type
+		if (CpuFeatureFlags & FEATURE_SSE2)
+		{
+			SetDlgItemText(hDlg, IDC_CPU_TYPE, "SSE2");
+		}
+		else if (CpuFeatureFlags & FEATURE_SSE)
+		{
+			SetDlgItemText(hDlg, IDC_CPU_TYPE, "SSE");
+		}
+		else if (CpuFeatureFlags & FEATURE_MMXEXT)
+		{
+			SetDlgItemText(hDlg, IDC_CPU_TYPE, "MMXEXT");
+		}
+		else if (CpuFeatureFlags & FEATURE_3DNOWEXT)
+		{
+			SetDlgItemText(hDlg, IDC_CPU_TYPE, "3DNOWEXT");
+		}
+		else if (CpuFeatureFlags & FEATURE_3DNOW)
+		{
+			SetDlgItemText(hDlg, IDC_CPU_TYPE, "3DNOW");
+		}
+		else
+		{
+			SetDlgItemText(hDlg, IDC_CPU_TYPE, "MMX");
+		}
+
 
 		break;
 
