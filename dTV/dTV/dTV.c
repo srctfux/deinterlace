@@ -402,8 +402,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				else
 					ChangeChannel(0);
 
-				sprintf(Text, "    Channel %s ",Programm[CurrentProgramm].Name);
-				StatusBar_ShowText(STATUS_TEXT, Text);
+				StatusBar_ShowText(STATUS_KEY, Programm[CurrentProgramm].Name);
 				OSD_ShowText(hWnd,Programm[CurrentProgramm].Name, 0);
 			}
 
@@ -435,8 +434,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 					}
 				}
 
-				sprintf(Text, "    Channel %s ",Programm[CurrentProgramm].Name);
-				StatusBar_ShowText(STATUS_TEXT, Text);
+				StatusBar_ShowText(STATUS_KEY, Programm[CurrentProgramm].Name);
 				OSD_ShowText(hWnd,Programm[CurrentProgramm].Name, 0);
 			}
 
@@ -1317,6 +1315,16 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			i = atoi(ChannelString);
 			i = i - 1;
 			ChangeChannel(i);
+			if(CurrentProgramm == i)
+			{
+				StatusBar_ShowText(STATUS_KEY, Programm[CurrentProgramm].Name);
+				OSD_ShowText(hWnd, Programm[CurrentProgramm].Name, 0);
+			}
+			else
+			{
+				StatusBar_ShowText(STATUS_KEY, "Not Found");
+				OSD_ShowText(hWnd, "Not Found", 0);
+			}
 			ChannelString[0] = '\0';
             break;
         //-------------------------------
@@ -1378,17 +1386,22 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		break;
 
 	case WM_CHAR:
-		if (((char) wParam >= '0') && ((char) wParam <= '9'))
+		if (VideoSource == SOURCE_TUNER)
 		{
-			sprintf(Text, "%c", LOWORD(wParam));
-			strcat(ChannelString, Text);
-			if (strlen(ChannelString) >= 3)
+			if (((char) wParam >= '0') && ((char) wParam <= '9'))
 			{
-				SetTimer(hWnd, TIMER_KEYNUMBER, 1, NULL);
-			}
-			else
-			{
-				SetTimer(hWnd, TIMER_KEYNUMBER, TIMER_KEYNUMBER_MS, NULL);
+				sprintf(Text, "%c", (char)wParam);
+				strcat(ChannelString, Text);
+				OSD_Clear(hWnd);
+				OSD_ShowText(hWnd, ChannelString, 0);
+				if (strlen(ChannelString) >= 3)
+				{
+					SetTimer(hWnd, TIMER_KEYNUMBER, 1, NULL);
+				}
+				else
+				{
+					SetTimer(hWnd, TIMER_KEYNUMBER, TIMER_KEYNUMBER_MS, NULL);
+				}
 			}
 		}
 		break;

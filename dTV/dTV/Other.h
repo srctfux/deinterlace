@@ -57,6 +57,7 @@ void Overlay_Clean();
 BOOL Overlay_Destroy();
 DWORD Overlay_ColorMatch(LPDIRECTDRAWSURFACE pdds, COLORREF rgb);
 COLORREF Overlay_GetColor();
+
 void SaveStill();
 
 extern DWORD DestSizeAlign;

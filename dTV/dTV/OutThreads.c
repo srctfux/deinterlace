@@ -340,7 +340,11 @@ BYTE* LockOverlay()
 
 	if (FAILED(FlipResult))				// prev flip was busy?
 	{
-		IDirectDrawSurface_Flip(lpDDOverlay, NULL, DDFLIP_DONOTWAIT);  
+		ddrval = IDirectDrawSurface_Flip(lpDDOverlay, NULL, DDFLIP_DONOTWAIT);  
+		if(ddrval == DDERR_SURFACELOST)
+		{
+			return NULL;
+		}
 		FlipResult = 0;					// but no time to try any more
 	}
 
@@ -348,6 +352,11 @@ BYTE* LockOverlay()
 	ddsd.dwSize = sizeof(ddsd);
 	ddrval = IDirectDrawSurface_Lock(lpDDOverlayBack, NULL, &ddsd, 
 		DDLOCK_WAIT | DDLOCK_NOSYSLOCK, NULL);
+	if(FAILED(ddrval))
+	{
+		return NULL;
+	}
+
 	OverlayPitch = ddsd.lPitch;			// Set new pitch, may change
 	return ddsd.lpSurface;
 }
@@ -526,44 +535,66 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 					}
 				}
 
-				if (!RunningLate)
+				__try
 				{
-					pDest = LockOverlay();	// Ready to access screen, Lock back buffer berfore accessing
-											// can't do this until after Lock Call
-					info.Overlay = pDest;
+					if (!RunningLate)
+					{
+						pDest = LockOverlay();	// Ready to access screen, Lock back buffer berfore accessing
+												// can't do this until after Lock Call
+						if(pDest == NULL)
+						{
+							PostMessage(hWnd, WM_COMMAND, IDM_OVERLAY_STOP, 0);
+							PostMessage(hWnd, WM_COMMAND, IDM_OVERLAY_START, 0);
+							ExitThread(1);
+							return 0;
+						}
+						info.Overlay = pDest;
 
-					NoiseFilter_Temporal(&info);
-				}
+						NoiseFilter_Temporal(&info);
+					}
 
-				if (RunningLate)
-				{
-					;     // do nothing
+					if (RunningLate)
+					{
+						;     // do nothing
+					}
+					// if we have dropped a field then do BOB 
+					// if we are doing a half height mode then just do that
+					// anyway as it will be just as fast
+					else if(bMissedFrame && !DeintMethods[gPulldownMode].bIsHalfHeight)
+					{
+						bFlipNow = Bob(&info);
+					}
+					// When we first detect film mode we will be on the right flip mode in PAL
+					// and at the end of a three series in NTSC this will be the starting point for
+					// our 2.5 field timings
+					else if(PrevPulldownMode != gPulldownMode && DeintMethods[gPulldownMode].bIsFilmMode)
+					{
+						bFlipNow = Weave(&info);
+					}
+					else
+					{
+						bFlipNow = DeintMethods[gPulldownMode].pfnAlgorithm(&info);
+					}
+					
+					AdjustAspectRatio(ppEvenLines[LastEvenFrame], ppOddLines[LastOddFrame]);
+				}					
+				// if there is any exception thrown in the above then just carry on
+				__except (EXCEPTION_EXECUTE_HANDLER) 
+				{ 
+					;
 				}
-				// if we have dropped a field then do BOB 
-				// if we are doing a half height mode then just do that
-				// anyway as it will be just as fast
-				else if(bMissedFrame && !DeintMethods[gPulldownMode].bIsHalfHeight)
-				{
-					bFlipNow = Bob(&info);
-				}
-				// When we first detect film mode we will be on the right flip mode in PAL
-				// and at the end of a three series in NTSC this will be the starting point for
-				// our 2.5 field timings
-				else if(PrevPulldownMode != gPulldownMode && DeintMethods[gPulldownMode].bIsFilmMode)
-				{
-					bFlipNow = Weave(&info);
-				}
-				else
-				{
-					bFlipNow = DeintMethods[gPulldownMode].pfnAlgorithm(&info);
-				}
-				
-				AdjustAspectRatio(ppEvenLines[LastEvenFrame], ppOddLines[LastOddFrame]);
 
 				// somewhere above we will have locked the buffer, unlock before flip
 				if (!RunningLate)
 				{
 					ddrval = IDirectDrawSurface_Unlock(lpDDOverlayBack, NULL);
+					if(ddrval == DDERR_SURFACELOST)
+					{
+						PostMessage(hWnd, WM_COMMAND, IDM_OVERLAY_STOP, 0);
+						PostMessage(hWnd, WM_COMMAND, IDM_OVERLAY_START, 0);
+						ExitThread(1);
+						return 0;
+					}
 
 					if (bFlipNow)
 					{
@@ -598,6 +629,13 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 							FlipFlag |= (info.IsOdd)?DDFLIP_ODD:DDFLIP_EVEN;
 						}
 						FlipResult = IDirectDrawSurface_Flip(lpDDOverlay, NULL, FlipFlag); 
+						if(FlipResult == DDERR_SURFACELOST)
+						{
+							PostMessage(hWnd, WM_COMMAND, IDM_OVERLAY_STOP, 0);
+							PostMessage(hWnd, WM_COMMAND, IDM_OVERLAY_START, 0);
+							ExitThread(1);
+							return 0;
+						}
 
 						// save the time of the last flip
 						FlipTicks = GetTickCount();

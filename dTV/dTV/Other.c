@@ -130,58 +130,63 @@ BOOL Overlay_Update(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL Color
 {
 	HRESULT		ddrval;
 	DDOVERLAYFX DDOverlayFX;
-	DDCOLORKEY DestColorKey;
 
 	if ((lpDD == NULL) || (lpDDSurface == NULL) || (lpDDOverlay == NULL))
 	{
-		return (FALSE);
+		return FALSE;
 	}
 
-	// Get original Destination Color key so that we can use that
-	// if setting it from the ini file color doesn't work
-	ddrval = IDirectDrawSurface_GetColorKey(lpDDOverlay, DDCKEY_DESTOVERLAY, &DestColorKey);
-	if (ddrval != DD_OK && ddrval != DDERR_NOCOLORKEY && ddrval != DDERR_NOCOLORKEYHW)
-	{
-		char szErrorMsg[200];
-		sprintf(szErrorMsg, "Error %x calling ColorKey value", ddrval);
-		ErrorBox(szErrorMsg);
-	}
-	// if GetColorKey says we have no hardware then don't bother trying to change
-	// the overlay value at all
-	if(ddrval != DDERR_NOCOLORKEYHW)
-	{
-		memset(&DDOverlayFX, 0x00, sizeof(DDOverlayFX));
-		DDOverlayFX.dwSize = sizeof(DDOverlayFX);
+	memset(&DDOverlayFX, 0x00, sizeof(DDOverlayFX));
+	DDOverlayFX.dwSize = sizeof(DDOverlayFX);
 
-		if (pSrcRect == NULL)
+	if (pSrcRect == NULL)
+	{
+		ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, NULL, lpDDSurface, NULL, dwFlags, &DDOverlayFX);
+		if (FAILED(ddrval))
 		{
-			ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, NULL, lpDDSurface, NULL, dwFlags, &DDOverlayFX);
-			if (ddrval != DD_OK)
+			// just return if we get this here
+			// all DDERR_SURFACELOST will be handled by
+			// the main processing loop
+			if(ddrval == DDERR_SURFACELOST)
+			{
+				return FALSE;
+			}
+			if (FAILED(ddrval))
 			{
 				// 2001-01-06 John Adcock
 				// Now show return code
 				char szErrorMsg[200];
 				sprintf(szErrorMsg, "Error %x calling UpdateOverlay (Hide)", ddrval);
 				ErrorBox(szErrorMsg);
+				return (TRUE);
 			}
-			return (TRUE);
 		}
+	}
 
-		dwFlags |= DDOVER_KEYDESTOVERRIDE;
+	dwFlags |= DDOVER_KEYDESTOVERRIDE;
 
+	PhysicalOverlayColor = Overlay_ColorMatch(lpDDSurface, OverlayColor);
+	if (PhysicalOverlayColor == 0)		// sometimes we glitch and can't get the value
+	{
+		LOG(" Physical overlay color is zero!  Retrying.");
 		PhysicalOverlayColor = Overlay_ColorMatch(lpDDSurface, OverlayColor);
-		if (PhysicalOverlayColor == 0)		// sometimes we glitch and can't get the value
+	}
+	LOG(" Physical overlay color is %x", PhysicalOverlayColor);
+
+	DDOverlayFX.dckDestColorkey.dwColorSpaceHighValue = PhysicalOverlayColor;
+	DDOverlayFX.dckDestColorkey.dwColorSpaceLowValue = PhysicalOverlayColor;
+
+	ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, pSrcRect, lpDDSurface, pDestRect, dwFlags, &DDOverlayFX);
+	if (FAILED(ddrval))
+	{
+		// just return if we get this here
+		// all DDERR_SURFACELOST will be handled by
+		// the main processing loop
+		if(ddrval == DDERR_SURFACELOST)
 		{
-			LOG(" Physical overlay color is zero!  Retrying.");
-			PhysicalOverlayColor = Overlay_ColorMatch(lpDDSurface, OverlayColor);
+			return FALSE;
 		}
-		LOG(" Physical overlay color is %x", PhysicalOverlayColor);
-
-		DDOverlayFX.dckDestColorkey.dwColorSpaceHighValue = PhysicalOverlayColor;
-		DDOverlayFX.dckDestColorkey.dwColorSpaceLowValue = PhysicalOverlayColor;
-
-		ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, pSrcRect, lpDDSurface, pDestRect, dwFlags, &DDOverlayFX);
-		if (ddrval != DD_OK)
+		if(FAILED(ddrval))
 		{
 			if ((pDestRect->top < pDestRect->bottom) && (pDestRect->left < pDestRect->right))
 			{
@@ -192,18 +197,13 @@ BOOL Overlay_Update(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL Color
 				// 2001-01-06 John Adcock
 				// Now show return code
 				char szErrorMsg[200];
-				sprintf(szErrorMsg, "Error %x in UpdateOverlay (Low %x High %x)", ddrval, DestColorKey.dwColorSpaceLowValue, DestColorKey.dwColorSpaceHighValue);
+				sprintf(szErrorMsg, "Error %x in UpdateOverlay", ddrval);
 				ErrorBox(szErrorMsg);
 			}
 			lpDDOverlay = NULL;
 			return (FALSE);
 		}
 	}
-	else
-	{
-		ErrorBox("No Destination ColorKey HW");
-	}
-
 	return TRUE;
 }
 
@@ -229,7 +229,7 @@ BOOL Overlay_Create()
 	ddsd.dwSize = sizeof(ddsd);
 	ddsd.dwFlags = DDSD_CAPS;
 	ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
-	if (IDirectDraw_CreateSurface(lpDD, &ddsd, &lpDDSurface, NULL) != DD_OK)
+	if (FAILED(IDirectDraw_CreateSurface(lpDD, &ddsd, &lpDDSurface, NULL)))
 	{
 		ErrorBox("Error Creating Primary surface");
 		return (FALSE);
@@ -280,6 +280,7 @@ BOOL Overlay_Create()
 		return (FALSE);
 	}
 
+	memset(&caps, 0, sizeof(caps));
 	caps.dwCaps = DDSCAPS_BACKBUFFER;
 	ddrval = IDirectDrawSurface_GetAttachedSurface(lpDDOverlay, &caps, &lpDDOverlayBack);
 	if (FAILED(ddrval))
@@ -404,7 +405,7 @@ BOOL InitDD(HWND hWnd)
 	HRESULT ddrval;
 	DDCAPS DriverCaps;
 
-	if (DirectDrawCreate(NULL, &lpDD, NULL) != DD_OK)
+	if (FAILED(DirectDrawCreate(NULL, &lpDD, NULL)))
 	{
 		ErrorBox("DirectDrawCreate failed");
 		return (FALSE);
@@ -415,7 +416,7 @@ BOOL InitDD(HWND hWnd)
 	DriverCaps.dwSize = sizeof(DriverCaps);
 	ddrval = IDirectDraw_GetCaps(lpDD, &DriverCaps, NULL);
 
-	if (ddrval == DD_OK)
+	if (FAILED(ddrval))
 	{
 		if (DriverCaps.dwCaps & DDCAPS_OVERLAY)
 		{
@@ -458,26 +459,12 @@ BOOL InitDD(HWND hWnd)
 
 	ddrval = IDirectDraw_SetCooperativeLevel(lpDD, hWnd, DDSCL_NORMAL);
 
-	if (ddrval != DD_OK)
+	if (FAILED(ddrval))
 	{
 		ErrorBox("SetCooperativeLevel failed");
 		return (FALSE);
 	}
-/*
-	memset(&ddsd, 0x00, sizeof(ddsd));
-	ddsd.dwSize = sizeof(ddsd);
-	ddsd.dwFlags = DDSD_CAPS;
-	ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
 
-	if (IDirectDraw_CreateSurface(lpDD, &ddsd, &lpDDSurface, NULL) != DD_OK)
-	{
-		ErrorBox("Error Creating Primary surface");
-		return (FALSE);
-	}
-
-	ddrval = IDirectDrawSurface_Lock(lpDDSurface, NULL, &ddsd, DDLOCK_WAIT, NULL);
-	ddrval = IDirectDrawSurface_Unlock(lpDDSurface, ddsd.lpSurface);
-*/
 	return TRUE;
 }
 
