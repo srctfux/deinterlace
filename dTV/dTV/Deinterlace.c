@@ -92,7 +92,7 @@ DEINTERLACE_METHOD* GetVideoDeintMethod(int Mode)
 {
 	if(Mode < NumVideoModes)
 	{
-		return VideoDeintMethods[gVideoPulldownMode];
+		return VideoDeintMethods[Mode];
 	}
 	else
 	{
@@ -104,7 +104,7 @@ DEINTERLACE_METHOD* GetFilmDeintMethod(eFILMPULLDOWNMODES Mode)
 {
 	if(Mode < FILMPULLDOWNMODES_LAST_ONE)
 	{
-		return FilmDeintMethods + gFilmPulldownMode;
+		return FilmDeintMethods + Mode;
 	}
 	else
 	{
