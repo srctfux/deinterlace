@@ -62,14 +62,17 @@ void OSD_ShowText(HWND hWnd, LPCTSTR szText, double dfSize)
     if (bOverride) return;
 	if (strlen(szText))
 	{
-		HDC hDC;
-		hDC = GetDC(hWnd);
+    	RECT		winRect;
+		HDC         hDC;
 
         grOSD.dfSize = dfSize;
         grOSD.dfXpos = 0.9;
         grOSD.dfYpos = 0.1;
 		strncpy(grOSD.szText, szText, sizeof(grOSD.szText));
         
+		hDC = GetDC(hWnd);
+        GetClientRect(hWnd,&winRect);
+    	PaintColorkey(hWnd, TRUE, hDC, &winRect);
 		OSD_Redraw(hWnd, hDC);
 		ReleaseDC(hWnd, hDC);
 		SetTimer(hWnd, OSD_TIMER_ID, OSD_TIMER_DELAY, NULL);
@@ -91,12 +94,17 @@ void OSD_ShowTextPersistent(HWND hWnd, LPCTSTR szText, double dfSize)
 	KillTimer(hWnd, OSD_TIMER_ID);
 	if (strlen(szText))
 	{
-		HDC hDC;
-		hDC = GetDC(hWnd);
+    	RECT		winRect;
+		HDC         hDC;
+
         grOSD.dfSize = dfSize;
         grOSD.dfXpos = 0.9;
         grOSD.dfYpos = 0.1;
 		strncpy(grOSD.szText, szText, sizeof(grOSD.szText));
+
+		hDC = GetDC(hWnd);
+	    GetClientRect(hWnd,&winRect);
+        PaintColorkey(hWnd, TRUE, hDC, &winRect);
         OSD_Redraw(hWnd, hDC);
 		ReleaseDC(hWnd, hDC);
 	}
@@ -139,9 +147,9 @@ void OSD_Redraw(HWND hWnd, HDC hDC)
 	int			nLen, nFontsize;
 	int			nXpos, nYpos;
     int         nXWinSize, nYWinSize;
-	RECT		winRect;
 	TEXTMETRIC	tmOSDFont;
 	SIZE		sizeText;
+   	RECT		winRect;
 	DWORD       dwQuality = 0;
 
 	nLen = strlen(grOSD.szText);
@@ -149,8 +157,7 @@ void OSD_Redraw(HWND hWnd, HDC hDC)
 	{
         if (grOSD.dfSize == 0) grOSD.dfSize = DefaultSizePerc;
 
-		GetClientRect(hWnd,&winRect);
-		PaintColorkey(hWnd, TRUE, hDC, &winRect);
+	    GetClientRect(hWnd,&winRect);
 		nFontsize = (int)((double)(winRect.bottom - winRect.top) * (grOSD.dfSize / 100.00));
 
 		// Set specified font

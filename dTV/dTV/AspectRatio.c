@@ -1185,7 +1185,7 @@ SETTING AspectSettings[ASPECT_SETTING_LASTONE] =
 	},
 	{
 		"Custom Source Aspect", SLIDER, 0, &custom_source_aspect,
-		1333, 1000, 3000, 1, 1000,
+		1335, 1000, 3000, 5, 1000,
 		NULL,
 		"ASPECT", "CustomSourceAspect", CustomSourceAspect_OnChange,
 	},
@@ -1197,7 +1197,7 @@ SETTING AspectSettings[ASPECT_SETTING_LASTONE] =
 	},
 	{
 		"Custom Screen Aspect", SLIDER, 0, &custom_target_aspect,
-		1333, 1000, 3000, 1, 1000,
+		1335, 1000, 3000, 5, 1000,
 		NULL,
 		"ASPECT", "CustomTargetAspect", CustomTargetAspect_OnChange,
 	},

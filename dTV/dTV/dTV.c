@@ -1252,6 +1252,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			    PaintColorkey(hWnd, TRUE, sPaint.hdc, &winRect);
 			    OSD_Redraw(hWnd, sPaint.hdc);
 				EndPaint(hWnd, &sPaint);
+                ValidateRect(hWnd, &sPaint.rcPaint);
 			}
 		    break;
 
@@ -1524,6 +1525,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			PaintColorkey(hWnd, TRUE, sPaint.hdc, &sPaint.rcPaint);
 			OSD_Redraw(hWnd, sPaint.hdc);
 			EndPaint(hWnd, &sPaint);
+            ValidateRect(hWnd, &sPaint.rcPaint);
 		}
 		break;
 
