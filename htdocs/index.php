@@ -59,8 +59,9 @@ src="images/developers.jpg" width="177" height="160" border=
 <tr>
 <td width="33%" height="30%"></td>
 <td width="33%" valign="bottom" height="30%"><br>
-      <p align="right"><a href="setup/index.htm" class=
-"bland">Setup</a><br>
+      <p align="right"><a href="channels/index.htm" class=
+"bland">Channel Setup Catalogue</a><br>
+       <a href="setup/index.htm">Setup</a><br>
         <a href="FAQ.htm" class="bland">FAQ</a><br>
         <a href="user_support.htm" class="bland">User Support<br>
         </a><a href="keyboard.htm" class="bland">Keyboard Shortcuts</a><br>
