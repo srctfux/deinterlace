@@ -108,6 +108,22 @@ void LoadSettingsFromIni(LPSTR Name)
 	TemporalTolerance = GetPrivateProfileInt("Deinterlace", "TemporalTolerance", TemporalTolerance, szIniFile);
 	SimilarityThreshold = GetPrivateProfileInt("Deinterlace", "SimilarityThreshold", SimilarityThreshold, szIniFile);
 	
+// Deinterlace settings for Blended Clip only
+	BlcMinimumClip  = GetPrivateProfileInt("Deinterlace", "BlcMinimumClip", BlcMinimumClip , szIniFile);
+	BlcPixelMotionSense = GetPrivateProfileInt("Deinterlace", "BlcPixelMotionSense", BlcPixelMotionSense  , szIniFile);
+	BlcRecentMotionSense  = GetPrivateProfileInt("Deinterlace", "BlcRecentMotionSense", BlcRecentMotionSense , szIniFile);
+	BlcMotionAvgPeriod  = GetPrivateProfileInt("Deinterlace", "BlcMotionAvgPeriod", BlcMotionAvgPeriod , szIniFile);
+	BlcPixelCombSense  = GetPrivateProfileInt("Deinterlace", "BlcPixelCombSense", BlcPixelCombSense , szIniFile);
+	BlcRecentCombSense  = GetPrivateProfileInt("Deinterlace", "BlcRecentCombSense", BlcRecentCombSense  , szIniFile);
+	BlcCombAvgPeriod  = GetPrivateProfileInt("Deinterlace", "BlcCombAvgPeriod", BlcCombAvgPeriod , szIniFile);
+	BlcHighCombSkip  = GetPrivateProfileInt("Deinterlace", "BlcHighCombSkip", BlcHighCombSkip , szIniFile);
+	BlcLowMotionSkip  = GetPrivateProfileInt("Deinterlace", "BlcLowMotionSkip", BlcLowMotionSkip , szIniFile);
+	BlcVerticalSmoothing  = GetPrivateProfileInt("Deinterlace", "BlcVerticalSmoothing", BlcVerticalSmoothing , szIniFile);
+	BlcUseInterpBob = GetPrivateProfileInt("Deinterlace", "BlcUseInterpBob", BlcUseInterpBob , szIniFile);
+	BlcBlendChroma  = GetPrivateProfileInt("Deinterlace", "BlcBlendChroma", BlcBlendChroma , szIniFile);
+	BlcShowControls  = GetPrivateProfileInt("Deinterlace", "BlcShowControls", BlcShowControls , szIniFile);
+
+
 	VBI_Flags = 0;
 	if(GetPrivateProfileInt("VBI", "VT", 0, szIniFile) != 0)
 	{
@@ -346,6 +362,22 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("Deinterlace", "SpatialTolerance", SpatialTolerance, szIniFile);
 	WritePrivateProfileInt("Deinterlace", "TemporalTolerance", TemporalTolerance, szIniFile);
 	WritePrivateProfileInt("Deinterlace", "SimilarityThreshold", SimilarityThreshold, szIniFile);
+
+// Deinterlace settings for Blended Clip only
+	WritePrivateProfileInt("Deinterlace", "BlcMinimumClip", BlcMinimumClip , szIniFile);
+	WritePrivateProfileInt("Deinterlace", "BlcPixelMotionSense", BlcPixelMotionSense  , szIniFile);
+	WritePrivateProfileInt("Deinterlace", "BlcRecentMotionSense", BlcRecentMotionSense , szIniFile);
+	WritePrivateProfileInt("Deinterlace", "BlcMotionAvgPeriod", BlcMotionAvgPeriod , szIniFile);
+	WritePrivateProfileInt("Deinterlace", "BlcPixelCombSense", BlcPixelCombSense , szIniFile);
+	WritePrivateProfileInt("Deinterlace", "BlcRecentCombSense", BlcRecentCombSense  , szIniFile);
+	WritePrivateProfileInt("Deinterlace", "BlcCombAvgPeriod", BlcCombAvgPeriod , szIniFile);
+	WritePrivateProfileInt("Deinterlace", "BlcHighCombSkip", BlcHighCombSkip , szIniFile);
+	WritePrivateProfileInt("Deinterlace", "BlcLowMotionSkip", BlcLowMotionSkip , szIniFile);
+	WritePrivateProfileInt("Deinterlace", "BlcVerticalSmoothing", BlcVerticalSmoothing , szIniFile);
+	WritePrivateProfileInt("Deinterlace", "BlcUseInterpBob", BlcUseInterpBob , szIniFile);
+	WritePrivateProfileInt("Deinterlace", "BlcBlendChroma", BlcBlendChroma , szIniFile);
+	WritePrivateProfileInt("Deinterlace", "BlcShowControls", BlcShowControls , szIniFile);
+
 
 
 	WritePrivateProfileInt("Show", "StatusBar", bDisplayStatusBar, szIniFile);

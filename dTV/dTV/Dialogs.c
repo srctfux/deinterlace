@@ -610,16 +610,17 @@ BOOL APIENTRY BlendedClipProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 
 		case IDC_DEFAULT:
 			BlcMinimumClip= 10;
-			BlcPixelMotionSense = 55;
-			BlcRecentMotionSense = 0;
-			BlcMotionAvgPeriod = 40;		// currently 1..200
-			BlcPixelCombSense = 50;
-			BlcRecentCombSense = 0;
-			BlcCombAvgPeriod = 40;			// currently 1.200
-			BlcHighCombSkip = 0;			// larger values skip more
+			BlcPixelMotionSense = 75;
+			BlcRecentMotionSense = 45;
+			BlcMotionAvgPeriod = 20;		// currently 1..200
+			BlcPixelCombSense = 75;
+			BlcRecentCombSense = 35;
+			BlcCombAvgPeriod = 20;			// currently 1.200
+			BlcHighCombSkip = 10;			// larger values skip more
 			BlcLowMotionSkip = 0;			// larger values skip more
+			BlcVerticalSmoothing = 0;		// not currently used
 			BlcUseInterpBob = FALSE;
-			BlcBlendChroma = FALSE;			// default should maybe be TRUE?
+			BlcBlendChroma = TRUE;			// default should maybe be TRUE?
 			SetBlcDisplayControls(hDlg);
 			break;
 		

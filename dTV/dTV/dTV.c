@@ -526,7 +526,8 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			gPulldownMode = BLENDED_CLIP;
 			UpdatePulldownStatus();
 			SetMenuAnalog();
-			DialogBox(hInst, "BLENDED_CLIP", hWnd, BlendedClipProc);
+			if (BlcShowControls)
+				DialogBox(hInst, "BLENDED_CLIP", hWnd, BlendedClipProc);
 			break;
 
 		case IDM_ABOUT:

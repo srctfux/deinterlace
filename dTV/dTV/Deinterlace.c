@@ -525,7 +525,7 @@ DoNext8Bytes:
 // of venetiaon blinds that can occur with sudden scene changes.  This value is
 // calculated separately for each pixel.
 
-	UINT	BlcPixelMotionSense = 55;
+	UINT	BlcPixelMotionSense = 80;
 
 // "Recent Motion Sensitivity" slider:  This increases the tendency to use Clip based
 // upon an n-period Exponential Moving Average of the recent motion.  Recent motion
@@ -534,7 +534,7 @@ DoNext8Bytes:
 // does not attempt to do 3:2 pulldown I believe the motion values could be of assistance
 // in the routines that do.  
 
-	UINT	BlcRecentMotionSense = 0;
+	UINT	BlcRecentMotionSense = 45;
 
 // "Motion Average Period" slider:  This sets the period of the moving average for Recent
 // Motion Sensitivity.  
@@ -547,7 +547,7 @@ DoNext8Bytes:
 
 //			X_new_avg = ( X_old_avg * (n-1) + 2 * X) / (n+1)
 
-	UINT	BlcMotionAvgPeriod = 40;		// currently 1..200
+	UINT	BlcMotionAvgPeriod = 20;		// currently 1..200
 
 // "Pixel Comb Sensitivity" slider:  This determines how sensitive we are to the current
 // comb factor of each pixel.  I used a simplified comb factor C = abs(2*W - H - L)/2,
@@ -556,17 +556,17 @@ DoNext8Bytes:
 // Motion Sense seem to be the two main things to play with to get good results.  Generally,
 // increase one of these if you get Weave artifacts and decrease one if you get BOB artifacts.
   
-	UINT	BlcPixelCombSense = 50;
+	UINT	BlcPixelCombSense = 75;
 
 // "Recent Comb Senseitivity" slider:  Operates like the Recent Motion slider but operates
 // on the average Comb Factor.
 
-	UINT	BlcRecentCombSense = 0;
+	UINT	BlcRecentCombSense = 35;
 
 // "Comb Average Period" slider: Sets the period of the Comb exponential moving average.
 // See the comments on "Motion Average Period".
 
-	UINT	BlcCombAvgPeriod = 40;			// currently 1.200
+	UINT	BlcCombAvgPeriod = 20;			// currently 1.200
 
 // "Skip High Comb Frames" slider:  I added this one in the hopes that it could help to
 // skip a frame in the event of a sudden flash attack on a rapid scene change or maybe
@@ -574,14 +574,20 @@ DoNext8Bytes:
 // a chance to experiment with it yet.  It will give very ugly results if you set it 
 // too high.
 
-	UINT	BlcHighCombSkip = 0;			// larger values skip more
+	UINT	BlcHighCombSkip = 10;			// larger values skip more
 
 // "Skip Low Motion Frames" slider:  This also is just experimental an probably of low
 // value.  The idea here is that any frame with sufficiently low change from the previous
 // one is maybe a still frame with some video noise, and could be skipped.  Not for
-// normal use.
+// normal use.  NOTE - This slider (but not parm) will soon be replaced by the
+// Vertical Smoothing slider.
 
 	UINT	BlcLowMotionSkip = 0;			// larger values skip more
+
+// "Vertical Smoothing" slider: Sets a smoothing constant to smooth between the even
+// and odd lines.  Not yet implemented, but the INI parm is there.
+
+	UINT    BlcVerticalSmoothing = 0;
 
 // "Use Interpolated BOB instead of Clip" check box.  For those who don't like the
 // Clipped Weave, this will change it to an Interpolated Bob.  All other blending and
@@ -597,7 +603,13 @@ DoNext8Bytes:
 // but it sometimes seems to create some softness or shimmering on my stock ticker or
 // rapidly moving objects with lots of detail like a hockey game.
 
-	BOOL	BlcBlendChroma = FALSE;			// default should maybe be TRUE?
+	BOOL	BlcBlendChroma = TRUE;			// default should maybe be TRUE?
+
+// Finally there is an INI parm, but not a contol to determine whether to even display
+// the Blended Clipping controls when that method is selected. If set to false then
+// Blended Clipping parms are determined only from the INI file.
+
+	BOOL	BlcShowControls = TRUE;
 
 // Other global values, not user parms:
 
@@ -688,13 +700,13 @@ void BlendedClipping(short** pOddLines, short** pEvenLines,
 // A random sampling of the values in both avg motion and avg comb show values usually
 // in the 1000-4000 range, with occasional jumps to much higher values.  Since the user
 // parms are 0-100 and we want output values 0-65535 we will assume a max usual value for each
-// average of 4500 and so divide by ((100*4500)/65535)) = 7 for now.
+// average of 4500 and so divide by ((100*4500)/65535)) = 7 for now. (up to 1/5 for new Comb)
 
 // Note the motion and comb average values have been scaled up by 256 in the averaging rtn, so
 // the typical value of 2000 means an average change of about 8 in the 8 bit luma values.
 
 	X = __max( (BlcRecentMotionSense * BlcTotalAverageMotion / 7),
-				(BlcRecentCombSense * BlcTotalAverageComb) / 7 );
+				(BlcRecentCombSense * BlcTotalAverageComb) / 5 );
 	i = __min( (X + BlcMinimumClip * 65535 / 100), 65535);	// scale to range of 0-65535
 	MinClip = i << 48 | i << 32 | i << 16 | i;
 	
@@ -806,11 +818,28 @@ DoNext8Bytes:
 
 // Now is a good time to calculate the Comb Factor.  A simple version is just the
 // distance between L2 and the bob (interpolated middle) value now in mm5.
-
+/*  try a different way for now, maybe change back later - TRB 11/14/00
 			movq	mm6, mm1				// L2
 			psubusb mm6, mm5				// L2 - bob, with sat
 			psubusb	mm5, mm1				// bob - L2
 			por		mm5, mm6				// abs diff (bob - L2)
+			pand	mm5, mm7				// keep only luma
+			movq	mm6, mm5				// save a copy for pixel comb sense calc
+			paddusw mm5, CombAvgL			// bump our hist average
+			movq	CombAvgL, mm5			// and save again
+			pmullw  mm6, PixelCombSense     // mul by user factor, keep only low 16 bits
+*/
+
+// Instead let's let the Comb Factor just be the difference between L2 and the clipped
+// value.  It will be zero for any pixel lying in the range where it does not get clipped.
+// This avoids penalizing pixels that just happens to be in a high vertical contrast area.
+// Doing this gives an adjustment similar to the use of the EdgeDetect value in the
+// original Video Delinterlace routine.
+			movq	mm6, mm1				// L2
+			movq    mm5, mm4                // our clipped value, call it LC
+			psubusb mm6, mm5				// L2 - LC, with sat
+			psubusb	mm5, mm1				// LC - L2
+			por		mm5, mm6				// abs diff (LC - L2)
 			pand	mm5, mm7				// keep only luma
 			movq	mm6, mm5				// save a copy for pixel comb sense calc
 			paddusw mm5, CombAvgL			// bump our hist average

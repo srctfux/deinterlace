@@ -243,6 +243,8 @@ extern  UINT	BlcAverageMotions[5][2];
 extern  UINT	BlcTotalAverageMotion;
 extern  UINT	BlcAverageCombs[5][2];
 extern  UINT	BlcTotalAverageComb;
+extern  BOOL	BlcShowControls;
+extern  UINT	BlcVerticalSmoothing;
 
 //------------------------------------------------------------------------
 // ######### IMPORTANT! READ ME FIRST! ##########
