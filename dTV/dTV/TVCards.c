@@ -22,9 +22,10 @@
 /////////////////////////////////////////////////////////////////////////////
 // Change Log
 //
-// Date          Developer             Changes
+// Date          Developer                Changes
 //
-// 15 Aug 2000   John Adcock           Added structures from bttv
+// 15 Aug 2000   John Adcock             Added structures from bttv
+// 20 Nov 2000   Michael Eskin, Conexant Added support for Conexant and Rockwell Bt878XEVKs
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -532,6 +533,31 @@ const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 		PLL_28,
 		TUNER_USER_SETUP
 	},
+	// MAE 20 Nov 2000 Start of change
+	{
+		"Conexant Bt878 NTSC XEVK",
+		3, 1, 0, 2, 0x007000,
+		{ 2, 3, 1, 1, 0, 0, 0, 0},
+		//{ 0xbc803f, 0, 0, 0xbcb03f, 0xbcb03f, 0},
+		{ 0x001000, 0x001000, 0x000000, 0x000000, 0x003000, 0x000000},
+		0,
+		1,0,0,0,0,0,0,0,
+		PLL_NONE,
+		TUNER_PHILIPS_NTSC
+	},
+	{
+		"Rockwell Bt878 NTSC XEVK",
+		3, 1, 0, 2, 0x007000,
+		{ 2, 3, 1, 1, 0, 0, 0, 0},
+		//{ 0xbc803f, 0, 0, 0xbcb03f, 0xbcb03f, 0},
+		{ 0x001000, 0x001000, 0x000000, 0x000000, 0x003000, 0x000000},
+		0,
+		1,0,0,0,0,0,0,0,
+		PLL_NONE,
+		TUNER_PHILIPS_NTSC
+	},
+	// MAE 20 Nov 2000 End of change
+
 };
 
 const AUTODETECT878 AutoDectect878[] =
@@ -555,6 +581,11 @@ const AUTODETECT878 AutoDectect878[] =
 	{ 0x300214ff, TVCARD_PHOEBE_TVMAS,  "Phoebe TV Master" },
 	{ 0x400a15b0, TVCARD_ZOLTRIX_GENIE, "Zoltrix Genie TV" },
 	{ 0x6606217d, TVCARD_WINFAST2000,   "Leadtek WinFast TV 2000" },
+	// MAE 20 Nov 2000 Start of change
+	{ 0x182214F1, TVCARD_CONEXANTNTSCXEVK,  "Conexant Bt878A NTSC XEVK" },
+	{ 0x1322127A, TVCARD_ROCKWELLNTSCXEVK,  "Rockwell Bt878A NTSC XEVK" },
+	// MAE 20 Nov 2000 End of change
+
 	{ 0, -1, NULL }
 };
 
