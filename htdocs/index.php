@@ -19,10 +19,9 @@ height="97%" align="center">
 <tr bgcolor="#FFFFFF">
 <td height="3%"> </td>
 <td height="3%"> </td>
-<td height="3%" align="right" valign="middle"><font color=
-"#FFFFFF"><font face="Verdana, Arial, Helvetica, sans-serif"
-size="2" color="#000000"><b>D E I N T E R L A C E
-R </b></font></font> </td>
+    <td height="3%" align="right" valign="middle"><font color=
+"#000000" face="Verdana, Arial, Helvetica, sans-serif" size="2"><b>P R O C E S 
+      S O R </b></font> </td>
 </tr>
 
 <tr bgcolor="#FFCC00">
@@ -33,8 +32,7 @@ width="100%" height="2" border="0"></td>
 <tr>
 <td width="33%" valign="top" height="30%">
 <p><a href="about.htm" class="bland">About</a><br>
- <a href="reviews/index.html" class="bland">What they say about
-DScaler</a><br>
+        <a href="reviews/index.htm" class="bland">Press Reviews</a><br>
  <a href="screenshots/index.htm" class=
 "bland">Screenshots</a><br>
  <a href="downloads.htm" class="bland">DScaler News &
@@ -61,20 +59,18 @@ src="images/developers.jpg" width="177" height="160" border=
 <tr>
 <td width="33%" height="30%"></td>
 <td width="33%" valign="bottom" height="30%"><br>
- 
-
-<p align="right"><a href="setup/index.htm" class=
+      <p align="right"><a href="setup/index.htm" class=
 "bland">Setup</a><br>
- <a href="keyboard.htm" class="bland">Keyboard Shortcuts</a><br>
- <a href="http://sourceforge.net/mail/?group_id=7420" class=
+        <a href="FAQ.htm" class="bland">FAQ</a><br>
+        <a href="user_support.htm" class="bland">User Support<br>
+        </a><a href="keyboard.htm" class="bland">Keyboard Shortcuts</a><br>
+        <a href="developers.htm" class="bland">Developers<br>
+        </a><a href="http://sourceforge.net/mail/?group_id=7420" class=
 "bland">Mailing List</a><br>
- <a href="FAQ.htm" class="bland">FAQ</a><br>
- <a href="user_support.htm" class="bland">User Support</a><br>
- <a href="developers.htm" class="bland">Developers</a><br>
- <a href="http://sourceforge.net/projects/deinterlace/" class=
+        <a href="http://sourceforge.net/projects/deinterlace/" class=
 "bland">SourceForge.net Project Page</a><br>
- <a href="Links.htm" class="bland">Links</a></p>
-</td>
+        <a href="Links.htm" class="bland">Links</a></p>
+      </td>
 </tr>
 
 <tr bgcolor="#FFCC00">
@@ -87,9 +83,9 @@ src="images/developers.jpg" width="177" height="160" border=
 </tr>
 
 <tr bgcolor="#FFFFFF">
-<td align="left" height="3%" valign="middle"><font face=
-"Verdana, Arial, Helvetica, sans-serif" size="2"><font color=
-"#000000"><b> T V &amp; V I D E O</b></font></font></td>
+    <td align="left" height="3%" valign="middle"><font face=
+"Verdana, Arial, Helvetica, sans-serif" size="2" color="#000000"><b> V I D E O 
+      &amp; T V</b></font></td>
 <td height="3%"> </td>
 <td height="3%" align="right">
 <p><a href="http://sourceforge.net"><img src=
