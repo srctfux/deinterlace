@@ -1,5 +1,27 @@
-// PlugTest.cpp : Defines the entry point for the console application.
+/////////////////////////////////////////////////////////////////////////////
+// PlugTest.c
+/////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2000 John Adcock.  All rights reserved.
+/////////////////////////////////////////////////////////////////////////////
 //
+//	This file is subject to the terms of the GNU General Public License as
+//	published by the Free Software Foundation.  A copy of this license is
+//	included with this software distribution in the file COPYING.  If you
+//	do not have a copy, you may obtain a copy by writing to the Free
+//	Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+//
+//	This software is distributed in the hope that it will be useful,
+//	but WITHOUT ANY WARRANTY; without even the implied warranty of
+//	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//	GNU General Public License for more details
+/////////////////////////////////////////////////////////////////////////////
+// Change Log
+//
+// Date          Developer             Changes
+//
+// 10 Apr 2001   John Adcock           Initial Version
+//
+/////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 
@@ -367,11 +389,15 @@ int ProcessSnapShot(char* SnapshotFile, char* PluginFile, char* TifFile)
 
 int main(int argc, char* argv[])
 {
-  	printf("PlugTest (c) 2001 John Adcock\n");
-  	printf("This product is licened under the GPL\n");
+  	printf("PlugTest (c) 2001 John Adcock\n\n");
+   printf("PlugTest comes with ABSOLUTELY NO WARRANTY");
+   printf("This is free software, and you are welcome");
+   printf("to redistribute it under certain conditions.");
+   printf("See http://www.gnu.org/copyleft/gpl.html for details.");
+   
    if(argc != 4)
    {
-   	printf("Usage: PlugTest dTVSnapFile PlugInDll OutputTifFile\n");
+   	printf("\nUsage: PlugTest dTVSnapFile PlugInDll OutputTifFile\n");
    	return 1;
    }
 	return ProcessSnapShot(argv[1], argv[2], argv[3]);
