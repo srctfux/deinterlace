@@ -2027,8 +2027,11 @@ void MainWndOnDestroy()
 
 	__try
 	{
-		LOG("Try SaveWindowPos");
-		SaveWindowPos(hWnd);
+		if(bIsFullScreen == FALSE)
+		{
+			LOG("Try SaveWindowPos");
+			SaveWindowPos(hWnd);
+		}
 	}
 	__except(EXCEPTION_EXECUTE_HANDLER) {LOG("Error SaveWindowPos");}
 	
