@@ -163,6 +163,244 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         </tr>
         <tr>
           <td colspan=3> 
+            <h3>[Hardware]</h3>
+          </td>
+        </tr>
+        <tr>
+          <td> 
+            <p>BtAgcDisable</p>
+          </td>
+          <td> 
+            <p align="center">0
+          </td>
+          <td> 
+            <p>Disable AGC(automatic gain control).  This doesn't work well for almost anyone, but it's there.
+            (Adv. Video Flags)</p>
+          </td>
+        </tr>
+        <tr>
+          <td> 
+            BtCrush
+          </td>
+          <td> 
+            <p align="center">1
+          </td>
+          <td> 
+            Turn on Adaptive AGC , this is the Crush bit in the ADC Interface register.
+            (Adv. Video Flags)
+          </td>
+        </tr>
+        <tr>
+          <td> 
+            BtWhiteCrushUp
+          </td>
+          <td> 
+            <p align="center">207
+          </td>
+          <td> 
+            Fine tuning of the Adaptive AGC White Crush Up Register. This, and
+            below, are the full 8 bit contents of the 2 registers.  I'm not sure we
+            have the best defaults here. See the BT8x8 datasheets. (Adv. Video
+            Flags)
+          </td>
+        </tr>
+        <tr>
+          <td> 
+            BtWhiteCrushDown
+          </td>
+          <td> 
+            <p align="center">127
+          </td>
+          <td> 
+            Fine tuning of the Adaptive AGC White Crush Down Registers. See
+            above. (Adv. Video Flags)
+          </td>
+        </tr>
+        <tr>
+          <td> 
+            BtEvenChromaAGC
+          </td>
+          <td> 
+            <p align="center">1
+          </td>
+          <td> 
+            Even/odd chroma AGC. Must be 0 or 1. Turns on color AGC. (Adv. Video
+            Flags)
+          </td>
+        </tr>
+        <tr>
+          <td> 
+            BtOddChromaAGC
+          </td>
+          <td> 
+            <p align="center">1
+          </td>
+          <td> 
+            &nbsp;
+          </td>
+        </tr>
+        <tr>
+          <td> 
+            BtEvenLumaPeak
+          </td>
+          <td align="center"> 
+            0
+          </td>
+          <td> 
+            From the BT8X8datasheet: (PEAK) bit determines whether the normal luma low-pass filters are
+            implemented via the HFILT bits, or the peaking filters are implemented.
+            (HFILT is the horizontal filter mentioned below) (Adv. Video Flags)
+          </td>
+        </tr>
+        <tr>
+          <td> 
+            BtOddLumaPeak
+          </td>
+          <td align="center"> 
+            0
+          </td>
+          <td> 
+            &nbsp;
+          </td>
+        </tr>
+        <tr>
+          <td> 
+            BtFullLumaRange
+          </td>
+          <td align="center"> 
+            1
+          </td>
+          <td> 
+            Luma Output Range. dTV defaults to 1 but maybe should be set to 0 for
+            NTSC systems. (Adv. Video Flags)
+          </td>
+        </tr>
+        <tr>
+          <td> 
+            BtEvenLumaDec
+          </td>
+          <td align="center"> 
+            0
+          </td>
+          <td> 
+            From the datasheet: The Luma Decimation filter is used to reduce the high-frequency component of the luma
+            signal. Useful when scaling to CIF resolutions or lower.&nbsp; If ON it enables luma decimation using the selectable H filter.
+            (Adv. Video Flags)
+          </td>
+        </tr>
+        <tr>
+          <td> 
+            BtOddLumaDec
+          </td>
+          <td> 
+            <p align="center">0
+          </td>
+          <td> 
+            &nbsp;
+          </td>
+        </tr>
+        <tr>
+          <td> 
+            BtEvenComb
+          </td>
+          <td align="center"> 
+            1
+          </td>
+          <td> 
+            Chroma Comb Enable. This bit determines if the chroma comb is included in<br>
+            the data path. If enabled, a full line store is used to average adjacent lines of<br>
+            color information, reducing cross-color artifacts. (Adv. Video
+            Flags)
+          </td>
+        </tr>
+        <tr>
+          <td> 
+            BtOddComb
+          </td>
+          <td align="center"> 
+            1
+          </td>
+          <td> 
+            &nbsp;
+          </td>
+        </tr>
+        <tr>
+          <td> 
+            BtColorBars
+          </td>
+          <td align="center"> 
+            0
+          </td>
+          <td> 
+            Show color bars on display (Adv. Video Flags)
+          </td>
+        </tr>
+        <tr>
+          <td> 
+            BtGammaCorrection
+          </td>
+          <td align="center"> 
+            0
+          </td>
+          <td> 
+            Gamma Correction.  This is another double negative.  If it equals 0 (OFF) it really says we do not want to do gamma correction removal.  If ON the we DO gamma correction removal.
+            (Adv. Video Flags)
+          </td>
+        </tr>
+        <tr>
+          <td> 
+            BtCoring
+          </td>
+          <td align="center"> 
+            0
+          </td>
+          <td> 
+            Luma Coring. This sets the minimum black level. This value might also be different
+            for PAL/NTSC. It must be 0, 1, 2, or 3. Unclear yet what is the best
+            value. (Adv. Video Flags)
+          </td>
+        </tr>
+        <tr>
+          <td> 
+            BtHorFilter
+          </td>
+          <td align="center"> 
+            0
+          </td>
+          <td> 
+            Turns on hardware Horizontal filter.  Because of dTVs large scale only values 0 and 1 are valid.
+            0=normal 2 tap filter (like before), 4 adds a little more filter but works (I think) only when the BtLumaPeak and
+            BtLumaDec are also both on.  It makes thing a little softer. (Adv.
+            Video Flags)<br>
+          </td>
+        </tr>
+        <tr>
+          <td> 
+            BtVertFilter
+          </td>
+          <td align="center"> 
+            0
+          </td>
+          <td> 
+            Vertical filter. Valid values would be 0-7 but at dTV's resolution only 0 and 4 are allowed.  0 = 2-tap
+            interpolation only. 4 = 2-tap plus z filter. This make thing a lot softer.
+            (Adv. Video Flags)
+          </td>
+        </tr>
+        <tr>
+          <td> 
+            BtColorKill
+          </td>
+          <td align="center"> 
+            1
+          </td>
+          <td> 
+            Auto Low Color Killer is supposed to suppress the color signal if it looks like a black and white video.  It should probably default to on.&nbsp;
+            (Adv. Video Flags)
+          </td>
+        </tr>
+        <tr>
+          <td colspan=3> 
             <h3>[Threads]</h3>
           </td>
         </tr>
