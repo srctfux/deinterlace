@@ -314,7 +314,7 @@ void AdjustAspectRatio(short** EvenField, short** OddField)
 
 		if (bIsFullScreen && aspectSettings.target_aspect && (newRatio > aspectSettings.target_aspect))
 		{
-			newRatio = aspectSettings.target_aspect;
+//			newRatio = aspectSettings.target_aspect;
 		}
 	}
 
@@ -342,12 +342,17 @@ void AdjustAspectRatio(short** EvenField, short** OddField)
 			min_ratio_found[0] = newRatio;
 		}
 
+		// If the mode (anamorphic/non anamorphic) changes, switch to the new
+		// mode and ratio immediately
+		if (newMode != aspectSettings.aspect_mode)
+		{
+			SwitchToRatio(newMode, newRatio);
+			newRatioFrameCount = 0;
+		}
 		// If the new ratio is less than the old one -- that is, if we've just
 		// become less letterboxed -- switch to the new ratio immediately to
 		// avoid cutting the image off.
-//		if ((newMode != aspectSettings.aspect_mode)
-//		 || (newRatio < aspectSettings.source_aspect))
-		if (newRatio < aspectSettings.source_aspect)
+		else if (newRatio < aspectSettings.source_aspect)
 		{
 			SwitchToRatio(newMode, newRatio);
 			newRatioFrameCount = 0;
