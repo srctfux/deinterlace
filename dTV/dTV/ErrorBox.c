@@ -26,6 +26,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "splash.h"
 
 #ifndef _DEBUG
 #include "OSD.h"
@@ -63,3 +64,10 @@ void _ErrorBox(HWND hwndParent, LPCSTR szFile, int Line, LPCSTR szMessage)
 	}
 #endif
 }
+
+void RealErrorBox(LPCSTR msg)
+{
+	HideSplashScreen();
+	MessageBox(hWnd, msg, "dTV Error", MB_ICONSTOP | MB_OK);
+}
+

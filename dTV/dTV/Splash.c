@@ -67,8 +67,11 @@ void ShowSpashScreen()
 
 void HideSplashScreen()
 {
-	EndDialog(SplashWnd, 0);
-	SplashWnd  = NULL;
+	if (SplashWnd != NULL)
+	{
+		EndDialog(SplashWnd, 0);
+		SplashWnd  = NULL;
+	}
 }
 
 

@@ -59,6 +59,8 @@
 #include "bt848.h"
 #include "OutThreads.h"
 #include "VBI_VideoText.h"
+#include "ErrorBox.h"
+#include "Splash.h"
 #define DOLOGGING
 #include "DebugLog.h"
 
@@ -73,7 +75,7 @@ DWORD DestSizeAlign;
 DWORD SrcSizeAlign;
 COLORREF OverlayColor = RGB(255, 0, 255);
 DWORD PhysicalOverlayColor = RGB(255, 0, 255);
-long Back_Buffers = 2;		// Make new user parm, TRB 10/28/00
+long Back_Buffers = -1;		// Make new user parm, TRB 10/28/00
 BOOL bCanDoBob = FALSE;
 BOOL bCanDoColorKey = FALSE;
 
@@ -260,8 +262,10 @@ BOOL Overlay_Create()
 	DDPIXELFORMAT PixelFormat;
 	HRESULT ddrval;
 	DDSCAPS caps;
+	int minBuffers, maxBuffers, numBuffers;
+	char msg[500];
 
-	if (lpDDOverlay) 
+	if (lpDDOverlay)
 	{
 		return FALSE;
 	}
@@ -274,13 +278,28 @@ BOOL Overlay_Create()
 	ddsd.dwSize = sizeof(ddsd);
 	ddsd.dwFlags = DDSD_CAPS;
 	ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
-	if (FAILED(IDirectDraw_CreateSurface(lpDD, &ddsd, &lpDDSurface, NULL)))
+	ddrval = IDirectDraw_CreateSurface(lpDD, &ddsd, &lpDDSurface, NULL);
+	if (FAILED(ddrval))
 	{
-		ErrorBox("Error Creating Primary surface");
+		sprintf(msg, "Error creating primary surface: %x", ddrval);
+		RealErrorBox(msg);
 		return (FALSE);
 	}
+
 	ddrval = IDirectDrawSurface_Lock(lpDDSurface, NULL, &ddsd, DDLOCK_WAIT, NULL);
+	if (FAILED(ddrval))
+	{
+		sprintf(msg, "Error locking primary surface: %x", ddrval);
+		RealErrorBox(msg);
+		return (FALSE);
+	}
 	ddrval = IDirectDrawSurface_Unlock(lpDDSurface, ddsd.lpSurface);
+	if (FAILED(ddrval))
+	{
+		sprintf(msg, "Error unlocking primary surface: %x", ddrval);
+		RealErrorBox(msg);
+		return (FALSE);
+	}
 
 	memset(&PixelFormat, 0x00, sizeof(PixelFormat));
 	PixelFormat.dwSize = sizeof(DDPIXELFORMAT);
@@ -298,16 +317,77 @@ BOOL Overlay_Create()
 	// mode changes without recreating the overlay
 	ddsd.dwWidth = DTV_MAX_WIDTH;
 	ddsd.dwHeight = DTV_MAX_HEIGHT;
-	ddsd.dwBackBufferCount = Back_Buffers;
-
 	ddsd.ddpfPixelFormat = PixelFormat;
-	ddrval = IDirectDraw_CreateSurface(lpDD, &ddsd, &lpDDOverlay, NULL);
+
+	// If the user specified a particular back buffer count, use it.  Otherwise
+	// try triple buffering and drop down to double buffering, then single
+	// buffering, if the card doesn't have enough memory.
+	minBuffers = Back_Buffers >= 0 ? Back_Buffers : 0;
+	maxBuffers = Back_Buffers >= 0 ? Back_Buffers : 2;
+
+	for (numBuffers = maxBuffers; numBuffers >= minBuffers; numBuffers--)
+	{
+		ddsd.dwBackBufferCount = numBuffers;
+		ddrval = IDirectDraw_CreateSurface(lpDD, &ddsd, &lpDDOverlay, NULL);
+
+		if (SUCCEEDED(ddrval) || ddrval != DDERR_OUTOFVIDEOMEMORY)
+			break;
+	}
+
+	if (FAILED(ddrval))
+		lpDDOverlay = NULL;
+
+	if (numBuffers < minBuffers)
+	{
+		// Not enough video memory.  Display different messages depending
+		// on what we tried to allocate, since it may mean different things.
+
+		if (minBuffers == 0)
+		{
+			// We tried single-buffering and it didn't work.
+			RealErrorBox("Your video card doesn't have enough overlay\n"
+					 "memory for a TV picture.  Try lowering your\n"
+					 "color depth or screen resolution.  Rebooting\n"
+					 "may help in some cases if memory is being\n"
+					 "used by something else on your system.");
+			return (FALSE);
+		}
+		else
+		{
+			// We didn't get down to single-buffering, meaning the user
+			// specified a back buffer count.
+			sprintf(msg, "Your video card doesn't have enough overlay\n"
+						 "memory for %d back buffers.  If you've used\n"
+						 "that many back buffers before, you may need\n"
+						 "to reboot.  Otherwise try lowering your screen\n"
+						 "resolution or color depth, or try setting\n"
+						 "Back_Buffers=-1 in dTV.ini to allow dTV to\n"
+						 "decide how many back buffers it can allocate.",
+					Back_Buffers);
+			RealErrorBox(msg);
+			return (FALSE);
+		}
+	}
+
 	if (FAILED(ddrval))
 	{
-		ErrorBox("Can't create Overlay Surface");
-		lpDDOverlay = NULL;
+		switch (ddrval) {
+		case DDERR_NOOVERLAYHW:
+			RealErrorBox("Your video card doesn't appear to support\n"
+				     "overlays, which dTV requires.");
+			return (FALSE);
+
+			// Any other interesting error codes?
+		}
+		
+		sprintf(msg, "Can't create overlay surface: %x", ddrval);
+		RealErrorBox(msg);
 		return FALSE;
 	}
+
+	sprintf(msg, "%d Back Buffers", numBuffers);
+	AddSplashTextLine(msg);
+	LOG(msg);
 
 	ddrval = IDirectDrawSurface_Lock(lpDDOverlay, NULL, &ddsd, DDLOCK_WAIT, NULL);
 	// sometimes in win98 we get weird error messages here
@@ -322,7 +402,8 @@ BOOL Overlay_Create()
 		ddrval = IDirectDraw_CreateSurface(lpDD, &ddsd, &lpDDOverlay, NULL);
 		if (FAILED(ddrval))
 		{
-			ErrorBox("Can't create Overlay Surface");
+			sprintf(msg, "Lost overlay surface and can't recreate it: %x", ddrval);
+			RealErrorBox(msg);
 			lpDDOverlay = NULL;
 			return FALSE;
 		}
@@ -332,14 +413,14 @@ BOOL Overlay_Create()
 	{
 		char szErrorMsg[200];
 		sprintf(szErrorMsg, "Error %x in Lock Surface", ddrval);
-		ErrorBox(szErrorMsg);
+		RealErrorBox(szErrorMsg);
 		return (FALSE);
 	}
 
 	ddrval = IDirectDrawSurface_Unlock(lpDDOverlay, ddsd.lpSurface);
 	if (FAILED(ddrval))
 	{
-		ErrorBox("Can't Unlock Surface");
+		RealErrorBox("Can't Unlock Surface");
 		return (FALSE);
 	}
 
@@ -348,7 +429,7 @@ BOOL Overlay_Create()
 	ddrval = IDirectDrawSurface_GetAttachedSurface(lpDDOverlay, &caps, &lpDDOverlayBack);
 	if (FAILED(ddrval))
 	{
-		ErrorBox("Can't create Overlay Back Surface");
+		RealErrorBox("Can't create Overlay Back Surface");
 		lpDDOverlayBack = NULL;
 		return (FALSE);
 	}
@@ -357,7 +438,7 @@ BOOL Overlay_Create()
 		ddrval = IDirectDrawSurface_Lock(lpDDOverlayBack, NULL, &ddsd, DDLOCK_WAIT, NULL);
 		if (FAILED(ddrval))
 		{
-			ErrorBox("Can't Lock Back Surface");
+			RealErrorBox("Can't Lock Back Surface");
 			return (FALSE);
 		}
 		ddrval = DDERR_WASSTILLDRAWING;
@@ -365,7 +446,7 @@ BOOL Overlay_Create()
 		ddrval = IDirectDrawSurface_Unlock(lpDDOverlayBack, ddsd.lpSurface);
 		if (FAILED(ddrval))
 		{
-			ErrorBox("Can't Unlock Back Surface");
+			RealErrorBox("Can't Unlock Back Surface");
 			return (FALSE);
 		}
 	}
@@ -803,7 +884,7 @@ SETTING OtherSettings[OTHER_SETTING_LASTONE] =
 {
 	{
 		"Back Buffers", NUMBER, 0, &Back_Buffers,
-		2, 2, 3, 1, NULL,
+		-1, -1, 2, 1, NULL,
 		"Overlay", "Back_Buffers", NULL,
 	},
 	{

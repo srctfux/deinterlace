@@ -27,6 +27,7 @@
 #define __ERRORBOX_H___
 
 void _ErrorBox(HWND hwndParent, LPCSTR szFile, int Line, LPCSTR szMessage);
+void RealErrorBox(LPCSTR szMessage);
 
 #define ErrorBox(Message) _ErrorBox(NULL, __FILE__, __LINE__, Message);
 #define ErrorBoxDlg(hwnd,Message) _ErrorBox(hwnd, __FILE__, __LINE__, Message);
