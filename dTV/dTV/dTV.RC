@@ -761,7 +761,6 @@ BEGIN
             MENUITEM "Defer Setting Overlay",       IDM_ASPECT_DEFER_OVERLAY
             MENUITEM "Orbiting\tCtrl+O",            IDM_WINPOS_ORBIT
             MENUITEM "Auto-Size Window",            IDM_WINPOS_AUTOSIZE
-            , GRAYED
         END
         POPUP "&Zoom"
         BEGIN
