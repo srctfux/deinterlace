@@ -81,6 +81,7 @@
 #include "Splash.h"
 #include "VideoSettings.h"
 #include "VBI_CCdecode.h"
+#include "VBI_VideoText.h"
 #define DOLOGGING
 #include "DebugLog.h"
 
@@ -286,7 +287,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 {
 	char Text[128];
 	char Text1[128];
-	int i, j, k;
+	int i;
 	long nValue;
 
 	switch (message)
@@ -304,101 +305,30 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
             Reset_Capture();
 			break;
 
-		case IDM_CLOSE_VT:
-			for (i = 0; i < MAXVTDIALOG; i++)
+		case IDM_VT_PAGE_MINUS:
+			if(VTState != VT_OFF)
 			{
-				if (VTDialog[i].Dialog != NULL)
-					SendMessage(VTDialog[i].Dialog, WM_COMMAND, IDCANCEL, 0);
+				if(VTDialog.Page >= 100)
+				{
+					VTDialog.Page--;
+					VTDialog.PageChange = TRUE;
+					InvalidateRect(hWnd,NULL,FALSE);
+				}
 			}
-			SetFocus(hWnd);
 			break;
 
-		case IDM_VT_PAGE_MINUS:
-			for (i = 0; i < MAXVTDIALOG; i++)
-			{
-				if (VTDialog[i].Dialog != NULL)
-				{
-					j = Get_Dialog_Slot(VTDialog[i].Dialog);
-					if (VTDialog[j].Page > 100)
-					{
-						SetDlgItemInt(VTDialog[j].Dialog, IDC_EDIT1, VTDialog[j].Page - 1, FALSE);
-						VTDialog[j].PageChange = TRUE;
-					}
-				}
-			}
-			return (TRUE);
-
 		case IDM_VT_PAGE_PLUS:
-			for (i = 0; i < MAXVTDIALOG; i++)
+			if(VTState != VT_OFF)
 			{
-				if (VTDialog[i].Dialog != NULL)
+				if(VTDialog.Page < 900)
 				{
-					j = Get_Dialog_Slot(VTDialog[i].Dialog);
-					if (VTDialog[j].Page < 899)
-					{
-						SetDlgItemInt(VTDialog[j].Dialog, IDC_EDIT1, VTDialog[j].Page + 1, FALSE);
-						VTDialog[j].PageChange = TRUE;
-					}
+					VTDialog.Page++;
+					VTDialog.PageChange = TRUE;
+					InvalidateRect(hWnd,NULL,FALSE);
 				}
 			}
-			return (TRUE);
+			break;
 
-		case IDM_VT_PAGE_UP:
-			for (i = 0; i < MAXVTDIALOG; i++)
-			{
-				if (VTDialog[i].Dialog != NULL)
-				{
-					j = Get_Dialog_Slot(VTDialog[i].Dialog);
-					k = VTDialog[j].SubPage;
-					if (VTFrame[VTDialog[j].FramePos].SubCount == 0)
-						return (TRUE);
-					k--;
-					while ((k >= 0) && (VTFrame[VTDialog[j].FramePos].SubPage[k].Fill == FALSE))
-						k--;
-					if (k < 0)
-						k = VTFrame[VTDialog[j].FramePos].SubCount - 1;	//DF:i
-					while ((k >= 0) && (VTFrame[VTDialog[j].FramePos].SubPage[k].Fill == FALSE))
-						k--;
-					if (k < 0)
-						return (TRUE);
-
-					if ((k >= 0) && (VTFrame[VTDialog[j].FramePos].SubPage[k].Fill == TRUE))
-						VTDialog[j].SubPage = k;	//DF: else...
-					SetDlgItemInt(VTDialog[j].Dialog, IDC_EDIT1, VTDialog[j].Page, FALSE);
-				}
-			}
-			return (TRUE);
-
-		case IDM_VT_PAGE_DOWN:
-			for (i = 0; i < MAXVTDIALOG; i++)
-			{
-				if (VTDialog[i].Dialog != NULL)
-				{
-					j = Get_Dialog_Slot(VTDialog[i].Dialog);
-					k = VTDialog[j].SubPage;
-					if (VTFrame[VTDialog[j].FramePos].SubCount == 0)
-						return (TRUE);
-					k++;
-					while ((k <= VTFrame[VTDialog[j].FramePos].SubCount - 1) && (VTFrame[VTDialog[j].FramePos].SubPage[k].Fill == FALSE))
-						k++;
-					if (k >= VTFrame[VTDialog[j].FramePos].SubCount)
-						k = 0;	//DF:i
-					while ((k <= VTFrame[VTDialog[j].FramePos].SubCount - 1) && (VTFrame[VTDialog[j].FramePos].SubPage[k].Fill == FALSE))
-						k++;
-					if (k >= VTFrame[VTDialog[j].FramePos].SubCount)
-						return (TRUE);
-
-					//k++;
-					//if ( k >= VTFrame[VTDialog[j].FramePos].SubCount ) k=0;
-					//while (( k < VTFrame[VTDialog[j].FramePos].SubCount) && ( VTFrame[VTDialog[j].FramePos].SubPage[k].Fill == FALSE )) k++;
-					if ((k < VTFrame[VTDialog[j].FramePos].SubCount) && (VTFrame[VTDialog[j].FramePos].SubPage[k].Fill == TRUE))
-						VTDialog[j].SubPage = k;
-					else
-						return (TRUE);
-					SetDlgItemInt(VTDialog[j].Dialog, IDC_EDIT1, VTDialog[j].Page, FALSE);
-				}
-			}
-			return (TRUE);
 
 		case IDM_CHANNELPLUS:
 			if (Setting_GetValue(BT848_GetSetting(VIDEOSOURCE)) == SOURCE_TUNER)
@@ -976,17 +906,18 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_CALL_VIDEOTEXTSMALL:
-			VTLarge = FALSE;
-			VThWnd = CreateDialog(hInst, "VIDEOTEXTSMALL", NULL, VideoTextProc);
-			if (bAlwaysOnTop == TRUE)
-				SetWindowPos(VThWnd, HWND_TOPMOST, 10, 10, 20, 20, SWP_NOMOVE | SWP_NOCOPYBITS | SWP_NOSIZE);
-			break;
-
 		case IDM_CALL_VIDEOTEXT:
-			VTLarge = TRUE;
-			VThWnd = CreateDialog(hInst, "VIDEOTEXT", NULL, VideoTextProc);
-			if (bAlwaysOnTop == TRUE)
-				SetWindowPos(VThWnd, HWND_TOPMOST, 10, 10, 20, 20, SWP_NOMOVE | SWP_NOCOPYBITS | SWP_NOSIZE);
+			VTState++;
+			if(VTState == VT_LASTSTATE)
+			{
+				VTState = VT_OFF;
+			}
+			else if(!Setting_GetValue(VBI_GetSetting(CAPTURE_VBI)) || !Setting_GetValue(VBI_GetSetting(DOTELETEXT)) )
+			{
+				Setting_SetValue(VBI_GetSetting(CAPTURE_VBI), TRUE);
+				Setting_SetValue(VBI_GetSetting(DOTELETEXT), TRUE);
+			}
+			InvalidateRect(hWnd,NULL,FALSE);
 			break;
 
 		case IDM_VT_RESET:
@@ -1239,6 +1170,10 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				BeginPaint(hWnd, &sPaint);
 			    PaintColorkey(hWnd, TRUE, sPaint.hdc, &winRect);
 			    OSD_Redraw(hWnd, sPaint.hdc);
+				if(VTState != VT_OFF)
+				{
+					VT_Redraw(hWnd, sPaint.hdc);
+				}
 				EndPaint(hWnd, &sPaint);
                 ValidateRect(hWnd, &sPaint.rcPaint);
 			}
@@ -1373,10 +1308,10 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			else
 			{
 				Text[0] = 0x00;
-				if (Packet30.Identifier[0] != 0x00)
+				if (*VT_GetStation() != 0x00)
 				{
-					sprintf(Text, "%s ", Packet30.Identifier);
-					Packet30.Identifier[0] = 0x00;
+					sprintf(Text, "%s ", VT_GetStation());
+					VT_ResetStation();
 				}
 				else if (VPS_lastname[0] != 0x00)
 				{
@@ -1394,18 +1329,26 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
         //-------------------------------
         case TIMER_KEYNUMBER:
 			KillTimer(hWnd, TIMER_KEYNUMBER);
-			i = atoi(ChannelString);
-			i = i - 1;
-			ChangeChannel(i);
-			if(CurrentProgramm == i)
+			if(VTState != VT_OFF)
 			{
-				StatusBar_ShowText(STATUS_KEY, Programm[CurrentProgramm].Name);
-				OSD_ShowText(hWnd, Programm[CurrentProgramm].Name, 0);
+				VTDialog.Page = atoi(ChannelString);
+				InvalidateRect(hWnd, NULL, FALSE);
 			}
 			else
 			{
-				StatusBar_ShowText(STATUS_KEY, "Not Found");
-				OSD_ShowText(hWnd, "Not Found", 0);
+				i = atoi(ChannelString);
+				i = i - 1;
+				ChangeChannel(i);
+				if(CurrentProgramm == i)
+				{
+					StatusBar_ShowText(STATUS_KEY, Programm[CurrentProgramm].Name);
+					OSD_ShowText(hWnd, Programm[CurrentProgramm].Name, 0);
+				}
+				else
+				{
+					StatusBar_ShowText(STATUS_KEY, "Not Found");
+					OSD_ShowText(hWnd, "Not Found", 0);
+				}
 			}
 			ChannelString[0] = '\0';
             break;
@@ -1494,14 +1437,17 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		break;
 
 	case WM_CHAR:
-		if (Setting_GetValue(BT848_GetSetting(VIDEOSOURCE)) == SOURCE_TUNER)
+		if (Setting_GetValue(BT848_GetSetting(VIDEOSOURCE)) == SOURCE_TUNER || VTState != VT_OFF)
 		{
 			if (((char) wParam >= '0') && ((char) wParam <= '9'))
 			{
 				sprintf(Text, "%c", (char)wParam);
 				strcat(ChannelString, Text);
-				OSD_Clear(hWnd);
-				OSD_ShowText(hWnd, ChannelString, 0);
+				if(VTState == VT_OFF)
+				{
+					OSD_Clear(hWnd);
+					OSD_ShowText(hWnd, ChannelString, 0);
+				}
 				if (strlen(ChannelString) >= 3)
 				{
 					SetTimer(hWnd, TIMER_KEYNUMBER, 1, NULL);
@@ -1520,6 +1466,10 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			BeginPaint(hWnd, &sPaint);
 			PaintColorkey(hWnd, TRUE, sPaint.hdc, &sPaint.rcPaint);
 			OSD_Redraw(hWnd, sPaint.hdc);
+			if(VTState != VT_OFF)
+			{
+				VT_Redraw(hWnd, sPaint.hdc);
+			}
 			EndPaint(hWnd, &sPaint);
 			// MRS 2-23-01 - Neither of these 2 lines should be needed
 			// Why are they here?  Removed to see if they clear up flashing issues.
@@ -2130,6 +2080,7 @@ BOOL IsFullScreen_OnChange(long NewValue)
 			SaveWindowPos(hWnd);
 			Cursor_SetVisibility(FALSE);
 		}
+		InvalidateRect(hWnd, NULL, FALSE);
 		WorkoutOverlaySize();
 	}
 	bDoResize = TRUE;

@@ -50,17 +50,13 @@ BYTE VBI_thresh;
 BYTE VBI_off;
 int vtstep;
 int vpsstep;
-BOOL VTLarge=TRUE;
 
 BOOL Capture_VBI = FALSE;
 BOOL DoTeletext = FALSE;
 BOOL DoVPS = FALSE;
 CCMODE CCMode = CCMODE_OFF;
 
-HWND ShowVTInfo=NULL;
 HWND ShowVPSInfo=NULL;
-
-struct TPacket30 Packet30;
 
 void VBI_Init()
 {

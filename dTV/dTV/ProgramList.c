@@ -442,8 +442,8 @@ BOOL APIENTRY AnalogScanProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 					SetDlgItemText(hDlg, IDC_TEXT20, "Video Signal Found");
 					
 					VPS_lastname[0] = 0x00;
-
-					Packet30.Identifier[0] = 0x00;
+					
+					VT_ResetStation();
 
 					Programm[progindex].freq = Freq;
 					
@@ -467,9 +467,9 @@ BOOL APIENTRY AnalogScanProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 								strcpy(Programm[progindex].Name, VPS_lastname);
 								i = 100;
 							}
-							else if (Packet30.Identifier[0] != 0x00)
+							else if (VT_GetStation()[0] != '\0')
 							{
-								strcpy(Programm[progindex].Name, Packet30.Identifier);
+								strcpy(Programm[progindex].Name, VT_GetStation());
 								i = 100;
 							}
 							i++;

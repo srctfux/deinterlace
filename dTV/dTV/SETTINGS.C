@@ -147,12 +147,7 @@ void LoadSettingsFromIni()
 	bSaveSettings = (GetPrivateProfileInt("Show", "SaveSettings", CountryCode, szIniFile) != 0);
 	CountryCode = GetPrivateProfileInt("Show", "CountryCode", CountryCode, szIniFile);
 
-	for(i = 0; i < 9; i++)
-	{
-		sprintf(szKey, "Color%d", i + 1);
-		VTColourTable[i] = GetPrivateProfileInt("VT", szKey, VTColourTable[i], szIniFile);
-	}
-	
+
 	MSPMode = GetPrivateProfileInt("MSP", "MSPMode", MSPMode, szIniFile);	
 	MSPMajorMode = GetPrivateProfileInt("MSP", "MSPMajorMode", MSPMajorMode, szIniFile);	
 	MSPMinorMode = GetPrivateProfileInt("MSP", "MSPMinorMode", MSPMinorMode, szIniFile);	
@@ -476,12 +471,6 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("Show", "SaveSettings", bSaveSettings, szIniFile);
 	WritePrivateProfileInt("Show", "CountryCode", CountryCode, szIniFile);
 
-	for(i = 0; i < 9; i++)
-	{
-		sprintf(szKey, "Color%d", i + 1);
-		WritePrivateProfileInt("VT", szKey, VTColourTable[i], szIniFile);
-	}
-	
 	WritePrivateProfileInt("MSP", "MSPMode", MSPMode, szIniFile);	
 	WritePrivateProfileInt("MSP", "MSPMajorMode", MSPMajorMode, szIniFile);	
 	WritePrivateProfileInt("MSP", "MSPMinorMode", MSPMinorMode, szIniFile);	

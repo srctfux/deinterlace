@@ -53,7 +53,6 @@
 #define IDM_VT_PAGE_PLUS                418
 #define IDM_VT_PAGE_UP                  419
 #define IDM_VT_PAGE_DOWN                420
-#define IDM_CLOSE_VT                    422
 #define IDM_SWAPMODE                    425
 #define IDM_KEEP_LOADED                 430
 #define IDM_TPSCAN                      431

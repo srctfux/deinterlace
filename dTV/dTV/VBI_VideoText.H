@@ -38,19 +38,82 @@
 #ifndef __VT_H___
 #define __VT_H___
 
+typedef enum
+{
+	VT_OFF,
+	VT_BLACK,
+	VT_MIX,
+	VT_LASTSTATE,
+} VT_STATE;
+
+typedef struct
+{
+	// Type 0 data
+	struct
+	{
+		unsigned nMag:3;
+		unsigned nPage:8;
+		unsigned:5; // Unused
+		WORD nSubcode;
+	} HomePage;
+	WORD NetId;
+	struct
+	{
+		char Offset;
+		DWORD JulianDay;
+		BYTE Hour;
+		BYTE Min;
+		BYTE Sec;
+	} UTC;
+	char Unknown[5];
+	char Identifier[21];
+
+	// Type 2 data
+
+	struct
+	{
+		unsigned LCI:2;
+		unsigned LUF:1;
+		unsigned PRF:1;
+		unsigned PCS:2;
+		unsigned MI:1;
+		unsigned day:5;
+		unsigned month:4;
+		unsigned hour:5;
+		unsigned minute:6;
+		unsigned:5;
+		WORD CNI;
+		WORD PTY;
+	} PDC;
+} TPacket30;
+
+
+typedef struct
+{
+	HWND Dialog;
+	int  Page;
+	int  SubPage;
+	BOOL PageChange;
+} TVTDialog;
+
+typedef struct
+{
+	WORD wCtrl;
+	BOOL Fill;
+	BYTE Frame[25][40];
+    BYTE LineUpdate[25];
+	BYTE bUpdated;
+    unsigned short SubCount;
+    unsigned short SubPage;
+} TVTPage;
+
 #define LARGE_WIDTH 15
 #define LARGE_HEIGHT 18
-
-#define SMALL_WIDTH 10
-#define SMALL_HEIGHT 12
 
 #define VTTimeout 60000
 
 #define VT_LARGE_BITMAP_HEIGHT (LARGE_HEIGHT*25)
 #define VT_LARGE_BITMAP_WIDTH (LARGE_WIDTH*40)
-
-#define VT_SMALL_BITMAP_HEIGHT (SMALL_HEIGHT*25)
-#define VT_SMALL_BITMAP_WIDTH (SMALL_WIDTH*40)
 
 
 #define ROUNDUP(w) (((w)+3)&~3)
@@ -90,15 +153,22 @@ unsigned char VBI_Scan(BYTE * Buffer, unsigned int step);
 void VBI_decode_vt(unsigned char *dat);
 void VBI_decode_line(unsigned char *d, int line);
 
-int New_Dialog_Slot(HWND hwnd);
-int Get_Dialog_Slot(HWND hwnd);
-int Del_Dialog_Slot(HWND hwnd);
 void VT_ChannelChange();
 
 void VT_DecodeLine(BYTE* VBI_Buffer);
 void VTS_DecodeLine(BYTE* VBI_Buffer);
 
-extern unsigned short UTPages[12];
+void VT_Redraw(HWND hWnd, HDC hDC);
+void VT_ResetStation();
+LPCSTR VT_GetStation();
 
+
+extern unsigned short UTPages[12];
+extern VT_STATE VTState;
+
+extern HWND ShowVTInfo;
+
+extern TVTPage VTPages[800];
+extern TVTDialog VTDialog;
 
 #endif

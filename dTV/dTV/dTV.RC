@@ -454,7 +454,7 @@ END
 ABOUT DIALOGEX 22, 17, 374, 274
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
 CAPTION "About dTV"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,305,9,58,19,WS_GROUP,WS_EX_CLIENTEDGE
     CTEXT           "dTV Version 2.x",IDC_VERSION,0,3,293,9
@@ -751,9 +751,9 @@ BEGIN
     END
     POPUP "&AspectRatio"
     BEGIN
-        MENUITEM "4:3 Fullscreen\t1",           IDM_ASPECT_FULLSCREEN
-        MENUITEM "Letterboxed\t2",              IDM_ASPECT_LETTERBOX
-        MENUITEM "16:9 Anamorphic\t3",          IDM_ASPECT_ANAMORPHIC
+        MENUITEM "4:3 Fullscreen",              IDM_ASPECT_FULLSCREEN
+        MENUITEM "Letterboxed",                 IDM_ASPECT_LETTERBOX
+        MENUITEM "16:9 Anamorphic",             IDM_ASPECT_ANAMORPHIC
         POPUP "Advanced Image Aspect Ratios"
         BEGIN
             MENUITEM "Autodetect (experimental)\tA", IDM_SASPECT_AUTO_TOGGLE
@@ -960,9 +960,8 @@ BEGIN
             MENUITEM "Text 4",                      IDM_TEXT4
         END
         MENUITEM SEPARATOR
-        MENUITEM "&Small VideoText Window",     IDM_CALL_VIDEOTEXTSMALL
+        MENUITEM "Toggle Teletext &Mode\tT",    IDM_CALL_VIDEOTEXTSMALL
         , GRAYED
-        MENUITEM "&Large VideoText Window",     IDM_CALL_VIDEOTEXT, GRAYED
         MENUITEM "&Videotext Reset (After switch over Composite)  ", 
                                                 IDM_VT_RESET, GRAYED
         MENUITEM SEPARATOR
@@ -1164,18 +1163,14 @@ ANALOGACCEL ACCELERATORS DISCARDABLE
 BEGIN
     "+",            IDM_VOLUMEPLUS,         ASCII,  NOINVERT
     "-",            IDM_VOLUMEMINUS,        ASCII,  NOINVERT
-    "0",            IDM_SASPECT_0,          VIRTKEY, NOINVERT
     "0",            IDM_SASPECT_0,          VIRTKEY, CONTROL, NOINVERT
     "0",            IDM_TASPECT_0,          VIRTKEY, ALT, NOINVERT
-    "1",            IDM_ASPECT_FULLSCREEN,  VIRTKEY, NOINVERT
     "1",            IDM_SASPECT_133,        VIRTKEY, CONTROL, NOINVERT
     "1",            IDM_TASPECT_133,        VIRTKEY, ALT, NOINVERT
-    "2",            IDM_ASPECT_LETTERBOX,   VIRTKEY, NOINVERT
     "2",            IDM_SASPECT_166,        VIRTKEY, CONTROL, NOINVERT
     "2",            IDM_TASPECT_166,        VIRTKEY, ALT, NOINVERT
     "2",            IDM_SASPECT_166A,       VIRTKEY, SHIFT, CONTROL, 
                                                     NOINVERT
-    "3",            IDM_ASPECT_ANAMORPHIC,  VIRTKEY, NOINVERT
     "3",            IDM_SASPECT_178,        VIRTKEY, CONTROL, NOINVERT
     "3",            IDM_TASPECT_178,        VIRTKEY, ALT, NOINVERT
     "3",            IDM_SASPECT_178A,       VIRTKEY, SHIFT, CONTROL, 
@@ -1244,7 +1239,6 @@ BEGIN
                                                     NOINVERT
     "S",            IDM_STATUSBAR,          VIRTKEY, NOINVERT
     "T",            IDM_CALL_VIDEOTEXTSMALL, VIRTKEY, NOINVERT
-    "T",            IDM_CLOSE_VT,           VIRTKEY, CONTROL, NOINVERT
     "T",            IDM_CALL_VIDEOTEXT,     VIRTKEY, SHIFT, NOINVERT
     "U",            IDM_USATURATION_MINUS,  VIRTKEY, NOINVERT
     "U",            IDM_USATURATION_PLUS,   VIRTKEY, SHIFT, NOINVERT

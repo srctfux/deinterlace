@@ -36,6 +36,9 @@
 // 03 Mar 2001   Laurent Garnier       Added functions OSD_ShowInfosScreen
 //                                     and OSD_GetLineYpos
 //
+// 10 Mar 2001   Laurent Garnier       Status bar height taken into account when
+//                                     calculating texts placement
+//
 // NOTICE FROM MARK: This code will probably be rewritten, but keeping 
 // this code neat and architecturally well organized, will maximize code 
 // recyclability.   There is a need for multiple independent OSD elements,
@@ -60,7 +63,7 @@
 #include "FD_60Hz.h"
 #include "Filter.h"
 #include "Dialogs.h"
-
+#include "dTV.h"
 
 char szFontName[128] = "Arial";
 long OutlineColor = RGB(0,0,0);
@@ -226,14 +229,21 @@ void OSD_Redraw(HWND hWnd, HDC hDC)
 	nLen = strlen(grOSD[0].szText);
 	if (nLen && hDC != NULL)
 	{
+	    GetClientRect(hWnd,&winRect);
+		nXWinSize = winRect.right  - winRect.left;
+		nYWinSize = winRect.bottom - winRect.top;
+		if (IsStatusBarVisible())
+		{
+			nYWinSize -= StatusBar_Height();
+		}
+
 		for (i = 0 ; i < NbText ; i++)
 		{
 
 		// LG 02/25/2001 This line is no more needed
 		// if (grOSD[i].dfSize == 0) grOSD[i].dfSize = DefaultSizePerc;
 
-	    GetClientRect(hWnd,&winRect);
-		nFontsize = (int)((double)(winRect.bottom - winRect.top) * (grOSD[i].dfSize / 100.00));
+		nFontsize = (int)((double)nYWinSize * (grOSD[i].dfSize / 100.00));
 
 		// Set specified font
 		if(bAntiAlias)
@@ -265,9 +275,6 @@ void OSD_Redraw(HWND hWnd, HDC hDC)
 		{
 			GetTextMetrics(hDC, &tmOSDFont);
 			GetTextExtentPoint32(hDC, grOSD[i].szText, strlen(grOSD[i].szText), &sizeText);
-
-            nXWinSize = winRect.right  - winRect.left;
-            nYWinSize = winRect.bottom - winRect.top;
 
 			switch (grOSD[i].textXpos)
 			{
@@ -422,8 +429,8 @@ void OSD_ShowInfosScreen(HWND hWnd, double dfSize)
 	if (Setting_GetValue(BT848_GetSetting(VIDEOSOURCE)) == SOURCE_TUNER)
 	{
 		OSD_AddText(Programm[CurrentProgramm].Name, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine, dfMargin, dfSize));
+		nLine++;
 	}
-	nLine++;
 
 	// Video input + video format
 	switch (Setting_GetValue(BT848_GetSetting(VIDEOSOURCE)))

@@ -1,4 +1,4 @@
-/////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////
 // vbi.h
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2000 John Adcock.  All rights reserved.
@@ -46,84 +46,12 @@ void VBI_ReadSettingsFromIni();
 void VBI_WriteSettingsToIni();
 void VBI_SetMenu(HMENU hMenu);
 
-
-#define MAXVTDIALOG 8
-
 #define VBI_VT  1
 #define VBI_VPS 2
 #define VBI_CC  32
 
 #define FPSHIFT 16
 #define FPFAC (1<<FPSHIFT)
-
-
-typedef struct TVTDialog
-{
-	HWND Dialog;
-	int  Page;
-	int  SubPage;
-	int  FramePos;
-	BOOL Large;
-	BOOL PageChange;
-	unsigned char AsciiBuffer[26][40];
-};
-
-struct TPacket30
-{
-	// Type 0 data
-
-	struct
-	{
-		unsigned nMag:3;
-		unsigned nPage:8;
-		unsigned:5; // Unused
-		WORD nSubcode;
-	} HomePage;
-	WORD NetId;
-	struct
-	{
-		char Offset;
-		DWORD JulianDay;
-		BYTE Hour;
-		BYTE Min;
-		BYTE Sec;
-	} UTC;
-	char Unknown[5];
-	char Identifier[21];
-
-	// Type 2 data
-
-	struct
-	{
-		unsigned LCI:2;
-		unsigned LUF:1;
-		unsigned PRF:1;
-		unsigned PCS:2;
-		unsigned MI:1;
-		unsigned day:5;
-		unsigned month:4;
-		unsigned hour:5;
-		unsigned minute:6;
-		unsigned:5;
-		WORD CNI;
-		WORD PTY;
-	} PDC;
-};
-
-typedef struct TVTPage
-{
-	WORD wCtrl;
-	BOOL Fill;
-	BYTE Frame[25][40];
-    BYTE LineUpdate[25];
-	BYTE bUpdated;
-};
-
-typedef struct TVT
-{
-    unsigned short SubCount;
-	struct TVTPage *SubPage;
-};
 
 void VBI_Init();
 void VBI_Exit();
@@ -134,14 +62,7 @@ extern int VBI_FPS;
 extern BYTE VBI_thresh;
 extern BYTE VBI_off;
 extern BOOL Capture_VBI;
-extern BOOL VTLarge;
 extern char VPS_lastname[9];
 extern HWND ShowVPSInfo;
-extern HWND ShowVTInfo;
-extern struct TPacket30 Packet30;
-
-extern struct TVT VTFrame[800];
-extern struct TVTDialog VTDialog[MAXVTDIALOG];
-extern unsigned short VTColourTable[9];
 
 #endif
