@@ -1,0 +1,23 @@
+HKCR
+{
+	DeinterlaceDMO.DeinterlaceSettings.1 = s 'DeinterlaceSettings Class'
+	{
+		CLSID = s '{108D2313-90C1-4383-9341-DE4BC501E81C}'
+	}
+	DeinterlaceDMO.DeinterlaceSettings = s 'DeinterlaceSettings Class'
+	{
+		CLSID = s '{108D2313-90C1-4383-9341-DE4BC501E81C}'
+		CurVer = s 'DeinterlaceDMO.DeinterlaceSettings.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {108D2313-90C1-4383-9341-DE4BC501E81C} = s 'DeinterlaceSettings Class'
+		{
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Both'
+			}
+		}
+	}
+}

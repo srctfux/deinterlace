@@ -1,0 +1,23 @@
+HKCR
+{
+	DeinterlaceDMO.DeinterlaceProperties.1 = s 'DeinterlaceProperties Class'
+	{
+		CLSID = s '{BDE07C3C-91E1-4303-ABCE-97EFD690A409}'
+	}
+	DeinterlaceDMO.DeinterlaceProperties = s 'DeinterlaceProperties Class'
+	{
+		CLSID = s '{BDE07C3C-91E1-4303-ABCE-97EFD690A409}'
+		CurVer = s 'DeinterlaceDMO.DeinterlaceProperties.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {BDE07C3C-91E1-4303-ABCE-97EFD690A409} = s 'DeinterlaceProperties Class'
+		{
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Both'
+			}
+		}
+	}
+}

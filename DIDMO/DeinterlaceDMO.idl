@@ -1,0 +1,127 @@
+/////////////////////////////////////////////////////////////////////////////
+// $Id: DeinterlaceDMO.idl,v 1.1.1.1 2001-07-30 16:14:44 tobbej Exp $
+/////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2001 Torbjörn Jansson.  All rights reserved.
+/////////////////////////////////////////////////////////////////////////////
+//
+//  This file is subject to the terms of the GNU General Public License as
+//  published by the Free Software Foundation.  A copy of this license is
+//  included with this software distribution in the file COPYING.  If you
+//  do not have a copy, you may obtain a copy by writing to the Free
+//  Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+//
+//  This software is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details
+/////////////////////////////////////////////////////////////////////////////
+// Change Log
+//
+// Date          Developer             Changes
+//
+//
+/////////////////////////////////////////////////////////////////////////////
+// CVS Log
+//
+// $Log: not supported by cvs2svn $
+//
+//////////////////////////////////////////////////////////////////////////////
+
+// DeinterlaceDMO.idl : IDL source for DeinterlaceDMO.dll
+//
+// This file will be processed by the MIDL tool to
+// produce the type library (DeinterlaceDMO.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+	
+	//MIDL doesnt like function pointers, so i had to make my own settings struct
+	typedef 
+	[
+		uuid(EF80D7A2-3C77-40EC-8D74-7C55F5F0A65F), 
+		helpstring("Setting")
+	]
+	struct DISETTING
+	{
+		[string] unsigned char *szDisplayName;
+		
+		[
+			helpstring("Type of setting")
+		]
+		enum DISETTING_TYPE
+		{
+			NOT_PRESENT = 0,
+			ONOFF,
+			YESNO,
+			ITEMFROMLIST,
+			SLIDER,
+			SUBMENU,
+		} Type;
+		long Default;
+		long MinValue;
+		long MaxValue;
+		long StepValue;
+		//const char** pszList;
+		//char* szIniSection;
+		//char* szIniEntry;
+	} DISETTING;
+
+	[
+		object,
+		uuid(064416B4-5A2E-4CF1-99A0-9A90FC5AD200),
+		dual,
+		helpstring("IDeinterlace Interface"),
+		pointer_default(unique)
+	]
+	interface IDeinterlace : IDispatch
+	{
+		//import "DISetting.h";
+
+		[id(1), helpstring("method LoadPlugin")] HRESULT LoadPlugin([in]LPCSTR szFileName,[in] long *hwndMain, [in] long *hwndStatus);
+		[id(2), helpstring("method UnloadPlugin")] HRESULT UnloadPlugin();
+		[id(3), helpstring("method IsPluginLoaded")] HRESULT IsPluginLoaded();
+		[id(4), helpstring("method GetPluginName")] HRESULT GetPluginName([out,string] unsigned char **szName);
+		[id(5), helpstring("method GetSetting")] HRESULT GetSetting([in] int nIndex,[out] DISETTING *pSetting);
+		[id(6), helpstring("method GetSettingCount")] HRESULT GetSettingCount([out] long *pCount);
+		[id(7), helpstring("method put_SettingValue")] HRESULT put_SettingValue([in] int nIndex,[in] long lValue);
+		[id(8), helpstring("method get_SettingValue")] HRESULT get_SettingValue([in] int nIndex,[out] long *pValue);
+	};
+
+[
+	uuid(3F4E6A87-7D7C-4F83-9D8F-15572E244A44),
+	version(1.0),
+	helpstring("DeinterlaceDMO 1.0 Type Library")
+]
+library DEINTERLACEDMOLib
+{
+	importlib("stdole32.tlb");
+	importlib("stdole2.tlb");
+
+	
+	[
+		uuid(DDA63A24-19EF-46AB-8CE9-7F94AACC9CC5),
+		helpstring("Deinterlace Class")
+	]
+	coclass Deinterlace
+	{
+		[default] interface IDeinterlace;
+	};
+
+	[
+		uuid(BDE07C3C-91E1-4303-ABCE-97EFD690A409),
+		helpstring("DeinterlaceProperties Class")
+	]
+	coclass DeinterlaceProperties
+	{
+		interface IUnknown;
+	};
+
+	[
+		uuid(108D2313-90C1-4383-9341-DE4BC501E81C),
+		helpstring("DeinterlaceSettings Class")
+	]
+	coclass DeinterlaceSettings
+	{
+		interface IUnknown;
+	};
+};

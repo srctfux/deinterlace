@@ -1,0 +1,205 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "winres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""winres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "1 TYPELIB ""DeinterlaceDMO.tlb""\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DEINTERLACEPROPERTIES DIALOGEX 0, 0, 211, 171
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    EDITTEXT        IDC_PLUGIN_FILENAME,20,131,140,14,ES_AUTOHSCROLL
+    GROUPBOX        "Plugin file",IDC_STATIC,0,120,210,50
+    LTEXT           "File:",IDC_STATIC,5,145,14,8
+    GROUPBOX        "Filter info",IDC_STATIC,15,75,180,40
+    LTEXT           "Status:",IDC_STATIC,21,86,23,8
+    CONTROL         "",IDC_PLUGIN_STATUS,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,65,86,125,10,WS_EX_STATICEDGE
+    LTEXT           "Name:",IDC_STATIC,21,100,22,8
+    LTEXT           "",IDC_PLUGIN_NAME,65,100,125,10,0,WS_EX_STATICEDGE
+    PUSHBUTTON      "Load",IDC_PLUGIN_LOAD,20,150,40,14
+    PUSHBUTTON      "Unload",IDC_PLUGIN_UNLOAD,75,150,40,14
+    PUSHBUTTON      "Browse...",IDC_PLUGIN_BROWSE,165,131,40,14
+    CTEXT           "Deinterlace DMO Filter",IDC_STATIC,0,0,210,10
+    CTEXT           "Copyright (c) 2001 Torbjörn Jansson",IDC_STATIC,0,10,
+                    210,10
+    CTEXT           "This program comes with ABSOLUTELY NO WARRANTY.  This software in licenced under the terms of the GNU GPL for details see http://www.gnu.org/copyleft/gpl.html",
+                    IDC_STATIC,10,35,190,25
+    GROUPBOX        "",IDC_STATIC,0,25,210,45
+    CTEXT           "Based on code from DScaler",IDC_STATIC,0,20,210,8
+END
+
+IDD_DEINTERLACESETTINGS DIALOG DISCARDABLE  0, 0, 211, 161
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Settings:",IDC_STATIC,5,5,28,8
+    LISTBOX         IDC_SETTINGS_LIST,5,15,95,140,LBS_SORT | 
+                    LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "",IDC_STATIC,105,10,100,145
+    EDITTEXT        IDC_SETTINGS_EDIT,110,20,40,14,ES_AUTOHSCROLL | 
+                    ES_NUMBER | NOT WS_VISIBLE
+    CONTROL         "Spin1",IDC_SETTINGS_SPIN,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS | NOT WS_VISIBLE,150,20,
+                    11,14
+    CONTROL         "Slider1",IDC_SETTINGS_SLIDER,"msctls_trackbar32",
+                    TBS_VERT | TBS_TOP | NOT WS_VISIBLE | WS_TABSTOP,175,15,
+                    25,135
+    PUSHBUTTON      "Default",IDC_SETTINGS_DEFAULT,110,40,40,14,NOT 
+                    WS_VISIBLE
+    COMBOBOX        IDC_SETTINGS_COMBO,110,20,90,75,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "",IDC_SETTINGS_CHECK,"Button",BS_AUTOCHECKBOX | NOT 
+                    WS_VISIBLE | WS_TABSTOP,110,20,90,10
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_PROJNAME            "DeinterlaceDMO"
+    IDS_DEINTERLACE_DESC    "Deinterlace Class"
+    IDS_TITLEDeinterlaceProperties "Deinterlace Settings"
+    IDS_DOCSTRINGDeinterlaceProperties "Your Help String"
+    IDS_TITLEDeinterlaceSettings "Plugin settings"
+    IDS_HELPFILEDeinterlaceSettings "Help File Name"
+    IDS_DOCSTRINGDeinterlaceSettings "Your Help String"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Swedish resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_SVE)
+#ifdef _WIN32
+LANGUAGE LANG_SWEDISH, SUBLANG_DEFAULT
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// REGISTRY
+//
+
+IDR_Deinterlace         REGISTRY DISCARDABLE    "Deinterlace.rgs"
+IDR_DEINTERLACEPROPERTIES REGISTRY DISCARDABLE    "DeinterlaceProperties.rgs"
+IDR_DEINTERLACESETTINGS REGISTRY DISCARDABLE    "DeinterlaceSettings.rgs"
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 0,1,0,55
+ PRODUCTVERSION 0,1,0,55
+ FILEFLAGSMASK 0x30003fL
+#ifdef _DEBUG
+ FILEFLAGS 0xbL
+#else
+ FILEFLAGS 0xaL
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904e4"
+        BEGIN
+            VALUE "ActiveMovie", "Filter dll\0"
+            VALUE "Comments", "Torbjörn Jansson\0"
+            VALUE "CompanyName", "\0"
+            VALUE "FileDescription", "Deinterlace DMO filter\0"
+            VALUE "FileVersion", "0, 1, 0, 55\0"
+            VALUE "InternalName", "DeinterlaceDMO.dll\0"
+            VALUE "LegalCopyright", "Copyright © 2001\0"
+            VALUE "LegalTrademarks", "This Program is covered by the term of the GNU GPL\0"
+            VALUE "OLESelfRegister", "AM20\0"
+            VALUE "OriginalFilename", "DeinterlaceDMO.dll\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "\0"
+            VALUE "ProductVersion", "0, 1, 0, 55\0"
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END
+
+#endif    // !_MAC
+
+#endif    // Swedish resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+1 TYPELIB "DeinterlaceDMO.tlb"
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
