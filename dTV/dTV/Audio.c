@@ -621,7 +621,8 @@ void Audio_MSP_Set_MajorMinor_Mode(int MajorMode, int MinorMode)
 	case 2:					// 6.0
 		// PAL I NICAM
 //          Audio_MSP_SetMode(Audio_MSP_MODE_FM_NICAM2);
-		Audio_MSP_SetCarrier(MSP_CARRIER(6.552), carrier_detect_main[MajorMode]);
+		//Audio_MSP_SetCarrier(MSP_CARRIER(6.552), carrier_detect_main[MajorMode]);
+		Audio_MSP_SetCarrier(MSP_CARRIER(6.55), carrier_detect_main[MajorMode]);
 		break;
 	case 3:					// 6.5
 		if (MinorMode == 1 || MinorMode == 2)
