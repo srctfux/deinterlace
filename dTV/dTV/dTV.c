@@ -88,8 +88,8 @@ int MoveYDist=-1;
 
 BITMAPINFO          *VTCharSetLarge                    = NULL;
 BITMAPINFO          *VTCharSetSmall                    = NULL;
-HBITMAP             BirneRot;
-HBITMAP             BirneGruen;
+HBITMAP             RedBulb;
+HBITMAP             GreenBulb;
 BITMAPINFO          *VTScreen[MAXVTDIALOG];
 
 long WStyle;
@@ -251,8 +251,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	hGlobal = LoadResource(hInst, FindResource(hInst, "VTCHARSMALL", RT_BITMAP));
 	VTCharSetSmall = (BITMAPINFO *) LockResource(hGlobal);
 
-	BirneRot = LoadBitmap(hInst, "BROT");
-	BirneGruen = LoadBitmap(hInst, "BGRUEN");
+	RedBulb = LoadBitmap(hInst, "REDBULB");
+	GreenBulb = LoadBitmap(hInst, "GREENBULB");
 	currFont = CreateFontIndirect(&lf);
 
 	// 2000-10-31 Added by Mark Rejhon
@@ -279,8 +279,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	DeleteObject(currFont);
 	DeleteObject(VTCharSetLarge);
 	DeleteObject(VTCharSetSmall);
-	DeleteObject(BirneRot);
-	DeleteObject(BirneGruen);
+	DeleteObject(RedBulb);
+	DeleteObject(GreenBulb);
 	
 	// unload any bTV plugin loaded
 	BTVPluginUnload();
@@ -431,26 +431,58 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			return (TRUE);
 
 		case IDM_CHANNELPLUS:
-			ChangeChannel(CurrentProgramm + 1);
-			if (bDisplayStatusBar == TRUE)
+			if (VideoSource == 0)
 			{
-				sprintf(Text, "Channel %d", CurrentProgramm);
-				SetWindowText(hwndTextField, Text);
+				// MAE 8 Nov 2000 Added wrap around
+				if (Programm[CurrentProgramm + 1].freq != 0)
+					ChangeChannel(CurrentProgramm + 1);
+				else
+					ChangeChannel(0);
+
+				OnScreenDisplay(hWnd,Programm[CurrentProgramm].Name);
 			}
+
 			break;
 
 		case IDM_CHANNELMINUS:
-			ChangeChannel(CurrentProgramm - 1);
-			if (bDisplayStatusBar == TRUE)
+			if (VideoSource == 0)
 			{
-				sprintf(Text, "Channel %d", CurrentProgramm);
-				SetWindowText(hwndTextField, Text);
+				// MAE 8 Nov 2000 Added wrap around
+				if (CurrentProgramm != 0)
+				{
+					ChangeChannel(CurrentProgramm - 1);
+				}
+				else
+				{
+					// Search for end of current program list
+					for (i=0;i<MAXPROGS;++i)
+					{
+						if (Programm[i].freq == 0)
+							break;
+					}
+					if (i != 0)
+					{
+						ChangeChannel(i - 1);
+					}
+					else
+					{
+						ChangeChannel(0);
+					}
+				}
+					
+				OnScreenDisplay(hWnd,Programm[CurrentProgramm].Name);
 			}
+			
 			break;
 
 		case IDM_RESET:
-			Reset_Capture();
-			Sleep(50);
+			Stop_Capture();
+			Overlay_Clean();
+			BT848_ResetHardware();
+			BT848_SetGeoSize();
+			WorkoutOverlaySize();
+			Start_Capture();
+			Sleep(100);
 			Audio_SetSource(AudioSource);
 			break;
 
@@ -635,6 +667,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 					Mixer_Mute();
 					sprintf(Text, "Mute Mixer");
 				}
+				OnScreenDisplay(hWnd,"MUTE");
 			}
 			else
 			{
@@ -650,6 +683,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 					sprintf(Text, "UnMute Mixer");
 				}
 
+				OnScreenDisplay(hWnd,"UNMUTE");
 			}
 			if (bDisplayStatusBar == TRUE)
 				SetWindowText(hwndTextField, Text);
@@ -824,7 +858,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			BT848_SetVideoSource(VideoSource);
 			if (bDisplayStatusBar == TRUE)
 			{
-				sprintf(Text, "%04d. %s ", CurrentProgramm + 1, Programm[CurrentProgramm].Name);
+				sprintf(Text, "Channel %s ", Programm[CurrentProgramm].Name);
 				SetWindowText(hwndKeyField, Text);
 			}
 			if(!System_In_Mute)
@@ -833,6 +867,9 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			}
 			Start_Capture();
 			SetMenuAnalog();
+
+			OnScreenDisplay(hWnd,Programm[CurrentProgramm].Name);
+
 			break;
 
 		case IDM_EXTERN1:
@@ -843,13 +880,28 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
 			// 10/16/2000 by Mark Rejhon:
 			// More guaranteed to work than mathematics with wParam
+			// 0= Tuner,
+			// 1= Composite,
+			// 2= SVideo,
+			// 3= Other 1
+			// 4= Other 2
 			VideoSource = 0;
 			switch (LOWORD(wParam)) {
-			case IDM_EXTERN1: VideoSource = 1; break;
-			case IDM_EXTERN2: VideoSource = 2; break;
-			case IDM_EXTERN3: VideoSource = 3; break;
-			case IDM_EXTERN4: VideoSource = 4; break;
-			case IDM_EXTERN5: VideoSource = 5; break;
+			case IDM_EXTERN1: VideoSource = 1; 
+				OnScreenDisplay(hWnd,"Composite");
+				break;
+			case IDM_EXTERN2: VideoSource = 2; 
+				OnScreenDisplay(hWnd,"S-Video");
+				break;
+			case IDM_EXTERN3: VideoSource = 3; 
+				OnScreenDisplay(hWnd,"Other 1");
+				break;
+			case IDM_EXTERN4: VideoSource = 4; 
+				OnScreenDisplay(hWnd,"Other 2");
+				break;
+			case IDM_EXTERN5: VideoSource = 5; 
+				OnScreenDisplay(hWnd,"Comp via S-V");
+				break;
 			}
 
 			AudioSource = AUDIOMUX_EXTERNAL;
@@ -1073,7 +1125,36 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_CHANNEL_LIST:
-			DialogBox(hInst, "CHANNELLIST", hWnd, (DLGPROC) ProgramListProc);
+			if (VideoSource == 0)
+			{
+				DialogBox(hInst, "CHANNELLIST", hWnd, (DLGPROC) ProgramListProc);
+				OnScreenDisplay(hWnd,Programm[CurrentProgramm].Name);
+			}
+			break;
+
+		case IDM_SHOW_OSD:
+			switch (VideoSource)
+			{
+				case 0:
+					OnScreenDisplay(hWnd,Programm[CurrentProgramm].Name);
+					break;
+				case 1:  
+					OnScreenDisplay(hWnd,"Composite");
+					break;
+				case 2:  
+					OnScreenDisplay(hWnd,"S-Video");
+					break;
+				case 3:  
+					OnScreenDisplay(hWnd,"Other 1");
+					break;
+				case 4:  
+					OnScreenDisplay(hWnd,"Other 2");
+					break;
+				case 5:  
+					OnScreenDisplay(hWnd,"Comp via S-V");
+					break;
+			}
+
 			break;
 
 		case IDM_TREADPRIOR_0:
@@ -1297,6 +1378,12 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			ChangeChannel(i);
 			ChannelString[0] = '\0';
 		}
+		else if (wParam == TIMER_OSD)
+		{
+			KillTimer(hWnd, TIMER_OSD);
+			InvalidateRect(hWnd, NULL, FALSE);
+		}
+
 		break;
 
 	case WM_SYSCOMMAND:
@@ -1368,8 +1455,12 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		// so that end users can write scripts that sends this special message 
 		// to safely restart the video after a resolution or timings change.
 		Overlay_Create();
-		Reset_Capture();
-		Sleep(50);
+		Overlay_Clean();
+		BT848_ResetHardware();
+		BT848_SetGeoSize();
+		WorkoutOverlaySize();
+		Start_Capture();
+		Sleep(100);
 		Audio_SetSource(AudioSource);
 		break;
 
@@ -1617,7 +1708,7 @@ void MainWndOnCreate(HWND hWnd)
 		VTDialog[i].Dialog = NULL;
 	}
 
-	Load_Program_List();
+	Load_Program_List_ASCII();
 	Load_Country_Settings();
 
 	VTScreen[0] = NULL;
@@ -1952,7 +2043,7 @@ void ChangeChannel(int NewChannel)
 
 				if (bDisplayStatusBar == TRUE)
 				{
-					sprintf(Text, "%04d. %s ", CurrentProgramm + 1, Programm[CurrentProgramm].Name);
+					sprintf(Text, "    Channel %s ",Programm[CurrentProgramm].Name);
 					SetWindowText(hwndKeyField, Text);
 				}
 				VT_ChannelChange();
@@ -1962,3 +2053,77 @@ void ChangeChannel(int NewChannel)
 		}
 	}
 }
+
+//
+// void OnScreenDisplay(HWND hWnd)
+// Put up the current channel number
+//
+// 8 Nov 2000 - Michael Eskin, Conexant Systems
+//
+
+void OnScreenDisplay(HWND hWnd,char *szText)
+{
+
+	HDC hdc;
+	LOGFONT lfTmp;
+	HFONT hTmp,hOSD;
+	int len,fontsize;
+	RECT winRect;
+	TEXTMETRIC tmOSDFont;
+	SIZE sizeText;
+
+	if (len = strlen(szText))
+	{
+		InvalidateRect(hWnd,NULL,FALSE);
+
+		PaintColorkey(hWnd, TRUE);
+
+		GetWindowRect(hWnd,&winRect);
+
+		fontsize = (winRect.bottom - winRect.top) / 10;
+
+		// Get the current window size
+
+		hOSD = CreateFont(fontsize, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, VARIABLE_PITCH | FF_SWISS, "");
+
+		if (GetObject(hOSD, sizeof(LOGFONT), &lfTmp))
+		{
+			if ((lfTmp.lfPitchAndFamily & VARIABLE_PITCH) && (lfTmp.lfPitchAndFamily & FF_SWISS))
+			{
+			}
+			else
+			{
+				ErrorBox("Unable to get an unnamed variable pitch swiss font");
+				hOSD = CreateFont(fontsize, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, VARIABLE_PITCH | FF_SWISS, "Arial");
+			}
+		}
+
+		if (!hOSD)
+		{
+			ErrorBox("Failed To Create Font");
+		}
+
+		hdc = GetDC(hWnd);
+
+		hTmp = SelectObject(hdc, hOSD);
+
+		SetTextColor(hdc, RGB(0,255,0));
+
+		SetBkColor(hdc, GetNearestColor(hdc, OverlayColor));
+
+		GetTextMetrics(hdc, &tmOSDFont);
+
+		GetTextExtentPoint32(hdc, szText, strlen(szText), &sizeText);
+
+		TextOut(hdc, (8*(winRect.right-winRect.left))/9 - sizeText.cx,sizeText.cy, szText, strlen(szText));
+		
+		SelectObject(hdc, hTmp);
+
+		DeleteObject(hOSD);
+
+		ReleaseDC(hWnd, hdc);			
+
+		SetTimer(hWnd, TIMER_OSD, TIMER_OSD_MS, NULL);
+	}
+}
+
