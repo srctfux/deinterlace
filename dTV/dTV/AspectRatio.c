@@ -771,7 +771,7 @@ int FindAspectRatio(short** EvenField, short** OddField)
 	topBorder = FindTopOfImage(EvenField, OddField) - InitialOverscan;
 
 	// Now find the size of the border at the bottom of the image.
-	bottomBorder = CurrentY - FindBottomOfImage(EvenField, OddField) - InitialOverscan;
+	bottomBorder = CurrentY - FindBottomOfImage(EvenField, OddField) - InitialOverscan * 2;
 
 	// The border size is the smaller of the two.
 	border = (topBorder < bottomBorder) ? topBorder : bottomBorder;
