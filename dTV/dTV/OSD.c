@@ -31,6 +31,8 @@
 //                                     Should improve compatability with coming
 //                                     OSD changes
 //
+// 25 Feb 2001   Laurent Garnier       Added management of multiple OSD texts
+//
 // NOTICE FROM MARK: This code will probably be rewritten, but keeping 
 // this code neat and architecturally well organized, will maximize code 
 // recyclability.   There is a need for multiple independent OSD elements,
@@ -56,11 +58,78 @@ BOOL bAntiAlias = TRUE;
 BOOL bOutline = TRUE;
 eOSDBackground Background;
 
-
 //---------------------------------------------------------------------------
 // Global OSD Information structure
-OSD_INFO    grOSD = {""};
+OSD_INFO    grOSD[OSD_MAX_TEXT];
+int         NbText = 0;
 BOOL        bOverride = FALSE;
+
+//---------------------------------------------------------------------------
+// Return the number of texts currently defined for OSD
+int OSD_GetNbText()
+{
+	return (NbText);
+}
+
+//---------------------------------------------------------------------------
+// Clean the list of texts for OSD
+void OSD_ClearAllTexts()
+{
+	NbText = 0;
+}
+
+//---------------------------------------------------------------------------
+// Add a new text to the list of texts for OSD
+void OSD_AddText(LPCTSTR szText, double dfSize, long textColor, OSD_TEXT_XPOS textXpos, double dfXpos, double dfYpos)
+{
+	if ( (strlen(szText) == 0) || (NbText >= OSD_MAX_TEXT) )
+	{
+		return;
+	}
+
+	if (dfSize == 0)
+	{
+        grOSD[NbText].dfSize = DefaultSizePerc;
+	}
+	else
+	{
+		grOSD[NbText].dfSize = dfSize;
+	}
+	if (textColor == 0)
+	{
+		grOSD[NbText].textColor = TextColor;
+	}
+	else
+	{
+		grOSD[NbText].textColor = textColor;
+	}
+	grOSD[NbText].textXpos = textXpos;
+	grOSD[NbText].dfXpos = dfXpos;
+	grOSD[NbText].dfYpos = dfYpos;
+	strncpy(grOSD[NbText].szText, szText, sizeof(grOSD[NbText].szText));
+
+	NbText++;
+}
+
+//---------------------------------------------------------------------------
+// Display defined OSD texts
+void OSD_Show(HWND hWnd, BOOL persistent)
+{
+    RECT		winRect;
+	HDC         hDC;
+
+	if (bOverride) return;
+	if (persistent == TRUE)
+		KillTimer(hWnd, OSD_TIMER_ID);
+	hDC = GetDC(hWnd);
+	GetClientRect(hWnd,&winRect);
+	PaintColorkey(hWnd, TRUE, hDC, &winRect);
+	OSD_Redraw(hWnd, hDC);
+	ReleaseDC(hWnd, hDC);
+	if (persistent == FALSE)
+		SetTimer(hWnd, OSD_TIMER_ID, OSD_TIMER_DELAY, NULL);
+	StatusBar_Repaint();
+}
 
 //---------------------------------------------------------------------------
 // Display specified OSD text with autohide
@@ -69,27 +138,15 @@ void OSD_ShowText(HWND hWnd, LPCTSTR szText, double dfSize)
     if (bOverride) return;
 	if (strlen(szText))
 	{
-    	RECT		winRect;
-		HDC         hDC;
-
-        grOSD.dfSize = dfSize;
-        grOSD.dfXpos = 0.9;
-        grOSD.dfYpos = 0.1;
-		strncpy(grOSD.szText, szText, sizeof(grOSD.szText));
-        
-		hDC = GetDC(hWnd);
-        GetClientRect(hWnd,&winRect);
-    	PaintColorkey(hWnd, TRUE, hDC, &winRect);
-		OSD_Redraw(hWnd, hDC);
-		ReleaseDC(hWnd, hDC);
-		SetTimer(hWnd, OSD_TIMER_ID, OSD_TIMER_DELAY, NULL);
+		OSD_ClearAllTexts();
+		OSD_AddText(szText, dfSize, 0, OSD_XPOS_RIGHT, 0.9, 0.1);
+		OSD_Show(hWnd, FALSE);
 	}
 	else
 	{
 		// If OSD message is blank, kill previous OSD message
 		OSD_Clear(hWnd);
 	}
-	StatusBar_Repaint();
 }
 
 //---------------------------------------------------------------------------
@@ -98,29 +155,17 @@ void OSD_ShowText(HWND hWnd, LPCTSTR szText, double dfSize)
 void OSD_ShowTextPersistent(HWND hWnd, LPCTSTR szText, double dfSize)
 {
     if (bOverride) return;
-	KillTimer(hWnd, OSD_TIMER_ID);
 	if (strlen(szText))
 	{
-    	RECT		winRect;
-		HDC         hDC;
-
-        grOSD.dfSize = dfSize;
-        grOSD.dfXpos = 0.9;
-        grOSD.dfYpos = 0.1;
-		strncpy(grOSD.szText, szText, sizeof(grOSD.szText));
-
-		hDC = GetDC(hWnd);
-	    GetClientRect(hWnd,&winRect);
-        PaintColorkey(hWnd, TRUE, hDC, &winRect);
-        OSD_Redraw(hWnd, hDC);
-		ReleaseDC(hWnd, hDC);
+		OSD_ClearAllTexts();
+		OSD_AddText(szText, dfSize, 0, OSD_XPOS_RIGHT, 0.9, 0.1);
+		OSD_Show(hWnd, TRUE);
 	}
 	else
 	{
 		// If OSD message is blank, kill previous OSD message
 		OSD_Clear(hWnd);
 	}
-	StatusBar_Repaint();
 }
 
 //---------------------------------------------------------------------------
@@ -139,12 +184,16 @@ void OSD_ShowTextOverride(HWND hWnd, LPCTSTR szText, double dfSize)
 // Clear currently displayed OSD
 void OSD_Clear(HWND hWnd)
 {
+	int	i;
+
 	KillTimer(hWnd, OSD_TIMER_ID);
     bOverride = FALSE;
-	if (grOSD.szText[0] != 0) { // No need if we don't have any OSD text...(MRS 2-23-01)
-		lstrcpy(grOSD.szText, "");
-		InvalidateRect(hWnd, &grOSD.currentRect, FALSE); // MRS 2-23-01 Added osdRect 
+	for (i = 0 ; i < NbText ; i++)
+	{
+		InvalidateRect(hWnd, &(grOSD[i].currentRect), FALSE);
 	}
+	OSD_ClearAllTexts();
+	StatusBar_Repaint();
 }
 
 //---------------------------------------------------------------------------
@@ -160,14 +209,19 @@ void OSD_Redraw(HWND hWnd, HDC hDC)
 	SIZE		sizeText;
    	RECT		winRect;
 	DWORD       dwQuality = 0;
+	int			i;
 
-	nLen = strlen(grOSD.szText);
+	nLen = strlen(grOSD[0].szText);
 	if (nLen && hDC != NULL)
 	{
-        if (grOSD.dfSize == 0) grOSD.dfSize = DefaultSizePerc;
+		for (i = 0 ; i < NbText ; i++)
+		{
+
+		// LG 02/25/2001 This line is no more needed
+		// if (grOSD[i].dfSize == 0) grOSD[i].dfSize = DefaultSizePerc;
 
 	    GetClientRect(hWnd,&winRect);
-		nFontsize = (int)((double)(winRect.bottom - winRect.top) * (grOSD.dfSize / 100.00));
+		nFontsize = (int)((double)(winRect.bottom - winRect.top) * (grOSD[i].dfSize / 100.00));
 
 		// Set specified font
 		if(bAntiAlias)
@@ -196,13 +250,26 @@ void OSD_Redraw(HWND hWnd, HDC hDC)
 		if (hTmp)
 		{
 			GetTextMetrics(hDC, &tmOSDFont);
-			GetTextExtentPoint32(hDC, grOSD.szText, strlen(grOSD.szText), &sizeText);
+			GetTextExtentPoint32(hDC, grOSD[i].szText, strlen(grOSD[i].szText), &sizeText);
 
             nXWinSize = winRect.right  - winRect.left;
             nYWinSize = winRect.bottom - winRect.top;
 
-			nXpos = (int)((double)nXWinSize * grOSD.dfXpos) - sizeText.cx;
-			nYpos = (int)((double)nYWinSize * grOSD.dfYpos);
+			switch (grOSD[i].textXpos)
+			{
+			case OSD_XPOS_RIGHT:
+				nXpos = (int)((double)nXWinSize * grOSD[i].dfXpos) - sizeText.cx;
+				break;
+			case OSD_XPOS_CENTER:
+				nXpos = (int)((double)nXWinSize * grOSD[i].dfXpos - (double)sizeText.cx / 2.0);
+				break;
+			case OSD_XPOS_LEFT:
+			default:
+				nXpos = (int)((double)nXWinSize * grOSD[i].dfXpos);
+				break;
+			}
+
+			nYpos = (int)((double)nYWinSize * grOSD[i].dfYpos);
 
 			// Draw the requested background for the text
 			switch(Background)
@@ -250,38 +317,40 @@ void OSD_Redraw(HWND hWnd, HDC hDC)
 			{
 				// Draw OSD outline if required
 				SetTextColor(hDC, OutlineColor);
-				TextOut(hDC, nXpos - 2, nYpos, grOSD.szText, strlen(grOSD.szText));
-				TextOut(hDC, nXpos + 2, nYpos, grOSD.szText, strlen(grOSD.szText));
-				TextOut(hDC, nXpos, nYpos - 2, grOSD.szText, strlen(grOSD.szText));
-				TextOut(hDC, nXpos, nYpos + 2, grOSD.szText, strlen(grOSD.szText));
-				TextOut(hDC, nXpos - 1, nYpos - 1, grOSD.szText, strlen(grOSD.szText));
-				TextOut(hDC, nXpos + 1, nYpos - 1, grOSD.szText, strlen(grOSD.szText));
-				TextOut(hDC, nXpos - 1, nYpos + 1, grOSD.szText, strlen(grOSD.szText));
-				TextOut(hDC, nXpos + 1, nYpos + 1, grOSD.szText, strlen(grOSD.szText));
+				TextOut(hDC, nXpos - 2, nYpos, grOSD[i].szText, strlen(grOSD[i].szText));
+				TextOut(hDC, nXpos + 2, nYpos, grOSD[i].szText, strlen(grOSD[i].szText));
+				TextOut(hDC, nXpos, nYpos - 2, grOSD[i].szText, strlen(grOSD[i].szText));
+				TextOut(hDC, nXpos, nYpos + 2, grOSD[i].szText, strlen(grOSD[i].szText));
+				TextOut(hDC, nXpos - 1, nYpos - 1, grOSD[i].szText, strlen(grOSD[i].szText));
+				TextOut(hDC, nXpos + 1, nYpos - 1, grOSD[i].szText, strlen(grOSD[i].szText));
+				TextOut(hDC, nXpos - 1, nYpos + 1, grOSD[i].szText, strlen(grOSD[i].szText));
+				TextOut(hDC, nXpos + 1, nYpos + 1, grOSD[i].szText, strlen(grOSD[i].szText));
 			}
 
 			// Draw OSD text
 			if (SelectObject(hDC, hOSDfont))
 			{
-				SetTextColor(hDC, TextColor);
+				SetTextColor(hDC, grOSD[i].textColor);
 				SetBkColor(hDC, OutlineColor);
-				TextOut(hDC, nXpos, nYpos, grOSD.szText, strlen(grOSD.szText));
+				TextOut(hDC, nXpos, nYpos, grOSD[i].szText, strlen(grOSD[i].szText));
 
 				{   // MRS 2-23-01 Calculate rectnagle for the entire OSD 
 					// so we do not invalidate the entire window to remove it.
 					SIZE sz;
-					GetTextExtentExPoint(hDC, grOSD.szText, strlen(grOSD.szText), 
+					GetTextExtentExPoint(hDC, grOSD[i].szText, strlen(grOSD[i].szText), 
 											32000, NULL, NULL, &sz);
-					grOSD.currentRect.left = nXpos-4; if (grOSD.currentRect.left < 0) grOSD.currentRect.left = 0;
-					grOSD.currentRect.right = nXpos + sz.cx + 4;
-					grOSD.currentRect.top = nYpos-4; if (grOSD.currentRect.top < 0) grOSD.currentRect.top = 0;
-					grOSD.currentRect.bottom = nYpos + sz.cy + 4;
+					grOSD[i].currentRect.left = nXpos-4; if (grOSD[i].currentRect.left < 0) grOSD[i].currentRect.left = 0;
+					grOSD[i].currentRect.right = nXpos + sz.cx + 4;
+					grOSD[i].currentRect.top = nYpos-4; if (grOSD[i].currentRect.top < 0) grOSD[i].currentRect.top = 0;
+					grOSD[i].currentRect.bottom = nYpos + sz.cy + 4;
 				}
- 			}
-			
+			}
+
 			SelectObject(hDC, hTmp);
 			DeleteObject(hOSDfont);
 			DeleteObject(hOSDfontOutline);
+
+			}			
 		}
 	}
 }

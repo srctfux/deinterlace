@@ -26,6 +26,8 @@
 //
 // 24 Feb 2001   Michael Samblanet     Added invalidation rectangle
 //
+// 25 Feb 2001   Laurent Garnier       Added management of multiple OSD texts
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __OSD_H___
@@ -44,15 +46,30 @@ void OSD_SetMenu(HMENU hMenu);
 #define OSD_TIMER_ID			42
 #define OSD_TIMER_DELAY			4000
 
+#define OSD_MAX_TEXT			25
+
+typedef enum
+{
+	OSD_XPOS_LEFT = 0,
+	OSD_XPOS_RIGHT,
+	OSD_XPOS_CENTER,
+} OSD_TEXT_XPOS;
+
 typedef struct OSD_INFO_TAG
 {
     char            szText[512];       // Text of OSD
     double          dfSize;            // Size of OSD as percentage of screen height
+	long			textColor;         // Text color (RGB)
+	OSD_TEXT_XPOS	textXpos;          // Text position / Xpos
     double          dfXpos;            // X position (0 = left, 1 = right)
     double          dfYpos;            // Y position (0 = top, 1 = bottom)
 	RECT            currentRect;       // MRS 2-24-01 Saves the current drawn rectangle (used to limit invalidation area)
 } OSD_INFO;
 
+int OSD_GetNbText();
+void OSD_ClearAllTexts();
+void OSD_AddText(LPCTSTR szText, double dfSize, long textColor, OSD_TEXT_XPOS textXpos, double dfXpos, double dfYpos);
+void OSD_Show(HWND hWnd, BOOL persistent);
 void OSD_ShowText(HWND hWnd, LPCTSTR szText, double dfSize);
 void OSD_ShowTextPersistent(HWND hWnd, LPCTSTR szText, double dfSize);
 void OSD_ShowTextOverride(HWND hWnd, LPCTSTR szText, double dfSize);
