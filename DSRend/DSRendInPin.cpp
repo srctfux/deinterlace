@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendInPin.cpp,v 1.5 2002-05-09 14:48:53 tobbej Exp $
+// $Id: DSRendInPin.cpp,v 1.6 2002-05-09 17:24:11 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.5  2002/05/09 14:48:53  tobbej
+// dont accept connections with field input since that is not implemented yet
+//
 // Revision 1.4  2002/03/11 19:26:57  tobbej
 // fixed pause so it blocks properly
 // dont accept mediatypes with empty width/height
@@ -544,7 +547,8 @@ HRESULT CDSRendInPin::CheckMediaType(const AM_MEDIA_TYPE *pmt)
 		}
 
 		//check that there is a size specified in the media type
-		if(pBmi!=NULL && pBmi->biWidth!=0 && pBmi->biHeight!=0)
+		//and that the width is a multiple of 16 (alignment problems in dscaler)
+		if(pBmi!=NULL && pBmi->biWidth!=0 && pBmi->biHeight!=0 && (pBmi->biWidth&0xf)==0)
 			return S_OK;
 	}
 	return E_FAIL;
