@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: util.h,v 1.1.1.1 2001-07-30 16:14:44 tobbej Exp $
+// $Id: StdAfx.cpp,v 1.1 2001-08-08 15:37:02 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2001 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,8 +24,21 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1.1.1  2001/07/30 16:14:44  tobbej
+// initial import of new dmo filter
+//
 //
 //////////////////////////////////////////////////////////////////////////////
 
-//checks if two mediatypes match
-bool TypesMatch(const DMO_MEDIA_TYPE *pmt1, const DMO_MEDIA_TYPE *pmt2);
+// stdafx.cpp : source file that includes just the standard includes
+//  stdafx.pch will be the pre-compiled header
+//  stdafx.obj will contain the pre-compiled type information
+
+#include "stdafx.h"
+
+#ifdef _ATL_STATIC_REGISTRY
+#include <statreg.h>
+#include <statreg.cpp>
+#endif
+
+#include <atlimpl.cpp>

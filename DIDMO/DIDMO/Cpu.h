@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// $Id: Cpu.h,v 1.1.1.1 2001-07-30 16:14:44 tobbej Exp $
+// $Id: Cpu.h,v 1.1 2001-08-08 15:37:02 tobbej Exp $
 ///////////////////////////////////////////////////////////////////////////////
 //	This file is subject to the terms of the GNU General Public License as
 //	published by the Free Software Foundation.  A copy of this license is

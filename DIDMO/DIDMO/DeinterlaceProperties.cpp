@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DeinterlaceProperties.cpp,v 1.3 2001-08-07 20:22:35 tobbej Exp $
+// $Id: DeinterlaceProperties.cpp,v 1.1 2001-08-08 15:37:02 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2001 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,10 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.3  2001/08/07 20:22:35  tobbej
+// added new button in propertypage to show plugin ui
+// fixed Activate function
+//
 // Revision 1.2  2001/08/07 17:43:52  tobbej
 // fixed NULL pointer crash in property page
 //

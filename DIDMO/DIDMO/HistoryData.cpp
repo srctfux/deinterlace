@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: StdAfx.cpp,v 1.1.1.1 2001-07-30 16:14:44 tobbej Exp $
+// $Id: HistoryData.cpp,v 1.1 2001-08-08 15:37:02 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2001 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,18 +24,29 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1.1.1  2001/07/30 16:14:44  tobbej
+// initial import of new dmo filter
+//
 //
 //////////////////////////////////////////////////////////////////////////////
 
-// stdafx.cpp : source file that includes just the standard includes
-//  stdafx.pch will be the pre-compiled header
-//  stdafx.obj will contain the pre-compiled type information
 
 #include "stdafx.h"
+#include "HistoryData.h"
 
-#ifdef _ATL_STATIC_REGISTRY
-#include <statreg.h>
-#include <statreg.cpp>
-#endif
+//////////////////////////////////////////////////////////////////////
+// Construction/Destruction
+//////////////////////////////////////////////////////////////////////
+CHistoryData::CHistoryData()
+:m_rtTimestamp(INVALID_TIME),m_rtTimelength(INVALID_TIME),m_flags(0)
+{
 
-#include <atlimpl.cpp>
+}
+
+void CHistoryData::Reset()
+{
+	m_Buffer=NULL;
+	m_flags=0;
+	m_rtTimestamp=INVALID_TIME;
+	m_rtTimelength=INVALID_TIME;
+}

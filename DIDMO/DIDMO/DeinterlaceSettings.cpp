@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DeinterlaceSettings.cpp,v 1.2 2001-08-06 17:47:19 tobbej Exp $
+// $Id: DeinterlaceSettings.cpp,v 1.1 2001-08-08 15:37:02 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2001 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,10 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.2  2001/08/06 17:47:19  tobbej
+// fixed default button to update controls properly
+// fixed displaying of first setting after the page has been activated
+//
 // Revision 1.1.1.1  2001/07/30 16:14:44  tobbej
 // initial import of new dmo filter
 //

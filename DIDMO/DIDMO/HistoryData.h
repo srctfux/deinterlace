@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: memcpy.h,v 1.1.1.1 2001-07-30 16:14:44 tobbej Exp $
+// $Id: HistoryData.h,v 1.1 2001-08-08 15:37:02 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2000 John Adcock.  All rights reserved.
+// Copyright (c) 2001 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
 //
 //  This file is subject to the terms of the GNU General Public License as
@@ -24,8 +24,35 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1.1.1  2001/07/30 16:14:44  tobbej
+// initial import of new dmo filter
+//
 //
 //////////////////////////////////////////////////////////////////////////////
 
-void memcpyMMX(void *Dest, void *Src, size_t nBytes);
-void memcpySSE(void *Dest, void *Src, size_t nBytes);
+
+#if !defined(AFX_HISTORYDATA_H__9E04B30E_EF9D_4AC0_BADD_08A3EBAA6EB0__INCLUDED_)
+#define AFX_HISTORYDATA_H__9E04B30E_EF9D_4AC0_BADD_08A3EBAA6EB0__INCLUDED_
+
+#if _MSC_VER > 1000
+#pragma once
+#endif // _MSC_VER > 1000
+
+#include <dmo.h>
+#include <limits.h>
+
+static const REFERENCE_TIME INVALID_TIME = _I64_MAX;
+
+class CHistoryData
+{
+public:
+	CHistoryData();
+	void Reset();
+
+	CComPtr<IMediaBuffer> m_Buffer;	//the buffer
+	DWORD m_flags;					//flags
+	REFERENCE_TIME m_rtTimestamp;	//timestamt
+	REFERENCE_TIME m_rtTimelength;	//length
+};
+
+#endif // !defined(AFX_HISTORYDATA_H__9E04B30E_EF9D_4AC0_BADD_08A3EBAA6EB0__INCLUDED_)

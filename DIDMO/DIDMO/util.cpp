@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: HistoryData.cpp,v 1.1.1.1 2001-07-30 16:14:44 tobbej Exp $
+// $Id: util.cpp,v 1.1 2001-08-08 15:37:02 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2001 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,26 +24,45 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1.1.1  2001/07/30 16:14:44  tobbej
+// initial import of new dmo filter
+//
 //
 //////////////////////////////////////////////////////////////////////////////
 
-
 #include "stdafx.h"
-#include "HistoryData.h"
+#include <dmo.h>
+#include <amvideo.h>
+#include <uuids.h>
+#include "util.h"
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-CHistoryData::CHistoryData()
-:m_rtTimestamp(INVALID_TIME),m_rtTimelength(INVALID_TIME),m_flags(0)
+bool TypesMatch(const DMO_MEDIA_TYPE *pmt1, const DMO_MEDIA_TYPE *pmt2)
 {
-
-}
-
-void CHistoryData::Reset()
-{
-	m_Buffer=NULL;
-	m_flags=0;
-	m_rtTimestamp=INVALID_TIME;
-	m_rtTimelength=INVALID_TIME;
+	LPBITMAPINFOHEADER pb1;
+	LPBITMAPINFOHEADER pb2;
+	if(pmt1->majortype==pmt2->majortype && pmt1->subtype==pmt2->subtype)
+	{
+		if(pmt1->formattype==FORMAT_VideoInfo)
+		{
+			pb1=&(((VIDEOINFOHEADER *)pmt1->pbFormat)->bmiHeader);
+			pb2=&(((VIDEOINFOHEADER *)pmt2->pbFormat)->bmiHeader);
+			
+			//abs() is needed becaus overlaymixer uses negative height/width
+			//and an incorect DMO_MEDIA_TYPE.lSampleSize
+			if(pb1->biBitCount==pb2->biBitCount &&
+				abs(pb1->biWidth)==abs(pb2->biWidth) &&
+				abs(pb1->biHeight)==abs(pb2->biHeight) &&
+				pb1->biCompression==pb2->biCompression &&
+				pb1->biSizeImage==pb2->biSizeImage)
+				return true;
+		}
+		
+		//more exact
+		if(pmt1->lSampleSize==pmt2->lSampleSize &&
+			pmt1->formattype==pmt2->formattype &&
+			pmt1->cbFormat==pmt2->cbFormat &&
+			0 == memcmp(pmt1->pbFormat, pmt2->pbFormat, pmt1->cbFormat))
+			return true;
+	}
+	return false;
 }
