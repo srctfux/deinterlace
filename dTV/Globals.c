@@ -173,7 +173,7 @@ int InitialOverscan = 4;
 
 BOOL Has_MSP=FALSE;
 
-BOOL Capture_VBI = TRUE;
+BOOL Capture_VBI = FALSE;
 
 LPDIRECTDRAW lpDD = NULL;
 

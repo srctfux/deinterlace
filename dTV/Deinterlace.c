@@ -28,7 +28,7 @@
 #include "deinterlace.h"
 #include "globals.h"
 
-long BitShift = 5;
+long BitShift = 6;
 
 /////////////////////////////////////////////////////////////////////////////
 // memcpyMMX

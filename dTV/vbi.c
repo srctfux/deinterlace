@@ -38,124 +38,13 @@
 #include "vt.h"
 #include "ccdecode.h"
 
-HANDLE VBI_Event=NULL;
 BOOL bStopVBI;
 HANDLE VBIThread;
 
-int VBI_lpf = 19;   // lines per field
+int VBI_lpf = 16;   // lines per field
 BYTE VBI_thresh;
 BYTE VBI_off;
 int vtstep;
-
-int VBIProcessor = 0;
-
-void VBI_Start()
-{
-	DWORD LinkThreadID;
-
-	if (VBIThread != NULL)
-	{
-		VBI_Stop();
-	}
-	
-	bStopVBI = FALSE;
-	VBI_Event = CreateEvent(NULL, FALSE, FALSE, NULL);
-	ResetEvent(VBI_Event);
-
-	VBIThread = CreateThread(NULL, 0, VBI_DecodeThread, NULL, (DWORD) 0, &LinkThreadID);
-}
-
-void VBI_Stop()
-{
-	DWORD ExitCode;
-	int i;
-	BOOL Thread_Stopped = FALSE;
-
-	if (VBIThread != NULL)
-	{
-		i = 5;
-		SetThreadPriority(VBIThread, THREAD_PRIORITY_NORMAL);
-		bStopVBI = TRUE;
-		SetEvent(VBI_Event);
-		while(i > 0 && !Thread_Stopped)
-		{
-			if (GetExitCodeThread(VBIThread, &ExitCode) == TRUE)
-			{
-				if (ExitCode != STILL_ACTIVE)
-				{
-					Thread_Stopped = TRUE;
-				}
-			}
-			else
-			{
-				Thread_Stopped = TRUE;
-			}
-			Sleep(100);
-			i--;
-		}
-
-		if (Thread_Stopped == FALSE)
-		{
-			TerminateThread(VBIThread, 0);
-		}
-		Sleep(50);
-		CloseHandle(VBIThread);
-		VBIThread = NULL;
-		CloseHandle(VBI_Event);
-		VBI_Event = NULL;
-	}
-}
-
-DWORD WINAPI VBI_DecodeThread(LPVOID lpThreadParameter)
-{
-	BYTE *pVBI;
-	DWORD VBI_Tic_Count = 0;
-	int vbi_frames;
-	int line;
-	int ProcessorMask;
-	
-	ProcessorMask = 1 << (VBIProcessor);
-	SetThreadAffinityMask(GetCurrentThread(), ProcessorMask);
-
-	vbi_frames = 0;
-	VBI_Tic_Count = GetTickCount();
-
-
-	vtstep = (int) ((28.636363 / 5.72725) * FPFAC + 0.5);
-
-	while(!bStopVBI)
-	{
-		if (WaitForSingleObject(VBI_Event, INFINITE) == WAIT_OBJECT_0)
-		{
-			ResetEvent(VBI_Event);
-			if (BT848_IsVideoPresent())
-			{
-				vbi_frames++;
-
-				// we get here because we have just got an odd field.
-				// that should mean that all the previous VBI data
-				// is availiable
-				pVBI = (LPBYTE) Vbi_dma[((CurrentFrame + 4) % 5)]->dwUser;
-
-				for (line = 0; line < VBI_lpf * 2; line++)
-				{
-					VBI_DecodeLine(pVBI + line * 2048, line);
-				}
-
-				if (VBI_Tic_Count + 960 <= GetTickCount())
-				{
-					VBI_FPS = vbi_frames + 1;
-					if (VBI_FPS > 25)
-						VBI_FPS = 25;
-					vbi_frames = 0;
-					VBI_Tic_Count = GetTickCount();
-				}
-			}
-		}
-	}
-	ExitThread(0);
-	return 0;
-}
 
 void VBI_DecodeLine(unsigned char *VBI_Buffer, int line)
 {
@@ -163,6 +52,8 @@ void VBI_DecodeLine(unsigned char *VBI_Buffer, int line)
 	{
 		line -= VBI_lpf;
 	}
+
+	vtstep = (int) ((28.636363 / 5.72725) * FPFAC + 0.5);
 
 	// set up threshold and offset data
 	VBI_AGC(VBI_Buffer, 120, 450, 1);

@@ -63,7 +63,6 @@ void LoadSettingsFromIni(LPSTR Name)
 	PriorClassId = GetPrivateProfileInt("Threads", "ProcessPriority", 0, szIniFile);
 	ThreadClassId = GetPrivateProfileInt("Threads", "ThreadPriority", 1, szIniFile);
 	MainProcessor = GetPrivateProfileInt("Threads", "WindowProcessor", 0, szIniFile);
-	VBIProcessor = GetPrivateProfileInt("Threads", "VBIProcessor", 0, szIniFile);
 	DecodeProcessor = GetPrivateProfileInt("Threads", "DecodeProcessor", 0, szIniFile);
 
 	bDisplayStatusBar = (GetPrivateProfileInt("Show", "StatusBar", 0, szIniFile) != 0);
@@ -128,7 +127,7 @@ void LoadSettingsFromIni(LPSTR Name)
 	ManuellAudio[6] = GetPrivateProfileInt("Hardware", "GPIO_DATA_IN", 0, szIniFile);  
 	ManuellAudio[7] = GetPrivateProfileInt("Hardware", "GPIO_REG_INP", 0, szIniFile);  
 
-	Capture_VBI = (GetPrivateProfileInt("Show", "CaptureVBI", 1, szIniFile) != 0);  
+	//Capture_VBI = (GetPrivateProfileInt("Show", "CaptureVBI", 0, szIniFile) != 0);  
 	InitialProg = GetPrivateProfileInt("Show", "LastProgram", 0, szIniFile);
 
 	LNB.Diseq = (GetPrivateProfileInt("Sound", "DiscEqu", 0, szIniFile) != 0);  
@@ -277,7 +276,6 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("Threads", "ProcessPriority", PriorClassId, szIniFile);
 	WritePrivateProfileInt("Threads", "ThreadPriority", ThreadClassId, szIniFile);
 	WritePrivateProfileInt("Threads", "WindowProcessor", MainProcessor, szIniFile);
-	WritePrivateProfileInt("Threads", "VBIProcessor", VBIProcessor, szIniFile);
 	WritePrivateProfileInt("Threads", "DecodeProcessor", DecodeProcessor, szIniFile);
 
 	WritePrivateProfileInt("Pulldown", "PulldownThresholdLow", PulldownThresholdLow, szIniFile);

@@ -39,22 +39,13 @@
 #include "structs.h"
 #include "globals.h"
 
-void VBI_Start();
-void VBI_Stop();
-DWORD WINAPI VBI_DecodeThread(LPVOID lpThreadParameter);
-
-
 void VBI_DecodeLine(unsigned char *VBI_Buffer, int line);
 void VBI_AGC(BYTE * Buffer, int start, int stop, int step);
-
-// used to signal to the VBI decoder that there is something to display
-extern HANDLE VBI_Event;
 
 extern int VBI_lpf;
 extern int VBI_Flags;
 extern int VBI_FPS;
 extern BYTE VBI_thresh;
 extern BYTE VBI_off;
-extern int VBIProcessor;
 
 #endif

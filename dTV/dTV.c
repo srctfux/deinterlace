@@ -1266,7 +1266,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 	case WM_QUERYENDSESSION:
 	case WM_DESTROY:
 		Stop_Thread();
-		VBI_Stop();
 		Audio_SetSource(AUDIOMUX_MUTE);
 		Stop_Capture();
 
@@ -1364,11 +1363,6 @@ void MainWndOnInitBT(HWND hWnd)
 		{
 			Show_Menu = TRUE;
 			SendMessage(hWnd, WM_COMMAND, IDM_TOGGLE_MENU, 0);
-		}
-
-		if (Capture_VBI == TRUE)
-		{
-			VBI_Start();
 		}
 
 		sprintf(TunerStatus, "No Device on I2C-Bus");
@@ -1565,19 +1559,15 @@ void MainWndOnCreate(HWND hWnd)
 			if (SysInfo.dwNumberOfProcessors == 2)
 			{
 				MainProcessor = 0;
-				VBIProcessor = 0;
 				DecodeProcessor = 1;
 			}
 			if (SysInfo.dwNumberOfProcessors == 3)
 			{
 				MainProcessor = 0;
-				VBIProcessor = 1;
 				DecodeProcessor = 2;
 			}
 			if (SysInfo.dwNumberOfProcessors > 3)
 			{
-				MainProcessor = 0;
-				VBIProcessor = 2;
 				DecodeProcessor = 3;
 			}
 
@@ -1586,10 +1576,8 @@ void MainWndOnCreate(HWND hWnd)
 		SetDlgItemText(SplashWnd, IDC_TEXT1, "Multi-Processor");
 		sprintf(Text, "Main-CPU %d ", MainProcessor);
 		SetDlgItemText(SplashWnd, IDC_TEXT2, Text);
-		sprintf(Text, "VBI-CPU %d ", VBIProcessor);
-		SetDlgItemText(SplashWnd, IDC_TEXT4, Text);
 		sprintf(Text, "DECODE-CPU %d ", DecodeProcessor);
-		SetDlgItemText(SplashWnd, IDC_TEXT5, Text);
+		SetDlgItemText(SplashWnd, IDC_TEXT3, Text);
 		Sleep(100);
 	}
 

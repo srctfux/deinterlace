@@ -43,6 +43,7 @@
 #include "vbi.h"
 #include "deinterlace.h"
 #include "DebugLog.h"
+#include "vbi.h"
 
 
 short pPALplusCode[] = {  18,  27,  36,  45,  54,  63,  72,  81,  90, 100, 110, 120, 134, 149};
@@ -59,7 +60,7 @@ ePULLDOWNMODES gPulldownMode = VIDEO_MODE;
 long PulldownThresholdLow = -1000;
 long PulldownThresholdHigh = 1000;
 long PulldownRepeatCount = 5;
-long Threshold32Pulldown = 2000;
+long Threshold32Pulldown = 10;
 BOOL bAutoDetectMode = FALSE;
 
 #define DOLOGGING
@@ -164,20 +165,12 @@ void Start_Capture()
 	BT848_SetDMA(TRUE);
 
 	Start_Thread();
-	if (Capture_VBI == TRUE)
-	{
-		VBI_Start();
-	}
 }
 
 void Stop_Capture()
 {
 	//  Stop The Output Thread
 	Stop_Thread();
-	if (Capture_VBI == TRUE)
-	{
-		VBI_Stop();
-	}
 
 	// stop capture
 	BT848_MaskDataByte(BT848_CAP_CTL, 0, 0x0f);
@@ -216,10 +209,7 @@ BOOL WaitForNextField(BOOL LastField)
 	default:
 		break;
 	}
-	if (VBI_Flags > 0 && bIsOddField == FALSE)
-	{
-		SetEvent(VBI_Event);
-	}
+
 	if(stat & BT848_INT_FDSR)
 	{
 		BT848_Restart_RISC_Code();
@@ -381,6 +371,7 @@ void UpdateNTSCPulldownMode(long FieldDiff, BOOL OnOddField)
         MOVIE_FIELD_CYCLE = 0;
 		MISMATCH_COUNT = 0;
 		gPulldownMode = VIDEO_MODE;
+		UpdatePulldownStatus();
 		return;
 	}
 
@@ -404,6 +395,7 @@ void UpdateNTSCPulldownMode(long FieldDiff, BOOL OnOddField)
             gPulldownMode = VIDEO_MODE;
             MOVIE_VERIFY_CYCLE = 0;
             MOVIE_FIELD_CYCLE = 0;
+			UpdatePulldownStatus();
         }
 	}
     else
@@ -446,6 +438,7 @@ void UpdateNTSCPulldownMode(long FieldDiff, BOOL OnOddField)
 			            gPulldownMode = FILM_32_PULLDOWN_1;
 						break;
 					}
+					UpdatePulldownStatus();
 				}
 				else
 				{
@@ -467,6 +460,7 @@ void UpdateNTSCPulldownMode(long FieldDiff, BOOL OnOddField)
 			            gPulldownMode = FILM_32_PULLDOWN_3;
 						break;
 					}
+					UpdatePulldownStatus();
 				}
 			}
 			else
@@ -510,12 +504,6 @@ BOOL DoWeWantToFlip(BOOL bFlipNow, BOOL bIsOddField)
 		break;
 	case BTV_PLUGIN:
 		RetVal = bFlipNow;
-		break;
-	case NEW_DEINTERLACE_ODD_ONLY:
-		RetVal = bIsOddField;
-		break;
-	case NEW_DEINTERLACE_BOTH:
-		RetVal = TRUE;
 		break;
 	case FILM_22_PULLDOWN_ODD:
 		RetVal = bIsOddField;
@@ -643,12 +631,6 @@ void UpdatePulldownStatus()
 	case INTERPOLATE_BOB:
 		SetWindowText(hwndPalField, "Interpolated BOB");
 		break;
-	case NEW_DEINTERLACE_ODD_ONLY:
-		SetWindowText(hwndPalField, "New Deinterlace Odd Only");
-		break;
-	case NEW_DEINTERLACE_BOTH:
-		SetWindowText(hwndPalField, "New Deinterlace Both");
-		break;
 	case BTV_PLUGIN:
 		SetWindowText(hwndPalField, "Using bTV Plugin");
 		break;
@@ -757,6 +739,15 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 					LogString(" Frame %d O CF = %d", CurrentFrame, CombFactor);
 				}
 
+				if (Capture_VBI == TRUE)
+				{
+					BYTE * pVBI = (LPBYTE) Vbi_dma[CurrentFrame]->dwUser;
+					for (nLineTarget = VBI_lpf; nLineTarget < 2 * VBI_lpf ; nLineTarget++)
+					{
+						VBI_DecodeLine(pVBI + nLineTarget * 2048, nLineTarget - VBI_lpf);
+					}
+				}
+
 				// if we have dropped a field then do BOB 
 				if(LastEvenFrame != CurrentFrame || gPulldownMode == INTERPOLATE_BOB)
 				{
@@ -775,29 +766,11 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 				}
 				else if(gPulldownMode == VIDEO_MODE)
 				{
-					// copy first line in bob way
-					memcpyBOBMMX(pDest,
-								ppOddLines[CurrentFrame][0], 
-								CurrentX * 2);
-					pDest += 2 * OverlayPitch;
-					// copy each middle odd line and interpolate even lines
-					for (nLineTarget = 1; nLineTarget < CurrentY / 2; nLineTarget++)
-					{
-						VideoDeinterlaceMMX(pDest, 
-										ppOddLines[CurrentFrame][nLineTarget - 1], 
-										ppEvenLines[LastEvenFrame][nLineTarget], 
-										ppOddLines[CurrentFrame][nLineTarget], 
-										CurrentX * 2);
-						pDest += 2 * OverlayPitch;
-					}
+					DeinterlaceOdd(ppOddLines[CurrentFrame], ppEvenLines[LastEvenFrame], lpCurOverlay);
 				}
 				else if(gPulldownMode == SIMPLE_WEAVE)
 				{
 					Weave(ppOddLines[CurrentFrame], ppEvenLines[LastEvenFrame], lpCurOverlay);
-				}
-				else if(gPulldownMode == NEW_DEINTERLACE_ODD_ONLY || gPulldownMode == NEW_DEINTERLACE_BOTH)
-				{
-					DeinterlaceOdd(ppOddLines[CurrentFrame], ppEvenLines[LastEvenFrame], lpCurOverlay);
 				}
 				else if(gPulldownMode == BTV_PLUGIN)
 				{
@@ -847,6 +820,15 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 					LogString(" Frame %d E CF = %d", CurrentFrame, CombFactor);
 				}
 
+				if (Capture_VBI == TRUE)
+				{
+					BYTE * pVBI = (LPBYTE) Vbi_dma[CurrentFrame]->dwUser;
+					for (nLineTarget = 0; nLineTarget < VBI_lpf ; nLineTarget++)
+					{
+						VBI_DecodeLine(pVBI + nLineTarget * 2048, nLineTarget);
+					}
+				}
+
 				// if we have dropped a field then do BOB
 				if(LastOddFrame != ((CurrentFrame + 4) % 5) || gPulldownMode == INTERPOLATE_BOB)
 				{
@@ -866,29 +848,11 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 				}
 				else if(gPulldownMode == VIDEO_MODE)
 				{
-					// copy first line in bob way
-					memcpyBOBMMX(pDest,
-								ppOddLines[LastOddFrame][0], 
-								CurrentX * 2);
-					pDest += 2 * OverlayPitch;
-					// copy each middle odd line and interpolate even lines
-					for (nLineTarget = 1; nLineTarget < CurrentY / 2; nLineTarget++)
-					{
-						VideoDeinterlaceMMX(pDest, 
-										ppOddLines[LastOddFrame][nLineTarget - 1], 
-										ppEvenLines[CurrentFrame][nLineTarget], 
-										ppOddLines[LastOddFrame][nLineTarget], 
-										CurrentX * 2);
-						pDest += 2 * OverlayPitch;
-					}
+					DeinterlaceEven(ppOddLines[LastOddFrame], ppEvenLines[CurrentFrame], lpCurOverlay);
 				}
 				else if(gPulldownMode == SIMPLE_WEAVE)
 				{
 					Weave(ppOddLines[LastOddFrame], ppEvenLines[CurrentFrame], lpCurOverlay);
-				}
-				else if(gPulldownMode == NEW_DEINTERLACE_BOTH)
-				{
-					DeinterlaceEven(ppOddLines[LastOddFrame], ppEvenLines[CurrentFrame], lpCurOverlay);
 				}
 				else if(gPulldownMode == BTV_PLUGIN)
 				{
@@ -1021,6 +985,16 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 					UpdateNTSCPulldownMode(CompareResult, TRUE);
 					LogString(" Frame %d O CR = %d", CurrentFrame, CompareResult);
 				}
+
+				if (Capture_VBI == TRUE)
+				{
+					BYTE * pVBI = (LPBYTE) Vbi_dma[CurrentFrame]->dwUser;
+					for (nLineTarget = VBI_lpf; nLineTarget < 2 * VBI_lpf ; nLineTarget++)
+					{
+						VBI_DecodeLine(pVBI + nLineTarget * 2048, nLineTarget - VBI_lpf);
+					}
+				}
+
 				// if we have dropped a field then do BOB 
 				if(LastEvenFrame != CurrentFrame || gPulldownMode == INTERPOLATE_BOB)
 				{
@@ -1039,21 +1013,7 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 				}
 				else if(gPulldownMode == VIDEO_MODE)
 				{
-					// copy first line in bob way
-					memcpyBOBMMX(pDest,
-								ppOddLines[CurrentFrame][0], 
-								CurrentX * 2);
-					pDest += 2 * OverlayPitch;
-					// copy each middle odd line and interpolate even lines
-					for (nLineTarget = 1; nLineTarget < CurrentY / 2; nLineTarget++)
-					{
-						VideoDeinterlaceMMX(pDest, 
-										ppOddLines[CurrentFrame][nLineTarget - 1], 
-										ppEvenLines[LastEvenFrame][nLineTarget], 
-										ppOddLines[CurrentFrame][nLineTarget], 
-										CurrentX * 2);
-						pDest += 2 * OverlayPitch;
-					}
+					DeinterlaceOdd(ppOddLines[CurrentFrame], ppEvenLines[LastEvenFrame], lpCurOverlay);
 				}
 				else if(gPulldownMode == SIMPLE_WEAVE)
 				{
@@ -1104,6 +1064,15 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 					LogString(" Frame %d E CR = %d", CurrentFrame, CompareResult);
 				}
 
+				if (Capture_VBI == TRUE)
+				{
+					BYTE * pVBI = (LPBYTE) Vbi_dma[CurrentFrame]->dwUser;
+					for (nLineTarget = 0; nLineTarget < VBI_lpf ; nLineTarget++)
+					{
+						VBI_DecodeLine(pVBI + nLineTarget * 2048, nLineTarget);
+					}
+				}
+
 				// if we have dropped a field then do BOB
 				if(LastOddFrame != ((CurrentFrame + 4) % 5) || gPulldownMode == INTERPOLATE_BOB)
 				{
@@ -1123,21 +1092,7 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 				}
 				else if(gPulldownMode == VIDEO_MODE)
 				{
-					// copy first line in bob way
-					memcpyBOBMMX(pDest,
-								ppOddLines[LastOddFrame][0], 
-								CurrentX * 2);
-					pDest += 2 * OverlayPitch;
-					// copy each middle odd line and interpolate even lines
-					for (nLineTarget = 1; nLineTarget < CurrentY / 2; nLineTarget++)
-					{
-						VideoDeinterlaceMMX(pDest, 
-										ppOddLines[LastOddFrame][nLineTarget - 1], 
-										ppEvenLines[CurrentFrame][nLineTarget], 
-										ppOddLines[LastOddFrame][nLineTarget], 
-										CurrentX * 2);
-						pDest += 2 * OverlayPitch;
-					}
+					DeinterlaceEven(ppOddLines[LastOddFrame], ppEvenLines[CurrentFrame], lpCurOverlay);
 				}
 				else if(gPulldownMode == SIMPLE_WEAVE)
 				{
