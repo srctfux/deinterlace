@@ -125,8 +125,8 @@
 #define IDM_32PULL3                     539
 #define IDM_32PULL4                     540
 #define IDM_32PULL5                     541
-#define IDM_FALLBACK                    542
-#define IDM_SASPECT_COMPUTE             543
+#define IDM_EVEN_ONLY                   542
+#define IDM_ODD_ONLY                    543
 #define IDM_SASPECT_AUTO                544
 #define IDM_ADV_VIDEOSETTINGS           545
 #define IDM_SHIFT_SPACEBAR              546
@@ -134,6 +134,8 @@
 #define IDM_STOP                        548
 #define IDM_START                       549
 #define IDM_BLENDED_CLIP                551
+#define IDM_FALLBACK                    552
+#define IDM_SASPECT_COMPUTE             553
 #define IDM_END                         1032
 #define IDM_TUNER                       1089
 #define IDM_EXTERN1                     1090
@@ -701,7 +703,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        155
-#define _APS_NEXT_COMMAND_VALUE         552
+#define _APS_NEXT_COMMAND_VALUE         556
 #define _APS_NEXT_CONTROL_VALUE         1812
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

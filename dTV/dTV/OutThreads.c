@@ -46,6 +46,7 @@
 #include "vbi.h"
 #include "deinterlace.h"
 #include "AspectRatio.h"
+#include "dtv.h"
 #define DOLOGGING
 #include "DebugLog.h"
 #include "vbi.h"
@@ -318,6 +319,21 @@ static int TrackModeSwitches()
 	}
 
 	return FALSE;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// SetDeinterlaceMode
+//
+// Sets the deinterlace mode as a result of a menu selection.  This turns off
+// autodetection, updates the mode indicator, etc.
+///////////////////////////////////////////////////////////////////////////////
+void SetDeinterlaceMode(int mode)
+{
+	bAutoDetectMode = FALSE;
+	gPulldownMode = mode;
+	UpdatePulldownStatus();
+	SetMenuAnalog();
+	SetHalfHeight(IS_HALF_HEIGHT(mode));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -750,6 +766,8 @@ BOOL DoWeWantToFlip(BOOL bFlipNow, BOOL bIsOddField)
 	case BTV_PLUGIN:             RetVal = bFlipNow;  break;
 	case FILM_22_PULLDOWN_ODD:   RetVal = bIsOddField;  break;
 	case FILM_22_PULLDOWN_EVEN:  RetVal = !bIsOddField;  break;
+	case ODD_ONLY:				 RetVal = bIsOddField;  break;
+	case EVEN_ONLY:				 RetVal = !bIsOddField;  break;
 	case FILM_32_PULLDOWN_0:
 		switch(CurrentFrame)
 		{
@@ -856,6 +874,12 @@ void UpdatePulldownStatus()
 			break;
 		case FILM_32_PULLDOWN_4:
 			SetWindowText(hwndPalField, "3:2 Pulldown Skip 5th Full Frame");
+			break;
+		case EVEN_ONLY:
+			SetWindowText(hwndPalField, "Even Scanlines Only");
+			break;
+		case ODD_ONLY:
+			SetWindowText(hwndPalField, "Odd Scanlines Only");
 			break;
 		default:
 			SetWindowText(hwndPalField, "Unknown Pulldown Mode");
@@ -1070,6 +1094,22 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 					BTVParams.ppOddDest = pDestOdd;
 					bFlipNow = BTVPluginDoField(&BTVParams);
 				}
+				else if (gPulldownMode == ODD_ONLY)
+				{
+					for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
+					{
+						// copy latest field's odd rows to overlay, resulting in a half-height image.
+						memcpyBOBMMX(pDest,
+									ppOddLines[CurrentFrame][nLineTarget],
+									CurrentX * 2);
+						pDest += OverlayPitch;
+					}
+					bFlipNow = TRUE;
+				}
+				else if (gPulldownMode == EVEN_ONLY)
+				{
+					// Do nothing.
+				}
 				else
 				{
 					// Pulldown mode.  If we have an entire new frame, display it.
@@ -1180,6 +1220,22 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 					BTVParams.ppEvenDest = pDestEven;
 					BTVParams.ppOddDest = pDestOdd;
 					bFlipNow = BTVPluginDoField(&BTVParams);
+				}
+				else if (gPulldownMode == EVEN_ONLY)
+				{
+					for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
+					{
+						// copy latest field's even rows to overlay, resulting in a half-height image.
+						memcpyBOBMMX(pDest,
+									ppEvenLines[CurrentFrame][nLineTarget],
+									CurrentX * 2);
+						pDest += OverlayPitch;
+					}
+					bFlipNow = TRUE;
+				}
+				else if (gPulldownMode == ODD_ONLY)
+				{
+					// Do nothing.
 				}
 				else
 				{

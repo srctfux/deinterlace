@@ -65,6 +65,9 @@ int aspect_mode = 0;
 int custom_source_aspect = 0;
 int custom_target_aspect = 0;
 
+// True if we're in half-height mode (even or odd scanlines only).
+static int HalfHeight = FALSE;
+
 // Luminance cutoff for a black pixel for letterbox detection.  0-127.
 long LuminanceThreshold = 30;
 
@@ -145,6 +148,17 @@ void SwitchToRatio(int nMode, int nRatio)
 	ratio_time[0] = GetTickCount();
 	source_aspect = nRatio;
 	WorkoutOverlaySize();
+}
+
+//----------------------------------------------------------------------------
+// Enter or leave half-height mode.
+void SetHalfHeight(int IsHalfHeight)
+{
+	if (IsHalfHeight != HalfHeight)
+	{
+		HalfHeight = IsHalfHeight;
+		WorkoutOverlaySize();
+	}
 }
 
 
@@ -686,6 +700,14 @@ void WorkoutOverlaySize()
 		rOverlaySrc.bottom -= (rOverlayDest.bottom - GetSystemMetrics(SM_CYSCREEN)) * 
 							CurrentY / DestHeight;
 		rOverlayDest.bottom = GetSystemMetrics(SM_CYSCREEN);
+	}
+
+	// If we're in half-height mode, squish the source rectangle accordingly.  This
+	// allows the overlay hardware to do our bobbing for us.
+	if (HalfHeight)
+	{
+		rOverlaySrc.top /= 2;
+		rOverlaySrc.bottom /= 2;
 	}
 
 	// make sure that any alignment restrictions are taken care of

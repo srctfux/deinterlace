@@ -171,7 +171,7 @@ extern struct TSoundSystem SoundSystem;
 extern struct TVDat VDat;
 extern struct TVT VTFrame[800];
 extern struct TVTDialog VTDialog[MAXVTDIALOG];
-extern struct TTVSetting TVSettings[10];
+extern struct TTVSetting TVSettings[];
 extern unsigned char *pBurstLine[5];
 extern char InitialBrightness;
 extern char InitialHue;

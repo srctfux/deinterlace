@@ -51,7 +51,7 @@ HWND ShowVTInfo=NULL;
 HWND ShowVPSInfo=NULL;
 
 // MAE 3 Nov 2000 Changed all BDELAY values from 5D to 5C for Macrovision fix
-struct TTVSetting TVSettings[10] =
+struct TTVSetting TVSettings[11] =
 {
 	/* PAL-BDGHI */
 	{ 768, 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_BDGHI|BT848_IFORM_XT1),

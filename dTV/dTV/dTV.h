@@ -65,7 +65,7 @@ void MainWndOnCreate(HWND hWnd);
 void MainWndOnInitBT(HWND hWnd);
 void SaveWindowPos(HWND hWnd);
 void CleanUpMemory();
-
+void SetMenuAnalog();
 void ShowText(HWND hWnd, LPCTSTR szText);
 void OSD_ShowVideoSource(HWND hWnd, int nVideoSource);
 

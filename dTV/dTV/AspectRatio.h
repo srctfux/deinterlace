@@ -38,6 +38,7 @@ void    WorkoutOverlaySize();
 void    PaintColorkey(HWND hWnd, BOOL bEnable);
 int		FindAspectRatio(short** EvenField, short** OddField);
 void	AdjustAspectRatio(short** EvenField, short** OddField);
+void	SetHalfHeight(int IsHalfHeight);
 
 extern long LuminanceThreshold;
 extern long IgnoreNonBlackPixels;

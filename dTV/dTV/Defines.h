@@ -49,6 +49,8 @@ typedef enum
 	FILM_32_PULLDOWN_2,
 	FILM_32_PULLDOWN_3,
 	FILM_32_PULLDOWN_4,
+	EVEN_ONLY,
+	ODD_ONLY,
 	BLENDED_CLIP,
 	PULLDOWNMODES_LAST_ONE
 } ePULLDOWNMODES;
@@ -62,6 +64,8 @@ typedef enum
 							 (x) == FILM_32_PULLDOWN_4)
 #define IS_VIDEO_MODE(x) ((x) == VIDEO_MODE_WEAVE || \
                           (x) == VIDEO_MODE_BOB)
+#define IS_HALF_HEIGHT(x) ((x) == EVEN_ONLY || \
+						   (x) == ODD_ONLY)
 
 #define MAXVTDIALOG 8
 #define MAXPROGS 4096

@@ -501,15 +501,15 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_AUTODETECT:
-			bAutoDetectMode = !bAutoDetectMode;
-			if(bAutoDetectMode == TRUE)
+			if(bAutoDetectMode == FALSE)
 			{
 				ShowText(hWnd, "Auto Pulldown Detect ON");
-				gPulldownMode = VIDEO_MODE_BOB;
-				UpdatePulldownStatus();
+				SetDeinterlaceMode(VIDEO_MODE_BOB);
+				bAutoDetectMode = TRUE;
 			}
 			else
 			{
+				bAutoDetectMode = FALSE;
 				ShowText(hWnd, "Auto Pulldown Detect OFF");
 			}
 			SetMenuAnalog();
@@ -539,17 +539,13 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_BOB:
 		case IDM_VIDEO_WEAVE:
 		case IDM_VIDEO_BOB:
-			bAutoDetectMode = FALSE;
-			gPulldownMode = LOWORD(wParam) - IDM_VIDEO_BOB;
-			UpdatePulldownStatus();
-			SetMenuAnalog();
+		case IDM_EVEN_ONLY:
+		case IDM_ODD_ONLY:
+			SetDeinterlaceMode(LOWORD(wParam) - IDM_VIDEO_BOB);
 			break;
 
 		case IDM_BLENDED_CLIP:
-			bAutoDetectMode = FALSE;
-			gPulldownMode = BLENDED_CLIP;
-			UpdatePulldownStatus();
-			SetMenuAnalog();
+			SetDeinterlaceMode(BLENDED_CLIP);
 			if (BlcShowControls)
 				DialogBox(hInst, "BLENDED_CLIP", hWnd, BlendedClipProc);
 			break;
@@ -1157,29 +1153,32 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_SPACEBAR:
 			if(bAutoDetectMode == FALSE)
 			{
-				gPulldownMode++;
+				int NewPulldownMode = gPulldownMode + 1;
+
 				// if we can't use a bTV plug-in then skip it
-				if(gPulldownMode == BTV_PLUGIN && bUseBTVPlugin == FALSE)
+				if(NewPulldownMode == BTV_PLUGIN && bUseBTVPlugin == FALSE)
 				{
-					gPulldownMode++;
+					NewPulldownMode++;
 				}
-				else if(gPulldownMode == PULLDOWNMODES_LAST_ONE)
+				else if(NewPulldownMode == PULLDOWNMODES_LAST_ONE)
 				{
-					gPulldownMode = VIDEO_MODE_BOB;
+					NewPulldownMode = VIDEO_MODE_BOB;
 				}
-				UpdatePulldownStatus();
+				SetDeinterlaceMode(NewPulldownMode);
 			}
 			break;
 
 		case IDM_SHIFT_SPACEBAR:
 			if (bAutoDetectMode == FALSE)
 			{
+				int NewPulldownMode = gPulldownMode;
+
 				if (gPulldownMode == VIDEO_MODE_BOB)
-					gPulldownMode = PULLDOWNMODES_LAST_ONE;
-				gPulldownMode--;
-				if (gPulldownMode == BTV_PLUGIN && bUseBTVPlugin == FALSE)
-					gPulldownMode--;
-				UpdatePulldownStatus();
+					NewPulldownMode = PULLDOWNMODES_LAST_ONE;
+				NewPulldownMode--;
+				if (NewPulldownMode == BTV_PLUGIN && bUseBTVPlugin == FALSE)
+					NewPulldownMode--;
+				SetDeinterlaceMode(NewPulldownMode);
 			}
 			break;
 
@@ -1938,6 +1937,8 @@ void SetMenuAnalog()
 	CheckMenuItem(GetMenu(hWnd), IDM_32PULL3, (gPulldownMode == FILM_32_PULLDOWN_2 && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_32PULL4, (gPulldownMode == FILM_32_PULLDOWN_3 && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_32PULL5, (gPulldownMode == FILM_32_PULLDOWN_4 && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_ODD_ONLY, (gPulldownMode == ODD_ONLY && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_EVEN_ONLY, (gPulldownMode == EVEN_ONLY && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
 
 	SetMenuAspectRatio(hWnd);
 }

@@ -311,7 +311,7 @@ EndCopyLoop:
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// BobbyDeinterlaceField
+// DeinterlaceFieldBob
 //
 // Deinterlaces a field with a tendency to bob rather than weave.  Best for
 // high-motion scenes like sports.

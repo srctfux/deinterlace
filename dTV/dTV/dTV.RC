@@ -1062,6 +1062,8 @@ BEGIN
             MENUITEM "3:2 Pulldown, Skip Field &5", IDM_32PULL5
             MENUITEM "2:2 Pulldown, Flip on &Odd",  IDM_22PULLODD
             MENUITEM "2:2 Pulldown, Flip on &Even", IDM_22PULLEVEN
+            MENUITEM "E&ven Fields Only",           IDM_EVEN_ONLY
+            MENUITEM "O&dd Fields Only",            IDM_ODD_ONLY
         END
         POPUP "&Audio Input"
         BEGIN
