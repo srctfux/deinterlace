@@ -963,7 +963,7 @@ BEGIN
                 MENUITEM "THREAD_PRIORITY_TIME_CRITICAL", IDM_TREADPRIOR_4
             END
         END
-        MENUITEM "Capture VBI-&Data",           IDM_VBI, GRAYED
+        MENUITEM "Capture VBI-&Data",           IDM_VBI
         MENUITEM "Automatic Pu&lldown Detect",  IDM_AUTODETECT
     END
     POPUP "&Hardware"

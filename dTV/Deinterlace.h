@@ -34,9 +34,12 @@ void DeinterlaceEven(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay);
 void DeinterlaceOdd(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay);
 long GetCombFactor(short** pLines1, short** pLines2);
 long CompareFields(short** pLines1, short** pLines2);
+long CompareFields2(short** pLines1, short** pLines2);
 
 extern long BitShift;
-
+extern long EdgeDetect;
+extern long JaggieThreshold;
+extern long DiffThreshold;
 
 
 #endif

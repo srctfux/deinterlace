@@ -39,12 +39,6 @@
 #include "structs.h"
 #include "globals.h"
 
-typedef enum
-{
-	CAPTURE_STOP_ALL,
-	CAPTURE_START
-} CAPTURETYPE;
-
 void Start_Capture();
 void Stop_Capture();
 
@@ -70,6 +64,9 @@ extern ePULLDOWNMODES gPulldownMode;
 extern long PulldownThresholdLow;
 extern long PulldownThresholdHigh;
 extern long PulldownRepeatCount;
+extern long PulldownRepeatCount2;
+extern DWORD dwLastFlipTicks;
+
 
 extern long Threshold32Pulldown;
 extern BOOL bAutoDetectMode;

@@ -490,9 +490,10 @@ BOOL BT848_SetGeoSize(int width, int height)
 	hactive = width;
 	vtc = (hactive < 193) ? 2 : ((hactive < 385) ? 1 : 0);
 
-	hscale = ((TVSettings[TVTYPE].wTotalWidth - TVSettings[TVTYPE].dwXsfNum) * 4096UL) / TVSettings[TVTYPE].dwXsfNum;
+	hscale = ((TVSettings[TVTYPE].wHActivex1 - width) * 4096UL) / width;
 	vdelay = TVSettings[TVTYPE].wVDelay;
 	hdelay = ((width * TVSettings[TVTYPE].wHDelayx1) / TVSettings[TVTYPE].wHActivex1) & 0x3fe;
+	//hdelay -= 4;
 
 	sr = (TVSettings[TVTYPE].wCropHeight * 512) / height - 512;
 	vscale = (WORD) (0x10000UL - sr) & 0x1fff;

@@ -42,7 +42,7 @@
 #include "vt.h"
 #include "vbi.h"
 #include "deinterlace.h"
-//#define DOLOGGING
+#define DOLOGGING
 #include "DebugLog.h"
 #include "vbi.h"
 
@@ -58,11 +58,13 @@ HANDLE OutThread;
 
 ePULLDOWNMODES gPulldownMode = VIDEO_MODE;
 
-long PulldownThresholdLow = -2500;
-long PulldownThresholdHigh = 2500;
-long PulldownRepeatCount = 5;
-long Threshold32Pulldown = 100;
-BOOL bAutoDetectMode = FALSE;
+long PulldownThresholdLow = -2000;
+long PulldownThresholdHigh = 2000;
+long PulldownRepeatCount = 4;
+long PulldownRepeatCount2 = 2;
+long Threshold32Pulldown = 200;
+BOOL bAutoDetectMode = TRUE;
+DWORD dwLastFlipTicks = -1;
 
 void Start_Thread()
 {
@@ -209,7 +211,7 @@ BOOL WaitForNextField(BOOL LastField)
 		break;
 	}
 
-	if(stat & BT848_INT_FDSR)
+	if(stat & (BT848_INT_FDSR | BT848_INT_RIPERR | BT848_INT_PPERR))
 	{
 		BT848_Restart_RISC_Code();
 		CurrentFrame = 0;
@@ -255,6 +257,8 @@ void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField)
 		LastPolarity = -1;
 		gPulldownMode = VIDEO_MODE;
 		LastDiff = 0;
+		UpdatePulldownStatus();
+		dwLastFlipTicks = -1;
 		return;
 	}
 	if(gPulldownMode == VIDEO_MODE)
@@ -275,12 +279,14 @@ void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField)
 						gPulldownMode = FILM_22_PULLDOWN_ODD;
 						UpdatePulldownStatus();
 						LOG("Gone to Odd");
+						dwLastFlipTicks = -1;
 					}
 					if(IsOddField == FALSE)
 					{
 						gPulldownMode = FILM_22_PULLDOWN_EVEN;
 						UpdatePulldownStatus();
 						LOG("Gone to Even");
+						dwLastFlipTicks = -1;
 					}
 				}
 			}
@@ -326,13 +332,14 @@ void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField)
 				LOG("Downed RepeatCount 2 %d", RepeatCount);
 			}
 		}
-		if(RepeatCount == 0)
+		if(RepeatCount == PulldownRepeatCount - PulldownRepeatCount2)
 		{
 			gPulldownMode = VIDEO_MODE;
 			RepeatCount = 0;
 			UpdatePulldownStatus();
 			LOG("Back To Video Mode");
 			LastPolarity = -1;
+			dwLastFlipTicks = -1;
 		}
 	}
 
@@ -356,8 +363,6 @@ void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField)
 ///////////////////////////////////////////////////////////////////////////////
 void UpdateNTSCPulldownMode(long FieldDiff, BOOL OnOddField)
 {
-	static long MAX_MISMATCH = 12;
-	static long MAX_VERIFY_CYCLES = 2;
 	static long MISMATCH_COUNT = 0;
 	static long MOVIE_FIELD_CYCLE = 0;
 	static long MOVIE_VERIFY_CYCLE = 0;
@@ -371,12 +376,13 @@ void UpdateNTSCPulldownMode(long FieldDiff, BOOL OnOddField)
 		MISMATCH_COUNT = 0;
 		gPulldownMode = VIDEO_MODE;
 		UpdatePulldownStatus();
+		dwLastFlipTicks = -1;
 		return;
 	}
 
     if(FieldDiff > Threshold32Pulldown)
 	{
-        if(MISMATCH_COUNT <= MAX_MISMATCH)
+        if(MISMATCH_COUNT <= PulldownRepeatCount2)
 		{
 			MISMATCH_COUNT++;
 		}
@@ -395,6 +401,8 @@ void UpdateNTSCPulldownMode(long FieldDiff, BOOL OnOddField)
             MOVIE_VERIFY_CYCLE = 0;
             MOVIE_FIELD_CYCLE = 0;
 			UpdatePulldownStatus();
+			LOG(" Back to Video");
+			dwLastFlipTicks = -1;
         }
 	}
     else
@@ -409,7 +417,7 @@ void UpdateNTSCPulldownMode(long FieldDiff, BOOL OnOddField)
 			// to be very certain that it is actually 3:2 pulldown
 			// This would mean a latency of 10 fields.
 			//
-			if(MOVIE_VERIFY_CYCLE >= MAX_VERIFY_CYCLES)
+			if(MOVIE_VERIFY_CYCLE >= PulldownRepeatCount)
 			{
 				//
 				// This executes regardless whether we've just entered or
@@ -438,6 +446,7 @@ void UpdateNTSCPulldownMode(long FieldDiff, BOOL OnOddField)
 						break;
 					}
 					UpdatePulldownStatus();
+					dwLastFlipTicks = -1;
 				}
 				else
 				{
@@ -460,11 +469,13 @@ void UpdateNTSCPulldownMode(long FieldDiff, BOOL OnOddField)
 						break;
 					}
 					UpdatePulldownStatus();
+					dwLastFlipTicks = -1;
 				}
 			}
 			else
 			{
 				MOVIE_VERIFY_CYCLE++;
+				LOG(" Found Pulldown Match");
 			}
 		}
 		else
@@ -681,7 +692,6 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 	int nLineTarget;
 	int nFrame = 0;
 	DWORD dwLastSecondTicks;
-	DWORD dwLastFlipTicks = 0;
 	BYTE* lpCurOverlay = lpOverlayBack;
 	long CombFactor;
 	short* ppEvenLines[5][CLEARLINES];
@@ -692,6 +702,20 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 	int CombNum = 0;
 	BOOL bFlipNow = TRUE;
 	BOOL bIsOddField = FALSE;
+	DWORD PALTicks[PULLDOWNMODES_LAST_ONE] = 
+	{
+		17,
+		17,
+		17,
+		17,
+		38,
+		38,
+		48,
+		48,
+		48,
+		48,
+		48,
+	};
 
 	if (lpDDOverlay == NULL || lpDDOverlay == NULL || lpOverlayBack == NULL || lpOverlay == NULL)
 	{
@@ -892,8 +916,10 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 			if(DoWeWantToFlip(bFlipNow, bIsOddField))
 			{
 				// wait for a good time to flip
-				//sprintf(Text, "%d\n", GetTickCount() - dwLastFlipTicks);
-				//OutputDebugString(Text);
+				while(GetTickCount() - dwLastFlipTicks < PALTicks[gPulldownMode])
+				{
+					Sleep(2);
+				}
 				IDirectDrawSurface_Flip(lpDDOverlay, lpDDOverlayBack, DDFLIP_WAIT);
 				dwLastFlipTicks = GetTickCount();
 				if(lpCurOverlay == lpOverlay)
@@ -940,6 +966,21 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 	BOOL bFlipNow = TRUE;
 	BOOL bIsOddField = FALSE;
 
+	DWORD NTSCTicks[PULLDOWNMODES_LAST_ONE] = 
+	{
+		14,
+		14,
+		14,
+		14,
+		30,
+		30,
+		39,
+		39,
+		39,
+		39,
+		39,
+	};
+
 	if (lpDDOverlay == NULL || lpDDOverlay == NULL || lpOverlayBack == NULL || lpOverlay == NULL)
 	{
 		ExitThread(-1);
@@ -980,9 +1021,9 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 			{
 				if(bAutoDetectMode == TRUE)
 				{
-					CompareResult = CompareFields(ppOddLines[(CurrentFrame + 4) % 5], ppOddLines[CurrentFrame]);
-					UpdateNTSCPulldownMode(CompareResult, TRUE);
+					CompareResult = CompareFields2(ppOddLines[(CurrentFrame + 4) % 5], ppOddLines[CurrentFrame]);
 					LOG(" Frame %d O CR = %d", CurrentFrame, CompareResult);
+					UpdateNTSCPulldownMode(CompareResult, TRUE);
 				}
 
 				if (Capture_VBI == TRUE)
@@ -1058,9 +1099,9 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 			{
 				if(bAutoDetectMode == TRUE)
 				{
-					CompareResult = CompareFields(ppEvenLines[(CurrentFrame + 4) % 5], ppEvenLines[CurrentFrame]);
-					UpdateNTSCPulldownMode(CompareResult, FALSE);
+					CompareResult = CompareFields2(ppEvenLines[(CurrentFrame + 4) % 5], ppEvenLines[CurrentFrame]);
 					LOG(" Frame %d E CR = %d", CurrentFrame, CompareResult);
+					UpdateNTSCPulldownMode(CompareResult, FALSE);
 				}
 
 				if (Capture_VBI == TRUE)
@@ -1135,7 +1176,13 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 
 			if(DoWeWantToFlip(bFlipNow, bIsOddField))
 			{
+				// wait for a good time to flip
+				while(GetTickCount() - dwLastFlipTicks < NTSCTicks[gPulldownMode])
+				{
+					Sleep(2);
+				}
 				IDirectDrawSurface_Flip(lpDDOverlay, lpDDOverlayBack, DDFLIP_WAIT);
+				dwLastFlipTicks = GetTickCount();
 				if(lpCurOverlay == lpOverlay)
 				{
 					lpCurOverlay = lpOverlayBack;

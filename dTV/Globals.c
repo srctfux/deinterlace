@@ -55,13 +55,13 @@ struct TTVSetting TVSettings[10] =
 {
 	/* PAL-BDGHI */
 	{ 768, 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_BDGHI|BT848_IFORM_XT1),
-	    944, 768, 186, 922, 0x1e, 0, TRUE, 511},
-	/* NTSC Square Pixel */ 
-	{ 640, 480,  910, 0x68, 0x5d, (BT848_IFORM_NTSC|BT848_IFORM_XT0),
-	    780, 640, 135, 754, 0x1a, 0, FALSE, 400},
+	    944, 768, 186, 922, 0x20, 0, TRUE, 511},
+	/* NTSC CCIR601 */ 
+	{ 720, 480,  910, 0x68, 0x5d, (BT848_IFORM_NTSC|BT848_IFORM_XT0),
+	    858, 720, 135, 754, 0x1a, 0, FALSE, 400},
 	/* SECAM */
-	{ 922, 576, 1135, 0x7f, 0xa0, (BT848_IFORM_SECAM|BT848_IFORM_XT1),
-	    1135, 922, 186, 922, 0x1c, 0, TRUE, 511},
+	{ 768, 576, 1135, 0x7f, 0xb0, (BT848_IFORM_SECAM|BT848_IFORM_XT1),
+	    944, 768, 186, 922, 0x20, 0, TRUE, 511},
 	/* PAL-M */
 	{ 754, 480,  910, 0x70, 0x5d, (BT848_IFORM_PAL_M|BT848_IFORM_XT0),
 	    910, 754, 135, 754, 0x1a, 0, FALSE, 400},
@@ -72,14 +72,14 @@ struct TTVSetting TVSettings[10] =
 	{ 754, 480,  910, 0x70, 0x5d, (BT848_IFORM_NTSC_JAP|BT848_IFORM_XT0),
 	    910, 754, 135, 754, 0x1a, 0, FALSE, 400},
 	/* PAL Full Pixel */
-	{ 922, 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_BDGHI|BT848_IFORM_XT1),
-	    1135, 922, 186, 922, 0x1c, 0 , TRUE, 511},
+	{ 924, 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_BDGHI|BT848_IFORM_XT1),
+	    1135, 924, 186, 924, 0x20, 0 , TRUE, 511},
 	/* NTSC Full Pixel */
 	{ 754, 480,  910, 0x70, 0x5d, (BT848_IFORM_NTSC|BT848_IFORM_XT0),
 	    910, 754, 135, 754, 0x1a, 0, FALSE, 400},
-	/* NTSC CCIR601 */ 
-	{ 720, 480,  910, 0x68, 0x5d, (BT848_IFORM_NTSC|BT848_IFORM_XT0),
-	    858, 720, 135, 754, 0x1a, 0, FALSE, 400},
+	/* NTSC Square Pixel */ 
+	{ 640, 480,  910, 0x68, 0x5d, (BT848_IFORM_NTSC|BT848_IFORM_XT0),
+	    780, 640, 135, 754, 0x1a, 0, FALSE, 400},
 };
 
 
@@ -148,7 +148,7 @@ int TVFormat;
 int AudioSource = 4;
 int VideoSource = 1;
 int CountryCode=0;
-int TVTYPE = 0;
+int TVTYPE = -1;
 
 /// VideoText
 unsigned short VTColourTable[9] =

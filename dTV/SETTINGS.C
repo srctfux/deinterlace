@@ -71,9 +71,14 @@ void LoadSettingsFromIni(LPSTR Name)
 	PulldownThresholdLow = GetPrivateProfileInt("Pulldown", "PulldownThresholdLow", PulldownThresholdLow, szIniFile);
 	PulldownThresholdHigh = GetPrivateProfileInt("Pulldown", "PulldownThresholdHigh", PulldownThresholdHigh, szIniFile);
 	PulldownRepeatCount = GetPrivateProfileInt("Pulldown", "PulldownRepeatCount", PulldownRepeatCount, szIniFile);
-	Threshold32Pulldown  = GetPrivateProfileInt("Pulldown", "Threshold32Pulldown", PulldownRepeatCount, szIniFile);
+	PulldownRepeatCount2 = GetPrivateProfileInt("Pulldown", "PulldownRepeatCount2", PulldownRepeatCount2, szIniFile);
+	Threshold32Pulldown  = GetPrivateProfileInt("Pulldown", "Threshold32Pulldown", Threshold32Pulldown, szIniFile);
 	bAutoDetectMode = (GetPrivateProfileInt("Pulldown", "bAutoDetectMode", bAutoDetectMode, szIniFile) != 0);
 	BitShift = GetPrivateProfileInt("Pulldown", "BitShift", BitShift, szIniFile);
+	DiffThreshold = GetPrivateProfileInt("Pulldown", "DiffThreshold", DiffThreshold, szIniFile);
+
+	EdgeDetect = GetPrivateProfileInt("Deinterlace", "EdgeDetect", EdgeDetect, szIniFile);
+	JaggieThreshold = GetPrivateProfileInt("Deinterlace", "JaggieThreshold", JaggieThreshold, szIniFile);
 
 	VBI_Flags = 0;
 	if(GetPrivateProfileInt("VBI", "VT", 0, szIniFile) != 0)
@@ -110,7 +115,7 @@ void LoadSettingsFromIni(LPSTR Name)
 	CardType = GetPrivateProfileInt("Hardware", "CardType", TVCARD_UNKNOWN, szIniFile);
 	VideoSource = GetPrivateProfileInt("Hardware", "VideoSource", 1, szIniFile);
 	TunerType = GetPrivateProfileInt("Hardware", "TunerType", TUNER_ABSENT, szIniFile); 
-	TVTYPE = GetPrivateProfileInt("Hardware", "TVType", 0, szIniFile); 
+	TVTYPE = GetPrivateProfileInt("Hardware", "TVType", -1, szIniFile); 
 	InitialHue = GetPrivateProfileInt("Hardware", "InitialHue", 0, szIniFile); 
 	InitialContrast = GetPrivateProfileInt("Hardware", "InitialContrast", 0xd8, szIniFile); 
 	InitialBrightness = GetPrivateProfileInt("Hardware", "InitialBrightness", 0, szIniFile); 
@@ -281,9 +286,15 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("Pulldown", "PulldownThresholdLow", PulldownThresholdLow, szIniFile);
 	WritePrivateProfileInt("Pulldown", "PulldownThresholdHigh", PulldownThresholdHigh, szIniFile);
 	WritePrivateProfileInt("Pulldown", "PulldownRepeatCount", PulldownRepeatCount, szIniFile);
-	WritePrivateProfileInt("Pulldown", "Threshold32Pulldown", PulldownRepeatCount, szIniFile);
+	WritePrivateProfileInt("Pulldown", "PulldownRepeatCount2", PulldownRepeatCount2, szIniFile);
+	WritePrivateProfileInt("Pulldown", "Threshold32Pulldown", Threshold32Pulldown, szIniFile);
 	WritePrivateProfileInt("Pulldown", "bAutoDetectMode", bAutoDetectMode, szIniFile);
 	WritePrivateProfileInt("Pulldown", "BitShift", BitShift, szIniFile);
+	WritePrivateProfileInt("Pulldown", "DiffThreshold", DiffThreshold, szIniFile);
+
+	WritePrivateProfileInt("Deinterlace", "EdgeDetect", EdgeDetect, szIniFile);
+	WritePrivateProfileInt("Deinterlace", "JaggieThreshold", JaggieThreshold, szIniFile);
+
 
 	WritePrivateProfileInt("Show", "StatusBar", bDisplayStatusBar, szIniFile);
 	WritePrivateProfileInt("Show", "Menu", Show_Menu, szIniFile);

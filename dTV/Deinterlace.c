@@ -29,6 +29,9 @@
 #include "globals.h"
 
 long BitShift = 6;
+long EdgeDetect = 625;
+long JaggieThreshold = 73;
+long DiffThreshold = 224;
 
 /////////////////////////////////////////////////////////////////////////////
 // memcpyMMX
@@ -305,7 +308,9 @@ EndCopyLoop:
 ///////////////////////////////////////////////////////////////////////////////
 // DeinterlaceOdd
 //
-// The algorithm for this was taken from the VirtualDub Deinterlace class
+// The algorithm for this was taken from the 
+// Deinterlace - area based Vitual Dub Plug-in by
+// Gunnar Thalin
 ///////////////////////////////////////////////////////////////////////////////
 void DeinterlaceOdd(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay)
 {
@@ -317,9 +322,15 @@ void DeinterlaceOdd(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay)
 	
 	const __int64 YMask    = 0x00ff00ff00ff00ff;
 	const __int64 UVMask    = 0xff00ff00ff00ff00;
-	const __int64 qwEdgeDetect = 0x0019001900190019;
-	const __int64 qwThreshold = 0x001B001B001B001B;
+
+	__int64 qwEdgeDetect;
+	__int64 qwThreshold;
 	const __int64 Mask = 0x7f7f7f7f7f7f7f7f;
+
+	qwEdgeDetect = EdgeDetect;
+	qwEdgeDetect += (qwEdgeDetect << 48) + (qwEdgeDetect << 32) + (qwEdgeDetect << 16);
+	qwThreshold = JaggieThreshold;
+	qwThreshold += (qwThreshold << 48) + (qwThreshold << 32) + (qwThreshold << 16);
 
 
 	// copy first even and odd line anyway
@@ -369,8 +380,12 @@ DoNext8Bytes:
 			pand  mm2, Mask
 			paddw mm0, mm2
 
-			// work out (O1 - E) * (O2 - E) - EdgeDetect * (O1 - O2) ^ 2 >> 12
+			// work out (O1 - E) * (O2 - E) / 2 - EdgeDetect * (O1 - O2) ^ 2 >> 12
 			// result will be in mm6
+
+			psrlw mm3, 01
+			psrlw mm4, 01
+			psrlw mm5, 01
 
 			movq mm6, mm3
 			psubw mm6, mm4		//mm6 = O1 - E
@@ -426,9 +441,14 @@ void DeinterlaceEven(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay)
 	
 	const __int64 YMask    = 0x00ff00ff00ff00ff;
 	const __int64 UVMask    = 0xff00ff00ff00ff00;
-	const __int64 qwEdgeDetect = 0x0019001900190019;
-	const __int64 qwThreshold = 0x001B001B001B001B;
+	__int64 qwEdgeDetect;
+	__int64 qwThreshold;
 	const __int64 Mask = 0x7f7f7f7f7f7f7f7f;
+
+	qwEdgeDetect = EdgeDetect;
+	qwEdgeDetect += (qwEdgeDetect << 48) + (qwEdgeDetect << 32) + (qwEdgeDetect << 16);
+	qwThreshold = JaggieThreshold;
+	qwThreshold += (qwThreshold << 48) + (qwThreshold << 32) + (qwThreshold << 16);
 
 
 	// copy first even line
@@ -479,6 +499,10 @@ DoNext8Bytes:
 
 			// work out (O1 - E) * (O2 - E) - EdgeDetect * (O1 - O2) ^ 2 >> 12
 			// result will be in mm6
+
+			psrlw mm3, 01
+			psrlw mm4, 01
+			psrlw mm5, 01
 
 			movq mm6, mm3
 			psubw mm6, mm4		//mm6 = O1 - E
@@ -546,10 +570,17 @@ long GetCombFactor(short** pLines1, short** pLines2)
 	short* YVal3;
 	long ActiveX = CurrentX - 2 * InitialOverscan;
 	const __int64 YMask    = 0x00ff00ff00ff00ff;
-	const __int64 qwEdgeDetect = 0x0019001900190019;
-	const __int64 qwThreshold = 0x001B001B001B001B;
 	const __int64 qwOnes = 0x0001000100010001;
 	__int64 wBitShift    = BitShift;
+
+	__int64 qwEdgeDetect;
+	__int64 qwThreshold;
+	const __int64 Mask = 0x7f7f7f7f7f7f7f7f;
+
+	qwEdgeDetect = EdgeDetect;
+	qwEdgeDetect += (qwEdgeDetect << 48) + (qwEdgeDetect << 32) + (qwEdgeDetect << 16);
+	qwThreshold = JaggieThreshold;
+	qwThreshold += (qwThreshold << 48) + (qwThreshold << 32) + (qwThreshold << 16);
 
 	for (Line = 100; Line < ((CurrentY - 100) / 2); ++Line)
 	{
@@ -578,6 +609,10 @@ Next8Bytes:
 			// work out (O1 - E) * (O2 - E) - EdgeDetect * (O1 - O2) ^ 2 >> 12
 			// result will be in mm6
 
+			psrlw mm3, 01
+			psrlw mm4, 01
+			psrlw mm5, 01
+
 			movq mm6, mm3
 			psubw mm6, mm4		//mm6 = O1 - E
 
@@ -599,6 +634,10 @@ Next8Bytes:
 			pand mm6, qwOnes
 
 			paddw mm0, mm6
+
+			add eax, 8
+			add ebx, 8
+			add edx, 8
 
 			dec ecx
 			jne near Next8Bytes
@@ -681,4 +720,70 @@ Next8Bytes:
 		DiffFactor += (long)sqrt(LineFactor);
 	}
 	return DiffFactor;
+}
+
+long CompareFields2(short** pLines1, short** pLines2)
+{
+	int Line;
+	long LineFactor;
+	long CombFactor = 0;
+	short* YVal1;
+	short* YVal2;
+	long ActiveX = CurrentX - 2 * InitialOverscan;
+	const __int64 YMask    = 0x00ff00ff00ff00ff;
+	const __int64 qwOnes = 0x0001000100010001;
+	__int64 wBitShift    = BitShift;
+
+	__int64 qwThreshold;
+
+	qwThreshold = DiffThreshold;
+	qwThreshold += (qwThreshold << 48) + (qwThreshold << 32) + (qwThreshold << 16);
+
+	for (Line = 100; Line < ((CurrentY - 100) / 2); ++Line)
+	{
+		YVal1 = pLines1[Line] + InitialOverscan;
+		YVal2 = pLines2[Line] + InitialOverscan;
+		_asm
+		{
+			mov ecx, ActiveX
+			mov eax,dword ptr [YVal1]
+			mov ebx,dword ptr [YVal2]
+			shr ecx, 2       // there are ActiveX * 2 / 8 qwords
+		    movq mm1, YMask
+			pxor mm0, mm0    // mm0 = 0
+align 8
+Next8Bytes:
+			movq mm3, qword ptr[eax] 
+			movq mm4, qword ptr[ebx] 
+
+			pand mm3, YMask
+			pand mm4, YMask
+
+			psubw mm3, mm4
+
+			pmullw mm3, mm3
+
+			pcmpgtw mm3, qwThreshold
+
+			pand mm3, qwOnes
+
+			paddw mm0, mm3
+
+			add eax, 8
+			add ebx, 8
+
+			dec ecx
+			jne near Next8Bytes
+
+			movd eax, mm0
+			psrlq mm0,32
+			movd ecx, mm0
+			add ecx, eax
+			mov dword ptr[LineFactor], ecx
+			emms
+		}
+		CombFactor += (LineFactor & 0xFFFF);
+		CombFactor += (LineFactor >> 16);
+	}
+	return CombFactor;
 }

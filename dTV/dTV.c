@@ -448,6 +448,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
 		case IDM_AUTODETECT:
 			bAutoDetectMode = !bAutoDetectMode;
+			dwLastFlipTicks = -1;
 			if(bAutoDetectMode == TRUE)
 			{
 				gPulldownMode = VIDEO_MODE;
@@ -1073,6 +1074,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			if(bAutoDetectMode == FALSE)
 			{
 				gPulldownMode++;
+				dwLastFlipTicks = -1;
 				// if we can't use a bTV plug-in then skip it
 				if(gPulldownMode == BTV_PLUGIN && bUseBTVPlugin == FALSE)
 				{
@@ -1340,6 +1342,28 @@ void MainWndOnInitBT(HWND hWnd)
 			if(CardType == TVCARD_UNKNOWN || TunerType == TUNER_ABSENT)
 			{
 				DialogBox(hInst, "SELECTCARD", hWnd, (DLGPROC) SelectCardProc);
+			}
+		}
+
+		// default the TVTYPE dependant on the Tuner selected
+		// should be OK most of the time
+		if(TVTYPE == -1)
+		{
+			switch(Tuners[TunerType].Type)
+			{
+			case PAL:
+			case PAL_I:
+				TVTYPE = 0;
+				break;
+			case NTSC:
+				TVTYPE = 1;
+				break;
+			case SECAM:
+				TVTYPE = 2;
+				break;
+			default:
+				TVTYPE = 0;
+				break;
 			}
 		}
 		
