@@ -104,8 +104,8 @@ struct {
 	BOOL	active;			// Screen to take into account or not
 } ActiveScreens[] = {
 	{	OSD_SCREEN_1,	0,							TRUE	},
+	{	OSD_SCREEN_3,	1000,						TRUE	},
 	{	OSD_SCREEN_2,	OSD_TIMER_REFRESH_DELAY,	TRUE	},
-	{	OSD_SCREEN_3,	0,							FALSE	},
 	{	OSD_SCREEN_4,	0,							FALSE	},
 	{	OSD_SCREEN_5,	0,							FALSE	},
 	{	OSD_SCREEN_6,	0,							FALSE	},
@@ -453,9 +453,11 @@ static double OSD_GetLineYpos (int nLine, double dfMargin, double dfSize)
 // Display/Refresh on screen the current information screen
 void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 {
-	double	dfMargin = 0.02;	// 2% of screen height/width
-	char	szInfo[64];
-	int		nLine;
+	double			dfMargin = 0.02;	// 2% of screen height/width
+	char			szInfo[64];
+	int				nLine;
+	int				i;
+	long			Color;
 
 	// Case : no OSD screen
 	if (IdxCurrentScreen == -1)
@@ -722,6 +724,40 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 		break;
 
 	case OSD_SCREEN_3:
+		// Title
+		OSD_AddText("Statistics", dfSize*1.5, RGB(255,150,150), OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (1, dfMargin, dfSize*1.5));
+
+		nLine = 3;
+
+		OSD_AddText("Dropped frames", dfSize, RGB(150,150,255), OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+
+		sprintf (szInfo, "Number : %ld", nTotalDropFrames);
+		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+		sprintf (szInfo, "In last second : %ld", nDropFramesLastSec);
+		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+		sprintf (szInfo, "Average / second : %d", nTotalDropFrames * 1000 / nSecTicks);
+		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+
+		nLine = 3;
+
+		OSD_AddText("Deinterlace modes", dfSize, RGB(150,150,255), OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+
+		sprintf (szInfo, "Number of changes : %ld", nTotalDeintModeChanges);
+		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+		OSD_AddText("changes - % of time - mode", dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+		for (i = 0 ; i < PULLDOWNMODES_LAST_ONE ; i++)
+		{
+			if (i == gPulldownMode)
+			{
+				Color = RGB(200,150,0);
+			}
+			else
+			{
+				Color = 0;
+			}
+			sprintf (szInfo, "%04d - %05.1f %% - %s", nDeintModeChanges[i], nDeintModeTicks[i] * 100 / (double)(nLastTicks - nInitialTicks), DeintModeNames[i]);
+			OSD_AddText(szInfo, dfSize, Color, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+		}
 		break;
 
 	case OSD_SCREEN_4:

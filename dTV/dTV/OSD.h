@@ -51,7 +51,7 @@ void OSD_SetMenu(HMENU hMenu);
 #define OSD_TIMER_REFRESH_ID	41
 #define OSD_TIMER_REFRESH_DELAY	750
 
-#define OSD_MAX_TEXT			25
+#define OSD_MAX_TEXT			50
 
 // Values for "ShowType" parameter in functions OSD_Show and OSD_RefreshInfosScreen
 #define	OSD_PERSISTENT		1
