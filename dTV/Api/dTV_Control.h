@@ -70,7 +70,7 @@
 #ifndef __DTV_CONTROL_H___
 #define __DTV_CONTROL_H___
 
-#define DSCALER_APPNAME "dScaler"
+#define DSCALER_APPNAME "DScaler"
 
 /////////////////////////////////////////////////////////////////////////////
 // Control Messages passed using WM_COMMAND
