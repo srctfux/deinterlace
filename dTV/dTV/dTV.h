@@ -71,13 +71,20 @@ void Overlay_Start(HWND hWnd);
 void ShowText(HWND hWnd, LPCTSTR szText);
 void OSD_ShowVideoSource(HWND hWnd, int nVideoSource);
 
-#define TIMER_STATUS 1
-#define TIMER_STATUS_MS 2000
+int GetCurrentAdjustmentStepCount();
+int AdjustSliderUp(int * pnValue, int nUpper);
+int AdjustSliderDown(int * pnValue, int nLower);
 
-#define TIMER_KEYNUMBER 99
-#define TIMER_KEYNUMBER_MS 1000
+#define TIMER_STATUS        1
+#define TIMER_STATUS_MS     2000
 
-#define TIMER_MSP 8
-#define TIMER_MSP_MS 10000
+#define TIMER_KEYNUMBER     99
+#define TIMER_KEYNUMBER_MS  1000
+
+#define TIMER_MSP           8
+#define TIMER_MSP_MS        10000
+
+#define TIMER_AUTOSAVE      55
+#define TIMER_AUTOSAVE_MS   1500
 
 #endif
