@@ -54,6 +54,7 @@
 #include "bt848.h"
 #include "OutThreads.h"
 #include "VBI_VideoText.h"
+#include "DebugLog.h"
 
 LPDIRECTDRAWSURFACE     lpDDSurface = NULL;
 // OverLay
@@ -66,6 +67,7 @@ BOOL Can_ColorKey=FALSE;
 DWORD DestSizeAlign;
 DWORD SrcSizeAlign;
 COLORREF OverlayColor = RGB(255, 0, 255);
+DWORD PhysicalOverlayColor = RGB(255, 0, 255);
 int Back_Buffers;		// Make new user parm, TRB 10/28/00
 void ExitDD(void)
 {
@@ -151,12 +153,18 @@ BOOL Overlay_Update(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL Color
 		return (TRUE);
 	}
 
-	if (! bIsFullScreen) {
-		dwFlags |= DDOVER_KEYDESTOVERRIDE;
-	}
+	dwFlags |= DDOVER_KEYDESTOVERRIDE;
 
-	DDOverlayFX.dckDestColorkey.dwColorSpaceHighValue = Overlay_ColorMatch(lpDDSurface, OverlayColor);
-	DDOverlayFX.dckDestColorkey.dwColorSpaceLowValue = DDOverlayFX.dckDestColorkey.dwColorSpaceHighValue;
+	PhysicalOverlayColor = Overlay_ColorMatch(lpDDSurface, OverlayColor);
+	if (PhysicalOverlayColor == 0)		// sometimes we glitch and can't get the value
+	{
+		LOG(" Physical overlay color is zero!  Retrying.");
+		PhysicalOverlayColor = Overlay_ColorMatch(lpDDSurface, OverlayColor);
+	}
+	LOG(" Physical overlay color is %x", PhysicalOverlayColor);
+
+	DDOverlayFX.dckDestColorkey.dwColorSpaceHighValue = PhysicalOverlayColor;
+	DDOverlayFX.dckDestColorkey.dwColorSpaceLowValue = PhysicalOverlayColor;
 
 	ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, pSrcRect, lpDDSurface, pDestRect, dwFlags, &DDOverlayFX);
 	if (ddrval != DD_OK)
@@ -280,7 +288,7 @@ DWORD Overlay_ColorMatch(LPDIRECTDRAWSURFACE pdds, COLORREF rgb)
     {
         rgbT = GetPixel(hdc, 0, 0);     // Save current pixel value
         SetPixel(hdc, 0, 0, rgb);       // Set our value
-        IDirectDrawSurface_ReleaseDC(pdds, hdc);
+		IDirectDrawSurface_ReleaseDC(pdds, hdc);
     }
     //
     // Now lock the surface so we can read back the converted color

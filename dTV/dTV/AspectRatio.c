@@ -364,13 +364,9 @@ void PaintOverlay(HWND hWnd)
 		IntersectRect(&r,&r2,&sPaint.rcPaint);
 		FillRect(sPaint.hdc, &r, black);
 
-		// Draw overlay color in middle if windowed mode.  Not needed
-		// for full screen since we don't use color keying.
-		if (! bIsFullScreen)
-		{
-			IntersectRect(&r,&destinationRectangle,&sPaint.rcPaint);
-			FillRect(sPaint.hdc, &r, overlay);
-		}
+		// Draw overlay color in the middle.
+		IntersectRect(&r,&destinationRectangle,&sPaint.rcPaint);
+		FillRect(sPaint.hdc, &r, overlay);
 	} else {
 		FillRect(sPaint.hdc, &sPaint.rcPaint, overlay);
 	}
