@@ -144,8 +144,6 @@ int DecodeProcessor=0;
 
 
 BOOL bShowCursor = TRUE;
-
-
 /****************************************************************************
 
     FUNCTION: WinMain(HANDLE, HANDLE, LPSTR, int)
@@ -521,6 +519,14 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			gPulldownMode = LOWORD(wParam) - IDM_VIDEO_BOB;
 			UpdatePulldownStatus();
 			SetMenuAnalog();
+			break;
+
+		case IDM_BLENDED_CLIP:
+			bAutoDetectMode = FALSE;
+			gPulldownMode = BLENDED_CLIP;
+			UpdatePulldownStatus();
+			SetMenuAnalog();
+			DialogBox(hInst, "BLENDED_CLIP", hWnd, BlendedClipProc);
 			break;
 
 		case IDM_ABOUT:

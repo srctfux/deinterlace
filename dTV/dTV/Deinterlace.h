@@ -35,6 +35,8 @@ void DeinterlaceFieldBob(short** pOddLines, short** pEvenLines, short **pPrevLin
 long GetCombFactor(short** pLines1, short** pLines2);
 long CompareFields(short** pLines1, short** pLines2);
 long CompareFields2(short** pLines1, short** pLines2);
+void BlendedClipping(short** pOddLines, short** pEvenLines, 
+		short** pPrevLines, BYTE* lpCurOverlay, BOOL bIsOdd);
 
 extern long BitShift;
 extern long EdgeDetect;

@@ -225,6 +225,25 @@ extern BOOL	Hurry_When_Late;        // " , default=TRUE, skip processing if behi
 extern long	Sleep_Interval;         // " , default=0, how long to wait for BT chip
 extern int	Back_Buffers;			// " , nuber of video back buffers
 
+// Add some global fields for Blended Clip Deinterlace - Tom Barry 11/05/00
+// These should be treated as part of that, if it ever becomes a class.
+extern	UINT	BlcMinimumClip;
+extern	UINT	BlcPixelMotionSense;
+extern	UINT	BlcRecentMotionSense;
+extern	UINT	BlcMotionAvgPeriod;
+extern	UINT	BlcPixelCombSense;
+extern	UINT	BlcRecentCombSense;
+extern	UINT	BlcCombAvgPeriod;
+extern	UINT	BlcHighCombSkip;
+extern	UINT	BlcLowMotionSkip;
+extern  BOOL	BlcUseInterpBob;
+extern  BOOL	BlcBlendChroma;
+extern  BOOL	BlcWantsToFlip;
+extern  UINT	BlcAverageMotions[5][2];
+extern  UINT	BlcTotalAverageMotion;
+extern  UINT	BlcAverageCombs[5][2];
+extern  UINT	BlcTotalAverageComb;
+
 //------------------------------------------------------------------------
 // ######### IMPORTANT! READ ME FIRST! ##########
 //

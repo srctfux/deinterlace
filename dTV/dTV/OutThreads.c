@@ -50,7 +50,6 @@
 #include "DebugLog.h"
 #include "vbi.h"
 
-
 short pPALplusCode[] = {  18,  27,  36,  45,  54,  63,  72,  81,  90, 100, 110, 120, 134, 149};
 short pPALplusData[] = { 160, 178, 196, 214, 232, 250, 268, 286, 304, 322, 340, 358, 376, 394};
 short nLevelLow      =  45;
@@ -747,6 +746,7 @@ BOOL DoWeWantToFlip(BOOL bFlipNow, BOOL bIsOddField)
 	case VIDEO_MODE_BOB:         RetVal = TRUE;  break;
 	case SIMPLE_WEAVE:           RetVal = TRUE;  break;
 	case INTERPOLATE_BOB:        RetVal = TRUE;  break;
+	case BLENDED_CLIP:			 RetVal = BlcWantsToFlip;  break;
 	case BTV_PLUGIN:             RetVal = bFlipNow;  break;
 	case FILM_22_PULLDOWN_ODD:   RetVal = bIsOddField;  break;
 	case FILM_22_PULLDOWN_EVEN:  RetVal = !bIsOddField;  break;
@@ -829,6 +829,9 @@ void UpdatePulldownStatus()
 			break;
 		case INTERPOLATE_BOB:
 			SetWindowText(hwndPalField, "Interpolated BOB");
+			break;
+		case BLENDED_CLIP:
+			SetWindowText(hwndPalField, "Blended Clip");
 			break;
 		case BTV_PLUGIN:
 			SetWindowText(hwndPalField, "Using bTV Plugin");
@@ -964,7 +967,6 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 	BT848_Restart_RISC_Code();
 
 	dwLastSecondTicks = GetTickCount();
-
 	while(!bStopThread)
 	{
 		bIsOddField = WaitForNextField(bIsOddField);
@@ -1039,6 +1041,12 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				else if(gPulldownMode == SIMPLE_WEAVE)
 				{
 					Weave(ppOddLines[CurrentFrame], ppEvenLines[LastEvenFrame], lpCurOverlay);
+				}
+				else if(gPulldownMode == BLENDED_CLIP)
+				{
+					BlendedClipping(ppOddLines[CurrentFrame], ppEvenLines[LastEvenFrame], 
+									ppOddLines[(CurrentFrame+4) % 5], lpCurOverlay,
+									TRUE);
 				}
 				else if(gPulldownMode == BTV_PLUGIN)
 				{
@@ -1145,6 +1153,12 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				{
 					Weave(ppOddLines[LastOddFrame], ppEvenLines[CurrentFrame], lpCurOverlay);
 				}
+				else if(gPulldownMode == BLENDED_CLIP)
+				{
+					BlendedClipping(ppOddLines[LastOddFrame], ppEvenLines[CurrentFrame],
+									ppEvenLines[(CurrentFrame+4) % 5], lpCurOverlay,
+									FALSE);
+				}
 				else if(gPulldownMode == BTV_PLUGIN)
 				{
 					BYTE* pDestEven[CLEARLINES];
@@ -1213,11 +1227,13 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 		{
 			if (dwLastSecondTicks + 1000 < GetTickCount())
 			{
+			
 				sprintf(Text, "%d DF/S", nFrame);
 				SetWindowText(hwndFPSField, Text);
 				nFrame = 0;
 				dwLastSecondTicks = GetTickCount();
-			}
+			
+			 }
 		}
 	}
 

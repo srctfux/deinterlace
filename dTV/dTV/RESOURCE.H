@@ -131,6 +131,7 @@
 #define IDM_ADV_VIDEOSETTINGS           545
 #define IDM_SHIFT_SPACEBAR              546
 #define IDM_SPLASH_ON_STARTUP           547
+#define IDM_BLENDED_CLIP                551
 #define IDM_STOP                        548
 #define IDM_START                       549
 #define IDM_END                         1032
@@ -534,6 +535,7 @@
 #define IDC_CARDSSELECT                 1771
 #define IDC_TUNERSELECT                 1772
 #define IDC_AGC                         1774
+#define IDC_DEFAULT                     1774
 #define IDC_CRUSH                       1775
 #define IDC_E_CAGC                      1776
 #define IDC_O_CAGC                      1777
@@ -557,31 +559,52 @@
 #define IDC_DT9                         1788
 #define IDC_DT10                        1789
 #define IDC_DT11                        1790
+#define IDC_MIN_CLIP                    1790
 #define IDC_DT12                        1791
+#define IDC_PIXEL_MOV                   1791
+#define IDC_MIN_CLIP_V                  1792
+#define IDC_Y                           1794
+#define IDC_PIXEL_MOV_V                 1795
+#define IDC_AVG_MOV                     1796
+#define IDC_AVG_MOV_V                   1797
+#define IDC_MOV_PERIOD                  1798
+#define IDC_MOV_PERIOD_V                1799
 #define IDC_DM1                         1800
 #define S1                              1800
+#define IDC_PIXEL_COMB                  1800
 #define IDC_DM2                         1801
 #define S2                              1801
+#define IDC_PIXEL_COMB_V                1801
 #define IDC_DM3                         1802
 #define S3                              1802
+#define IDC_AVG_COMB                    1802
 #define IDC_DM4                         1803
 #define S4                              1803
+#define IDC_AVG_COMB_V                  1803
 #define IDC_DM5                         1804
 #define S5                              1804
+#define IDC_COMB_PERIOD                 1804
 #define IDC_DM6                         1805
 #define S6                              1805
+#define IDC_COMB_PERIOD_V               1805
 #define IDC_DM7                         1806
 #define S7                              1806
+#define IDC_COMB_SKIP                   1806
 #define IDC_DM8                         1807
 #define S8                              1807
+#define IDC_COMB_SKIP_V                 1807
 #define IDC_DM9                         1808
 #define S9                              1808
+#define IDC_MOTION_SKIP                 1808
 #define IDC_DM10                        1809
 #define S10                             1809
+#define IDC_MOTION_SKIP_V               1809
 #define IDC_DM11                        1810
 #define S11                             1810
+#define IDC_USE_INTERP_BOB              1810
 #define IDC_DM12                        1811
 #define S12                             1811
+#define IDC_BLEND_CHROMA                1811
 #define S13                             1812
 #define S14                             1813
 #define S15                             1814
@@ -676,11 +699,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NO_MFC                     1
-#define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        153
-#define _APS_NEXT_COMMAND_VALUE         550
-#define _APS_NEXT_CONTROL_VALUE         1774
+#define _APS_NEXT_RESOURCE_VALUE        155
+#define _APS_NEXT_COMMAND_VALUE         552
+#define _APS_NEXT_CONTROL_VALUE         1811
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

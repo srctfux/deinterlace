@@ -44,6 +44,7 @@ BOOL APIENTRY VideoTextUnterTitelProc(HWND hDlg, UINT message, UINT wParam, LONG
 BOOL APIENTRY SplashProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 BOOL APIENTRY AdvVideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
+BOOL APIENTRY BlendedClipProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 BOOL APIENTRY ICSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 BOOL APIENTRY VTSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 BOOL APIENTRY VDSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);

@@ -31,7 +31,6 @@
 //                                     Cut out digital hardware stuff
 //
 /////////////////////////////////////////////////////////////////////////////
-
 #include "stdafx.h"
 #include "dialogs.h"
 #include "bt848.h"
@@ -415,6 +414,226 @@ BOOL APIENTRY AdvVideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lPa
 	return (FALSE);
 }
 
+void SetHorSliderInt(HWND hDlgItem, int yPos, int Value, int nMin, int nMax)
+{
+	int x = 5 + 160 *(Value - nMin) / (nMax - nMin);
+	MoveWindow(hDlgItem, x, yPos +5, 10, 12, TRUE);
+}
+
+int GetHorSliderInt(int MouseX, int nMin, int nMax)
+{
+	int i;
+	i = nMin + (MouseX - 5) * (nMax - nMin) / 160;
+	if (i < nMin)
+		i = nMin;
+	else if (i > nMax)
+		i = nMax;
+	return i;
+}
+
+void SetBlcDisplayControls(HWND hDlg)
+{
+	// Set the sliders and visible numbers correctly
+	SetDlgItemInt(hDlg, IDC_MIN_CLIP_V, BlcMinimumClip, FALSE);
+	SetHorSliderInt(GetDlgItem(hDlg, IDC_MIN_CLIP),  35, BlcMinimumClip,  0, 100);
+
+	SetDlgItemInt(hDlg, IDC_PIXEL_MOV_V, BlcPixelMotionSense, FALSE);
+	SetHorSliderInt(GetDlgItem(hDlg, IDC_PIXEL_MOV),  85, BlcPixelMotionSense,  0, 100);
+	
+	SetDlgItemInt(hDlg, IDC_AVG_MOV_V, BlcRecentMotionSense, FALSE);
+	SetHorSliderInt(GetDlgItem(hDlg, IDC_AVG_MOV),  135, BlcRecentMotionSense,  0, 100);
+	
+	SetDlgItemInt(hDlg, IDC_MOV_PERIOD_V, BlcMotionAvgPeriod, FALSE);
+	SetHorSliderInt(GetDlgItem(hDlg, IDC_MOV_PERIOD),  185,  BlcMotionAvgPeriod,  1, 200);
+	
+	SetDlgItemInt(hDlg, IDC_PIXEL_COMB_V, BlcPixelCombSense, FALSE);
+	SetHorSliderInt(GetDlgItem(hDlg, IDC_PIXEL_COMB),  235, BlcPixelCombSense,  0, 100);
+	
+	SetDlgItemInt(hDlg, IDC_AVG_COMB_V, BlcRecentCombSense, FALSE);
+	SetHorSliderInt(GetDlgItem(hDlg, IDC_AVG_COMB),  285, BlcRecentCombSense,  0, 100);
+	
+	SetDlgItemInt(hDlg, IDC_COMB_PERIOD_V, BlcCombAvgPeriod, FALSE);
+	SetHorSliderInt(GetDlgItem(hDlg, IDC_COMB_PERIOD),  335, BlcCombAvgPeriod,  1, 200);
+	
+	SetDlgItemInt(hDlg, IDC_COMB_SKIP_V, BlcHighCombSkip, FALSE);
+	SetHorSliderInt(GetDlgItem(hDlg, IDC_COMB_SKIP),  385, BlcHighCombSkip,  0, 100);
+	
+	SetDlgItemInt(hDlg, IDC_MOTION_SKIP_V, BlcLowMotionSkip, FALSE);
+	SetHorSliderInt(GetDlgItem(hDlg, IDC_MOTION_SKIP),  435, BlcLowMotionSkip,  0, 100);
+	
+	CheckDlgButton(hDlg, IDC_BLEND_CHROMA, BlcBlendChroma);
+	CheckDlgButton(hDlg, IDC_USE_INTERP_BOB, BlcUseInterpBob);
+	
+
+}
+// dialog code for new Blended Clipping Deinterlace control panel - TRB 11/00
+BOOL APIENTRY BlendedClipProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
+{
+	int x, y;
+	static UINT TMinimumClip;
+	static UINT TPixelMotionSense;
+	static UINT TRecentMotionSense;
+	static UINT TMotionAvgPeriod;
+	static UINT TPixelCombSense;
+	static UINT TRecentCombSense;
+	static UINT TCombAvgPeriod;
+	static UINT THighCombSkip;
+	static UINT TLowMotionSkip;
+	static BOOL TUseInterpBob;
+	static BOOL TBlendChroma;
+	switch (message)
+	{
+	case WM_INITDIALOG:
+
+		// Capture the current global values
+		TMinimumClip = BlcMinimumClip;
+		TPixelMotionSense = BlcPixelMotionSense;
+		TRecentMotionSense = BlcRecentMotionSense;
+		TMotionAvgPeriod = BlcMotionAvgPeriod;
+		TPixelCombSense = BlcPixelCombSense;
+		TRecentCombSense = BlcRecentCombSense;
+		TCombAvgPeriod = BlcCombAvgPeriod;
+		THighCombSkip = BlcHighCombSkip;
+		TLowMotionSkip = BlcLowMotionSkip;
+		TUseInterpBob = BlcUseInterpBob;
+		TBlendChroma = BlcBlendChroma;
+		SetBlcDisplayControls(hDlg);
+
+
+		break;
+
+	case WM_MOUSEMOVE:
+
+		if (wParam == MK_LBUTTON)
+			{
+				y = HIWORD(lParam);
+				x = LOWORD(lParam);
+				
+				if ((x >= 5) && (x <= 166))
+				{
+					if ((y >= 35) && (y <= 55))		// Is Minimum clip slider?
+					{
+						MoveWindow(GetDlgItem(hDlg, IDC_MIN_CLIP), x, 35+5, 10, 12, TRUE);
+						BlcMinimumClip = GetHorSliderInt(x, 0, 100);
+						SetDlgItemInt(hDlg, IDC_MIN_CLIP_V, BlcMinimumClip, TRUE);
+					}
+					if ((y >= 85) && (y <= 105))		// Is Pixel Motion slider?
+					{
+						MoveWindow(GetDlgItem(hDlg, IDC_PIXEL_MOV), x, 85+5, 10, 12, TRUE);
+						BlcPixelMotionSense = GetHorSliderInt(x, 0, 100);
+						SetDlgItemInt(hDlg, IDC_PIXEL_MOV_V, BlcPixelMotionSense, TRUE);
+					}
+					if ((y >= 135) && (y <= 155))		// Is Avg Hist slider?
+					{
+						MoveWindow(GetDlgItem(hDlg, IDC_AVG_MOV), x, 135+5, 10, 12, TRUE);
+						BlcRecentMotionSense = GetHorSliderInt(x, 0, 100);
+						SetDlgItemInt(hDlg, IDC_AVG_MOV_V, BlcRecentMotionSense, TRUE);
+					}
+					if ((y >= 185) && (y <= 205))		// Is Hist Mov Avg Peroid clip slider?
+					{
+						MoveWindow(GetDlgItem(hDlg, IDC_MOV_PERIOD), x, 185+5, 10, 12, TRUE);
+						BlcMotionAvgPeriod = GetHorSliderInt(x, 1, 200);
+						SetDlgItemInt(hDlg, IDC_MOV_PERIOD_V, BlcMotionAvgPeriod, TRUE);
+					}
+					if ((y >= 235) && (y <= 255))		// Is Pixel Comb clip slider?
+					{
+						MoveWindow(GetDlgItem(hDlg, IDC_PIXEL_COMB), x, 235+5, 10, 12, TRUE);
+						BlcPixelCombSense = GetHorSliderInt(x, 0, 100);
+						SetDlgItemInt(hDlg, IDC_PIXEL_COMB_V, BlcPixelCombSense, TRUE);
+					}
+					if ((y >= 285) && (y <= 305))		// Is Hist Comb slider?
+					{
+						MoveWindow(GetDlgItem(hDlg, IDC_AVG_COMB), x, 285+5, 10, 12, TRUE);
+						BlcRecentCombSense = GetHorSliderInt(x, 0, 100);
+						SetDlgItemInt(hDlg, IDC_AVG_COMB_V, BlcRecentCombSense, TRUE);
+					}
+					if ((y >= 335) && (y <= 355))		// Is Hist Comb Period slider?
+					{
+						MoveWindow(GetDlgItem(hDlg, IDC_COMB_PERIOD), x, 335+5, 10, 12, TRUE);
+						BlcCombAvgPeriod = GetHorSliderInt(x, 1, 200);
+						SetDlgItemInt(hDlg, IDC_COMB_PERIOD_V, BlcCombAvgPeriod, TRUE);
+					}
+					if ((y >= 385) && (y <= 405))		// Is Suppress High Comb slider?
+					{
+						MoveWindow(GetDlgItem(hDlg, IDC_COMB_SKIP), x, 385+5, 10, 12, TRUE);
+						BlcHighCombSkip = GetHorSliderInt(x, 0, 100);
+						SetDlgItemInt(hDlg, IDC_COMB_SKIP_V, BlcHighCombSkip, TRUE);
+					}
+					if ((y >= 435) && (y <= 455))		// Is Suppress Low motion slider?
+					{
+						MoveWindow(GetDlgItem(hDlg, IDC_MOTION_SKIP), x, 435+5, 10, 12, TRUE);
+						BlcLowMotionSkip = GetHorSliderInt(x, 0, 100);
+						SetDlgItemInt(hDlg, IDC_MOTION_SKIP_V, BlcLowMotionSkip, TRUE);
+					}
+				}
+			}
+		return (FALSE);
+/*	
+	case WM_GETTEXT:	
+	case WM_PAINT:
+		return FALSE;						// say we did not process this
+
+	case WM_NCPAINT:
+		return FALSE;						// say we did not process this
+*/
+	case WM_COMMAND:
+
+		switch LOWORD(wParam)
+		{
+		case IDOK:							// Is Done, use our new parms
+			EndDialog(hDlg, TRUE);
+			break;
+
+		case IDCANCEL:						
+			BlcMinimumClip = TMinimumClip;
+			BlcPixelMotionSense = TPixelMotionSense;
+			BlcRecentMotionSense = TRecentMotionSense;
+			BlcMotionAvgPeriod = TMotionAvgPeriod;
+			BlcPixelCombSense = TPixelCombSense;
+			BlcRecentCombSense = TRecentCombSense;
+			BlcCombAvgPeriod = TCombAvgPeriod;
+			BlcHighCombSkip = THighCombSkip;
+			BlcLowMotionSkip = TLowMotionSkip;
+			BlcUseInterpBob = TUseInterpBob;
+			BlcBlendChroma = TBlendChroma;
+			EndDialog(hDlg, TRUE);
+			break;
+
+		case IDC_BLEND_CHROMA:				// Blend chroma from mult pixels
+			BlcBlendChroma = (BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_BLEND_CHROMA));
+			break;  
+
+		case IDC_USE_INTERP_BOB:				// Blend chroma from mult pixels
+			BlcUseInterpBob = (BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_USE_INTERP_BOB));
+			break;  
+
+
+		case IDC_DEFAULT:
+			BlcMinimumClip= 10;
+			BlcPixelMotionSense = 55;
+			BlcRecentMotionSense = 0;
+			BlcMotionAvgPeriod = 40;		// currently 1..200
+			BlcPixelCombSense = 50;
+			BlcRecentCombSense = 0;
+			BlcCombAvgPeriod = 40;			// currently 1.200
+			BlcHighCombSkip = 0;			// larger values skip more
+			BlcLowMotionSkip = 0;			// larger values skip more
+			BlcUseInterpBob = FALSE;
+			BlcBlendChroma = FALSE;			// default should maybe be TRUE?
+			SetBlcDisplayControls(hDlg);
+			break;
+		
+		default:
+			break;
+
+		}
+		break;
+
+	default:
+		break;
+	}
+	return (FALSE);
+}
 
 
 BOOL APIENTRY AudioSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
