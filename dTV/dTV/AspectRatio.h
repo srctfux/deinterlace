@@ -65,7 +65,7 @@ typedef enum
 int     ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID);
 void    AspectRatio_SetMenu(HMENU hMenu);
 void    WorkoutOverlaySize();
-void    PaintColorkey(HWND hWnd, BOOL bEnable);
+void PaintColorkey(HWND hWnd, BOOL bEnable, HDC hDC, RECT* PaintRect);
 int		FindAspectRatio(short** EvenField, short** OddField);
 void	AdjustAspectRatio(short** EvenField, short** OddField);
 void	SetHalfHeight(int IsHalfHeight);

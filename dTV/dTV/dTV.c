@@ -71,6 +71,8 @@
 #include "FD_50Hz.H"
 #include "FLT_TNoise.h"
 #include "Splash.h"
+#define DOLOGGING
+#include "DebugLog.h"
 
 
 HWND hWnd = NULL;
@@ -666,7 +668,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				if (USE_MIXER == FALSE)
 				{
 					Audio_SetSource(AUDIOMUX_MUTE);
-					sprintf(Text, "Mute BT");
 				}
 				if (USE_MIXER == TRUE)
 				{
@@ -690,7 +691,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				if (USE_MIXER == FALSE)
 				{
 					Audio_SetSource(AudioSource);
-					sprintf(Text, "UnMute BT");
 				}
 				if (USE_MIXER == TRUE)
 				{
@@ -1135,8 +1135,15 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
         case IDM_FAST_REPAINT:
-		    PaintColorkey(hWnd, TRUE);
-		    OSD_Redraw(hWnd);
+			{
+				RECT winRect;
+				HDC hDC;
+				GetClientRect(hWnd, &winRect);
+				hDC = GetDC(hWnd);
+			    PaintColorkey(hWnd, TRUE, hDC, &winRect);
+			    OSD_Redraw(hWnd, hDC);
+				ReleaseDC(hWnd, hDC);
+			}
 		    break;
 
 		case IDM_HELP_HOMEPAGE:
@@ -1383,8 +1390,13 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		break;
 
 	case WM_PAINT:
-		PaintColorkey(hWnd, TRUE);
-		OSD_Redraw(hWnd);
+		{
+			PAINTSTRUCT sPaint;
+			BeginPaint(hWnd, &sPaint);
+			PaintColorkey(hWnd, TRUE, sPaint.hdc, &sPaint.rcPaint);
+			OSD_Redraw(hWnd, sPaint.hdc);
+			EndPaint(hWnd, &sPaint);
+		}
 		break;
 
 	case WM_QUERYENDSESSION:
@@ -1677,20 +1689,23 @@ void MainWndOnDestroy()
 {
 	__try
 	{
+		LOG("Try Stop_Capture");
 		Stop_Capture();
 	}
-	__except(EXCEPTION_EXECUTE_HANDLER) {;}
+	__except(EXCEPTION_EXECUTE_HANDLER) {LOG("Error Stop_Capture");}
 
 	__try
 	{
+		LOG("Try Mute 1");
 		Audio_SetSource(AUDIOMUX_MUTE);
 	}
-	__except(EXCEPTION_EXECUTE_HANDLER) {;}
+	__except(EXCEPTION_EXECUTE_HANDLER) {LOG("Error Mute 1");}
 	
 	__try
 	{
 		// MAE 8 Dec 2000 Start of change
 		// JA 8 Jan 2001 Changed to use function
+		LOG("Try Mute 2");
 		if (Audio_MSP_IsPresent())
 		{
 			// Mute the MSP decoder
@@ -1698,47 +1713,53 @@ void MainWndOnDestroy()
 		}
 		// MAE 8 Dec 2000 End of change
 	}
-	__except(EXCEPTION_EXECUTE_HANDLER) {;}
+	__except(EXCEPTION_EXECUTE_HANDLER) {LOG("Error Mute 2");}
 
 	__try
 	{
+		LOG("Try CleanUpMemory");
 		CleanUpMemory();
 	}
-	__except(EXCEPTION_EXECUTE_HANDLER) {;}
+	__except(EXCEPTION_EXECUTE_HANDLER) {LOG("Error CleanUpMemory");}
 
 	__try
 	{
+		LOG("Try SaveWindowPos");
 		if(bIsFullScreen == FALSE)
 		{
 			SaveWindowPos(hWnd);
 		}
 	}
-	__except(EXCEPTION_EXECUTE_HANDLER) {;}
+	__except(EXCEPTION_EXECUTE_HANDLER) {LOG("Error SaveWindowPos");}
 	
 	__try
 	{
+		LOG("Try BT848_Close");
 		BT848_Close();
 	}
-	__except(EXCEPTION_EXECUTE_HANDLER) {;}
+	__except(EXCEPTION_EXECUTE_HANDLER) {LOG("Error BT848_Close");}
 
 	__try
 	{
+		LOG("Try StatusBar_Destroy");
 		StatusBar_Destroy();
 	}
-	__except(EXCEPTION_EXECUTE_HANDLER) {;}
+	__except(EXCEPTION_EXECUTE_HANDLER) {LOG("Error StatusBar_Destroy");}
 	
 	__try
 	{
+		LOG("Try ExitDD");
 		ExitDD();
 	}
-	__except(EXCEPTION_EXECUTE_HANDLER) {;}
+	__except(EXCEPTION_EXECUTE_HANDLER) {LOG("Error ExitDD");}
 	
 	__try
 	{
 		// save settings
+		LOG("WriteSettingsToIni");
 		WriteSettingsToIni();
 	}
-	__except(EXCEPTION_EXECUTE_HANDLER) {;}
+	__except(EXCEPTION_EXECUTE_HANDLER) {LOG("Error WriteSettingsToIni");}
 }
 
 //---------------------------------------------------------------------------
@@ -1855,10 +1876,15 @@ void CleanUpMemory()
 // This is also called during a Suspend operation
 void Overlay_Stop(HWND hWnd)
 {
-    InvalidateRect(hWnd, NULL, FALSE);
-	PaintColorkey(hWnd, FALSE);
+	RECT winRect;
+	HDC hDC;
+	GetClientRect(hWnd, &winRect);
+	hDC = GetDC(hWnd);
+	PaintColorkey(hWnd, FALSE, hDC, &winRect);
+	ReleaseDC(hWnd,hDC);
 	Stop_Capture();
 	Overlay_Destroy();
+    InvalidateRect(hWnd, NULL, FALSE);
 }
 
 //---------------------------------------------------------------------------

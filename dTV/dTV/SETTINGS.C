@@ -427,11 +427,6 @@ void WritePrivateProfileInt(LPCTSTR lpAppName,  LPCTSTR lpKeyName,  int nValue, 
 	WritePrivateProfileString(lpAppName,  lpKeyName,  szValue, lpFileName);
 }
 
-DWORD GetRefreshRate()
-{
-	return GetPrivateProfileInt("Pulldown", "RefreshRate", 0, szIniFile);	
-}
-
 // Start of new UI code
 // Not to be used yet
 
@@ -499,7 +494,7 @@ BOOL Setting_SetValue(SETTING* pSetting, long Value)
 	
 	if(pSetting->pfnOnChange != NULL)
 	{
-		return pSetting->pfnOnChange(Value);
+		return pSetting->pfnOnChange(*pSetting->pValue);
 	}
 	else
 	{

@@ -40,12 +40,15 @@ void _ErrorBox(HWND hwndParent, LPCSTR szFile, int Line, LPCSTR szMessage)
 #ifndef _DEBUG
     if (hWnd != NULL)
     {
+		HDC hDC;
+		hDC = GetDC(hWnd);
         // Show OSD text immediately and pause for 2 seconds.
         // OSD will continue to show after 2 seconds,
         // if there are no other OSD's pending afterwards. (thus the reason for 2 second delay)
         _snprintf(szDispMessage, sizeof(szDispMessage), "ERROR: %s", szMessage);
         OSD_ShowTextPersistent(hWnd, szDispMessage, 4);
-        OSD_Redraw(hWnd);
+        OSD_Redraw(hWnd, hDC);
+		ReleaseDC(hWnd, hDC);
         Sleep(2000);
     }
 #else

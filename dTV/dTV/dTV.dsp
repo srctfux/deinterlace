@@ -60,8 +60,8 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 ddraw.lib dxguid.lib kernel32.lib user32.lib gdi32.lib advapi32.lib winmm.lib comdlg32.lib ..\driver\bin\dTVdrv.lib /nologo /subsystem:windows /profile /debug /machine:I386 /out:".\dTV.exe"
 # SUBTRACT BASE LINK32 /map /nodefaultlib
-# ADD LINK32 ..\Driver\DLL\Debug\dTVdrv.lib ddraw.lib dxguid.lib winmm.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib COMCTL32.LIB version.lib /nologo /subsystem:windows /pdb:none /map:"dTV.map" /debug /machine:I386 /out:"..\Debug\dTV.exe"
-# SUBTRACT LINK32 /profile
+# ADD LINK32 ..\Driver\DLL\Debug\dTVdrv.lib ddraw.lib dxguid.lib winmm.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib COMCTL32.LIB version.lib /nologo /subsystem:windows /pdb:none /debug /machine:I386 /out:"..\Debug\dTV.exe"
+# SUBTRACT LINK32 /profile /map
 
 !ELSEIF  "$(CFG)" == "dTV - Win32 Release"
 
@@ -79,7 +79,7 @@ LINK32=link.exe
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /G6 /MT /W3 /Gi /Ot /I "..\driver\include\\" /D "NDEBUG" /D "_WINDOWS" /D "WIN32" /D "_MBCS" /YX /FD /c
 # SUBTRACT BASE CPP /Fr
-# ADD CPP /nologo /G6 /MT /W3 /Gi /Ot /Gf /Gy /I "..\driver\include\\" /D "NDEBUG" /D "_WINDOWS" /D "WIN32" /D "_MBCS" /FAs /Fr /YX"stdafx.h" /FD /c
+# ADD CPP /nologo /G6 /MT /W3 /Gi /Zi /Ot /Gf /Gy /I "..\driver\include\\" /D "NDEBUG" /D "_WINDOWS" /D "WIN32" /D "_MBCS" /FAcs /Fr /YX"stdafx.h" /FD /c
 # ADD BASE MTL /D "NDEBUG" /mktyplib203 /win32
 # SUBTRACT BASE MTL /nologo
 # ADD MTL /D "NDEBUG" /mktyplib203 /win32
@@ -94,8 +94,8 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 ddraw.lib dxguid.lib kernel32.lib user32.lib gdi32.lib advapi32.lib winmm.lib comdlg32.lib ..\driver\bin\hwiodrv.lib /nologo /subsystem:windows /incremental:yes /machine:I386
 # SUBTRACT BASE LINK32 /profile /map /debug /nodefaultlib
-# ADD LINK32 ..\Driver\DLL\Release\dTVdrv.lib ddraw.lib dxguid.lib kernel32.lib user32.lib gdi32.lib advapi32.lib shell32.lib winmm.lib comdlg32.lib COMCTL32.LIB version.lib /nologo /subsystem:windows /incremental:yes /map /machine:I386 /out:"..\Release\dTV.exe"
-# SUBTRACT LINK32 /profile /debug /nodefaultlib
+# ADD LINK32 ..\Driver\DLL\Release\dTVdrv.lib ddraw.lib dxguid.lib kernel32.lib user32.lib gdi32.lib advapi32.lib shell32.lib winmm.lib comdlg32.lib COMCTL32.LIB version.lib /nologo /subsystem:windows /incremental:yes /map /debug /machine:I386 /out:"..\Release\dTV.exe"
+# SUBTRACT LINK32 /profile /nodefaultlib
 
 !ENDIF 
 

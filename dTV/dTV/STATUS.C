@@ -460,3 +460,11 @@ void StatusBar_Destroy(void)
 	DestroyWindow(hwndStatusBar);	
 	DeleteObject(hbrBtnFace);
 }
+
+void StatusBar_Repaint()
+{
+	if (IsWindowVisible(hwndStatusBar))
+	{
+		InvalidateRect(hwndStatusBar, NULL, TRUE);
+	}
+}

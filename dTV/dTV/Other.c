@@ -141,6 +141,9 @@ BOOL Overlay_Update(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL Color
 
 	if (pSrcRect == NULL)
 	{
+		////////////////////////////////
+		// we are trying to hide overlay
+		////////////////////////////////
 		ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, NULL, lpDDSurface, NULL, dwFlags, &DDOverlayFX);
 		// if another device has requested exclusive access then we
 		// can get the no hardware error, just wait a bit and try again
@@ -163,55 +166,58 @@ BOOL Overlay_Update(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL Color
 			char szErrorMsg[200];
 			sprintf(szErrorMsg, "Error %x calling UpdateOverlay (Hide)", ddrval);
 			ErrorBox(szErrorMsg);
-			return (TRUE);
+			return FALSE;
 		}
 	}
-
-	dwFlags |= DDOVER_KEYDESTOVERRIDE;
-
-	PhysicalOverlayColor = Overlay_ColorMatch(lpDDSurface, OverlayColor);
-	if (PhysicalOverlayColor == 0)		// sometimes we glitch and can't get the value
+	else
 	{
-		LOG(" Physical overlay color is zero!  Retrying.");
+		////////////////////////////////
+		// we are trying to show overlay
+		////////////////////////////////
+		dwFlags |= DDOVER_KEYDESTOVERRIDE;
+
 		PhysicalOverlayColor = Overlay_ColorMatch(lpDDSurface, OverlayColor);
-	}
-	LOG(" Physical overlay color is %x", PhysicalOverlayColor);
-
-	DDOverlayFX.dckDestColorkey.dwColorSpaceHighValue = PhysicalOverlayColor;
-	DDOverlayFX.dckDestColorkey.dwColorSpaceLowValue = PhysicalOverlayColor;
-
-	ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, pSrcRect, lpDDSurface, pDestRect, dwFlags, &DDOverlayFX);
-	// if another device has requested exclusive access then we
-	// can get the no hardware error, just wait a bit and try again
-	while(ddrval == DDERR_NOOVERLAYHW)
-	{
-		Sleep(100);
-		ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, NULL, lpDDSurface, NULL, dwFlags, &DDOverlayFX);
-	}
-	// just return if we get this here
-	// all DDERR_SURFACELOST will be handled by
-	// the main processing loop
-	if(ddrval == DDERR_SURFACELOST)
-	{
-		return FALSE;
-	}
-	if (FAILED(ddrval))
-	{
-		if ((pDestRect->top < pDestRect->bottom) && (pDestRect->left < pDestRect->right))
+		if (PhysicalOverlayColor == 0)		// sometimes we glitch and can't get the value
 		{
-			// 2000-10-29 Added by Mark Rejhon
-			// Display error message only if rectangle dimensions are positive.
-			// Negative rectangle dimensions are frequently caused by the user
-			// resizing the window smaller than the video size.
-			// 2001-01-06 John Adcock
-			// Now show return code
-			char szErrorMsg[200];
-			sprintf(szErrorMsg, "Error %x in UpdateOverlay", ddrval);
-			ErrorBox(szErrorMsg);
+			LOG(" Physical overlay color is zero!  Retrying.");
+			PhysicalOverlayColor = Overlay_ColorMatch(lpDDSurface, OverlayColor);
 		}
-		IDirectDrawSurface_Release(lpDDOverlay);
-		lpDDOverlay = NULL;
-		return (FALSE);
+		LOG(" Physical overlay color is %x", PhysicalOverlayColor);
+
+		DDOverlayFX.dckDestColorkey.dwColorSpaceHighValue = PhysicalOverlayColor;
+		DDOverlayFX.dckDestColorkey.dwColorSpaceLowValue = PhysicalOverlayColor;
+
+		ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, pSrcRect, lpDDSurface, pDestRect, dwFlags, &DDOverlayFX);
+		// if another device has requested exclusive access then we
+		// can get the no hardware error, just wait a bit and try again
+		while(ddrval == DDERR_NOOVERLAYHW)
+		{
+			Sleep(100);
+			ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, NULL, lpDDSurface, NULL, dwFlags, &DDOverlayFX);
+		}
+		// just return if we get this here
+		// all DDERR_SURFACELOST will be handled by
+		// the main processing loop
+		if(ddrval == DDERR_SURFACELOST)
+		{
+			return FALSE;
+		}
+		if (FAILED(ddrval))
+		{
+			if ((pDestRect->top < pDestRect->bottom) && (pDestRect->left < pDestRect->right))
+			{
+				// 2000-10-29 Added by Mark Rejhon
+				// Display error message only if rectangle dimensions are positive.
+				// Negative rectangle dimensions are frequently caused by the user
+				// resizing the window smaller than the video size.
+				// 2001-01-06 John Adcock
+				// Now show return code
+				char szErrorMsg[200];
+				sprintf(szErrorMsg, "Error %x in UpdateOverlay", ddrval);
+				ErrorBox(szErrorMsg);
+			}
+			return FALSE;
+		}
 	}
 	return TRUE;
 }
@@ -398,32 +404,45 @@ DWORD Overlay_ColorMatch(LPDIRECTDRAWSURFACE pdds, COLORREF rgb)
 // 
 BOOL Overlay_Destroy()
 {
-	if (lpDD != NULL)
+	// Now destroy the Back Overlay
+	if (lpDDOverlayBack != NULL)
 	{
-		if (lpDDOverlay != NULL)
-		{
-			// Destroy the video overlay
-			Overlay_Update(NULL, NULL, DDOVER_HIDE, FALSE);
-			IDirectDrawSurface_Release(lpDDOverlay);
-			lpDDOverlay = NULL;
-			lpDDOverlayBack = NULL;
-
-			// Now destroy the primary surface
-			if (lpDDSurface != NULL) 
-			{
-				IDirectDrawSurface_Release(lpDDSurface);
-				lpDDSurface = NULL;
-			}
-			return TRUE;
-		}
+		IDirectDrawSurface_Release(lpDDOverlayBack);
+		lpDDOverlayBack = NULL;
 	}
-	return FALSE;
+
+	// Now destroy the main Overlay
+	if (lpDDOverlay != NULL)
+	{
+		// Destroy the video overlays
+		IDirectDrawSurface_Release(lpDDOverlay);
+		lpDDOverlay = NULL;
+	}
+
+	// Now destroy the primary surface
+	if (lpDDSurface != NULL) 
+	{
+		IDirectDrawSurface_Release(lpDDSurface);
+		lpDDSurface = NULL;
+	}
+	return TRUE;
 }
 
 COLORREF Overlay_GetColor()
 {
 	return OverlayColor;
 }
+
+void Overlay_WaitForVerticalBlank()
+{
+	HRESULT ddrval = -1;
+
+	while(ddrval != DD_OK)
+	{
+		ddrval = IDirectDraw_WaitForVerticalBlank(lpDD, DDWAITVB_BLOCKBEGIN, NULL);
+	}
+}
+
 
 //-----------------------------------------------------------------------------
 // Initialize DirectDraw

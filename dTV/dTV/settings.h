@@ -112,7 +112,6 @@ void SetIniFileForSettings(LPSTR Name);
 void LoadSettingsFromIni();
 void WriteSettingsToIni();
 void WritePrivateProfileInt(LPCTSTR lpAppName,  LPCTSTR lpKeyName,  int nValue, LPCTSTR lpFileName);
-DWORD GetRefreshRate();
 
 #define INIFILE "dTV.ini"
 

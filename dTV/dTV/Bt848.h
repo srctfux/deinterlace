@@ -108,7 +108,7 @@ void BT848_CreateRiscCode(int nFlags);
 int BT848_GetRISCPosAsInt();
 BOOL BT848_SetGeoSize();
 
-BOOL BT848_SetVideoSource(int nInput);
+BOOL BT848_SetVideoSource(VIDEOSOURCETYPE nInput);
 void BT848_SetDMA(BOOL bState);
 BOOL BT848_IsVideoPresent();
 void BT848_SetGeometryEvenOdd(BOOL bOdd, BYTE bVtc, int wHScale, int wVScale, int wHActive, int wVActive, int wHDelay, int wVDelay, BYTE bCrop);

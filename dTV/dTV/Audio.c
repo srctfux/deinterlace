@@ -40,7 +40,7 @@ BYTE AudioDeviceRead;
 int CAudioSource=0;
 
 BOOL Has_MSP = FALSE;
-char MSPStatus[30] = "";
+char MSPStatus[40] = "";
 char MSPVersion[16] = "";
 BOOL MSPToneControl = FALSE;
 
@@ -237,7 +237,7 @@ BOOL Audio_MSP_Init(BYTE DWrite, BYTE DRead)
 
 	Has_MSP = TRUE;
 
-	sprintf(MSPStatus, "MSP-Device I2C-Bus I/O 0x80/0x81");
+	strncpy(MSPStatus, "MSP-Device I2C-Bus I/O 0x80/0x81",sizeof(MSPStatus));
 
 	Audio_MSP_Reset();
 	Sleep(4);

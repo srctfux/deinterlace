@@ -41,7 +41,7 @@
 
 TVCARDID CardType = TVCARD_UNKNOWN;
 TVTUNERID TunerType = TUNER_ABSENT;
-long ProcessorSpeed = 0;
+long ProcessorSpeed = 1;
 long TradeOff = 1;
 
 
@@ -903,6 +903,10 @@ void ChangeDefaultsBasedOnHardware()
 BOOL APIENTRY SelectCardProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 {
 	int i;
+	static long OrigProcessorSpeed;
+	static long OrigTradeOff;
+	static long OrigTuner;
+
 	switch (message)
 	{
 	case WM_INITDIALOG:
@@ -927,7 +931,9 @@ BOOL APIENTRY SelectCardProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 		SendMessage(GetDlgItem(hDlg, IDC_TRADEOFF), CB_ADDSTRING, 0, (LONG)"Show all frames - Lowest judder");
 		SendMessage(GetDlgItem(hDlg, IDC_TRADEOFF), CB_ADDSTRING, 0, (LONG)"Best picture quality");
 		SendMessage(GetDlgItem(hDlg, IDC_TRADEOFF), CB_SETCURSEL, TradeOff, 0);
-
+		OrigProcessorSpeed = ProcessorSpeed;
+		OrigTradeOff = TradeOff;
+		OrigTuner = TunerType;
 		SetFocus(hDlg);
 		break;
 	case WM_COMMAND:
@@ -938,7 +944,12 @@ BOOL APIENTRY SelectCardProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 			CardType = SendMessage(GetDlgItem(hDlg, IDC_CARDSSELECT), CB_GETCURSEL, 0, 0);
 			ProcessorSpeed = SendMessage(GetDlgItem(hDlg, IDC_PROCESSOR_SPEED), CB_GETCURSEL, 0, 0);
 			TradeOff = SendMessage(GetDlgItem(hDlg, IDC_TRADEOFF), CB_GETCURSEL, 0, 0);
-			ChangeDefaultsBasedOnHardware();
+			if(OrigProcessorSpeed != ProcessorSpeed || 
+				OrigTradeOff != TradeOff ||
+				OrigTuner != TunerType)
+			{
+				ChangeDefaultsBasedOnHardware();
+			}
 			EndDialog(hDlg, TRUE);
 			break;
 		case IDCANCEL:

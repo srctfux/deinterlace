@@ -731,15 +731,15 @@ BOOL APIENTRY MixerSetupProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 
 		if (Volume.SoundSystem >= 0)
 		{
-			sprintf(Text, "%s", SoundSystem.MixerDev[Volume.SoundSystem].szPname);
+			strncpy(Text, SoundSystem.MixerDev[Volume.SoundSystem].szPname, sizeof(Text));
 		}
 		else if (Mute.SoundSystem >= 0)
 		{
-			sprintf(Text, "%s", SoundSystem.MixerDev[Mute.SoundSystem].szPname);
+			strncpy(Text, SoundSystem.MixerDev[Mute.SoundSystem].szPname, sizeof(Text));
 		}
 		else
 		{
-			sprintf(Text, "%s", SoundSystem.MixerDev[0].szPname);
+			strncpy(Text, SoundSystem.MixerDev[0].szPname, sizeof(Text));
 		}
 		SetDlgItemText(hDlg, TEXT1, Text);
 		if (Volume.SoundSystem >= 0)

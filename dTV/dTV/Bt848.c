@@ -757,7 +757,7 @@ BOOL BT848_Registers_OnChange(long IgnoreCompletely)
 }
 
 
-BOOL BT848_SetVideoSource(int nInput)
+BOOL BT848_SetVideoSource(VIDEOSOURCETYPE nInput)
 {
 	DWORD MuxSel;
 	// 0= Tuner,
@@ -773,24 +773,25 @@ BOOL BT848_SetVideoSource(int nInput)
 	// set the comp bit for svideo
 	switch (nInput)
 	{
-	case 0:
+	case SOURCE_TUNER:
 		BT848_AndDataByte(BT848_E_CONTROL, ~BT848_CONTROL_COMP);
 		BT848_AndDataByte(BT848_O_CONTROL, ~BT848_CONTROL_COMP);
 		MuxSel = GetCardSetup()->MuxSelect[GetCardSetup()->TunerInput & 7];
 		break;
-	case 2:
+	case SOURCE_SVIDEO:
 		BT848_OrDataByte(BT848_E_CONTROL, BT848_CONTROL_COMP);
 		BT848_OrDataByte(BT848_O_CONTROL, BT848_CONTROL_COMP);
 		MuxSel = GetCardSetup()->MuxSelect[GetCardSetup()->SVideoInput & 7];
 		break;
-	case 5:
+	case SOURCE_COMPVIASVIDEO:
 		BT848_AndDataByte(BT848_E_CONTROL, ~BT848_CONTROL_COMP);
 		BT848_AndDataByte(BT848_O_CONTROL, ~BT848_CONTROL_COMP);
 		MuxSel = GetCardSetup()->MuxSelect[GetCardSetup()->SVideoInput & 7];
 		break;
-	case 1:
-	case 3:
-	case 4:
+	case SOURCE_COMPOSITE:
+	case SOURCE_OTHER1:
+	case SOURCE_OTHER2:
+	case SOURCE_CCIR656:
 	default:
 		BT848_AndDataByte(BT848_E_CONTROL, ~BT848_CONTROL_COMP);
 		BT848_AndDataByte(BT848_O_CONTROL, ~BT848_CONTROL_COMP);
@@ -1365,7 +1366,6 @@ BOOL VideoSource_OnChange(long NewValue)
 		{
 			AudioSource = AUDIOMUX_TUNER;
 		}
-		BT848_SetVideoSource(VideoSource);
 		ChangeChannel(CurrentProgramm);
 		break;
 
@@ -1397,7 +1397,6 @@ BOOL VideoSource_OnChange(long NewValue)
 		BT848_ResetHardware();
 		BT848_SetGeoSize();
 		WorkoutOverlaySize();
-		BT848_SetVideoSource(VideoSource);
 		AudioSource = AUDIOMUX_EXTERNAL;
 		break;
 	default:

@@ -473,17 +473,15 @@ int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 //----------------------------------------------------------------------------
 // Repaints the overlay colorkey, optionally with black borders around it
 // during aspect ratio control
-void PaintColorkey(HWND hWnd, BOOL bEnable)
+void PaintColorkey(HWND hWnd, BOOL bEnable, HDC hDC, RECT* PaintRect)
 {
-	PAINTSTRUCT sPaint;
 	// MRS 9-9-00
 	HBRUSH black = CreateSolidBrush(RGB(0,0,0));
 	HBRUSH overlay;
-	BeginPaint(hWnd, &sPaint);
 
 	if (bEnable && OverlayActive())
 	{
-		overlay = CreateSolidBrush(GetNearestColor(sPaint.hdc, Overlay_GetColor()));
+		overlay = CreateSolidBrush(GetNearestColor(hDC, Overlay_GetColor()));
 	}
 	else
 	{
@@ -494,53 +492,49 @@ void PaintColorkey(HWND hWnd, BOOL bEnable)
 		RECT r;
 		// Draw black in the 4 borders
 		RECT r2, winRect;
-		GetWindowRect(hWnd,&winRect);
+		GetClientRect(hWnd,&winRect);
 
 		// Top
 		r2.left = 0;
 		r2.top = 0;
 		r2.right = winRect.right;
 		r2.bottom = destinationRectangle.top;
-		IntersectRect(&r,&r2,&sPaint.rcPaint);
-		FillRect(sPaint.hdc, &r, black);
+		IntersectRect(&r, &r2, PaintRect);
+		FillRect(hDC, &r, black);
 
 		// Bottom
 		r2.left = 0;
 		r2.top = destinationRectangle.bottom;
 		r2.right = winRect.right;
 		r2.bottom = winRect.bottom;
-		IntersectRect(&r,&r2,&sPaint.rcPaint);
-		FillRect(sPaint.hdc, &r, black);
+		IntersectRect(&r, &r2, PaintRect);
+		FillRect(hDC, &r, black);
 
 		// Left
 		r2.left = 0;
 		r2.top = 0;
 		r2.right = destinationRectangle.left;
 		r2.bottom = winRect.bottom;
-		IntersectRect(&r,&r2,&sPaint.rcPaint);
-		FillRect(sPaint.hdc, &r, black);
+		IntersectRect(&r, &r2, PaintRect);
+		FillRect(hDC, &r, black);
 
 		// Right
 		r2.left = destinationRectangle.right;
 		r2.top = 0;
 		r2.right = winRect.right;
 		r2.bottom = winRect.bottom;
-		IntersectRect(&r,&r2,&sPaint.rcPaint);
-		FillRect(sPaint.hdc, &r, black);
+		IntersectRect(&r, &r2, PaintRect);
+		FillRect(hDC, &r, black);
 
 		// Draw overlay color in the middle.
-		IntersectRect(&r,&destinationRectangle,&sPaint.rcPaint);
-		FillRect(sPaint.hdc, &r, overlay);
+		IntersectRect(&r, &destinationRectangle, PaintRect);
+		FillRect(hDC, &r, overlay);
 	} else {
-		FillRect(sPaint.hdc, &sPaint.rcPaint, overlay);
+		FillRect(hDC, PaintRect, overlay);
 	}
 
 	DeleteObject(black);
 	DeleteObject(overlay);
-
-	// END MRS
-	EndPaint(hWnd, &sPaint);
-
 }
 
 //----------------------------------------------------------------------------

@@ -49,6 +49,7 @@ HWND StatusBar_AddField(int iId, int iMin, int iMax, BOOL bNewGroup);
 void StatusBar_Destroy();
 void StatusBar_ShowText(eSTATUSBAR_BOX Field, LPCTSTR  szText);
 void StatusBar_ShowWindow(BOOL bShow);
+void StatusBar_Repaint();
 
 
 #endif
