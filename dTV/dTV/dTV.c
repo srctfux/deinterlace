@@ -1478,7 +1478,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				strcat(ChannelString, Text);
 				if(VTState == VT_OFF)
 				{
-					OSD_Clear(hWnd);
 					OSD_ShowText(hWnd, ChannelString, 0);
 				}
 				if (strlen(ChannelString) >= 3)
