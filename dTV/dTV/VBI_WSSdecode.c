@@ -42,11 +42,11 @@
 // Structure of WSS signal for 625-line systems
 #define	WSS625_RUNIN_CODE_LENGTH	29
 #define	WSS625_START_CODE_LENGTH	24
-#define	WSS625_BEFORE_DATA_LENGTH	(WSS625_RUNIN_CODE_LENGTH+WSS625_START_CODE_LENGTH)
 #define	WSS625_DATA_BIT_LENGTH		6
 #define	WSS625_NB_DATA_BITS			14
 #define	WSS625_START_POS_MIN		110
 #define	WSS625_START_POS_MAX		150
+#define WSS625_MIN_THRESHOLD		0x55
 
 // Possible ratio values for 625-line systems
 #define	WSS625_RATIO_133					0x08
@@ -65,8 +65,6 @@
 
 #define AR_NONANAMORPHIC 1
 #define AR_ANAMORPHIC    2
-
-#define ROUND(d)	(int)floor((d)+0.5)
 
 extern int decodebit(unsigned char *data, int threshold, int NumPixels);
 
@@ -89,7 +87,24 @@ int		WSSNbDecodeOk = 0;			// Number of correct decoding
 int		WSSMinPos = WSS625_START_POS_MAX;
 int		WSSMaxPos = WSS625_START_POS_MIN;
 int		WSSTotalPos = 0;
+int		WSSNbErrPos = 0;
 static int	WSSNbSuccessiveErr = 0;	// Number of successive decoding errors
+
+// Offsets of each clock pixels (7.09379) in VBI buffer line
+static int offsets[] = {   0,   7,  14,  21,  28,  35,  43,  50,  57,  64,
+						  71,  78,  85,  92,  99, 106, 114, 121, 128, 135,
+						 142, 149, 156, 163, 170, 177, 184, 192, 199, 206,
+						 213, 220, 227, 234, 241, 248, 255, 262, 270, 277,
+						 284, 291, 298, 305, 312, 319, 326, 333, 341, 348,
+						 355, 362, 369, 376, 383, 390, 397, 404, 411, 419,
+						 426, 433, 440, 447, 454, 461, 468, 475, 482, 489,
+						 497, 504, 511, 518, 525, 532, 539, 546, 553, 560,
+						 568, 575, 582, 589, 596, 603, 610, 617, 624, 631,
+						 638, 646, 653, 660, 667, 674, 681, 688, 695, 702,
+						 709, 716, 724, 731, 738, 745, 752, 759, 766, 773,
+						 780, 787, 795, 802, 809, 816, 823, 830, 837, 844,
+						 851, 858, 865, 873, 880, 887, 894, 901, 908, 915,
+						 922, 929, 936, 943, 951, 958, 965, 972, 979, 986 };
 
 // Sequence values for run-in code
 static int WSS625_runin[WSS625_RUNIN_CODE_LENGTH] = { 1,1,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1 };
@@ -100,7 +115,7 @@ static int WSS625_start[WSS625_START_CODE_LENGTH] = { 0,0,0,1,1,1,1,0,0,0,1,1,1,
 // Sequence values for a data bit = 0
 static int WSS625_0[WSS625_DATA_BIT_LENGTH] = { 0,0,0,1,1,1 };
 
-// Sequence values for a data bit = 0
+// Sequence values for a data bit = 1
 static int WSS625_1[WSS625_DATA_BIT_LENGTH] = { 1,1,1,0,0,0 };
 
 // Clear WSS decoded data
@@ -128,31 +143,20 @@ void WSS_init ()
 	WSSMinPos = WSS625_START_POS_MAX;
 	WSSMaxPos = WSS625_START_POS_MIN;
 	WSSTotalPos = 0;
+	WSSNbErrPos = 0;
 	WSSNbSuccessiveErr = 0;
 
 	// Clear WSS decoded data
 	WSS_clear_data ();
 }
 
-static void log_databit(int bit_pos, int decoded_bit, BYTE* vbiline, double ClockPixels)
-{
-	int	i, pos;
-
-	for (i = 0 ; i < WSS625_DATA_BIT_LENGTH ; i++)
-	{
-		pos = ROUND (ClockPixels * i);
-		LOG("WSS bit b%d : %d => %x %x %x %x %x %x %x", bit_pos, decoded_bit, vbiline[pos], vbiline[pos+1], vbiline[pos+2], vbiline[pos+3], vbiline[pos+4], vbiline[pos+5], vbiline[pos+6]);
-	}
-}
-
-static BOOL decode_sequence(BYTE* vbiline, int *DecodedVals, int NbVal, int Threshold, double ClockPixels)
+static BOOL decode_sequence(BYTE* vbiline, int *DecodedVals, int NbVal, int Threshold, int *Offsets)
 {
 	int	i;
-	int	NbPixels = ROUND (ClockPixels);
 
 	for (i = 0 ; i < NbVal ; i++)
 	{
-		if (decodebit (vbiline + ROUND (ClockPixels * i), Threshold, NbPixels) != DecodedVals[i])
+		if (decodebit (vbiline + Offsets[i] - Offsets[0], Threshold, 7) != DecodedVals[i])
 			break;
 	}
 	return ( (i == NbVal) ? TRUE : FALSE );
@@ -160,59 +164,70 @@ static BOOL decode_sequence(BYTE* vbiline, int *DecodedVals, int NbVal, int Thre
 
 static BOOL WSS625_DecodeLine(BYTE* vbiline)
 {
-	int		i, j;
+	int		i, j, k;
 	BOOL	DecodeOk = FALSE;
-	double	ClockPixels;
 	int		Threshold = 0;
-	int		pos;
+	int		StartPos;
 	int		bits[WSS625_NB_DATA_BITS];
 	int		packedbits;
 	int		nb;
 
-	ClockPixels = 7.09379;
 	Threshold = VBI_thresh;
-	if (Threshold < 10)
+
+	if (Threshold < WSS625_MIN_THRESHOLD)
 	{
-//		LOG("WSS signal threshold < 10");
+//		LOG("WSS signal threshold too low (%x)", Threshold);
 		return FALSE;
 	}
 
 	for (i = WSS625_START_POS_MIN ; i <= WSS625_START_POS_MAX ; i++)
 	{
+//		if ( (vbiline[i+3] <= Threshold)
+//		  || (vbiline[i+2] <= Threshold)
+//		  || (vbiline[i+4] <= Threshold)
+//		  || (vbiline[i+1] <= Threshold)
+//		  || (vbiline[i+5] <= Threshold) )
+		if (vbiline[i] < Threshold)
+			continue;
+
+		StartPos = i;
+//		LOG("WSS decoding at start position = %d", StartPos);
+
 		// run-in code decoding
-		pos = i;
-		if (decode_sequence (vbiline + pos, WSS625_runin, WSS625_RUNIN_CODE_LENGTH, Threshold, ClockPixels))
+		k = 0;
+		if (decode_sequence (vbiline + i + offsets[k], WSS625_runin, WSS625_RUNIN_CODE_LENGTH, Threshold, &offsets[k]))
 		{
-//			LOG("WSS run-in code detected (i = %d, Threshold = %x)", i, Threshold);
+//			LOG("WSS run-in code detected (start pos = %d, Threshold = %x)", i, Threshold);
+			k += WSS625_RUNIN_CODE_LENGTH;
 
 			// Start code decoding
-			pos = i + ROUND (ClockPixels * WSS625_RUNIN_CODE_LENGTH);
-			if (decode_sequence (vbiline + pos, WSS625_start, WSS625_START_CODE_LENGTH, Threshold, ClockPixels))
+			if (decode_sequence (vbiline + i + offsets[k], WSS625_start, WSS625_START_CODE_LENGTH, Threshold, &offsets[k]))
 			{
 //				LOG("WSS start code detected");
+				k += WSS625_START_CODE_LENGTH;
 
 				// Data bits decoding
 				nb = 0;
 				for (j = 0 ; j < WSS625_NB_DATA_BITS ; j++)
 				{
-					pos = i + ROUND (ClockPixels * (WSS625_BEFORE_DATA_LENGTH + j * WSS625_DATA_BIT_LENGTH));
-					if (decode_sequence (vbiline + pos, WSS625_0, WSS625_DATA_BIT_LENGTH, Threshold, ClockPixels))
+					if (decode_sequence (vbiline + i + offsets[k], WSS625_0, WSS625_DATA_BIT_LENGTH, Threshold, &offsets[k]))
 					{
 						bits[j] = 0;
 						nb++;
-//						LOG("WSS b%d = 0 (i = %d, Threshold = %x)", j, i, Threshold);
+//						LOG("WSS b%d = 0 (start pos = %d, Threshold = %x)", j, i, Threshold);
 					}
-					else if (decode_sequence (vbiline + pos, WSS625_1, WSS625_DATA_BIT_LENGTH, Threshold, ClockPixels))
+					else if (decode_sequence (vbiline + i + offsets[k], WSS625_1, WSS625_DATA_BIT_LENGTH, Threshold, &offsets[k]))
 					{
 						bits[j] = 1;
 						nb++;
-//						LOG("WSS b%d = 1 (i = %d, Threshold = %x)", j, i, Threshold);
+//						LOG("WSS b%d = 1 (start pos = %d, Threshold = %x)", j, i, Threshold);
 					}
 					else
 					{
 						bits[j] = -1;
 //						LOG("WSS b%d = ?", j);
 					}
+					k += WSS625_DATA_BIT_LENGTH;
 				}
 				if (nb == WSS625_NB_DATA_BITS)
 				{
@@ -221,37 +236,30 @@ static BOOL WSS625_DecodeLine(BYTE* vbiline)
 				}
 			}
 		}
+		WSSNbErrPos++;
 	}
-
-//	if (! DecodeOk)
-//	{
-//		i = 0;
-//		LOG("WSS start pos = %d, Threshold = %x, Min = %x, Max = %x", i, Threshold, min, max);
-//		for (j = 0 ; j < 250 ; j++)
-//		{
-//			pos = i + ROUND (ClockPixels * j);
-//			LOG("WSS pos = %d : %x %x %x %x %x %x %x", pos, vbiline[pos], vbiline[pos + 1], vbiline[pos + 2], vbiline[pos + 3], vbiline[pos + 4], vbiline[pos + 5], vbiline[pos + 6]);
-//		}
-//	}
-//	else
-//	{
-//		LOG("WSS start pos = %d, Threshold = %x", i, Threshold);
-//		for (j = 0 ; j < WSS625_NB_DATA_BITS ; j++)
-//		{
-//			pos = i + ROUND (ClockPixels * (WSS625_BEFORE_DATA_LENGTH + j * WSS625_DATA_BIT_LENGTH));
-//			log_databit (j, bits[j], vbiline + pos, ClockPixels);
-//			LOG("WSS bit b%d = %d",j,bits[j]);
-//		}
-//	}
 
 	if (DecodeOk)
 	{
+//		LOG("WSS decode OK start pos = %d, Threshold = %x", StartPos, Threshold);
+//		k = WSS625_RUNIN_CODE_LENGTH + WSS625_START_CODE_LENGTH;
+//		for (i = 0 ; i < WSS625_NB_DATA_BITS ; i++)
+//		{
+//			for (j = 0 ; j < WSS625_DATA_BIT_LENGTH ; j++)
+//			{
+//				int pos = StartPos + offsets[k];
+//				LOG("WSS bit b%d => %x %x %x %x %x %x %x", i, vbiline[pos], vbiline[pos+1], vbiline[pos+2], vbiline[pos+3], vbiline[pos+4], vbiline[pos+5], vbiline[pos+6]);
+//				k++;
+//			}
+//			LOG("WSS bit b%d = %d", i, bits[i]);
+//		}
+
 		// Decoding statistics
-		WSSTotalPos += i;
-		if (i < WSSMinPos)
-			WSSMinPos = i;
-		if (i > WSSMaxPos)
-			WSSMaxPos = i;
+		WSSTotalPos += StartPos;
+		if (StartPos < WSSMinPos)
+			WSSMinPos = StartPos;
+		if (StartPos > WSSMaxPos)
+			WSSMaxPos = StartPos;
 
 		packedbits = 0;
 		for (j = 0 ; j < WSS625_NB_DATA_BITS ; j++)
@@ -297,6 +305,16 @@ static BOOL WSS625_DecodeLine(BYTE* vbiline)
 		WSSCopyrightAsserted = (packedbits & 0x1000) ? TRUE : FALSE;
 		WSSCopyProtection = (packedbits & 0x2000) ? TRUE : FALSE;
 	}
+//	else
+//	{
+//		LOG("WSS decode ERROR Threshold = %x", Threshold);
+//		StartPos = 0;
+//		for (j = 0 ; j < 250 ; j++)
+//		{
+//			k = StartPos + j * 7;
+//			LOG("WSS pos = %d : %x %x %x %x %x %x %x", k, vbiline[k], vbiline[k + 1], vbiline[k + 2], vbiline[k + 3], vbiline[k + 4], vbiline[k + 5], vbiline[k + 6]);
+//		}
+//	}
 
 	return DecodeOk;
 }

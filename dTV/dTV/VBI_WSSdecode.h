@@ -49,6 +49,7 @@ extern int	WSSNbDecodeOk;	// Number of correct decoding
 extern int	WSSMinPos;
 extern int	WSSMaxPos;
 extern int	WSSTotalPos;
+extern int	WSSNbErrPos;
 
 void WSS_init ();
 int WSS_DecodeLine(BYTE* vbiline);

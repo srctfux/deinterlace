@@ -653,7 +653,7 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 			OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 		}
 
-		if (WSSNbDecodeOk > 0)
+		if ((WSSNbDecodeOk+WSSNbDecodeErr) > 0)
 		{
 
 			if (WSSDecodeOk)
@@ -706,13 +706,18 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 			}
 
-			OSD_AddText("Stats", dfSize, RGB(150,150,255), OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+			OSD_AddText("Debug", dfSize, RGB(150,150,255), OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 
 			// Debug informations
-			sprintf (szInfo, "Minimum start position : %d", WSSMinPos);
+			sprintf (szInfo, "Errors searching start position : %d", WSSNbErrPos);
 			OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-			sprintf (szInfo, "Maximum start position : %d", WSSMaxPos);
-			OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+			if (WSSNbDecodeOk > 0)
+			{
+				sprintf (szInfo, "Minimum start position : %d", WSSMinPos);
+				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+				sprintf (szInfo, "Maximum start position : %d", WSSMaxPos);
+				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+			}
 		}
 		break;
 
