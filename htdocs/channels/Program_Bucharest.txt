@@ -1,0 +1,148 @@
+Name: Romantica
+Freq: 112250
+Chan: 4
+Active: 1
+Name: Rai Uno
+Freq: 119250
+Chan: 5
+Active: 1
+Name: Atomic
+Freq: 126250
+Chan: 6
+Active: 1
+Name: Discovery
+Freq: 133250
+Chan: 7
+Active: 1
+Name: Eurosport
+Freq: 140250
+Chan: 8
+Active: 1
+Name: Astral Telecom
+Freq: 147250
+Chan: 10
+Active: 1
+Name: Euronews
+Freq: 154250
+Chan: 0
+Active: 1
+Name: Tele 7abc
+Freq: 161250
+Chan: 12
+Active: 1
+Name: TV 5
+Freq: 168250
+Chan: 13
+Active: 1
+Name: PAX
+Freq: 175250
+Chan: 14
+Active: 1
+Name: Antena 1
+Freq: 182250
+Chan: 0
+Active: 1
+Name: PRO TV
+Freq: 189250
+Chan: 0
+Active: 1
+Name: TVR 1
+Freq: 196250
+Chan: 0
+Active: 1
+Name: TVR 2
+Freq: 203250
+Chan: 0
+Active: 1
+Name: Prima TV
+Freq: 210250
+Chan: 0
+Active: 1
+Name: B1TV
+Freq: 217250
+Chan: 0
+Active: 1
+Name: HBO
+Freq: 248250
+Chan: 0
+Active: 0
+Name: Acasa
+Freq: 224250
+Chan: 0
+Active: 1
+Name: HBO 2
+Freq: 239250
+Chan: 0
+Active: 0
+Name: Fox Kids
+Freq: 252250
+Chan: 0
+Active: 1
+Name: Hallmark
+Freq: 259250
+Chan: 0
+Active: 1
+Name: MTV
+Freq: 266250
+Chan: 0
+Active: 1
+Name: National Geografic
+Freq: 273250
+Chan: 0
+Active: 1
+Name: Animal Planet
+Freq: 280250
+Chan: 0
+Active: 1
+Name: Realitatea TV
+Freq: 287250
+Chan: 0
+Active: 1
+Name: VH1
+Freq: 294250
+Chan: 0
+Active: 1
+Name: Cartoon Network
+Freq: 303250
+Chan: 0
+Active: 1
+Name: Reality TV
+Freq: 311250
+Chan: 0
+Active: 1
+Name: TVR Cultural
+Freq: 319250
+Chan: 0
+Active: 1
+Name: Mezzo
+Freq: 327250
+Chan: 0
+Active: 1
+Name: TVRM
+Freq: 343250
+Chan: 0
+Active: 1
+Name: CNN
+Freq: 351250
+Chan: 0
+Active: 1
+Name: PRO 7
+Freq: 359250
+Chan: 0
+Active: 1
+Name: TVE
+Freq: 367250
+Chan: 0
+Active: 1
+Name: Duna TV
+Freq: 471250
+Chan: 0
+Active: 1
+Name: ETNO
+Freq: 479250
+Chan: 0
+Active: 1
+Name: M6
+Freq: 487250
+Chan: 0
+Active: 1

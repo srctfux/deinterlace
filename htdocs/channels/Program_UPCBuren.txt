@@ -1,0 +1,124 @@
+Name: Ned 1
+Freq: 203250
+Chan: 9
+Active: 1
+Form: 0
+Name: Ned 2
+Freq: 189250
+Chan: 7
+Active: 1
+Form: 0
+Name: Ned 3
+Freq: 217000
+Chan: 11
+Active: 1
+Form: 0
+Name: RTL 4
+Freq: 661750
+Chan: 45
+Active: 1
+Form: 0
+Name: RTL 5
+Freq: 790750
+Chan: 61
+Active: 1
+Name: SBS 6
+Freq: 709500
+Chan: 51
+Active: 1
+Form: 0
+Name: Yourin
+Freq: 182250
+Chan: 6
+Active: 1
+Form: 0
+Name: V 8
+Freq: 538000
+Chan: 29
+Active: 1
+Form: 0
+Name: Net 5
+Freq: 775250
+Chan: 59
+Active: 1
+Form: 0
+Name: TMF
+Freq: 497750
+Chan: 24
+Active: 1
+Form: 0
+Name: BRT
+Freq: 511750
+Chan: 26
+Active: 1
+Form: 0
+Name: Ketnet
+Freq: 527250
+Chan: 28
+Active: 1
+Form: 0
+Name: WDR
+Freq: 48250
+Chan: 2
+Active: 1
+Form: 0
+Name: ZDF
+Freq: 175250
+Chan: 5
+Active: 1
+Form: 0
+Name: BBC 1
+Freq: 551250
+Chan: 31
+Active: 1
+Form: 0
+Name: BBC 2
+Freq: 568250
+Chan: 33
+Active: 1
+Form: 0
+Name: National Geographic
+Freq: 632000
+Chan: 41
+Active: 1
+Form: 0
+Name: Eurosport
+Freq: 719250
+Chan: 52
+Active: 1
+Form: 0
+Name: Discovery
+Freq: 743750
+Chan: 55
+Active: 1
+Form: 0
+Name: CNN
+Freq: 801250
+Chan: 62
+Active: 1
+Form: 0
+Name: Kabelkrant
+Freq: 823250
+Chan: 65
+Active: 1
+Form: 0
+Name: TV 5
+Freq: 62250
+Chan: 4
+Active: 1
+Form: 0
+Name: Tellsell
+Freq: 487250
+Chan: 23
+Active: 1
+Form: 0
+Name: TV Gelderland
+Freq: 196250
+Chan: 8
+Active: 1
+Form: 0
+Name: UPC
+Freq: 55250
+Chan: 3
+Active: 1
+Form: 0

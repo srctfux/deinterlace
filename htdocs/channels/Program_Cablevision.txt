@@ -1,0 +1,360 @@
+Name: America
+Freq2: 991
+Chan: 1
+Active: 0
+Form: 8
+Name: P&E
+Freq2: 991
+Chan: 2
+Active: 1
+Form: 8
+Name: Canal 3 Local
+Freq2: 1083
+Chan: 3
+Active: 1
+Form: 8
+Name: TN
+Freq2: 1184
+Chan: 4
+Active: 1
+Form: 8
+Name: Cronica
+Freq2: 1344
+Chan: 5
+Active: 1
+Form: 8
+Name: CVN
+Freq2: 1440
+Chan: 6
+Active: 1
+Form: 8
+Name: Canal 13 Bs. As.
+Freq2: 2912
+Chan: 7
+Active: 1
+Form: 8
+Name: siete
+Freq2: 3008
+Chan: 8
+Active: 1
+Form: 8
+Name: Empty
+Freq2: 3200
+Chan: 9
+Active: 0
+Form: 8
+Name: Telefe
+Freq2: 3200
+Chan: 10
+Active: 1
+Form: 8
+Name: America
+Freq2: 3296
+Chan: 11
+Active: 1
+Form: 8
+Name: 9 Resistencia
+Freq2: 3392
+Chan: 12
+Active: 1
+Form: 8
+Name: 13 Corrientes
+Freq2: 3486
+Chan: 13
+Active: 1
+Form: 8
+Name: T y C Sports
+Freq2: 2432
+Chan: 14
+Active: 1
+Form: 8
+Name: Espn +
+Freq2: 3576
+Chan: 15
+Active: 1
+Form: 8
+Name: Fox Sports
+Freq2: 2234
+Chan: 16
+Active: 1
+Form: 8
+Name: Espn
+Freq2: 2336
+Chan: 17
+Active: 1
+Form: 8
+Name: America Sports / T y C Max
+Freq2: 2432
+Chan: 18
+Active: 1
+Form: 8
+Name: Cartoon Network
+Freq2: 2528
+Chan: 19
+Active: 1
+Form: 8
+Name: Magic Kids
+Freq2: 2624
+Chan: 20
+Active: 1
+Form: 8
+Name: Fox Kids
+Freq2: 2720
+Chan: 21
+Active: 1
+Form: 8
+Name: Nickelodeon
+Freq2: 2816
+Chan: 22
+Active: 1
+Form: 8
+Name: Discovery Kids
+Freq2: 3584
+Chan: 23
+Active: 1
+Form: 8
+Name: Cinecanal
+Freq2: 3680
+Chan: 24
+Active: 1
+Form: 8
+Name: Hallmark
+Freq2: 3776
+Chan: 25
+Active: 1
+Form: 8
+Name: TNT
+Freq2: 3872
+Chan: 26
+Active: 1
+Form: 8
+Name: I - Sat
+Freq2: 3968
+Chan: 27
+Active: 1
+Form: 8
+Name: Space
+Freq2: 4064
+Chan: 28
+Active: 1
+Form: 8
+Name: FOX
+Freq2: 4160
+Chan: 0
+Active: 1
+Form: 8
+Name: Warner Bros
+Freq2: 4256
+Chan: 30
+Active: 1
+Form: 8
+Name: Sony
+Freq2: 4352
+Chan: 31
+Active: 1
+Form: 8
+Name: HBO
+Freq2: 4448
+Chan: 32
+Active: 0
+Form: 8
+Name: HBO Plus
+Freq2: 4544
+Chan: 33
+Active: 0
+Form: 8
+Name: Cinemax
+Freq2: 4640
+Chan: 34
+Active: 0
+Form: 8
+Name: Movie City
+Freq2: 4736
+Chan: 35
+Active: 0
+Form: 8
+Name: Cinecanal 2
+Freq2: 4832
+Chan: 36
+Active: 0
+Form: 8
+Name: Utilisima Satelital
+Freq2: 4928
+Chan: 37
+Active: 1
+Form: 8
+Name: elgourmet.com
+Freq2: 5024
+Chan: 38
+Active: 1
+Form: 8
+Name: The History Channel
+Freq2: 5120
+Chan: 39
+Active: 1
+Form: 8
+Name: Discovery
+Freq2: 5216
+Chan: 40
+Active: 1
+Form: 8
+Name: (á)
+Freq2: 5312
+Chan: 41
+Active: 1
+Form: 8
+Name: National Geographic
+Freq2: 5408
+Chan: 42
+Active: 1
+Form: 8
+Name: MTV
+Freq2: 5504
+Chan: 43
+Active: 1
+Form: 8
+Name: Argentinisima
+Freq2: 5600
+Chan: 44
+Active: 1
+Form: 8
+Name: TV Española
+Freq2: 5694
+Chan: 45
+Active: 1
+Form: 8
+Name: De las estrellas
+Freq2: 5792
+Chan: 46
+Active: 1
+Form: 8
+Name: RAI
+Freq2: 5888
+Chan: 47
+Active: 1
+Form: 8
+Name: CNN Español
+Freq2: 5984
+Chan: 48
+Active: 1
+Form: 8
+Name: E! Entertainment
+Freq2: 6080
+Chan: 49
+Active: 1
+Form: 8
+Name: Volver
+Freq2: 6176
+Chan: 50
+Active: 1
+Form: 8
+Name: AXN
+Freq2: 6272
+Chan: 51
+Active: 1
+Form: 8
+Name: MGM
+Freq2: 6368
+Chan: 52
+Active: 1
+Form: 8
+Name: The Film Zone
+Freq2: 6464
+Chan: 53
+Active: 1
+Form: 8
+Name: USA Network
+Freq2: 6560
+Chan: 54
+Active: 1
+Form: 8
+Name: Retro
+Freq2: 6656
+Chan: 55
+Active: 1
+Form: 8
+Name: Europa Europa
+Freq2: 6752
+Chan: 56
+Active: 1
+Form: 8
+Name: FTV
+Freq2: 6848
+Chan: 57
+Active: 1
+Form: 8
+Name: Cosmopolitan
+Freq2: 6944
+Chan: 58
+Active: 1
+Form: 8
+Name: Animal Planet
+Freq2: 7040
+Chan: 59
+Active: 1
+Form: 8
+Name: Infinito
+Freq2: 7136
+Chan: 60
+Active: 1
+Form: 8
+Name: empty
+Freq2: 7136
+Chan: 0
+Active: 0
+Form: 8
+Name: People & Arts
+Freq2: 7321
+Chan: 62
+Active: 1
+Form: 8
+Name: Much Music
+Freq2: 7419
+Chan: 63
+Active: 1
+Form: 8
+Name: Locomotion
+Freq2: 7520
+Chan: 64
+Active: 1
+Form: 8
+Name: Deutsch Welle
+Freq2: 7616
+Chan: 65
+Active: 1
+Form: 8
+Name: TV Chile
+Freq2: 7712
+Chan: 66
+Active: 1
+Form: 8
+Name: CNN ingles?
+Freq2: 7808
+Chan: 67
+Active: 1
+Form: 8
+Name: TV Globo
+Freq2: 7898
+Chan: 68
+Active: 1
+Form: 8
+Name: Rural
+Freq2: 8000
+Chan: 69
+Active: 1
+Form: 8
+Name: Plus
+Freq2: 8091
+Chan: 70
+Active: 1
+Form: 8
+Name: Canal Evangelico
+Freq2: 8192
+Chan: 71
+Active: 1
+Form: 8
+Name: EWTN
+Freq2: 8288
+Chan: 72
+Active: 1
+Form: 8

@@ -1,0 +1,144 @@
+Name: NED 1
+Freq: 184000
+Chan: 6
+Active: 1
+Name: NED 2
+Freq: 192000
+Chan: 7
+Active: 1
+Name: NED 3
+Freq: 200000
+Chan: 8
+Active: 1
+Name: RTL 4
+Freq: 743750
+Chan: 55
+Active: 1
+Name: RTL 5
+Freq: 720000
+Chan: 52
+Active: 1
+Name: Yorin
+Freq: 648000
+Chan: 43
+Active: 1
+Name: SBS 6
+Freq: 632000
+Chan: 41
+Active: 1
+Name: NET 5
+Freq: 504000
+Chan: 25
+Active: 1
+Name: V8
+Freq: 792000
+Chan: 61
+Active: 1
+Name: VRT 1
+Freq: 208000
+Chan: 9
+Active: 1
+Name: VRT 2
+Freq: 216000
+Chan: 10
+Active: 1
+Name: ARD
+Freq: 528000
+Chan: 28
+Active: 1
+Name: ZDF
+Freq: 568000
+Chan: 33
+Active: 1
+Name: WDR 3
+Freq: 624000
+Chan: 40
+Active: 1
+Name: SWR 3
+Freq: 536000
+Chan: 29
+Active: 1
+Name: RTL+
+Freq: 816000
+Chan: 0
+Active: 1
+Name: SAT 1
+Freq: 800000
+Chan: 62
+Active: 1
+Name: BBC 1
+Freq: 664000
+Chan: 45
+Active: 1
+Name: BBC 2
+Freq: 696000
+Chan: 49
+Active: 1
+Name: CNN
+Freq: 760000
+Chan: 57
+Active: 1
+Name: EuroNews
+Freq: 544000
+Chan: 0
+Active: 1
+Name: National Geographic Channel
+Freq: 832000
+Chan: 0
+Active: 1
+Name: Discovery
+Freq: 848000
+Chan: 68
+Active: 1
+Name: Animal Channel
+Freq: 776000
+Chan: 0
+Active: 1
+Name: MTV
+Freq: 784000
+Chan: 60
+Active: 1
+Name: TMF
+Freq: 752000
+Chan: 56
+Active: 1
+Name: The Box
+Freq: 712000
+Chan: 51
+Active: 1
+Name: L1
+Freq: 488000
+Chan: 23
+Active: 1
+Name: TV 5
+Freq: 736000
+Chan: 54
+Active: 1
+Name: Nickolodeon
+Freq: 728000
+Chan: 0
+Active: 1
+Name: EuroSport
+Freq: 840000
+Chan: 0
+Active: 1
+Name: Parkstad
+Freq: 480000
+Chan: 22
+Active: 1
+Name: TVT
+Freq: 512000
+Chan: 26
+Active: 1
+Name: Info
+Freq: 224000
+Chan: 27
+Active: 1
+Name: PreView
+Freq: 232000
+Chan: 28
+Active: 1
+Name: Shop
+Freq: 672000
+Chan: 46
+Active: 1

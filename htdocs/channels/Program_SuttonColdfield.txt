@@ -1,0 +1,25 @@
+Name: BBC ONE
+Freq: 671312
+Chan: 46
+Active: 1
+Form: 4
+Name: BBC TWO
+Freq: 623250
+Chan: 40
+Active: 1
+Form: 4
+Name: ITV1 (Carlton)
+Freq: 647250
+Chan: 43
+Active: 1
+Form: 4
+Name: Channel 4 Television
+Freq: 703250
+Chan: 50
+Active: 1
+Form: 4
+Name: five
+Freq: 599250
+Chan: 37
+Active: 1
+Form: 4
