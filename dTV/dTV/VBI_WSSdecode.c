@@ -45,8 +45,8 @@
 #define	WSS625_BEFORE_DATA_LENGTH	(WSS625_RUNIN_CODE_LENGTH+WSS625_START_CODE_LENGTH)
 #define	WSS625_DATA_BIT_LENGTH		6
 #define	WSS625_NB_DATA_BITS			14
-#define	WSS625_START_POS_MIN		50
-#define	WSS625_START_POS_MAX		200
+#define	WSS625_START_POS_MIN		110
+#define	WSS625_START_POS_MAX		150
 
 // Possible ratio values for 625-line systems
 #define	WSS625_RATIO_133					0x08
@@ -405,7 +405,9 @@ int WSS_DecodeLine(BYTE* vbiline)
 					NewAspectRatio = aspectSettings.source_aspect;
 				}
 			}
-			if (bSwitch)
+			if (bSwitch
+			 && ( (NewAspectMode != aspectSettings.aspect_mode)
+			   || (NewAspectRatio != aspectSettings.source_aspect) ) )
 			{
 				SwitchToRatio (NewAspectMode, NewAspectRatio);
 			}
