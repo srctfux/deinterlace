@@ -448,7 +448,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			bAutoDetectMode = !bAutoDetectMode;
 			if(bAutoDetectMode == TRUE)
 			{
-				gPulldownMode = VIDEO_MODE;
+				gPulldownMode = VIDEO_MODE_BOB;
 				UpdatePulldownStatus();
 			}
 			SetMenuAnalog();
@@ -468,9 +468,10 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_22PULLEVEN:
 		case IDM_WEAVE:
 		case IDM_BOB:
-		case IDM_VIDEO:
+		case IDM_VIDEO_WEAVE:
+		case IDM_VIDEO_BOB:
 			bAutoDetectMode = FALSE;
-			gPulldownMode = LOWORD(wParam) - IDM_VIDEO;
+			gPulldownMode = LOWORD(wParam) - IDM_VIDEO_BOB;
 			UpdatePulldownStatus();
 			SetMenuAnalog();
 			break;
@@ -1119,8 +1120,20 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				}
 				else if(gPulldownMode == PULLDOWNMODES_LAST_ONE)
 				{
-					gPulldownMode = VIDEO_MODE;
+					gPulldownMode = VIDEO_MODE_BOB;
 				}
+				UpdatePulldownStatus();
+			}
+			break;
+
+		case IDM_SHIFT_SPACEBAR:
+			if (bAutoDetectMode == FALSE)
+			{
+				if (gPulldownMode == VIDEO_MODE_BOB)
+					gPulldownMode = PULLDOWNMODES_LAST_ONE;
+				gPulldownMode--;
+				if (gPulldownMode == BTV_PLUGIN && bUseBTVPlugin == FALSE)
+					gPulldownMode--;
 				UpdatePulldownStatus();
 			}
 			break;
@@ -1803,7 +1816,8 @@ void SetMenuAnalog()
 
 	CheckMenuItem(GetMenu(hWnd), IDM_AUTODETECT, bAutoDetectMode?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_FALLBACK, bFallbackToVideo?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_VIDEO, (gPulldownMode == VIDEO_MODE && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_VIDEO_BOB, (gPulldownMode == VIDEO_MODE_BOB && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_VIDEO_WEAVE, (gPulldownMode == VIDEO_MODE_WEAVE && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_WEAVE, (gPulldownMode == SIMPLE_WEAVE && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_BOB, (gPulldownMode == INTERPOLATE_BOB && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_BTV, (gPulldownMode == BTV_PLUGIN && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);

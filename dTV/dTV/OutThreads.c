@@ -62,7 +62,7 @@ BOOL                bIsPaused = FALSE;
 HANDLE              OutThread;
 
 // Dynamically updated variables
-ePULLDOWNMODES      gPulldownMode = VIDEO_MODE;
+ePULLDOWNMODES      gPulldownMode = VIDEO_MODE_BOB;
 int                 CurrentFrame=0;
 DWORD               dwLastFlipTicks = -1;
 DWORD				ModeSwitchTimestamps[MAXMODESWITCHES];
@@ -78,7 +78,8 @@ long                ThresholdPulldownMismatch = 900;
 long                ThresholdPulldownComb = 150;
 long                PulldownSwitchInterval = 3000;
 long                PulldownSwitchMax = 4;
-long				StaticImageFieldCount = 16;
+long				StaticImageFieldCount = 100;
+long				VideoWeaveFieldCount = 4;
 BOOL                bAutoDetectMode = TRUE;
 BOOL                bFallbackToVideo = TRUE;
 
@@ -327,13 +328,13 @@ void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField)
 		LastCombFactor = 0;
 		RepeatCount = 0;
 		LastPolarity = -1;
-		gPulldownMode = VIDEO_MODE;
+		gPulldownMode = VIDEO_MODE_BOB;
 		LastDiff = 0;
 		UpdatePulldownStatus();
 		dwLastFlipTicks = -1;
 		return;
 	}
-	if(gPulldownMode == VIDEO_MODE)
+	if(IS_VIDEO_MODE(gPulldownMode))
 	{
 		if((CombFactor - LastCombFactor) < PulldownThresholdLow && LastDiff > PulldownThresholdLow)
 		{
@@ -404,7 +405,7 @@ void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField)
 		}
 		if(RepeatCount == PulldownRepeatCount - PulldownRepeatCount2)
 		{
-			gPulldownMode = VIDEO_MODE;
+			gPulldownMode = VIDEO_MODE_WEAVE;
 			RepeatCount = 0;
 			UpdatePulldownStatus();
 			LOG("Back To Video Mode");
@@ -461,7 +462,7 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 	static long MOVIE_FIELD_CYCLE = 0;
 	static long MOVIE_VERIFY_CYCLE = 0;
 	static long MATCH_COUNT = 0;
-	static ePULLDOWNMODES OldPulldownMode = VIDEO_MODE;
+	static ePULLDOWNMODES OldPulldownMode = VIDEO_MODE_BOB;
 
 	// Call with FieldDiff -1 is an initialization call.
 	// This resets static variables when we start the thread each time.
@@ -473,12 +474,13 @@ void UpdateNTSCPulldownMode(long FieldDiff,
         MOVIE_FIELD_CYCLE = 0;
 		MISMATCH_COUNT = 0;
 		MATCH_COUNT = 0;
-		gPulldownMode = VIDEO_MODE;
+		gPulldownMode = VIDEO_MODE_WEAVE;
 		UpdatePulldownStatus();
 		dwLastFlipTicks = -1;
 		memset(&ModeSwitchTimestamps[0], 0, sizeof(ModeSwitchTimestamps));
 		return;
 	}
+
 
 	// If the field difference is bigger than the threshold, then
 	// the current field is very different from the field two fields ago.
@@ -509,6 +511,14 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 			SwitchToVideo = TRUE;
 		}
 
+		if (FieldDiff >= ThresholdPulldownMismatch &&
+			gPulldownMode == VIDEO_MODE_WEAVE)
+		{
+			// A big field difference; video-weave mode probably
+			// isn't the best choice.
+			SwitchToVideo = TRUE;
+		}
+
 		// If we're in a film mode and an incoming field would cause
 		// weave artifacts, optionally switch to video mode but make
 		// it very easy to get back into film mode in case this was
@@ -526,9 +536,19 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 
 		if (SwitchToVideo)
 		{
-			gPulldownMode = VIDEO_MODE;
-			MOVIE_VERIFY_CYCLE = 0;
-			MOVIE_FIELD_CYCLE = 0;
+			// If we're in weave mode, it might be okay to drop to video
+			// weave mode.
+			if (gPulldownMode == SIMPLE_WEAVE &&
+				FieldDiff < ThresholdPulldownMismatch)
+			{
+				gPulldownMode = VIDEO_MODE_WEAVE;
+			}
+			else
+			{
+				gPulldownMode = VIDEO_MODE_BOB;
+				MOVIE_VERIFY_CYCLE = 0;
+				MOVIE_FIELD_CYCLE = 0;
+			}
 			UpdatePulldownStatus();
 			LOG(" Back to Video, comb factor %d", CombFactor);
 		}
@@ -617,7 +637,7 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 					// the film mode we just dropped out of was correct.
 					if (bFallbackToVideo && TrackModeSwitches(gPulldownMode))
 					{
-						gPulldownMode = VIDEO_MODE;
+						gPulldownMode = VIDEO_MODE_BOB;
 						MOVIE_VERIFY_CYCLE = 0;
 						MOVIE_FIELD_CYCLE = 0;
 						UpdatePulldownStatus();
@@ -685,8 +705,15 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 		}
 		MISMATCH_COUNT = 0;
 
+		if (MATCH_COUNT >= VideoWeaveFieldCount &&
+			gPulldownMode == VIDEO_MODE_BOB)
+		{
+			gPulldownMode = VIDEO_MODE_WEAVE;
+			LOG(" Match count %ld, switching to video-weave", MATCH_COUNT);
+			UpdatePulldownStatus();
+		}
 		if (MATCH_COUNT >= StaticImageFieldCount &&
-			gPulldownMode == VIDEO_MODE)
+			gPulldownMode == VIDEO_MODE_WEAVE)
 		{
 			gPulldownMode = SIMPLE_WEAVE;
 			LOG(" Match count %ld, switching to weave", MATCH_COUNT);
@@ -704,7 +731,8 @@ BOOL DoWeWantToFlip(BOOL bFlipNow, BOOL bIsOddField)
 	BOOL RetVal;
 	switch(gPulldownMode)
 	{
-	case VIDEO_MODE:             RetVal = TRUE;  break;
+	case VIDEO_MODE_WEAVE:       RetVal = TRUE;  break;
+	case VIDEO_MODE_BOB:         RetVal = TRUE;  break;
 	case SIMPLE_WEAVE:           RetVal = TRUE;  break;
 	case INTERPOLATE_BOB:        RetVal = TRUE;  break;
 	case BTV_PLUGIN:             RetVal = bFlipNow;  break;
@@ -778,8 +806,11 @@ void UpdatePulldownStatus()
 	{
 		switch(gPulldownMode)
 		{
-		case VIDEO_MODE:
-			SetWindowText(hwndPalField, "Video Deinterlace");
+		case VIDEO_MODE_WEAVE:
+			SetWindowText(hwndPalField, "Video Deinterlace (Weave)");
+			break;
+		case VIDEO_MODE_BOB:
+			SetWindowText(hwndPalField, "Video Deinterlace (Bob)");
 			break;
 		case SIMPLE_WEAVE:
 			SetWindowText(hwndPalField, "Simple Weave");
@@ -983,11 +1014,15 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 						nFrame++;
 					}
 				}
-				else if(gPulldownMode == VIDEO_MODE)
+				else if(gPulldownMode == VIDEO_MODE_WEAVE)
 				{
-					DeinterlaceField(ppOddLines[CurrentFrame], ppEvenLines[LastEvenFrame],
-					                 ppOddLines[(CurrentFrame + 4) % 5], lpCurOverlay, TRUE);
-					 //OldDeinterlaceField(ppOddLines[CurrentFrame], ppEvenLines[LastEvenFrame], lpCurOverlay, TRUE);
+					DeinterlaceFieldWeave(ppOddLines[CurrentFrame], ppEvenLines[LastEvenFrame],
+										  ppOddLines[(CurrentFrame + 4) % 5], lpCurOverlay, TRUE);
+				}
+				else if (gPulldownMode == VIDEO_MODE_BOB)
+				{
+					DeinterlaceFieldBob(ppOddLines[CurrentFrame], ppEvenLines[LastEvenFrame],
+										ppOddLines[(CurrentFrame + 4) % 5], lpCurOverlay, TRUE);
 				}
 				else if(gPulldownMode == SIMPLE_WEAVE)
 				{
@@ -1090,12 +1125,15 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 						nFrame++;
 					}
 				}
-				else if(gPulldownMode == VIDEO_MODE)
+				else if(gPulldownMode == VIDEO_MODE_WEAVE)
 				{
-					DeinterlaceField(ppOddLines[LastOddFrame], ppEvenLines[CurrentFrame],
-					                 ppEvenLines[(CurrentFrame + 4) % 5], lpCurOverlay, FALSE);
-					
-					 //OldDeinterlaceField(ppOddLines[LastOddFrame], ppEvenLines[CurrentFrame], lpCurOverlay, FALSE);
+					DeinterlaceFieldWeave(ppOddLines[LastOddFrame], ppEvenLines[CurrentFrame],
+										  ppEvenLines[(CurrentFrame + 4) % 5], lpCurOverlay, FALSE);
+				}
+				else if(gPulldownMode == VIDEO_MODE_BOB)
+				{
+					DeinterlaceFieldBob(ppOddLines[LastOddFrame], ppEvenLines[CurrentFrame],
+										ppEvenLines[(CurrentFrame + 4) % 5], lpCurOverlay, FALSE);
 				}
 				else if(gPulldownMode == SIMPLE_WEAVE)
 				{

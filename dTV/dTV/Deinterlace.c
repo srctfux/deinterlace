@@ -310,21 +310,16 @@ EndCopyLoop:
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// DeinterlaceField (old version)
+// BobbyDeinterlaceField
+//
+// Deinterlaces a field with a tendency to bob rather than weave.  Best for
+// high-motion scenes like sports.
 //
 // The algorithm for this was taken from the 
 // Deinterlace - area based Vitual Dub Plug-in by
 // Gunnar Thalin
-//
-// 
-// The algorithm for Deinterlace in VirtualDub was probably not intended for
-// writing directly to video memory.  Most video memory these days supports
-// Write Combining which goes much faster in chunks of at least 32 bytes.
-// To do this here I unrolled the loop below and in function DeinterlaceEven 4 times
-// to write 32 byte sequential chunks.  This function now assumes the lines we write
-// are a multiple of 32 bytes.  It used to assume only 8.  -  Tom Barry 10/11/00
 ///////////////////////////////////////////////////////////////////////////////
-void OldDeinterlaceField(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay, BOOL bIsOdd)
+void DeinterlaceFieldBob(short** pOddLines, short** pEvenLines, short** pPrevLines, BYTE* lpCurOverlay, BOOL bIsOdd)
 {
 	int Line;
 	short* YVal1;
@@ -339,6 +334,7 @@ void OldDeinterlaceField(short** pOddLines, short** pEvenLines, BYTE* lpCurOverl
 	__int64 qwThreshold;
 	const __int64 Mask = 0x7f7f7f7f7f7f7f7f;
 
+	pPrevLines = NULL;	// stop the compiler from whining
 	qwEdgeDetect = EdgeDetect;
 	qwEdgeDetect += (qwEdgeDetect << 48) + (qwEdgeDetect << 32) + (qwEdgeDetect << 16);
 	qwThreshold = JaggieThreshold;
@@ -376,6 +372,9 @@ void OldDeinterlaceField(short** pOddLines, short** pEvenLines, BYTE* lpCurOverl
 		// even field" etc.  So wherever you see "odd" or "even" below, keep in mind that
 		// half the time this function is called, those words' meanings will invert.
 
+		// Copy the odd line to the overlay verbatim.
+		memcpyMMX(Dest + OverlayPitch, YVal3, CurrentX * 2);
+
 		_asm
 		{
 			mov ecx, CurrentX
@@ -383,35 +382,18 @@ void OldDeinterlaceField(short** pOddLines, short** pEvenLines, BYTE* lpCurOverl
 			mov ebx, dword ptr [YVal2]
 			mov edx, dword ptr [YVal3]
 			mov edi, dword ptr [Dest]
-			shr ecx, 4       // there are ActiveX * 2 / 8 qwords, now done 4 at a time
+			shr ecx, 2       // there are CurrentX * 2 / 8 qwords
 
 align 8
-DoNext32Bytes:			
-
-// Loop pass 1, unrolled
-			add edi, OverlayPitch
-			
+DoNext8Bytes:			
 			movq mm0, qword ptr[eax] 
 			movq mm1, qword ptr[ebx] 
-
-			// move all data movement to odd line code here to front of unrolled loop
-			movq mm2, qword ptr[edx] 
-			movq mm3, qword ptr[edx+8] 
-			movq mm4, qword ptr[edx+16] 
-			movq mm5, qword ptr[edx+24] 
-
-			// copy the odd line to destination, 32 bytes at a time
-			movq qword ptr[edi], mm2
-			movq qword ptr[edi+8], mm3
-			movq qword ptr[edi+16], mm4
-			movq qword ptr[edi+24], mm5
+			movq mm2, qword ptr[edx]
 
 			// get intensities in mm3 - 4
 			movq mm3, mm0
 			movq mm4, mm1
 			movq mm5, mm2
-
-			sub edi, OverlayPitch
 
 			pand mm3, YMask
 			pand mm4, YMask
@@ -459,181 +441,12 @@ DoNext32Bytes:
 
 			movq qword ptr[edi], mm7
 
-// Loop pass 2, unrolled
-			movq mm0, qword ptr[eax+8] 
-			movq mm1, qword ptr[ebx+8] 
-			movq mm2, qword ptr[edx+8]
-
-			// get intensities in mm3 - 4
-			movq mm3, mm0
-			movq mm4, mm1
-			movq mm5, mm2
-
-			pand mm3, YMask
-			pand mm4, YMask
-			pand mm5, YMask
-
-			// get average in mm0
-			psrlw mm0, 01
-			psrlw mm2, 01
-			pand  mm0, Mask
-			pand  mm2, Mask
-			paddw mm0, mm2
-
-			// work out (O1 - E) * (O2 - E) / 2 - EdgeDetect * (O1 - O2) ^ 2 >> 12
-			// result will be in mm6
-
-			psrlw mm3, 01
-			psrlw mm4, 01
-			psrlw mm5, 01
-
-			movq mm6, mm3
-			psubw mm6, mm4	//mm6 = O1 - E
-
-			movq mm7, mm5
-			psubw mm7, mm4	//mm7 = O2 - E
-
-			pmullw mm6, mm7		// mm0 = (O1 - E) * (O2 - E)
-
-			movq mm7, mm3
-			psubw mm7, mm5		// mm7 = (O1 - O2)
-			pmullw mm7, mm7		// mm7 = (O1 - O2) ^ 2
-			psrlw mm7, 12		// mm7 = (O1 - O2) ^ 2 >> 12
-			pmullw mm7, qwEdgeDetect		// mm1  = EdgeDetect * (O1 - O2) ^ 2 >> 12
-
-			psubw mm6, mm7      // mm6 is what we want
-
-			pcmpgtw mm6, qwThreshold
-
-			movq mm7, mm6
-
-			pand mm0, mm6
-
-			pandn mm7, mm1
-
-			por mm7, mm0
-
-			movq qword ptr[edi+8], mm7
-	
-// Loop pass 2, unrolled
-			movq mm0, qword ptr[eax+16] 
-			movq mm1, qword ptr[ebx+16] 
-			movq mm2, qword ptr[edx+16]
-
-			// get intensities in mm3 - 4
-			movq mm3, mm0
-			movq mm4, mm1
-			movq mm5, mm2
-
-			pand mm3, YMask
-			pand mm4, YMask
-			pand mm5, YMask
-
-			// get average in mm0
-			psrlw mm0, 01
-			psrlw mm2, 01
-			pand  mm0, Mask
-			pand  mm2, Mask
-			paddw mm0, mm2
-
-			// work out (O1 - E) * (O2 - E) / 2 - EdgeDetect * (O1 - O2) ^ 2 >> 12
-			// result will be in mm6
-
-			psrlw mm3, 01
-			psrlw mm4, 01
-			psrlw mm5, 01
-
-			movq mm6, mm3
-			psubw mm6, mm4	//mm6 = O1 - E
-
-			movq mm7, mm5
-			psubw mm7, mm4	//mm7 = O2 - E
-
-			pmullw mm6, mm7		// mm0 = (O1 - E) * (O2 - E)
-
-			movq mm7, mm3
-			psubw mm7, mm5		// mm7 = (O1 - O2)
-			pmullw mm7, mm7		// mm7 = (O1 - O2) ^ 2
-			psrlw mm7, 12		// mm7 = (O1 - O2) ^ 2 >> 12
-			pmullw mm7, qwEdgeDetect		// mm1  = EdgeDetect * (O1 - O2) ^ 2 >> 12
-
-			psubw mm6, mm7      // mm6 is what we want
-
-			pcmpgtw mm6, qwThreshold
-
-			movq mm7, mm6
-
-			pand mm0, mm6
-
-			pandn mm7, mm1
-
-			por mm7, mm0
-
-			movq qword ptr[edi+16], mm7
-	
-// Loop pass 4, unrolled
-			movq mm0, qword ptr[eax+24] 
-			movq mm1, qword ptr[ebx+24] 
-			movq mm2, qword ptr[edx+24]
-
-			// get intensities in mm3 - 4
-			movq mm3, mm0
-			movq mm4, mm1
-			movq mm5, mm2
-
-			pand mm3, YMask
-			pand mm4, YMask
-			pand mm5, YMask
-
-			// get average in mm0
-			psrlw mm0, 01
-			psrlw mm2, 01
-			pand  mm0, Mask
-			pand  mm2, Mask
-			paddw mm0, mm2
-
-			// work out (O1 - E) * (O2 - E) / 2 - EdgeDetect * (O1 - O2) ^ 2 >> 12
-			// result will be in mm6
-
-			psrlw mm3, 01
-			psrlw mm4, 01
-			psrlw mm5, 01
-
-			movq mm6, mm3
-			psubw mm6, mm4	//mm6 = O1 - E
-
-			movq mm7, mm5
-			psubw mm7, mm4	//mm7 = O2 - E
-
-			pmullw mm6, mm7		// mm0 = (O1 - E) * (O2 - E)
-
-			movq mm7, mm3
-			psubw mm7, mm5		// mm7 = (O1 - O2)
-			pmullw mm7, mm7		// mm7 = (O1 - O2) ^ 2
-			psrlw mm7, 12		// mm7 = (O1 - O2) ^ 2 >> 12
-			pmullw mm7, qwEdgeDetect		// mm1  = EdgeDetect * (O1 - O2) ^ 2 >> 12
-
-			psubw mm6, mm7      // mm6 is what we want
-
-			pcmpgtw mm6, qwThreshold
-
-			movq mm7, mm6
-
-			pand mm0, mm6
-
-			pandn mm7, mm1
-
-			por mm7, mm0
-
-			movq qword ptr[edi+24], mm7
-	
-
-			add eax, 32
-			add ebx, 32
-			add edx, 32
-			add edi, 32
+			add eax, 8
+			add ebx, 8
+			add edx, 8
+			add edi, 8
 			dec ecx
-			jne near DoNext32Bytes
+			jne near DoNext8Bytes
 			emms
 		}
 	}
@@ -644,12 +457,12 @@ DoNext32Bytes:
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Deinterlace the latest field, attempting to weave wherever it won't cause
-// visible artifacts.
+// Deinterlace the latest field, with a tendency to weave rather than bob.
+// Good for high detail on low-movement scenes.
 //
 // The algorithm is described in comments below.
 //
-void DeinterlaceField(short** pOddLines, short** pEvenLines, short** pPrevLines, BYTE* lpCurOverlay, BOOL bIsOdd)
+void DeinterlaceFieldWeave(short** pOddLines, short** pEvenLines, short** pPrevLines, BYTE* lpCurOverlay, BOOL bIsOdd)
 {
 	int Line;
 	short* YVal1;
@@ -707,6 +520,11 @@ void DeinterlaceField(short** pOddLines, short** pEvenLines, short** pPrevLines,
 		// even field" etc.  So wherever you see "odd" or "even" below, keep in mind that
 		// half the time this function is called, those words' meanings will invert.
 
+		// Copy the even scanline below this one to the overlay buffer, since we'll be
+		// adapting the current scanline to the even lines surrounding it.  The scanline
+		// above has already been copied by the previous pass through the loop.
+		memcpyMMX(Dest + OverlayPitch, YVal3, CurrentX * 2);
+
 		_asm
 		{
 			mov dword ptr[OldStack], esi
@@ -717,26 +535,10 @@ void DeinterlaceField(short** pOddLines, short** pEvenLines, short** pPrevLines,
 			mov edx, dword ptr [YVal3]
 			mov esi, dword ptr [YVal4]
 			mov edi, dword ptr [Dest]
-			shr ecx, 4       // there are ActiveX * 2 / 8 qwords, now done 4 at a time
+			shr ecx, 2       // there are ActiveX * 2 / 8 qwords
 
 align 8
-DoNext32Bytes:			
-			// Copy the even scanline below this one to the overlay buffer, since we'll be
-			// adapting the current scanline to the even lines surrounding it.  The scanline
-			// above has already been copied by the previous pass through the loop.
-			add edi, OverlayPitch
-			movq mm2, qword ptr[edx]
-			movq mm3, qword ptr[edx+8] 
-			movq mm4, qword ptr[edx+16] 
-			movq mm5, qword ptr[edx+24] 
-			movq qword ptr[edi], mm2
-			movq qword ptr[edi+8], mm3
-			movq qword ptr[edi+16], mm4
-			movq qword ptr[edi+24], mm5
-			sub edi, OverlayPitch
-
-// Loop pass 1, unrolled
-			
+DoNext8Bytes:			
 			movq mm0, qword ptr[eax]		// mm0 = E1
 			movq mm1, qword ptr[ebx]		// mm1 = O
 			movq mm2, qword ptr[edx]		// mm2 = E2
@@ -815,172 +617,13 @@ DoNext32Bytes:
 
 			movq qword ptr[edi], mm7
 
-// Loop pass 2, unrolled
-			movq mm0, qword ptr[eax+8] 
-			movq mm1, qword ptr[ebx+8] 
-			movq mm2, qword ptr[edx+8]
-
-			movq mm3, mm0					// mm3 = intensity(E1)
-			movq mm4, mm1					// mm4 = intensity(O)
-			movq mm6, mm2					// mm6 = intensity(E2)
-			pand mm3, YMask
-			pand mm4, YMask
-			pand mm6, YMask
-
-#if 0	// The following SSE instruction doesn't work on older CPUs, but is faster for newer ones
-			_emit 0x0F						// mm0 = avg(E1, E2)
-			_emit 0xE0
-			_emit 0xC2
-#else
-			pand mm0, Mask					// mm0 = E1 with lower chroma bit stripped off
-			psrlw mm0, 1					// mm0 = E1 / 2
-			pand mm2, Mask					// mm2 = E2 with lower chroma bit stripped off
-			psrlw mm2, 1					// mm2 = E2 / 2
-			paddb mm0, mm2					// mm2 = (E1 + E2) / 2
-#endif
-
-			movq mm7, qwSpatialTolerance
-			movq mm5, mm3					// mm5 = E1
-			psubsw mm5, mm4					// mm5 = E1 - O
-			pmullw mm5, mm5					// mm5 = (E1 - O) ^ 2
-			psubusw mm7, mm5				// mm7 = ST - (E1 - O) ^ 2, or 0 if that's negative
-
-			movq mm3, qwSpatialTolerance
-			movq mm5, mm6					// mm5 = E2
-			psubsw mm5, mm4					// mm5 = E2 - O
-			pmullw mm5, mm5					// mm5 = (E2 - O) ^ 2
-			psubusw mm3, mm5				// mm0 = ST - (E2 - O) ^ 2, or 0 if that's negative
-			paddusw mm7, mm3				// mm7 = (ST - (E1 - O) ^ 2) + (ST - (E2 - O) ^ 2)
-
-			movq mm3, qwTemporalTolerance
-			movq mm5, qword ptr[esi+8]		// mm5 = Oold
-			pand mm5, YMask
-			psubsw mm5, mm4					// mm5 = Oold - O
-			pmullw mm5, mm5					// mm5 = (Oold - O) ^ 2
-			psubusw mm3, mm5				// mm0 = TT - (Oold - O) ^ 2, or 0 if that's negative
-			paddusw mm7, mm3				// mm7 = our magic number
-
-			pcmpgtw mm7, qwThreshold		// mm7 = 0xffff where we're greater than the threshold, 0 elsewhere
-			movq mm6, mm7					// mm6 = 0xffff where we're greater than the threshold, 0 elsewhere
-			pand mm7, mm1					// mm7 = weaved data where we're greater than the threshold, 0 elsewhere
-			pandn mm6, mm0					// mm6 = bobbed data where we're not greater than the threshold, 0 elsewhere
-			por mm7, mm6					// mm7 = bobbed and weaved data
-
-			movq qword ptr[edi+8], mm7
-	
-// Loop pass 3, unrolled
-			movq mm0, qword ptr[eax+16] 
-			movq mm1, qword ptr[ebx+16] 
-			movq mm2, qword ptr[edx+16]
-
-			movq mm3, mm0					// mm3 = intensity(E1)
-			movq mm4, mm1					// mm4 = intensity(O)
-			movq mm6, mm2					// mm6 = intensity(E2)
-			pand mm3, YMask
-			pand mm4, YMask
-			pand mm6, YMask
-
-#if 0	// The following SSE instruction doesn't work on older CPUs, but is faster for newer ones
-			_emit 0x0F						// mm0 = avg(E1, E2)
-			_emit 0xE0
-			_emit 0xC2
-#else
-			pand mm0, Mask					// mm0 = E1 with lower chroma bit stripped off
-			psrlw mm0, 1					// mm0 = E1 / 2
-			pand mm2, Mask					// mm2 = E2 with lower chroma bit stripped off
-			psrlw mm2, 1					// mm2 = E2 / 2
-			paddb mm0, mm2					// mm2 = (E1 + E2) / 2
-#endif
-
-			movq mm7, qwSpatialTolerance
-			movq mm5, mm3					// mm5 = E1
-			psubsw mm5, mm4					// mm5 = E1 - O
-			pmullw mm5, mm5					// mm5 = (E1 - O) ^ 2
-			psubusw mm7, mm5				// mm7 = ST - (E1 - O) ^ 2, or 0 if that's negative
-
-			movq mm3, qwSpatialTolerance
-			movq mm5, mm6					// mm5 = E2
-			psubsw mm5, mm4					// mm5 = E2 - O
-			pmullw mm5, mm5					// mm5 = (E2 - O) ^ 2
-			psubusw mm3, mm5				// mm0 = ST - (E2 - O) ^ 2, or 0 if that's negative
-			paddusw mm7, mm3				// mm7 = (ST - (E1 - O) ^ 2) + (ST - (E2 - O) ^ 2)
-
-			movq mm3, qwTemporalTolerance
-			movq mm5, qword ptr[esi+16]		// mm5 = Oold
-			pand mm5, YMask
-			psubsw mm5, mm4					// mm5 = Oold - O
-			pmullw mm5, mm5					// mm5 = (Oold - O) ^ 2
-			psubusw mm3, mm5				// mm0 = TT - (Oold - O) ^ 2, or 0 if that's negative
-			paddusw mm7, mm3				// mm7 = our magic number
-
-			pcmpgtw mm7, qwThreshold		// mm7 = 0xffff where we're greater than the threshold, 0 elsewhere
-			movq mm6, mm7					// mm6 = 0xffff where we're greater than the threshold, 0 elsewhere
-			pand mm7, mm1					// mm7 = weaved data where we're greater than the threshold, 0 elsewhere
-			pandn mm6, mm0					// mm6 = bobbed data where we're not greater than the threshold, 0 elsewhere
-			por mm7, mm6					// mm7 = bobbed and weaved data
-
-			movq qword ptr[edi+16], mm7
-	
-// Loop pass 4, unrolled
-			movq mm0, qword ptr[eax+24] 
-			movq mm1, qword ptr[ebx+24] 
-			movq mm2, qword ptr[edx+24]
-
-			movq mm3, mm0					// mm3 = intensity(E1)
-			movq mm4, mm1					// mm4 = intensity(O)
-			movq mm6, mm2					// mm6 = intensity(E2)
-			pand mm3, YMask
-			pand mm4, YMask
-			pand mm6, YMask
-
-#if 0	// The following SSE instruction doesn't work on older CPUs, but is faster for newer ones
-			_emit 0x0F						// mm0 = avg(E1, E2)
-			_emit 0xE0
-			_emit 0xC2
-#else
-			pand mm0, Mask					// mm0 = E1 with lower chroma bit stripped off
-			psrlw mm0, 1					// mm0 = E1 / 2
-			pand mm2, Mask					// mm2 = E2 with lower chroma bit stripped off
-			psrlw mm2, 1					// mm2 = E2 / 2
-			paddb mm0, mm2					// mm2 = (E1 + E2) / 2
-#endif
-
-			movq mm7, qwSpatialTolerance
-			movq mm5, mm3					// mm5 = E1
-			psubsw mm5, mm4					// mm5 = E1 - O
-			pmullw mm5, mm5					// mm5 = (E1 - O) ^ 2
-			psubusw mm7, mm5				// mm7 = ST - (E1 - O) ^ 2, or 0 if that's negative
-
-			movq mm3, qwSpatialTolerance
-			movq mm5, mm6					// mm5 = E2
-			psubsw mm5, mm4					// mm5 = E2 - O
-			pmullw mm5, mm5					// mm5 = (E2 - O) ^ 2
-			psubusw mm3, mm5				// mm0 = ST - (E2 - O) ^ 2, or 0 if that's negative
-			paddusw mm7, mm3				// mm7 = (ST - (E1 - O) ^ 2) + (ST - (E2 - O) ^ 2)
-
-			movq mm3, qwTemporalTolerance
-			movq mm5, qword ptr[esi+24]		// mm5 = Oold
-			pand mm5, YMask
-			psubsw mm5, mm4					// mm5 = Oold - O
-			pmullw mm5, mm5					// mm5 = (Oold - O) ^ 2
-			psubusw mm3, mm5				// mm0 = TT - (Oold - O) ^ 2, or 0 if that's negative
-			paddusw mm7, mm3				// mm7 = our magic number
-
-			pcmpgtw mm7, qwThreshold		// mm7 = 0xffff where we're greater than the threshold, 0 elsewhere
-			movq mm6, mm7					// mm6 = 0xffff where we're greater than the threshold, 0 elsewhere
-			pand mm7, mm1					// mm7 = weaved data where we're greater than the threshold, 0 elsewhere
-			pandn mm6, mm0					// mm6 = bobbed data where we're not greater than the threshold, 0 elsewhere
-			por mm7, mm6					// mm7 = bobbed and weaved data
-
-			movq qword ptr[edi+24], mm7
-
-			add eax, 32
-			add ebx, 32
-			add edx, 32
-			add edi, 32
-			add esi, 32
+			add eax, 8
+			add ebx, 8
+			add edx, 8
+			add edi, 8
+			add esi, 8
 			dec ecx
-			jne near DoNext32Bytes
+			jne near DoNext8Bytes
 			emms
 
 			mov esi, dword ptr[OldStack]

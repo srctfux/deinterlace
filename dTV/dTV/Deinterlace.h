@@ -30,7 +30,8 @@
 void memcpyMMX(void *Dest, void *Src, size_t nBytes);
 void memcpyBOBMMX(void *Dest, void *Src, size_t nBytes);
 void VideoDeinterlaceMMX(void *Dest, void *SrcUp, void *SrcSame, void *SrcDown, size_t nBytes);
-void DeinterlaceField(short** pOddLines, short** pEvenLines, short **pPrevLines, BYTE* lpCurOverlay, BOOL bIsOdd);
+void DeinterlaceFieldWeave(short** pOddLines, short** pEvenLines, short **pPrevLines, BYTE* lpCurOverlay, BOOL bIsOdd);
+void DeinterlaceFieldBob(short** pOddLines, short** pEvenLines, short **pPrevLines, BYTE* lpCurOverlay, BOOL bIsOdd);
 long GetCombFactor(short** pLines1, short** pLines2);
 long CompareFields(short** pLines1, short** pLines2);
 long CompareFields2(short** pLines1, short** pLines2);

@@ -123,7 +123,7 @@ SPLASHBOX DIALOGEX 0, 0, 145, 192
 STYLE DS_SYSMODAL | DS_NOIDLEMSG | DS_SETFOREGROUND | DS_3DLOOK | DS_CENTER | 
     WS_POPUP | WS_VISIBLE | WS_BORDER
 EXSTYLE WS_EX_NOPARENTNOTIFY
-FONT 8, "System"
+FONT 8, "System", 0, 0, 0x1
 BEGIN
     CONTROL         "STARTUP",IDC_STATIC,"Static",SS_BITMAP,0,0,11,11
     CTEXT           "",IDC_TEXT1,40,144,60,8
@@ -983,7 +983,8 @@ BEGIN
             MENUITEM "&Automatic Pulldown Detect",  IDM_AUTODETECT
             MENUITEM "&Fall Back to Video on Bad Pulldown", IDM_FALLBACK
             MENUITEM SEPARATOR
-            MENUITEM "&Video Deinterlace",          IDM_VIDEO
+            MENUITEM "&Video Deinterlace (Bob)",    IDM_VIDEO_BOB
+            MENUITEM "V&ideo Deinterlace (Weave)",  IDM_VIDEO_WEAVE
             MENUITEM "Simple &Weave",               IDM_WEAVE
             MENUITEM "Interpolated &Bob",           IDM_BOB
             MENUITEM "B&TV Plugin",                 IDM_BTV
@@ -1377,6 +1378,7 @@ BEGIN
     VK_LEFT,        IDM_VT_PAGE_MINUS,      VIRTKEY, NOINVERT
     VK_RIGHT,       IDM_VT_PAGE_PLUS,       VIRTKEY, NOINVERT
     VK_SPACE,       IDM_SPACEBAR,           VIRTKEY, NOINVERT
+    VK_SPACE,       IDM_SHIFT_SPACEBAR,     VIRTKEY, SHIFT, NOINVERT
     VK_UP,          IDM_VT_PAGE_UP,         VIRTKEY, NOINVERT
     "X",            IDM_R_BALANCE,          VIRTKEY, NOINVERT
     "X",            IDM_R_BALANCE,          VIRTKEY, SHIFT, NOINVERT

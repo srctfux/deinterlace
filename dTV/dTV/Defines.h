@@ -37,7 +37,8 @@
 
 typedef enum
 {
-	VIDEO_MODE = 0,
+	VIDEO_MODE_BOB = 0,
+	VIDEO_MODE_WEAVE,
 	SIMPLE_WEAVE,
 	INTERPOLATE_BOB,
 	BTV_PLUGIN,
@@ -58,6 +59,8 @@ typedef enum
 							 (x) == FILM_32_PULLDOWN_2 || \
 							 (x) == FILM_32_PULLDOWN_3 || \
 							 (x) == FILM_32_PULLDOWN_4)
+#define IS_VIDEO_MODE(x) ((x) == VIDEO_MODE_WEAVE || \
+                          (x) == VIDEO_MODE_BOB)
 
 #define MAXVTDIALOG 8
 #define MAXPROGS 4096
