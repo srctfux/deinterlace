@@ -164,7 +164,7 @@ FILTER_METHOD GammaMethod =
 	TRUE,
 	FilterGamma, 
 	0,
-	FALSE,
+	TRUE,
 	FilterStartGamma,
 	NULL,
 	NULL,
