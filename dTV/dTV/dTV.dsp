@@ -388,10 +388,6 @@ SOURCE=.\VideoSettings.h
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe"
 # Begin Source File
 
-SOURCE=.\1.ico
-# End Source File
-# Begin Source File
-
 SOURCE=.\RES\dTV.ico
 # End Source File
 # Begin Source File
@@ -441,66 +437,6 @@ SOURCE=.\res\VTx10x12.bmp
 # Begin Source File
 
 SOURCE=.\res\Vtx15x18.bmp
-# End Source File
-# End Group
-# Begin Group "Docs"
-
-# PROP Default_Filter "*.htm;*.txt;*.doc"
-# Begin Source File
-
-SOURCE=..\Release\Docs\32spec.htm
-# End Source File
-# Begin Source File
-
-SOURCE=..\Release\Docs\Authors.htm
-# End Source File
-# Begin Source File
-
-SOURCE=..\Release\Docs\Bugs.htm
-# End Source File
-# Begin Source File
-
-SOURCE=..\Release\Docs\card_support.htm
-# End Source File
-# Begin Source File
-
-SOURCE=..\Release\Docs\COPYING.html
-# End Source File
-# Begin Source File
-
-SOURCE=.\Developer.htm
-# End Source File
-# Begin Source File
-
-SOURCE=..\Release\Docs\dTV_Readme.htm
-# End Source File
-# Begin Source File
-
-SOURCE=..\Release\Docs\IniFile.HTM
-# End Source File
-# Begin Source File
-
-SOURCE=..\Release\Docs\installation.htm
-# End Source File
-# Begin Source File
-
-SOURCE=..\Release\Docs\keyboard.htm
-# End Source File
-# Begin Source File
-
-SOURCE=..\Release\Docs\News.htm
-# End Source File
-# Begin Source File
-
-SOURCE=..\Release\Docs\Thanks.htm
-# End Source File
-# Begin Source File
-
-SOURCE=..\Release\Docs\Thanks_MultiDec.txt
-# End Source File
-# Begin Source File
-
-SOURCE=.\Todo.htm
 # End Source File
 # End Group
 # Begin Source File
