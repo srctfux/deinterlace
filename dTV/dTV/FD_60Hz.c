@@ -52,7 +52,7 @@
 // Default values which can be overwritten by the INI file
 ePULLDOWNMODES gNTSCFilmFallbackMode = ADAPTIVE;
 long Threshold32Pulldown = 15;
-long ThresholdPulldownMismatch = 900;
+long ThresholdPulldownMismatch = 100;
 long ThresholdPulldownComb = 150;
 BOOL bFallbackToVideo = TRUE;
 long PulldownRepeatCount = 4;
@@ -63,6 +63,10 @@ long PulldownSwitchInterval = 3000;
 // Module wide declarations
 long NextPulldownRepeatCount = 0;    // for temporary increases of PullDownRepeatCount
 DWORD ModeSwitchTimestamps[MAXMODESWITCHES];
+ePULLDOWNMODES ModeSwitchModes[MAXMODESWITCHES];
+int NumSwitches;
+
+BOOL DidWeExpectFieldMatch(DEINTERLACE_INFO *pInfo);
 
 ///////////////////////////////////////////////////////////////////////////////
 // ResetModeSwitches
@@ -72,6 +76,8 @@ DWORD ModeSwitchTimestamps[MAXMODESWITCHES];
 void ResetModeSwitches()
 {
 	memset(&ModeSwitchTimestamps[0], 0, sizeof(ModeSwitchTimestamps));
+	memset(&ModeSwitchModes[0], 0, sizeof(ModeSwitchModes));
+	NumSwitches = 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -86,19 +92,29 @@ void ResetModeSwitches()
 // sensitivity of this algorithm.  To trigger video mode there need to be
 // PulldownSwitchMax mode switches in PulldownSwitchInterval milliseconds.
 ///////////////////////////////////////////////////////////////////////////////
-BOOL TrackModeSwitches()
+BOOL TrackModeSwitches(ePULLDOWNMODES PulldownMode)
 {
-	static DWORD ModeSwitchTimestamps[MAXMODESWITCHES];
-	// Scroll the list of timestamps.  Most recent is first in the list.
-	memmove(&ModeSwitchTimestamps[1], &ModeSwitchTimestamps[0], sizeof(ModeSwitchTimestamps) - sizeof(DWORD));
-	ModeSwitchTimestamps[0] = GetTickCount();
-	
-	if (PulldownSwitchMax > 1 && PulldownSwitchInterval > 0 &&	// if the user wants to track switches
-		ModeSwitchTimestamps[PulldownSwitchMax - 1] > 0)		// and there have been enough of them
+	if(DeintMethods[PulldownMode].bIsFilmMode &&
+		PulldownMode != ModeSwitchModes[0])
 	{
-		int ticks = ModeSwitchTimestamps[0] - ModeSwitchTimestamps[PulldownSwitchMax - 1];
-		if (ticks <= PulldownSwitchInterval)
-			return TRUE;
+		// Scroll the list of timestamps.  Most recent is first in the list.
+		memmove(&ModeSwitchTimestamps[1], &ModeSwitchTimestamps[0], sizeof(ModeSwitchTimestamps) - sizeof(DWORD));
+		memmove(&ModeSwitchModes[1], &ModeSwitchModes[0], sizeof(ModeSwitchModes) - sizeof(ePULLDOWNMODES));
+		ModeSwitchTimestamps[0] = GetTickCount();
+		ModeSwitchModes[0] = PulldownMode;
+		if(NumSwitches < MAXMODESWITCHES)
+		{
+			NumSwitches++;
+		}
+	
+		if (PulldownSwitchMax > 1 && PulldownSwitchInterval > 0 &&	// if the user wants to track switches
+			PulldownSwitchMax <= NumSwitches &&
+			ModeSwitchTimestamps[PulldownSwitchMax - 1] > 0)		// and there have been enough of them
+		{
+			int ticks = ModeSwitchTimestamps[0] - ModeSwitchTimestamps[PulldownSwitchMax - 1];
+			if (ticks <= PulldownSwitchInterval)
+				return TRUE;
+		}
 	}
 
 	return FALSE;
@@ -191,7 +207,7 @@ void UpdateNTSCPulldownMode(DEINTERLACE_INFO *pInfo)
 			bFallbackToVideo &&							// let the user turn this on and off.
 			ThresholdPulldownMismatch > 0 &&		    // only do video-force check if there's a threshold.
 			pInfo->FieldDiff >= ThresholdPulldownMismatch &&	// only force video if this field is very different,
-			DoWeWantToFlipNTSC(pInfo) &&				// and we would weave it with the previous field,
+			DidWeExpectFieldMatch(pInfo) &&				// and we would weave it with the previous field,
 			GetCombFactor(pInfo) > ThresholdPulldownComb) // and it'd produce artifacts
 		{
 			SwitchToVideo = TRUE;
@@ -251,6 +267,7 @@ void UpdateNTSCPulldownMode(DEINTERLACE_INFO *pInfo)
 					case 4:  gPulldownMode = FILM_32_PULLDOWN_1;  break;
 					}
 					UpdatePulldownStatus();
+					LOG("Gone to film mode %d", gPulldownMode - FILM_32_PULLDOWN_0); 
 				}
 				else
 				{
@@ -263,6 +280,7 @@ void UpdateNTSCPulldownMode(DEINTERLACE_INFO *pInfo)
 					case 4:  gPulldownMode = FILM_32_PULLDOWN_3;  break;
 					}
 					UpdatePulldownStatus();
+					LOG("Gone to film mode %d", gPulldownMode - FILM_32_PULLDOWN_0); 
 				}
 
 				if (OldPulldownMode != gPulldownMode)
@@ -289,7 +307,8 @@ void UpdateNTSCPulldownMode(DEINTERLACE_INFO *pInfo)
 					// we should stay in pulldown mode, we don't want to
 					// bail out of film mode if we subsequently decide that
 					// the film mode we just dropped out of was correct.
-					if (bFallbackToVideo && TrackModeSwitches(gPulldownMode))
+					if (bFallbackToVideo &&
+						TrackModeSwitches(gPulldownMode))
 					{
 						gPulldownMode = gNTSCFilmFallbackMode;
 						MOVIE_VERIFY_CYCLE = 0;
@@ -308,7 +327,8 @@ void UpdateNTSCPulldownMode(DEINTERLACE_INFO *pInfo)
 						//
 						// FIXME: Eliminate hardcoded values
 						//
-						NextPulldownRepeatCount = PulldownSwitchInterval / 83;
+						//NextPulldownRepeatCount = PulldownSwitchInterval / 83;
+						NextPulldownRepeatCount = PulldownRepeatCount * 2;
 					}
 				}
 
@@ -366,6 +386,69 @@ BOOL FilmModeNTSC(DEINTERLACE_INFO *pInfo)
 		Weave(pInfo);
 	return bFlipNow;
 }
+
+BOOL DidWeExpectFieldMatch(DEINTERLACE_INFO *pInfo)
+{
+	BOOL RetVal;
+	switch(gPulldownMode)
+	{
+	case FILM_32_PULLDOWN_0:
+		switch(pInfo->CurrentFrame)
+		{
+		case 0:  RetVal = FALSE;          break;
+		case 1:  RetVal = !pInfo->IsOdd;  break;
+		case 2:  RetVal = FALSE;          break;
+		case 3:  RetVal = pInfo->IsOdd;   break;
+		case 4:  RetVal = FALSE;          break;
+		}
+		break;
+	case FILM_32_PULLDOWN_1:
+		switch(pInfo->CurrentFrame)
+		{
+		case 0:  RetVal = FALSE;          break;
+		case 1:  RetVal = FALSE;          break;
+		case 2:  RetVal = !pInfo->IsOdd;  break;
+		case 3:  RetVal = FALSE;          break;
+		case 4:  RetVal = pInfo->IsOdd;   break;
+		}
+		break;
+	case FILM_32_PULLDOWN_2:
+		switch(pInfo->CurrentFrame)
+		{
+		case 0:  RetVal = pInfo->IsOdd;   break;
+		case 1:  RetVal = FALSE;          break;
+		case 2:  RetVal = FALSE;          break;
+		case 3:  RetVal = !pInfo->IsOdd;  break;
+		case 4:  RetVal = FALSE;          break;
+		}
+		break;
+	case FILM_32_PULLDOWN_3:
+		switch(pInfo->CurrentFrame)
+		{
+		case 0:  RetVal = FALSE;          break;
+		case 1:  RetVal = pInfo->IsOdd;   break;
+		case 2:  RetVal = FALSE;          break;
+		case 3:  RetVal = FALSE;          break;
+		case 4:  RetVal = !pInfo->IsOdd;  break;
+		}
+		break;
+	case FILM_32_PULLDOWN_4:
+		switch(pInfo->CurrentFrame)
+		{
+		case 0:  RetVal = !pInfo->IsOdd;  break;
+		case 1:  RetVal = FALSE;          break;
+		case 2:  RetVal = pInfo->IsOdd;   break;
+		case 3:  RetVal = FALSE;          break;
+		case 4:  RetVal = FALSE;          break;
+		}
+		break;
+	default:
+		RetVal = FALSE;
+		break;
+	}
+	return RetVal;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Flip decisioning for film modes.
@@ -468,7 +551,7 @@ SETTING FD60Settings[FD60_SETTING_LASTONE] =
 	},
 	{
 		"Threshold 3:2 Pulldown Mismatch", SLIDER, 0, &ThresholdPulldownMismatch,
-		900, 1, 10000, 10, 1,
+		100, 1, 10000, 10, 1,
 		NULL,
 		"Pulldown", "ThresholdPulldownMismatch", NULL,
 	},
