@@ -37,6 +37,7 @@
 #include "bt848.h"
 #include "mixerdev.h"
 #include "vt.h"
+#include "AspectRatio.h"
 #include "dTV.h"
 #include "settings.h"
 #include "ProgramList.h"
@@ -90,9 +91,9 @@ BITMAPINFO          *VTScreen[MAXVTDIALOG];
 
 long WStyle;
 
-BOOL Show_Menu=TRUE;
-HMENU hMenu;
-HANDLE          hAccel;
+BOOL    Show_Menu=TRUE;
+HMENU   hMenu;
+HANDLE  hAccel;
 
 HWND SplashWnd;
 
@@ -145,6 +146,7 @@ int DecodeProcessor=0;
 
 
 BOOL bShowCursor = TRUE;
+
 
 /****************************************************************************
 
@@ -1128,8 +1130,11 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		default:
+			// Check whether menu ID is an aspect ratio related item
+			ProcessAspectRatioSelection(hWnd, LOWORD(wParam));
 			break;
 		}
+		
 		break;
 
 	case WM_CREATE:
@@ -1260,13 +1265,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		break;
 	
 	case WM_PAINT:
-		{
-			PAINTSTRUCT sPaint;
-			BeginPaint(hWnd, &sPaint);
-			OverlayColor = GetNearestColor(sPaint.hdc, OverlayColor);
-			FillRect(sPaint.hdc, &sPaint.rcPaint, CreateSolidBrush(OverlayColor));
-			EndPaint(hWnd, &sPaint);
-		}
+		PaintOverlay(hWnd);
 		break;
 
 	case WM_QUERYENDSESSION:
@@ -1771,6 +1770,8 @@ void SetMenuAnalog()
 	CheckMenuItem(GetMenu(hWnd), IDM_AUTOSTEREO, AutoStereoSelect?MF_CHECKED:MF_UNCHECKED);
 
 	CheckMenuItem(GetMenu(hWnd), IDM_AUTODETECT, bAutoDetectMode?MF_CHECKED:MF_UNCHECKED);
+
+	SetMenuAspectRatio(hWnd);
 }
 
 void CleanUpMemory()
@@ -1831,109 +1832,4 @@ void ChangeChannel(int NewChannel)
 			}
 		}
 	}
-}
-
-void WorkoutOverlaySize()
-{
-	RECT rOverlayDest;
-	RECT rOverlaySrc;
-
-	int DestWidth, DestHeight;
-
-	if(bIsFullScreen == TRUE)
-	{
-		SetWindowLong(hWnd, GWL_STYLE, WS_VISIBLE);
-
-		SetWindowPos(hWnd,
-					HWND_TOPMOST,
-					0,
-					0,
-					GetSystemMetrics(SM_CXSCREEN),
-					GetSystemMetrics(SM_CYSCREEN),
-					SWP_SHOWWINDOW);
-		ShowWindow(hwndStatusBar, SW_HIDE);
-		SetMenu(hWnd, NULL);
-	}
-	else
-	{
-		SetWindowLong(hWnd, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_VISIBLE);
-
-		SetMenu(hWnd, (Show_Menu == TRUE)?hMenu:NULL);
-
-		ShowWindow(hwndStatusBar, bDisplayStatusBar?SW_SHOW:SW_HIDE);
-
-		SetWindowPos(hWnd,bAlwaysOnTop?HWND_TOPMOST:HWND_NOTOPMOST,
-					0,0,0,0,
-					SWP_NOSIZE | SWP_NOMOVE | SWP_SHOWWINDOW);
-	}
-
-	// Do overscan
-	rOverlaySrc.left = InitialOverscan;
-	rOverlaySrc.top  = InitialOverscan;
-	rOverlaySrc.right = CurrentX - InitialOverscan;
-	rOverlaySrc.bottom = CurrentY - InitialOverscan;
-
-	// get main window client area
-	// and convert to screen coordinates
-	GetClientRect(hWnd, &rOverlayDest);
-	ClientToScreen(hWnd, (POINT *) &(rOverlayDest.left));
-	ClientToScreen(hWnd, (POINT *) &(rOverlayDest.right));
-	if (bDisplayStatusBar == TRUE && bIsFullScreen == FALSE)
-	{
-		rOverlayDest.bottom -= 21;
-	}
-
-	// crop the Destination rect so that the
-	// overlay destination region is 
-	// always on the screen
-	// we will also update the source area to reflect this
-	// so that we see the appropriate portion
-	// on the screen
-	// (this should make us compatable with YXY)
-	DestHeight = rOverlayDest.bottom - rOverlayDest.top;
-	DestWidth = rOverlayDest.right - rOverlayDest.left;
-	
-	if (rOverlayDest.left < 0 && DestWidth > 0)
-	{
-		rOverlaySrc.left = (CurrentX * -rOverlayDest.left) / DestWidth;
-		rOverlayDest.left = 0;
-	}
-	if (rOverlayDest.top < 0 && DestHeight > 0)
-	{
-		rOverlaySrc.top = (CurrentY * -rOverlayDest.top) / DestHeight;
-		rOverlayDest.top = 0;
-	}
-	if (rOverlayDest.right >= GetSystemMetrics(SM_CXSCREEN) && DestWidth > 0)
-	{
-		rOverlaySrc.right -= (rOverlayDest.right - GetSystemMetrics(SM_CXSCREEN)) * 
-							CurrentX / DestWidth;
-		rOverlayDest.right = GetSystemMetrics(SM_CXSCREEN);
-	}
-	if (rOverlayDest.bottom >= GetSystemMetrics(SM_CYSCREEN) && DestHeight > 0)
-	{
-		rOverlaySrc.bottom -= (rOverlayDest.bottom - GetSystemMetrics(SM_CYSCREEN)) * 
-							CurrentY / DestHeight;
-		rOverlayDest.bottom = GetSystemMetrics(SM_CYSCREEN);
-	}
-
-	// amke sure that any alignment restrictions are taken care of
-	if(SrcSizeAlign > 1)
-	{
-		rOverlaySrc.left += SrcSizeAlign - rOverlaySrc.left % SrcSizeAlign;
-		rOverlaySrc.top += SrcSizeAlign - rOverlaySrc.top % SrcSizeAlign;
-		rOverlaySrc.right -= rOverlaySrc.right % SrcSizeAlign;
-		rOverlaySrc.bottom -= rOverlaySrc.bottom % SrcSizeAlign;
-	}
-
-	if(DestSizeAlign > 1)
-	{
-		rOverlayDest.left += DestSizeAlign - rOverlayDest.left % DestSizeAlign;
-		rOverlayDest.top += DestSizeAlign - rOverlayDest.top % DestSizeAlign;
-		rOverlayDest.right -= rOverlayDest.right % DestSizeAlign;
-		rOverlayDest.bottom -= rOverlayDest.bottom % DestSizeAlign;
-	}
-
-	Overlay_Update(&rOverlaySrc, &rOverlayDest, DDOVER_SHOW, TRUE);
-
-	return;
 }

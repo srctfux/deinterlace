@@ -33,6 +33,14 @@
 #include "OutThreads.h"
 #include "deinterlace.h"
 
+// MRS 9-2-00
+// Added variable in dTV.c to track which aspect mode we are currently in
+// Use aspect * 1000 (1.66 = 1660, 2.35 = 2350, etc)
+// Declared in DTV.C
+extern int source_aspect, target_aspect, aspect_mode, custom_source_aspect, custom_target_aspect;
+// END MRS 9-2-00
+
+
 void LoadSettingsFromIni(LPSTR Name)
 {
 	char szIniFile[MAX_PATH];
@@ -245,6 +253,15 @@ void LoadSettingsFromIni(LPSTR Name)
 	BTVParams.UseKey2 = GetPrivateProfileInt("BTVPlugin", "UseKey2", BTVParams.UseKey2, szIniFile);
 
 	bIsFullScreen = (GetPrivateProfileInt("MainWindow", "bIsFullScreen", bIsFullScreen, szIniFile) != 0);
+
+	// MRS 9/2/00
+	// Load Aspect Mode from INI- using strings would be more elegant long-term
+	source_aspect = GetPrivateProfileInt("ASPECT", "SourceAspect", 0, szIniFile);
+	custom_source_aspect = GetPrivateProfileInt("ASPECT", "CustomSourceAspect", 0, szIniFile);
+	target_aspect = GetPrivateProfileInt("ASPECT", "ScreenAspect", 0, szIniFile);
+	custom_target_aspect = GetPrivateProfileInt("ASPECT", "CustomScreenAspect", 0, szIniFile);
+	aspect_mode = GetPrivateProfileInt("ASPECT", "Mode", 0, szIniFile);
+	// END MRS 9/2/00
 }
 
 void WriteSettingsToIni()
@@ -429,6 +446,13 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("BTVPlugin", "y", BTVParams.y, szIniFile);
 	WritePrivateProfileInt("BTVPlugin", "UseKey1", BTVParams.UseKey1, szIniFile);
 	WritePrivateProfileInt("BTVPlugin", "UseKey2", BTVParams.UseKey2, szIniFile);
+
+	// MRS 9/2/00
+	// Save Aspect Mode from INI- using strings would be more elegant long-term
+	WritePrivateProfileInt("ASPECT", "SourceAspect", source_aspect, szIniFile);
+	WritePrivateProfileInt("ASPECT", "ScreenAspect", target_aspect, szIniFile);
+	WritePrivateProfileInt("ASPECT", "Mode", aspect_mode, szIniFile);
+	// END MRS 9/2/00
 }
 
 void WritePrivateProfileInt(LPCTSTR lpAppName,  LPCTSTR lpKeyName,  int nValue, LPCTSTR lpFileName)

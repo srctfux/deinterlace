@@ -82,6 +82,25 @@
 #define IDM_OVERSCAN_MINUS              486
 #define IDM_OVERSCAN_PLUS               487
 #define IDM_AUTODETECT                  488
+#define IDM_ASPECT_NONE                 489
+#define IDM_ASPECT_LETTERBOX            490
+#define IDM_ASPECT_ANAMORPHIC_177       491
+#define IDM_SASPECT_0                   494
+#define IDM_SASPECT_133                 495
+#define IDM_SASPECT_166                 496
+#define IDM_SASPECT_177                 497
+#define IDM_SASPECT_185                 498
+#define IDM_SASPECT_233                 499
+#define IDM_SASPECT_235                 500
+#define IDM_SASPECT_CUSTOM              501
+#define IDM_TASPECT_0                   502
+#define IDM_TASPECT_133                 503
+#define IDM_TASPECT_166                 504
+#define IDM_TASPECT_177                 505
+#define IDM_TASPECT_185                 506
+#define IDM_TASPECT_233                 507
+#define IDM_TASPECT_235                 508
+#define IDM_TASPECT_CUSTOM              509
 #define IDM_END                         1032
 #define IDM_TUNER                       1089
 #define IDM_EXTERN1                     1090
@@ -614,8 +633,8 @@
 #define _APS_NO_MFC                     1
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        153
-#define _APS_NEXT_COMMAND_VALUE         489
-#define _APS_NEXT_CONTROL_VALUE         1773
+#define _APS_NEXT_COMMAND_VALUE         512
+#define _APS_NEXT_CONTROL_VALUE         1774
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

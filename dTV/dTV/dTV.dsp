@@ -39,7 +39,7 @@ RSC=rc.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "."
+# PROP Output_Dir "Debug"
 # PROP Intermediate_Dir "Debug"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
@@ -59,7 +59,7 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 ddraw.lib dxguid.lib kernel32.lib user32.lib gdi32.lib advapi32.lib winmm.lib comdlg32.lib ..\driver\bin\dTVdrv.lib /nologo /subsystem:windows /profile /debug /machine:I386 /out:".\dTV.exe"
 # SUBTRACT BASE LINK32 /map /nodefaultlib
-# ADD LINK32 ddraw.lib dxguid.lib kernel32.lib user32.lib gdi32.lib advapi32.lib winmm.lib comdlg32.lib .\dTVdrv.lib /nologo /subsystem:windows /pdb:none /map:"dTV.map" /debug /machine:I386
+# ADD LINK32 ..\Driver\DLL\Debug\dTVdrv.lib ddraw.lib dxguid.lib kernel32.lib user32.lib gdi32.lib advapi32.lib winmm.lib comdlg32.lib /nologo /subsystem:windows /pdb:none /map:"dTV.map" /debug /machine:I386 /out:"..\Debug\dTV.exe"
 # SUBTRACT LINK32 /profile
 
 !ELSEIF  "$(CFG)" == "dTV - Win32 Release"
@@ -72,7 +72,7 @@ LINK32=link.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "."
+# PROP Output_Dir "Release"
 # PROP Intermediate_Dir "Release"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
@@ -93,7 +93,7 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 ddraw.lib dxguid.lib kernel32.lib user32.lib gdi32.lib advapi32.lib winmm.lib comdlg32.lib ..\driver\bin\hwiodrv.lib /nologo /subsystem:windows /incremental:yes /machine:I386
 # SUBTRACT BASE LINK32 /profile /map /debug /nodefaultlib
-# ADD LINK32 ddraw.lib dxguid.lib kernel32.lib user32.lib gdi32.lib advapi32.lib winmm.lib comdlg32.lib .\dTVdrv.lib /nologo /subsystem:windows /incremental:yes /machine:I386
+# ADD LINK32 ..\Driver\DLL\Release\dTVdrv.lib ddraw.lib dxguid.lib kernel32.lib user32.lib gdi32.lib advapi32.lib winmm.lib comdlg32.lib /nologo /subsystem:windows /incremental:yes /machine:I386 /out:"..\Release\dTV.exe"
 # SUBTRACT LINK32 /profile /map /debug /nodefaultlib
 
 !ENDIF 
@@ -105,6 +105,10 @@ LINK32=link.exe
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;for;f90"
+# Begin Source File
+
+SOURCE=.\AspectRatio.c
+# End Source File
 # Begin Source File
 
 SOURCE=.\Audio.c
@@ -197,6 +201,10 @@ SOURCE=.\vt.c
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl;fi;fd"
+# Begin Source File
+
+SOURCE=.\AspectRatio.h
+# End Source File
 # Begin Source File
 
 SOURCE=.\Audio.h
@@ -354,41 +362,69 @@ SOURCE=.\res\VTx10x12.bmp
 SOURCE=.\res\Vtx15x18.bmp
 # End Source File
 # End Group
+# Begin Group "Docs"
+
+# PROP Default_Filter "*.htm;*.txt;*.doc"
 # Begin Source File
 
-SOURCE=.\32Spec.htm
+SOURCE=..\Release\Docs\32spec.htm
 # End Source File
 # Begin Source File
 
-SOURCE=.\Authors.htm
+SOURCE=..\Release\Docs\Authors.htm
 # End Source File
 # Begin Source File
 
-SOURCE=.\Channel.lst
+SOURCE=..\Release\Docs\Bugs.htm
 # End Source File
 # Begin Source File
 
-SOURCE=.\COPYING.html
+SOURCE=..\Release\Docs\card_support.htm
 # End Source File
 # Begin Source File
 
-SOURCE=.\dTV_Readme.htm
+SOURCE=..\Release\Docs\COPYING.html
 # End Source File
 # Begin Source File
 
-SOURCE=.\News.htm
+SOURCE=..\Release\Docs\Developer.htm
 # End Source File
 # Begin Source File
 
-SOURCE=.\Thanks.htm
+SOURCE=..\Release\Docs\dTV_Readme.htm
 # End Source File
 # Begin Source File
 
-SOURCE=.\Thanks_MultiDec.txt
+SOURCE=..\Release\Docs\IniFile.HTM
 # End Source File
 # Begin Source File
 
-SOURCE=.\Todo.htm
+SOURCE=..\Release\Docs\installation.htm
+# End Source File
+# Begin Source File
+
+SOURCE=..\Release\Docs\keyboard.htm
+# End Source File
+# Begin Source File
+
+SOURCE=..\Release\Docs\News.htm
+# End Source File
+# Begin Source File
+
+SOURCE=..\Release\Docs\Thanks.htm
+# End Source File
+# Begin Source File
+
+SOURCE=..\Release\Docs\Thanks_MultiDec.txt
+# End Source File
+# Begin Source File
+
+SOURCE=..\Release\Docs\Todo.htm
+# End Source File
+# End Group
+# Begin Source File
+
+SOURCE=.\READ_ME_FIRST_NOW.txt
 # End Source File
 # End Target
 # End Project

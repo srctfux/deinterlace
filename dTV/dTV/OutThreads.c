@@ -387,7 +387,16 @@ void UpdateNTSCPulldownMode(long FieldDiff, BOOL OnOddField)
 
     if(FieldDiff > Threshold32Pulldown)
 	{
-        if(MISMATCH_COUNT <= PulldownRepeatCount2 * 5)
+		// 2000-09-11: Commented by Mark Rejhon
+		// Suggested by Steve Grimm to eliminate combing artifacts
+		// during scene changes where 3/2 pulldown sequences changes.
+		// This code is unused at the moment, for experimenting.
+		//
+		// if ((FieldDiff < ThresholdForceVideo) &&
+		// 	(MISMATCH_COUNT <= PulldownRepeatCount2 * 5)
+		//
+
+		if(MISMATCH_COUNT <= PulldownRepeatCount2 * 5)
 		{
 			MISMATCH_COUNT++;
 		}

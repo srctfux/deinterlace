@@ -36,7 +36,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "dTVdrv95"=..\Driver\VXD\dTVdrv95.dsp - Package Owner=<4>
+Project: "dTVdrv95"=..\DRIVER\VXD\dTVdrv95.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

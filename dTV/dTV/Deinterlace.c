@@ -28,7 +28,7 @@
 #include "deinterlace.h"
 #include "globals.h"
 
-long BitShift = 14;
+long BitShift = 12;
 long EdgeDetect = 625;
 long JaggieThreshold = 73;
 long DiffThreshold = 224;
