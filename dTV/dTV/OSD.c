@@ -107,7 +107,7 @@ static struct {
 	int		refresh_delay;	// Refresh period in ms (0 means no refresh)
 	BOOL	active;			// Screen to take into account or not
 } ActiveScreens[] = {
-	{	OSD_SCREEN_1,	0,							TRUE	},
+	{	OSD_SCREEN_1,	OSD_TIMER_REFRESH_DELAY,	TRUE	},
 	{	OSD_SCREEN_3,	1000,						TRUE	},
 	{	OSD_SCREEN_2,	OSD_TIMER_REFRESH_DELAY,	TRUE	},
 	{	OSD_SCREEN_4,	0,							FALSE	},
