@@ -95,8 +95,11 @@ void LoadSettingsFromIni()
 	// Added new performance related parms to Threads group - TRB 10/28/00
 	Hurry_When_Late = (GetPrivateProfileInt("Threads", "Hurry_When_Late", Hurry_When_Late, szIniFile) != 0);
 	Wait_For_Flip = (GetPrivateProfileInt("Threads", "Wait_For_Flip", Wait_For_Flip, szIniFile) != 0);
-	Back_Buffers = GetPrivateProfileInt("Threads", "Back_Buffers", Back_Buffers, szIniFile);
 	Sleep_Interval = GetPrivateProfileInt("Threads", "Sleep_Interval", Sleep_Interval, szIniFile);
+
+    // Mark Rejhon 01/01/01 - New Overlay section and OverlayColor setting
+	Back_Buffers = GetPrivateProfileInt("Overlay", "Back_Buffers", Back_Buffers, szIniFile);
+	OverlayColor = GetPrivateProfileInt("Overlay", "OverlayColor", OverlayColor, szIniFile);
 
 	bDisplayStatusBar = (GetPrivateProfileInt("Show", "StatusBar", bDisplayStatusBar, szIniFile) != 0);
 	Show_Menu = (GetPrivateProfileInt("Show", "Menu", Show_Menu, szIniFile) != 0);
@@ -382,10 +385,12 @@ void WriteSettingsToIni()
 	// Added new performance related parms to Threads group - TRB 10/28/00
 	WritePrivateProfileInt("Threads", "Hurry_When_Late", Hurry_When_Late, szIniFile);
 	WritePrivateProfileInt("Threads", "Wait_For_Flip", Wait_For_Flip, szIniFile);
-	WritePrivateProfileInt("Threads", "Back_Buffers", Back_Buffers, szIniFile);
 	WritePrivateProfileInt("Threads", "Sleep_Interval", Sleep_Interval, szIniFile);
 
-
+    // Mark Rejhon 01/01/01 - New Overlay section and OverlayColor setting
+	WritePrivateProfileInt("Overlay", "Back_Buffers", Back_Buffers, szIniFile);
+	WritePrivateProfileInt("Overlay", "OverlayColor", OverlayColor, szIniFile);
+	
 	WritePrivateProfileInt("Pulldown", "PulldownThresholdLow", PulldownThresholdLow, szIniFile);
 	WritePrivateProfileInt("Pulldown", "PulldownThresholdHigh", PulldownThresholdHigh, szIniFile);
 	WritePrivateProfileInt("Pulldown", "PulldownRepeatCount", PulldownRepeatCount, szIniFile);
@@ -428,8 +433,6 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("Deinterlace", "BlcUseInterpBob", BlcUseInterpBob , szIniFile);
 	WritePrivateProfileInt("Deinterlace", "BlcBlendChroma", BlcBlendChroma , szIniFile);
 	WritePrivateProfileInt("Deinterlace", "BlcShowControls", BlcShowControls , szIniFile);
-
-
 
 	WritePrivateProfileInt("Show", "StatusBar", bDisplayStatusBar, szIniFile);
 	WritePrivateProfileInt("Show", "Menu", Show_Menu, szIniFile);
