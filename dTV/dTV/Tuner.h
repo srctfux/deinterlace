@@ -34,8 +34,8 @@
 #ifndef __TUNER_H___
 #define __TUNER_H___
 
-BOOL Tuner_Init(int TunerNr);
-BOOL Tuner_SetFrequency(int TunerTyp, int wFrequency);
+BOOL Tuner_Init();
+BOOL Tuner_SetFrequency(int wFrequency);
 const char* Tuner_Status();
 void Load_Country_Settings();
 void Load_Country_Specific_Settings(int LPos);
@@ -67,7 +67,5 @@ typedef struct TChannels
 
 extern struct TCountries Countries[35];
 extern struct TChannels Channels;
-
-struct TCountries Countries[35];
 
 #endif

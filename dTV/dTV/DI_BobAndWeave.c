@@ -58,12 +58,10 @@ BOOL DeinterlaceFieldBob(DEINTERLACE_INFO *info)
 	short **pEvenLines = info->EvenLines[0];
 	DWORD LineLength = info->LineLength;
 	
-	const __int64 YMask    = 0x00ff00ff00ff00ff;
-	const __int64 UVMask    = 0xff00ff00ff00ff00;
-
 	__int64 qwEdgeDetect;
 	__int64 qwThreshold;
 	const __int64 Mask = 0x7f7f7f7f7f7f7f7f;
+	const __int64 YMask    = 0x00ff00ff00ff00ff;
 
 	qwEdgeDetect = EdgeDetect;
 	qwEdgeDetect += (qwEdgeDetect << 48) + (qwEdgeDetect << 32) + (qwEdgeDetect << 16);
@@ -212,7 +210,6 @@ BOOL DeinterlaceFieldWeave(DEINTERLACE_INFO *info)
 	DWORD LineLength = info->LineLength;
 
 	const __int64 YMask    = 0x00ff00ff00ff00ff;
-	const __int64 UVMask    = 0xff00ff00ff00ff00;
 
 	__int64 qwSpatialTolerance;
 	__int64 qwTemporalTolerance;

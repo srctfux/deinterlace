@@ -166,14 +166,14 @@ BOOL Audio_SetSource(AUDIOMUXTYPE nChannel)
 	int i;
 	DWORD MuxSelect;
 
-	BT848_AndOrDataDword(BT848_GPIO_OUT_EN, TVCards[CardType].GPIOMask, ~TVCards[CardType].GPIOMask);
+	BT848_AndOrDataDword(BT848_GPIO_OUT_EN, GetCardSetup()->GPIOMask, ~GetCardSetup()->GPIOMask);
 
 	switch(nChannel)
 	{
 	case AUDIOMUX_MSP_RADIO:
 	case AUDIOMUX_MUTE:
 		// just get on with it
-		MuxSelect = TVCards[CardType].AudioMuxSelect[nChannel];
+		MuxSelect = GetCardSetup()->AudioMuxSelect[nChannel];
 		break;
 	default:
 		// see if there is a video signal present
@@ -186,18 +186,18 @@ BOOL Audio_SetSource(AUDIOMUXTYPE nChannel)
 		/* if video not in H-lock, turn audio off */
 		if (i == 20)
 		{
-			MuxSelect = TVCards[CardType].AudioMuxSelect[AUDIOMUX_MUTE];
+			MuxSelect = GetCardSetup()->AudioMuxSelect[AUDIOMUX_MUTE];
 		}
 		else
 		{
-			MuxSelect = TVCards[CardType].AudioMuxSelect[nChannel];
+			MuxSelect = GetCardSetup()->AudioMuxSelect[nChannel];
 		}
 		break;
 	}
 
 	/* select direct input */
 	//BT848_WriteWord(BT848_GPIO_REG_INP, 0x00); // MAE 14 Dec 2000 disabled
-	BT848_AndOrDataDword(BT848_GPIO_DATA, MuxSelect, ~TVCards[CardType].GPIOMask); 
+	BT848_AndOrDataDword(BT848_GPIO_DATA, MuxSelect, ~GetCardSetup()->GPIOMask); 
 	return TRUE;
 }
 

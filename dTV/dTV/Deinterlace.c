@@ -242,7 +242,7 @@ void Deinterlace_SetMenu(HMENU hMenu)
 
 	if(Setting_GetValue(OutThreads_GetSetting(AUTODETECT)))
 	{
-		if(TVSettings[TVTYPE].Is25fps)
+		if(BT848_GetTVFormat()->Is25fps)
 		{
 			ModeToShow = Setting_GetValue(FD50_GetSetting(PALFILMFALLBACKMODE));
 		}

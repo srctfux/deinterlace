@@ -122,6 +122,7 @@ typedef enum
 	CURRENTX,
 	CUSTOMPIXELWIDTH,
 	VIDEOSOURCE,
+	TVFORMAT,
 	BT848_SETTING_LASTONE,
 } BT848_SETTING;
 
@@ -354,5 +355,19 @@ typedef enum
 #define WM_DI_GREEDY_GETVALUE	(WM_USER + 15)
 #define WM_DI_GREEDY_SETVALUE	(WM_USER + 115)
 
+/////////////////////////////////////////////////////////////////////////////
+// Control settings contained in TVCards.c
+/////////////////////////////////////////////////////////////////////////////
+
+typedef enum
+{
+	CURRENTCARDTYPE = 0,
+	CURRENTTUNERTYPE,
+	PROCESSORSPEED,
+	TRADEOFF,
+	TVCARD_SETTING_LASTONE,
+} TVCARD_SETTING;
+#define WM_TVCARD_GETVALUE	(WM_USER + 16)
+#define WM_TVCARD_SETVALUE	(WM_USER + 116)
 
 #endif

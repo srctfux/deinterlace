@@ -72,6 +72,7 @@
 #include "slider.h"
 #include "Splash.h"
 #include "OSD.h"
+#include "TVCards.h"
 
 char szIniFile[MAX_PATH] = "dTV.ini";
 
@@ -109,6 +110,7 @@ void LoadSettingsFromIni()
 	DI_TwoFrame_ReadSettingsFromIni();
 	Deinterlace_ReadSettingsFromIni();
 	FLT_TNoise_ReadSettingsFromIni();
+	TVCard_ReadSettingsFromIni();
 
 	VBI_Flags = 0;
 	if(GetPrivateProfileInt("VBI", "VT", 0, szIniFile) != 0)
@@ -126,12 +128,6 @@ void LoadSettingsFromIni()
 
 	GetPrivateProfileString("Files", "DebugLogFilename", DebugLogFilename, DebugLogFilename, MAX_PATH, szIniFile);
 	DebugLogEnabled = GetPrivateProfileInt("Files", "DebugLogEnabled", DebugLogEnabled, szIniFile);
-
-	CardType = GetPrivateProfileInt("Hardware", "CardType", TVCARD_UNKNOWN, szIniFile);
-	TunerType = GetPrivateProfileInt("Hardware", "TunerType", TUNER_ABSENT, szIniFile); 
-	TVTYPE = GetPrivateProfileInt("Hardware", "TVType", -1, szIniFile); 
-	ProcessorSpeed = GetPrivateProfileInt("Hardware", "ProcessorSpeed", ProcessorSpeed, szIniFile); 
-	TradeOff = GetPrivateProfileInt("Hardware", "TradeOff", TradeOff, szIniFile); 
 
 	Capture_VBI = (GetPrivateProfileInt("Show", "CaptureVBI", Capture_VBI, szIniFile) != 0);  
 	CurrentProgramm = GetPrivateProfileInt("Show", "LastProgram", CurrentProgramm, szIniFile);
@@ -256,6 +252,9 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 		case WM_FLT_TNOISE_GETVALUE:		
 			return Setting_GetValue(FLT_TNoise_GetSetting((FLT_TNOISE_SETTING)wParam));
 			break;
+		case WM_TVCARD_GETVALUE:		
+			return Setting_GetValue(TVCard_GetSetting((TVCARD_SETTING)wParam));
+			break;
 
 		case WM_ASPECT_SETVALUE:
 			Setting_SetValue(Aspect_GetSetting((ASPECT_SETTING)wParam), lParam);
@@ -302,9 +301,24 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 		case WM_FLT_TNOISE_SETVALUE:		
 			Setting_SetValue(FLT_TNoise_GetSetting((FLT_TNOISE_SETTING)wParam), lParam);
 			break;
+		case WM_TVCARD_SETVALUE:		
+			Setting_SetValue(TVCard_GetSetting((TVCARD_SETTING)wParam), lParam);
+			break;
 		default:
 			break;
 	}
+
+    // Updates the menu checkbox settings
+	SetMenuAnalog();
+
+    // Set the configuration file autosave timer.
+    // We use an autosave timer so that when the user has finished
+    // making adjustments and at least a small delay has occured,
+    // that the DTV.INI file is properly up to date, even if 
+    // the system crashes or system is turned off abruptly.
+    KillTimer(hWnd, TIMER_AUTOSAVE);
+    SetTimer(hWnd, TIMER_AUTOSAVE, TIMER_AUTOSAVE_MS, NULL);
+
 	return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
@@ -328,6 +342,7 @@ void WriteSettingsToIni()
 	DI_TwoFrame_WriteSettingsToIni();
 	Deinterlace_WriteSettingsToIni();
 	FLT_TNoise_WriteSettingsToIni();
+	TVCard_WriteSettingsToIni();
 
 	WritePrivateProfileInt("VBI", "VT", VBI_Flags & VBI_VT, szIniFile);
 	WritePrivateProfileInt("VBI", "VPS", VBI_Flags & VBI_VPS, szIniFile);
@@ -335,12 +350,6 @@ void WriteSettingsToIni()
 
 	WritePrivateProfileString("Files", "DebugLogFilename", DebugLogFilename, szIniFile);
 	WritePrivateProfileInt("Files", "DebugLogEnabled", DebugLogEnabled, szIniFile);
-
-	WritePrivateProfileInt("Hardware", "CardType", CardType, szIniFile);
-	WritePrivateProfileInt("Hardware", "TunerType", TunerType, szIniFile); 
-	WritePrivateProfileInt("Hardware", "TVType", TVTYPE, szIniFile); 
-	WritePrivateProfileInt("Hardware", "ProcessorSpeed", ProcessorSpeed, szIniFile); 
-	WritePrivateProfileInt("Hardware", "TradeOff", TradeOff, szIniFile); 
 
 	WritePrivateProfileInt("Show", "CaptureVBI", Capture_VBI, szIniFile);
 	WritePrivateProfileInt("Show", "LastProgram", CurrentProgramm, szIniFile);

@@ -56,7 +56,19 @@ typedef enum
     SOURCE_CCIR656
 } VIDEOSOURCETYPE;
 
-struct TTVSetting
+typedef enum
+{
+	FORMAT_PAL_BDGHI = 0,
+	FORMAT_NTSC,
+	FORMAT_SECAM,
+	FORMAT_PAL_M,
+	FORMAT_PAL_N,
+	FORMAT_NTSC_J,
+	FORMAT_PAL60,
+    FORMAT_LASTONE,
+} VIDEOFORMAT;
+
+typedef struct
 {
 	LPCSTR szDesc;
 	WORD wCropHeight;
@@ -71,7 +83,7 @@ struct TTVSetting
 	BOOL Is25fps;
 	WORD VBIPacketSize;
 	WORD VBILines;
-};
+} TTVFORMAT;
 
 
 // Get Hold of the bt848.c file settings
@@ -101,6 +113,7 @@ void BT848_SetDMA(BOOL bState);
 BOOL BT848_IsVideoPresent();
 void BT848_SetGeometryEvenOdd(BOOL bOdd, BYTE bVtc, int wHScale, int wVScale, int wHActive, int wVActive, int wHDelay, int wVDelay, BYTE bCrop);
 void BT848_Restart_RISC_Code();
+TTVFORMAT* BT848_GetTVFormat();
 
 BOOL APIENTRY AdvVideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 
@@ -474,8 +487,6 @@ extern BOOL bSaveSettings;
 extern BYTE* pDisplay[5];
 extern BYTE* pVBILines[5];
 
-extern int TVTYPE;
-
 // 10/19/2000 Mark Rejhon
 // Better NTSC defaults
 #define DEFAULT_HUE_NTSC 0
@@ -495,7 +506,5 @@ extern int TVTYPE;
 extern long CurrentX;
 extern int CurrentY;
 extern int CurrentVBILines;
-
-extern struct TTVSetting TVSettings[];
 
 #endif

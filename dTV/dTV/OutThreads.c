@@ -368,13 +368,12 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 	int nLineTarget;
 	int nFrame = 0;
 	DWORD dwLastSecondTicks;
-	long FlipTicks;
+	long FlipTicks = 0;
 	short* ppEvenLines[5][DTV_MAX_HEIGHT / 2];
 	short* ppOddLines[5][DTV_MAX_HEIGHT / 2];
 	BYTE* pDest;
 	int LastEvenFrame = 0;
 	int LastOddFrame = 0;
-	int CombNum = 0;
 	BOOL bFlipNow = TRUE;
 	BOOL bMissedFrame;
 	HRESULT ddrval;
@@ -383,7 +382,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 	ePULLDOWNMODES PrevPulldownMode = PULLDOWNMODES_LAST_ONE;
 	DWORD RefreshRate;
 
-	BOOL bIsPAL = TVSettings[TVTYPE].Is25fps;
+	BOOL bIsPAL = BT848_GetTVFormat()->Is25fps;
 
 	// catch anything fatal in this loop so we don't crash the machine
 	__try
@@ -668,7 +667,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 		// so return to the current fallback mode instead.
 		if(bAutoDetectMode && DeintMethods[gPulldownMode].bIsFilmMode)
 		{
-			if(TVSettings[TVTYPE].Is25fps)
+			if(bIsPAL)
 			{
 				gPulldownMode = Setting_GetValue(FD50_GetSetting(PALFILMFALLBACKMODE));
 			}

@@ -47,6 +47,7 @@
 #include "Status.h"
 #include "Audio.h"
 #include "VBI_VideoText.h"
+#include "TVCards.h"
 
 int CurSel;
 unsigned short SelectButton;
@@ -66,7 +67,6 @@ BOOL APIENTRY ProgramListProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 	static BOOL NextBlock = FALSE;
 	RECT ptrtoWndPos;
 	static int currX, currY;
-	int fwKeys = wParam;		// key flags
 	static int distance = -9999;
 	static int sPos;
 	static int EndPos;
@@ -503,10 +503,10 @@ BOOL APIENTRY AnalogScanProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 			if (STOP == TRUE)
 				return (TRUE);
 
-			if (ChannelNr <= (Channels.MaxChannel-Channels.MinChannel))
+			if (ChannelNr <= (Channels.MaxChannel - Channels.MinChannel))
 			{
 				Freq = Channels.freq[ChannelNr];
-				if (!Tuner_SetFrequency(TunerType, MulDiv((Freq * 1000), 16, 1000000)))
+				if (!Tuner_SetFrequency(MulDiv((Freq * 1000), 16, 1000000)))
 				{
 					sprintf(Text, "SetFrequency %10.2f Failed.", (float) Freq / 1000);
 					ErrorBox(Text);
@@ -529,7 +529,7 @@ BOOL APIENTRY AnalogScanProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 			{
 				if (FirstFreq != 0)
 				{
-					(void) Tuner_SetFrequency(TunerType, MulDiv((Programm[0].freq * 1000), 16, 1000000));
+					(void) Tuner_SetFrequency(MulDiv((Programm[0].freq * 1000), 16, 1000000));
 
 					SetDlgItemText(hDlg, IDC_EDIT15, Programm[0].Name);
 					
@@ -572,7 +572,7 @@ BOOL APIENTRY AnalogScanProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 			sprintf(line, "%10.2f", (float) Freq / 1000);
 			SetDlgItemText(hDlg, IDC_EDIT2, line);
 
-			if (!Tuner_SetFrequency(TunerType, MulDiv((Freq * 1000), 16, 1000000)))
+			if (!Tuner_SetFrequency(MulDiv((Freq * 1000), 16, 1000000)))
 			{
 				sprintf(Text, "Set Frequency %10.2f Mhz fialed", (float) Freq / 1000);
 				StatusBar_ShowText(STATUS_TEXT, Text);
@@ -616,7 +616,7 @@ BOOL APIENTRY AnalogScanProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 //---------------------------------------------------------------------------
 void ChangeChannel(int NewChannel)
 {
-	if (TunerType != TUNER_ABSENT)
+	if (GetTunerSetup() != NULL)
 	{
 		if(NewChannel >= 0 && NewChannel < MAXPROGS)
 		{
@@ -624,7 +624,7 @@ void ChangeChannel(int NewChannel)
 			{
 				Audio_SetSource(AUDIOMUX_MUTE);
 				CurrentProgramm = NewChannel;
-				Tuner_SetFrequency(TunerType, MulDiv(Programm[CurrentProgramm].freq * 1000, 16, 1000000));
+				Tuner_SetFrequency(MulDiv(Programm[CurrentProgramm].freq * 1000, 16, 1000000));
 				Sleep(20);
 				Audio_SetSource(AudioSource);
 

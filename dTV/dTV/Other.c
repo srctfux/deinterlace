@@ -72,7 +72,7 @@ DWORD DestSizeAlign;
 DWORD SrcSizeAlign;
 COLORREF OverlayColor = RGB(255, 0, 255);
 DWORD PhysicalOverlayColor = RGB(255, 0, 255);
-int Back_Buffers = 2;		// Make new user parm, TRB 10/28/00
+long Back_Buffers = 2;		// Make new user parm, TRB 10/28/00
 
 //-----------------------------------------------------------------------------
 // Tells whether or not video overlay is active

@@ -396,7 +396,6 @@ LONG APIENTRY StatusFieldProc(HWND hwnd, UINT msg, UINT wParam, LONG lParam)
 	PAINTSTRUCT ps;
 	RECT rect, border;
 	HBRUSH hBrush;
-	WORD edge = 1;
 	HFONT hTmp;
 	char szText[80];
 	int len;

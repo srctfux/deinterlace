@@ -35,6 +35,15 @@
 #include "tvcards.h"
 #include "bt848.h"
 #include "i2c.h"
+#include "OutThreads.h"
+#include "FD_50Hz.h"
+#include "FD_60Hz.h"
+
+TVCARDID CardType = TVCARD_UNKNOWN;
+TVTUNERID TunerType = TUNER_ABSENT;
+long ProcessorSpeed = 0;
+long TradeOff = 1;
+
 
 const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 {
@@ -653,10 +662,8 @@ const TVTUNERSETUP Tuners[TUNER_LASTONE] =
 
 };
 
-TVCARDID CardType = TVCARD_UNKNOWN;
-
 // do any specific card related initilaisation
-void Card_Init(TVCARDID CardType)
+void Card_Init()
 {
 	switch(CardType)
 	{
@@ -765,4 +772,272 @@ TVCARDID Card_AutoDetect()
 	}
 
 	return TVCARD_UNKNOWN;
+}
+
+const TVCARDSETUP* GetCardSetup()
+{
+	return TVCards + CardType;
+}
+
+const TVTUNERSETUP* GetTunerSetup()
+{
+	if(TunerType >= 0)
+	{
+		return Tuners + TunerType;
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+void TVCard_FirstTimeSetupHardware(HINSTANCE hInst, HWND hWnd)
+{
+	// try to detect the card
+	CardType = Card_AutoDetect();
+	Card_AutoDetectTuner(CardType);
+
+	// then display the hardware setup dialog
+	DialogBox(hInst, "SELECTCARD", hWnd, (DLGPROC) SelectCardProc);
+}
+
+void TVCard_ChangeDefault(SETTING* pSetting, long Default)
+{
+	pSetting->Default = Default;
+	*pSetting->pValue = Default;
+}
+	
+void ChangeDefaultsBasedOnHardware()
+{
+	// default the TVTYPE dependant on the Tuner selected
+	// should be OK most of the time
+	if(TunerType != TUNER_ABSENT)
+	{
+		switch(Tuners[TunerType].Type)
+		{
+		case PAL:
+		case PAL_I:
+			TVCard_ChangeDefault(BT848_GetSetting(TVFORMAT), FORMAT_PAL_BDGHI);
+			break;
+		case NTSC:
+			TVCard_ChangeDefault(BT848_GetSetting(TVFORMAT), FORMAT_NTSC);
+			break;
+		case SECAM:
+		default:
+			TVCard_ChangeDefault(BT848_GetSetting(TVFORMAT), FORMAT_NTSC);
+			break;
+		}
+	}
+	// now do defaults based on the processor speed selected
+	if(ProcessorSpeed == 1 && TradeOff == 0)
+	{
+		// User has selected 300-500 MHz and low judder
+		TVCard_ChangeDefault(OutThreads_GetSetting(HURRYWHENLATE), FALSE);
+		TVCard_ChangeDefault(OutThreads_GetSetting(WAITFORFLIP), TRUE);
+		TVCard_ChangeDefault(OutThreads_GetSetting(DOACCURATEFLIPS), TRUE);
+		TVCard_ChangeDefault(OutThreads_GetSetting(AUTODETECT), TRUE);
+		TVCard_ChangeDefault(OutThreads_GetSetting(PULLDOWNMODE), GREEDY);
+		TVCard_ChangeDefault(FD60_GetSetting(NTSCFILMFALLBACKMODE), GREEDY);
+		TVCard_ChangeDefault(FD50_GetSetting(PALFILMFALLBACKMODE), GREEDY);
+		TVCard_ChangeDefault(BT848_GetSetting(CURRENTX), 720);
+	}
+	else if(ProcessorSpeed == 1 && TradeOff == 1)
+	{
+		// User has selected 300-500 MHz and best picture
+		TVCard_ChangeDefault(OutThreads_GetSetting(HURRYWHENLATE), TRUE);
+		TVCard_ChangeDefault(OutThreads_GetSetting(WAITFORFLIP), FALSE);
+		TVCard_ChangeDefault(OutThreads_GetSetting(DOACCURATEFLIPS), FALSE);
+		TVCard_ChangeDefault(OutThreads_GetSetting(AUTODETECT), TRUE);
+		TVCard_ChangeDefault(OutThreads_GetSetting(PULLDOWNMODE), GREEDY);
+		TVCard_ChangeDefault(FD60_GetSetting(NTSCFILMFALLBACKMODE), GREEDY);
+		TVCard_ChangeDefault(FD50_GetSetting(PALFILMFALLBACKMODE), GREEDY);
+		TVCard_ChangeDefault(BT848_GetSetting(CURRENTX), 720);
+	}
+	else if(ProcessorSpeed == 2 && TradeOff == 0)
+	{
+		// User has selected below 300 MHz and low judder
+		TVCard_ChangeDefault(OutThreads_GetSetting(HURRYWHENLATE), FALSE);
+		TVCard_ChangeDefault(OutThreads_GetSetting(WAITFORFLIP), TRUE);
+		TVCard_ChangeDefault(OutThreads_GetSetting(DOACCURATEFLIPS), TRUE);
+		TVCard_ChangeDefault(OutThreads_GetSetting(AUTODETECT), FALSE);
+		TVCard_ChangeDefault(OutThreads_GetSetting(PULLDOWNMODE), GREEDY);
+		TVCard_ChangeDefault(FD60_GetSetting(NTSCFILMFALLBACKMODE), GREEDY);
+		TVCard_ChangeDefault(FD50_GetSetting(PALFILMFALLBACKMODE), GREEDY);
+		TVCard_ChangeDefault(BT848_GetSetting(CURRENTX), 640);
+	}
+	else if(ProcessorSpeed == 2 && TradeOff == 1)
+	{
+		// User has selected below 300 MHz and best picture
+		TVCard_ChangeDefault(OutThreads_GetSetting(HURRYWHENLATE), TRUE);
+		TVCard_ChangeDefault(OutThreads_GetSetting(WAITFORFLIP), FALSE);
+		TVCard_ChangeDefault(OutThreads_GetSetting(DOACCURATEFLIPS), FALSE);
+		TVCard_ChangeDefault(OutThreads_GetSetting(AUTODETECT), FALSE);
+		TVCard_ChangeDefault(OutThreads_GetSetting(PULLDOWNMODE), GREEDY);
+		TVCard_ChangeDefault(FD60_GetSetting(NTSCFILMFALLBACKMODE), GREEDY);
+		TVCard_ChangeDefault(FD50_GetSetting(PALFILMFALLBACKMODE), GREEDY);
+		TVCard_ChangeDefault(BT848_GetSetting(CURRENTX), 640);
+	}
+	else
+	{
+		// user has fast processor use best defaults
+		TVCard_ChangeDefault(OutThreads_GetSetting(HURRYWHENLATE), FALSE);
+		TVCard_ChangeDefault(OutThreads_GetSetting(WAITFORFLIP), TRUE);
+		TVCard_ChangeDefault(OutThreads_GetSetting(DOACCURATEFLIPS), TRUE);
+		TVCard_ChangeDefault(OutThreads_GetSetting(AUTODETECT), TRUE);
+		TVCard_ChangeDefault(OutThreads_GetSetting(PULLDOWNMODE), ADAPTIVE);
+		TVCard_ChangeDefault(FD60_GetSetting(NTSCFILMFALLBACKMODE), ADAPTIVE);
+		TVCard_ChangeDefault(FD50_GetSetting(PALFILMFALLBACKMODE), GREEDY);
+		TVCard_ChangeDefault(BT848_GetSetting(CURRENTX), 720);
+	}
+}
+
+BOOL APIENTRY SelectCardProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
+{
+	int i;
+	switch (message)
+	{
+	case WM_INITDIALOG:
+		SendMessage(GetDlgItem(hDlg, IDC_CARDSSELECT), CB_RESETCONTENT, 0, 0);
+		for(i = 0; i < TVCARD_LASTONE; i++)
+		{
+			SendMessage(GetDlgItem(hDlg, IDC_CARDSSELECT), CB_ADDSTRING, 0, (LONG)TVCards[i].szName);
+		}
+		SendMessage(GetDlgItem(hDlg, IDC_CARDSSELECT), CB_SETCURSEL, CardType, 0);
+
+		SendMessage(GetDlgItem(hDlg, IDC_TUNERSELECT), CB_RESETCONTENT, 0, 0);
+		for(i = 0; i < TUNER_LASTONE; i++)
+		{
+			SendMessage(GetDlgItem(hDlg, IDC_TUNERSELECT), CB_ADDSTRING, 0, (LONG)Tuners[i].szName);
+		}
+		SendMessage(GetDlgItem(hDlg, IDC_TUNERSELECT), CB_SETCURSEL, TunerType, 0);
+
+		SendMessage(GetDlgItem(hDlg, IDC_PROCESSOR_SPEED), CB_ADDSTRING, 0, (LONG)"Above 500 MHz");
+		SendMessage(GetDlgItem(hDlg, IDC_PROCESSOR_SPEED), CB_ADDSTRING, 0, (LONG)"300 - 500 MHz");
+		SendMessage(GetDlgItem(hDlg, IDC_PROCESSOR_SPEED), CB_ADDSTRING, 0, (LONG)"Below 300 MHz");
+		SendMessage(GetDlgItem(hDlg, IDC_PROCESSOR_SPEED), CB_SETCURSEL, ProcessorSpeed, 0);
+		SendMessage(GetDlgItem(hDlg, IDC_TRADEOFF), CB_ADDSTRING, 0, (LONG)"Show all frames - Lowest judder");
+		SendMessage(GetDlgItem(hDlg, IDC_TRADEOFF), CB_ADDSTRING, 0, (LONG)"Best picture quality");
+		SendMessage(GetDlgItem(hDlg, IDC_TRADEOFF), CB_SETCURSEL, TradeOff, 0);
+
+		SetFocus(hDlg);
+		break;
+	case WM_COMMAND:
+		switch(LOWORD(wParam))
+		{
+		case IDOK:
+			TunerType = SendMessage(GetDlgItem(hDlg, IDC_TUNERSELECT), CB_GETCURSEL, 0, 0);
+			CardType = SendMessage(GetDlgItem(hDlg, IDC_CARDSSELECT), CB_GETCURSEL, 0, 0);
+			ProcessorSpeed = SendMessage(GetDlgItem(hDlg, IDC_PROCESSOR_SPEED), CB_GETCURSEL, 0, 0);
+			TradeOff = SendMessage(GetDlgItem(hDlg, IDC_TRADEOFF), CB_GETCURSEL, 0, 0);
+			EndDialog(hDlg, TRUE);
+			break;
+		case IDCANCEL:
+			EndDialog(hDlg, TRUE);
+			break;
+		case IDC_CARDSSELECT:
+			i = SendMessage(GetDlgItem(hDlg, IDC_CARDSSELECT), CB_GETCURSEL, 0, 0);
+			if(TVCards[i].TunerId == TUNER_USER_SETUP)
+			{
+				SendMessage(GetDlgItem(hDlg, IDC_TUNERSELECT), CB_SETCURSEL, TUNER_ABSENT, 0);
+			}
+			else if(TVCards[i].TunerId == TUNER_AUTODETECT)
+			{
+				SendMessage(GetDlgItem(hDlg, IDC_TUNERSELECT), CB_SETCURSEL, Card_AutoDetectTuner(i), 0);
+			}
+			else
+			{
+				SendMessage(GetDlgItem(hDlg, IDC_TUNERSELECT), CB_SETCURSEL, TVCards[i].TunerId, 0);
+			}
+			break;
+		default:
+			break;
+		}
+		break;
+	default:
+		break;
+	}
+	return (FALSE);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Start of Settings related code
+/////////////////////////////////////////////////////////////////////////////
+
+SETTING TVCardSettings[TVCARD_SETTING_LASTONE] =
+{
+	{
+		"Card Type", NUMBER, 0, &CardType,
+		 TVCARD_UNKNOWN, TVCARD_UNKNOWN, TVCARD_LASTONE - 1, 0, NULL,
+		"Hardware", "CardType", NULL,
+	},
+	{
+		"Tuner Type", NUMBER, 0, &TunerType,
+		 TUNER_ABSENT, TUNER_ABSENT, TUNER_LASTONE - 1, 0, NULL,
+		"Hardware", "TunerType", NULL,
+	},
+	{
+		"Processor Speed", NUMBER, 0, &ProcessorSpeed,
+		 1, 0, 2, 0, NULL,
+		"Hardware", "ProcessorSpeed", NULL,
+	},
+	{
+		"Trade Off", NUMBER, 0, &TradeOff,
+		 1, 0, 1, 0, NULL,
+		"Hardware", "TradeOff", NULL,
+	},
+};
+
+
+SETTING* TVCard_GetSetting(TVCARD_SETTING Setting)
+{
+	if(Setting > -1 && Setting < TVCARD_SETTING_LASTONE)
+	{
+		return &(TVCardSettings[Setting]);
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+void TVCard_ReadSettingsFromIni()
+{
+	int i;
+	for(i = 0; i < TVCARD_SETTING_LASTONE; i++)
+	{
+		Setting_ReadFromIni(&(TVCardSettings[i]));
+	}
+}
+
+void TVCard_WriteSettingsToIni()
+{
+	int i;
+	for(i = 0; i < TVCARD_SETTING_LASTONE; i++)
+	{
+		Setting_WriteToIni(&(TVCardSettings[i]));
+	}
+}
+
+void TVCard_SetMenu(HMENU hMenu)
+{
+	EnableMenuItem(hMenu, IDM_CHANNELPLUS, (TunerType != TUNER_ABSENT)?MF_ENABLED:MF_GRAYED);
+	EnableMenuItem(hMenu, IDM_CHANNELMINUS, (TunerType != TUNER_ABSENT)?MF_ENABLED:MF_GRAYED);
+	EnableMenuItem(hMenu, IDM_ANALOGSCAN, (TunerType != TUNER_ABSENT)?MF_ENABLED:MF_GRAYED);
+
+	EnableMenuItem(hMenu, IDM_SOURCE_TUNER, (TVCards[CardType].TunerInput != -1)?MF_ENABLED:MF_GRAYED);
+
+	if(TVCards[CardType].SVideoInput == -1)
+	{
+		EnableMenuItem(hMenu, IDM_SOURCE_SVIDEO, MF_GRAYED);
+		EnableMenuItem(hMenu, IDM_SOURCE_OTHER1, (TVCards[CardType].nVideoInputs > 2)?MF_ENABLED:MF_GRAYED);
+		EnableMenuItem(hMenu, IDM_SOURCE_OTHER2, (TVCards[CardType].nVideoInputs > 3)?MF_ENABLED:MF_GRAYED);
+		EnableMenuItem(hMenu, IDM_SOURCE_COMPVIASVIDEO, MF_GRAYED);
+	}
+	else
+	{
+		EnableMenuItem(hMenu, IDM_SOURCE_SVIDEO, MF_ENABLED);
+		EnableMenuItem(hMenu, IDM_SOURCE_OTHER1, (TVCards[CardType].nVideoInputs > 3)?MF_ENABLED:MF_GRAYED);
+		EnableMenuItem(hMenu, IDM_SOURCE_OTHER2, (TVCards[CardType].nVideoInputs > 4)?MF_ENABLED:MF_GRAYED);
+		EnableMenuItem(hMenu, IDM_SOURCE_COMPVIASVIDEO, MF_ENABLED);
+	}
 }

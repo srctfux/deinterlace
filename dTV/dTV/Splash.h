@@ -27,6 +27,7 @@
 #define __SPLASH_H___
 
 void ShowSpashScreen();
+void HideSplashScreen();
 void AddSplashTextLine(const char* szText);
 
 #endif

@@ -31,6 +31,13 @@
 #ifndef __TVCARDS_H___
 #define __TVCARDS_H___
 
+#include "settings.h"
+
+// Get Hold of the TVCard.c file settings
+SETTING* TVCard_GetSetting(TVCARD_SETTING Setting);
+void TVCard_ReadSettingsFromIni();
+void TVCard_WriteSettingsToIni();
+void TVCard_SetMenu(HMENU hMenu);
 
 typedef enum
 {
@@ -202,17 +209,13 @@ typedef struct
 
 TVCARDID Card_AutoDetect();
 int Card_AutoDetectTuner(TVCARDID CardId);
-void Card_Init(TVCARDID CardType);
+void Card_Init();
 void init_PXC200();
+const TVCARDSETUP* GetCardSetup();
+const TVTUNERSETUP* GetTunerSetup();
+void TVCard_FirstTimeSetupHardware(HINSTANCE hInst, HWND hWnd);
+void ChangeDefaultsBasedOnHardware();
 
-extern const TVCARDSETUP TVCards[TVCARD_LASTONE];
-extern const AUTODETECT878 AutoDectect878[];
-extern const TVTUNERSETUP Tuners[TUNER_LASTONE];
-extern TVTUNERID TunerType;
-extern TVCARDID CardType;
-extern int ProcessorSpeed;
-extern int TradeOff;
-
-
+BOOL APIENTRY SelectCardProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 
 #endif

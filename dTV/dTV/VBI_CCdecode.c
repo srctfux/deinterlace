@@ -112,7 +112,7 @@ int CC_DecodeBit(BYTE* data, int threshold)
 int CC_DecodeLine(BYTE* vbiline)
 {
 	int max[7], min[7], val[7], i, clk, tmp, sample, packedbits = 0;
-	int done = 0, mode = 0, lastchar = 0;
+	int mode = 0, lastchar = 0;
 	int b1, b2, ret;
 
     for (clk=0; clk<7; clk++)

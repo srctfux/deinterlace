@@ -32,22 +32,20 @@
 
 BYTE TunerDeviceWrite, TunerDeviceRead;
 char TunerStatus[30] = "No Device on I2C-Bus";
-TVTUNERID TunerType = TUNER_ABSENT;
-int ProcessorSpeed = 0;
-int TradeOff = 1;
 
 struct TChannels Channels;
+struct TCountries Countries[35];
 
 const char* Tuner_Status()
 {
 	return TunerStatus;
 }
 
-BOOL Tuner_Init(int TunerNr)
+BOOL Tuner_Init()
 {
 	unsigned char j;
 
-	if (TunerNr == TUNER_ABSENT)
+	if (GetTunerSetup() == NULL)
 		return (TRUE);
 
 	j = 0xc0;
@@ -72,23 +70,23 @@ BOOL Tuner_Init(int TunerNr)
 /*
  *	Set TSA5522 synthesizer frequency
  */
-BOOL Tuner_SetFrequency(int TunerTyp, int wFrequency)
+BOOL Tuner_SetFrequency(int wFrequency)
 {
 	BYTE config;
 	WORD div;
 	BOOL bAck;
 
-	if (TunerTyp == TUNER_ABSENT)
+	if (GetTunerSetup() == NULL)
 		return (TRUE);
 
-	if (wFrequency < Tuners[TunerTyp].thresh1)
-		config = Tuners[TunerTyp].VHF_L;
-	else if (wFrequency < Tuners[TunerTyp].thresh2)
-		config = Tuners[TunerTyp].VHF_H;
+	if (wFrequency < GetTunerSetup()->thresh1)
+		config = GetTunerSetup()->VHF_L;
+	else if (wFrequency < GetTunerSetup()->thresh2)
+		config = GetTunerSetup()->VHF_H;
 	else
-		config = Tuners[TunerTyp].UHF;
+		config = GetTunerSetup()->UHF;
 
-	div = wFrequency + Tuners[TunerTyp].IFPCoff;
+	div = wFrequency + GetTunerSetup()->IFPCoff;
 
 	div &= 0x7fff;
 	I2CBus_Lock();				// Lock/wait
@@ -106,13 +104,13 @@ BOOL Tuner_SetFrequency(int TunerTyp, int wFrequency)
 			}
 		}
 	}
-	if (!(bAck = I2CBus_Write(TunerDeviceWrite, Tuners[TunerTyp].config, config, TRUE)))
+	if (!(bAck = I2CBus_Write(TunerDeviceWrite, GetTunerSetup()->config, config, TRUE)))
 	{
 		Sleep(1);
-		if (!(bAck = I2CBus_Write(TunerDeviceWrite, Tuners[TunerTyp].config, config, TRUE)))
+		if (!(bAck = I2CBus_Write(TunerDeviceWrite, GetTunerSetup()->config, config, TRUE)))
 		{
 			Sleep(1);
-			if (!(bAck = I2CBus_Write(TunerDeviceWrite, Tuners[TunerTyp].config, config, TRUE)))
+			if (!(bAck = I2CBus_Write(TunerDeviceWrite, GetTunerSetup()->config, config, TRUE)))
 			{
 				ErrorBox("Tuner Device : Error Writing (2)");
 			}

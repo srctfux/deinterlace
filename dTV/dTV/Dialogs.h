@@ -49,7 +49,6 @@ BOOL APIENTRY AudioSettingProc1(HWND hDlg, UINT message, UINT wParam, LONG lPara
 BOOL APIENTRY AboutProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 BOOL APIENTRY PLLSettingProc(HWND hDlg,UINT message,UINT wParam,LONG lParam);
 BOOL APIENTRY ChipSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
-BOOL APIENTRY SelectCardProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 void SetHorSliderInt(HWND hDlgItem, int yPos, int Value, int nMin, int nMax);
 int GetHorSliderInt(int MouseX, int nMin, int nMax);
 

@@ -65,6 +65,12 @@ void ShowSpashScreen()
 	SetWindowPos(SplashWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOCOPYBITS | SWP_NOSIZE);
 }
 
+void HideSplashScreen()
+{
+	EndDialog(SplashWnd, 0);
+	SplashWnd  = NULL;
+}
+
 
 void AddSplashTextLine(const char* szText)
 {

@@ -81,11 +81,9 @@ long GetCombFactor(DEINTERLACE_INFO *pInfo)
 	long ActiveX = pInfo->SourceRect.right - pInfo->SourceRect.left;
 	const __int64 YMask    = 0x00ff00ff00ff00ff;
 	const __int64 qwOnes = 0x0001000100010001;
-	__int64 wBitShift    = BitShift;
 
 	__int64 qwEdgeDetect;
 	__int64 qwThreshold;
-	const __int64 Mask = 0x7f7f7f7f7f7f7f7f;
 
 	// If we've already computed the comb factor, just return it.
 	if (pInfo->CombFactor > -1)

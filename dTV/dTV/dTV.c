@@ -288,8 +288,9 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_SETUPCARD:
 			Stop_Capture();
 			DialogBox(hInst, "SELECTCARD", hWnd, (DLGPROC) SelectCardProc);
-			Card_Init(CardType);
-			Tuner_Init(TunerType);
+			ChangeDefaultsBasedOnHardware();
+			Card_Init();
+			Tuner_Init();
             Reset_Capture();
 			break;
 
@@ -460,7 +461,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			}
 			// Set Deinterlace Mode to film fallback in
 			// either case
-			if(TVSettings[TVTYPE].Is25fps)
+			if(BT848_GetTVFormat()->Is25fps)
 			{
 				SetDeinterlaceMode(Setting_GetValue(FD50_GetSetting(PALFILMFALLBACKMODE)));
 			}
@@ -508,7 +509,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_VIDEO_GREEDY:
 			if(Setting_GetValue(OutThreads_GetSetting(AUTODETECT)))
 			{
-				if(TVSettings[TVTYPE].Is25fps)
+				if(BT848_GetTVFormat()->Is25fps)
 				{
 					Setting_SetValue(FD50_GetSetting(PALFILMFALLBACKMODE), LOWORD(wParam) - IDM_VIDEO_BOB);
 				}
@@ -1040,13 +1041,8 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_TYPEFORMAT_5:
 		case IDM_TYPEFORMAT_6:
             // Video format (NTSC, PAL, etc)
-			TVTYPE = LOWORD(wParam) - IDM_TYPEFORMAT_0;
-			CurrentX = 720;
-			ShowText(hWnd, TVSettings[TVTYPE].szDesc);
-			Stop_Capture();
-			BT848_SetGeoSize();
-			WorkoutOverlaySize();
-			Start_Capture();
+			Setting_SetValue(BT848_GetSetting(TVFORMAT), LOWORD(wParam) - IDM_TYPEFORMAT_0);
+			ShowText(hWnd, BT848_GetTVFormat()->szDesc);
 			break;
 
 		case ID_SETTINGS_PIXELWIDTH_768:
@@ -1473,42 +1469,15 @@ void MainWndOnInitBT(HWND hWnd)
 
 	if (bInitOK)
 	{
-		// if the user has not set up the card
-		// ask them for the id
-		if(CardType == TVCARD_UNKNOWN)
+		if(Setting_GetValue(TVCard_GetSetting(CURRENTCARDTYPE)) == TVCARD_UNKNOWN)
 		{
-			// try to detect the card
-			CardType = Card_AutoDetect();
-			Card_AutoDetectTuner(CardType);
-			// if we cannot detect the card of the tuner
-			// present them with the card setup dialog box
-			if(CardType == TVCARD_UNKNOWN || TunerType == TUNER_ABSENT)
-			{
-				DialogBox(hInst, "SELECTCARD", hWnd, (DLGPROC) SelectCardProc);
-			}
+			HideSplashScreen();
+			TVCard_FirstTimeSetupHardware(hInst, hWnd);
 		}
 
-		// default the TVTYPE dependant on the Tuner selected
-		// should be OK most of the time
-		if(TVTYPE == -1)
-		{
-			switch(Tuners[TunerType].Type)
-			{
-			case PAL:
-			case PAL_I:
-				TVTYPE = 0;
-				break;
-			case NTSC:
-				TVTYPE = 1;
-				break;
-			case SECAM:
-				TVTYPE = 2;
-				break;
-			default:
-				TVTYPE = 0;
-				break;
-			}
-		}
+		// reset any defaults that are affected by the hardware
+		// selected or tradeoff choices
+		ChangeDefaultsBasedOnHardware();
 
 		WStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
 		if (bAlwaysOnTop == FALSE)
@@ -1530,7 +1499,7 @@ void MainWndOnInitBT(HWND hWnd)
 			SendMessage(hWnd, WM_COMMAND, IDM_TOGGLE_MENU, 0);
 		}
 
-		if (Tuner_Init(TunerType) == TRUE)
+		if (Tuner_Init() == TRUE)
 		{
 			AddSplashTextLine("Tuner OK");
 		}
@@ -1752,11 +1721,6 @@ void SetMenuAnalog()
 		EnableMenuItem(hMenu, IDM_CLOSEDCAPTION, MF_GRAYED);
 	}
 
-
-	EnableMenuItem(hMenu, IDM_CHANNELPLUS, (TunerType != TUNER_ABSENT)?MF_ENABLED:MF_GRAYED);
-	EnableMenuItem(hMenu, IDM_CHANNELMINUS, (TunerType != TUNER_ABSENT)?MF_ENABLED:MF_GRAYED);
-	EnableMenuItem(hMenu, IDM_ANALOGSCAN, (TunerType != TUNER_ABSENT)?MF_ENABLED:MF_GRAYED);
-
 	CheckMenuItem(hMenu, IDM_TREADPRIOR_0, (ThreadClassId == 0)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_TREADPRIOR_1, (ThreadClassId == 1)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_TREADPRIOR_2, (ThreadClassId == 2)?MF_CHECKED:MF_UNCHECKED);
@@ -1766,33 +1730,6 @@ void SetMenuAnalog()
 	CheckMenuItem(hMenu, IDM_PRIORCLASS_0, (PriorClassId == 0)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_PRIORCLASS_1, (PriorClassId == 1)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_PRIORCLASS_2, (PriorClassId == 2)?MF_CHECKED:MF_UNCHECKED);
-
-	CheckMenuItem(hMenu, IDM_TYPEFORMAT_0, (TVTYPE == 0)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_TYPEFORMAT_1, (TVTYPE == 1)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_TYPEFORMAT_2, (TVTYPE == 2)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_TYPEFORMAT_3, (TVTYPE == 3)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_TYPEFORMAT_4, (TVTYPE == 4)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_TYPEFORMAT_5, (TVTYPE == 5)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_TYPEFORMAT_6, (TVTYPE == 6)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_TYPEFORMAT_7, (TVTYPE == 7)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_TYPEFORMAT_8, (TVTYPE == 8)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_TYPEFORMAT_9, (TVTYPE == 9)?MF_CHECKED:MF_UNCHECKED);
-
-	EnableMenuItem(hMenu, IDM_SOURCE_TUNER, (TVCards[TVTYPE].TunerInput != -1)?MF_ENABLED:MF_GRAYED);
-	if(TVCards[TVTYPE].SVideoInput == -1)
-	{
-		EnableMenuItem(hMenu, IDM_SOURCE_SVIDEO, MF_GRAYED);
-		EnableMenuItem(hMenu, IDM_SOURCE_OTHER1, (TVCards[TVTYPE].nVideoInputs > 2)?MF_ENABLED:MF_GRAYED);
-		EnableMenuItem(hMenu, IDM_SOURCE_OTHER2, (TVCards[TVTYPE].nVideoInputs > 3)?MF_ENABLED:MF_GRAYED);
-		EnableMenuItem(hMenu, IDM_SOURCE_COMPVIASVIDEO, MF_GRAYED);
-	}
-	else
-	{
-		EnableMenuItem(hMenu, IDM_SOURCE_SVIDEO, MF_ENABLED);
-		EnableMenuItem(hMenu, IDM_SOURCE_OTHER1, (TVCards[TVTYPE].nVideoInputs > 3)?MF_ENABLED:MF_GRAYED);
-		EnableMenuItem(hMenu, IDM_SOURCE_OTHER2, (TVCards[TVTYPE].nVideoInputs > 4)?MF_ENABLED:MF_GRAYED);
-		EnableMenuItem(hMenu, IDM_SOURCE_COMPVIASVIDEO, MF_ENABLED);
-	}
 
 	CheckMenuItem(hMenu, IDM_MUTE,    System_In_Mute?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_AUDIO_0, (AudioSource == 0)?MF_CHECKED:MF_UNCHECKED);
@@ -1839,6 +1776,7 @@ void SetMenuAnalog()
 	Deinterlace_SetMenu(hMenu);
 	FLT_TNoise_SetMenu(hMenu);
 	BT848_SetMenu(hMenu);
+	TVCard_SetMenu(hMenu);
 }
 
 //---------------------------------------------------------------------------

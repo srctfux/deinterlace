@@ -129,7 +129,7 @@ long    BtWhiteCrushDown = 0x7f;	// Crush down - entire register value
 //    { 922, 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_N|BT848_IFORM_XT1),
 //	      1135, 922, 186, 922, 0x1c, 0, TRUE, 400},
 //
-struct TTVSetting TVSettings[] =
+TTVFORMAT TVFormats[FORMAT_LASTONE] =
 {
 	/* PAL-BDGHI */
 	{ "PAL DBGHI", 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_BDGHI|BT848_IFORM_XT1),
@@ -154,7 +154,7 @@ struct TTVSetting TVSettings[] =
 	    186, 922, 0x1a, 0, TRUE, 400, 13},
 };
 
-int TVTYPE = -1;
+long TVFormat = -1;
 
 // 10/19/2000 Mark Rejhon
 // Better NTSC defaults
@@ -550,26 +550,26 @@ BOOL BT848_SetGeoSize()
 	int hactive, vactive;
 	BYTE crop, vtc, ColourFormat;
 
-	CurrentY = TVSettings[TVTYPE].wCropHeight;
-	CurrentVBILines = TVSettings[TVTYPE].VBILines;
+	CurrentY = TVFormats[TVFormat].wCropHeight;
+	CurrentVBILines = TVFormats[TVFormat].VBILines;
 
 	// set the pll on the card if appropriate
-	if(TVSettings[TVTYPE].Is25fps == TRUE && TVCards[CardType].pll != PLL_NONE)
+	if(TVFormats[TVFormat].Is25fps == TRUE && GetCardSetup()->pll != PLL_NONE)
 	{
-		BT848_SetPLL(TVCards[CardType].pll);
+		BT848_SetPLL(GetCardSetup()->pll);
 	}
 	else
 	{
 		BT848_SetPLL(0);
 	}
 
-	BT848_WriteByte(BT848_ADELAY, TVSettings[TVTYPE].bDelayA);
-	BT848_WriteByte(BT848_BDELAY, TVSettings[TVTYPE].bDelayB);
+	BT848_WriteByte(BT848_ADELAY, TVFormats[TVFormat].bDelayA);
+	BT848_WriteByte(BT848_BDELAY, TVFormats[TVFormat].bDelayB);
 
-	BT848_WriteByte(BT848_VBI_PACK_SIZE, (BYTE)(TVSettings[TVTYPE].VBIPacketSize & 0xff));
-	BT848_WriteByte(BT848_VBI_PACK_DEL, (BYTE)(TVSettings[TVTYPE].VBIPacketSize >> 8));
+	BT848_WriteByte(BT848_VBI_PACK_SIZE, (BYTE)(TVFormats[TVFormat].VBIPacketSize & 0xff));
+	BT848_WriteByte(BT848_VBI_PACK_DEL, (BYTE)(TVFormats[TVFormat].VBIPacketSize >> 8));
 
-	BT848_MaskDataByte(BT848_IFORM, TVSettings[TVTYPE].bIForm, BT848_IFORM_NORM | BT848_IFORM_XTBOTH);
+	BT848_MaskDataByte(BT848_IFORM, TVFormats[TVFormat].bIForm, BT848_IFORM_NORM | BT848_IFORM_XTBOTH);
 
 	ColourFormat = (BYTE)((BT848_COLOR_FMT_YUY2 << 4) | BT848_COLOR_FMT_YUY2);
 
@@ -587,13 +587,13 @@ BOOL BT848_SetGeoSize()
 	hactive = CurrentX;
 //	vtc = (hactive < 193) ?	2 : ((hactive < 385) ? 1 : 0);		// TRB 12/15/00  allow vertical filter from ini
 	vtc = BtVertFilter;		
-	hscale = ((TVSettings[TVTYPE].wHActivex1 - CurrentX) * 4096UL) / CurrentX;
-	vdelay = TVSettings[TVTYPE].wVDelay;
-	hdelay = ((CurrentX * TVSettings[TVTYPE].wHDelayx1) / TVSettings[TVTYPE].wHActivex1) & 0x3fe;
+	hscale = ((TVFormats[TVFormat].wHActivex1 - CurrentX) * 4096UL) / CurrentX;
+	vdelay = TVFormats[TVFormat].wVDelay;
+	hdelay = ((CurrentX * TVFormats[TVFormat].wHDelayx1) / TVFormats[TVFormat].wHActivex1) & 0x3fe;
 
-	sr = (TVSettings[TVTYPE].wCropHeight * 512) / CurrentY - 512;
+	sr = (TVFormats[TVFormat].wCropHeight * 512) / CurrentY - 512;
 	vscale = (WORD) (0x10000UL - sr) & 0x1fff;
-	vactive = TVSettings[TVTYPE].wCropHeight;
+	vactive = TVFormats[TVFormat].wCropHeight;
 	crop = ((hactive >> 8) & 0x03) | ((hdelay >> 6) & 0x0c) | ((vactive >> 4) & 0x30) | ((vdelay >> 2) & 0xc0);
 
 	BT848_SetGeometryEvenOdd(FALSE, vtc, hscale, vscale, hactive, vactive, hdelay, vdelay, crop);
@@ -759,7 +759,7 @@ BOOL BT848_SetVideoSource(int nInput)
 	// 4= Other 2
 	// 5= Composite via SVideo
 
-	BT848_AndOrDataDword(BT848_GPIO_OUT_EN, TVCards[CardType].GPIOMuxMask, ~TVCards[CardType].GPIOMuxMask);
+	BT848_AndOrDataDword(BT848_GPIO_OUT_EN, GetCardSetup()->GPIOMuxMask, ~GetCardSetup()->GPIOMuxMask);
 	BT848_AndDataByte(BT848_IFORM, ~BT848_IFORM_MUXSEL);
 
 	// set the comp bit for svideo
@@ -768,29 +768,30 @@ BOOL BT848_SetVideoSource(int nInput)
 	case 0:
 		BT848_AndDataByte(BT848_E_CONTROL, ~BT848_CONTROL_COMP);
 		BT848_AndDataByte(BT848_O_CONTROL, ~BT848_CONTROL_COMP);
-		MuxSel = TVCards[CardType].MuxSelect[TVCards[CardType].TunerInput & 7];
+		MuxSel = GetCardSetup()->MuxSelect[GetCardSetup()->TunerInput & 7];
 		break;
 	case 2:
 		BT848_OrDataByte(BT848_E_CONTROL, BT848_CONTROL_COMP);
 		BT848_OrDataByte(BT848_O_CONTROL, BT848_CONTROL_COMP);
-		MuxSel = TVCards[CardType].MuxSelect[TVCards[CardType].SVideoInput & 7];
+		MuxSel = GetCardSetup()->MuxSelect[GetCardSetup()->SVideoInput & 7];
 		break;
 	case 5:
 		BT848_AndDataByte(BT848_E_CONTROL, ~BT848_CONTROL_COMP);
 		BT848_AndDataByte(BT848_O_CONTROL, ~BT848_CONTROL_COMP);
-		MuxSel = TVCards[CardType].MuxSelect[TVCards[CardType].SVideoInput & 7];
+		MuxSel = GetCardSetup()->MuxSelect[GetCardSetup()->SVideoInput & 7];
 		break;
 	case 1:
 	case 3:
 	case 4:
+	default:
 		BT848_AndDataByte(BT848_E_CONTROL, ~BT848_CONTROL_COMP);
 		BT848_AndDataByte(BT848_O_CONTROL, ~BT848_CONTROL_COMP);
-		MuxSel = TVCards[CardType].MuxSelect[nInput];
+		MuxSel = GetCardSetup()->MuxSelect[nInput];
 		break;
 	}
 	
 	BT848_MaskDataByte(BT848_IFORM, (BYTE) (((MuxSel) & 3) << 5), BT848_IFORM_MUXSEL);
-	BT848_AndOrDataDword(BT848_GPIO_DATA, MuxSel >> 4, ~TVCards[CardType].GPIOMuxMask);
+	BT848_AndOrDataDword(BT848_GPIO_DATA, MuxSel >> 4, ~GetCardSetup()->GPIOMuxMask);
 	return TRUE;
 }
 
@@ -999,8 +1000,6 @@ void Free_DMA(PMemStruct * dma)
 
 void Free_Display_DMA(int NR)
 {
-	LPVOID *MemPtr = NULL;
-
 	if (Display_dma[NR] == NULL)
 	{
 		return;
@@ -1203,6 +1202,10 @@ BOOL BT848_Enable656()
 	return TRUE;
 }
 
+TTVFORMAT* BT848_GetTVFormat()
+{
+	return TVFormats + TVFormat;
+}
 
 BOOL APIENTRY AdvVideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 {
@@ -1401,6 +1404,16 @@ BOOL VideoSource_OnChange(long NewValue)
 	return FALSE;
 }
 
+BOOL TVFormat_OnChange(long NewValue)
+{
+	Stop_Capture();
+	TVFormat = NewValue;
+	BT848_SetGeoSize();
+	WorkoutOverlaySize();
+	Start_Capture();
+	return FALSE;
+}
+
 BOOL CurrentX_OnChange(long NewValue)
 {
 	CurrentX = NewValue;
@@ -1571,6 +1584,11 @@ SETTING BT848Settings[BT848_SETTING_LASTONE] =
 		SOURCE_COMPOSITE, SOURCE_TUNER, SOURCE_CCIR656, 0, NULL,
 		"Hardware", "VideoSource", VideoSource_OnChange,
 	},
+	{
+		"Video Format", NUMBER, 0, &TVFormat,
+		FORMAT_NTSC, 0, FORMAT_LASTONE - 1, 0, NULL,
+		"Hardware", "TVType", TVFormat_OnChange,
+	},
 };
 
 SETTING* BT848_GetSetting(BT848_SETTING Setting)
@@ -1619,4 +1637,17 @@ void BT848_SetMenu(HMENU hMenu)
 	CheckMenuItem(hMenu, ID_SETTINGS_PIXELWIDTH_384, (CurrentX == 384)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, ID_SETTINGS_PIXELWIDTH_320, (CurrentX == 320)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, ID_SETTINGS_PIXELWIDTH_CUSTOM, (CurrentX == CustomPixelWidth)?MF_CHECKED:MF_UNCHECKED);
+
+	CheckMenuItem(hMenu, IDM_TYPEFORMAT_0, (TVFormat == 0)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_TYPEFORMAT_1, (TVFormat == 1)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_TYPEFORMAT_2, (TVFormat == 2)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_TYPEFORMAT_3, (TVFormat == 3)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_TYPEFORMAT_4, (TVFormat == 4)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_TYPEFORMAT_5, (TVFormat == 5)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_TYPEFORMAT_6, (TVFormat == 6)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_TYPEFORMAT_7, (TVFormat == 7)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_TYPEFORMAT_8, (TVFormat == 8)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_TYPEFORMAT_9, (TVFormat == 9)?MF_CHECKED:MF_UNCHECKED);
+
+
 }
