@@ -37,13 +37,32 @@ HWND SplashWnd = NULL;
 
 BOOL APIENTRY SplashProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 {
-
 	switch (message)
 	{
 	case WM_INITDIALOG:
-		InvalidateRect(hDlg, NULL, TRUE);
-		SetTimer(hDlg, 2, 5000, NULL);
-		return (TRUE);
+		{
+			RECT rPicture;
+			RECT rList;
+			int Width = GetSystemMetrics(SM_CXSCREEN);
+			int Height = GetSystemMetrics(SM_CYSCREEN);
+			GetWindowRect(GetDlgItem(hDlg, IDC_P1), &rPicture);
+			GetWindowRect(GetDlgItem(hDlg, IDC_LIST1), &rList);
+			SetWindowPos(hDlg, HWND_TOPMOST, 
+				(Width - (rPicture.right - rPicture.left)) / 2, 
+				(Height - (rPicture.bottom - rPicture.top)) / 2, 
+				(rPicture.right - rPicture.left), 
+				(rPicture.bottom - rPicture.top), 
+				SWP_SHOWWINDOW);
+			MoveWindow(GetDlgItem(hDlg, IDC_LIST1), 
+				((rPicture.right - rPicture.left) - (rList.right - rList.left)) / 2, 
+				((rPicture.bottom - rPicture.top) - (rList.bottom - rList.top) - 10), 
+				(rList.right - rList.left), 
+				(rList.bottom - rList.top), 
+				FALSE);
+			InvalidateRect(GetDlgItem(hDlg, IDC_P1), NULL, TRUE);
+			SetTimer(hDlg, 2, 5000, NULL);
+			return (TRUE);
+		}
 
 	case WM_TIMER:
 		if (wParam == 2)
@@ -51,7 +70,6 @@ BOOL APIENTRY SplashProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 			SplashWnd  = NULL;
 			EndDialog(hDlg, 0);
 		}
-
 		return (FALSE);
 	}
 	return (FALSE);
@@ -61,7 +79,6 @@ BOOL APIENTRY SplashProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 void ShowSpashScreen()
 {
 	SplashWnd = CreateDialog(hInst, "SPLASHBOX", NULL, SplashProc);
-	SetWindowPos(SplashWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOCOPYBITS | SWP_NOSIZE);
 }
 
 void HideSplashScreen()

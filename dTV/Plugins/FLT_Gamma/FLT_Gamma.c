@@ -79,14 +79,7 @@ LOOP_LABEL:
 
 double GetGammaAdjustedValue(double Input, double Gamma)
 {
-	if(Input < 0.0812)
-	{
-		return Input * Gamma;
-	}
-	else
-	{
-		return pow((Input + 0.099) / 1.099, Gamma);
-	}
+	return pow(Input, Gamma);
 }
 
 BOOL Gamma_OnChange(long NewValue)
