@@ -1048,6 +1048,12 @@ void GetSourceRect(RECT *rect)
 	memcpy(rect, &sourceRectangle, sizeof(RECT));
 }
 
+//----------------------------------------------------------------------------
+// Returns the current source rectangle.
+void GetDestRect(RECT *rect)
+{
+	memcpy(rect, &destinationRectangle, sizeof(RECT));
+}
 
 
 //----------------------------------------------------------------------------

@@ -87,7 +87,7 @@ void VBI_DecodeLine(unsigned char *VBI_Buffer, int line, BOOL IsOdd)
 	// it also appears on PAL videos at line 22
 	// see http://www.wgbh.org/wgbh/pages/captioncenter/cctechfacts4.html
 	// for more infomation
-	if ((VBI_Flags & VBI_CC) && line == BT848_GetTVFormat()->CC_Line) 
+	if ((VBI_Flags & VBI_CC) && line == BT848_GetTVFormat()->CC_Line && IsOdd == FALSE) 
 	{
 		CC_DecodeLine(VBI_Buffer);
 	}

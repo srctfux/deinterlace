@@ -785,14 +785,14 @@ BEGIN
         END
         POPUP "Window Vertical Position"
         BEGIN
-            MENUITEM "&Centre",                     IDM_WINPOS_VERT_CENTRE
             MENUITEM "&Top",                        IDM_WINPOS_VERT_TOP
+            MENUITEM "&Centre",                     IDM_WINPOS_VERT_CENTRE
             MENUITEM "&Bottom",                     IDM_WINPOS_VERT_BOTTOM
         END
         POPUP "Window Horizontal Position"
         BEGIN
-            MENUITEM "&Centre",                     IDM_WINPOS_HORZ_CENTRE
             MENUITEM "&Left",                       IDM_WINPOS_HORZ_LEFT
+            MENUITEM "&Centre",                     IDM_WINPOS_HORZ_CENTRE
             MENUITEM "&Right",                      IDM_WINPOS_HORZ_RIGHT
         END
     END
