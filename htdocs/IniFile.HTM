@@ -51,17 +51,17 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       This would cause the vcr.ini (or whatever) file to be used and saved on
       exit.&nbsp; Doing this is easiest if you copy a working dTV.ini file first
       and then change it using the dTV menus.</p>
-      <p> 
+       
       <table border="1">
         <tr> 
           <th> 
-            <p>Setting</p>
+            Setting
           </th>
           <th> 
-            <p>Default</p>
+            Default
           </th>
           <th> 
-            <p>Description</p>
+            Description
           </th>
         </tr>
         <tr> 
@@ -71,94 +71,128 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         </tr>
         <tr> 
           <td> 
-            <p>PulldownThresholdLow</p>
+            PulldownThresholdLow
           </td>
           <td> 
-            <p align="center">-2000</p>
+            <p align="center">40
           </td>
           <td> 
-            <p>Determines when PAL pulldown detection will detect a noticable 
-              improvement in combing.&nbsp; Lower values (more negative) will 
+            A percentage which determines when PAL pulldown detection will detect a noticable 
+              improvement in combing.&nbsp; Lower values will 
               make detection require more combing to change.&nbsp; Change this 
-              if PAL detection is not working for you.</p>
+              if PAL detection is not working for you.
           </td>
         </tr>
         <tr> 
           <td> 
-            <p>PulldownThresholdHigh</p>
+            PulldownThresholdHigh
           </td>
           <td> 
-            <p align="center">2000</p>
+            <p align="center">10
           </td>
           <td> 
-            <p>Determines when PAL pulldown detection will go back from movie 
+            A percentage which determines when PAL pulldown detection will go back from movie 
               mode to video mode.&nbsp; This value copes with certain types of 
               video noise, if it is set too low then it will flip back on static 
               movie images, if set too high it will remain in movie mode for too 
-              long.</p>
+              long.
+          </td>
+        </tr>
+        <tr>
+          <td> 
+            PALPulldownRepeatCount
+          </td>
+          <td> 
+            <p align="center">3
+          </td>
+          <td> 
+            Number of times film mode is detected in a row before going into film mode
           </td>
         </tr>
         <tr> 
           <td> 
-            <p>PulldownRepeatCount</p>
+            PALPulldownRepeatCount2
           </td>
           <td> 
-            <p align="center">4</p>
+            <p align="center">1
           </td>
           <td> 
-            <p>This is the number of times the pulldown pattern must be detected 
-              before switching.</p>
+            Number of times that film mode errors must bedetected in a row before going
+            back to video mode
           </td>
         </tr>
         <tr> 
           <td> 
-            <p>Threshold32Pulldown&nbsp;</p>
+            PulldownRepeatCount
           </td>
           <td> 
-            <p align="center">15</p>
+            <p align="center">4
           </td>
           <td> 
-            <p>This is the number of pixels per field that need to be similar 
+            This is the number of times the pulldown pattern must be detected 
+              before switching.
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            Threshold32Pulldown&nbsp;
+          </td>
+          <td> 
+            <p align="center">15
+          </td>
+          <td> 
+            This is the number of pixels per field that need to be similar 
               for NTSC movie detection to detect a triplet of fields from the 
               same movie frame.&nbsp; Higher values will cope with more video 
-              noise but will not detect the movies as well.</p>
+              noise but will not detect the movies as well.
           </td>
         </tr>
         <tr> 
           <td> 
-            <p>BitShift</p>
+            BitShift
           </td>
           <td> 
-            <p align="center">13</p>
+            <p align="center">13
           </td>
           <td> 
-            <p>This is used by the NTSC detection code to limit what pixels are 
+            This is used by the NTSC detection code to limit what pixels are 
               the same.&nbsp; This should allow for noise in source.&nbsp; The 
               value is applied to the square of the pixel difference with the 
-              results bitshifted right by this amount.</p>
+              results bitshifted right by this amount.
           </td>
         </tr>
         <tr> 
           <td> 
-            <p>DiffThreshold</p>
+            DiffThreshold
           </td>
           <td> 
-            <p align="center">224</p>
+            <p align="center">224
           </td>
           <td> 
-            <p>No longer used</p>
+            No longer used
           </td>
         </tr>
         <tr> 
           <td> 
-            <p>PulldownRepeatCount2</p>
+            PulldownRepeatCount2
           </td>
           <td> 
-            <p align="center">2</p>
+            <p align="center">2
           </td>
           <td> 
-            <p>The number of times an unexpected pattern can occur before switching 
-              back to video video mode from a film mode.&nbsp;</p>
+            The number of times an unexpected pattern can occur before switching 
+              back to video video mode from a film mode.&nbsp;
+          </td>
+        </tr>
+        <tr>
+          <td> 
+            RefreshRate
+          </td>
+          <td> 
+            <p align="center">0
+          </td>
+          <td> 
+            If set then it is used with DoAccurateFlips to reduce judder
           </td>
         </tr>
         <tr>
@@ -168,14 +202,14 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         </tr>
         <tr>
           <td> 
-            <p>BtAgcDisable</p>
+            BtAgcDisable
           </td>
           <td> 
             <p align="center">0
           </td>
           <td> 
-            <p>Disable AGC(automatic gain control).  This doesn't work well for almost anyone, but it's there.
-            (Adv. Video Flags)</p>
+            Disable AGC(automatic gain control).  This doesn't work well for almost anyone, but it's there.
+            (Adv. Video Flags)
           </td>
         </tr>
         <tr>
@@ -406,15 +440,15 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         </tr>
         <tr>
           <td> 
-            <p>Hurry_When_Late</p>
+            Hurry_When_Late
           </td>
           <td> 
             <p align="center">0
           </td>
           <td> 
-            <p>Performance parameter.&nbsp; If set to 1 will cause dTV to bypass
+            Performance parameter.&nbsp; If set to 1 will cause dTV to bypass
             some processing to conserve CPU time if it seems to not be keeping
-            up with the input video stream. May be set to 1for slower machines.</p>
+            up with the input video stream. May be set to 1for slower machines.
           </td>
         </tr>
         <tr>
@@ -460,6 +494,18 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
             small performance penalty.
           </td>
         </tr>
+        <tr>
+          <td> 
+            DoAccurateFlips
+          </td>
+          <td> 
+            <p align="center">1
+          </td>
+          <td> 
+            Used to eliminate judder.&nbsp; Has no effect if RefreshRate is
+            not set in [Pulldown]
+          </td>
+        </tr>
         <tr> 
           <td colspan=3> 
             <h3>[Deinterlace]</h3>
@@ -480,27 +526,27 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         </tr>
         <tr> 
           <td> 
-            <p>EdgeDetect&nbsp;</p>
+            EdgeDetect&nbsp;
           </td>
           <td> 
-            <p align="center">625</p>
+            <p align="center">625
           </td>
           <td> 
-            <p>This values governs the strength of edge detection, use higher 
+            This values governs the strength of edge detection, use higher 
               values if you think that the video deinterlacing is occurring too 
-              often.</p>
+              often.
           </td>
         </tr>
         <tr> 
           <td> 
-            <p>JaggieThreshold</p>
+            JaggieThreshold
           </td>
           <td> 
-            <p align="center">73</p>
+            <p align="center">73
           </td>
           <td> 
-            <p>This values governs the threshold for fine line dtection, use higher 
-              values if you get problems with small text</p>
+            This values governs the threshold for fine line dtection, use higher 
+              values if you get problems with small text
           </td>
         </tr>
         <tr> 
@@ -678,158 +724,158 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         </tr>
         <tr> 
           <td> 
-            <p><font size="1">SourceAspect</font></p>
+            <font size="1">SourceAspect</font>
           </td>
           <td> 
-            <p align="center"><font size="1">0</font></p>
+            <p align="center"><font size="1">0</font>
           </td>
           <td> 
-            <p><font size="1">The most recent aspect ratio used. This is the ratio multiplied 
+            <font size="1">The most recent aspect ratio used. This is the ratio multiplied 
               by 1000, e.g. a 4:3 ratio is (4 / 3 * 1000) or 1333. A value of 
               0 means to use the aspect ratio of the source material, either 4:3 
               or 16:9 depending on <tt>aspect_mode</tt>. This is settable via 
               various menu items in the Aspect menu, and may also be modified 
-              by the aspect ratio autodetect option.</font></p>
+              by the aspect ratio autodetect option.</font>
           </td>
         </tr>
         <tr> 
           <td> 
-            <p>CustomSourceAspect</p>
+            CustomSourceAspect
           </td>
           <td> 
-            <p align="center">0</p>
+            <p align="center">0
           </td>
           <td> 
-            <p>Allows you to specify a custom aspect ratio which may be accessed 
-              from the Aspect menu. Normally unused.</p>
+            Allows you to specify a custom aspect ratio which may be accessed 
+              from the Aspect menu. Normally unused.
           </td>
         </tr>
         <tr> 
           <td> 
-            <p>ScreenAspect</p>
+            ScreenAspect
           </td>
           <td> 
-            <p align="center">0</p>
+            <p align="center">0
           </td>
           <td> 
-            <p>The aspect ratio of the display screen. If 0, the screen is assumed 
+            The aspect ratio of the display screen. If 0, the screen is assumed 
               to have square pixels and its resolution is used as the aspect ratio. 
-              This is settable via various menu items in the Aspect menu.</p>
+              This is settable via various menu items in the Aspect menu.
           </td>
         </tr>
         <tr> 
           <td> 
-            <p>CustomScreenAspect</p>
+            CustomScreenAspect
           </td>
           <td> 
-            <p align="center">0</p>
+            <p align="center">0
           </td>
           <td> 
-            <p>Allows you to specify a custom screen aspect ratio which may be 
-              accessed from the Aspect menu. Normally unused.</p>
+            Allows you to specify a custom screen aspect ratio which may be 
+              accessed from the Aspect menu. Normally unused.
           </td>
         </tr>
         <tr> 
           <td> 
-            <p>Mode</p>
+            Mode
           </td>
           <td> 
-            <p align="center">0</p>
+            <p align="center">0
           </td>
           <td> 
-            <p>1 if the source is a 4:3 image (even a letterboxed one), 2 if it's 
+            1 if the source is a 4:3 image (even a letterboxed one), 2 if it's 
               an anamorphic 16:9 image, or 0 to stretch the source to the current 
               window size. This is settable via various menu items in the Aspect 
-              menu.</p>
+              menu.
           </td>
         </tr>
         <tr> 
           <td> 
-            <p>AutoDetectAspect</p>
+            AutoDetectAspect
           </td>
           <td> 
-            <p align="center">0</p>
+            <p align="center">0
           </td>
           <td> 
-            <p>Controls whether the code analyzes each frame to detect the current 
+            Controls whether the code analyzes each frame to detect the current 
               aspect ratio. This may be toggled using the "Autodetect" Aspect 
               menu option. If deactivated, you can get dTV to detect the aspect 
-              ratio of the current frame using the "Compute" Aspect menu option.</p>
+              ratio of the current frame using the "Compute" Aspect menu option.
           </td>
         </tr>
         <tr> 
           <td> 
-            <p>LuminanceThreshold</p>
+            LuminanceThreshold
           </td>
           <td> 
-            <p align="center">15</p>
+            <p align="center">15
           </td>
           <td> 
-            <p>Controls how bright letterbox bars are allowed to get. Valid values 
+            Controls how bright letterbox bars are allowed to get. Valid values 
               are 0 through 127. Any pixel with lower luminance than this is considered 
               black by the aspect ratio detection code. Lowering this value will 
               allow dTV to detect letterbox modes on darker scenes, at the cost 
               of increasing the chance that video noise in the letterbox bars 
               will be treated as part of the picture. <em>If all your letterboxed 
               material is from a clean signal source, you'll probably want to 
-              lower this.</em></p>
+              lower this.</em>
           </td>
         </tr>
         <tr> 
           <td> 
-            <p>IgnoreNonBlackPixels</p>
+            IgnoreNonBlackPixels
           </td>
           <td> 
-            <p align="center">0</p>
+            <p align="center">0
           </td>
           <td> 
-            <p>When detecting aspect ratios, we often want to ignore TV station 
+            When detecting aspect ratios, we often want to ignore TV station 
               logos that extend into the letterbox area. This setting controls 
               how many non-black pixels (see LuminanceThreshold) must be present 
               on a line before it's no longer considered part of a letterbox bar. 
               A value of 0 means 20% of the width of the screen, more than big 
               enough to cover most logos. <em>If you never watch letterboxed material 
               with station logos, e.g. if all your letterboxed material is on 
-              laserdisc or DVD, set this to 1.</em></p>
+              laserdisc or DVD, set this to 1.</em>
           </td>
         </tr>
         <tr> 
           <td> 
-            <p>AspectConsistencyTime</p>
+            AspectConsistencyTime
           </td>
           <td> 
-            <p align="center">15</p>
+            <p align="center">15
           </td>
           <td> 
-            <p>This many seconds must pass without a narrower frame appearing 
+            This many seconds must pass without a narrower frame appearing 
               before the autodetect code will switch to a wide ratio it hasn't 
-              seen before.</p>
+              seen before.
           </td>
         </tr>
         <tr> 
           <td> 
-            <p>AspectHistoryTime</p>
+            AspectHistoryTime
           </td>
           <td> 
-            <p align="center">300</p>
+            <p align="center">300
           </td>
           <td> 
-            <p>The autodetect module will remember previous aspect ratios it's 
+            The autodetect module will remember previous aspect ratios it's 
               switched to for this many seconds. Ratios that last for less than 
-              a second aren't remembered since they're assumed to have been erroneous.</p>
+              a second aren't remembered since they're assumed to have been erroneous.
           </td>
         </tr>
         <tr> 
           <td> 
-            <p>ZoomInFrameCount</p>
+            ZoomInFrameCount
           </td>
           <td> 
-            <p align="center">60</p>
+            <p align="center">60
           </td>
           <td> 
-            <p>When autodetecting aspect ratios, if a ratio we've used before 
+            When autodetecting aspect ratios, if a ratio we've used before 
               (within the past <tt>AspectHistoryTime</tt> seconds) reappears and 
-              is consistent for this many frames, switch back to it.</p>
+              is consistent for this many frames, switch back to it.
           </td>
         </tr>
       </table>
@@ -859,8 +905,8 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
     </td>
   </tr>
 </table>
-<p><a href="http://sourceforge.net"><img src="http://sourceforge.net/sflogo.php?group_id=7420&type=1" width="88" height="31" border="0"
-alt="SourceForge.net" align="right"></a></p>
-<p>&nbsp; </p>
+<a href="http://sourceforge.net"><img src="http://sourceforge.net/sflogo.php?group_id=7420&type=1" width="88" height="31" border="0"
+alt="SourceForge.net" align="right"></a>
+&nbsp; 
 </body>
 <!-- #EndTemplate --></html>
