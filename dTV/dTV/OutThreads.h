@@ -71,4 +71,14 @@ BYTE * LockOverlay();		// Lock overlay, returns ptr to buffer
 
 extern ePULLDOWNMODES gPulldownMode;
 
+// Statistics
+extern long	nTotalDropFrames;
+extern long	nDropFramesLastSec;
+extern long nSecTicks;
+extern long nInitialTicks;
+extern long nLastTicks;
+extern long nTotalDeintModeChanges;
+extern long nDeintModeChanges[PULLDOWNMODES_LAST_ONE];
+extern long nDeintModeTicks[PULLDOWNMODES_LAST_ONE];
+
 #endif

@@ -110,6 +110,16 @@ BOOL bWaitForVsync = FALSE;
 // FIXME: should be able to get of this variable
 long OverlayPitch = 0;
 
+// Statistics
+long nTotalDropFrames = 0;
+long nDropFramesLastSec = 0;
+long nSecTicks = 0;
+long nInitialTicks = -1;
+long nLastTicks = 0;
+long nTotalDeintModeChanges = 0;
+long nDeintModeChanges[PULLDOWNMODES_LAST_ONE] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+long nDeintModeTicks[PULLDOWNMODES_LAST_ONE] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+
 // cope with older DX header files
 #if !defined(DDFLIP_DONOTWAIT)
 	#define DDFLIP_DONOTWAIT 0
@@ -330,8 +340,22 @@ void UpdatePulldownStatus()
 
 	if (gPulldownMode != lastPulldownMode)
 	{
+		DWORD CurrentTickCount = GetTickCount();
+
+		if (nInitialTicks == -1)
+		{
+			nInitialTicks = CurrentTickCount;
+			nLastTicks = CurrentTickCount;
+		}
+		if (lastPulldownMode != PULLDOWNMODES_LAST_ONE)
+		{
+			nDeintModeTicks[lastPulldownMode] += CurrentTickCount - nLastTicks;
+		}
+		nLastTicks = CurrentTickCount;
 		StatusBar_ShowText(STATUS_PAL, DeinterlaceModeName(gPulldownMode));
 		lastPulldownMode = gPulldownMode;
+		nTotalDeintModeChanges++;
+		nDeintModeChanges[gPulldownMode]++;
 	}
 }
 
@@ -400,6 +424,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 	LARGE_INTEGER CurrentFlipTime;
 	BOOL RunningLate = FALSE;
 	double Weight = 0.005;
+	DWORD CurrentTickCount;
 
 	// get the Frequency of the high resolution timer
 	QueryPerformanceFrequency(&TimerFrequency);
@@ -806,15 +831,24 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 			// save the last pulldown mode so that we know if its changed
 			PrevPulldownMode = gPulldownMode;
 
-			if (IsStatusBarVisible())
+			CurrentTickCount = GetTickCount();
+			if (dwLastSecondTicks + 1000 < CurrentTickCount)
 			{
-				if (dwLastSecondTicks + 1000 < GetTickCount())
+				nTotalDropFrames += nFrame;
+				nDropFramesLastSec = nFrame;
+				nFrame = 0;
+				nSecTicks += CurrentTickCount - dwLastSecondTicks;
+				dwLastSecondTicks = CurrentTickCount;
+				if (gPulldownMode != PULLDOWNMODES_LAST_ONE)
 				{
-					sprintf(Text, "%d DF/S", nFrame);
+					nDeintModeTicks[gPulldownMode] += CurrentTickCount - nLastTicks;
+				}
+				nLastTicks = CurrentTickCount;
+				if (IsStatusBarVisible())
+				{
+					sprintf(Text, "%d DF/S", nDropFramesLastSec);
 					StatusBar_ShowText(STATUS_FPS, Text);
-					nFrame = 0;
-					dwLastSecondTicks = GetTickCount();
-				 }
+				}
 			}
 		}
 
