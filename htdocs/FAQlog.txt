@@ -21,7 +21,11 @@ Any questions regarding the FAQ should go to me, Yvonus, at yvonus@removethis_bi
 
 
 
-
+30/7 Yvonus
+. Corrected glitch due to "dumb" search and replace of dTV occurences.. ended up as as "Dscaler is the old name
+for Dscaler" :-) Renamed the "what is Dscaler" in "what is dTV"
+. Added the "what is dTV" part in the French version
+. Broken (internal to the site) link to the "Thanks" and "Authors"
 
 4/6 again .. Yvonus
 . Renamed part "Can I use more than one video card" => ".. more than one video input"
