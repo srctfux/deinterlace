@@ -745,10 +745,13 @@ BEGIN
         MENUITEM "Toggle &Menu\tTab",           IDM_TOGGLE_MENU
         MENUITEM "Toggle &Status Bar\tS",       IDM_STATUSBAR, CHECKED
         MENUITEM "Toggle Show &Cursor   \tCtrl+Enter", IDM_TOGGLECURSOR
+        MENUITEM "Au&tohide Cursor",            IDM_AUTOHIDE_CURSOR
         MENUITEM "&Full Screen\tAlt+Enter",     IDM_FULL_SCREEN
         MENUITEM "&Always on Top",              IDM_ON_TOP
+        MENUITEM SEPARATOR
         MENUITEM "&Pause\tP",                   IDM_CAPTURE_PAUSE
         MENUITEM "Take Sti&ll Picture\tL",      IDM_TAKESTILL
+        MENUITEM SEPARATOR
         MENUITEM "Show &OSD\tEnter",            IDM_SHOW_OSD
         MENUITEM "&Hide OSD\tBackspace",        IDM_HIDE_OSD
         MENUITEM "A&utohide OSD",               IDM_AUTOHIDE_OSD, CHECKED

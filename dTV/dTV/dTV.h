@@ -81,6 +81,9 @@ BOOL IsStatusBarVisible();
 #define TIMER_BOUNCE        43
 #define TIMER_ORBIT         44
 
+#define TIMER_HIDECURSOR	45
+#define TIMER_HIDECURSOR_MS	5000
+
 extern HANDLE hInst;
 extern HWND hWnd;
 

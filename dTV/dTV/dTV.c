@@ -57,6 +57,8 @@
 //
 // 31 Mar 2001   Laurent Garnier       Single click replaced by double click
 //
+// 04 Apr 2001   Laurent Garnier       Automatic hide cursor
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -110,6 +112,7 @@ long WStyle;
 
 BOOL    Show_Menu=TRUE;
 HMENU   hMenu;
+HMENU   hMenuPopup;
 HANDLE  hAccel;
 
 char ChannelString[10];
@@ -131,6 +134,7 @@ int PriorClassId = 0;
 int ThreadClassId = 1;
 
 BOOL bShowCursor = TRUE;
+BOOL bAutoHideCursor = FALSE;
 
 long emsizex = 649;
 long emsizey = 547;
@@ -216,6 +220,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	}
 	hMenu = LoadMenu(hInstance, "ANALOGMENU");
 
+	hMenuPopup = GetSubMenu(hMenu, 4); 
 
 	// 2000-10-31 Added by Mark: Changed to WS_POPUP for more cosmetic direct-to-full-screen startup,
 	// let UpdateWindowState() handle initialization of windowed dTV instead.
@@ -263,26 +268,6 @@ LONG APIENTRY MainWndProcSafe(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 }
 
 
-BOOL APIENTRY DisplayContextMenu(HWND hWnd, POINT pt)
-{ 
-	HMENU hMenuTrackPopup;  // shortcut menu 
- 
-	SetMenuAnalog();
-
-	hMenuTrackPopup = GetSubMenu(hMenu, 4); 
-	if (hMenuTrackPopup == NULL)
-		return FALSE;
- 
-	Cursor_SetVisibility(TRUE);
-
-	// Display the shortcut menu. Track the right mouse
-	// button.
-	return TrackPopupMenuEx(hMenuTrackPopup, 
-                            TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON, 
-                            pt.x, pt.y, hWnd, NULL); 
-} 
-
-
 BOOL WINAPI OnContextMenu(HWND hWnd, int x, int y)
 { 
 	RECT rc;					// client area of window
@@ -299,7 +284,11 @@ BOOL WINAPI OnContextMenu(HWND hWnd, int x, int y)
 	if (PtInRect(&rc, pt))
 	{
 		ClientToScreen(hWnd, &pt);
-		return DisplayContextMenu(hWnd, pt);
+		// Display the shortcut menu. Track the right mouse
+		// button.
+		return TrackPopupMenuEx(hMenuPopup, 
+                                TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON, 
+                                pt.x, pt.y, hWnd, NULL); 
 	}
  
 	// Return FALSE if no menu is displayed.
@@ -783,6 +772,15 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
 			}
 			ShowText(hWnd, Text);
+			break;
+
+		case IDM_AUTOHIDE_CURSOR:
+			bAutoHideCursor = !bAutoHideCursor;
+			if (!bAutoHideCursor)
+			{
+		        KillTimer(hWnd, TIMER_HIDECURSOR);
+				Cursor_SetVisibility(bShowCursor);
+			}
 			break;
 
 		case IDM_TOGGLECURSOR:
@@ -1295,6 +1293,10 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 //		}
 //		break;
 
+	case WM_INITMENU: 
+		SetMenuAnalog();
+	    break;
+
 	case WM_CONTEXTMENU: 
 		if (!OnContextMenu(hWnd, GET_X_LPARAM(lParam),GET_Y_LPARAM(lParam)))
 			return DefWindowProc(hWnd, message, wParam, lParam);
@@ -1385,9 +1387,22 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			// MRS 2-20-01 - Resetup the display for bounce and orbiting
 			WorkoutOverlaySize(); // Takes care of everything...
 			break;
+        //-------------------------------
+        case TIMER_HIDECURSOR:
+	        KillTimer(hWnd, TIMER_HIDECURSOR);
+			Cursor_SetVisibility(FALSE);
+            break;
 		}
 		break;
 	
+	case WM_NCHITTEST:
+		if (bAutoHideCursor)
+		{
+			Cursor_SetVisibility(TRUE);
+			SetTimer(hWnd, TIMER_HIDECURSOR, TIMER_HIDECURSOR_MS, NULL);
+		}
+		break;
+
 	// support for mouse wheel
 	// the WM_MOUSEWHEEL message is not defined but this is it's value
 	case WM_MOUSELAST + 1:
@@ -1426,7 +1441,8 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				if(bIsFullScreen == FALSE)
 				{
 					bIsFullScreen = TRUE;
-					Cursor_SetVisibility(FALSE);
+					if (!bAutoHideCursor)
+						Cursor_SetVisibility(FALSE);
 					WorkoutOverlaySize();
 				}
 				break;
@@ -1780,7 +1796,8 @@ void MainWndOnCreate(HWND hWnd)
 
 	if(bIsFullScreen == TRUE)
 	{
-		Cursor_SetVisibility(FALSE);
+		if (!bAutoHideCursor)
+			Cursor_SetVisibility(FALSE);
 	}
 	else
 	{
@@ -1882,8 +1899,8 @@ void MainWndOnDestroy()
 //---------------------------------------------------------------------------
 void SetMenuAnalog()
 {
-	HMENU hMenu;
-	hMenu = GetMenu(hWnd);
+//	HMENU hMenu;
+//	hMenu = GetMenu(hWnd);
 	CheckMenuItem(hMenu, ThreadClassId + 1150, MF_CHECKED);
 	CheckMenuItem(hMenu, PriorClassId + 1160, MF_CHECKED);
 
@@ -1931,6 +1948,8 @@ void SetMenuAnalog()
 	CheckMenuItem(hMenu, IDM_MINOR_CARRIER_7, (MSPMinorMode == 7)?MF_CHECKED:MF_UNCHECKED);
 
 	CheckMenuItem(hMenu, IDM_TOGGLECURSOR,      bShowCursor?MF_CHECKED:MF_UNCHECKED);
+	EnableMenuItem(hMenu,IDM_TOGGLECURSOR,      bAutoHideCursor?MF_GRAYED:MF_ENABLED);
+	CheckMenuItem(hMenu, IDM_AUTOHIDE_CURSOR,   bAutoHideCursor?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_STATUSBAR,         bDisplayStatusBar?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_ON_TOP,            bAlwaysOnTop?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_AUTOSTEREO,        AutoStereoSelect?MF_CHECKED:MF_UNCHECKED);
@@ -2111,7 +2130,8 @@ BOOL IsFullScreen_OnChange(long NewValue)
 		if(bIsFullScreen == FALSE)
 		{
 			SetWindowPos(hWnd, 0, emstartx, emstarty, emsizex, emsizey, SWP_SHOWWINDOW);
-			Cursor_SetVisibility(bShowCursor);
+			if (!bAutoHideCursor)
+				Cursor_SetVisibility(bShowCursor);
 			if (bDisplayStatusBar == TRUE)
 			{
 				SetTimer(hWnd, TIMER_STATUS, TIMER_STATUS_MS, NULL);
@@ -2120,7 +2140,8 @@ BOOL IsFullScreen_OnChange(long NewValue)
 		else
 		{
 			SaveWindowPos(hWnd);
-			Cursor_SetVisibility(FALSE);
+			if (!bAutoHideCursor)
+				Cursor_SetVisibility(FALSE);
 		}
 		InvalidateRect(hWnd, NULL, FALSE);
 		WorkoutOverlaySize();
@@ -2228,6 +2249,12 @@ SETTING dTVSettings[DTV_SETTING_LASTONE] =
 		TRUE, 0, 1, 1, 1,
 		NULL,
 		"Show", "Menu", ShowMenu_OnChange,
+	},
+	{
+		"Auto Hide Cursor", ONOFF, 0, &bAutoHideCursor,
+		FALSE, 0, 1, 1, 1,
+		NULL,
+		"MainWindow", "AutoHideCursor", NULL,
 	},
 	{
 		"Window Processor", NUMBER, 0, &MainProcessor,
