@@ -43,6 +43,64 @@
 #include "structs.h"
 #include "globals.h"
 
+// This is the Header for the new UI code
+// This is currently in developement and is not to be used
+// It has only been checked in so that I can work on the 
+// crashing problems
+
+typedef enum
+{
+	NOT_PRESENT = 0,
+	YESNO,
+	ITEMFROMLIST,
+	SLIDER_UCHAR,
+	SLIDER_CHAR,
+	SLIDER_UINT,
+	SLIDER_INT,
+	SLIDER_ULONG,
+	SLIDER_LONG,
+	NUMBER_UCHAR,
+	NUMBER_CHAR,
+	NUMBER_UINT,
+	NUMBER_INT,
+	NUMBER_ULONG,
+	NUMBER_LONG,
+	SUBMENU,
+
+} SETTING_TYPE;
+
+// Function called when setting value changes
+// return value indicates whether.rest of screen needs to be
+// refreshed
+typedef BOOL (SETTING_ONCHANGE)(long NewValue);
+
+typedef struct
+{
+	char* szDisplayName;
+	SETTING_TYPE Type;
+	BOOL bHasChanged;
+	void* pValue;
+	long Default;
+	long MaxValue;
+	long MinValue;
+	long StepValue;
+	long PrevValue;
+	char** pszList;
+	SETTING_ONCHANGE* pfnOnChange;
+} SETTING;
+
+#define SETTINGS_PER_MENU 8
+
+typedef struct
+{
+   char* szDisplayName;
+   SETTING Elements[SETTINGS_PER_MENU];
+} UI_SUBMENU;
+
+void DisplayUISubMenuAsDialog(UI_SUBMENU* pSubMenu);
+
+// End of new UI code header
+
 void SetIniFileForSettings(LPSTR Name);
 void LoadSettingsFromIni();
 void WriteSettingsToIni();

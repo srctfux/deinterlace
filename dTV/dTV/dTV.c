@@ -63,6 +63,7 @@
 #include "tuner.h"
 #include "status.h"
 #include "vbi.h"
+#include "COMMCTRL.H"
 
 //---------------------------------------------------------------------------
 // 2000-12-19 Added by Mark Rejhon
@@ -197,6 +198,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		SetForegroundWindow(hPrevWindow);
 		return FALSE;
 	}
+
+	// JA 07/01/2001
+	// Required to use slider control
+	InitCommonControls();
 
 	// JA 21/12/2000
 	// Added single place to setup ini file name

@@ -1,5 +1,6 @@
 
 #include <windows.h>
+#include <windowsx.h>
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>

@@ -607,3 +607,188 @@ DWORD GetRefreshRate()
 {
 	return GetPrivateProfileInt("Pulldown", "RefreshRate", 0, szIniFile);	
 }
+
+// Start of new UI code
+// Not to be used yet
+
+void SetControlVisibility(HWND hDlg, int ControlID, BOOL IsVisible)
+{
+	if(!IsVisible)
+	{
+		ShowWindow(GetDlgItem(hDlg, ControlID), SW_HIDE);
+	}
+}
+
+long GetUIValue(SETTING* pSetting)
+{
+	switch(pSetting->Type)
+	{
+	case YESNO:
+		return *(BOOL*) pSetting->pValue;
+		break;
+	case ITEMFROMLIST:
+		return *(int*) pSetting->pValue;
+		break;
+	case SLIDER_UCHAR:
+	case NUMBER_UCHAR:
+		return *(UCHAR*) pSetting->pValue;
+		break;
+
+	case SLIDER_CHAR:
+	case NUMBER_CHAR:
+		return *(CHAR*) pSetting->pValue;
+		break;
+
+	case SLIDER_INT:
+	case NUMBER_INT:
+		return *(INT*) pSetting->pValue;
+		break;
+
+	case SLIDER_ULONG:
+	case NUMBER_ULONG:
+		return *(ULONG*) pSetting->pValue;
+		break;
+
+	case SLIDER_UINT:
+	case NUMBER_UINT:
+		return *(UINT*) pSetting->pValue;
+		break;
+
+	case SLIDER_LONG:
+	case NUMBER_LONG:
+		return *(LONG*) pSetting->pValue;
+		break;
+	default:
+		return 0;
+	}
+}
+
+BOOL SetUIValue(SETTING* pSetting, long Value)
+{
+	switch(pSetting->Type)
+	{
+	case YESNO:
+		*(BOOL*) pSetting->pValue = (BOOL) Value;
+		break;
+	case ITEMFROMLIST:
+		*(int*) pSetting->pValue = (int)Value;
+		break;
+	case SLIDER_UCHAR:
+	case NUMBER_UCHAR:
+		*(UCHAR*) pSetting->pValue = (UCHAR)Value;
+		break;
+
+	case SLIDER_CHAR:
+	case NUMBER_CHAR:
+		*(CHAR*) pSetting->pValue = (CHAR)Value;
+		break;
+
+	case SLIDER_INT:
+	case NUMBER_INT:
+		*(INT*) pSetting->pValue = (INT)Value;
+		break;
+
+	case SLIDER_ULONG:
+	case NUMBER_ULONG:
+		*(LONG*) pSetting->pValue = (LONG)Value;
+		break;
+
+	case SLIDER_UINT:
+	case NUMBER_UINT:
+		*(UINT*) pSetting->pValue = (UINT)Value;
+		break;
+
+	case SLIDER_LONG:
+	case NUMBER_LONG:
+		*(LONG*) pSetting->pValue = (LONG)Value;
+		break;
+	default:
+		return FALSE;
+		break;
+	}
+	
+	if(pSetting->pfnOnChange != NULL)
+	{
+		return pSetting->pfnOnChange(Value);
+	}
+	else
+	{
+		return FALSE;
+	}
+}
+
+BOOL APIENTRY UISubMenuProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
+{
+	static UI_SUBMENU* pSubMenu;
+	int i;
+
+	switch (message)
+	{
+	case WM_INITDIALOG:
+		pSubMenu = (UI_SUBMENU*)lParam;
+		for(i = 0;i < 8;i++)
+		{
+			SetDlgItemText(hDlg, IDC_STATIC1 + i, pSubMenu->Elements[i].szDisplayName);
+			SetControlVisibility(hDlg, IDC_CHECK1 + i, (pSubMenu->Elements[i].Type == YESNO));
+			SetControlVisibility(hDlg, IDC_SLIDER1 + i, (pSubMenu->Elements[i].Type >= SLIDER_UCHAR && pSubMenu->Elements[i].Type <= SLIDER_LONG));
+			SetControlVisibility(hDlg, IDC_COMBO1 + i, (pSubMenu->Elements[i].Type == ITEMFROMLIST));
+			pSubMenu->Elements[i].PrevValue = GetUIValue(pSubMenu->Elements + i);
+		}
+		break;
+
+	case WM_COMMAND:
+		switch LOWORD(wParam)
+		{
+		case IDOK:
+			EndDialog(hDlg, TRUE);
+			break;
+
+		case IDCANCEL:
+			// revert to old value
+			for(i = 0;i < 8;i++)
+			{
+				SetUIValue(pSubMenu->Elements + i, pSubMenu->Elements[i].PrevValue);
+			}
+			EndDialog(hDlg, FALSE);
+			break;
+
+		case IDC_CHECK1:
+		case IDC_CHECK2:
+		case IDC_CHECK3:
+		case IDC_CHECK4:
+		case IDC_CHECK5:
+		case IDC_CHECK6:
+		case IDC_CHECK7:
+		case IDC_CHECK8:
+			break;
+
+		case IDC_SLIDER1:
+		case IDC_SLIDER2:
+		case IDC_SLIDER3:
+		case IDC_SLIDER4:
+		case IDC_SLIDER5:
+		case IDC_SLIDER6:
+		case IDC_SLIDER7:
+		case IDC_SLIDER8:
+			break;
+
+		case IDC_COMBO1:
+		case IDC_COMBO2:
+		case IDC_COMBO3:
+		case IDC_COMBO4:
+		case IDC_COMBO5:
+		case IDC_COMBO6:
+		case IDC_COMBO7:
+		case IDC_COMBO8:
+			break;
+		}
+		break;
+	}
+	return (FALSE);
+}
+
+void DisplayUISubMenuAsDialog(UI_SUBMENU* pSubMenu)
+{
+	DialogBoxParam(hInst, "UI_SUB_MENU", hWnd, UISubMenuProc, (LPARAM)pSubMenu);
+}
+

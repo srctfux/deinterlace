@@ -692,6 +692,71 @@ BEGIN
                     WS_TABSTOP,129,163,38,40
 END
 
+UI_SUB_MENU DIALOG DISCARDABLE  0, 0, 376, 223
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Dialog"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,7,202,32,14
+    PUSHBUTTON      "Cancel",IDCANCEL,47,202,32,14
+    CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_VISIBLE | WS_TABSTOP,200,20,170,18
+    CONTROL         "Slider1",IDC_SLIDER2,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_VISIBLE | WS_TABSTOP,200,40,170,18
+    CONTROL         "Slider1",IDC_SLIDER3,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_VISIBLE | WS_TABSTOP,200,60,170,18
+    CONTROL         "Slider1",IDC_SLIDER4,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_VISIBLE | WS_TABSTOP,200,80,170,18
+    CONTROL         "Slider1",IDC_SLIDER5,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_VISIBLE | WS_TABSTOP,200,100,170,18
+    CONTROL         "Slider1",IDC_SLIDER6,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_VISIBLE | WS_TABSTOP,200,120,170,18
+    CONTROL         "Slider1",IDC_SLIDER7,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_VISIBLE | WS_TABSTOP,200,140,170,18
+    CONTROL         "Slider1",IDC_SLIDER8,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_VISIBLE | WS_TABSTOP,200,160,170,18
+    LTEXT           "Static",IDC_STATIC1,10,20,186,10
+    LTEXT           "Static",IDC_STATIC2,10,40,186,10
+    LTEXT           "Static",IDC_STATIC3,10,60,186,10
+    LTEXT           "Static",IDC_STATIC4,10,80,186,10
+    LTEXT           "Static",IDC_STATIC5,10,100,186,10
+    LTEXT           "Static",IDC_STATIC6,10,120,186,10
+    LTEXT           "Static",IDC_STATIC7,10,140,186,10
+    LTEXT           "Static",IDC_STATIC8,10,160,186,10
+    CONTROL         "",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,200,
+                    20,166,17
+    CONTROL         "",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,200,
+                    40,166,17
+    CONTROL         "",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,200,
+                    60,166,17
+    CONTROL         "",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,200,
+                    80,166,17
+    CONTROL         "",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,200,
+                    100,166,17
+    CONTROL         "",IDC_CHECK6,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,200,
+                    120,166,17
+    CONTROL         "",IDC_CHECK7,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,200,
+                    140,166,17
+    CONTROL         "",IDC_CHECK8,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,200,
+                    160,166,17
+    COMBOBOX        IDC_COMBO1,200,20,167,17,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO2,200,40,167,17,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO3,200,60,167,17,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO4,200,80,167,17,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO5,200,100,166,17,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO6,200,120,113,17,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO7,200,140,167,17,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO8,200,160,167,17,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1107,6 +1172,14 @@ BEGIN
         RIGHTMARGIN, 171
         BOTTOMMARGIN, 286
         HORZGUIDE, 4
+    END
+
+    "UI_SUB_MENU", DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 369
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 216
     END
 END
 #endif    // APSTUDIO_INVOKED
