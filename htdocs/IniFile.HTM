@@ -40,7 +40,8 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
     <td colspan="3">&nbsp;</td>
   </tr>
   <tr>
-    <td colspan="3"><!-- #BeginEditable "Text" --> 
+    <td colspan="3">
+<!-- #BeginEditable "Text" --> 
       <p>Many features of the program are configurable through the menu system.&nbsp; 
         Some advanced settings and functions in beta test will require changes 
         to this ini file to work properly.&nbsp; All the settings used by the 
@@ -135,7 +136,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         </tr>
         <tr> 
           <td> 
-            Threshold32Pulldown&nbsp;
+            Threshold32Pulldown
           </td>
           <td> 
             <p align="center">15
@@ -143,7 +144,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
           <td> 
             This is the number of pixels per field that need to be similar 
               for NTSC movie detection to detect a triplet of fields from the 
-              same movie frame.&nbsp; Higher values will cope with more video 
+              same movie frame. Higher values will cope with more video 
               noise but will not detect the movies as well.
           </td>
         </tr>
@@ -195,6 +196,49 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
             If set then it is used with DoAccurateFlips to reduce judder
           </td>
         </tr>
+
+        <tr>
+          <td>StaticImageFieldCount</td>
+          <td>16</td>
+          <td>The Adaptive video deinterlace mode considers an image to be static if it
+            stays the same (or nearly the same, subject to Threshold32Pulldown) for this
+            many fields.  In Adaptive mode, DScaler will switch from LowMotionMode to
+            StaticImageMode for as long as the image remains the same.  This
+            helps reduce CPU consumption on still images such as DVD menu screens.</td>
+        </tr>
+
+        <tr>
+          <td>LowMotionFieldCount</td>
+          <td>4</td>
+          <td>The Adaptive video deinterlace mode considers an image to be
+            low-motion if its difference stays below Threshold32Pulldown for this many fields.
+            When that happens, DScaler will switch from high-motion to low-motion mode.</td>
+        </tr>
+
+        <tr>
+          <td>StaticImageMode</td>
+          <td>3</td>
+          <td>Specifies the
+            <a href="#modes">video deinterlace mode</a>
+            to use in Adaptive mode for static scenes (see StaticImageFieldCount).</td>
+        </tr>
+
+        <tr>
+          <td>LowMotionMode</td>
+          <td>2</td>
+          <td>Specifies the
+            <a href="#modes">video deinterlace mode</a>
+            to use in Adaptive mode for low-motion scenes (see LowMotionFieldCount).</td>
+        </tr>
+
+        <tr>
+          <td>HighMotionMode</td>
+          <td>2</td>
+          <td>CSpecifies the
+            <a href="#modes">video deinterlace mode</a>
+            to use in Adaptive mode for high-motion scenes (see LowMotionFieldCount).</td>
+        </tr>
+
         <tr>
           <td colspan=3> 
             <h3>[Hardware]</h3>
@@ -474,8 +518,8 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
           <td> 
             Performance parameter. The number of milliseconds DScaler will sleep,
             waiting for the next video input buffer. May be set to 0 for slower
-            machines. If this is set to 0 it may appear on a CPU monitor that
-            DScaler is using 100% of available CPU processor time but it will still
+            machines. If this is set to 0 it may appear on a CPU monitor that DScaler
+            is using 100% of available CPU processor time but it will still
             be a good citizen and yield control if another task is ready to run.
             May be set to 0 for slower machines.
           </td>
@@ -878,6 +922,95 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
               is consistent for this many frames, switch back to it.
           </td>
         </tr>
+        <tr>
+          <td>Clipping</td>
+          <td align="center">1</td>
+          <td>If turned on (non-zero), the source image is clipped (masked)
+		    to hide any source material outside the expected region.  This
+			is the normal operation mode.  It can be turned off and combined
+			with the image positioning commands to make more space available
+			for captions.</td>
+        </tr>
+        <tr>
+          <td>deferedOverlay</td>
+          <td align="center">0</td>
+          <td>If turned on (non-zero) the overlay on the screen will not be
+		    updated until Windows has painted the black masking bars but
+			before painting the purple overlay color.  Additionally, it
+			imposes a delay for the vertical retrace before painting the 
+			overlay color.  Under normal CPU load, this should eleminate 
+			flashing of purple borders when resizing or bouncing the image.  
+			Flashing may still occur under heavy load.</td>
+        </tr>
+        <tr>
+          <td>Bounce</td>
+          <td align="center">0</td>
+          <td>If turned on (non-zero), the image will bounce within any 
+		    space remaining either beside or above/below the image.  Used to
+			maximize the region being used on a CRT projector to minimize 
+			the risk of burning in one piece of the CRT.</td>
+        </tr>
+        <tr>
+          <td>BouncePeriod</td>
+          <td align="center">1800</td>
+          <td>Time (in seconds) it takes for the image to bounce from the center
+		    to the right/bottom then back to the left/top and back to center.  Default
+			is half an hour.</td>
+        </tr>
+        <tr>
+          <td>BounceTimerPeriod</td>
+          <td align="center">1000</td>
+          <td>Number of miliseconds between overlay updates when bounce mode is
+		    enabled.</td>
+        </tr>
+        <tr>
+          <td>Orbit</td>
+          <td align="center">0</td>
+          <td>If enabled (non-zero) the region of the captured image is bounced
+		    around.  This prevents any individual item on the screen from being
+			constantly displayed in the same location and thus minimizes CRT
+			burn-in risk from small static objects.  The orbit causes the image
+			to move into the overlay region, so you may need a larger overlay setting
+			if you use the orbit option.</td>
+        </tr>
+        <tr>
+          <td>OrbitPeriodX</td>
+          <td align="center">2700</td>
+          <td>Number of seconds for the image to move back and forth across the
+		    entire orbit region in the horizontal.  It is recommended that OrbitPeriodX
+			and OrbitPeriodY use different values to provide wider variation in the
+			orbit positions.  If both values are the same, the image will only diagionally
+			orbit from top-left to bottom-right.</td>
+        </tr>
+        <tr>
+          <td>OrbitPeriodY</td>
+          <td align="center">3600</td>
+          <td>Number of seconds for the image to vertically across the
+		    entire orbit region.  It is recommended that OrbitPeriodX
+			and OrbitPeriodY use different values to provide wider variation in the
+			orbit positions.  If both values are the same, the image will only diagionally
+			orbit from top-left to bottom-right.</td>
+        </tr>
+        <tr>
+          <td>OrbitSize</td>
+          <td align="center">8</td>
+          <td>Number of pixels in the captured material to orbit.</td>
+        </tr>
+        <tr>
+          <td>OrbitTimerPeriod</td>
+          <td align="center">60000</td>
+          <td>Number of miliseconds between updates of the overlay for image orbiting.</td>
+        </tr>
+        <tr>
+          <td>VerticalPos</td>
+          <td align="center">CENTER</td>
+          <td>Vertical position of the image (TOP, CENTER, BOTTOM).</td>
+        </tr>
+        <tr>
+          <td>HorizontalPos</td>
+          <td align="center">CENTER</td>
+          <td>Horizontal position of the image (LEFT, CENTER, RIGHT).</td>
+        </tr>
 
         <tr>
           <td colspan=3><h3>[NoiseFilter]</h3></td>
@@ -892,26 +1025,173 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
 
         <tr>
           <td>TemporalLuminanceThreshold</td>
-          <td align="center">10</td>
+          <td align="center">6</td>
           <td>Controls how different a pixel's luminance (brightness) has to be
           from its predecessor in the previous frame before it's considered a
           change in the actual image rather than just noise.  Valid values are
-          0-255.  Values over 20 tend to produce posterization artifacts that
+          0-255.  Values over 15 tend to produce posterization artifacts that
           are more distracting than the video noise was.</td>
         </tr>
 
         <tr>
           <td>TemporalChromaThreshold</td>
-          <td align="center">12</td>
+          <td align="center">7</td>
           <td>Controls how different a pixel's chrominance (hue) has to be
             from its predecessor in the previous frame before it's considered a
             change in the actual image rather than just noise.  Valid values are
-            0-255.  Values over 25 tend to produce posterization artifacts that
+            0-255.  Values over 20 tend to produce posterization artifacts that
             are more distracting than the video noise was.</td>
         </tr>
-
+        <tr>
+          <td colspan=3> 
+            <h3>[GammaFilter]</h3>
+          </td>
+        </tr>
+        <tr>
+          <td> 
+            UseGammaFilter
+          </td>
+          <td> 
+            <p align="center">0
+          </td>
+          <td> 
+            Do you want to use the gamma filter
+          </td>
+        </tr>
+        <tr>
+          <td> 
+           Gamma
+          </td>
+          <td> 
+            <p align="center">1000
+          </td>
+          <td> 
+            Gamma adjustment, note 1000 doesn't do anything, 1300 does a 1.3 power adjustment
+          </td>
+        </tr>
       </table>
-      <!-- #EndEditable --></td>
+
+<h2 id="modes">Deinterlace Modes</h2>
+
+<p>The following numeric codes correspond to the various deinterlace modes
+supported by DScaler.  They are used in the DeinterlaceMode, LowMotionMode,
+HighMotionMode, and StillImageMode settings.
+
+<p>
+<table border="1">
+<tr>
+<th>ID</th>
+<th>Name</th>
+<th>Summary</th>
+</tr>
+
+<tr>
+<td>0</td>
+<td>Video Bob</td>
+<td>Adaptive video deinterlace with a tendency to bob rather than weave.
+Useful for high-motion scenes on slower PCs.</td>
+</tr>
+
+<tr>
+<td>1</td>
+<td>Video Weave</td>
+<td>Adaptive video deinterlace with a tendency to weave rather than bob.
+Useful for low-motion scenes on slower PCs.</td>
+</tr>
+
+<tr>
+<td>2</td>
+<td>Video 2-Frame</td>
+<td>Adaptive video deinterlace that examines more data than Video Bob or
+Video Weave.  Can handle high and low-motion scenes but requires more
+CPU horsepower.</td>
+</tr>
+
+<tr>
+<td>3</td>
+<td>Simple Weave</td>
+<td>Combines each incoming field with the previous one, with no attempt
+to eliminate visible artifacts.  Suitable for static (still) images.</td>
+</tr>
+
+<tr>
+<td>4</td>
+<td>Simple Bob</td>
+<td>Fills the whole screen with each incoming field, effectively cutting
+resolution in half.  Not generally useful, though some sports may look
+acceptable and it uses less CPU time than most of the other modes.</td>
+</tr>
+
+<tr>
+<td>5</td>
+<td>Scaler Bob</td>
+<td>Like Simple Bob, but uses the display hardware to expand the
+half-resolution image rather than doing it in software.  Uses less CPU
+time than Simple Bob and looks better on some video cards.  Switching
+to and from this mode may produce brief distortions in the picture.</td>
+</tr>
+
+<tr>
+<td>6-7</td>
+<td>2:2 Pulldown</td>
+<td>PAL film modes, each film frame corresponding to two video fields
+for a frame rate of 25FPS. Generally you will want to let DScaler automatically
+detect these modes rather than setting them by hand.</td>
+</tr>
+
+<tr>
+<td>8-12</td>
+<td>3:2 Pulldown</td>
+<td>NTSC film modes, each pair of film frames corresponding to five video
+fields for a frame rate of 24FPS. Generally you will want to let DScaler automatically detect these modes rather than setting them by hand.</td>
+</tr>
+
+<tr>
+<td>13-14</td>
+<td>Even/Odd Only</td>
+<td>Ignore the odd or even fields, respectively.  Essentially these are
+bob modes, but they may produce better results on some video cards than
+simple bobbing.  Mostly useful for older videogame systems (PlayStation,
+Nintendo64, etc.) that render games at half resolution.</td>
+</tr>
+
+<tr>
+<td>15</td>
+<td>Blended Clip</td>
+<td>Attempts to smoothly blend the results of weaving and bobbing rather
+than simply choosing one or the other outright.  This mode has a lot of
+settings that can be tweaked with a control panel.</td>
+</td>
+</tr>
+
+<tr>
+<td>16</td>
+<td>Adaptive</td>
+<td>Not exactly a mode in its own right, the adaptive algorithm switches
+between other deinterlace modes depending on the amount of motion in the
+scene.  Its exact behavior is controlled by LowMotionFieldCount,
+HighMotionMode, and related INI file settings; see the [Pulldown]
+section above.</td>
+</td>
+</tr>
+
+<tr>
+<td>17</td>
+<td>Greedy</td>
+<td>Examines several nearby pixels to determine which one will produce
+the best image.  Works well on poorly-mastered film material and on
+video with low amounts of motion.</td>
+</tr>
+
+<tr>
+<td>18</td>
+<td>Greedy 2 Frame</td>
+<td>Examines several nearby pixels to determine when to BOB a pixel.  Works well on sports and on video with large amounts of motion.</td>
+</tr>
+
+</table>
+<!-- #EndEditable -->
+	</td>
   </tr>
   <tr> 
     <td colspan="3">&nbsp;</td>
