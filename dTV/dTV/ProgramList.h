@@ -40,14 +40,14 @@
 #include "globals.h"
 
 void Write_Program_List();
+void Write_Program_List_ASCII();
 void Load_Program_List();
+void Load_Program_List_ASCII();
 
 BOOL APIENTRY ProgramListProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
-BOOL APIENTRY ListFeldSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
-BOOL APIENTRY KanalNummerProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
-VOID APIENTRY HandleFocusStateKanalListe(HWND hDlg, LPDRAWITEMSTRUCT lpdis);
-VOID APIENTRY DrawEntireItemKanalListe(HWND hDlg, LPDRAWITEMSTRUCT lpdis, INT Typ);
-void GetFeldName(short id, char *zeile);
+BOOL APIENTRY ChannelNumberProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
+VOID APIENTRY HandleFocusStateChannelList(HWND hDlg, LPDRAWITEMSTRUCT lpdis);
+VOID APIENTRY DrawEntireItemChannelList(HWND hDlg, LPDRAWITEMSTRUCT lpdis, INT Typ);
 BOOL APIENTRY AnalogScanProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 
 #endif

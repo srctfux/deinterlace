@@ -19,6 +19,7 @@
 #define IDM_VBI                         231
 #define IDM_CAPTURE_PAUSE               232
 #define IDM_CHANNEL_LIST                242
+#define IDM_SHOW_OSD										243
 #define IDM_CALL_VIDEOTEXT              245
 #define IDM_CALL_VIDEOTEXTSMALL         252
 #define IDM_VT_RESET                    261

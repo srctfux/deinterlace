@@ -73,18 +73,6 @@ void LoadSettingsFromIni(LPSTR Name)
 		bIsFullScreen = TRUE;
 	}
 
-	pgstartx = GetPrivateProfileInt("ProgList", "StartLeft", -1, szIniFile);
-	pgstarty = GetPrivateProfileInt("ProgList", "StartTop", -1, szIniFile);
-	pgsizex = GetPrivateProfileInt("ProgList", "StartWidth", -1, szIniFile);
-	pgsizey = GetPrivateProfileInt("ProgList", "StartHeight", -1, szIniFile);
-	for(i = 0; i < 15; i++)
-	{
-		sprintf(szKey, "LISTFIELD_%d_ID", i + 1);
-		ButtonList[i].FeldId = GetPrivateProfileInt("ProgList", szKey, 0, szIniFile);
-		sprintf(szKey, "LISTFIELD_%d_LENGTH", i + 1);
-		ButtonList[i].x = GetPrivateProfileInt("ProgList", szKey, 0, szIniFile);
-	}
-
 	PriorClassId = GetPrivateProfileInt("Threads", "ProcessPriority", 0, szIniFile);
 	ThreadClassId = GetPrivateProfileInt("Threads", "ThreadPriority", 1, szIniFile);
 	MainProcessor = GetPrivateProfileInt("Threads", "WindowProcessor", 0, szIniFile);
@@ -324,18 +312,6 @@ void WriteSettingsToIni()
 		WritePrivateProfileInt("MainWindow", "StartTop", emstarty, szIniFile);
 		WritePrivateProfileInt("MainWindow", "StartWidth", emsizex, szIniFile);
 		WritePrivateProfileInt("MainWindow", "StartHeight", emsizey, szIniFile);
-	}
-
-	WritePrivateProfileInt("ProgList", "StartLeft", pgstartx, szIniFile);
-	WritePrivateProfileInt("ProgList", "StartTop", pgstarty, szIniFile);
-	WritePrivateProfileInt("ProgList", "StartWidth", pgsizex, szIniFile);
-	WritePrivateProfileInt("ProgList", "StartHeight", pgsizey, szIniFile);
-	for(i = 0; i < 15; i++)
-	{
-		sprintf(szKey, "LISTFIELD_%d_ID", i + 1);
-		WritePrivateProfileInt("ProgList", szKey, ButtonList[i].FeldId, szIniFile);
-		sprintf(szKey, "LISTFIELD_%d_LENGTH", i + 1);
-		WritePrivateProfileInt("ProgList", szKey, ButtonList[i].x, szIniFile);
 	}
 
 	WritePrivateProfileInt("Threads", "ProcessPriority", PriorClassId, szIniFile);

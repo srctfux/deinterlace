@@ -311,15 +311,15 @@ SOURCE=.\VBI_VideoText.H
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe"
 # Begin Source File
 
-SOURCE=.\RES\bgruen1.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\RES\brot1.bmp
-# End Source File
-# Begin Source File
-
 SOURCE=.\RES\dTV.ico
+# End Source File
+# Begin Source File
+
+SOURCE=.\Res\greenbulb.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\Res\redbulb.bmp
 # End Source File
 # Begin Source File
 

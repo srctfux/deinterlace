@@ -1611,6 +1611,8 @@ BOOL APIENTRY SelectCardProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 			SendMessage(GetDlgItem(hDlg, IDC_TUNERSELECT), CB_ADDSTRING, 0, (LONG)Tuners[i].szName);
 		}
 		SendMessage(GetDlgItem(hDlg, IDC_TUNERSELECT), CB_SETCURSEL, TunerType, 0);
+
+		SetFocus(hDlg);
 		break;
 	case WM_COMMAND:
 		switch(LOWORD(wParam))

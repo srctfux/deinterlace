@@ -58,15 +58,12 @@ BEGIN
     GROUPBOX        "Video-Subsystem",IDC_STATIC,3,102,195,50
 END
 
-CHANNELLIST DIALOG DISCARDABLE  22, 17, 499, 156
-STYLE DS_3DLOOK | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
-CAPTION "Process Channel List"
+CHANNELLIST DIALOG DISCARDABLE  22, 17, 75, 156
+STYLE DS_MODALFRAME | DS_SETFOREGROUND | DS_3DLOOK | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Channel List"
 FONT 8, "MS Sans Serif"
 BEGIN
-    PUSHBUTTON      "Again",IDM_NEU,10,140,40,14,WS_GROUP
-    PUSHBUTTON      "On",IDC_BUTTON1,466,8,20,10
-    PUSHBUTTON      "Off",IDC_BUTTON2,320,120,20,12
-    DEFPUSHBUTTON   "OK",IDOK2,290,140,40,14,WS_GROUP
+    DEFPUSHBUTTON   "OK",IDOK2,50,20,40,14,WS_GROUP
     LTEXT           "",IDC_MOVE1,8,0,20,20,SS_SUNKEN | WS_BORDER | NOT 
                     WS_GROUP
     LTEXT           "",IDC_MOVE2,28,0,20,20,SS_SUNKEN | WS_BORDER | NOT 
@@ -752,17 +749,15 @@ BEGIN
     EDITTEXT        IDC_EDIT2,112,30,40,12,ES_AUTOHSCROLL | ES_READONLY | 
                     NOT WS_TABSTOP
     LTEXT           "Mhz",-1,156,30,16,12,SS_CENTERIMAGE
-    PUSHBUTTON      "Cancel",IDCANCEL,222,100,44,14,WS_GROUP
+    PUSHBUTTON      "Cancel",IDCANCEL,216,100,44,14,WS_GROUP
     EDITTEXT        IDC_EDIT15,112,70,96,12,ES_AUTOHSCROLL | ES_READONLY | 
                     NOT WS_TABSTOP
     PUSHBUTTON      "Start",IDSTART,114,100,44,14,WS_GROUP
     CTEXT           "",IDC_TEXT20,6,84,258,10,SS_CENTERIMAGE
-    LTEXT           "Programme",-1,66,70,32,12,SS_CENTERIMAGE
-    CONTROL         "Channels",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,10,6,118,10
+    LTEXT           "Channel",-1,66,70,32,12,SS_CENTERIMAGE
     COMBOBOX        IDC_COMBO1,132,4,126,56,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    LTEXT           "VideoStatus",-1,66,50,42,12,SS_CENTERIMAGE
+    LTEXT           "Status",-1,66,50,42,12,SS_CENTERIMAGE
     DEFPUSHBUTTON   "OK",IDOK,6,100,44,14,WS_DISABLED | WS_GROUP
 END
 
@@ -925,7 +920,7 @@ BEGIN
     POPUP "&Channels"
     BEGIN
         MENUITEM "Channel &Scan",               IDM_ANALOGSCAN
-        MENUITEM "Channel &List",               IDM_CHANNEL_LIST
+        MENUITEM "Channel &List\tHome",         IDM_CHANNEL_LIST
         MENUITEM SEPARATOR
         MENUITEM "&Next Channel\tPgUp",         IDM_CHANNELPLUS
         MENUITEM "&Previous Channel\tPgDn",     IDM_CHANNELMINUS
@@ -1136,8 +1131,8 @@ SLIDER                  BITMAP  DISCARDABLE     "res\\slider1.bmp"
 SLIDER1                 BITMAP  DISCARDABLE     "res\\slider.bmp"
 VTCHARLARGE             BITMAP  DISCARDABLE     "res\\Vtx15x18.bmp"
 VTCHARSMALL             BITMAP  DISCARDABLE     "res\\VTx10x12.bmp"
-BGRUEN                  BITMAP  DISCARDABLE     "res\\brot1.bmp"
-BROT                    BITMAP  DISCARDABLE     "res\\bgruen1.bmp"
+GREENBULB               BITMAP  DISCARDABLE     "res\\redbulb.bmp"
+REDBULB                 BITMAP  DISCARDABLE     "res\\greenbulb.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1403,6 +1398,9 @@ BEGIN
     "Y",            IDM_L_BALANCE,          VIRTKEY, SHIFT, NOINVERT
     "_",            IDM_VOLUMEMINUS,        ASCII,  NOINVERT
     "`",            IDM_SASPECT_COMPUTE,    ASCII,  NOINVERT
+		// MAE 8 Nov 2000 Added for channel list
+		VK_HOME,				IDM_CHANNEL_LIST,				VIRTKEY, NOINVERT
+		VK_END,					IDM_SHOW_OSD,						VIRTKEY, NOINVERT
 END
 
 

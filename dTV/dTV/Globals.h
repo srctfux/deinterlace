@@ -213,8 +213,8 @@ extern int CountryCode;
 
 extern struct TProgramm Programm[MAXPROGS+1];
 extern HFONT currFont;
-extern HBITMAP BirneRot;
-extern HBITMAP BirneGruen;
+extern HBITMAP RedBulb;
+extern HBITMAP GreenBulb;
 
 extern char BTVendorID[10];
 extern char BTDeviceID[10];

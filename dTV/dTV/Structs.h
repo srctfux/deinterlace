@@ -135,9 +135,7 @@ struct PIDFilters
 
 typedef struct TProgramm
 {
-	char Name[30];
-	char Anbieter[30];
-	char Land[30];
+	char Name[255];
     unsigned long freq;
     char Typ;
     BOOL  Tuner_Auto;
@@ -279,7 +277,7 @@ struct TMixerControls
 
 struct TBL
 {
-	short FeldId;
+	short FieldId;
 	unsigned short x;
 	unsigned short s;
 	unsigned short r;

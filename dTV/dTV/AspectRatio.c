@@ -377,10 +377,13 @@ void PaintColorkey(HWND hWnd, BOOL bEnable)
 	} else {
 		FillRect(sPaint.hdc, &sPaint.rcPaint, overlay);
 	}
+
 	DeleteObject(black);
 	DeleteObject(overlay);
+
 	// END MRS
 	EndPaint(hWnd, &sPaint);
+
 }
 
 //----------------------------------------------------------------------------

@@ -117,10 +117,10 @@ BOOL Tuner_SetFrequency(int TunerTyp, int wFrequency)
 void Load_Country_Settings()
 {
 	FILE *iniFile;
-	char zeile[128];
+	char line[128];
 	char *Pos;
 	char *Pos1;
-	char *SemmelPos;
+	char *eol_ptr;
 	unsigned int i;
 
 	for (i = 0; i < 32; i++)
@@ -128,26 +128,26 @@ void Load_Country_Settings()
 		Countries[i].Name[0] = 0x00;
 	}
 
-	if ((iniFile = fopen("Channel.lst", "r")) == NULL)
+	if ((iniFile = fopen("Channel.txt", "r")) == NULL)
 	{
-		ErrorBox("File Channel.lst not Found");
+		ErrorBox("File Channel.txt not Found");
 		return;
 	}
 	i = 0;
 
-	while (fgets(zeile, sizeof(zeile), iniFile) != NULL)
+	while (fgets(line, sizeof(line), iniFile) != NULL)
 	{
 		if (i >= 35)
 		{
-			ErrorBox("File Channel.lst has more than 35 settings!\nThe extra ones are ingnored.");
+			ErrorBox("File Channel.txt has more than 35 settings!\nThe extra ones are ingnored.");
 			fclose(iniFile);
 			return;
 		}
-		SemmelPos = strstr(zeile, ";");
-		if (SemmelPos == NULL)
-			SemmelPos = strstr(zeile, "\n");
+		eol_ptr = strstr(line, ";");
+		if (eol_ptr == NULL)
+			eol_ptr = strstr(line, "\n");
 
-		if (((Pos = strstr(zeile, "[")) != 0) && (SemmelPos > Pos) && ((Pos1 = strstr(zeile, "]")) != 0))
+		if (((Pos = strstr(line, "[")) != 0) && (eol_ptr > Pos) && ((Pos1 = strstr(line, "]")) != 0))
 		{
 
 			Pos++;
@@ -169,50 +169,50 @@ void Load_Country_Specific_Settings(int LPos)
 {
 	unsigned short i, j, k;
 	FILE *iniFile;
-	char zeile[128];
+	char line[128];
 	char txt[128];
 	char *Pos;
 	char *Pos1;
-	char *SemmelPos;
+	char *eol_ptr;
 
-	if ((iniFile = fopen("Channel.lst", "r")) == NULL)
+	if ((iniFile = fopen("Channel.txt", "r")) == NULL)
 	{
-		ErrorBox("File Channel.lst not found");
+		ErrorBox("File Channel.txt not found");
 		return;
 	}
 	i = 0;
 	k = 0;
 
-	while (fgets(zeile, sizeof(zeile), iniFile) != NULL)
+	while (fgets(line, sizeof(line), iniFile) != NULL)
 	{
 
-		SemmelPos = strstr(zeile, ";");
-		if (SemmelPos == NULL)
-			SemmelPos = strstr(zeile, "\n");
+		eol_ptr = strstr(line, ";");
+		if (eol_ptr == NULL)
+			eol_ptr = strstr(line, "\n");
 
 		sprintf(txt, "[%s]", Countries[LPos].Name);
 
-		if (strstr(zeile, txt) != 0)
+		if (strstr(line, txt) != 0)
 		{
 			strcpy(Channels.Name, Countries[LPos].Name);
-			while (fgets(zeile, sizeof(zeile), iniFile) != NULL)
+			while (fgets(line, sizeof(line), iniFile) != NULL)
 			{
-				SemmelPos = strstr(zeile, ";");
-				if (SemmelPos == NULL)
-					SemmelPos = strstr(zeile, "\n");
+				eol_ptr = strstr(line, ";");
+				if (eol_ptr == NULL)
+					eol_ptr = strstr(line, "\n");
 
-				if (((Pos = strstr(zeile, "[")) != 0) && (SemmelPos > Pos) && ((Pos1 = strstr(zeile, "]")) != 0))
+				if (((Pos = strstr(line, "[")) != 0) && (eol_ptr > Pos) && ((Pos1 = strstr(line, "]")) != 0))
 				{
 					fclose(iniFile);
 					return;
 				}
 
-				if (((Pos = strstr(zeile, "KanalLow=")) != 0) && (SemmelPos > Pos))
+				if (((Pos = strstr(line, "ChannelLow=")) != 0) && (eol_ptr > Pos))
 				{
-					Pos = Pos + 9;
+					Pos = Pos + 11;
 					j = 0;
 					txt[j] = 0x00;
-					while (Pos < SemmelPos)
+					while (Pos < eol_ptr)
 					{
 						if (*Pos != 0x20)
 						{
@@ -224,12 +224,12 @@ void Load_Country_Specific_Settings(int LPos)
 					}
 					Channels.MinChannel = atoi(txt);
 				}
-				else if (((Pos = strstr(zeile, "KanalHigh=")) != 0) && (SemmelPos > Pos))
+				else if (((Pos = strstr(line, "ChannelHigh=")) != 0) && (eol_ptr > Pos))
 				{
-					Pos = Pos + 10;
+					Pos = Pos + 12;
 					j = 0;
 					txt[j] = 0x00;
-					while (Pos < SemmelPos)
+					while (Pos < eol_ptr)
 					{
 						if (*Pos != 0x20)
 						{
@@ -243,10 +243,10 @@ void Load_Country_Specific_Settings(int LPos)
 				}
 				else
 				{
-					Pos = &zeile[0];
+					Pos = &line[0];
 					j = 0;
 					txt[j] = 0x00;
-					while (Pos < SemmelPos)
+					while (Pos < eol_ptr)
 					{
 						if ((*Pos >= '0') && (*Pos <= '9'))
 						{
