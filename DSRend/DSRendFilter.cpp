@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendFilter.cpp,v 1.2 2002-02-03 20:01:39 tobbej Exp $
+// $Id: DSRendFilter.cpp,v 1.3 2002-02-06 15:01:24 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.2  2002/02/03 20:01:39  tobbej
+// made framerate counter work
+//
 // Revision 1.1.1.1  2002/02/03 10:52:53  tobbej
 // First import of new direct show renderer filter
 //
@@ -151,6 +154,12 @@ HRESULT CDSRendFilter::Run(REFERENCE_TIME tStart)
 	m_filterState=State_Running;
 	
 	return S_OK;
+}
+
+bool CDSRendFilter::isStopped()
+{
+	CAutoLockCriticalSection lock(&m_Lock);
+	return m_filterState==State_Stopped;
 }
 
 HRESULT CDSRendFilter::GetState(DWORD dwMilliSecsTimeout,FILTER_STATE *State)
@@ -367,7 +376,7 @@ HRESULT CDSRendFilter::get_FramesDrawn(int *pcFramesDrawn)
 
 HRESULT CDSRendFilter::get_FramesDroppedInRenderer(int *pcFrames)
 {
-	ATLTRACE(_T("%s(%d) : CDSRendFilter::get_FramesDroppedInRenderer\n"),__FILE__,__LINE__);
+	//ATLTRACE(_T("%s(%d) : CDSRendFilter::get_FramesDroppedInRenderer\n"),__FILE__,__LINE__);
 	CAutoLockCriticalSection lock(&m_Lock);
 
 	if(pcFrames==NULL)

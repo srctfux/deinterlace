@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendInPin.h,v 1.1.1.1 2002-02-03 10:52:53 tobbej Exp $
+// $Id: DSRendInPin.h,v 1.2 2002-02-06 15:01:23 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1.1.1  2002/02/03 10:52:53  tobbej
+// First import of new direct show renderer filter
+//
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -43,7 +46,7 @@ class CDSRendFilter;
 
 /**
  * The input pin of the renderer filter.
- * @todo implement scheduling of samples
+ * @todo implement scheduling of samples. done, but might need some tweaking.
  * @todo add support for changing format when graph is running
  */
 class ATL_NO_VTABLE CDSRendInPin : 

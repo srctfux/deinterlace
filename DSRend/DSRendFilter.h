@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendFilter.h,v 1.1.1.1 2002-02-03 10:52:53 tobbej Exp $
+// $Id: DSRendFilter.h,v 1.2 2002-02-06 15:01:24 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1.1.1  2002/02/03 10:52:53  tobbej
+// First import of new direct show renderer filter
+//
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -59,9 +62,9 @@ private:
 
 /**
  * The filter itself.
- * @todo make the filter work
  * @todo add quality-control management
  * @todo add more statistics on IQualProp, not all data is updated
+ * @todo add buffering of IMediaSamples, might need a IMemAllocator first
  */
 class ATL_NO_VTABLE CDSRendFilter : 
 	public CComObjectRootEx<CComMultiThreadModel>,
@@ -153,8 +156,11 @@ public:
 	 */
 	HRESULT renderSample(IMediaSample *pSample);
 
-	/// @return true if the filter is stopped
-	bool isStopped(){return m_filterState==State_Stopped;};
+	/**
+	 * Checks if the filter is stopped.
+	 * @return true if the filter is stopped
+	 */
+	bool isStopped();
 	bool isStreaming(){return false /*FIXME*/;};
 	
 	HRESULT sendNotifyMsg(long eventCode,LONG_PTR param1,LONG_PTR param2);
