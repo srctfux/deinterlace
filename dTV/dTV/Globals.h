@@ -227,9 +227,9 @@ extern int	Back_Buffers;			// " , nuber of video back buffers
 
 // Add some global fields for Blended Clip Deinterlace - Tom Barry 11/05/00
 // These should be treated as part of that, if it ever becomes a class.
-extern	UINT	BlcMinimumClip;
+extern	int		BlcMinimumClip;
 extern	UINT	BlcPixelMotionSense;
-extern	UINT	BlcRecentMotionSense;
+extern	int		BlcRecentMotionSense;
 extern	UINT	BlcMotionAvgPeriod;
 extern	UINT	BlcPixelCombSense;
 extern	UINT	BlcRecentCombSense;

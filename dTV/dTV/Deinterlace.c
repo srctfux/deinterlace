@@ -516,7 +516,7 @@ DoNext8Bytes:
 // still see too many Weave artifacts ("venetion blinds").  It's best to try everything
 // else first.
 
-	UINT	BlcMinimumClip= 10;
+	int		BlcMinimumClip = -15;				// currently -100 .. 100
 
 // "Pixel Motion Sensitivity" slider:  This determines how sensitive we are to motion.
 // Motion is calculated as the maximum absolute change in luma from the previous field
@@ -525,7 +525,7 @@ DoNext8Bytes:
 // of venetiaon blinds that can occur with sudden scene changes.  This value is
 // calculated separately for each pixel.
 
-	UINT	BlcPixelMotionSense = 80;
+	UINT	BlcPixelMotionSense = 17;
 
 // "Recent Motion Sensitivity" slider:  This increases the tendency to use Clip based
 // upon an n-period Exponential Moving Average of the recent motion.  Recent motion
@@ -534,7 +534,7 @@ DoNext8Bytes:
 // does not attempt to do 3:2 pulldown I believe the motion values could be of assistance
 // in the routines that do.  
 
-	UINT	BlcRecentMotionSense = 45;
+	int		BlcRecentMotionSense = 0;		// current -100 .. 100)		
 
 // "Motion Average Period" slider:  This sets the period of the moving average for Recent
 // Motion Sensitivity.  
@@ -556,12 +556,12 @@ DoNext8Bytes:
 // Motion Sense seem to be the two main things to play with to get good results.  Generally,
 // increase one of these if you get Weave artifacts and decrease one if you get BOB artifacts.
   
-	UINT	BlcPixelCombSense = 75;
+	UINT	BlcPixelCombSense = 27;
 
 // "Recent Comb Senseitivity" slider:  Operates like the Recent Motion slider but operates
 // on the average Comb Factor.
 
-	UINT	BlcRecentCombSense = 35;
+	UINT	BlcRecentCombSense = 0;
 
 // "Comb Average Period" slider: Sets the period of the Comb exponential moving average.
 // See the comments on "Motion Average Period".
@@ -639,6 +639,7 @@ void BlendedClipping(short** pOddLines, short** pEvenLines,
 	const __int64 SomeOnes  = 0x0001000100010001;	
 	__int64 i;
 	__int64 MinClip;
+	__int64 MinClipMinus;
 	__int64 PixelMotionSense;
 	__int64 PixelCombSense;
 	__int64 L1Mask;					// determines blended chroma vs. chroma from line 1
@@ -704,12 +705,20 @@ void BlendedClipping(short** pOddLines, short** pEvenLines,
 
 // Note the motion and comb average values have been scaled up by 256 in the averaging rtn, so
 // the typical value of 2000 means an average change of about 8 in the 8 bit luma values.
-
-	X = __max( (BlcRecentMotionSense * BlcTotalAverageMotion / 7),
-				(BlcRecentCombSense * BlcTotalAverageComb) / 5 );
-	i = __min( (X + BlcMinimumClip * 65535 / 100), 65535);	// scale to range of 0-65535
+// Both BlcMinimumClip and BlcRecentMotionSense may now have negative values but since
+// we are using saturated arithmatic those are set in a separate field.
+	X = __max(BlcRecentMotionSense,0);
+	X = (X * BlcTotalAverageMotion / 7) 
+				+ (BlcRecentCombSense * BlcTotalAverageComb) / 5;
+	i = __max((BlcMinimumClip * 65535 / 100), 0);
+	i = __min( (X + i), 65535);				// scale to range of 0-65535
 	MinClip = i << 48 | i << 32 | i << 16 | i;
 	
+	X = __max( (-BlcRecentMotionSense * BlcTotalAverageMotion / 10), 0)
+		+ __max( (-BlcMinimumClip), 0);
+	i = __min(X, 255);
+	MinClipMinus = i << 48 | i << 32 | i << 16 | i;
+
 // Set up our two parms that are actually evaluated for each pixel
 	i = BlcPixelMotionSense * 257/100;		// scale to range of 0-257
 	PixelMotionSense = i << 48 | i << 32 | i << 16 | i;    // only 32 bits?>>>>
@@ -844,7 +853,14 @@ DoNext8Bytes:
 			movq	mm6, mm5				// save a copy for pixel comb sense calc
 			paddusw mm5, CombAvgL			// bump our hist average
 			movq	CombAvgL, mm5			// and save again
+			psubusb mm6, MinClipMinus       // possibly forgive small values
 			pmullw  mm6, PixelCombSense     // mul by user factor, keep only low 16 bits
+			paddusw mm6, mm6                // try making it bigger
+			paddusw mm6, mm6				// again
+			paddusw mm6, mm6				// again
+			paddusw mm6, mm6				// again
+			paddusw mm6, mm6				// again
+			paddusw mm6, mm6				// again
 
 // Let's see how much L1 or L3 have changed since the last frame.  If L1 or L3 has  
 // changed a lot (we take the greater) then L2 (the weave pixel) probably has also.
@@ -873,12 +889,11 @@ DoNext8Bytes:
 
 			psubusb mm2, mm5
 			paddusb mm2, mm5				// max of abs(L1-LP1) and abs(L3-LP3)
+			psubusb mm2, MinClipMinus		// but maybe ignore some small changes
 
 			pmullw	mm2, PixelMotionSense	// mul by user factor, keep only low 16 bits		
-			psubusw mm2, mm6				// combine with our pixel comb
-			paddusw mm2, mm6				// but do it by taking max of both
+			paddusw mm2, mm6				// combine with our pixel comb
 			paddusw mm2, mm2				// let's dbl them both for greater sensitivity
-			paddusw mm2, mm2				// again
 
 // Now turn the motion & comb factors in mm2 into a 2 blending factors that sum to 256
 

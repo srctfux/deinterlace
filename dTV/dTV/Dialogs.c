@@ -434,14 +434,14 @@ int GetHorSliderInt(int MouseX, int nMin, int nMax)
 void SetBlcDisplayControls(HWND hDlg)
 {
 	// Set the sliders and visible numbers correctly
-	SetDlgItemInt(hDlg, IDC_MIN_CLIP_V, BlcMinimumClip, FALSE);
-	SetHorSliderInt(GetDlgItem(hDlg, IDC_MIN_CLIP),  35, BlcMinimumClip,  0, 100);
+	SetDlgItemInt(hDlg, IDC_MIN_CLIP_V, BlcMinimumClip, TRUE);
+	SetHorSliderInt(GetDlgItem(hDlg, IDC_MIN_CLIP),  35, BlcMinimumClip,  -100, 100);
 
 	SetDlgItemInt(hDlg, IDC_PIXEL_MOV_V, BlcPixelMotionSense, FALSE);
 	SetHorSliderInt(GetDlgItem(hDlg, IDC_PIXEL_MOV),  85, BlcPixelMotionSense,  0, 100);
 	
-	SetDlgItemInt(hDlg, IDC_AVG_MOV_V, BlcRecentMotionSense, FALSE);
-	SetHorSliderInt(GetDlgItem(hDlg, IDC_AVG_MOV),  135, BlcRecentMotionSense,  0, 100);
+	SetDlgItemInt(hDlg, IDC_AVG_MOV_V, BlcRecentMotionSense, TRUE);
+	SetHorSliderInt(GetDlgItem(hDlg, IDC_AVG_MOV),  135, BlcRecentMotionSense,  -100, 100);
 	
 	SetDlgItemInt(hDlg, IDC_MOV_PERIOD_V, BlcMotionAvgPeriod, FALSE);
 	SetHorSliderInt(GetDlgItem(hDlg, IDC_MOV_PERIOD),  185,  BlcMotionAvgPeriod,  1, 200);
@@ -470,9 +470,9 @@ void SetBlcDisplayControls(HWND hDlg)
 BOOL APIENTRY BlendedClipProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 {
 	int x, y;
-	static UINT TMinimumClip;
+	static int TMinimumClip;
 	static UINT TPixelMotionSense;
-	static UINT TRecentMotionSense;
+	static int TRecentMotionSense;
 	static UINT TMotionAvgPeriod;
 	static UINT TPixelCombSense;
 	static UINT TRecentCombSense;
@@ -514,7 +514,7 @@ BOOL APIENTRY BlendedClipProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 					if ((y >= 35) && (y <= 55))		// Is Minimum clip slider?
 					{
 						MoveWindow(GetDlgItem(hDlg, IDC_MIN_CLIP), x, 35+5, 10, 12, TRUE);
-						BlcMinimumClip = GetHorSliderInt(x, 0, 100);
+						BlcMinimumClip = GetHorSliderInt(x, -100, 100);
 						SetDlgItemInt(hDlg, IDC_MIN_CLIP_V, BlcMinimumClip, TRUE);
 					}
 					if ((y >= 85) && (y <= 105))		// Is Pixel Motion slider?
@@ -526,7 +526,7 @@ BOOL APIENTRY BlendedClipProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 					if ((y >= 135) && (y <= 155))		// Is Avg Hist slider?
 					{
 						MoveWindow(GetDlgItem(hDlg, IDC_AVG_MOV), x, 135+5, 10, 12, TRUE);
-						BlcRecentMotionSense = GetHorSliderInt(x, 0, 100);
+						BlcRecentMotionSense = GetHorSliderInt(x, -100, 100);
 						SetDlgItemInt(hDlg, IDC_AVG_MOV_V, BlcRecentMotionSense, TRUE);
 					}
 					if ((y >= 185) && (y <= 205))		// Is Hist Mov Avg Peroid clip slider?
@@ -609,12 +609,12 @@ BOOL APIENTRY BlendedClipProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 
 
 		case IDC_DEFAULT:
-			BlcMinimumClip= 10;
-			BlcPixelMotionSense = 75;
-			BlcRecentMotionSense = 45;
+			BlcMinimumClip= -15;
+			BlcPixelMotionSense = 17;
+			BlcRecentMotionSense = 0;
 			BlcMotionAvgPeriod = 20;		// currently 1..200
-			BlcPixelCombSense = 75;
-			BlcRecentCombSense = 35;
+			BlcPixelCombSense = 27;
+			BlcRecentCombSense = 0;
 			BlcCombAvgPeriod = 20;			// currently 1.200
 			BlcHighCombSkip = 10;			// larger values skip more
 			BlcLowMotionSkip = 0;			// larger values skip more
