@@ -12,12 +12,12 @@
 
 cd /home/groups/d/de/deinterlace/htdocs
 
-cvs update -d -P
+cvs update -d
 
 #Then change the file permissions so that anyone in the deinterlace administrative group
 #can delete the directories and files
 
-chmod -R 777 *
+chmod -R 771 *
 chown -R adcockj.deinterlace *
 
 #Joy
