@@ -800,7 +800,7 @@ BEGIN
             MENUITEM "&Centre",                     IDM_WINPOS_HORZ_CENTRE
             MENUITEM "&Right",                      IDM_WINPOS_HORZ_RIGHT
         END
-        MENUITEM "Bounce Window Position (expieremental)\tCtrl+B", 
+        MENUITEM "Bounce Window Position (Experimental)\tCtrl+B", 
                                                 IDM_WINPOS_BOUNCE
     END
     POPUP "&Settings"
