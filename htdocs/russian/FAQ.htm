@@ -29,7 +29,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
     <td height="1" width="501"><img src="../images/spacer.gif" width="1" height="1"></td>
   </tr>
   <tr> 
-    <td width="160" rowspan="2"><img src="../images/dscalerlogo.jpg" alt="DScaler logo"></td>
+    <td width="160" rowspan="2"><img src="../images/dscalerlogo.jpg" alt="Логотип DScaler"></td>
     <td colspan="2" align="right" valign="top"> <font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><font size="1"><!-- #BeginEditable "Language%20Selector" --><font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><font size="1"><font face="Verdana, Arial, Helvetica, sans-serif" size="5"></font></font></b><b><font size="1"><font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><font size="1"><font face="Verdana, Arial, Helvetica, sans-serif" size="5"><a href="francais/FAQ.htm"><img src="../images/selector-french.gif" width="50" height="18" border="0"></a></font></font></b><img src="../images/selector-divider.gif" width="10" height="17"><b><font size="1"><font face="Verdana, Arial, Helvetica, sans-serif" size="5"><a href="portuguese/PortugueseFAQ.htm"><img src="../images/selector-portuguese.gif" width="60" height="18" border="0"></a></font></font></b></font></font></b><img src="../images/selector-divider.gif" width="10" height="17"><b><font size="1"><font face="Verdana, Arial, Helvetica, sans-serif" size="5"><img src="../images/selector-english.gif" width="45" height="18" border="0"></font></font></b></font><!-- #EndEditable --></font></b></font></td>
   </tr>
   <tr> 
@@ -46,108 +46,125 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <h1>&nbsp;</h1>
       <h1>Введение</h1>
       <h2>Что такое DScaler ?</h2>
-      <p> DScaler is a piece of software that grabs analog, interlaced video, 
-        and deinterlaces it to make it a progressive scan feed then allows scaling 
-        to any resolution for use on your computer monitor or projector.</p>
-      <p> Analog, interlaced video is what devices like VCRs, laserdisc, and game 
-        consoles output.</p>
-      <h2>What is so special about DScaler ?</h2>
-      <p> Unlike most existing software for use with TV cards, DScaler implements 
-        sophisticated deinterlacing algorithms. Using such algorithms makes sure 
-        that each kind of video source is handled a different way. It provides 
-        the user with a level of image quality unknown to PC owners until now. 
+      <p> DScaler - это такое приложение, которое преобразует аналоговое видео с
+	  черезстрочной разверткой в цифровое с прямой (прогрессивной) разверткой.
+	  Полученное в результате этой нехитрой операции кино можно легко (и что самое главное -
+	  с высоким качеством) масштабировать до любых разумных разрешений и смотреть
+	  на любимом компьютерном мониторе или проекторе.</p>
+      <p>Аналоговое видео с черезстрочной разверткой - это как раз то, что получается на
+	  выходе видеомагнитофона, проигрывателя лазерных дисков и DVD, игровой приставки и
+	  тому подобного добра, подключаемого, как правило, к аналоговому телевизору.
+	  После оцифровки аналогового сигнала распространнеными сегодня платами видеоввода
+	  (включая видеокарты с TV-входом) просмотр полученного видео на экране с прогрессивной
+	  разверткой несколько коробит глаз - появляются горизонтальные полосы
+	  (эффект "жалюзи"), а высокая четкость монитора этому только способствует (особенно при
+	  растягивании картинки на весь экран). DScaler позволяет решить эту и некторые
+	  другие проблемы.</p>
+      <h2>Что хорошего в DScaler'е ?</h2>
+      <p> В отличие от большинства других приложений для плат видеоввода, в DScaler'е
+	  реализованы довольно сложные алгоритмы преобразования черезстрочной развертки
+	  в прогрессивную (в простонародии - "дебобуляции" - прим. переводчика).
+	  Использование этих алгоритмов гарантирует, что каждый источник видеосигнала
+	  обрабатывается сообразно его особенностям. Это приводит к невиданному ранее
+	  (пользователями PC) уровню качества изображения.
       </p>
-      <p> Some of the techniques are: 
+      <p> Некоторые используемых техники: 
       <ul>
-        <li>video source deinterlacing</li>
-        <li>inverse telecine detection: 2:2 (for pal movies) as well as 3:2 (for 
-          ntsc movies) pulldown</li>
-        <li>Automatic aspect ratio control</li>
-        <li>Judder elimination</li>
+        <li>преобразование черезстрочной развертки в прогрессивную</li>
+        <li>обнаружение видеоматериала (50 или 60 полей/с), полученного из киноматериала (24 кадр/с):
+		2:2 (для PAL) и 3:2 (для NTSC) pulldown</li>
+        <li>автоматический контроль соотношения геометрических размеров изображения (aspect ratio)</li>
+        <li>подавление дрожания</li>
+		<li>адаптивное шумоподавление</li>
       </ul>
-      The image quality resulting from those complex operations is high and allows 
-      some people equipped with data capable projectors to feed them with progressive 
-      scan images. 
+	  Получаемое качество изображения оказывается довольно высоким и позволяет счастливым обладателям
+	  цифровых видео проекторов наслаждаться просмотром фильмов на этих проекторах с прогрессивной
+	  разверткой.
       <p></p>
       <h2>Что такое dTV ?</h2>
-      <p>dTV is the old name for DScaler, we changed the name as people use dTV 
-        to refer to digital television and this was causing confusion. In the 
-        source and on the website you will still see references to dTV but please 
-        refer to the program as DScaler from now on. </p>
+      <p>dTV - это старое название DScaler'а. Мы изменили название, поскольку говоря "dTV",
+	  люди обычно подразумевают цифровое телевидение (digital TV), что вызывало некоторое
+	  непонимание. В исходных кодах DScaler, документации и форумах до сих пор можно встретить
+	  слово "dTV" - теперь его следует читать "DScaler".
+      </p>
       <h2>Кто это сделал ?</h2>
-      <p>See <a href="Authors.htm"> Authors</a> for the main contributors and 
-        <a href="Thanks.htm">Thanks</a> for a list of people who have helped make 
-        DScaler a success.</p>
-      <h2>How much does DScaler cost ?</h2>
-      <p> $1000 (plus taxes) :-) Of course not, DScaler is fully free of charge, 
-        open-source, coded under GPL. 
+      <p>Смотрите страничку <a href="Authors.htm">Авторы</a> - там перечислены имена
+	  основных разработчиков, <a href="Thanks.htm">Благодарности</a> - имена тех, кто помог
+	  DScaler'у добиться успеха.</p>
+      <h2>Сколько стоит DScaler ?</h2>
+      <p> $1000 (плюс налоги) :-) Шутка. DScaler распространяется совершенно бесплатно
+        с открытым исходным кодом (Open Source) под лицензией GNU GPL. Остерегайтесь дешевых подделок.
       <h1>Общие вопросы</h1>
-      <h2>Should I use DScaler to deinterlace the output from my set-top dvd player 
-        ?</h2>
-      <p> While it's feasible and works quite well (see the &quot;DScaler Windvd 
-        challenge&quot; in the <a href="/screenshots/index.htm">screenshots</a> 
-        section), home theatre PC's have shown the best results while using dvd 
-        decoding software along with a dvd-rom and a modern graphics card. However, 
-        there are people who find things easier to use with DScaler and an external 
-        DVD player. 
-      <p> Some people have found that DScaler does a better job with non-film 
-        DVDs (concert videos or DVDs of some television shows, for example) than 
-        the software players. 
+      <h2>Следует ли мне использовать DScaler для преобразования видеосигнала с моего аппаратного
+	  DVD плеера?</h2>
+      <p> Это вполне возможно и выглядит очень даже ничего (см. &quot;DScaler vs. WinDVD 
+        challenge&quot; в <a href="/screenshots/index.htm">скриншотах</a> - сравнение
+        результатов DScaler'а и популярного программного проигрывателя DVD, зарекомендовавшего
+		себя высоким качеством изображения), наилучших результатов на PC для домашнего кинотеатра
+		удается добиться используя программный DVD плеер с DVD-ROM'ом и современной видеокартой (VGA).
+		Однако, есть некоторые граждане, которым больше нравится пользоваться DScaler'ом и внешним
+		аппаратным DVD плеером. 
+      <p> Некоторые считают, что DScaler лучше справляется с DVD, изготовленными не из
+	  киноматериала (концертные записи или телевизионные шоу, например), чем
+      программные плееры. 
       <h1>Вопросы программного обеспечения</h1>
-      <h2>Which operating system can I use DScaler on ?</h2>
-      <p> Windows 95 ok <i>uses VxD running in ring-0, may need ie 4.0 installed</i><br>
-        Windows 98 ok <i>uses VxD running in ring-0</i><br>
-        Windows NT ?? <i>may require hacked DirectX 5.0</i><br>
-        Windows Me ok <i>uses VxD running in ring-0</i><br>
-        Windows 2000 ok <i>uses sys running in ring-0</i><br>
-        Windows XP ok <i>uses sys running in ring-0</i><br>
-        Linux no <i>if you want to do a port <a href="#HELP">contact us</a></i><br>
-        OS/2 definitely no ;-) 
-      <h2>What are all those deinterlace algorithms ?</h2>
+      <h2>на какой операционной системе можно использовать DScaler ?</h2>
+      <p> Windows 95 - можно <i>использует VxD, работающую в ring-0, может потребоваться Internet Explorer 4.0</i><br>
+        Windows 98 - можно <i>использует VxD, работающую в ring-0</i><br>
+        Windows NT - не понятно <i>требуется DirectX 5.0, которую на WinNT взгромоздить не совсем просто
+		(лично я этим не занимался - прим. перев.)</i><br>
+        Windows Me - можно <i>использует VxD, работающую в ring-0</i><br>
+        Windows 2000 - можно <i>использует SYS-драйвер, работающий в ring-0</i><br>
+        Windows XP - можно <i>использует SYS-драйвер, работающий в ring-0</i><br>
+        Linux - пока нет <i>если вы хотите написать порт, <a href="#HELP">свяжитесь с нами</a></i><br>
+        OS/2 - однозначно нет ;-) 
+      <h2>Какие такие алгоритмы преобразования черезстрочной развертки в прогрессивную ?</h2>
       <h3>Video Deinterlace (Bob)</h3>
-      <p> This method is based on Gunnar Thalin's VirtualDub filter.&nbsp; If 
-        it detects weaving artifacts in the current image it uses bob to get rid 
-        of them.&nbsp; This method has a tendency to bob rather too much and gives 
-        poor results on fine static images. 
+      <p> Bob - англ., одно из значений - полировать. Метод на базе фильтра для VirtualDub от Gunnar Thalin'а.&nbsp;
+	  При обнаружении дефектов "сплетения" (weave) алгоритм использует "полирование" (т.е., сглаживание) (bob)
+	  чтобы от них избавиться.&nbsp;
+	  В данном случае метод отдает предпочтение сглаживанию, что не есть хорошо на четких статичных изображениях. 
       <h3>Video Deinterlace (Weave)</h3>
-      <p> Similar to Video Deinterlace (Bob), however this method has a tendency 
-        to weave on moving images. 
+      <p> Weave - англ., одно из значений - плести. Аналогичен Video Deinterlace (Bob), но предпочтение
+	  отдается "сплетению" на движущихся деталях на изображении. В итоге четкость остается, но на быстром
+	  движении наблюдаются "жалюзи".
       <h3>Video Deinterlace (2-Frame)</h3>
-      <p>This method uses the current frame and the last two to determine whether 
-        to bob or weave a given pixel. This gives better results on both stationary 
-        and moving images than the above two methods however it uses more CPU. 
+      <p>Этот метод использует текущий кадр (два поля) и предыдущий (еще два поля), чтобы определить,
+	  что делать с каждым конкретным пикселом. Результаты гораздо лучше, чем у каждого из вышеперечисленных
+	  методов, однако загрузка процесора заметно выше (то есть, производительность ниже).
       <h3>Simple Weave</h3>
-      <p> This method just combines the most recent even and odd fields.&nbsp; 
-        This causes motion artifacts and is provided for comparison. 
+      <p> Простое сплетение. Просто комбинирует последнее четное и нечетное поля.&nbsp;
+	  Приводит к дефектам движения и реализовано исключительно для сравнения из научного интереса.
       <h3>Simple Bob</h3>
-      <p>This uses only the most recent field and fills the lines in between with 
-        interpolated pixels.&nbsp; This method has in may ways been superceded 
-        by Scaler BOB. 
+      <p> Простое сглаживание. Использует только последнее поле и заполняет оставшиеся строчки
+	  интерполированными значениями.&nbsp; Scaler Bob делает то же самое, но используя аппаратные возможности
+	  видеокарты, что гораздо быстрее и эффективнее. 
       <h3>Blended Clip</h3>
-      <p> The BLENDED CLIP Deinterlace method is designed mostly for experimentation 
-        by those interested in what works for video deinterlacing. When it is 
-        selected it will pop up a control panel with many controls to adjust various 
-        parameters. These all correspond to Blc... parameters in the [Deinterlace] 
-        section of the DScaler.ini file and are documented there. It is probably 
-        not the single best method for anything but it can be used to create custom 
-        deinterlace methods for special purposes. These can be saved in a separate 
-        ini file and invoked by a command line parameter when starting DScaler.exe. 
-        Somewhat CPU intensive 
+      <p> Дословный перевод ("смешанное обрезание") по-русски несколько неблагозвучен.
+	  Метод сделан специально для экспериментов с преобразованием черезстрочной развертки
+	  в прогрессивную. При запуске появляется диалоговое окно с множеством регулировок
+	  для разнообразных параметров алгоритма. Для всех них есть соответствующие поля в
+	  секции [Deinterlace] файла DScaler.ini. Это не универсальный метод для всего подряд,
+	  однако его можно использовать для создания собственных алгоритмов для специальных случаев.
+	  Параметры можно сохранить в отдельном ini-файле и передавать в качестве аргумента
+	  командной строки в DScaler.exe. Нагрузка на процессор высокая.
       <h3> Scaler Bob</h3>
-      <p> Uses the DirectDraw hardware bob feature (if available), this uses the 
-        current field and lets the video card scaler size the picture to fit the 
-        screen.&nbsp; Produces good results for fast moving images. 
+      <p> Использует аппаратные возможности bob через DirectDraw&reg; (если таковые имеются).
+	  Берется последнее поле передается видеокарте, которая сама разбирается с масштабированием
+	  изображения и втискиванием его в экран.&nbsp; Дает хорошие результаты на быстро
+	  меняющихся изображениях. 
       <h3> Even Fields Only<br>
         Odd Fields Only</h3>
-      <p>These use only one field out of each pair and use hardware scaling.&nbsp; 
-        This reduces bob artifacts at the cost of loss of information.&nbsp; These 
-        were originally intended to be used with game consoles.
+      <p>Только четные/только нечетные поля.
+	  Использует только одно поле из пары и аппаратное масштабирование.&nbsp; 
+      Уменьшает дефекты сглаживания за счет уменьшения количества информации.&nbsp;
+	  Изначально предполагалось для использования с игровыми приставками.
       <h3>Adaptive Deinterlace</h3>
-      <p>This method uses the amount of motion detected to select the best deinterlacing 
-        alogoritm.&nbsp; Currently by default it switches between 2-Frame and 
-        weave. 
+      <p>Адаптивный алгоритм. Использует оценку количества движения для выбора наилучшего
+	  алгоритма преобразования.&nbsp; Пока по умолчанию переключается между
+	  2-Frame и weave. 
       <h3>Greedy deinterlace method</h3>
-      <p> The GREEDY Deinterlace method is designed to give good results on low 
+      <p> "Жадный" метод. The GREEDY Deinterlace method is designed to give good results on low 
         motion video source, using less CPU than some others. Good on slower machines 
         but it will give awful results on high motion video material like sports. 
         Quite by accident, it can also do a decent job on poorly mastered 3:2 
@@ -341,9 +358,9 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         We don't have any full explanation of the problem but it happens when 
         resizing DScaler or making it go from fullscreen to window mode. Also 
         the color depth, frequency and size of the desktop might be related. 
-      <h2>I still have a problem?</h2>
-      <p>See <a href="user_support.htm">Support</a> for how to get support for 
-        DScaler. </p>
+      <h2>Все равно не работает</h2>
+      <p>Смотрите <a href="user_support.htm">Поддержку пользователей</a>. Там указаны адреса тех,
+	  кого нужно доставать.</p>
       <a name="HELP"></a> 
       <h1>Чем я могу помочь ?</h1>
       <h2>Тестирование</h2>
@@ -356,14 +373,14 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         you're using, especially video card, grab card and processor type and 
         speed.</p>
       <h2>Программирование</h2>
-      <p> Any help is welcome. Despite including very complex code, there are 
-        a lot of features in it that are simple or that could be easily implemented 
-        without knowing anything about 3:2 pulldown detection.
-      <p> If you've got an idea, or feel like to trying to implement something 
-        that is already in the <a href="http://sourceforge.net/pm/task.php?group_project_id=7174&group_id=7420&func=browse">Tasks 
-        list</a>, join the <a href="http://lists.sourceforge.net/lists/listinfo/deinterlace-discuss">mailing 
-        list</a>. All relevant information to get you started are on the <a href="developers.htm">developers 
-        page</a>. 
+      <p> Любая помощь приветствуется. За исключением некоторых участков чересчур сложного кода,
+	  существует множество полезных вещей, которые просто реализовать без особого знания деталей
+	  алгоритмов обработки видео.
+      <p> Если у вас есть какие-то соображения или желание реализовать что-либо из
+        <a href="http://sourceforge.net/pm/task.php?group_project_id=7174&group_id=7420&func=browse">Списка 
+        задач</a>, подписывайтесь на <a href="http://lists.sourceforge.net/lists/listinfo/deinterlace-discuss">список 
+        рассылки</a>. Вся информация для успешного старта находится на <a href="developers.htm">странице 
+        разработчика</a>. 
       <!-- #EndEditable --> </td>
   </tr>
   <tr> 
