@@ -54,8 +54,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,1,0,2
- PRODUCTVERSION 1,1,0,2
+ FILEVERSION 1,2,0,0
+ PRODUCTVERSION 1,2,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -73,7 +73,7 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "\0"
             VALUE "FileDescription", "DSRend Module\0"
-            VALUE "FileVersion", "1, 1, 0, 2\0"
+            VALUE "FileVersion", "1, 2, 0, 0\0"
             VALUE "InternalName", "DSRend\0"
             VALUE "LegalCopyright", "Copyright 2001\0"
             VALUE "LegalTrademarks", "This file is released under the terms of the GNU GPL\0"
@@ -81,7 +81,7 @@ BEGIN
             VALUE "OriginalFilename", "DSRend.DLL\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "DSRend Module\0"
-            VALUE "ProductVersion", "1, 1, 0, 2\0"
+            VALUE "ProductVersion", "1, 2, 0, 0\0"
             VALUE "SpecialBuild", "\0"
         END
     END
@@ -103,6 +103,7 @@ IDR_DSRENDFILTER        REGISTRY DISCARDABLE    "DSRendFilter.rgs"
 IDR_DSRENDINPIN         REGISTRY DISCARDABLE    "DSRendInPin.rgs"
 IDR_DSRENDQUALITYPAGE   REGISTRY DISCARDABLE    "DSRendQualityPage.rgs"
 IDR_SETTINGSPAGE        REGISTRY DISCARDABLE    "SettingsPage.rgs"
+IDR_DSRENDABOUTPAGE     REGISTRY DISCARDABLE    "DSRendAboutPage.rgs"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -163,6 +164,28 @@ BEGIN
     GROUPBOX        "Settings",IDC_STATIC,0,0,170,60
 END
 
+IDD_DSRENDABOUTPAGE DIALOG DISCARDABLE  0, 0, 181, 190
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "You shoud not see this",IDC_ABOUT_COMPILEDATE,45,70,125,
+                    8
+    LTEXT           "Compiled on",IDC_STATIC,5,70,40,8
+    LTEXT           "Version",IDC_STATIC,5,60,24,8
+    CTEXT           "DScaler renderer filter",IDC_ABOUT_LINE1,0,0,180,8
+    LTEXT           "You shoud not see this",IDC_ABOUT_VERSION,31,60,140,8
+    LTEXT           "Copyright © 2001-2002 Torbjörn Jansson",IDC_ABOUT_LINE2,
+                    0,10,180,8
+    GROUPBOX        "License Information",IDC_ABOUT_GRP2,0,90,180,100
+    LTEXT           "This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.",
+                    IDC_STATIC,6,101,169,44
+    LTEXT           "This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.",
+                    IDC_STATIC,5,145,170,40
+    GROUPBOX        "Version",IDC_ABOUT_GRP1,0,50,180,35
+    LTEXT           "This filer is used to transfer video data from DirectShow to DScaler.",
+                    IDC_ABOUT_LINE3,0,25,175,20
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -195,6 +218,13 @@ BEGIN
     IDS_TITLESettingsPage   "Settings"
     IDS_HELPFILESettingsPage "Help File Name"
     IDS_DOCSTRINGSettingsPage "Your Help String"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_TITLEDSRendAboutPage "About"
+    IDS_HELPFILEDSRendAboutPage "Help File Name"
+    IDS_DOCSTRINGDSRendAboutPage "Your Help String"
 END
 
 #endif    // English (U.S.) resources

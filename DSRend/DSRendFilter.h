@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendFilter.h,v 1.10 2002-08-11 13:59:52 tobbej Exp $
+// $Id: DSRendFilter.h,v 1.11 2002-11-14 19:02:09 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.10  2002/08/11 13:59:52  tobbej
+// implemented loading and saving of settings via IPersistStream
+//
 // Revision 1.9  2002/08/01 20:28:21  tobbej
 // implemented IQualProp::get_AvgSyncOffset counter
 //
@@ -117,6 +120,7 @@ END_COM_MAP()
 
 BEGIN_PROP_MAP(CDSRendFilter)
 	PROP_PAGE(CLSID_DSRendQualityPage)
+	PROP_PAGE(CLSID_DSRendAboutPage)
 END_PROP_MAP()
 
 // IDSRendFilter

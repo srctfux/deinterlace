@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRend.idl,v 1.6 2002-08-01 20:28:21 tobbej Exp $
+// $Id: DSRend.idl,v 1.7 2002-11-14 19:02:08 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.6  2002/08/01 20:28:21  tobbej
+// implemented IQualProp::get_AvgSyncOffset counter
+//
 // Revision 1.5  2002/07/29 17:51:40  tobbej
 // added vertical mirror.
 // fixed field ordering and even/odd flags, seems like it is working
@@ -176,9 +179,18 @@ library DSRENDLib
 
 	[
 		uuid(8AC05775-495A-435A-A143-A1002657E584),
-		helpstring("CSettingsPage Class")
+		helpstring("SettingsPage Class")
 	]
 	coclass SettingsPage
+	{
+		interface IUnknown;
+	};
+
+	[
+		uuid(495D7645-48CF-4B3F-AF26-61CC5F03B4DF),
+		helpstring("DSRendAboutPage Class")
+	]
+	coclass DSRendAboutPage
 	{
 		interface IUnknown;
 	};

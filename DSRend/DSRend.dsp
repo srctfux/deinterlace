@@ -51,11 +51,11 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib strmiids.lib /nologo /subsystem:windows /dll /debug /machine:I386 /out:"..\DScaler\Debug/DSRend.dll" /pdbtype:sept
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib strmiids.lib version.lib /nologo /subsystem:windows /dll /debug /machine:I386 /out:"..\DScaler\Debug/DSRend.dll" /pdbtype:sept
 # Begin Custom Build - Performing registration
 OutDir=.\Debug
-TargetPath=\Source\deinterlace\DScaler\Debug\DSRend.dll
-InputPath=\Source\deinterlace\DScaler\Debug\DSRend.dll
+TargetPath=\Programering\prj\deinterlace\DScaler\Debug\DSRend.dll
+InputPath=\Programering\prj\deinterlace\DScaler\Debug\DSRend.dll
 SOURCE="$(InputPath)"
 
 "$(OutDir)\regsvr32.trg" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
@@ -87,11 +87,11 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib strmiids.lib /nologo /subsystem:windows /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib strmiids.lib /nologo /subsystem:windows /dll /machine:I386 /out:"..\DScaler\Release/DSRend.dll"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib strmiids.lib version.lib /nologo /subsystem:windows /dll /machine:I386 /out:"..\DScaler\Release/DSRend.dll"
 # Begin Custom Build - Performing registration
 OutDir=.\Release
-TargetPath=\Source\deinterlace\DScaler\Release\DSRend.dll
-InputPath=\Source\deinterlace\DScaler\Release\DSRend.dll
+TargetPath=\Programering\prj\deinterlace\DScaler\Release\DSRend.dll
+InputPath=\Programering\prj\deinterlace\DScaler\Release\DSRend.dll
 SOURCE="$(InputPath)"
 
 "$(OutDir)\regsvr32.trg" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
@@ -137,6 +137,10 @@ SOURCE=.\DSRend.idl
 # Begin Source File
 
 SOURCE=.\DSRend.rc
+# End Source File
+# Begin Source File
+
+SOURCE=.\DSRendAboutPage.cpp
 # End Source File
 # Begin Source File
 
@@ -232,6 +236,10 @@ SOURCE=.\CustomComObj.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\DSRendAboutPage.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\DSRendFilter.h
 # End Source File
 # Begin Source File
@@ -280,6 +288,10 @@ SOURCE=.\StdAfx.h
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 # Begin Source File
 
+SOURCE=.\DSRendAboutPage.rgs
+# End Source File
+# Begin Source File
+
 SOURCE=.\DSRendFilter.rgs
 # End Source File
 # Begin Source File
@@ -310,4 +322,11 @@ SOURCE=.\SettingsPage.rgs
 # 	1:26:IDS_TITLEDSRendQualityPage:103
 # 	1:29:IDS_HELPFILEDSRendQualityPage:104
 # 	1:21:IDR_DSRENDQUALITYPAGE:106
+# End Section
+# Section DSRend : {00700000-0000-0000-0000-000077088800}
+# 	1:28:IDS_DOCSTRINGDSRendAboutPage:115
+# 	1:19:IDD_DSRENDABOUTPAGE:117
+# 	1:24:IDS_TITLEDSRendAboutPage:113
+# 	1:27:IDS_HELPFILEDSRendAboutPage:114
+# 	1:19:IDR_DSRENDABOUTPAGE:116
 # End Section

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRend.cpp,v 1.3 2002-07-15 18:21:09 tobbej Exp $
+// $Id: DSRend.cpp,v 1.4 2002-11-14 19:02:08 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.3  2002/07/15 18:21:09  tobbej
+// new settings
+//
 // Revision 1.2  2002/07/06 16:43:01  tobbej
 // new field buffering
 //
@@ -52,6 +55,7 @@
 #include "DSRendQualityPage.h"
 #include "Cpu.h"
 #include "SettingsPage.h"
+#include "DSRendAboutPage.h"
 
 CComModule _Module;
 
@@ -59,6 +63,7 @@ BEGIN_OBJECT_MAP(ObjectMap)
 OBJECT_ENTRY(CLSID_DSRendFilter, CDSRendFilter)
 OBJECT_ENTRY(CLSID_DSRendQualityPage, CDSRendQualityPage)
 OBJECT_ENTRY(CLSID_SettingsPage, CSettingsPage)
+OBJECT_ENTRY(CLSID_DSRendAboutPage, CDSRendAboutPage)
 END_OBJECT_MAP()
 
 /// Filter name

@@ -15,6 +15,11 @@
 #define IDS_DOCSTRINGSettingsPage       110
 #define IDR_SETTINGSPAGE                111
 #define IDD_SETTINGSPAGE                112
+#define IDS_TITLEDSRendAboutPage        113
+#define IDS_HELPFILEDSRendAboutPage     114
+#define IDS_DOCSTRINGDSRendAboutPage    115
+#define IDR_DSRENDABOUTPAGE             116
+#define IDD_DSRENDABOUTPAGE             117
 #define IDC_AVG_FRAME_RATE              1000
 #define IDC_AVG_SYNC_OFFSET             1001
 #define IDC_STDDEV_SYNC_OFFSET          1002
@@ -37,6 +42,13 @@
 #define IDC_SETTINGSPAGE_FIELD          1019
 #define IDC_SETTINGSPAGE_COLORCNV       1020
 #define IDC_SETTINGSPAGE_SIZE           1021
+#define IDC_ABOUT_COMPILEDATE           1023
+#define IDC_ABOUT_VERSION               1025
+#define IDC_ABOUT_LINE1                 1026
+#define IDC_ABOUT_LINE2                 1027
+#define IDC_ABOUT_LINE3                 1028
+#define IDC_ABOUT_GRP1                  1029
+#define IDC_ABOUT_GRP2                  1030
 
 // Next default values for new objects
 // 
@@ -44,7 +56,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        212
 #define _APS_NEXT_COMMAND_VALUE         32768
-#define _APS_NEXT_CONTROL_VALUE         1022
-#define _APS_NEXT_SYMED_VALUE           113
+#define _APS_NEXT_CONTROL_VALUE         1031
+#define _APS_NEXT_SYMED_VALUE           118
 #endif
 #endif
