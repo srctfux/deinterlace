@@ -612,7 +612,6 @@ int CCdecode(int data, BOOL CaptionMode, int Channel)
 							{
 								Mode = ROLL_UP;
 								ModeRows = b2 - 0x23;
-								memset(&Screens[0],0,sizeof(CC_Screen));
 								ScreenToWrite = 0;
 								memcpy(&CurrentState, &ResetState, sizeof(CC_Char));
 								CursorPos = 0;
@@ -703,6 +702,7 @@ int CCdecode(int data, BOOL CaptionMode, int Channel)
 										}
 										CursorRow = 14;
 									}
+									memset(Screens[ScreenToWrite].ScreenData[x], 0 ,CC_CHARS_PER_LINE * sizeof(CC_Char));
 									memcpy(&CurrentState, &ResetState, sizeof(CC_Char));
 									CursorPos = 0;
 								}
@@ -767,7 +767,7 @@ int CCdecode(int data, BOOL CaptionMode, int Channel)
 
 int CC_DecodeLine(BYTE* vbiline, CCMODE CCMode, BOOL IsOdd)
 {
-	if(IsOdd)
+	if(!IsOdd)
 	{
 		switch(CCMode)
 		{
