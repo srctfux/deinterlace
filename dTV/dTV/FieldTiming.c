@@ -90,6 +90,8 @@ void UpdateRunningAverage(LARGE_INTEGER* pNewFieldTime)
 			LOG(" Old Running Average %f", RunningAverageCounterTicks);
 		}
 	}
+	// save current value for next time
+	LastFieldTime.QuadPart = pNewFieldTime->QuadPart;
 }
 
 
@@ -226,8 +228,6 @@ void Timing_WaitForNextFieldAccurate(DEINTERLACE_INFO* pInfo)
 		if(!(pInfo->bRunningLate))
 		{
 			UpdateRunningAverage(&CurrentFieldTime);
-			// save current value for next time
-			LastFieldTime.QuadPart = CurrentFieldTime.QuadPart;
 		}
 		else
 		{
@@ -276,8 +276,8 @@ void Timing_WaitForTimeToFlip(DEINTERLACE_INFO* pInfo, DEINTERLACE_METHOD* Curre
 		else
 		{
 			LONGLONG TicksToWait;
-			int NewPos;
-			int OldPos = BT848_GetRISCPosAsInt();
+			//int NewPos;
+			//int OldPos = BT848_GetRISCPosAsInt();
 
 			// work out the required ticks between flips
 			if(bIsPAL)
@@ -291,16 +291,15 @@ void Timing_WaitForTimeToFlip(DEINTERLACE_INFO* pInfo, DEINTERLACE_METHOD* Curre
 			QueryPerformanceCounter(&CurrentFlipTime);
 			while(!(*bStopThread) && (CurrentFlipTime.QuadPart - LastFlipTime.QuadPart) < TicksToWait)
 			{
-				NewPos = BT848_GetRISCPosAsInt();
-				if((NewPos + 9) % 10 == OldPos)
-				{
-					if((NewPos & 1) == 0)
-					{
-						UpdateRunningAverage(&CurrentFlipTime);
-						LastFieldTime.QuadPart = CurrentFlipTime.QuadPart;
-					}
-					OldPos = NewPos;
-				}
+				//NewPos = BT848_GetRISCPosAsInt();
+				//if((NewPos + 9) % 10 == OldPos)
+				//{
+				//	if((NewPos & 1) == 0)
+				//	{
+				//		UpdateRunningAverage(&CurrentFlipTime);
+				//	}
+				//	OldPos = NewPos;
+				//}
 				QueryPerformanceCounter(&CurrentFlipTime);
 			}
 			LastFlipTime.QuadPart = CurrentFlipTime.QuadPart;
@@ -308,7 +307,7 @@ void Timing_WaitForTimeToFlip(DEINTERLACE_INFO* pInfo, DEINTERLACE_METHOD* Curre
 	}
 	else
 	{
-		LastFlipTime.QuadPart = 0;
+		QueryPerformanceCounter(&LastFlipTime);
 	}
 	FlipAdjust = FALSE;
 }
