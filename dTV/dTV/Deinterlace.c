@@ -748,11 +748,22 @@ DoNext32Bytes:
 			pand mm4, YMask
 			pand mm6, YMask
 
-			// Average E1 and E2 for interpolated bobbing.  This is the hex encoding
-			// for "pavg mm0,mm2" which VC++'s assembler doesn't seem to recognize.
+			// Average E1 and E2 for interpolated bobbing.
+#if 0
+			// The following SSE instruction doesn't work on older CPUs, but is faster for
+			// newer ones.  Comment it out until we have CPU type detection.
+			// This is the hex encoding for "pavg mm0,mm2" which VC++'s assembler doesn't
+			// seem to recognize.
 			_emit 0x0F						// mm0 = avg(E1, E2)
 			_emit 0xE0
 			_emit 0xC2
+#else
+			pand mm0, Mask					// mm0 = E1 with lower chroma bit stripped off
+			psrlw mm0, 1					// mm0 = E1 / 2
+			pand mm2, Mask					// mm2 = E2 with lower chroma bit stripped off
+			psrlw mm2, 1					// mm2 = E2 / 2
+			paddb mm0, mm2					// mm2 = (E1 + E2) / 2
+#endif
 
 			// The meat of the work is done here.  We want to see whether this pixel is
 			// close in luminosity to ANY of: its top neighbor, its bottom neighbor,
@@ -816,9 +827,17 @@ DoNext32Bytes:
 			pand mm4, YMask
 			pand mm6, YMask
 
+#if 0	// The following SSE instruction doesn't work on older CPUs, but is faster for newer ones
 			_emit 0x0F						// mm0 = avg(E1, E2)
 			_emit 0xE0
 			_emit 0xC2
+#else
+			pand mm0, Mask					// mm0 = E1 with lower chroma bit stripped off
+			psrlw mm0, 1					// mm0 = E1 / 2
+			pand mm2, Mask					// mm2 = E2 with lower chroma bit stripped off
+			psrlw mm2, 1					// mm2 = E2 / 2
+			paddb mm0, mm2					// mm2 = (E1 + E2) / 2
+#endif
 
 			movq mm7, qwSpatialTolerance
 			movq mm5, mm3					// mm5 = E1
@@ -861,9 +880,17 @@ DoNext32Bytes:
 			pand mm4, YMask
 			pand mm6, YMask
 
+#if 0	// The following SSE instruction doesn't work on older CPUs, but is faster for newer ones
 			_emit 0x0F						// mm0 = avg(E1, E2)
 			_emit 0xE0
 			_emit 0xC2
+#else
+			pand mm0, Mask					// mm0 = E1 with lower chroma bit stripped off
+			psrlw mm0, 1					// mm0 = E1 / 2
+			pand mm2, Mask					// mm2 = E2 with lower chroma bit stripped off
+			psrlw mm2, 1					// mm2 = E2 / 2
+			paddb mm0, mm2					// mm2 = (E1 + E2) / 2
+#endif
 
 			movq mm7, qwSpatialTolerance
 			movq mm5, mm3					// mm5 = E1
@@ -906,9 +933,17 @@ DoNext32Bytes:
 			pand mm4, YMask
 			pand mm6, YMask
 
+#if 0	// The following SSE instruction doesn't work on older CPUs, but is faster for newer ones
 			_emit 0x0F						// mm0 = avg(E1, E2)
 			_emit 0xE0
 			_emit 0xC2
+#else
+			pand mm0, Mask					// mm0 = E1 with lower chroma bit stripped off
+			psrlw mm0, 1					// mm0 = E1 / 2
+			pand mm2, Mask					// mm2 = E2 with lower chroma bit stripped off
+			psrlw mm2, 1					// mm2 = E2 / 2
+			paddb mm0, mm2					// mm2 = (E1 + E2) / 2
+#endif
 
 			movq mm7, qwSpatialTolerance
 			movq mm5, mm3					// mm5 = E1
