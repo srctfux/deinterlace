@@ -67,7 +67,7 @@ typedef enum
 	HORZ_POS_LEFT,
 } HORZ_POS;
 
-int     ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID);
+BOOL    ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID);
 void    AspectRatio_SetMenu(HMENU hMenu);
 void    WorkoutOverlaySize();
 void    PaintColorkey(HWND hWnd, BOOL bEnable, HDC hDC, RECT* PaintRect);

@@ -76,11 +76,12 @@ void UnloadDeinterlacePlugins();
 DEINTERLACE_METHOD* GetCurrentDeintMethod();
 DEINTERLACE_METHOD* GetVideoDeintMethod(int Mode);
 DEINTERLACE_METHOD* GetFilmDeintMethod(eFILMPULLDOWNMODES Mode);
+BOOL ProcessDeinterlaceSelection(HWND hWnd, WORD wMenuID);
+
 BOOL IsFilmMode();
 eFILMPULLDOWNMODES GetFilmMode();
 BOOL InHalfHeightMode();
 void SetFilmDeinterlaceMode(int mode);
-void SetVideoDeinterlaceMode(int mode);
 void SetVideoDeinterlaceIndex(int index);
 char* GetDeinterlaceModeName();
 void IncrementDeinterlaceMode();

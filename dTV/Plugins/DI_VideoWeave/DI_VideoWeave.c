@@ -250,6 +250,7 @@ DEINTERLACE_METHOD VideoWeaveMethod =
 {
 	"Video Deinterlace (Weave)", 
 	"Weave", 
+	"V&ideo Deinterlace (Weave)",
 	FALSE, 
 	FALSE, 
 	DeinterlaceFieldWeave, 

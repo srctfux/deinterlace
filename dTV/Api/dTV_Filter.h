@@ -37,6 +37,8 @@ typedef struct
 {
 	// What to display when selected
 	char* szName;
+	// What to put in the Menu (NULL to use szName)
+	char* szMenuName;
 	// Are we active Initially FALSE
 	BOOL bActive;
 	// Do we get called on Input

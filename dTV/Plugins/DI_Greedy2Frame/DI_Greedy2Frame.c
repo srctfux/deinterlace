@@ -164,7 +164,8 @@ SETTING DI_Greedy2FrameSettings[DI_GREEDY2FRAME_SETTING_LASTONE] =
 DEINTERLACE_METHOD Greedy2FrameMethod =
 {
 	"Greedy 2 Frame", 
-	NULL, 
+	NULL,
+	"Greedy &2 Frame",
 	FALSE, 
 	FALSE, 
 	DeinterlaceGreedy2Frame, 

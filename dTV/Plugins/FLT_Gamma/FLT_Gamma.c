@@ -151,6 +151,7 @@ void __stdcall FilterStartGamma(void)
 FILTER_METHOD GammaMethod =
 {
 	"Gamma Filter",
+	"&Gamma",
 	FALSE,
 	TRUE,
 	FilterGamma, 

@@ -174,7 +174,7 @@ void AspectRatio_SetMenu(HMENU hMenu)
 // MENU PROCESSING:
 // Processing aspect ratio control related menu selection
 // during aspect ratio control
-int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
+BOOL ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 {
 	switch (wMenuID) {
 	//------------------------------------------------------------------
@@ -401,7 +401,7 @@ int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 			break;
 		default:
 			// It's not an aspect ratio related menu selection
-			return 0;
+			return FALSE;
 		}
 	}
 
@@ -409,7 +409,7 @@ int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 	AspectRatio_SetMenu(GetMenu(hWnd));
 
 	// Yes, we processed the menu selection.
-	return 1;
+	return TRUE;
 }
 
 //----------------------------------------------------------------------------

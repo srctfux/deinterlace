@@ -36,6 +36,8 @@ typedef struct
 	char* szName;
 	// What to display when used in adaptive mode (NULL to use szName)
 	char* szAdaptiveName;
+	// What to put in the Menu (NULL to use szName)
+	char* szMenuName;
 	// Do we need to shrink the overlay by half
 	BOOL bIsHalfHeight;
 	// Is this a film mode

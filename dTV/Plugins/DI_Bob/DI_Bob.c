@@ -226,7 +226,8 @@ BOOL DeinterlaceBob(DEINTERLACE_INFO *info)
 DEINTERLACE_METHOD BobMethod =
 {
 	"Simple Bob", 
-	NULL, 
+	NULL,
+	"Simple &Bob",
 	FALSE, 
 	FALSE, 
 	DeinterlaceBob, 

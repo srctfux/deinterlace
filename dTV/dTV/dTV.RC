@@ -819,19 +819,6 @@ BEGIN
             MENUITEM "&Fall Back to Video on Bad Pulldown", IDM_FALLBACK
             MENUITEM "&JudderTerminator (tm)",      IDM_JUDDERTERMINATOR
             MENUITEM SEPARATOR
-            MENUITEM "&Video Deinterlace (Bob)",    IDM_VIDEO_BOB
-            MENUITEM "V&ideo Deinterlace (Weave)",  IDM_VIDEO_WEAVE
-            MENUITEM "Video Dei&nterlace (2-Frame)", IDM_VIDEO_2FRAME
-            MENUITEM "Simple &Weave",               IDM_WEAVE
-            MENUITEM "Simple &Bob",                 IDM_BOB
-            MENUITEM "Blended &Clip ...",           IDM_BLENDED_CLIP
-            MENUITEM "&Scaler BOB",                 IDM_SCALER_BOB
-            MENUITEM "E&ven Fields Only",           IDM_EVEN_ONLY
-            MENUITEM "O&dd Fields Only",            IDM_ODD_ONLY
-            MENUITEM "Ada&ptive Deinterlace",       IDM_ADAPTIVE
-            MENUITEM "Video (&Greedy, Low Motion)", IDM_VIDEO_GREEDY
-            MENUITEM "Greedy &2 Frame",             IDM_VIDEO_GREEDY2FRAME
-            MENUITEM SEPARATOR
             POPUP "&Manual Film Mode Select"
             BEGIN
                 MENUITEM "3:2 Pulldown, Skip Field &1", IDM_32PULL1
@@ -842,6 +829,7 @@ BEGIN
                 MENUITEM "2:2 Pulldown, Flip on &Odd",  IDM_22PULLODD
                 MENUITEM "2:2 Pulldown, Flip on &Even", IDM_22PULLEVEN
             END
+            MENUITEM SEPARATOR
         END
         POPUP "&Audio Input"
         BEGIN

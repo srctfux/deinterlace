@@ -33,6 +33,7 @@ BOOL LoadFilterPlugins();
 void UnloadFilterPlugins();
 
 
+BOOL ProcessFilterSelection(HWND hWnd, WORD wMenuID);
 SETTING* Filter_GetSetting(long nIndex, FILTER_SETTING Setting);
 LONG Filter_HandleSettingsMsg(HWND hWnd, UINT message, UINT wParam, LONG lParam, BOOL* bDone);
 void Filter_ReadSettingsFromIni();

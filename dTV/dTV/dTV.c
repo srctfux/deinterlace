@@ -289,6 +289,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 	char Text1[128];
 	int i;
 	long nValue;
+	BOOL bDone;
 
 	switch (message)
 	{
@@ -414,11 +415,11 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			// either case
 			if(BT848_GetTVFormat()->Is25fps)
 			{
-				SetVideoDeinterlaceMode(Setting_GetValue(FD50_GetSetting(PALFILMFALLBACKMODE)));
+				SetVideoDeinterlaceIndex(Setting_GetValue(FD50_GetSetting(PALFILMFALLBACKMODE)));
 			}
 			else
 			{
-				SetVideoDeinterlaceMode(Setting_GetValue(FD60_GetSetting(NTSCFILMFALLBACKMODE)));
+				SetVideoDeinterlaceIndex(Setting_GetValue(FD60_GetSetting(NTSCFILMFALLBACKMODE)));
 			}
 			break;
 
@@ -1216,7 +1217,15 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
         default:
 			// Check whether menu ID is an aspect ratio related item
-			ProcessAspectRatioSelection(hWnd, LOWORD(wParam));
+			bDone = ProcessAspectRatioSelection(hWnd, LOWORD(wParam));
+			if(!bDone)
+			{
+				bDone = ProcessDeinterlaceSelection(hWnd, LOWORD(wParam));
+			}
+			if(!bDone)
+			{
+				bDone = ProcessFilterSelection(hWnd, LOWORD(wParam));
+			}
 			break;
 		}
 
@@ -1529,42 +1538,43 @@ void MainWndOnInitBT(HWND hWnd)
 	int i;
 	BOOL bInitOK = FALSE;
 
-	// TODO: put bvack to hardware tests first
-	AddSplashTextLine("Software Init");
-	if(!LoadDeinterlacePlugins())
-	{
-		AddSplashTextLine("");
-		AddSplashTextLine("No");
-		AddSplashTextLine("Plug-ins");
-		AddSplashTextLine("Found");
-		bInitOK = FALSE;
-	}
-	else
-	{
-		LoadFilterPlugins();
+	AddSplashTextLine("Hardware Init");
 
-		AddSplashTextLine("Hardware Init");
-
-		if (BT848_FindTVCard(hWnd) == TRUE)
+	if (BT848_FindTVCard(hWnd) == TRUE)
+	{
+		AddSplashTextLine(BT848_ChipType());
+		if(InitDD(hWnd) == TRUE)
 		{
-			AddSplashTextLine(BT848_ChipType());
-			if(InitDD(hWnd) == TRUE)
+			if(Overlay_Create() == TRUE)
 			{
-				if(Overlay_Create() == TRUE)
+				if (BT848_MemoryInit() == TRUE)
 				{
-					if (BT848_MemoryInit() == TRUE)
-					{
-						bInitOK = TRUE;
-					}
+					bInitOK = TRUE;
 				}
 			}
 		}
-		else
+	}
+	else
+	{
+		AddSplashTextLine("");
+		AddSplashTextLine("No");
+		AddSplashTextLine("Suitable");
+		AddSplashTextLine("Hardware");
+	}
+
+	if (bInitOK)
+	{
+		if(!LoadDeinterlacePlugins())
 		{
 			AddSplashTextLine("");
 			AddSplashTextLine("No");
-			AddSplashTextLine("Suitable");
-			AddSplashTextLine("Hardware");
+			AddSplashTextLine("Plug-ins");
+			AddSplashTextLine("Found");
+			bInitOK = FALSE;
+		}
+		else
+		{
+			LoadFilterPlugins();
 		}
 	}
 	

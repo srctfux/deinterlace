@@ -887,7 +887,8 @@ void __stdcall BlendedClipStart(void)
 DEINTERLACE_METHOD BlendedClipMethod =
 {
 	"Blended Clip", 
-	NULL, 
+	NULL,
+	"Blended &Clip...",
 	FALSE, 
 	FALSE, 
 	DeinterlaceBlendedClip, 

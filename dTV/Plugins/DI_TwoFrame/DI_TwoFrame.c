@@ -198,6 +198,7 @@ DEINTERLACE_METHOD TwoFrameMethod =
 {
 	"Video Deinterlace (2-Frame)", 
 	"2-Frame", 
+	"Video Dei&nterlace (2-Frame)",
 	FALSE, 
 	FALSE, 
 	DeinterlaceFieldTwoFrame, 

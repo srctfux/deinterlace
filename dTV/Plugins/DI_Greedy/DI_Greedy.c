@@ -211,7 +211,8 @@ SETTING DI_GreedySettings[DI_GREEDY_SETTING_LASTONE] =
 DEINTERLACE_METHOD GreedyMethod =
 {
 	"Video (Greedy)", 
-	"Greedy", 
+	"Greedy",
+	"Video (&Greedy, Low Motion)",
 	FALSE, 
 	FALSE, 
 	DeinterlaceGreedy, 

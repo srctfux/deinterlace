@@ -53,19 +53,19 @@
 DEINTERLACE_METHOD FilmDeintMethods[FILMPULLDOWNMODES_LAST_ONE] =
 {
 	// FILM_22_PULLDOWN_ODD
-	{"2:2 Pulldown Flip on Odd", "2:2 Odd", FALSE, TRUE, FilmModePALOdd, 25, 30, 0, NULL, 0, NULL, NULL, 2, 0, 0, -1,},
+	{"2:2 Pulldown Flip on Odd", "2:2 Odd", NULL, FALSE, TRUE, FilmModePALOdd, 25, 30, 0, NULL, 0, NULL, NULL, 2, 0, 0, -1,},
 	// FILM_22_PULLDOWN_EVEN
-	{"2:2 Pulldown Flip on Even", "2:2 Even", FALSE, TRUE, FilmModePALEven, 25, 30, 0, NULL, 0, NULL, NULL, 2, 0, 0, -1,},
+	{"2:2 Pulldown Flip on Even", "2:2 Even", NULL, FALSE, TRUE, FilmModePALEven, 25, 30, 0, NULL, 0, NULL, NULL, 2, 0, 0, -1,},
 	// FILM_32_PULLDOWN_0
-	{"3:2 Pulldown Skip 1st Full Frame", "3:2 1st", FALSE, TRUE, FilmModeNTSC1st, 1000, 24, 0, NULL, 0, NULL, NULL, 2, 0, 0, -1,},
+	{"3:2 Pulldown Skip 1st Full Frame", "3:2 1st", NULL, FALSE, TRUE, FilmModeNTSC1st, 1000, 24, 0, NULL, 0, NULL, NULL, 2, 0, 0, -1,},
 	// FILM_32_PULLDOWN_1
-	{"3:2 Pulldown Skip 2nd Full Frame", "3:2 2nd", FALSE, TRUE, FilmModeNTSC2nd, 1000, 24, 0, NULL, 0, NULL, NULL, 2, 0, 0, -1,},
+	{"3:2 Pulldown Skip 2nd Full Frame", "3:2 2nd", NULL, FALSE, TRUE, FilmModeNTSC2nd, 1000, 24, 0, NULL, 0, NULL, NULL, 2, 0, 0, -1,},
 	// FILM_32_PULLDOWN_2
-	{"3:2 Pulldown Skip 3rd Full Frame", "3:2 3rd", FALSE, TRUE, FilmModeNTSC3rd, 1000, 24, 0, NULL, 0, NULL, NULL, 2, 0, 0, -1,},
+	{"3:2 Pulldown Skip 3rd Full Frame", "3:2 3rd", NULL, FALSE, TRUE, FilmModeNTSC3rd, 1000, 24, 0, NULL, 0, NULL, NULL, 2, 0, 0, -1,},
 	// FILM_32_PULLDOWN_3
-	{"3:2 Pulldown Skip 4th Full Frame", "3:2 4th", FALSE, TRUE, FilmModeNTSC4th, 1000, 24, 0, NULL, 0, NULL, NULL, 2, 0, 0, -1,},
+	{"3:2 Pulldown Skip 4th Full Frame", "3:2 4th", NULL, FALSE, TRUE, FilmModeNTSC4th, 1000, 24, 0, NULL, 0, NULL, NULL, 2, 0, 0, -1,},
 	// FILM_32_PULLDOWN_4
-	{"3:2 Pulldown Skip 5th Full Frame", "3:2 5th", FALSE, TRUE, FilmModeNTSC5th, 1000, 24, 0, NULL, 0, NULL, NULL, 2, 0, 0, -1,},
+	{"3:2 Pulldown Skip 5th Full Frame", "3:2 5th", NULL, FALSE, TRUE, FilmModeNTSC5th, 1000, 24, 0, NULL, 0, NULL, NULL, 2, 0, 0, -1,},
 };
 
 long NumVideoModes = 0;
@@ -310,6 +310,20 @@ void DecrementDeinterlaceMode()
 	}
 }
 
+BOOL ProcessDeinterlaceSelection(HWND hWnd, WORD wMenuID)
+{
+	int i;
+	for(i = 0; i < NumVideoModes; i++)
+	{
+		if(wMenuID == VideoDeintMethods[i]->MenuId)
+		{
+			SetVideoDeinterlaceMode(i);
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
 void LoadPlugin(LPCSTR szFileName)
 {
 	GETDEINTERLACEPLUGININFO* pfnGetDeinterlacePluginInfo;
@@ -368,9 +382,18 @@ int MethodCompare( const void *arg1, const void *arg2 )
 	}
 }
 
-void AddUIForDeintPlugin(DEINTERLACE_METHOD* DeintMethod)
+void AddUIForDeintPlugin(HMENU hMenu, DEINTERLACE_METHOD* DeintMethod)
 {
-	// TODO Get UI Sorted
+	static MenuId = 6000;
+	DeintMethod->MenuId = MenuId++;
+	if(DeintMethod->szMenuName != NULL)
+	{
+		AppendMenu(hMenu, MF_STRING | MF_ENABLED, DeintMethod->MenuId, DeintMethod->szMenuName);
+	}
+	else
+	{
+		AppendMenu(hMenu, MF_STRING | MF_ENABLED, DeintMethod->MenuId, DeintMethod->szName);
+	}
 }
 
 BOOL LoadDeinterlacePlugins()
@@ -378,6 +401,8 @@ BOOL LoadDeinterlacePlugins()
 	WIN32_FIND_DATA FindFileData;
 	HANDLE hFindFile;
 	int i;
+	HMENU hMenu;
+
 	hFindFile = FindFirstFile("DI_*.dll", &FindFileData);
 
 	if (hFindFile != INVALID_HANDLE_VALUE)
@@ -396,11 +421,25 @@ BOOL LoadDeinterlacePlugins()
 	{
 		qsort((void*) VideoDeintMethods, NumVideoModes, sizeof(DEINTERLACE_METHOD*), MethodCompare);
 	}
-	for(i = 0; i < NumVideoModes; i++)
+	if(NumVideoModes > 0)
 	{
-		AddUIForDeintPlugin(VideoDeintMethods[i]);
+		hMenu = GetMenu(hWnd);
+		if(hMenu == NULL) return FALSE;
+		hMenu = GetSubMenu(hMenu, 4);
+		if(hMenu == NULL) return FALSE;
+		hMenu = GetSubMenu(hMenu, 1);
+		if(hMenu == NULL) return FALSE;
+
+		for(i = 0; i < NumVideoModes; i++)
+		{
+			AddUIForDeintPlugin(hMenu, VideoDeintMethods[i]);
+		}
+		return TRUE;
 	}
-	return (NumVideoModes > 0);
+	else
+	{
+		return FALSE;
+	}
 }
 
 
@@ -566,44 +605,38 @@ void Deinterlace_WriteSettingsToIni()
 
 void Deinterlace_SetMenu(HMENU hMenu)
 {
-	eFILMPULLDOWNMODES ModeToShow;
+	int i;
 
-	if(Setting_GetValue(OutThreads_GetSetting(AUTODETECT)))
+	if(bIsFilmMode)
 	{
-		if(BT848_GetTVFormat()->Is25fps)
-		{
-			ModeToShow = Setting_GetValue(FD50_GetSetting(PALFILMFALLBACKMODE));
-		}
-		else
-		{
-			ModeToShow = Setting_GetValue(FD60_GetSetting(NTSCFILMFALLBACKMODE));
-		}
+		CheckMenuItem(hMenu, IDM_22PULLODD, (gFilmPulldownMode == FILM_22_PULLDOWN_ODD) ?MF_CHECKED:MF_UNCHECKED);
+		CheckMenuItem(hMenu, IDM_22PULLEVEN, (gFilmPulldownMode == FILM_22_PULLDOWN_EVEN) ?MF_CHECKED:MF_UNCHECKED);
+		CheckMenuItem(hMenu, IDM_32PULL1, (gFilmPulldownMode == FILM_32_PULLDOWN_0) ?MF_CHECKED:MF_UNCHECKED);
+		CheckMenuItem(hMenu, IDM_32PULL2, (gFilmPulldownMode == FILM_32_PULLDOWN_1) ?MF_CHECKED:MF_UNCHECKED);
+		CheckMenuItem(hMenu, IDM_32PULL3, (gFilmPulldownMode == FILM_32_PULLDOWN_2) ?MF_CHECKED:MF_UNCHECKED);
+		CheckMenuItem(hMenu, IDM_32PULL4, (gFilmPulldownMode == FILM_32_PULLDOWN_3) ?MF_CHECKED:MF_UNCHECKED);
+		CheckMenuItem(hMenu, IDM_32PULL5, (gFilmPulldownMode == FILM_32_PULLDOWN_4) ?MF_CHECKED:MF_UNCHECKED);
 	}
 	else
 	{
-		ModeToShow = gFilmPulldownMode;
+		CheckMenuItem(hMenu, IDM_22PULLODD, MF_UNCHECKED);
+		CheckMenuItem(hMenu, IDM_22PULLEVEN, MF_UNCHECKED);
+		CheckMenuItem(hMenu, IDM_32PULL1, MF_UNCHECKED);
+		CheckMenuItem(hMenu, IDM_32PULL2, MF_UNCHECKED);
+		CheckMenuItem(hMenu, IDM_32PULL3, MF_UNCHECKED);
+		CheckMenuItem(hMenu, IDM_32PULL4, MF_UNCHECKED);
+		CheckMenuItem(hMenu, IDM_32PULL5, MF_UNCHECKED);
 	}
 
-	CheckMenuItem(hMenu, IDM_22PULLODD, (ModeToShow == FILM_22_PULLDOWN_ODD) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_22PULLEVEN, (ModeToShow == FILM_22_PULLDOWN_EVEN) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_32PULL1, (ModeToShow == FILM_32_PULLDOWN_0) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_32PULL2, (ModeToShow == FILM_32_PULLDOWN_1) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_32PULL3, (ModeToShow == FILM_32_PULLDOWN_2) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_32PULL4, (ModeToShow == FILM_32_PULLDOWN_3) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_32PULL5, (ModeToShow == FILM_32_PULLDOWN_4) ?MF_CHECKED:MF_UNCHECKED);
-
-	/*
-	CheckMenuItem(hMenu, IDM_VIDEO_BOB, (ModeToShow == VIDEO_MODE_BOB) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_VIDEO_WEAVE, (ModeToShow == VIDEO_MODE_WEAVE) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_VIDEO_2FRAME, (ModeToShow == VIDEO_MODE_2FRAME) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_WEAVE, (ModeToShow == SIMPLE_WEAVE) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_BOB, (ModeToShow == SIMPLE_BOB) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_SCALER_BOB, (ModeToShow == SCALER_BOB) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_ODD_ONLY, (ModeToShow == ODD_ONLY) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_EVEN_ONLY, (ModeToShow == EVEN_ONLY) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_BLENDED_CLIP, (ModeToShow == BLENDED_CLIP) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_ADAPTIVE, (ModeToShow == ADAPTIVE) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_VIDEO_GREEDY, (ModeToShow == GREEDY) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_VIDEO_GREEDY2FRAME, (ModeToShow == GREEDY2FRAME) ?MF_CHECKED:MF_UNCHECKED);
-	*/
+	for(i = 0; i < NumVideoModes; i++)
+	{
+		if(gVideoPulldownMode == i)
+		{
+			CheckMenuItem(hMenu, VideoDeintMethods[i]->MenuId, MF_CHECKED);
+		}
+		else
+		{
+			CheckMenuItem(hMenu, VideoDeintMethods[i]->MenuId, MF_UNCHECKED);
+		}
+	}
 }

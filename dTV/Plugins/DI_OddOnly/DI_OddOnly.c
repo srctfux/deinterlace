@@ -50,7 +50,8 @@ BOOL DeinterlaceOddOnly(DEINTERLACE_INFO *info)
 DEINTERLACE_METHOD OddOnlyMethod =
 {
 	"Odd Scanlines Only", 
-	"Odd", 
+	"Odd",
+	"O&dd Fields Only",
 	TRUE, 
 	FALSE, 
 	DeinterlaceOddOnly, 

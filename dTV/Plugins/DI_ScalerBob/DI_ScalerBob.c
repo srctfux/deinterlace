@@ -53,6 +53,7 @@ DEINTERLACE_METHOD ScalerBobMethod =
 {
 	"Scaler Bob", 
 	NULL,
+	"S&caler BOB",
 	TRUE,
 	FALSE,
 	DeinterlaceScalerBob,

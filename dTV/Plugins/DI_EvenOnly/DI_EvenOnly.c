@@ -52,7 +52,8 @@ BOOL DeinterlaceEvenOnly(DEINTERLACE_INFO *info)
 DEINTERLACE_METHOD EvenOnlyMethod =
 {
 	"Even Scanlines Only", 
-	"Even", 
+	"Even",
+	"E&ven Fields Only",
 	TRUE, 
 	FALSE, 
 	DeinterlaceEvenOnly, 

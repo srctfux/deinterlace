@@ -50,7 +50,8 @@ BOOL DeinterlaceWeave(DEINTERLACE_INFO *info)
 DEINTERLACE_METHOD WeaveMethod =
 {
 	"Simple Weave", 
-	NULL, 
+	NULL,
+	"Simple &Weave",
 	FALSE, 
 	FALSE, 
 	DeinterlaceWeave, 

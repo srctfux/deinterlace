@@ -184,6 +184,7 @@ DEINTERLACE_METHOD AdaptiveMethod =
 {
 	"Adaptive", 
 	NULL, 
+	"Ada&ptive Deinterlace",
 	FALSE, 
 	FALSE, 
 	DeinterlaceAdaptive, 
