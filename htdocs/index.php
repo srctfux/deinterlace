@@ -50,6 +50,7 @@ p {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt; font-style: nor
         <a href="http://sourceforge.net/mail/?group_id=7420" class="bland">Mailing 
         List&nbsp;</a><br>
         <a href="/FAQ.htm" class="bland">FAQ</a>&nbsp;<br>
+        <a href="user_support.htm" class="bland">User Support</a>&nbsp;<br>
         <a href="/developers.htm" class="bland">Developers</a>&nbsp;<br>
         <a href="/Links.htm" class="bland">Links</a>&nbsp;</p>
     </td>
