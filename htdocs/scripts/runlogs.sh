@@ -6,7 +6,7 @@
 #1/25/2001
 
 #Instructions...
-#cp /home/groups/deinterlace/htdocs/runlogs.sh /home/users/yourusername/ <Enter>
+#cp /home/groups/deinterlace/htdocs/scripts runlogs.sh /home/users/yourusername/ <Enter>
 #Schedule this update script in your crontab to update Webalizer at 15 before midnight or so each night.
 #Don't run it any closer to midnight, because sometimes it takes a minute or so to run, and other traffic may step
 #on you and make it the next day, etc.  Only run this script once a day to avoid corruption of stats.

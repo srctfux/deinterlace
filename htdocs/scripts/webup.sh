@@ -7,7 +7,7 @@
 
 #Instructions for initial run...
 #cvs -d:pserver:anonymous@cvs1:/cvsroot/deinterlace login <Enter> (See below for discussion)
-#cp /home/groups/deinterlace/htdocs/webup.sh /home/users/yourusername/ <Enter>
+#cp /home/groups/deinterlace/htdocs/scripts/webup.sh /home/users/yourusername/ <Enter>
 #cd /home/users/yourusername/ <Enter>
 #sh webup.sh <Enter>
 
