@@ -332,7 +332,6 @@ void SetDeinterlaceMode(int mode)
 	bAutoDetectMode = FALSE;
 	gPulldownMode = mode;
 	UpdatePulldownStatus();
-	SetMenuAnalog();
 	SetHalfHeight(IS_HALF_HEIGHT(mode));
 }
 
