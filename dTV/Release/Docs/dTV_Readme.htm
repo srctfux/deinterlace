@@ -40,7 +40,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
   </tr>
   <tr>
     <td colspan="3"><!-- #BeginEditable "Text" --> 
-      <H1>dTV - version 2.1</H1>
+      <H1>dTV - version 2.1.1</H1>
       <P>What's new:<br>
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Preliminary judder fix<br>
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Steve's new 2-Frame Deinterlacing algorithm<br>
@@ -58,6 +58,24 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Should start correctly from a shortcut<br>
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Many code optimizations for SSE and 3DNOW!
       processors<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font SIZE="2">Adaptive deinterlace now
+      separate method<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Scaler bob deinterlacing method<br>
+      </font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font SIZE="2">Extensive card and
+      audio recognition improvements from Mike<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Extensive reworking of parameters and
+      defaults.<br>
+      </font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font SIZE="2">Audio
+      start/stop/save/restore on entry<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The ability to have multiple named .ini
+      files.<br>
+      </font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font SIZE="2">Adv Video Flags now
+      saved and specified in ini file<br>
+      </font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font SIZE="2">Deinterlace mode and
+      many other status items now kept in ini file.
+      </P>
+      </font>
+      <P>
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       </P>
       <H2>License:</H2>
@@ -74,7 +92,8 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <H2>Requirements:</H2>
       <P>- I think it will run on Win 95/98 and NT. I have tested it on 98, Windows 
         2000.<br>
-      - You will need a processor faster than about Pentium II 400MHz.<br>
+      - You will need a processor faster than about Pentium II 400MHz to use all
+      the features<br>
       - You will definitely need a PCI TV card with a BT848 BT849 BT878 BT879 
         in it.<br>
       - This software will not work with ATI All-in-Wonder or Matrox TV cards.</P>
@@ -83,8 +102,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         it runs.&nbsp; This means that some of the code runs inside Ring0 along 
         with the kernel.&nbsp; What this means is that if anything goes wrong 
         this program can crash your whole system causing a BSOD in NT or a hanging 
-        95/98.&nbsp; I have had no problems running the exe stand alone but you 
-        may get problems.&nbsp; If using a debugger then it it is very important 
+        95/98.&nbsp; If using a debugger then it it is very important 
         that the program is allowed to shut down normally.&nbsp; If you use Stop 
         Debugging while running the program you system WILL crash.</font></P>
       <P><font color="#FF0000">As a precaution sync the disks before running this 

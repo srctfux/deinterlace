@@ -881,26 +881,26 @@ BEGIN
             MENUITEM "FM Radio",                    IDM_MSPMODE_2
             MENUITEM "TV Terrestial FM-mono + FM-stereo ", IDM_MSPMODE_3
             MENUITEM "TV Sat FM-mono ",             IDM_MSPMODE_4
-            MENUITEM "NICAM B/G, D/K",              IDM_MSPMODE_5
-            MENUITEM "NICAM I",                     IDM_MSPMODE_6
+            MENUITEM "NICAM PAL BDGH && SECAM",     IDM_MSPMODE_5
+            MENUITEM "NICAM PAL I",                 IDM_MSPMODE_6
             MENUITEM SEPARATOR
             POPUP "Major Carrier"
             BEGIN
                 MENUITEM "NTSC",                        IDM_MAJOR_CARRIER_0
-                MENUITEM "PAl B/G",                     IDM_MAJOR_CARRIER_1
+                MENUITEM "PAl BGH",                     IDM_MAJOR_CARRIER_1
                 MENUITEM "PAL I",                       IDM_MAJOR_CARRIER_2
-                MENUITEM "PAL D/K + Sat + Secam",       IDM_MAJOR_CARRIER_3
+                MENUITEM "PAL D + Sat + Secam",         IDM_MAJOR_CARRIER_3
             END
             POPUP "Minor Carrier"
             BEGIN
-                MENUITEM "PAL B/G FM-stereo",           IDM_MINOR_CARRIER_0
+                MENUITEM "PAL B/G FM-Stereo",           IDM_MINOR_CARRIER_0
                 MENUITEM "PAL B/G NICAM",               IDM_MINOR_CARRIER_1
                 MENUITEM "PAL D/K NICAM",               IDM_MINOR_CARRIER_2
                 MENUITEM "PAL D/K1 FM-Stereo",          IDM_MINOR_CARRIER_3
-                MENUITEM "PAL D/K2 FM-stereo",          IDM_MINOR_CARRIER_4
-                MENUITEM "PAL SAT FM-stereo s/b",       IDM_MINOR_CARRIER_5
-                MENUITEM "PAL SAT FM-stereo s",         IDM_MINOR_CARRIER_6
-                MENUITEM "PAL SAT FM-stereo b",         IDM_MINOR_CARRIER_7
+                MENUITEM "PAL D/K2 FM-Stereo",          IDM_MINOR_CARRIER_4
+                MENUITEM "PAL SAT FM-Stereo s/b",       IDM_MINOR_CARRIER_5
+                MENUITEM "PAL SAT FM-Stereo s",         IDM_MINOR_CARRIER_6
+                MENUITEM "PAL SAT FM-Stereo b",         IDM_MINOR_CARRIER_7
             END
             MENUITEM SEPARATOR
             MENUITEM "Mono",                        IDM_MSPSTEREO_1
@@ -1263,8 +1263,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,1,0,0
- PRODUCTVERSION 2,1,0,0
+ FILEVERSION 2,1,1,0
+ PRODUCTVERSION 2,1,1,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -1282,14 +1282,14 @@ BEGIN
             VALUE "Comments", "John Adcock\0"
             VALUE "CompanyName", "\0"
             VALUE "FileDescription", "dTV\0"
-            VALUE "FileVersion", "2, 1, 0, 0\0"
+            VALUE "FileVersion", "2, 1, 1, 0\0"
             VALUE "InternalName", "dTV\0"
-            VALUE "LegalCopyright", "Copyright © 2000\0"
+            VALUE "LegalCopyright", "Copyright © 2000, 2001\0"
             VALUE "LegalTrademarks", "This Program is covered by the term of the GNU GPL\0"
             VALUE "OriginalFilename", "dTV.exe\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "dTV\0"
-            VALUE "ProductVersion", "2, 1, 0, 0\0"
+            VALUE "ProductVersion", "2, 1, 1, 0\0"
             VALUE "SpecialBuild", "\0"
         END
     END
