@@ -30,41 +30,6 @@
 #ifndef __aspectrect_hpp__
 #define __aspectrect_hpp__
 
-// Bouncer classes are virtual classes to handle different positioning mechansism
-// Currently a period bouncer (goes from mid-point to max back to mid back to mid)
-// and a static (fixed value) bouncer are all that have been coded.
-class Bouncer {
-	public: 
-		virtual double position() = 0;
-};
-
-class PeriodBouncer : public Bouncer {
-	public:
-		PeriodBouncer(time_t period, double amplitude, double offset) { time(&m_startTime); m_period = period; m_amplitude = amplitude; m_offset = offset; }
-		PeriodBouncer(time_t startTime, time_t period, double amplitude, double offset) { m_startTime = startTime; m_period = period; m_amplitude = amplitude; m_offset = offset; }
-
-		virtual double position() {
-			double val = ((double)((time(NULL)-m_startTime)%m_period))*m_amplitude*2.0/m_period;
-			if (val > m_period) val = fabs(2*m_amplitude-val);
-			return val + m_offset;
-		}
-		
-	protected: 
-		time_t m_startTime;
-		time_t m_period;
-		double m_amplitude;
-		double m_offset;
-};
-
-class StaticBouncer : public Bouncer {
-	public:
-		StaticBouncer(double v) { m_value = v; }
-		virtual double position() { return m_value; }
-
-	protected:
-		double m_value;
-};
-
 // Aspect aware smart-rectangle
 // All function in-line for efficency when compiled...
 class AspectRect : public RECT {
@@ -132,6 +97,16 @@ class AspectRect : public RECT {
 			top += top % t;
 			i = top % t; if (i > 0) top += t-i;
 			bottom -= bottom % b;
+		}
+
+		// Shrinks the rectangle by x pixels
+		// by Shrinking the rectangle.
+		void shrink(int n = 4) { shrink(n,n,n,n); }
+		void shrink(int x, int y) { shrink(x,x,y,y); }
+		void shrink(int l, int r, int t, int b) {
+			normalize(); // Need a normalized rectangle
+			left += l; right -= r;
+			top += t; bottom -= b;
 		}
 
 		// Ensure the rectangle is at least n pixels in size...
@@ -216,17 +191,10 @@ class AspectRect : public RECT {
 			if (ar < sourceAspect()) adjustSourceAspectByHeight(ar);
 			else adjustSourceAspectByWidth(ar);
 		}
-		void adjustTargetAspectByShrink(double ar, Bouncer *bX = NULL, Bouncer *bY = NULL) { adjustSourceAspectByShrink(ar/m_outputAdjustment,bX, bY); }
-		void adjustSourceAspectByShrink(double ar, Bouncer *bX = NULL, Bouncer *bY = NULL) {
-			if (ar > sourceAspect()) {
-				int t = top;
-				adjustSourceAspectByHeight(ar);
-				if (bY) shift(0,(int)(bY->position()*(top-t)));
-			} else {
-				int l = left;
-			    adjustSourceAspectByWidth(ar);
-				if (bX) shift((int)(bX->position()*(left-l)),0);
-			}
+		void adjustTargetAspectByShrink(double ar) { adjustSourceAspectByShrink(ar/m_outputAdjustment); }
+		void adjustSourceAspectByShrink(double ar) {
+			if (ar > sourceAspect()) adjustSourceAspectByHeight(ar);
+			else adjustSourceAspectByWidth(ar);
 		}
 		// Adjusts the rectangle to new aspect.  Width is preserved
 		// unless doing so causes the rectangle to go outside of r
@@ -247,6 +215,10 @@ class AspectRect : public RECT {
 				ClientToScreen(hWnd, (POINT *) &left);
 				ClientToScreen(hWnd, (POINT *) &right);
 			}
+		}
+
+		void DebugDump(FILE *f) {
+			fprintf(f,"L:%04i R:%04i T:%04i B:%04i [SA: %.4lf TA: %.4lf Adj:%.4lf]\n",left,right,top,bottom,sourceAspect(),targetAspect(),m_outputAdjustment);
 		}
 };
 

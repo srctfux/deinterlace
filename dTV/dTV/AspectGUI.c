@@ -703,7 +703,7 @@ SETTING AspectSettings[ASPECT_SETTING_LASTONE] =
 	},
 	{
 		"Defer Setting Overlay", ONOFF, 0, &aspectSettings.deferedSetOverlay,
-		FALSE, 0, 1, 1, 1,
+		TRUE, 0, 1, 1, 1,
 		NULL,
 		"ASPECT", "deferedOverlay", NULL,
 	},

@@ -827,12 +827,10 @@ BEGIN
             MENUITEM "&Centre",                     IDM_WINPOS_HORZ_CENTRE
             MENUITEM "&Right",                      IDM_WINPOS_HORZ_RIGHT
             MENUITEM SEPARATOR
-            MENUITEM "Bounce Window Position (Experimental)\tCtrl+B", 
-                                                    IDM_WINPOS_BOUNCE
-            MENUITEM "Defer Setting Overlay (Experimental)", 
-                                                    IDM_ASPECT_DEFER_OVERLAY
-            MENUITEM "Orbiting (Experimental)\tCtrl+O", IDM_WINPOS_ORBIT
-            MENUITEM "Auto-Size Window (Experimental)", IDM_WINPOS_AUTOSIZE
+            MENUITEM "Bounce Window Position\tCtrl+B", IDM_WINPOS_BOUNCE
+            MENUITEM "Defer Setting Overlay",       IDM_ASPECT_DEFER_OVERLAY
+            MENUITEM "Orbiting\tCtrl+O",            IDM_WINPOS_ORBIT
+            MENUITEM "Auto-Size Window",            IDM_WINPOS_AUTOSIZE
         END
     END
     POPUP "&Settings"
