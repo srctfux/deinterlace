@@ -355,12 +355,12 @@ const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 	},
 	{
 		"FlyVideo 98",
-		3, 1, 0, 2, 0x8dff00,
+		3, 1, 0, 2, 0x8dfe00,
 		{2, 3, 1, 1, 0, 0, 0, 0},
 		{ 0, 0x8dff00, 0x8df700, 0x8de700, 0x8dff00, 0 },
 		0,
 		1,1,1,1,0,0,0,1,
-		PLL_NONE,
+		PLL_28,
 		TUNER_USER_SETUP
 	},
 	{
