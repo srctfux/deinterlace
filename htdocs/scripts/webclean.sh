@@ -43,6 +43,7 @@ cd /home/groups/d/de/deinterlace/
 #and we will again have accurate usage info, etc.
 
 rm -f htdocs/*
+rm -R -f htdocs/CVS
 rm -R -f htdocs/bugs
 rm -R -f htdocs/card-support
 rm -R -f htdocs/dtv-vs-windvd
@@ -58,6 +59,7 @@ rm -R -f htdocs/scripts
 rm -R -f htdocs/setup
 rm -R -f htdocs/Templates
 
+rm -d -f htdocs/CVS
 rm -d -f htdocs/bugs
 rm -d -f htdocs/card-support
 rm -d -f htdocs/dtv-vs-windvd

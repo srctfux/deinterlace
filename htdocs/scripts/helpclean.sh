@@ -24,9 +24,13 @@
 
 cd /home/groups/d/de/deinterlace/htdocs
 
+rm -R -f htdocs/Help/CVS
+rm -R -f htdocs/Help/classes
 rm -R -f htdocs/Help/images
 rm -R -f htdocs/Help
 
+rm -d -f htdocs/Help/CVS
+rm -d -f htdocs/Help/classes
 rm -d -f htdocs/Help/images
 rm -d -f htdocs/Help
 
