@@ -1686,7 +1686,13 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			//StatusBar_Repaint(); 
 		}
 		break;
-
+	
+	//TJ 010506 make sure we dont erase the background
+	//if we do, it will cause flickering when resizing the window
+	//in future we migth need to adjust this to only erase parts not covered by overlay
+	case WM_ERASEBKGND:
+		return TRUE;
+	
 	case WM_QUERYENDSESSION:
 	case WM_DESTROY:
 		MainWndOnDestroy();
