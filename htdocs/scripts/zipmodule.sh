@@ -1,6 +1,6 @@
 #!/bin/sh 
 
-#dTV Module Zip Script
+#dScaler Module Zip Script
 #Dan Schmelzer
 #dschmelzer@hotmail.com
 #1/30/2001
@@ -30,7 +30,7 @@
 
 #Remove the old module zip from the FTP site
 
-rm -f /home/groups/ftp/pub/deinterlace/dtvmodule.zip
+rm -f /home/groups/ftp/pub/deinterlace/dscalermodule.zip
 
 
 #Do the remaining work from the dTV subdirectory
@@ -109,17 +109,17 @@ cd /home/groups/d/de/deinterlace/
 
 #Zip up the module
 
-zip -r dtvmodule.zip dTV
+zip -r dscalermodule.zip dTV
 
 
 #Give the zip file group permissions in case somebody else needs to delete it
 
-chmod 777 dtvmodule.zip
+chmod 777 dscalermodule.zip
 
 
 #Then move it to the site space
 
-mv dtvmodule.zip /home/groups/ftp/pub/deinterlace/
+mv dscalermodule.zip /home/groups/ftp/pub/deinterlace/
 
 
 #Clean up the temporary space
