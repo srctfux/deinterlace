@@ -191,31 +191,6 @@ struct SOTREC SOTInfoRec;
 unsigned short UTPages[12];
 unsigned short UTCount=0;
 
-ePULLDOWNMODES gPulldownMode = VIDEO_MODE;
-
-long PulldownThresholdLow = 100;
-long PulldownThresholdHigh = 7000;
-long PulldownRepeatCount = 5;
-
-char szBTVPluginName[MAX_PATH];
-
-BOOL bUseBTVPlugin = FALSE;
-
-BTV_V1_PARAMS BTVParams = 
-{
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	0,
-	0,
-	0,
-	0,
-	1,
-	0,
-	0,
-};
-
 BOOL bIsFullScreen = FALSE;
 
 char BTVendorID[10];

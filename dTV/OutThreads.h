@@ -56,8 +56,8 @@ void SetupCaptureFlags();
 DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter);
 DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter);
 
-void UpdatePALPulldownMode(struct TPulldowmMode* PulldownMode, long* CombFactors);
-void UpdateNTSCPulldownMode(struct TPulldowmMode* PulldownMode, long* CombFactors);
+void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField);
+void UpdateNTSCPulldownMode(long FieldDiff, BOOL OnOddField);
 
 BOOL DoWeWantToFlip(BOOL bFlipNow, BOOL bIsOddField);
 void UpdatePulldownStatus();
@@ -65,5 +65,12 @@ void Deinterlace(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay);
 void Weave(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay);
 BOOL WaitForNextField(BOOL LastField);
 
+extern ePULLDOWNMODES gPulldownMode;
+
+extern long PulldownThresholdLow;
+extern long PulldownThresholdHigh;
+extern long PulldownRepeatCount;
+
+extern long Threshold32Pulldown;
 
 #endif

@@ -194,16 +194,6 @@ extern HFONT currFont;
 extern HBITMAP BirneRot;
 extern HBITMAP BirneGruen;
 
-extern ePULLDOWNMODES gPulldownMode;
-
-extern long PulldownThresholdLow;
-extern long PulldownThresholdHigh;
-extern long PulldownRepeatCount;
-
-extern char szBTVPluginName[MAX_PATH];
-extern BOOL bUseBTVPlugin;
-extern BTV_V1_PARAMS BTVParams;
-
 extern BOOL bIsFullScreen;
 extern char BTVendorID[10];
 extern char BTDeviceID[10];

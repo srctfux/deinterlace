@@ -274,16 +274,19 @@ BOOL BT848_MemoryInit(void)
 
 void BT848_Restart_RISC_Code()
 {
+	BYTE CapCtl = BT848_ReadByte(BT848_CAP_CTL);
+	BT848_MaskDataByte(BT848_CAP_CTL, 0, (BYTE) 0x0f);
 	BT848_WriteDword(BT848_INT_STAT, (DWORD) 0x0fffffff);
-	BT848_WriteDword(BT848_RISC_STRT_ADD, RiscLogToPhys(m_pRiscJump));
+	BT848_WriteDword(BT848_RISC_STRT_ADD, RiscLogToPhys(m_pRiscJump + 2));
+	BT848_WriteByte(BT848_CAP_CTL, CapCtl);
 }
 
 void BT848_ResetHardware()
 {
+	BT848_SetDMA(FALSE);
 	BT848_WriteByte(BT848_SRESET, 0);
-	Sleep(100);
-	BT848_WriteDword(BT848_RISC_STRT_ADD, RiscLogToPhys(m_pRiscJump));
 	BT848_WriteByte(BT848_CAP_CTL, 0x00);
+	BT848_WriteDword(BT848_RISC_STRT_ADD, RiscLogToPhys(m_pRiscJump + 2));
 	BT848_WriteByte(BT848_VBI_PACK_SIZE, (VBI_SPL / 4) & 0xff);
 	BT848_WriteByte(BT848_VBI_PACK_DEL, (VBI_SPL / 4) >> 8);
 	BT848_WriteWord(BT848_GPIO_DMA_CTL, 0xfc);
@@ -307,7 +310,7 @@ void BT848_ResetHardware()
 	BT848_WriteByte(BT848_TDEC, 0x00);
 
 	BT848_WriteDword(BT848_INT_STAT, (DWORD) 0x0fffffff);
-	BT848_WriteDword(BT848_INT_MASK, 0);
+	BT848_WriteDword(BT848_INT_MASK, 0x800800);
 
 	BT848_SetPLL(0);
 
@@ -436,10 +439,6 @@ void BT848_SetPLL(PLLFREQ PLL)
 
 void BT848_SetDMA(BOOL bState)
 {
-	unsigned short x, y;
-
-	x = BT848_ReadWord(BT848_GPIO_DMA_CTL);
-
 	if (bState)
 	{
 		BT848_OrDataWord(BT848_GPIO_DMA_CTL, 3);
@@ -448,8 +447,6 @@ void BT848_SetDMA(BOOL bState)
 	{
 		BT848_AndDataWord(BT848_GPIO_DMA_CTL, ~3);
 	}
-
-	y = BT848_ReadWord(BT848_GPIO_DMA_CTL);
 }
 
 BOOL BT848_SetGeoSize(int width, int height)

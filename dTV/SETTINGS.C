@@ -29,6 +29,8 @@
 #include "audio.h"
 #include "bt848.h"
 #include "vbi.h"
+#include "bTVPlugin.h"
+#include "OutThreads.h"
 
 void LoadSettingsFromIni(LPSTR Name)
 {
@@ -69,6 +71,7 @@ void LoadSettingsFromIni(LPSTR Name)
 	PulldownThresholdLow = GetPrivateProfileInt("Pulldown", "PulldownThresholdLow", PulldownThresholdLow, szIniFile);
 	PulldownThresholdHigh = GetPrivateProfileInt("Pulldown", "PulldownThresholdHigh", PulldownThresholdHigh, szIniFile);
 	PulldownRepeatCount = GetPrivateProfileInt("Pulldown", "PulldownRepeatCount", PulldownRepeatCount, szIniFile);
+	Threshold32Pulldown  = GetPrivateProfileInt("Pulldown", "Threshold32Pulldown", PulldownRepeatCount, szIniFile);
 
 	VBI_Flags = 0;
 	if(GetPrivateProfileInt("VBI", "VT", 0, szIniFile) != 0)
@@ -277,6 +280,7 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("Pulldown", "PulldownThresholdLow", PulldownThresholdLow, szIniFile);
 	WritePrivateProfileInt("Pulldown", "PulldownThresholdHigh", PulldownThresholdHigh, szIniFile);
 	WritePrivateProfileInt("Pulldown", "PulldownRepeatCount", PulldownRepeatCount, szIniFile);
+	WritePrivateProfileInt("Pulldown", "Threshold32Pulldown", PulldownRepeatCount, szIniFile);
 
 	WritePrivateProfileInt("Show", "StatusBar", bDisplayStatusBar, szIniFile);
 	WritePrivateProfileInt("Show", "Menu", Show_Menu, szIniFile);

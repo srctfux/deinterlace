@@ -42,6 +42,7 @@
 #include "vt.h"
 #include "vbi.h"
 #include "deinterlace.h"
+#include "DebugLog.h"
 
 
 short pPALplusCode[] = {  18,  27,  36,  45,  54,  63,  72,  81,  90, 100, 110, 120, 134, 149};
@@ -52,31 +53,14 @@ short nLevelHigh     = 135;
 BOOL bStopThread = FALSE;
 HANDLE OutThread;
 
-struct TPulldownDetect
-{
-	ePULLDOWNMODES Mode;
-	WORD nFlags1;
-	WORD nFlags2;
-};
+ePULLDOWNMODES gPulldownMode = VIDEO_MODE;
 
-struct TPulldownDetect PulldownDetect[] =
-{
-	{VIDEO_MODE, 0, 0,},
-	// if it's 101 010 101 then 2:2 flip on odd
-	{FILM_22_PULLDOWN_ODD, 0525, 0252,},
-	// if it's 010 101 010 then 2:2 flip on even
-	{FILM_22_PULLDOWN_EVEN, 0252, 0525,},
-	// if it's 101 101 011 then 3:2 flip on first
-	{FILM_32_PULLDOWN_0, 0553, 0224,},
-	// if it's 110 101 101 then 3:2 flip on Second
-	{FILM_32_PULLDOWN_1, 0655, 0122,},
-	// if it's 010 110 101 then 3:2 flip on Third
-	{FILM_32_PULLDOWN_2, 0265, 0512,},
-	// if it's 011 010 110 then 3:2 flip on Forth
-	{FILM_32_PULLDOWN_3, 0326, 0451,},
-	// if it's 101 011 010 then 3:2 flip on Fifth
-	{FILM_32_PULLDOWN_4, 0532, 0245,},
-};
+long PulldownThresholdLow = 100;
+long PulldownThresholdHigh = 7000;
+long PulldownRepeatCount = 5;
+long Threshold32Pulldown = 2000;
+
+#define DOLOGGING
 
 void Start_Thread()
 {
@@ -160,7 +144,7 @@ void Start_Capture()
 
 	BT848_MaskDataByte(BT848_CAP_CTL, 0, 0x0f);
 
-	// resety intercast settings
+	// reset intercast settings
 	InterCast.esc = 0;
 	InterCast.done = 0;
 	InterCast.pnum = 0;
@@ -172,17 +156,7 @@ void Start_Capture()
 
 	BT848_MaskDataByte(BT848_CAP_CTL, (BYTE) nFlags, (BYTE) 0x0f);
 
-	if (nFlags & 0x0f)
-	{
-		BT848_SetDMA(TRUE);
-	}
-	else
-	{
-		BT848_SetDMA(FALSE);
-	}
-
-
-	BT848_Restart_RISC_Code();
+	BT848_SetDMA(TRUE);
 
 	Start_Thread();
 	if (Capture_VBI == TRUE)
@@ -193,14 +167,15 @@ void Start_Capture()
 
 void Stop_Capture()
 {
-	BT848_MaskDataByte(BT848_CAP_CTL, 0, 0x0f);
-
 	//  Stop The Output Thread
 	Stop_Thread();
 	if (Capture_VBI == TRUE)
 	{
 		VBI_Stop();
 	}
+
+	// stop capture
+	BT848_MaskDataByte(BT848_CAP_CTL, 0, 0x0f);
 }
 
 BOOL WaitForNextField(BOOL LastField)
@@ -244,6 +219,9 @@ BOOL WaitForNextField(BOOL LastField)
 	{
 		BT848_Restart_RISC_Code();
 		CurrentFrame = 0;
+		UpdatePALPulldownMode(-1, FALSE);
+		UpdateNTSCPulldownMode(-1, FALSE);
+		gPulldownMode = VIDEO_MODE;
 	}
 	return bIsOddField;
 }
@@ -268,216 +246,239 @@ void SetupProcessorAndThread()
 		SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
 }
 
-
-ePULLDOWNMODES GuessCorrectPALPulldownMode(WORD Flags1, WORD Flags2)
+void UpdatePALPulldownMode(long CombFactors, BOOL IsOddField)
 {
-	ePULLDOWNMODES i;
-	for(i = 1; i < 3; i++)
+	static long LastCombFactor;
+	static long RepeatCount;
+	static long LastPolarity;
+
+	// call with CombFactors -1 to reset static variables when we start the thread
+	// each time
+	if(CombFactors == -1)
 	{
-		if((Flags1 & PulldownDetect[i].nFlags1) == PulldownDetect[i].nFlags1)
-		{
-			return i;
-		}
+		LastCombFactor = 0;
+		RepeatCount = 0;
+		LastPolarity = -1;
+		return;
 	}
-	return VIDEO_MODE;
-}
-
-ePULLDOWNMODES GuessCorrectNTSCPulldownMode(WORD Flags1, WORD Flags2)
-{
-	ePULLDOWNMODES i;
-	for(i = 3; i < PULLDOWNMODES_LAST_ONE; i++)
+	if((CombFactors - LastCombFactor) < PulldownThresholdLow)
 	{
-		if((Flags1 & PulldownDetect[i].nFlags1) == PulldownDetect[i].nFlags1 &&
-			(Flags2 & PulldownDetect[i].nFlags2) == 0 )
+		if(gPulldownMode == VIDEO_MODE)
 		{
-			return i;
-		}
-	}
-	return VIDEO_MODE;
-}
-
-void UpdatePALPulldownMode(struct TPulldowmMode* PulldownMode, long* CombFactors)
-{
-	WORD Flags1 = 0;
-	WORD Flags2 = 0;
-	int i;
-
-	for(i = 0; i < 9; i++)
-	{
-		int Diff = CombFactors[i + 1] - CombFactors[i];
-		if(Diff * 100 / (CombFactors[i + 1]  + 1) < PulldownThresholdHigh)
-		{
-			Flags1 |= 1 << i;
-		}
-		if(Diff * 100 / (CombFactors[i + 1]  + 1) > PulldownThresholdLow)
-		{
-			Flags2 |= 1 << i;
-		}
-	}
-
-	if(gPulldownMode == VIDEO_MODE)
-	{
-		// if we are in video mode then look for the same
-		// pattern being repeated PulldownRepeatCount times
-		ePULLDOWNMODES BestGuess = GuessCorrectPALPulldownMode(Flags1, Flags2);
-		if(BestGuess != 0 && BestGuess == PulldownMode->LastGuess)
-		{
-			if((Flags2 & PulldownDetect[gPulldownMode].nFlags2) == 0)
+			if(LastPolarity == IsOddField)
 			{
-				PulldownMode->LastGuessCount++;
-			}
-		}
-		else if(BestGuess != 0)
-		{
-			PulldownMode->LastGuessCount = 1;
-			PulldownMode->LastGuess = BestGuess;
-		}
-		if(PulldownMode->LastGuessCount > PulldownRepeatCount)
-		{
-			gPulldownMode = PulldownMode->LastGuess;
-			PulldownMode->nCount = PulldownMode->LastGuessCount;
-			PulldownMode->LastGuessCount = 0;
-			UpdatePulldownStatus();
-		}
-	}
-	else
-	{
-		// is it not OK to carry on using what we started with
-		// then update the structure
-		if((Flags1 & PulldownDetect[gPulldownMode].nFlags1) != PulldownDetect[gPulldownMode].nFlags1)
-		{
-			ePULLDOWNMODES BestGuess = GuessCorrectPALPulldownMode(Flags1, Flags2);
-			if(BestGuess == PulldownMode->LastGuess)
-			{
-				if((Flags2 & PulldownDetect[gPulldownMode].nFlags2) == 0)
+				if(RepeatCount < PulldownRepeatCount)
 				{
-					PulldownMode->LastGuessCount++;
+					RepeatCount++;
+				}
+				else
+				{
+					if(IsOddField == TRUE && gPulldownMode != FILM_22_PULLDOWN_ODD)
+					{
+						gPulldownMode = FILM_22_PULLDOWN_ODD;
+						UpdatePulldownStatus();
+					}
+					if(IsOddField == FALSE && gPulldownMode != FILM_22_PULLDOWN_EVEN)
+					{
+						gPulldownMode = FILM_22_PULLDOWN_EVEN;
+						UpdatePulldownStatus();
+					}
 				}
 			}
 			else
 			{
-				PulldownMode->LastGuessCount = 0;
+				RepeatCount = 0;
 			}
-			PulldownMode->nCount--;
-			if(PulldownMode->nCount == 0)
-			{
-				// if we have got some sort of new lock then jump straight to it
-				if(PulldownMode->LastGuessCount > 2)
-				{
-					gPulldownMode = PulldownMode->LastGuess;
-					PulldownMode->nCount = PulldownMode->LastGuessCount;
-					PulldownMode->LastGuessCount = 1;
-					UpdatePulldownStatus();
-				}
-				else
-				{
-					gPulldownMode = VIDEO_MODE;
-					PulldownMode->nCount = PulldownMode->LastGuessCount;
-					UpdatePulldownStatus();
-				}
-			}
+			LastPolarity = IsOddField;
 		}
 		else
 		{
-			PulldownMode->LastGuess = gPulldownMode;
-			PulldownMode->LastGuessCount = 0;
-			if(PulldownMode->nCount < PulldownRepeatCount)
+			if(gPulldownMode == FILM_22_PULLDOWN_ODD && IsOddField == FALSE)
 			{
-				if((Flags2 & PulldownDetect[gPulldownMode].nFlags2) == 0)
-				{
-					PulldownMode->nCount++;
-				}
+				//RepeatCount--;
 			}
-		}
-	}
-}
-
-void UpdateNTSCPulldownMode(struct TPulldowmMode* PulldownMode, long* CombFactors)
-{
-	WORD Flags1 = 0;
-	WORD Flags2 = 0;
-	int i;
-
-	for(i = 0; i < 9; i++)
-	{
-		int Diff = CombFactors[i + 1] - CombFactors[i];
-		if(Diff * 100 / (CombFactors[i + 1]  + 1) < PulldownThresholdLow)
-		{
-			Flags1 |= 1 << i;
-		}
-		else if(Diff * 100 / (CombFactors[i + 1] + 1) > PulldownThresholdHigh)
-		{
-			Flags2 |= 1 << i;
-		}
-	}
-
-	if(gPulldownMode == VIDEO_MODE)
-	{
-		// if we are in video mode then look for the same
-		// pattern being repeated PulldownRepeatCount times
-		ePULLDOWNMODES BestGuess = GuessCorrectNTSCPulldownMode(Flags1, Flags2);
-		if(BestGuess == PulldownMode->LastGuess)
-		{
-			PulldownMode->LastGuessCount++;
-		}
-		else
-		{
-			PulldownMode->LastGuessCount = 1;
-			PulldownMode->LastGuess = BestGuess;
-		}
-		if(PulldownMode->LastGuessCount > PulldownRepeatCount)
-		{
-			gPulldownMode = PulldownMode->LastGuess;
-			PulldownMode->nCount = PulldownMode->LastGuessCount;
-			PulldownMode->LastGuessCount = 0;
-			UpdatePulldownStatus();
+			if(gPulldownMode == FILM_22_PULLDOWN_EVEN && IsOddField == TRUE)
+			{
+				//RepeatCount--;
+			}
+			if(RepeatCount == 0)
+			{
+				gPulldownMode = VIDEO_MODE;
+				RepeatCount = 0;
+				UpdatePulldownStatus();
+			}
+			LastPolarity = -1;
 		}
 	}
 	else
 	{
-		// is it not OK to carry on using what we started with
-		// then update the structure
-		if((Flags1 & !PulldownDetect[gPulldownMode].nFlags1) != !PulldownDetect[gPulldownMode].nFlags1 &&
-			(Flags2 & !PulldownDetect[gPulldownMode].nFlags2) > 0)
+		if(gPulldownMode == FILM_22_PULLDOWN_ODD && IsOddField == TRUE)
 		{
-			ePULLDOWNMODES BestGuess = GuessCorrectNTSCPulldownMode(Flags1, Flags2);
-			if(BestGuess == PulldownMode->LastGuess)
+			if((CombFactors - LastCombFactor) > PulldownThresholdHigh)
 			{
-				PulldownMode->LastGuessCount++;
-				PulldownMode->LastGuess = BestGuess;
+				RepeatCount--;
 			}
-			else
+		}
+		if(gPulldownMode == FILM_22_PULLDOWN_EVEN && IsOddField == FALSE)
+		{
+			if((CombFactors - LastCombFactor) > PulldownThresholdHigh)
 			{
-				PulldownMode->LastGuessCount = 0;
+				RepeatCount--;
 			}
-			PulldownMode->nCount--;
-			if(PulldownMode->nCount == 0)
+		}
+		if(RepeatCount == 0)
+		{
+			gPulldownMode = VIDEO_MODE;
+			RepeatCount = 0;
+			UpdatePulldownStatus();
+		}
+		if(LastPolarity == IsOddField)
+		{
+			LastPolarity = -1;
+		}
+	}
+	LastCombFactor = CombFactors;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// UpdateNTSCPulldownMode
+//
+// OK mark I've given up ;-)
+// this is my attempt to implement Mark Rejhon's 3:2 pulldown code
+// the alogoritm and comments below are taken from Mark's post to the AVS
+// Home Computer Forum reproduced in the file 32Spec.htm that should be with
+// this source.
+// the key to getting this to work will be choosing the right value for the 
+// Threshold32Pulldown variable
+// this should probably vary depending on the input source, higher for video
+// lower for TV and cable and very low for laserdisk
+///////////////////////////////////////////////////////////////////////////////
+void UpdateNTSCPulldownMode(long FieldDiff, BOOL OnOddField)
+{
+	static long MAX_MISMATCH = 12;
+	static long MAX_VERIFY_CYCLES = 2;
+	static long MISMATCH_COUNT = 0;
+	static long MOVIE_FIELD_CYCLE = 0;
+	static long MOVIE_VERIFY_CYCLE = 0;
+	
+	// call with FieldDiff -1 to reset static variables when we start the thread
+	// each time
+	if(FieldDiff == -1)
+	{
+        MOVIE_VERIFY_CYCLE = 0;
+        MOVIE_FIELD_CYCLE = 0;
+		MISMATCH_COUNT = 0;
+		return;
+	}
+
+    if(FieldDiff > Threshold32Pulldown)
+	{
+        if(MISMATCH_COUNT <= MAX_MISMATCH)
+		{
+			MISMATCH_COUNT++;
+		}
+        else
+		{
+            //
+            // There has been no duplicate fields lately.
+            // It's probably video source.
+            //
+            // MAX_MISMATCH should be a reasonably high value so
+            // that we do not have an oversensitive hair-trigger
+            // in switching to video source everytime there is
+            // video noise or a single spurious field added/dropped
+            // during a movie causing mis-synchronization problems. 
+            gPulldownMode = VIDEO_MODE;
+            MOVIE_VERIFY_CYCLE = 0;
+            MOVIE_FIELD_CYCLE = 0;
+        }
+	}
+    else
+	{
+		// It's either a stationary image OR a duplicate field in a movie
+		if(MISMATCH_COUNT == 4)
+		{
+			//
+			// 3:2 pulldown is a cycle of 5 fields where there is only
+			// one duplicate field pair, and 4 mismatching pairs.
+			// We need to continue detection for at least 2 cycles
+			// to be very certain that it is actually 3:2 pulldown
+			// This would mean a latency of 10 fields.
+			//
+			if(MOVIE_VERIFY_CYCLE >= MAX_VERIFY_CYCLES)
 			{
-				// if we have got some sort of new lock then jump straight to it
-				if(PulldownMode->LastGuessCount > 2)
+				//
+				// This executes regardless whether we've just entered or
+				// if we're *already* in 3:2 pulldown. Either way, we are
+				// currently now (re)synchronized to 3:2 pulldown and that
+				// we've now detected the duplicate field.
+				//
+				if(OnOddField == TRUE)
 				{
-					gPulldownMode = PulldownMode->LastGuess;
-					PulldownMode->nCount = PulldownMode->LastGuessCount;
-					PulldownMode->LastGuessCount = 1;
-					UpdatePulldownStatus();
+					switch(CurrentFrame)
+					{
+					case 0:
+			            gPulldownMode = FILM_32_PULLDOWN_2;
+						break;
+					case 1:
+			            gPulldownMode = FILM_32_PULLDOWN_3;
+						break;
+					case 2:
+			            gPulldownMode = FILM_32_PULLDOWN_4;
+						break;
+					case 3:
+			            gPulldownMode = FILM_32_PULLDOWN_0;
+						break;
+					case 4:
+			            gPulldownMode = FILM_32_PULLDOWN_1;
+						break;
+					}
 				}
 				else
 				{
-					gPulldownMode = VIDEO_MODE;
-					PulldownMode->nCount = PulldownMode->LastGuessCount;
-					UpdatePulldownStatus();
+					switch(CurrentFrame)
+					{
+					case 0:
+			            gPulldownMode = FILM_32_PULLDOWN_4;
+						break;
+					case 1:
+			            gPulldownMode = FILM_32_PULLDOWN_0;
+						break;
+					case 2:
+			            gPulldownMode = FILM_32_PULLDOWN_1;
+						break;
+					case 3:
+			            gPulldownMode = FILM_32_PULLDOWN_2;
+						break;
+					case 4:
+			            gPulldownMode = FILM_32_PULLDOWN_3;
+						break;
+					}
 				}
+			}
+			else
+			{
+				MOVIE_VERIFY_CYCLE++;
 			}
 		}
 		else
 		{
-			PulldownMode->LastGuess = gPulldownMode;
-			PulldownMode->LastGuessCount = 0;
-			if(PulldownMode->nCount < PulldownRepeatCount)
-			{
-				PulldownMode->nCount++;
-			}
+			//
+			// If execution point hits here, it is probably just
+			// stationary video. That would produce lots of duplicate
+			// field pairs. We can't determine whether it's video or
+			// movie source. Therefore, we want to keep doing the
+			// current algorithm from a prior detection. Therefore,
+			// don't modify any variables EXCEPT the MISMATCH_COUNT
+			// variable which will be reset to 0 below.
+			// Also, occasionally we'll hit here during synchronization
+			// problems during a movie, such as a spurious field added
+			// or dropped. Reset MISMATCH_COUNT to 0 below and let
+			// detection cycle happen again in order to re-synchronize.
+			// Keep the MODE variable the way it currently is.
 		}
+		MISMATCH_COUNT = 0;
 	}
 }
 
@@ -677,11 +678,10 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 	DWORD dwLastSecondTicks;
 	DWORD dwLastFlipTicks = 0;
 	BYTE* lpCurOverlay = lpOverlayBack;
-	//long CombFactors[10];
+	long CombFactor;
 	short* ppEvenLines[5][CLEARLINES];
 	short* ppOddLines[5][CLEARLINES];
 	BYTE* pDest;
-	//struct TPulldowmMode PulldownMode;
 	int LastEvenFrame = 0;
 	int LastOddFrame = 0;
 	int CombNum = 0;
@@ -695,6 +695,13 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 
 	// Sets processor Affinity and Thread priority according to menu selection
 	SetupProcessorAndThread();
+
+	// reset the static variables in the detection code
+	UpdatePALPulldownMode(-1, FALSE);
+
+	// start the capture off
+	
+	//BT848_Restart_RISC_Code();
 
 	// Set up 5 sets of pointers to the start of odd and even lines
 	// we will always go up to the limit so that we can use bTV
@@ -722,14 +729,9 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 		pDest = lpCurOverlay;
 		if(bIsOddField)
 		{
-			//CombFactors[CurrentFrame * 2 + 1] = GetCombFactor(ppEvenLines[CurrentFrame], ppOddLines[CurrentFrame]);
-			if(CurrentFrame == 4)
-			{
-				// update the gPulldownMode based on last set of 5 frames
-				// doesn't check for dropped frames but this shouldn't matter
-				// too much
-				//UpdatePALPulldownMode(&PulldownMode, CombFactors);
-			}
+			CombFactor = GetCombFactor(ppEvenLines[CurrentFrame], ppOddLines[CurrentFrame]);
+			UpdatePALPulldownMode(CombFactor, TRUE);
+
 			// if we have dropped a field then do BOB 
 			if(LastEvenFrame != CurrentFrame || gPulldownMode == INTERPOLATE_BOB)
 			{
@@ -806,7 +808,8 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 		}
 		else
 		{
-			//CombFactors[CurrentFrame * 2] = GetCombFactor(ppOddLines[(CurrentFrame + 4) % 5], ppEvenLines[CurrentFrame] + 1);
+			CombFactor = GetCombFactor(ppOddLines[(CurrentFrame + 4) % 5], ppEvenLines[CurrentFrame] + 1);
+			UpdatePALPulldownMode(CombFactor, FALSE);
 
 			// if we have dropped a field then do BOB
 			if(LastOddFrame != ((CurrentFrame + 4) % 5) || gPulldownMode == INTERPOLATE_BOB)
@@ -886,8 +889,8 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 		if(DoWeWantToFlip(bFlipNow, bIsOddField))
 		{
 			// wait for a good time to flip
-			sprintf(Text, "%d\n", GetTickCount() - dwLastFlipTicks);
-			OutputDebugString(Text);
+			//sprintf(Text, "%d\n", GetTickCount() - dwLastFlipTicks);
+			//OutputDebugString(Text);
 			IDirectDrawSurface_Flip(lpDDOverlay, lpDDOverlayBack, DDFLIP_WAIT);
 			dwLastFlipTicks = GetTickCount();
 			if(lpCurOverlay == lpOverlay)
@@ -923,11 +926,10 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 	int nFrame = 0;
 	DWORD dwLastCount;
 	BYTE* lpCurOverlay = lpOverlayBack;
-	//long CombFactors[10];
+	long CompareResult;
 	short* ppEvenLines[5][CLEARLINES];
 	short* ppOddLines[5][CLEARLINES];
 	BYTE* pDest;
-	//struct TPulldowmMode PulldownMode;
 	int LastEvenFrame = 0;
 	int LastOddFrame = 0;
 	int CombNum = 0;
@@ -941,6 +943,9 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 
 	// Sets processor Affinity and Thread priority according to menu selection
 	SetupProcessorAndThread();
+
+	// start the capture off
+	BT848_Restart_RISC_Code();
 
 	// Set up 5 sets of pointers to the start of odd and even lines
 	// we will always go up to the limit so that we can use bTV
@@ -956,6 +961,9 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 	// make sure we start with a clean sheet of paper
 	Overlay_Clean();
 
+	// reset the static variables in the detection code
+	UpdateNTSCPulldownMode(-1, FALSE);
+
 	// display the current pulldown mode
 	UpdatePulldownStatus();
 	
@@ -968,14 +976,8 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 		pDest = lpCurOverlay;
 		if(bIsOddField)
 		{
-			//CombFactors[CurrentFrame * 2 + 1] = GetCombFactor(ppEvenLines[CurrentFrame], ppOddLines[CurrentFrame]);
-			if(CurrentFrame == 4)
-			{
-				// update the gPulldownMode based on last set of 5 frames
-				// doesn't check for dropped frames but this shouldn't matter
-				// too much
-				//UpdateNTSCPulldownMode(&PulldownMode, CombFactors);
-			}
+			CompareResult = CompareFields(ppOddLines[(CurrentFrame + 4) % 5], ppOddLines[CurrentFrame]);
+			UpdateNTSCPulldownMode(CompareResult, TRUE);
 			// if we have dropped a field then do BOB 
 			if(LastEvenFrame != CurrentFrame || gPulldownMode == INTERPOLATE_BOB)
 			{
@@ -1052,7 +1054,8 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 		}
 		else
 		{
-			//CombFactors[CurrentFrame * 2] = GetCombFactor(ppOddLines[(CurrentFrame + 4) % 5], ppEvenLines[CurrentFrame] + 1);
+			CompareResult = CompareFields(ppEvenLines[(CurrentFrame + 4) % 5], ppEvenLines[CurrentFrame]);
+			UpdateNTSCPulldownMode(CompareResult, FALSE);
 
 			// if we have dropped a field then do BOB
 			if(LastOddFrame != ((CurrentFrame + 4) % 5) || gPulldownMode == INTERPOLATE_BOB)
@@ -1128,7 +1131,7 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 			}
 			LastEvenFrame = CurrentFrame;
 		}
-
+		//LogString(" %d %c %d", CurrentFrame, bIsOddField?'O':'E', CompareResult);
 		if(DoWeWantToFlip(bFlipNow, bIsOddField))
 		{
 			IDirectDrawSurface_Flip(lpDDOverlay, lpDDOverlayBack, DDFLIP_WAIT);
@@ -1153,6 +1156,7 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 			}
 		}
 	}
+	BT848_SetDMA(FALSE);
 	ExitThread(0);
 	return 0;
 }

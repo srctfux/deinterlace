@@ -42,8 +42,27 @@ typedef struct
 } BTVPLUGINFUNCTIONS;
 
 BTVPLUGINFUNCTIONS BTVPlugin;
+
 HMODULE hLibrary = NULL;
 BOOL bWantsToFlip;
+char szBTVPluginName[MAX_PATH];
+
+BOOL bUseBTVPlugin = FALSE;
+
+BTV_V1_PARAMS BTVParams = 
+{
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	0,
+	0,
+	0,
+	0,
+	1,
+	0,
+	0,
+};
 
 BOOL BTVPluginLoad(const char * szPluginName)
 {

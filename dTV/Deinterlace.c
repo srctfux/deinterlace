@@ -446,7 +446,7 @@ long GetCombFactor(short** pLines1, short** pLines2)
 
 	const __int64 YMask    = 0x00ff00ff00ff00ff;
 
-	for (Line = 1; Line < (CurrentY / 2 - 2); ++Line)
+	for (Line = 1; Line < (CurrentY / 2 - 2); ++Line, ++Line)
 	{
 		YVal1 = pLines1[Line];
 		YVal2 = pLines2[Line];
@@ -481,7 +481,8 @@ Next8Bytes:
 			paddd mm0, mm3
 			add edx, 8
 
-			loop Next8Bytes
+			dec ecx
+			jne near Next8Bytes
 
 			movd eax, mm0
 			psrlq mm0,32
@@ -493,4 +494,66 @@ Next8Bytes:
 		CombFactor += (long)sqrt(LineFactor);
 	}
 	return CombFactor;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// CompareFields
+//
+// This routine basically calculates how close the pixels in pLines2
+// are to the pixels in pLines1
+// this is my attempt to implement Mark Rejhon's 3:2 pulldown code
+// we will use this to dect the times when we get three fields in a row from
+// the same frame
+// the result is the total average diffrence between the Y components of each pixel
+// in the middle section of the screen, I'll ignore the the first and last few lines
+///////////////////////////////////////////////////////////////////////////////
+long CompareFields(short** pLines1, short** pLines2)
+{
+	int Line;
+	long LineFactor;
+	long DiffFactor = 0;
+	short* YVal1;
+	short* YVal2;
+
+	const __int64 YMask    = 0x00ff00ff00ff00ff;
+
+	for (Line = 2; Line < (CurrentY / 2 - 3); ++Line, ++Line)
+	{
+		YVal1 = pLines1[Line];
+		YVal2 = pLines2[Line];
+		_asm
+		{
+			mov ecx, CurrentX
+			mov eax,dword ptr [YVal1]
+			mov ebx,dword ptr [YVal2]
+			shr ecx, 1
+		    movq mm1,qword ptr[YMask]  
+			pxor mm0, mm0    // mm0 = 0  this is running total
+align 8
+Next8Bytes:
+			movq mm4, qword ptr[eax] 
+			movq mm5, qword ptr[ebx] 
+			pand mm5, mm1    // get only Y compoment
+			pand mm4, mm1    // get only Y compoment
+
+			psubw mm4, mm5   // mm4 = Y1 - Y2
+			pmaddwd mm4, mm4 // mm4 = (Y1 - Y2) ^ 2
+			paddd mm0, mm4   // keep total in mm0
+
+			add eax, 8
+			add ebx, 8
+			
+			dec ecx
+			jne near Next8Bytes
+
+			movd eax, mm0
+			psrlq mm0,32
+			movd ecx, mm0
+			add ecx, eax
+			mov dword ptr[LineFactor], ecx
+			emms
+		}
+		DiffFactor += (long)sqrt(LineFactor);
+	}
+	return DiffFactor;
 }

@@ -33,6 +33,7 @@ void VideoDeinterlaceMMX(void *Dest, void *SrcUp, void *SrcSame, void *SrcDown, 
 void DeinterlaceEven(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay);
 void DeinterlaceOdd(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay);
 long GetCombFactor(short** pLines1, short** pLines2);
+long CompareFields(short** pLines1, short** pLines2);
 
 
 #endif

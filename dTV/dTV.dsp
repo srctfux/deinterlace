@@ -123,6 +123,10 @@ SOURCE=.\ccdecode.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\DebugLog.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\Deinterlace.c
 # End Source File
 # Begin Source File
@@ -211,7 +215,15 @@ SOURCE=.\ccdecode.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\DebugLog.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\defines.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\Deinterlace.h
 # End Source File
 # Begin Source File
 

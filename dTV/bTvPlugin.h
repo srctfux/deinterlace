@@ -47,4 +47,8 @@ void BTVPluginConfig(HWND hWnd);
 int BTVPluginGetProps(BTV_V1_PROPS *pProps);
 long BTVPluginDoField(BTV_V1_PARAMS *pParams);
 
+extern char szBTVPluginName[MAX_PATH];
+extern BOOL bUseBTVPlugin;
+extern BTV_V1_PARAMS BTVParams;
+
 #endif
