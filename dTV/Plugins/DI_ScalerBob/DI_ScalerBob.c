@@ -37,13 +37,13 @@ BOOL DeinterlaceScalerBob(DEINTERLACE_INFO *info)
 		{
 			info->pMemcpy(info->Overlay + nLineTarget * info->OverlayPitch,
 						info->OddLines[0][nLineTarget],
-						info->LineLength * 2);
+						info->LineLength);
 		}
 		else
 		{
 			info->pMemcpy(info->Overlay + nLineTarget * info->OverlayPitch,
 						info->EvenLines[0][nLineTarget],
-						info->LineLength * 2);
+						info->LineLength);
 		}
 	}
 	// need to clear up MMX registers

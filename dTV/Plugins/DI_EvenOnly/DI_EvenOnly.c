@@ -38,7 +38,7 @@ BOOL DeinterlaceEvenOnly(DEINTERLACE_INFO *info)
 			// copy latest field's rows to overlay, resulting in a half-height image.
 			info->pMemcpy(info->Overlay + nLineTarget * info->OverlayPitch,
 						info->EvenLines[0][nLineTarget],
-						info->LineLength * 2);
+						info->LineLength);
 		}
 		// need to clear up MMX registers
 		_asm
