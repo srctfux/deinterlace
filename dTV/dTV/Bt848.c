@@ -116,18 +116,12 @@ int VideoSource = SOURCE_COMPOSITE;
 // 10/19/2000 Mark Rejhon
 // Better NTSC defaults
 // These are the original defaults, likely optimized for PAL (could use refinement).
-//int InitialHue        = 0x00;
-//int InitialBrightness = 0x00;
-//int InitialContrast    = 0xd8;
-//int InitialSaturationU = 0xfe;
-//int InitialSaturationV = 0xb4;
-//int InitialOverscan    = 4;
-int InitialHue         = 0;
-int InitialBrightness  = 20;
-int InitialContrast    = 207;
-int InitialSaturationU = 254;
-int InitialSaturationV = 219;
-int InitialOverscan    = 4;
+int InitialHue         = DEFAULT_HUE_NTSC;
+int InitialBrightness  = DEFAULT_BRIGHTNESS_NTSC;
+int InitialContrast    = DEFAULT_CONTRAST_NTSC;
+int InitialSaturationU = DEFAULT_SAT_U_NTSC;
+int InitialSaturationV = DEFAULT_SAT_V_NTSC;
+int InitialOverscan    = DEFAULT_OVERSCAN;
 
 int CurrentX = 720;
 int CurrentY;

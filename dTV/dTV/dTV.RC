@@ -93,7 +93,7 @@ SPLASHBOX DIALOGEX 0, 0, 145, 192
 STYLE DS_SYSMODAL | DS_NOIDLEMSG | DS_SETFOREGROUND | DS_3DLOOK | DS_CENTER | 
     WS_POPUP | WS_VISIBLE | WS_BORDER
 EXSTYLE WS_EX_NOPARENTNOTIFY
-FONT 8, "System"
+FONT 8, "System", 0, 0, 0x1
 BEGIN
     CONTROL         "STARTUP",IDC_STATIC,"Static",SS_BITMAP,0,0,11,11
     LISTBOX         IDC_LIST1,38,140,66,47,NOT LBS_NOTIFY | 
@@ -125,51 +125,44 @@ STYLE DS_SYSMODAL | DS_SETFOREGROUND | DS_3DLOOK | WS_POPUP | WS_VISIBLE |
 CAPTION "Video Settings"
 FONT 8, "MS Sans Serif"
 BEGIN
-    CTEXT           "Brightness",IDC_STATIC,11,9,33,10
-    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME,6,5,45,150
-    DEFPUSHBUTTON   "OK",IDOK,305,161,45,15
-    PUSHBUTTON      "Default",IDDEFAULT,154,161,45,15
-    EDITTEXT        IDC_D1,10,25,35,12,ES_CENTER | ES_AUTOHSCROLL | 
-                    WS_DISABLED
-    CTEXT           "Contrast",IDC_STATIC,60,9,33,10
-    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME,55,5,45,150
-    EDITTEXT        IDC_D2,60,25,35,12,ES_CENTER | ES_AUTOHSCROLL | 
-                    WS_DISABLED
-    CTEXT           "Hue",IDC_STATIC,110,9,33,10
-    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME,105,5,45,150
-    EDITTEXT        IDC_D3,110,25,35,12,ES_CENTER | ES_AUTOHSCROLL | 
-                    WS_DISABLED
-    CTEXT           "Color",IDC_STATIC,160,9,33,10
-    PUSHBUTTON      "Cancel",IDCANCEL,6,161,45,15
-    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME,155,5,45,150
-    CTEXT           "Color U",IDC_STATIC,210,9,33,10
-    EDITTEXT        IDC_D4,160,25,35,12,ES_CENTER | ES_AUTOHSCROLL | 
-                    WS_DISABLED
-    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME,205,5,45,150
-    EDITTEXT        IDC_D5,210,25,35,12,ES_CENTER | ES_AUTOHSCROLL | 
-                    WS_DISABLED
-    CTEXT           "Color V",IDC_STATIC,260,9,33,10
-    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME,255,5,45,150
-    EDITTEXT        IDC_D6,260,25,35,12,ES_CENTER | ES_AUTOHSCROLL | 
-                    WS_DISABLED
-    CTEXT           "Overscan",IDC_STATIC,311,9,33,10
-    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME,305,5,45,150
-    EDITTEXT        IDC_D7,309,26,35,12,ES_CENTER | ES_AUTOHSCROLL | 
-                    WS_DISABLED
-    CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_VERT | 
-                    TBS_TOP | WS_TABSTOP,16,41,23,109
-    CONTROL         "Slider1",IDC_SLIDER2,"msctls_trackbar32",TBS_VERT | 
-                    TBS_TOP | WS_TABSTOP,66,40,23,109
-    CONTROL         "Slider1",IDC_SLIDER3,"msctls_trackbar32",TBS_VERT | 
-                    TBS_TOP | WS_TABSTOP,116,41,23,109
-    CONTROL         "Slider1",IDC_SLIDER4,"msctls_trackbar32",TBS_VERT | 
-                    TBS_TOP | WS_TABSTOP,166,41,23,109
-    CONTROL         "Slider1",IDC_SLIDER5,"msctls_trackbar32",TBS_VERT | 
-                    TBS_TOP | WS_TABSTOP,216,41,23,109
-    CONTROL         "Slider1",IDC_SLIDER6,"msctls_trackbar32",TBS_VERT | 
-                    TBS_TOP | WS_TABSTOP,266,41,23,109
-    CONTROL         "Slider1",IDC_SLIDER7,"msctls_trackbar32",TBS_VERT | 
-                    TBS_TOP | WS_TABSTOP,315,41,23,109
+    LTEXT           "&Brightness",IDC_STATIC,6,13,33,10
+    CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_TOP | 
+                    WS_TABSTOP,50,5,258,20
+    EDITTEXT        IDC_D1,315,10,35,12,ES_CENTER | ES_AUTOHSCROLL | 
+                    WS_DISABLED | NOT WS_TABSTOP
+    LTEXT           "Con&trast",IDC_STATIC,6,33,33,10
+    CONTROL         "Slider1",IDC_SLIDER2,"msctls_trackbar32",TBS_TOP | 
+                    WS_TABSTOP,50,25,258,20
+    EDITTEXT        IDC_D2,315,30,35,12,ES_CENTER | ES_AUTOHSCROLL | 
+                    WS_DISABLED | NOT WS_TABSTOP
+    LTEXT           "&Hue",IDC_STATIC,6,52,33,10
+    CONTROL         "Slider1",IDC_SLIDER3,"msctls_trackbar32",TBS_TOP | 
+                    WS_TABSTOP,50,45,258,20
+    EDITTEXT        IDC_D3,315,50,35,12,ES_CENTER | ES_AUTOHSCROLL | 
+                    WS_DISABLED | NOT WS_TABSTOP
+    LTEXT           "&Color",IDC_STATIC,6,73,33,10
+    CONTROL         "Slider1",IDC_SLIDER4,"msctls_trackbar32",TBS_TOP | 
+                    WS_TABSTOP,50,65,258,20
+    EDITTEXT        IDC_D4,315,70,35,12,ES_CENTER | ES_AUTOHSCROLL | 
+                    WS_DISABLED | NOT WS_TABSTOP
+    LTEXT           "Color &U",IDC_STATIC,6,93,33,10
+    CONTROL         "Slider1",IDC_SLIDER5,"msctls_trackbar32",TBS_TOP | 
+                    WS_TABSTOP,50,85,258,20
+    EDITTEXT        IDC_D5,315,90,35,12,ES_CENTER | ES_AUTOHSCROLL | 
+                    WS_DISABLED | NOT WS_TABSTOP
+    LTEXT           "Color &V",IDC_STATIC,6,113,33,10
+    CONTROL         "Slider1",IDC_SLIDER6,"msctls_trackbar32",TBS_TOP | 
+                    WS_TABSTOP,50,105,258,20
+    EDITTEXT        IDC_D6,315,110,35,12,ES_CENTER | ES_AUTOHSCROLL | 
+                    WS_DISABLED | NOT WS_TABSTOP
+    LTEXT           "&Overscan",IDC_STATIC,6,133,33,10
+    CONTROL         "Slider1",IDC_SLIDER7,"msctls_trackbar32",TBS_TOP | 
+                    WS_TABSTOP,50,125,258,20
+    EDITTEXT        IDC_D7,315,130,35,12,ES_CENTER | ES_AUTOHSCROLL | 
+                    WS_DISABLED | NOT WS_TABSTOP
+    DEFPUSHBUTTON   "&OK",IDOK,6,161,45,15
+    PUSHBUTTON      "Cancel",IDCANCEL,57,161,45,15,WS_GROUP
+    PUSHBUTTON      "&Default",IDDEFAULT,113,161,45,15
 END
 
 AUDIOEINSTELLUNGEN DIALOG DISCARDABLE  0, 0, 257, 236
@@ -444,7 +437,7 @@ BEGIN
     PUSHBUTTON      "",IDC_S1,170,55,15,10,WS_DISABLED
     EDITTEXT        IDC_D1,160,30,35,10,ES_CENTER | ES_AUTOHSCROLL | 
                     WS_DISABLED
-    CTEXT           "Links",TEXT10,160,20,33,10
+    CTEXT           "Left",TEXT10,160,20,33,10
     CONTROL         "Always On",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,5,140,125,10
     CONTROL         "Mixer-Device activate and control",IDC_CHECK2,"Button",
@@ -462,7 +455,7 @@ BEGIN
     PUSHBUTTON      "",IDC_S2,270,55,15,10,WS_DISABLED
     EDITTEXT        IDC_D2,260,30,35,10,ES_CENTER | ES_AUTOHSCROLL | 
                     WS_DISABLED
-    CTEXT           "Balance",TEXT12,260,20,33,10
+    CTEXT           "Right",TEXT12,260,20,33,10
 END
 
 ABOUT DIALOGEX 22, 17, 374, 274
@@ -830,6 +823,18 @@ BEGIN
             MENUITEM "2.00\tAlt+5",                 IDM_TASPECT_200
             MENUITEM "2.35\tAlt+6",                 IDM_TASPECT_235
             MENUITEM "Custom  (from .INI file)\tAlt+9", IDM_TASPECT_CUSTOM
+        END
+        POPUP "Window Vertical Position"
+        BEGIN
+            MENUITEM "&Centre",                     IDM_WINPOS_VERT_CENTRE
+            MENUITEM "&Top",                        IDM_WINPOS_VERT_TOP
+            MENUITEM "&Bottom",                     IDM_WINPOS_VERT_BOTTOM
+        END
+        POPUP "Window Horizontal Position"
+        BEGIN
+            MENUITEM "&Centre",                     IDM_WINPOS_HORZ_CENTRE
+            MENUITEM "&Left",                       IDM_WINPOS_HORZ_LEFT
+            MENUITEM "&Right",                      IDM_WINPOS_HORZ_RIGHT
         END
     END
     POPUP "&Settings"
@@ -1308,8 +1313,8 @@ CSIZEX                  CURSOR  DISCARDABLE     "res\\sizex.cur"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,0,0,0
- PRODUCTVERSION 3,0,0,0
+ FILEVERSION 2,1,0,0
+ PRODUCTVERSION 2,1,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -1327,14 +1332,14 @@ BEGIN
             VALUE "Comments", "John Adcock\0"
             VALUE "CompanyName", "\0"
             VALUE "FileDescription", "dTV\0"
-            VALUE "FileVersion", "3, 0, 0, 0\0"
+            VALUE "FileVersion", "2, 1, 0, 0\0"
             VALUE "InternalName", "dTV\0"
             VALUE "LegalCopyright", "Copyright © 2000\0"
             VALUE "LegalTrademarks", "This Program is covered by the term of the GNU GPL\0"
             VALUE "OriginalFilename", "dTV.exe\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "dTV\0"
-            VALUE "ProductVersion", "3, 0, 0, 0\0"
+            VALUE "ProductVersion", "2, 1, 0, 0\0"
             VALUE "SpecialBuild", "\0"
         END
     END

@@ -36,6 +36,20 @@
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 
+typedef enum
+{
+	VERT_POS_CENTRE = 0,
+	VERT_POS_TOP,
+	VERT_POS_BOTTOM,
+} VERT_POS;
+
+typedef enum
+{
+	HORZ_POS_CENTRE = 0,
+	HORZ_POS_LEFT,
+	HORZ_POS_RIGHT,
+} HORZ_POS;
+
 int     ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID);
 void    SetMenuAspectRatio(HWND hWnd);
 void    UpdateWindowState();
@@ -52,3 +66,5 @@ extern long ZoomInFrameCount;
 extern long AutoDetectAspect;
 extern long AspectConsistencyTime;
 extern long AspectHistoryTime;
+extern VERT_POS VerticalPos;
+extern HORZ_POS HorizontalPos;

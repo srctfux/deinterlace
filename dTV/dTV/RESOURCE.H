@@ -153,6 +153,12 @@
 #define ID_SETTINGS_PIXELWIDTH_384      764
 #define ID_SETTINGS_PIXELWIDTH_CUSTOM   765
 #define IDM_NOISE_FILTER                768
+#define IDM_WINPOS_VERT_CENTRE          770
+#define IDM_WINPOS_VERT_TOP             771
+#define IDM_WINPOS_VERT_BOTTOM          772
+#define IDM_WINPOS_HORZ_CENTRE          773
+#define IDM_WINPOS_HORZ_LEFT            774
+#define IDM_WINPOS_HORZ_RIGHT           775
 #define IDM_END                         1032
 #define IDM_SOURCE_TUNER                1089
 #define IDM_SOURCE_COMPOSITE            1090
@@ -739,7 +745,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        157
-#define _APS_NEXT_COMMAND_VALUE         769
+#define _APS_NEXT_COMMAND_VALUE         776
 #define _APS_NEXT_CONTROL_VALUE         1873
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

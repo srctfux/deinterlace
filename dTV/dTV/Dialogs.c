@@ -112,42 +112,42 @@ BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 
 		// Setup Bightness Slider
 		Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER1), -128, 127);
-		Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER1), 0x00);
+		Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER1), DEFAULT_BRIGHTNESS_NTSC);
 		Slider_SetLineSize(GetDlgItem(hDlg, IDC_SLIDER1), 1);
 		Slider_SetPageSize(GetDlgItem(hDlg, IDC_SLIDER1), 10);
 		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER1),TBrightness);
 
 		// Setup Contrast Slider
 		Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER2), 0, 255);
-		Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER2), 0xd8);
+		Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER2), DEFAULT_CONTRAST_NTSC);
 		Slider_SetLineSize(GetDlgItem(hDlg, IDC_SLIDER2), 1);
 		Slider_SetPageSize(GetDlgItem(hDlg, IDC_SLIDER2), 10);
 		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER2),TContrast);
 
 		// Setup Hue Slider
 		Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER3), -128, 127);
-		Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER3), 0x00);
+		Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER3), DEFAULT_HUE_NTSC);
 		Slider_SetLineSize(GetDlgItem(hDlg, IDC_SLIDER3), 1);
 		Slider_SetPageSize(GetDlgItem(hDlg, IDC_SLIDER3), 10);
 		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER3),THue);
 
 		// Setup Saturation Slider
 		Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER4), abs(TSaturationU - TSaturationV) / 2, 255 - (abs(TSaturationU - TSaturationV) / 2));
-		Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER4), 0xd9);
+		Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER4), (DEFAULT_SAT_U_NTSC + DEFAULT_SAT_V_NTSC)/2);
 		Slider_SetLineSize(GetDlgItem(hDlg, IDC_SLIDER4), 1);
 		Slider_SetPageSize(GetDlgItem(hDlg, IDC_SLIDER4), 10);
 		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER4),LastSaturation);
 
 		// Setup SaturationU Slider
 		Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER5), 0, 255);
-		Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER5), 0xfe);
+		Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER5), DEFAULT_SAT_U_NTSC);
 		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER5),TSaturationU);
 		Slider_SetLineSize(GetDlgItem(hDlg, IDC_SLIDER5), 1);
 		Slider_SetPageSize(GetDlgItem(hDlg, IDC_SLIDER5), 10);
 
 		// Setup SaturationU Slider
 		Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER6), 0, 255);
-		Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER6), 0xb4);
+		Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER6), DEFAULT_SAT_V_NTSC);
 		Slider_SetLineSize(GetDlgItem(hDlg, IDC_SLIDER6), 1);
 		Slider_SetPageSize(GetDlgItem(hDlg, IDC_SLIDER6), 10);
 		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER6),TSaturationV);
@@ -161,10 +161,10 @@ BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 		{
 			Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER7), 0, CurrentX / 2 - 1);
 		}
-		Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER7), 0x04);
+		Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER7), DEFAULT_OVERSCAN);
 		Slider_SetLineSize(GetDlgItem(hDlg, IDC_SLIDER7), 1);
 		Slider_SetPageSize(GetDlgItem(hDlg, IDC_SLIDER7), 10);
-		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER7),TOverscan);
+		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER7),InitialOverscan);
 		break;
 
 	case WM_COMMAND:
@@ -192,12 +192,12 @@ BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 			break;
 
 		case IDDEFAULT:
-			THue = 0x00;
-			TBrightness = 0x00;
-			TContrast = 0xd8;
-			TSaturationU = 0xfe;
-			TSaturationV = 0xb4;
-			InitialOverscan = 4;
+			TBrightness = DEFAULT_BRIGHTNESS_NTSC;
+			TContrast = DEFAULT_CONTRAST_NTSC;
+			THue = DEFAULT_HUE_NTSC;
+			TSaturationU = DEFAULT_SAT_U_NTSC;
+			TSaturationV = DEFAULT_SAT_V_NTSC;
+			InitialOverscan = DEFAULT_OVERSCAN;
 			LastSaturation = (TSaturationU + TSaturationV) /2;
 			BT848_SetBrightness(TBrightness);
 			BT848_SetContrast(TContrast);
@@ -211,7 +211,7 @@ BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 			SetDlgItemInt(hDlg, IDC_D4, LastSaturation, FALSE);
 			SetDlgItemInt(hDlg, IDC_D5, TSaturationU, FALSE);
 			SetDlgItemInt(hDlg, IDC_D6, TSaturationV, FALSE);
-			SetDlgItemInt(hDlg, IDC_D7, TOverscan, FALSE);
+			SetDlgItemInt(hDlg, IDC_D7, InitialOverscan, FALSE);
 			Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER4), abs(TSaturationU - TSaturationV) / 2, 255 - abs(TSaturationU - TSaturationV) / 2);
 			Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER1), TBrightness);
 			Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER2), TContrast);
@@ -219,7 +219,7 @@ BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 			Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER4), LastSaturation);
 			Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER5), TSaturationU);
 			Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER6), TSaturationV);
-			Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER7), TOverscan);
+			Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER7), InitialOverscan);
 			break;
 		default:
 			break;

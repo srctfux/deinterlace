@@ -486,6 +486,23 @@ extern int InitialBrightness;
 extern int InitialHue;
 extern int InitialOverscan;
 
+// 10/19/2000 Mark Rejhon
+// Better NTSC defaults
+#define DEFAULT_HUE_NTSC 0
+#define DEFAULT_BRIGHTNESS_NTSC 20
+#define DEFAULT_CONTRAST_NTSC 207
+#define DEFAULT_SAT_U_NTSC 254
+#define DEFAULT_SAT_V_NTSC 219
+#define DEFAULT_OVERSCAN 4
+
+// These are the original defaults, likely optimized for PAL (could use refinement).
+//int InitialHue        = 0x00;
+//int InitialBrightness = 0x00;
+//int InitialContrast    = 0xd8;
+//int InitialSaturationU = 0xfe;
+//int InitialSaturationV = 0xb4;
+//int InitialOverscan    = 4;
+
 extern int CurrentX;
 extern int CurrentY;
 extern int CurrentVBILines;

@@ -336,6 +336,8 @@ void LoadSettingsFromIni()
 	ZoomInFrameCount = GetPrivateProfileInt("ASPECT", "ZoomInFrameCount", ZoomInFrameCount, szIniFile);
 	AspectHistoryTime = GetPrivateProfileInt("ASPECT", "AspectHistoryTime", AspectHistoryTime, szIniFile);
 	AspectConsistencyTime = GetPrivateProfileInt("ASPECT", "AspectConsistencyTime", AspectConsistencyTime, szIniFile);
+	VerticalPos = GetPrivateProfileInt("ASPECT", "VerticalPos", VerticalPos, szIniFile);
+	HorizontalPos = GetPrivateProfileInt("ASPECT", "HorizontalPos", HorizontalPos, szIniFile);
 }
 
 void WriteSettingsToIni()
@@ -556,6 +558,8 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("ASPECT", "ZoomInFrameCount", ZoomInFrameCount, szIniFile);
 	WritePrivateProfileInt("ASPECT", "AspectHistoryTime", AspectHistoryTime, szIniFile);
 	WritePrivateProfileInt("ASPECT", "AspectConsistencyTime", AspectConsistencyTime, szIniFile);
+	WritePrivateProfileInt("ASPECT", "VerticalPos", VerticalPos, szIniFile);
+	WritePrivateProfileInt("ASPECT", "HorizontalPos", HorizontalPos, szIniFile);
 }
 
 void WritePrivateProfileInt(LPCTSTR lpAppName,  LPCTSTR lpKeyName,  int nValue, LPCTSTR lpFileName)

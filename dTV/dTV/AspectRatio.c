@@ -29,15 +29,21 @@
 //
 // Date          Developer             Changes
 //
-// 12 Sep 2000   Mark Rejhon           Centralized aspect ratio code
-//                                     into separate module
-//
 // 09 Sep 2000   Michael Samblanet     Aspect ratio code contributed 
 //                                     to dTV project
+//
+// 12 Sep 2000   Mark Rejhon           Centralized aspect ratio code
+//                                     into separate module
 //
 // 08 Jan 2001   John Adcock           Global Variable Tidy up
 //                                     Got rid of global.h structs.h defines.h
 //
+// 11 Jan 2001   John Adcock           Added Code for window position
+//                                     Changed SourceFrameAspect to use
+//                                     CurrentX/Y rather than SourceRect
+//                                     So that overscan does not effect Ratio
+//                                     Fixed bug in FindBottomOfImage when
+//                                     Overscan is 0
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -118,20 +124,24 @@ long ShortRatioIgnoreMs = 1000;
 static int min_ratio_found[RATIO_HISTORY_SECONDS];
 
 // Timestamp of the most recent computation of min_ratio_found.
-static int min_ratio_tick_count = 0;
+int min_ratio_tick_count = 0;
 
 // Aspect ratios we've used recently.
-static int ratio_used[RATIO_HISTORY_CHANGES];
+int ratio_used[RATIO_HISTORY_CHANGES];
 
 // When we switched to each of the ratios in ratio_used[].
-static int ratio_time[RATIO_HISTORY_CHANGES];
+int ratio_time[RATIO_HISTORY_CHANGES];
 
 // True if we want to use whatever ratio is present on the next frame.
-static int DetectAspectNow = FALSE;
+int DetectAspectNow = FALSE;
+
+// Where does the window sit on the screen
+// defaults to bang in the middle
+VERT_POS VerticalPos = VERT_POS_CENTRE;
+HORZ_POS HorizontalPos = HORZ_POS_CENTRE;
 
 RECT destinationRectangle = {0,0,0,0};
 RECT sourceRectangle = {0,0,0,0};
-
 
 //----------------------------------------------------------------------------
 // Switch to a new aspect ratio and record it in the ratio history list.
@@ -260,6 +270,14 @@ void SetMenuAspectRatio(HWND hWnd)
 	CheckMenuItem(GetMenu(hWnd), IDM_TASPECT_200, (target_aspect == 2000)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_TASPECT_235, (target_aspect == 2350)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_TASPECT_CUSTOM, (target_aspect && target_aspect == custom_target_aspect)?MF_CHECKED:MF_UNCHECKED);
+
+	CheckMenuItem(GetMenu(hWnd), IDM_WINPOS_VERT_CENTRE, (VerticalPos == VERT_POS_CENTRE)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_WINPOS_VERT_TOP, (VerticalPos == VERT_POS_TOP)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_WINPOS_VERT_BOTTOM, (VerticalPos == VERT_POS_BOTTOM)?MF_CHECKED:MF_UNCHECKED);
+
+	CheckMenuItem(GetMenu(hWnd), IDM_WINPOS_HORZ_CENTRE, (HorizontalPos == HORZ_POS_CENTRE)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_WINPOS_HORZ_LEFT, (HorizontalPos == HORZ_POS_LEFT)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_WINPOS_HORZ_RIGHT, (HorizontalPos == HORZ_POS_RIGHT)?MF_CHECKED:MF_UNCHECKED);
 }
 
 //----------------------------------------------------------------------------
@@ -424,6 +442,19 @@ int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 	case IDM_TASPECT_CUSTOM:
 		target_aspect = custom_target_aspect;
 		ShowText(hWnd, "Custom Aspect Ratio Screen");
+		break;
+	case IDM_WINPOS_VERT_CENTRE:
+	case IDM_WINPOS_VERT_TOP:
+	case IDM_WINPOS_VERT_BOTTOM:
+		VerticalPos = wMenuID - IDM_WINPOS_VERT_CENTRE; 
+		WorkoutOverlaySize();
+		break;
+
+	case IDM_WINPOS_HORZ_CENTRE:
+	case IDM_WINPOS_HORZ_LEFT:
+	case IDM_WINPOS_HORZ_RIGHT:
+		HorizontalPos = wMenuID - IDM_WINPOS_HORZ_CENTRE; 
+		WorkoutOverlaySize();
 		break;
 	default:
 		// It's not an aspect ratio related menu selection
@@ -605,8 +636,8 @@ void WorkoutOverlaySize()
 		// and not calculating values needed - but this function is rarely called (window size, hardware setup, and aspect size changes)
 		// and as such, I see no reason to go through the effort to modify it.
 		
-		// Aspect ratio of the source rectangle - about 1.5 instead of 1.3 because sampling is at 720x480, not 640x480
-		double SourceFrameAspect = ASPECT(rOverlaySrc);
+		// Aspect ratio of the Input - about 1.5 instead of 1.3 because sampling is at 720x480, not 640x480
+		double SourceFrameAspect = (double)CurrentX/(double)CurrentY;
 		// The source normally represents a 4:3 video frame (left as a variable for future processors to change)
 		// BUT in anamorphic modes, it really represents a 16:9 video frame.
 		double ActualSourceFrameAspect;
@@ -660,17 +691,43 @@ void WorkoutOverlaySize()
 			}
 		}
 		// Crop the destination rectangle
-		if (TargetDestAspect > .1) {
-			if (WindowAspect > TargetDestAspect) {
+		if (TargetDestAspect > .1)
+		{
+			if (WindowAspect > TargetDestAspect)
+			{
 				// Source is wider - crop Left and Right
 				int NewWidth = (int) floor((TargetDestAspect*RHEIGHT(rOverlayDest))+.5);
-				rOverlayDest.left += (RWIDTH(rOverlayDest) - NewWidth)/2;
-				rOverlayDest.right = rOverlayDest.left + NewWidth;
-			} else {
+				switch(HorizontalPos)
+				{
+				case HORZ_POS_CENTRE:
+					rOverlayDest.left += (RWIDTH(rOverlayDest) - NewWidth)/2;
+					rOverlayDest.right = rOverlayDest.left + NewWidth;
+					break;
+				case HORZ_POS_LEFT:
+					rOverlayDest.right = rOverlayDest.left + NewWidth;
+					break;
+				case HORZ_POS_RIGHT:
+					rOverlayDest.left = rOverlayDest.right - NewWidth;
+					break;
+				}
+			}
+			else
+			{
 				// Source is taller - crop top and bottom
 				int NewHeight = (int) floor((RWIDTH(rOverlayDest)/TargetDestAspect)+.5);
-				rOverlayDest.top += (RHEIGHT(rOverlayDest) - NewHeight)/2;
-				rOverlayDest.bottom = rOverlayDest.top + NewHeight;
+				switch(VerticalPos)
+				{
+				case VERT_POS_CENTRE:
+					rOverlayDest.top += (RHEIGHT(rOverlayDest) - NewHeight)/2;
+					rOverlayDest.bottom = rOverlayDest.top + NewHeight;
+					break;
+				case VERT_POS_TOP:
+					rOverlayDest.bottom = rOverlayDest.top + NewHeight;
+					break;
+				case VERT_POS_BOTTOM:
+					rOverlayDest.top = rOverlayDest.bottom - NewHeight;
+					break;
+				}
 			}
 		}
 
@@ -860,7 +917,7 @@ int FindBottomOfImage(short** EvenField, short** OddField)
 			ignoreCount = 1;
 	}
 
-	for (y = maxY; y >= maxY / 2; y--)
+	for (y = maxY - 1; y >= maxY / 2; y--)
 	{
 		if (y & 1)
 			pixel = (BYTE *)OddField[y / 2];
