@@ -123,8 +123,8 @@
 #define IDM_BDELAY_CURRENT              623
 #define IDM_AUTODETECT                  690
 #define IDM_ASPECT_NONE                 700
-#define IDM_ASPECT_LETTERBOX            701
-#define IDM_ASPECT_FULLSCREEN           702
+#define IDM_ASPECT_FULLSCREEN           701
+#define IDM_ASPECT_LETTERBOX            702
 #define IDM_ASPECT_ANAMORPHIC           703
 #define IDM_SASPECT_0                   710
 #define IDM_SASPECT_133                 711
@@ -140,7 +140,9 @@
 #define IDM_SASPECT_235A                724
 #define IDM_SASPECT_CUSTOM              730
 #define IDM_SASPECT_COMPUTE             731
-#define IDM_SASPECT_AUTO                732
+#define IDM_SASPECT_AUTO_TOGGLE         732
+#define IDM_SASPECT_AUTO_ON             733
+#define IDM_SASPECT_AUTO_OFF            734
 #define IDM_TASPECT_0                   740
 #define IDM_TASPECT_133                 741
 #define IDM_TASPECT_166                 742

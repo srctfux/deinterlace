@@ -1017,7 +1017,7 @@ BEGIN
         MENUITEM "16:9 Anamorphic\t3",          IDM_ASPECT_ANAMORPHIC
         POPUP "Advanced Image Aspect Ratios"
         BEGIN
-            MENUITEM "Autodetect (experimental)\tA", IDM_SASPECT_AUTO
+            MENUITEM "Autodetect (experimental)\tA", IDM_SASPECT_AUTO_TOGGLE
             MENUITEM "Detect from Current Image\t`", IDM_SASPECT_COMPUTE
             MENUITEM "Stretch to Window\tCtrl+0",   IDM_SASPECT_0
             MENUITEM "1.33\tCtrl+1",                IDM_SASPECT_133
@@ -1451,7 +1451,10 @@ BEGIN
     "9",            IDM_SASPECT_CUSTOM,     VIRTKEY, CONTROL, NOINVERT
     "9",            IDM_TASPECT_CUSTOM,     VIRTKEY, ALT, NOINVERT
     "=",            IDM_VOLUMEPLUS,         ASCII,  NOINVERT
-    "A",            IDM_SASPECT_AUTO,       VIRTKEY, NOINVERT
+    "A",            IDM_SASPECT_AUTO_ON,    VIRTKEY, NOINVERT
+    "A",            IDM_SASPECT_AUTO_OFF,   VIRTKEY, SHIFT, NOINVERT
+    "A",            IDM_SASPECT_AUTO_TOGGLE, VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
     "B",            IDM_BRIGHTNESS_MINUS,   VIRTKEY, NOINVERT
     "B",            IDM_BRIGHTNESS_PLUS,    VIRTKEY, SHIFT, NOINVERT
     "B",            IDM_BRIGHTNESS_CURRENT, VIRTKEY, SHIFT, CONTROL, 
