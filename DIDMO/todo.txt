@@ -1,0 +1,11 @@
+* fix RGB24 format
+* maybe support more color formats?
+* handle source and target rect
+* loading and saving of settings?
+* support for halfheight mode
+* implement combfactor and field diff
+* add button in propertypage so its posibel to show UI for plugins that has its own UI
+* check wich plugins works as they shoud
+* find a way to handel frame/fileld difference between dscaler plugins and the dmo
+* build a sample program that uses dmo
+* find a way to do 2:2 and 3:2 pulldown
