@@ -61,7 +61,7 @@ int custom_source_aspect = 0;
 int custom_target_aspect = 0;
 
 // Luminance cutoff for a black pixel for letterbox detection.  0-127.
-long LuminanceThreshold = 25;
+long LuminanceThreshold = 30;
 
 // Ignore this many non-black pixels when detecting letterbox.  0 means
 // use a reasonable default.
@@ -596,11 +596,10 @@ void WorkoutOverlaySize()
 
 	// 2000-09-14 Mark Rejhon
 	// This was an attempt to eliminate error messages when window is resized to zero height
-	// Apparently, this attempt doesn't work.
-	if (rOverlayDest.left >= rOverlayDest.right)  rOverlayDest.right = rOverlayDest.left   + 1;
-	if (rOverlayDest.top  >= rOverlayDest.bottom) rOverlayDest.top   = rOverlayDest.bottom + 1;
-	if (rOverlaySrc.left  >= rOverlaySrc.right)   rOverlaySrc.right  = rOverlaySrc.left    + 1;
-	if (rOverlaySrc.top   >= rOverlaySrc.bottom)  rOverlaySrc.top    = rOverlaySrc.bottom  + 1;
+	if (rOverlayDest.left >= rOverlayDest.right)  rOverlayDest.right  = rOverlayDest.left + 1;
+	if (rOverlayDest.top  >= rOverlayDest.bottom) rOverlayDest.bottom = rOverlayDest.top  + 1;
+	if (rOverlaySrc.left  >= rOverlaySrc.right)   rOverlaySrc.right   = rOverlaySrc.left  + 1;
+	if (rOverlaySrc.top   >= rOverlaySrc.bottom)  rOverlaySrc.bottom  = rOverlaySrc.top   + 1;
 
 	Overlay_Update(&rOverlaySrc, &rOverlayDest, DDOVER_SHOW, TRUE);
 

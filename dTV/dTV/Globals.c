@@ -134,7 +134,7 @@ int pgstartx = -1;
 int pgstarty = -1;
 
 BOOL bAlwaysOnTop = FALSE;
-
+BOOL bDisplaySplashScreen = TRUE;
 BOOL bDisplayStatusBar = TRUE;
 
 PMemStruct Risc_dma;

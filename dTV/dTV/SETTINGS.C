@@ -56,7 +56,18 @@ void LoadSettingsFromIni(LPSTR Name)
 	emstarty = GetPrivateProfileInt("MainWindow", "StartTop", 10, szIniFile);
 	emsizex = GetPrivateProfileInt("MainWindow", "StartWidth", 754, szIniFile);
 	emsizey = GetPrivateProfileInt("MainWindow", "StartHeight", 521, szIniFile);
-	bAlwaysOnTop = (GetPrivateProfileInt("MainWindow", "AlwaysOnTop", 0, szIniFile) != 0);
+
+	bAlwaysOnTop = (GetPrivateProfileInt("MainWindow", "AlwaysOnTop", bAlwaysOnTop, szIniFile) != 0);
+	bDisplaySplashScreen = (GetPrivateProfileInt("MainWindow", "DisplaySplashScreen", bDisplaySplashScreen, szIniFile) != 0);
+	bIsFullScreen = (GetPrivateProfileInt("MainWindow", "bIsFullScreen", bIsFullScreen, szIniFile) != 0);
+
+	// 2000-10-30 Added by Mark Rejhon
+	// This is for situations where it is desirable for dTV to always start up in full screen
+	// even if dTV was exited during windowed mode on the last time
+	if (GetPrivateProfileInt("MainWindow", "AlwaysForceFullScreen", 0, szIniFile) != 0)
+	{
+		bIsFullScreen = TRUE;
+	}
 
 	pgstartx = GetPrivateProfileInt("ProgList", "StartLeft", -1, szIniFile);
 	pgstarty = GetPrivateProfileInt("ProgList", "StartTop", -1, szIniFile);
@@ -143,12 +154,12 @@ void LoadSettingsFromIni(LPSTR Name)
 	VideoSource = GetPrivateProfileInt("Hardware", "VideoSource", 1, szIniFile);
 	TunerType = GetPrivateProfileInt("Hardware", "TunerType", TUNER_ABSENT, szIniFile); 
 	TVTYPE = GetPrivateProfileInt("Hardware", "TVType", -1, szIniFile); 
-	InitialHue = GetPrivateProfileInt("Hardware", "InitialHue", 0, szIniFile); 
-	InitialContrast = GetPrivateProfileInt("Hardware", "InitialContrast", 0xd8, szIniFile); 
-	InitialBrightness = GetPrivateProfileInt("Hardware", "InitialBrightness", 0, szIniFile); 
-	InitialSaturationU = GetPrivateProfileInt("Hardware", "InitialSaturationU", 0xfe, szIniFile); 
-	InitialSaturationV = GetPrivateProfileInt("Hardware", "InitialSaturationV", 0xb4, szIniFile); 
-	InitialOverscan = GetPrivateProfileInt("Hardware", "InitialOverscan", 4, szIniFile); 
+	InitialHue = GetPrivateProfileInt("Hardware", "InitialHue", InitialHue, szIniFile); 
+	InitialContrast = GetPrivateProfileInt("Hardware", "InitialContrast", InitialContrast, szIniFile); 
+	InitialBrightness = GetPrivateProfileInt("Hardware", "InitialBrightness", InitialBrightness, szIniFile); 
+	InitialSaturationU = GetPrivateProfileInt("Hardware", "InitialSaturationU", InitialSaturationU, szIniFile); 
+	InitialSaturationV = GetPrivateProfileInt("Hardware", "InitialSaturationV", InitialSaturationV, szIniFile); 
+	InitialOverscan = GetPrivateProfileInt("Hardware", "InitialOverscan", InitialOverscan, szIniFile); 
 
 	ManuellAudio[0] = GetPrivateProfileInt("Hardware", "GPIO_OUT_EN", 0, szIniFile); 
 	ManuellAudio[1] = GetPrivateProfileInt("Hardware", "GPIO_DATA_TUNER", 0, szIniFile);  
@@ -271,8 +282,6 @@ void LoadSettingsFromIni(LPSTR Name)
 	BTVParams.UseKey1 = GetPrivateProfileInt("BTVPlugin", "UseKey1", BTVParams.UseKey1, szIniFile);
 	BTVParams.UseKey2 = GetPrivateProfileInt("BTVPlugin", "UseKey2", BTVParams.UseKey2, szIniFile);
 
-	bIsFullScreen = (GetPrivateProfileInt("MainWindow", "bIsFullScreen", bIsFullScreen, szIniFile) != 0);
-
 	// MRS 9/2/00
 	// Load Aspect Mode from INI- using strings would be more elegant long-term
 	source_aspect = GetPrivateProfileInt("ASPECT", "SourceAspect", 0, szIniFile);
@@ -298,6 +307,8 @@ void WriteSettingsToIni()
 	GetCurrentDirectory(MAX_PATH, szIniFile);
 	strcat(szIniFile, "\\dTV.ini");
 
+	WritePrivateProfileInt("MainWindow", "AlwaysOnTop", bAlwaysOnTop, szIniFile);
+	WritePrivateProfileInt("MainWindow", "DisplaySplashScreen", bDisplaySplashScreen, szIniFile);
 	WritePrivateProfileInt("MainWindow", "bIsFullScreen", bIsFullScreen, szIniFile);
 	if(!bIsFullScreen)
 	{
@@ -306,7 +317,6 @@ void WriteSettingsToIni()
 		WritePrivateProfileInt("MainWindow", "StartWidth", emsizex, szIniFile);
 		WritePrivateProfileInt("MainWindow", "StartHeight", emsizey, szIniFile);
 	}
-	WritePrivateProfileInt("MainWindow", "AlwaysOnTop", bAlwaysOnTop, szIniFile);
 
 	WritePrivateProfileInt("ProgList", "StartLeft", pgstartx, szIniFile);
 	WritePrivateProfileInt("ProgList", "StartTop", pgstarty, szIniFile);

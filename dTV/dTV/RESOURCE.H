@@ -129,6 +129,7 @@
 #define IDM_SASPECT_AUTO                544
 #define IDM_ADV_VIDEOSETTINGS           545
 #define IDM_SHIFT_SPACEBAR              546
+#define IDM_SPLASH_ON_STARTUP           547
 #define IDM_END                         1032
 #define IDM_TUNER                       1089
 #define IDM_EXTERN1                     1090
@@ -675,7 +676,7 @@
 #define _APS_NO_MFC                     1
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        153
-#define _APS_NEXT_COMMAND_VALUE         547
+#define _APS_NEXT_COMMAND_VALUE         548
 #define _APS_NEXT_CONTROL_VALUE         1774
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

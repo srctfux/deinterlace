@@ -187,6 +187,8 @@ extern int emsizey;
 extern int emstartx;
 extern int emstarty;
 extern BOOL bAlwaysOnTop;
+extern BOOL bIsFullScreen;
+extern BOOL bDisplaySplashScreen;
 
 extern int pgsizex;
 extern int pgsizey;
@@ -209,7 +211,6 @@ extern HFONT currFont;
 extern HBITMAP BirneRot;
 extern HBITMAP BirneGruen;
 
-extern BOOL bIsFullScreen;
 extern char BTVendorID[10];
 extern char BTDeviceID[10];
 extern char MSPVersion[16];

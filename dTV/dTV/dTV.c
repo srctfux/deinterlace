@@ -172,12 +172,14 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		return FALSE;
 	}
 
-	SplashWnd = CreateDialog(hInst, "SPLASHBOX", NULL, SplashProc);
+	LoadSettingsFromIni();
+	if (bDisplaySplashScreen)
+	{
+		SplashWnd = CreateDialog(hInst, "SPLASHBOX", NULL, SplashProc);
+	}
 #ifndef _DEBUG
 	SetWindowPos(SplashWnd, HWND_TOPMOST, 10, 10, 20, 20, SWP_NOMOVE | SWP_NOCOPYBITS | SWP_NOSIZE);
 #endif
-
-	LoadSettingsFromIni();
 
 	// try to load up bTV plugin
 	bUseBTVPlugin = BTVPluginLoad(szBTVPluginName);
@@ -1057,6 +1059,11 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			SetMenuAnalog();
 			break;
 
+		case IDM_SPLASH_ON_STARTUP:
+			bDisplaySplashScreen = !bDisplaySplashScreen;
+			SetMenuAnalog();
+			break;
+
 		case IDM_ANALOGSCAN:
 			SendMessage(hWnd, WM_COMMAND, IDM_TUNER, 0);
 			DialogBox(hInst, "ANALOGSCAN", hWnd, (DLGPROC) AnalogScanProc);
@@ -1820,6 +1827,7 @@ void SetMenuAnalog()
 	CheckMenuItem(GetMenu(hWnd), IDM_STATUSBAR, bDisplayStatusBar?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_ON_TOP, bAlwaysOnTop?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_AUTOSTEREO, AutoStereoSelect?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_SPLASH_ON_STARTUP, bDisplaySplashScreen?MF_CHECKED:MF_UNCHECKED);
 
 	CheckMenuItem(GetMenu(hWnd), IDM_AUTODETECT, bAutoDetectMode?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_FALLBACK, bFallbackToVideo?MF_CHECKED:MF_UNCHECKED);
