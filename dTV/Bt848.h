@@ -50,7 +50,7 @@ void BT848_Close();
 void BT848_MakeVBITable(int VBI_Lines);
 void BT848_SetPLL(PLLFREQ PLL);
 void BT848_SetRiscJumpsDecode(int nFlags);
-BOOL BT848_SetGeoSize(int wWidth, int wHeight);
+BOOL BT848_SetGeoSize();
 BOOL BT848_SetBrightness(char bBrightness);
 BOOL BT848_SetHue(char bHue);
 BOOL BT848_SetContrast(int wContrast);

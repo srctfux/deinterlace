@@ -62,7 +62,7 @@ long PulldownThresholdLow = -2000;
 long PulldownThresholdHigh = 2000;
 long PulldownRepeatCount = 4;
 long PulldownRepeatCount2 = 2;
-long Threshold32Pulldown = 200;
+long Threshold32Pulldown = 5000;
 BOOL bAutoDetectMode = TRUE;
 DWORD dwLastFlipTicks = -1;
 
@@ -211,13 +211,18 @@ BOOL WaitForNextField(BOOL LastField)
 		break;
 	}
 
-	if(stat & (BT848_INT_FDSR | BT848_INT_RIPERR | BT848_INT_PPERR))
+	BT848_WriteDword(BT848_INT_STAT, (DWORD) 0x0fffffff);
+
+// taken out for testing may still have to use BT rest to recover from overruns
+
+/*	if(stat & (BT848_INT_PPERR | BT848_INT_SCERR | BT848_INT_FBUS | BT848_INT_FTRGT | BT848_INT_RIPERR))
 	{
 		BT848_Restart_RISC_Code();
 		CurrentFrame = 0;
+		bIsOddField = TRUE;
 		UpdatePALPulldownMode(-1, FALSE);
 		UpdateNTSCPulldownMode(-1, FALSE);
-	}
+	} */
 	return bIsOddField;
 }
 
@@ -382,7 +387,7 @@ void UpdateNTSCPulldownMode(long FieldDiff, BOOL OnOddField)
 
     if(FieldDiff > Threshold32Pulldown)
 	{
-        if(MISMATCH_COUNT <= PulldownRepeatCount2)
+        if(MISMATCH_COUNT <= PulldownRepeatCount2 * 5)
 		{
 			MISMATCH_COUNT++;
 		}
@@ -702,20 +707,6 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 	int CombNum = 0;
 	BOOL bFlipNow = TRUE;
 	BOOL bIsOddField = FALSE;
-	DWORD PALTicks[PULLDOWNMODES_LAST_ONE] = 
-	{
-		17,
-		17,
-		17,
-		17,
-		38,
-		38,
-		48,
-		48,
-		48,
-		48,
-		48,
-	};
 
 	if (lpDDOverlay == NULL || lpDDOverlay == NULL || lpOverlayBack == NULL || lpOverlay == NULL)
 	{
@@ -915,11 +906,6 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 
 			if(DoWeWantToFlip(bFlipNow, bIsOddField))
 			{
-				// wait for a good time to flip
-				while(GetTickCount() - dwLastFlipTicks < PALTicks[gPulldownMode])
-				{
-					Sleep(2);
-				}
 				IDirectDrawSurface_Flip(lpDDOverlay, lpDDOverlayBack, DDFLIP_WAIT);
 				dwLastFlipTicks = GetTickCount();
 				if(lpCurOverlay == lpOverlay)
@@ -966,21 +952,6 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 	BOOL bFlipNow = TRUE;
 	BOOL bIsOddField = FALSE;
 
-	DWORD NTSCTicks[PULLDOWNMODES_LAST_ONE] = 
-	{
-		14,
-		14,
-		14,
-		14,
-		30,
-		30,
-		39,
-		39,
-		39,
-		39,
-		39,
-	};
-
 	if (lpDDOverlay == NULL || lpDDOverlay == NULL || lpOverlayBack == NULL || lpOverlay == NULL)
 	{
 		ExitThread(-1);
@@ -1021,7 +992,7 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 			{
 				if(bAutoDetectMode == TRUE)
 				{
-					CompareResult = CompareFields2(ppOddLines[(CurrentFrame + 4) % 5], ppOddLines[CurrentFrame]);
+					CompareResult = CompareFields(ppOddLines[(CurrentFrame + 4) % 5], ppOddLines[CurrentFrame]);
 					LOG(" Frame %d O CR = %d", CurrentFrame, CompareResult);
 					UpdateNTSCPulldownMode(CompareResult, TRUE);
 				}
@@ -1099,7 +1070,7 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 			{
 				if(bAutoDetectMode == TRUE)
 				{
-					CompareResult = CompareFields2(ppEvenLines[(CurrentFrame + 4) % 5], ppEvenLines[CurrentFrame]);
+					CompareResult = CompareFields(ppEvenLines[(CurrentFrame + 4) % 5], ppEvenLines[CurrentFrame]);
 					LOG(" Frame %d E CR = %d", CurrentFrame, CompareResult);
 					UpdateNTSCPulldownMode(CompareResult, FALSE);
 				}
@@ -1176,11 +1147,6 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 
 			if(DoWeWantToFlip(bFlipNow, bIsOddField))
 			{
-				// wait for a good time to flip
-				while(GetTickCount() - dwLastFlipTicks < NTSCTicks[gPulldownMode])
-				{
-					Sleep(2);
-				}
 				IDirectDrawSurface_Flip(lpDDOverlay, lpDDOverlayBack, DDFLIP_WAIT);
 				dwLastFlipTicks = GetTickCount();
 				if(lpCurOverlay == lpOverlay)

@@ -58,7 +58,7 @@ struct TTVSetting TVSettings[10] =
 	    944, 768, 186, 922, 0x20, 0, TRUE, 511},
 	/* NTSC CCIR601 */ 
 	{ 720, 480,  910, 0x68, 0x5d, (BT848_IFORM_NTSC|BT848_IFORM_XT0),
-	    858, 720, 135, 754, 0x1a, 0, FALSE, 400},
+	    858, 720, 137, 754, 0x1a, 0, FALSE, 400},
 	/* SECAM */
 	{ 768, 576, 1135, 0x7f, 0xb0, (BT848_IFORM_SECAM|BT848_IFORM_XT1),
 	    944, 768, 186, 922, 0x20, 0, TRUE, 511},

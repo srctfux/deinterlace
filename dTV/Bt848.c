@@ -48,10 +48,6 @@ DWORD *m_pRiscFrameEven[5];
 DWORD *m_pRiscVBIEven[5];
 DWORD *m_pRiscFrameOdd[5];
 
-
-WORD m_wWindowWidth;
-WORD m_wWindowHeight;
-
 BOOL BT848_FindTVCard(HWND hWnd)
 {
 	FILE *SettingFile;
@@ -267,8 +263,6 @@ BOOL BT848_MemoryInit(void)
 	m_pRiscFrameOdd[4] = m_pRiscVBIEven[4] + 160;
 	m_pRiscFrameEven[4] = m_pRiscFrameOdd[4] + 1536;
 
-	BT848_ResetHardware();
-
 	return (TRUE);
 }
 
@@ -285,8 +279,8 @@ void BT848_ResetHardware()
 {
 	BT848_SetDMA(FALSE);
 	BT848_WriteByte(BT848_SRESET, 0);
-	BT848_WriteByte(BT848_CAP_CTL, 0x00);
 	BT848_WriteDword(BT848_RISC_STRT_ADD, RiscLogToPhys(m_pRiscJump + 2));
+	BT848_WriteByte(BT848_CAP_CTL, 0x00);
 	BT848_WriteByte(BT848_VBI_PACK_SIZE, (VBI_SPL / 4) & 0xff);
 	BT848_WriteByte(BT848_VBI_PACK_DEL, (VBI_SPL / 4) >> 8);
 	BT848_WriteWord(BT848_GPIO_DMA_CTL, 0xfc);
@@ -310,7 +304,13 @@ void BT848_ResetHardware()
 	BT848_WriteByte(BT848_TDEC, 0x00);
 
 	BT848_WriteDword(BT848_INT_STAT, (DWORD) 0x0fffffff);
-	BT848_WriteDword(BT848_INT_MASK, 0x800800);
+	BT848_WriteDword(BT848_INT_MASK, 0);
+//						BT848_INT_SCERR|
+//						BT848_INT_OCERR|
+//						BT848_INT_FDSR|
+//						BT848_INT_PPERR|
+//						BT848_INT_FBUS|
+//						BT848_INT_FTRGT);
 
 	BT848_SetPLL(0);
 
@@ -320,6 +320,7 @@ void BT848_ResetHardware()
 	BT848_SetSaturationU(InitialSaturationU);
 	BT848_SetSaturationV(InitialSaturationV);
 	BT848_SetVideoSource(VideoSource);
+	BT848_SetGeoSize();
 }
 
 PHYS RiscLogToPhys(DWORD * pLog)
@@ -449,7 +450,7 @@ void BT848_SetDMA(BOOL bState)
 	}
 }
 
-BOOL BT848_SetGeoSize(int width, int height)
+BOOL BT848_SetGeoSize()
 {
 	int vscale, hscale;
 	DWORD sr;
@@ -457,13 +458,8 @@ BOOL BT848_SetGeoSize(int width, int height)
 	int hactive, vactive;
 	BYTE crop, vtc, ColourFormat;
 
-	if (!width || !height)
-	{
-		return FALSE;
-	}
-
-	m_wWindowHeight = height;
-	m_wWindowWidth = width;
+	CurrentX = TVSettings[TVTYPE].wCropWidth;
+	CurrentY = TVSettings[TVTYPE].wCropHeight;
 
 	// set the pll on the card if appropriate
 	if(TVSettings[TVTYPE].Is25fps == TRUE && TVCards[CardType].pll != PLL_NONE)
@@ -487,15 +483,14 @@ BOOL BT848_SetGeoSize(int width, int height)
 
 	BT848_WriteByte(BT848_COLOR_FMT, ColourFormat);
 
-	hactive = width;
+	hactive = CurrentX;
 	vtc = (hactive < 193) ? 2 : ((hactive < 385) ? 1 : 0);
 
-	hscale = ((TVSettings[TVTYPE].wHActivex1 - width) * 4096UL) / width;
+	hscale = ((TVSettings[TVTYPE].wHActivex1 - CurrentX) * 4096UL) / CurrentX;
 	vdelay = TVSettings[TVTYPE].wVDelay;
-	hdelay = ((width * TVSettings[TVTYPE].wHDelayx1) / TVSettings[TVTYPE].wHActivex1) & 0x3fe;
-	//hdelay -= 4;
+	hdelay = ((CurrentX * TVSettings[TVTYPE].wHDelayx1) / TVSettings[TVTYPE].wHActivex1) & 0x3fe;
 
-	sr = (TVSettings[TVTYPE].wCropHeight * 512) / height - 512;
+	sr = (TVSettings[TVTYPE].wCropHeight * 512) / CurrentY - 512;
 	vscale = (WORD) (0x10000UL - sr) & 0x1fff;
 	vactive = TVSettings[TVTYPE].wCropHeight;
 	crop = ((hactive >> 8) & 0x03) | ((hdelay >> 6) & 0x0c) | ((vactive >> 4) & 0x30) | ((vdelay >> 2) & 0xc0);

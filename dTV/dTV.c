@@ -433,8 +433,9 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
 		case IDM_RESET:
 			Stop_Capture();
-			BT848_ResetHardware();
 			Overlay_Clean();
+			BT848_ResetHardware();
+			BT848_SetGeoSize();
 			WorkoutOverlaySize();
 			Start_Capture();
 			Sleep(100);
@@ -806,6 +807,9 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			VideoSource = wParam - IDM_TUNER;
 			AudioSource = AUDIOMUX_EXTERNAL;
 			Stop_Capture();
+			BT848_ResetHardware();
+			BT848_SetGeoSize();
+			WorkoutOverlaySize();
 			BT848_SetVideoSource(VideoSource);
 			if (bDisplayStatusBar == TRUE)
 			{
@@ -1064,7 +1068,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_TYPEFORMAT_9:
 			TVTYPE = wParam - 1120;
 			Stop_Capture();
-			Setup_PictureSize();
+			BT848_SetGeoSize();
 			WorkoutOverlaySize();
 			Start_Capture();
 			SetMenuAnalog();
@@ -1444,7 +1448,9 @@ void MainWndOnInitBT(HWND hWnd)
 			pDisplay[i] = Display_dma[i]->dwUser;
 		}
 
-		Setup_PictureSize();
+		// OK we're ready to go
+		BT848_ResetHardware();
+		BT848_SetGeoSize();
 		WorkoutOverlaySize();
 		Start_Capture();
 		Sleep(100);
@@ -1825,13 +1831,6 @@ void ChangeChannel(int NewChannel)
 			}
 		}
 	}
-}
-
-void Setup_PictureSize()
-{
-	CurrentX = TVSettings[TVTYPE].wCropWidth;
-	CurrentY = TVSettings[TVTYPE].wCropHeight;
-	BT848_SetGeoSize(CurrentX, CurrentY);
 }
 
 void WorkoutOverlaySize()
