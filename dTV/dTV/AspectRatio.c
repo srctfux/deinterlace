@@ -55,6 +55,7 @@
 //                                     Made bounce timer a ini setting and changed to 1sec default
 //
 // 23 Feb 2001   Michael Samblanet     Added experemental orbiting code
+// 24 Feb 2001   Michael Samblanet     Minor bug fixes to invalidate code
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -986,6 +987,10 @@ void WorkoutOverlaySize()
 		RECT invalidate;
 		UnionRect(&invalidate,&previousDest,&destinationRectangle);
 		InvalidateRect(hWnd,&invalidate,FALSE);
+	} else if (overlayNeedsSetting) {
+		// If not invalidating, we need to update the overlay now...
+		Overlay_Update(&rOverlaySrc, &rOverlayDest, DDOVER_SHOW, TRUE);
+		overlayNeedsSetting = FALSE;
 	}
 
 	return;

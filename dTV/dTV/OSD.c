@@ -27,6 +27,10 @@
 // 23 Feb 2001   Michael Samblanet     Calculate OSD rect so we do not 
 //                                     invalidate entire display to erase
 //
+// 24 Feb 2001   Michael Samblanet     Moved rect into OSDInfo structure
+//                                     Should improve compatability with coming
+//                                     OSD changes
+//
 // NOTICE FROM MARK: This code will probably be rewritten, but keeping 
 // this code neat and architecturally well organized, will maximize code 
 // recyclability.   There is a need for multiple independent OSD elements,
@@ -51,7 +55,6 @@ long DefaultSizePerc = 10;
 BOOL bAntiAlias = TRUE;
 BOOL bOutline = TRUE;
 eOSDBackground Background;
-RECT osdRect = {0,0,0,0};
 
 
 //---------------------------------------------------------------------------
@@ -140,7 +143,7 @@ void OSD_Clear(HWND hWnd)
     bOverride = FALSE;
 	if (grOSD.szText[0] != 0) { // No need if we don't have any OSD text...(MRS 2-23-01)
 		lstrcpy(grOSD.szText, "");
-		InvalidateRect(hWnd, &osdRect, FALSE); // MRS 2-23-01 Added osdRect 
+		InvalidateRect(hWnd, &grOSD.currentRect, FALSE); // MRS 2-23-01 Added osdRect 
 	}
 }
 
@@ -269,10 +272,10 @@ void OSD_Redraw(HWND hWnd, HDC hDC)
 					SIZE sz;
 					GetTextExtentExPoint(hDC, grOSD.szText, strlen(grOSD.szText), 
 											32000, NULL, NULL, &sz);
-					osdRect.left = nXpos-4; if (osdRect.left < 0) osdRect.left = 0;
-					osdRect.right = nXpos + sz.cx + 4;
-					osdRect.top = nYpos-4; if (osdRect.top < 0) osdRect.top = 0;
-					osdRect.bottom = nYpos + sz.cy + 4;
+					grOSD.currentRect.left = nXpos-4; if (grOSD.currentRect.left < 0) grOSD.currentRect.left = 0;
+					grOSD.currentRect.right = nXpos + sz.cx + 4;
+					grOSD.currentRect.top = nYpos-4; if (grOSD.currentRect.top < 0) grOSD.currentRect.top = 0;
+					grOSD.currentRect.bottom = nYpos + sz.cy + 4;
 				}
  			}
 			

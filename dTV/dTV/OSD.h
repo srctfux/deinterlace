@@ -24,6 +24,8 @@
 //
 // 28 Nov 2000   Mark Rejhon           Reorganization and visual improvements
 //
+// 24 Feb 2001   Michael Samblanet     Added invalidation rectangle
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __OSD_H___
@@ -48,6 +50,7 @@ typedef struct OSD_INFO_TAG
     double          dfSize;            // Size of OSD as percentage of screen height
     double          dfXpos;            // X position (0 = left, 1 = right)
     double          dfYpos;            // Y position (0 = top, 1 = bottom)
+	RECT            currentRect;       // MRS 2-24-01 Saves the current drawn rectangle (used to limit invalidation area)
 } OSD_INFO;
 
 void OSD_ShowText(HWND hWnd, LPCTSTR szText, double dfSize);
