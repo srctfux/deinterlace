@@ -21,6 +21,10 @@
 //
 // 24 Jul 2000   John Adcock           changed to windows Ini file functions
 //
+//  3 Nov 2000   Michael Eskin         Added override of initial BDELAY setting
+//               Conexant Systems      by adding non-zero InitialBDelay in .ini
+//                                     File. Changed NTSC defaults to 0x5C
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -160,6 +164,10 @@ void LoadSettingsFromIni(LPSTR Name)
 	InitialSaturationU = GetPrivateProfileInt("Hardware", "InitialSaturationU", InitialSaturationU, szIniFile); 
 	InitialSaturationV = GetPrivateProfileInt("Hardware", "InitialSaturationV", InitialSaturationV, szIniFile); 
 	InitialOverscan = GetPrivateProfileInt("Hardware", "InitialOverscan", InitialOverscan, szIniFile); 
+
+	// MAE 2 Nov 2000 - Start of change for Macrovision fix
+	InitialBDelay = GetPrivateProfileInt("Hardware", "InitialBDelay", InitialBDelay, szIniFile);
+	// MAE 2 Nov 2000 - End of change for Macrovision fix
 
 	ManuellAudio[0] = GetPrivateProfileInt("Hardware", "GPIO_OUT_EN", 0, szIniFile); 
 	ManuellAudio[1] = GetPrivateProfileInt("Hardware", "GPIO_DATA_TUNER", 0, szIniFile);  
@@ -390,6 +398,10 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("Hardware", "InitialSaturationU", InitialSaturationU, szIniFile); 
 	WritePrivateProfileInt("Hardware", "InitialSaturationV", InitialSaturationV, szIniFile); 
 	WritePrivateProfileInt("Hardware", "InitialOverscan", InitialOverscan, szIniFile); 
+
+// MAE 2 Nov 2000 - Start of change for Macrovision fix
+	WritePrivateProfileInt("Hardware", "InitialBDelay", InitialBDelay, szIniFile); 
+// MAE 2 Nov 2000 - End of change for Macrovision fix
 
 	WritePrivateProfileInt("Hardware", "GPIO_OUT_EN", ManuellAudio[0], szIniFile); 
 	WritePrivateProfileInt("Hardware", "GPIO_DATA_TUNER", ManuellAudio[1], szIniFile);  

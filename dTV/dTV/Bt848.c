@@ -22,6 +22,10 @@
 // 24 Jul 2000   John Adcock           Original Release
 //                                     Removed use of WinDrvr
 //
+//  3 Nov 2000   Michael Eskin         Added override of initial BDELAY setting
+//               Conexant Systems      by adding non-zero InitialBDelay in .ini
+//                                     File. Changed NTSC defaults to 0x5C
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -303,6 +307,15 @@ void BT848_ResetHardware()
 	
 	BT848_WriteByte(BT848_TDEC, 0x00);
 
+// MAE 2 Nov 2000 - Start of change for Macrovision fix
+	if (InitialBDelay != 0)
+	{
+		// BDELAY override from .ini file
+		BT848_SetBDELAY((BYTE)InitialBDelay);
+	}
+// MAE 2 Nov 2000 - End of change for Macrovision fix
+
+
 	BT848_WriteDword(BT848_INT_STAT, (DWORD) 0x0fffffff);
 	BT848_WriteDword(BT848_INT_MASK, 0);
 //						BT848_INT_SCERR|
@@ -483,6 +496,14 @@ BOOL BT848_SetGeoSize()
 
 	BT848_WriteByte(BT848_COLOR_FMT, ColourFormat);
 
+// MAE 2 Nov 2000 - Start of change for Macrovision fix
+	if (InitialBDelay != 0)
+	{
+		// BDELAY override from .ini file
+		BT848_SetBDELAY((BYTE)InitialBDelay);
+	}
+// MAE 2 Nov 2000 - End of change for Macrovision fix
+
 	hactive = CurrentX;
 	vtc = (hactive < 193) ? 2 : ((hactive < 385) ? 1 : 0);
 
@@ -546,6 +567,14 @@ BOOL BT848_SetSaturationV(int wData)
 	BT848_MaskDataByte(BT848_O_CONTROL, bDataHi, 1);
 	return TRUE;
 }
+
+// MAE 3 Nov 2000 Start of Macrovision fix
+BOOL BT848_SetBDELAY(BYTE bBDelay)
+{
+	BT848_WriteByte(BT848_BDELAY, bBDelay);
+	return TRUE;
+}
+// MAE 3 Nov 2000 End of Macrovision fix
 
 BOOL BT848_SetVideoSource(int nInput)
 {

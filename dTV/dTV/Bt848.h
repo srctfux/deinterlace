@@ -56,6 +56,11 @@ BOOL BT848_SetHue(char bHue);
 BOOL BT848_SetContrast(int wContrast);
 BOOL BT848_SetSaturationU(int wData);
 BOOL BT848_SetSaturationV(int wData);
+
+// MAE 3 Nov 2000 Start of Macrovision fix
+BOOL BT848_SetBDELAY(BYTE bBDelay);
+// MAE 3 Nov 2000 End of Macrovision fix
+
 BOOL BT848_SetVideoSource(int nInput);
 void BT848_SetDMA(BOOL bState);
 BOOL BT848_IsVideoPresent();

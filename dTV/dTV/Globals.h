@@ -127,6 +127,11 @@ extern int InitialContrast;
 extern int InitialProg;
 extern int InitialSaturationU;
 extern int InitialSaturationV;
+
+// MAE 2 Nov 2000 - Start of change for Macrovision fix
+extern int InitialBDelay;
+// MAE 2 Nov 2000 - End of change for Macrovision fix
+
 extern int InitialOverscan;
 extern int InitialVolume;
 extern int LineFlag;
