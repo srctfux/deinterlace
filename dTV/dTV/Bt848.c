@@ -435,23 +435,7 @@ void BT848_ResetHardware()
 	BT848_WriteWord(BT848_GPIO_DMA_CTL, 0xfc);
 	BT848_WriteByte(BT848_IFORM, BT848_IFORM_MUX1 | BT848_IFORM_XTAUTO | BT848_IFORM_PAL_BDGHI);
 
-	BT848_WriteByte(BT848_E_CONTROL, BtEvenLumaDec);
-	BT848_WriteByte(BT848_O_CONTROL, BtOddLumaDec);
-
-	BT848_WriteByte(BT848_E_SCLOOP, 
-		(BYTE) (BtEvenChromaAGC | BtEvenLumaPeak | BtColorKill | BtHorFilter));
-	
-	BT848_WriteByte(BT848_O_SCLOOP, 
-		(BYTE) (BtOddChromaAGC | BtOddLumaPeak | BtColorKill | BtHorFilter));
-
-	BT848_WriteByte(BT848_OFORM, (BYTE)(BtCoring | BtFullLumaRange));
-	
-	BT848_WriteByte(BT848_E_VSCALE_HI, BtEvenComb);
-	BT848_WriteByte(BT848_O_VSCALE_HI, BtOddComb);
-	
-	BT848_WriteByte(BT848_ADC, (BYTE) (BT848_ADC_RESERVED | BtAgcDisable | BtCrush)); 
-
-	BT848_WriteByte(BT848_COLOR_CTL, (BYTE) (BtColorBars | BtGammaCorrection));
+	BT848_Registers_OnChange(0);
 	
 	BT848_WriteByte(BT848_TDEC, 0x00);
 
@@ -466,12 +450,6 @@ void BT848_ResetHardware()
 
 	BT848_WriteDword(BT848_INT_STAT, (DWORD) 0x0fffffff);
 	BT848_WriteDword(BT848_INT_MASK, 0);
-//						BT848_INT_SCERR|
-//						BT848_INT_OCERR|
-//						BT848_INT_FDSR|
-//						BT848_INT_PPERR|
-//						BT848_INT_FBUS|
-//						BT848_INT_FTRGT);
 
 	BT848_SetPLL(0);
 
