@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DeinterlaceProperties.cpp,v 1.1.1.1 2001-07-30 16:14:44 tobbej Exp $
+// $Id: DeinterlaceProperties.cpp,v 1.2 2001-08-07 17:43:52 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2001 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1.1.1  2001/07/30 16:14:44  tobbej
+// initial import of new dmo filter
+//
 //
 //////////////////////////////////////////////////////////////////////////////
 
@@ -84,17 +87,26 @@ LRESULT CDeinterlaceProperties::OnPluginLoad(WORD wNotifyCode, WORD wID, HWND hW
 {
 	ATLTRACE("%s(%d) : OnPluginLoad\n",__FILE__,__LINE__);
 	USES_CONVERSION;
+	HRESULT hr;
 	CComQIPtr<IDeinterlace,&IID_IDeinterlace> pDI(m_ppUnk[0]);
 
 	TCHAR strFileName[255];
 	GetDlgItemText(IDC_PLUGIN_FILENAME,strFileName,255);
-	if(FAILED(pDI->LoadPlugin(strFileName,NULL,NULL)))
+	hr=pDI->LoadPlugin(strFileName,NULL,NULL);
+	if(FAILED(hr))
 	{
 		CComPtr<IErrorInfo> pError;
 		CComBSTR strError;
 		GetErrorInfo(0, &pError);
-		pError->GetDescription(&strError);
-		MessageBox(OLE2T(strError), _T("Error"), MB_ICONEXCLAMATION);
+		if(pError!=NULL)
+		{
+			pError->GetDescription(&strError);
+			MessageBox(OLE2T(strError), _T("Error"), MB_ICONEXCLAMATION);
+		}
+		else
+		{
+			MessageBox("Unknown error","Error",MB_ICONEXCLAMATION);
+		}
 		return 0;
 	}
 
