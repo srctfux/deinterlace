@@ -50,12 +50,19 @@
 #include "status.h"
 #include "vbi.h"
 
-#define SOURCE_TUNER           0
-#define SOURCE_COMPOSITE       1
-#define SOURCE_SVIDEO          2
-#define SOURCE_OTHER1          3
-#define SOURCE_OTHER2          4
-#define SOURCE_COMPVIASVIDEO   5
+//---------------------------------------------------------------------------
+// 2000-12-19 Added by Mark Rejhon
+// These are constants for the GetCurrentAdjustmentStepCount()
+// function.  This is a feature to allow accelerated slider adjustments
+// For example, adjusting Contrast or Brightness faster the longer you
+// hold down the adjustment key.
+#define ADJ_MINIMUM_REPEAT_BEFORE_ACCEL     6      // Minimum number of taps before acceleration begins
+#define ADJ_KEYB_TYPEMATIC_REPEAT_DELAY     200    // Milliseconds threshold for consecutive keypress repeat
+#define ADJ_KEYB_TYPEMATIC_ACCEL_STEP       2000   // Milliseconds between each acceleration of adjustment
+#define ADJ_KEYB_TYPEMATIC_MAX_STEP         5      // Maximum adjustment step at one time
+#define ADJ_BUTTON_REPRESS_REPEAT_DELAY     400    // Milliseconds threshold for consecutive button repress
+#define ADJ_BUTTON_REPRESS_ACCEL_STEP       500    // Milliseconds between each acceleration of adjustment
+#define ADJ_BUTTON_REPRESS_MAX_STEP         15     // Maximum adjustment step at one time
 
 HWND hwndStatusBar;
 HWND hwndTextField;
@@ -442,7 +449,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
 				sprintf(Text, "    Channel %s ",Programm[CurrentProgramm].Name);
 				StatusBar_ShowText(hwndTextField, Text);
-				OSD_ShowText(hWnd,Programm[CurrentProgramm].Name);
+				OSD_ShowText(hWnd,Programm[CurrentProgramm].Name, 0);
 			}
 
 			break;
@@ -475,7 +482,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
 				sprintf(Text, "    Channel %s ",Programm[CurrentProgramm].Name);
 				StatusBar_ShowText(hwndTextField, Text);
-				OSD_ShowText(hWnd,Programm[CurrentProgramm].Name);
+				OSD_ShowText(hWnd,Programm[CurrentProgramm].Name, 0);
 			}
 
 			break;
@@ -546,13 +553,13 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_BRIGHTNESS_PLUS:
-			if (InitialBrightness < 127) InitialBrightness++;
-			BT848_SetBrightness(InitialBrightness);
+            AdjustSliderUp(&InitialBrightness, 127);
+            BT848_SetBrightness(InitialBrightness);
             SendMessage(hWnd, WM_COMMAND, IDM_BRIGHTNESS_CURRENT, 0);
 			break;
 
 		case IDM_BRIGHTNESS_MINUS:
-			if (InitialBrightness > -127) InitialBrightness--;
+            AdjustSliderDown(&InitialBrightness, -127);
 			BT848_SetBrightness(InitialBrightness);
             SendMessage(hWnd, WM_COMMAND, IDM_BRIGHTNESS_CURRENT, 0);
 			break;
@@ -562,23 +569,68 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			ShowText(hWnd, Text);
 			break;
 
+		case IDM_KONTRAST_PLUS:
+            AdjustSliderUp(&InitialContrast, 255);
+			BT848_SetContrast(InitialContrast);
+            SendMessage(hWnd, WM_COMMAND, IDM_KONTRAST_CURRENT, 0);
+			break;
+
+		case IDM_KONTRAST_MINUS:
+            AdjustSliderDown(&InitialContrast, 0);
+			BT848_SetContrast(InitialContrast);
+            SendMessage(hWnd, WM_COMMAND, IDM_KONTRAST_CURRENT, 0);
+			break;
+
+		case IDM_KONTRAST_CURRENT:
+			sprintf(Text, "Contrast %d", InitialContrast);
+			ShowText(hWnd, Text);
+			break;
+
+		case IDM_USATURATION_PLUS:
+            AdjustSliderUp(&InitialSaturationU, 255);
+			BT848_SetSaturationU(InitialSaturationU);
+            SendMessage(hWnd, WM_COMMAND, IDM_USATURATION_CURRENT, 0);
+			break;
+		
+        case IDM_USATURATION_MINUS:
+            AdjustSliderDown(&InitialSaturationU, 0);
+			BT848_SetSaturationU(InitialSaturationU);
+            SendMessage(hWnd, WM_COMMAND, IDM_USATURATION_CURRENT, 0);
+			break;
+
+        case IDM_USATURATION_CURRENT:
+			sprintf(Text, "U Saturation %d", InitialSaturationU);
+			ShowText(hWnd, Text);
+			break;
+		
+        case IDM_VSATURATION_PLUS:
+            AdjustSliderUp(&InitialSaturationV, 255);
+			BT848_SetSaturationV(InitialSaturationV);
+            SendMessage(hWnd, WM_COMMAND, IDM_VSATURATION_CURRENT, 0);
+			break;
+
+        case IDM_VSATURATION_MINUS:
+            AdjustSliderDown(&InitialSaturationV, 0);
+			BT848_SetSaturationV(InitialSaturationV);
+            SendMessage(hWnd, WM_COMMAND, IDM_VSATURATION_CURRENT, 0);
+			break;
+
+        case IDM_VSATURATION_CURRENT:
+			sprintf(Text, "V Saturation %d", InitialSaturationV);
+			ShowText(hWnd, Text);
+			break;
+
 		case IDM_COLOR_PLUS:
-			if ((InitialSaturationU < 255) && (InitialSaturationV < 255))
-			{
-				InitialSaturationU++;
-				InitialSaturationV++;
-			}
+            AdjustSliderUp(&InitialSaturationU, 255);
+            AdjustSliderUp(&InitialSaturationV, 255);
 			BT848_SetSaturationU(InitialSaturationU);
 			BT848_SetSaturationV(InitialSaturationV);
             SendMessage(hWnd, WM_COMMAND, IDM_COLOR_CURRENT, 0);
 			break;
 
 		case IDM_COLOR_MINUS:
-			if ((InitialSaturationU > 0) && (InitialSaturationV > 0))
-			{
-				InitialSaturationU--;
-				InitialSaturationV--;
-			}
+            AdjustSliderDown(&InitialSaturationU, 0);
+            AdjustSliderDown(&InitialSaturationV, 0);
 			BT848_SetSaturationU(InitialSaturationU);
 			BT848_SetSaturationV(InitialSaturationV);
             SendMessage(hWnd, WM_COMMAND, IDM_COLOR_CURRENT, 0);
@@ -590,13 +642,13 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_HUE_PLUS:
-			if (InitialHue < 127) InitialHue++;
+            AdjustSliderUp(&InitialHue, 127);
 			BT848_SetHue(InitialHue);
             SendMessage(hWnd, WM_COMMAND, IDM_HUE_CURRENT, 0);
 			break;
 
 		case IDM_HUE_MINUS:
-			if (InitialHue > -127) InitialHue--;
+            AdjustSliderDown(&InitialHue, -127);
 			BT848_SetHue(InitialHue);
             SendMessage(hWnd, WM_COMMAND, IDM_HUE_CURRENT, 0);
 			break;
@@ -606,38 +658,15 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			ShowText(hWnd, Text);
 			break;
 
-		case IDM_KONTRAST_PLUS:
-			if (InitialContrast < 255) InitialContrast++;
-			BT848_SetContrast(InitialContrast);
-            SendMessage(hWnd, WM_COMMAND, IDM_KONTRAST_CURRENT, 0);
-			break;
-
-		case IDM_KONTRAST_MINUS:
-			if (InitialContrast > 0) InitialContrast--;
-			BT848_SetContrast(InitialContrast);
-            SendMessage(hWnd, WM_COMMAND, IDM_KONTRAST_CURRENT, 0);
-			break;
-
-		case IDM_KONTRAST_CURRENT:
-			sprintf(Text, "Contrast %d", InitialContrast);
-			ShowText(hWnd, Text);
-			break;
-
 		case IDM_OVERSCAN_PLUS:
-			if(InitialOverscan < 127)
-			{
-				InitialOverscan++;
-				WorkoutOverlaySize();
-			}
+            AdjustSliderUp(&InitialOverscan, 127);
+			WorkoutOverlaySize();
             SendMessage(hWnd, WM_COMMAND, IDM_OVERSCAN_CURRENT, 0);
 			break;
 
 		case IDM_OVERSCAN_MINUS:
-			if(InitialOverscan > 0)
-			{
-				InitialOverscan--;
-				WorkoutOverlaySize();
-			}
+            AdjustSliderDown(&InitialOverscan, 0);
+			WorkoutOverlaySize();
             SendMessage(hWnd, WM_COMMAND, IDM_OVERSCAN_CURRENT, 0);
 			break;
 
@@ -647,7 +676,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_BDELAY_PLUS:
-			if (InitialBDelay < 255) InitialBDelay++;
+            AdjustSliderUp(&InitialBDelay, 255);
     		BT848_SetBDELAY((BYTE)InitialBDelay);
             SendMessage(hWnd, WM_COMMAND, IDM_BDELAY_CURRENT, 0);
 			break;
@@ -655,9 +684,10 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_BDELAY_MINUS:
 			if (InitialBDelay > 0) 
             {
-                InitialBDelay--;
+                AdjustSliderDown(&InitialBDelay, 0);
                 if (InitialBDelay == 0) 
                 {
+                    // We use automatic BDelay if InitialBDelay is 0
                     Reset_Capture();
                 }
                 else
@@ -875,7 +905,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
 			sprintf(Text, "Channel %s", Programm[CurrentProgramm].Name);
 			StatusBar_ShowText(hwndTextField, Text);
-			OSD_ShowText(hWnd,Programm[CurrentProgramm].Name);
+			OSD_ShowText(hWnd,Programm[CurrentProgramm].Name, 0);
 			break;
 
 		case IDM_EXTERN1:
@@ -1104,7 +1134,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			if (VideoSource == 0)
 			{
 				DialogBox(hInst, "CHANNELLIST", hWnd, (DLGPROC) ProgramListProc);
-				OSD_ShowText(hWnd,Programm[CurrentProgramm].Name);
+				OSD_ShowText(hWnd,Programm[CurrentProgramm].Name, 0);
 			}
 			break;
 
@@ -1258,15 +1288,31 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
             Overlay_Start(hWnd);
 			break;
 
+        case IDM_FAST_REPAINT:
+		    PaintColorkey(hWnd, TRUE);
+		    OSD_Redraw(hWnd);
+		    break;
+
 		default:
 			// Check whether menu ID is an aspect ratio related item
 			ProcessAspectRatioSelection(hWnd, LOWORD(wParam));
 			break;
 		}
 
+        //-------------------------------------------------------
+        // The following code executes on all WM_COMMAND calls
+
         // Updates the menu checkbox settings
 		SetMenuAnalog();
-		break;
+
+        // Set the configuration file autosave timer.
+        // We use an autosave timer so that when the user has finished
+        // making adjustments and at least a small delay has occured,
+        // that the DTV.INI file is properly up to date, even if 
+        // the system crashes or system is turned off abruptly.
+        KillTimer(hWnd, TIMER_AUTOSAVE);
+        SetTimer(hWnd, TIMER_AUTOSAVE, TIMER_AUTOSAVE_MS, NULL);
+        break;
 
 	case WM_CREATE:
 		MainWndOnCreate(hWnd);
@@ -1333,15 +1379,18 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		break;
 
 	case WM_TIMER:
-		if (wParam == TIMER_MSP)
-		{
+        
+        switch (LOWORD(wParam))
+        {
+        //-------------------------------
+        case TIMER_MSP:
 			if (bDisplayStatusBar == TRUE)
 				Audio_MSP_Print_Mode();
 			if (AutoStereoSelect == TRUE)
 				Audio_MSP_Watch_Mode();
-		}
-		else if (wParam == TIMER_STATUS)
-		{
+            break;
+        //-------------------------------
+        case TIMER_STATUS:
 			if (!BT848_IsVideoPresent())
 			{
 				StatusBar_ShowText(hwndTextField, "No Video Signal Found");
@@ -1366,20 +1415,24 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 					sprintf(Text1, "Volume Mute");
 				StatusBar_ShowText(hwndTextField, Text1);
 			}
-		}
-		else if (wParam == TIMER_KEYNUMBER)
-		{
+            break;
+        //-------------------------------
+        case TIMER_KEYNUMBER:
 			KillTimer(hWnd, TIMER_KEYNUMBER);
 			i = atoi(ChannelString);
 			i = i - 1;
 			ChangeChannel(i);
 			ChannelString[0] = '\0';
-		}
-		else if (wParam == OSD_TIMER_ID)
-		{
+            break;
+        //-------------------------------
+        case TIMER_AUTOSAVE:
+			WriteSettingsToIni();
+            break;
+        //-------------------------------
+        case OSD_TIMER_ID:
 			OSD_Clear(hWnd);
+            break;
 		}
-
 		break;
 
 	case WM_SYSCOMMAND:
@@ -2059,12 +2112,12 @@ void OSD_ShowVideoSource(HWND hWnd, int nVideoSource)
 {
 	switch (nVideoSource)
 	{
-	case SOURCE_TUNER:         OSD_ShowText(hWnd,Programm[CurrentProgramm].Name); break;
-	case SOURCE_COMPOSITE:     OSD_ShowText(hWnd,"Composite");                    break;
-	case SOURCE_SVIDEO:        OSD_ShowText(hWnd,"S-Video");                      break;
-	case SOURCE_OTHER1:        OSD_ShowText(hWnd,"Other 1");                      break;
-	case SOURCE_OTHER2:        OSD_ShowText(hWnd,"Other 2");                      break;
-	case SOURCE_COMPVIASVIDEO: OSD_ShowText(hWnd,"Composite via S-Video");        break;
+	case SOURCE_TUNER:         OSD_ShowText(hWnd,Programm[CurrentProgramm].Name, 0); break;
+	case SOURCE_COMPOSITE:     OSD_ShowText(hWnd,"Composite", 0);                    break;
+	case SOURCE_SVIDEO:        OSD_ShowText(hWnd,"S-Video", 0);                      break;
+	case SOURCE_OTHER1:        OSD_ShowText(hWnd,"Other 1", 0);                      break;
+	case SOURCE_OTHER2:        OSD_ShowText(hWnd,"Other 2", 0);                      break;
+	case SOURCE_COMPVIASVIDEO: OSD_ShowText(hWnd,"Composite via S-Video", 0);        break;
 	}
 }
 
@@ -2073,5 +2126,109 @@ void OSD_ShowVideoSource(HWND hWnd, int nVideoSource)
 void ShowText(HWND hWnd, LPCTSTR szText)
 {
 	StatusBar_ShowText(hwndTextField, szText);
-	OSD_ShowText(hWnd, szText);
+	OSD_ShowText(hWnd, szText, 0);
+}
+
+//---------------------------------------------------------------------------
+// This function allows for accelerated slider adjustments
+// For example, adjusting Contrast or Brightness faster the longer 
+// you hold down the adjustment key.
+int GetCurrentAdjustmentStepCount()
+{
+    static DWORD        dwLastTick = 0;
+    static DWORD        dwFirstTick = 0;
+    static DWORD        dwTaps = 0;
+    DWORD               dwTick;
+    DWORD               dwElapsedSinceLastCall;
+    DWORD               dwElapsedSinceFirstTick;
+    int                 nStepCount;
+
+    dwTick = GetTickCount();
+    dwElapsedSinceLastCall = dwTick - dwLastTick;
+    dwElapsedSinceFirstTick = dwTick - dwFirstTick;
+
+    if ((dwTaps < ADJ_MINIMUM_REPEAT_BEFORE_ACCEL) &&
+        (dwElapsedSinceLastCall < ADJ_BUTTON_REPRESS_REPEAT_DELAY))
+    {
+        // Ensure that the button or keypress is repeated or tapped
+        // a minimum number of times before acceleration begins
+        dwFirstTick = dwTick;
+        nStepCount = 1;
+    }
+    if (dwElapsedSinceLastCall < ADJ_KEYB_TYPEMATIC_REPEAT_DELAY)
+    {
+        // This occurs if the end-user is holding down a keyboard key.
+        // The longer the time has elapsed since the keyboard key has
+        // been held down, the bigger the adjustment steps become, up to a maximum.
+        nStepCount = 1 + (dwElapsedSinceFirstTick / ADJ_KEYB_TYPEMATIC_ACCEL_STEP);
+        if (nStepCount > ADJ_KEYB_TYPEMATIC_MAX_STEP)
+        {
+            nStepCount = ADJ_KEYB_TYPEMATIC_MAX_STEP;
+        }
+    }
+    else if (dwElapsedSinceLastCall < ADJ_BUTTON_REPRESS_REPEAT_DELAY)
+    {
+        // This occurs if the end-user is tapping a button repeatedly
+        // such as on a handheld remote control, when a universal remote
+        // is programmed with a keypress.  Most remotes cannot repeat 
+        // a keypress automatically, so the end user must tap the key.
+        // The longer the time has elapsed since the first button press,
+        // the bigger the adjustment steps become, up to a maximum.
+        nStepCount = 1 + (dwElapsedSinceFirstTick / ADJ_BUTTON_REPRESS_ACCEL_STEP);
+        if (nStepCount > ADJ_BUTTON_REPRESS_MAX_STEP)
+        {
+            nStepCount = ADJ_BUTTON_REPRESS_MAX_STEP;
+        }
+    }
+    else
+    {
+        // The keypress or button press is no longer consecutive, 
+        // so reset adjustment step.
+        dwFirstTick = dwTick;
+        nStepCount = 1;
+        dwTaps = 0;
+    }
+    dwTaps++;
+    dwLastTick = dwTick;
+    return nStepCount;
+}
+
+//---------------------------------------------------------------------------
+// Adjusts a specified integer upwards, with adjustment acceleration
+// Used for operations such as adjusting Brightness, Contrast, etc.
+int AdjustSliderUp(int * pnValue, int nUpper)
+{
+    int         nStep = 0;
+    int         nNewValue = *pnValue;
+
+    if (*pnValue < nUpper)
+    {
+        nStep = GetCurrentAdjustmentStepCount();
+        nNewValue = *pnValue + nStep;
+
+        if (nNewValue > nUpper) nNewValue = nUpper;
+        nStep = nNewValue - *pnValue;
+        *pnValue = nNewValue;
+    }
+    return nStep;
+}
+
+//---------------------------------------------------------------------------
+// Adjusts a specified integer downwards, with adjustment acceleration
+// Used for operations such as adjusting Brightness, Contrast, etc.
+int AdjustSliderDown(int * pnValue, int nLower)
+{
+    int         nStep = 0;
+    int         nNewValue;
+
+    if (*pnValue > nLower)
+    {
+        nStep = GetCurrentAdjustmentStepCount();
+        nNewValue = *pnValue - nStep;
+
+        if (nNewValue < nLower) nNewValue = nLower;
+        nStep = *pnValue - nNewValue;
+        *pnValue = nNewValue;
+    }
+    return nStep;
 }
