@@ -60,7 +60,7 @@ ePULLDOWNMODES gPulldownMode = VIDEO_MODE;
 long PulldownThresholdLow = -1000;
 long PulldownThresholdHigh = 1000;
 long PulldownRepeatCount = 5;
-long Threshold32Pulldown = 10;
+long Threshold32Pulldown = 100;
 BOOL bAutoDetectMode = FALSE;
 
 #define DOLOGGING
