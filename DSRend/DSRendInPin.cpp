@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendInPin.cpp,v 1.7 2002-06-03 18:22:03 tobbej Exp $
+// $Id: DSRendInPin.cpp,v 1.8 2002-07-06 16:40:52 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.7  2002/06/03 18:22:03  tobbej
+// changed mediatype handling a bit
+//
 // Revision 1.6  2002/05/09 17:24:11  tobbej
 // reject connection if width not a multiple of 16 (alignment problems in dscaler)
 //
@@ -60,7 +63,7 @@
 #include <dvdmedia.h>
 
 CDSRendInPin::CDSRendInPin(CDSRendFilter *pFilter)
-:m_pFilter(pFilter),m_cAllocBuffers(1),m_bFlushing(false)
+:m_pFilter(pFilter),m_bFlushing(false)
 {
 	//clear mediatype
 	memset(&m_mt,0,sizeof(m_mt));
@@ -159,6 +162,12 @@ HRESULT CDSRendInPin::ReceiveConnection(IPin *pConnector,const AM_MEDIA_TYPE *pm
 	if(FAILED(CheckMediaType(pmt)))
 	{
 		return VFW_E_TYPE_NOT_ACCEPTED;
+	}
+	HRESULT hr=m_pFilter->m_FieldBuffer.SetMediaType(pmt);
+	if(FAILED(hr))
+	{
+		ATLTRACE(_T(" m_FieldBuffer.SetMediaType failed!!\n"));
+		return hr;
 	}
 
 	m_pConnected=pConnector;
@@ -409,6 +418,7 @@ HRESULT CDSRendInPin::NotifyAllocator(IMemAllocator *pAllocator,BOOL bReadOnly)
 	{
 		return E_POINTER;
 	}
+	ATLASSERT(bReadOnly==FALSE);
 
 	ALLOCATOR_PROPERTIES prop;
 	if(FAILED(pAllocator->GetProperties(&prop)))
@@ -422,12 +432,13 @@ HRESULT CDSRendInPin::NotifyAllocator(IMemAllocator *pAllocator,BOOL bReadOnly)
 		return VFW_E_BADALIGN;
 	}
 
-	//this will make the connection fail on some filters that dont give us the right amount of buffers
-	if(prop.cbPrefix==0 && prop.cBuffers>=m_cAllocBuffers)
+	if(prop.cbPrefix!=0)
 	{
-		return S_OK;
+		return E_FAIL;
 	}
-	return E_FAIL;
+	ATLASSERT(prop.cBuffers>0);
+	m_pFilter->m_FieldBuffer.SetMediaSampleCount(prop.cBuffers-1);
+	return S_OK;
 }
 
 HRESULT CDSRendInPin::GetAllocatorRequirements(ALLOCATOR_PROPERTIES *pProps)
@@ -435,13 +446,23 @@ HRESULT CDSRendInPin::GetAllocatorRequirements(ALLOCATOR_PROPERTIES *pProps)
 	ATLTRACE(_T("%s(%d) : CDSRendInPin::GetAllocatorRequirements\n"),__FILE__,__LINE__);
 	if(pProps==NULL)
 		return E_POINTER;
-	//request 16 byte aligned buffers remeber that this is just a request,
+
+	ATLASSERT(m_pFilter->m_FieldBuffer.GetFieldCount()>0);
+	
+	//request 16 byte aligned buffers. remeber that this is just a request,
 	//need to check it in NotifyAllocator
 	pProps->cbAlign=16;
 	pProps->cbBuffer=0;
 	pProps->cbPrefix=0;
-	//pProps->cBuffers=m_cAllocBuffers;
-	pProps->cBuffers=2;
+
+	/**
+	 * @todo the number of extra buffers to request shod be user
+	 * configurable if we dont request a few extra buffers and doing field
+	 * input, there will be a lot of dropped fields.
+	 * Maybe also check with CFieldBuffer if it can buffer samples directly
+	 * and only request extra fields if it can (field input)
+	 */
+	pProps->cBuffers=m_pFilter->m_FieldBuffer.GetFieldCount()+8;
 	return S_OK;
 }
 
@@ -470,16 +491,42 @@ HRESULT CDSRendInPin::Receive(IMediaSample *pSample)
 	{
 		return S_FALSE;
 	}
-	
+
+	//check if the mediatype has changed
+	///@todo check for IMediaSample2
+	AM_MEDIA_TYPE *pmt=NULL;
+	if(pSample->GetMediaType(&pmt)==S_OK)
+	{	
+		/**
+		 * @todo if returning a failiure, send end of stream and post EC_ERRORABORT
+		 */
+		if(FAILED(CheckMediaType(pmt)))
+		{
+			return VFW_E_TYPE_NOT_ACCEPTED;
+		}
+		m_pFilter->m_FieldBuffer.RemoveFields(INFINITE);
+		hr=m_pFilter->m_FieldBuffer.SetMediaType(pmt);
+		if(FAILED(hr))
+		{
+			ATLTRACE(_T(" m_FieldBuffer.SetMediaType failed!\n"));
+			return hr;
+		}
+		
+		freeMediaType(&m_mt);
+		copyMediaType(&m_mt,pmt);
+		freeMediaType(pmt);
+	}
+
 	//wait for corect time to render the sample
-	REFERENCE_TIME rtStart;
+	///@todo this needs to be moved
+	/*REFERENCE_TIME rtStart;
 	REFERENCE_TIME rtEnd;
 	hr=pSample->GetTime(&rtStart,&rtEnd);
 	if(SUCCEEDED(hr))
 	{
 		hr=m_pFilter->waitForTime(rtStart);
 		//ATLASSERT(SUCCEEDED(hr));
-	}
+	}*/
 
 	//render the sample
 	hr=m_pFilter->renderSample(pSample);
@@ -555,18 +602,32 @@ HRESULT CDSRendInPin::CheckMediaType(const AM_MEDIA_TYPE *pmt)
 				VIDEOINFOHEADER2 *pHeader=(VIDEOINFOHEADER2*)pmt->pbFormat;
 				pBmi=&(pHeader->bmiHeader);
 				
-				//currently the filter dont support one field per sample
-				if(pHeader->dwInterlaceFlags & AMINTERLACE_IsInterlaced)
+				if(pHeader->dwInterlaceFlags&AMINTERLACE_1FieldPerSample)
 				{
-					return E_FAIL;
+					//must have both fields
+					switch(pHeader->dwInterlaceFlags&AMINTERLACE_FieldPatternMask)
+					{
+					case AMINTERLACE_FieldPatField1Only:
+					case AMINTERLACE_FieldPatField2Only:
+						return E_FAIL;
+					}
+					ATLASSERT((pHeader->dwInterlaceFlags&AMINTERLACE_FieldPatternMask)|(AMINTERLACE_FieldPatBothIrregular|AMINTERLACE_FieldPatBothRegular));
+					/*if((pHeader->dwInterlaceFlags&AMINTERLACE_DisplayModeMask)!=AMINTERLACE_DisplayModeBobOnly)
+					{
+						return E_FAIL;
+					}*/
+					//return E_FAIL;
 				}
 			}
+			
 		}
 
 		//check that there is a size specified in the media type
 		//and that the width is a multiple of 16 (alignment problems in dscaler)
 		if(pBmi!=NULL && pBmi->biWidth!=0 && pBmi->biHeight!=0 && (pBmi->biWidth&0xf)==0)
+		{
 			return S_OK;
+		}
 	}
 	return E_FAIL;
 }
