@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendFilter.h,v 1.2 2002-02-06 15:01:24 tobbej Exp $
+// $Id: DSRendFilter.h,v 1.3 2002-02-07 13:08:20 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,10 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.2  2002/02/06 15:01:24  tobbej
+// fixed race condition betwen stop and recive
+// updated some comments
+//
 // Revision 1.1.1.1  2002/02/03 10:52:53  tobbej
 // First import of new direct show renderer filter
 //
@@ -155,6 +159,7 @@ public:
 	 * @param pSample sample to render
 	 */
 	HRESULT renderSample(IMediaSample *pSample);
+	HRESULT beginFlush();
 
 	/**
 	 * Checks if the filter is stopped.
@@ -174,7 +179,9 @@ public:
 	
 	/// unblock a call to waitForTime.
 	void stopWait();
-
+	
+	///rendering lock
+	CComAutoCriticalSection m_renderLock;
 private:
 	/**
 	 * Helper function for IMediaSeeking interface.

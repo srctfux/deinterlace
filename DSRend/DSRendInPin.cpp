@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendInPin.cpp,v 1.2 2002-02-06 15:01:24 tobbej Exp $
+// $Id: DSRendInPin.cpp,v 1.3 2002-02-07 13:08:20 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,10 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.2  2002/02/06 15:01:24  tobbej
+// fixed race condition betwen stop and recive
+// updated some comments
+//
 // Revision 1.1.1.1  2002/02/03 10:52:53  tobbej
 // First import of new direct show renderer filter
 //
@@ -322,10 +326,9 @@ HRESULT CDSRendInPin::BeginFlush()
 	CAutoLockCriticalSection lock(&m_Lock);
 	m_bFlushing=true;
 	
-	//unblock recive
-	m_pFilter->stopWait();
-	
 	//need to free our mediasamples here so we dont lock upstream filters
+	//beginFlush in the filter will take care of that
+	m_pFilter->beginFlush();
 	
 	return S_OK;
 }
@@ -416,20 +419,24 @@ HRESULT CDSRendInPin::GetAllocatorRequirements(ALLOCATOR_PROPERTIES *pProps)
 HRESULT CDSRendInPin::Receive(IMediaSample *pSample)
 {
 	//ATLTRACE(_T("%s(%d) : CDSRendInPin::Receive\n"),__FILE__,__LINE__);
-	CAutoLockCriticalSection lock(&m_renderLock);
 
 	if(pSample==NULL)
 	{
 		return E_POINTER;
 	}
-	if(isFlushing())
-	{
-		return S_FALSE;
-	}
+	//isStopped must be synced with streaming thread,
+	//but we cant hold the render lock here since that might cause a deadlock with stop
 	if(m_pFilter->isStopped())
 	{
 		return VFW_E_WRONG_STATE;
 	}
+	
+	CAutoLockCriticalSection lock(&m_pFilter->m_renderLock);
+	if(isFlushing())
+	{
+		return S_FALSE;
+	}
+	
 	
 	//wait for corect time to render the sample (blocking if paused)
 	REFERENCE_TIME rtStart;

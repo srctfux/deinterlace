@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendFilter.cpp,v 1.3 2002-02-06 15:01:24 tobbej Exp $
+// $Id: DSRendFilter.cpp,v 1.4 2002-02-07 13:08:20 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,10 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.3  2002/02/06 15:01:24  tobbej
+// fixed race condition betwen stop and recive
+// updated some comments
+//
 // Revision 1.2  2002/02/03 20:01:39  tobbej
 // made framerate counter work
 //
@@ -102,6 +106,9 @@ HRESULT CDSRendFilter::Stop()
 	}
 	
 	//free buffered sample
+	//sync with rendering thread
+	stopWait();
+	CAutoLockCriticalSection rendLock(&m_renderLock);
 	m_sampleLock.Lock();
 	m_pSample=NULL;
 	m_sampleLock.Unlock();
@@ -419,8 +426,10 @@ HRESULT CDSRendFilter::waitForTime(REFERENCE_TIME rtStreamTime)
 	HRESULT hr=m_pRefClk->AdviseTime(m_tStart,rtStreamTime,(HEVENT)m_refClockEvent.getHandle(),&m_refClockCookie);
 	if(FAILED(hr))
 		return hr;
+
 	if(m_refClockEvent.wait(INFINITE))
 		return S_OK;
+
 	return E_FAIL;
 }
 
@@ -436,9 +445,20 @@ void CDSRendFilter::stopWait()
 	}
 }
 
+HRESULT CDSRendFilter::beginFlush()
+{
+	ATLTRACE(_T("%s(%d) : CDSRendFilter::beginFlush\n"),__FILE__,__LINE__);
+	stopWait();
+	
+	CAutoLockCriticalSection lock(&m_sampleLock);
+	m_pSample=NULL;
+	
+	return S_OK;
+}
+
 HRESULT CDSRendFilter::renderSample(IMediaSample *pSample)
 {
-	CAutoLockCriticalSection lock(&m_Lock);
+	//input pins holds the render lock
 
 	//is the old sample retrieved?
 	if(m_nextSampleReady.wait(0))
@@ -475,7 +495,11 @@ STDMETHODIMP CDSRendFilter::GetNextSample(IMediaSample **ppSample,DWORD dwTimeou
 	}
 	m_cFramesDrawn++;
 	*ppSample=m_pSample;
+	
+	//addref the returned sample and release our buffered sample,
+	//this is nessesary if the upstream filter only provides one singel IMediaSample
 	(*ppSample)->AddRef();
+	m_pSample=NULL;
 	m_sampleLock.Unlock();
 	return S_OK;
 }
