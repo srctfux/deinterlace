@@ -263,6 +263,50 @@ LONG APIENTRY MainWndProcSafe(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 }
 
 
+BOOL APIENTRY DisplayContextMenu(HWND hWnd, POINT pt)
+{ 
+	HMENU hMenuTrackPopup;  // shortcut menu 
+ 
+	SetMenuAnalog();
+
+	hMenuTrackPopup = GetSubMenu(hMenu, 4); 
+	if (hMenuTrackPopup == NULL)
+		return FALSE;
+ 
+	Cursor_SetVisibility(TRUE);
+
+	// Display the shortcut menu. Track the right mouse
+	// button.
+	return TrackPopupMenuEx(hMenuTrackPopup, 
+                            TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON, 
+                            pt.x, pt.y, hWnd, NULL); 
+} 
+
+
+BOOL WINAPI OnContextMenu(HWND hWnd, int x, int y)
+{ 
+	RECT rc;					// client area of window
+	POINT pt = { x, y };		// location of mouse click
+
+	// Get the bounding rectangle of the client area.
+	GetClientRect(hWnd, &rc);
+
+	// Convert the mouse position to client coordinates.
+	ScreenToClient(hWnd, &pt);
+
+	// If the position is in the client area, display a
+	// shortcut menu.
+	if (PtInRect(&rc, pt))
+	{
+		ClientToScreen(hWnd, &pt);
+		return DisplayContextMenu(hWnd, pt);
+	}
+ 
+	// Return FALSE if no menu is displayed.
+	return FALSE; 
+} 
+
+
 /****************************************************************************
 
     FUNCTION: MainWndProc(HWND, unsigned, WORD, LONG)
@@ -1243,13 +1287,18 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		SendMessage(hWnd, WM_COMMAND, IDM_FULL_SCREEN, 0);
 		break;
 
-	case WM_RBUTTONUP:
-		if(bIsFullScreen == FALSE)
-		{
-			bShowCursor = !bShowCursor;
-			Cursor_SetVisibility(bShowCursor);
-		}
-		break;
+//	case WM_RBUTTONUP:
+//		if(bIsFullScreen == FALSE)
+//		{
+//			bShowCursor = !bShowCursor;
+//			Cursor_SetVisibility(bShowCursor);
+//		}
+//		break;
+
+	case WM_CONTEXTMENU: 
+		if (!OnContextMenu(hWnd, GET_X_LPARAM(lParam),GET_Y_LPARAM(lParam)))
+			return DefWindowProc(hWnd, message, wParam, lParam);
+	    break;
 
 	case WM_TIMER:
         
