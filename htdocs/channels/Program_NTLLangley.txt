@@ -1,0 +1,174 @@
+Name: BBC ONE
+Freq: 536000
+Chan: 1
+Active: 1
+Form: 20
+Name: BBC TWO
+Freq: 472000
+Chan: 2
+Active: 1
+Form: 20
+Name: Yorkshire Television
+Freq: 488000
+Chan: 3
+Active: 1
+Form: 20
+Name: Channel 4 Television
+Freq: 520000
+Chan: 4
+Active: 1
+Form: 4
+Name: Channel 5
+Freq: 504000
+Chan: 5
+Active: 1
+Form: 4
+Name: ITV 2
+Freq: 280000
+Chan: 6
+Active: 1
+Form: 4
+Name: Channel 7
+Freq: 464000
+Chan: 7
+Active: 1
+Form: 4
+Name: Grenada / Men & Motors
+Freq: 448000
+Chan: 8
+Active: 1
+Form: 20
+Name: Sky One
+Freq: 128000
+Chan: 9
+Active: 1
+Form: 20
+Name: Sky Sports 1
+Freq: 176000
+Chan: 11
+Active: 1
+Form: 20
+Name: Sky Sports 2
+Freq: 80000
+Chan: 0
+Active: 1
+Form: 4
+Name: BBC News 24
+Freq: 320000
+Chan: 14
+Active: 1
+Form: 20
+Name: Living TV / Television X
+Freq: 344000
+Chan: 15
+Active: 1
+Form: 20
+Name: Discovery
+Freq: 296000
+Chan: 16
+Active: 1
+Form: 20
+Name: Paramount/Nick
+Freq: 368000
+Chan: 17
+Active: 1
+Form: 4
+Name: Disney
+Freq: 352000
+Chan: 19
+Active: 1
+Form: 20
+Name: Sky News
+Freq: 336000
+Chan: 21
+Active: 1
+Form: 20
+Name: CNN
+Freq: 480000
+Chan: 22
+Active: 1
+Form: 20
+Name: VH 1
+Freq: 312000
+Chan: 23
+Active: 1
+Form: 20
+Name: MTV
+Freq: 304000
+Chan: 24
+Active: 1
+Form: 20
+Name: The Box
+Freq: 288000
+Chan: 26
+Active: 1
+Form: 20
+Name: QVC
+Freq: 150000
+Chan: 28
+Active: 1
+Form: 20
+Name: UK Horizons
+Freq: 248000
+Chan: 0
+Active: 1
+Form: 4
+Name: Cartoon Network / TCM
+Freq: 136000
+Chan: 44
+Active: 1
+Form: 20
+Name: UK Gold
+Freq: 184000
+Chan: 0
+Active: 1
+Name: Sky Sports 3
+Freq: 192000
+Chan: 0
+Active: 1
+Name: E4
+Freq: 200000
+Chan: 0
+Active: 1
+Name: Sky Cinema
+Freq: 208000
+Chan: 0
+Active: 1
+Name: Trouble / Bravo
+Freq: 216000
+Chan: 35
+Active: 1
+Form: 20
+Name: Sci-Fi
+Freq: 224000
+Chan: 34
+Active: 1
+Form: 20
+Name: Sky Premier
+Freq: 232000
+Chan: 0
+Active: 1
+Name: Sky Movie Max
+Freq: 240000
+Chan: 0
+Active: 1
+Name: TV Travel Shop
+Freq: 256000
+Chan: 1
+Active: 1
+Form: 4
+Name: PPV
+Freq: 264000
+Chan: 51
+Active: 1
+Form: 4
+Name: Challenge Plus
+Freq: 360000
+Chan: 0
+Active: 1
+Form: 4
+Name: ITV News
+Freq: 272000
+Chan: 0
+Active: 1
+

@@ -6,6 +6,7 @@ header("Expires: 0");
 
 $fp=fopen("$filename","r");
 $str=fread($fp,filesize($filename));
+$str .= chr(13)
 echo $str;
 fclose($fp);
 ?>
