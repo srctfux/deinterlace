@@ -102,6 +102,10 @@ SOURCE=.\DI_Greedy.c
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Source File
+
+SOURCE=.\DI_Greedy.asm
+# End Source File
 # End Group
 # Begin Group "Resource Files"
 

@@ -20,152 +20,262 @@
 // DI_Greedy2Frame.c.  It's in a separate file so we can compile variants for different
 // CPU types; most of the code is the same in the different variants.
 
-#ifdef IS_SSE
+#if defined(IS_SSE)
 #define MAINLOOP_LABEL DoNext8Bytes_SSE
-#endif
-#ifdef IS_3DNOW
+#elif defined(IS_3DNOW)
 #define MAINLOOP_LABEL DoNext8Bytes_3DNow
-#endif
-#ifdef IS_MMX
+#else
 #define MAINLOOP_LABEL DoNext8Bytes_MMX
 #endif
 
-	_asm
+///////////////////////////////////////////////////////////////////////////////
+// Field 1 | Field 2 | Field 3 | Field 4 |
+//   T0    |         |    T1   |         | 
+//         |   M0    |         |    M1   | 
+//   B0    |         |    B1   |         | 
+//
+
+
+// debugging feature
+// output the value of mm4 at this point which is pink where we will weave
+// and green were we are going to bob
+// uncomment next line to see this
+//#define CHECK_BOBWEAVE
+
+#if defined(IS_SSE)
+BOOL DeinterlaceGreedy2Frame_SSE(DEINTERLACE_INFO *info)
+#elif defined(IS_3DNOW)
+BOOL DeinterlaceGreedy2Frame_3DNOW(DEINTERLACE_INFO *info)
+#else
+BOOL DeinterlaceGreedy2Frame_MMX(DEINTERLACE_INFO *info)
+#endif
+{
+	int Line;
+	short* M1;
+	short* M0;
+	short* T0;
+	short* T1;
+	short* B1;
+	short* B0;
+	DWORD OldSI;
+	DWORD OldSP;
+	BYTE* Dest;
+	DWORD LineLength = info->LineLength;
+
+	const __int64 YMask    = 0x00ff00ff00ff00ff;
+
+	__int64 qwGreedyTwoFrameThreshold;
+	const __int64 Mask = 0x7f7f7f7f7f7f7f7f;
+	const __int64 DwordOne = 0x0000000100000001;	
+	const __int64 DwordTwo = 0x0000000200000002;	
+
+	if (info->OddLines[0] == NULL || info->OddLines[1] == NULL ||
+		info->EvenLines[0] == NULL || info->EvenLines[1] == NULL)
 	{
-		// We'll be using a couple registers that have meaning in the C code, so
-		// save them.
-		mov OldSI, esi
-		mov OldSP, esp
+		return FALSE;
+	}
 
-		// Figure out what to do with the scanline above the one we just copied.
-		// See above for a description of the algorithm.
+	qwGreedyTwoFrameThreshold = GreedyTwoFrameThreshold;
+	qwGreedyTwoFrameThreshold += (qwGreedyTwoFrameThreshold << 56) +
+								(qwGreedyTwoFrameThreshold << 48) +
+								(qwGreedyTwoFrameThreshold << 40) + 
+								(qwGreedyTwoFrameThreshold << 32) + 
+								(qwGreedyTwoFrameThreshold << 24) + 
+								(qwGreedyTwoFrameThreshold << 16) + 
+								(qwGreedyTwoFrameThreshold << 8);
 
-		mov ecx, LineLength
-		mov eax, dword ptr [T1]		
-		mov ebx, dword ptr [M1]		
-		mov edx, dword ptr [B1]		
-		mov esi, dword ptr [M0]		
-		mov esp, dword ptr [T0]
-		shr ecx, 3						// there are LineLength / 8 qwords
-		movq    mm6, Mask
+	// copy first even line no matter what, and the first odd line if we're
+	// processing an odd field.
+	info->pMemcpy(info->Overlay, info->EvenLines[0][0], info->LineLength);
+	if (!info->IsOdd)
+	{
+		info->pMemcpy(info->Overlay + info->OverlayPitch, info->OddLines[0][0], info->LineLength);
+	}
+
+	for (Line = 0; Line < info->FieldHeight - 1; ++Line)
+	{
+		if (info->IsOdd)
+		{
+			M1 = info->OddLines[0][Line];
+			T1 = info->EvenLines[0][Line];
+			B1 = info->EvenLines[0][Line + 1];
+			M0 = info->OddLines[1][Line];
+			T0 = info->EvenLines[1][Line];
+			B0 = info->EvenLines[1][Line + 1];
+			Dest = info->Overlay + (Line * 2 + 2) * info->OverlayPitch;
+		}
+		else
+		{
+			M1 = info->EvenLines[0][Line + 1];
+			T1 = info->OddLines[0][Line];
+			B1 = info->OddLines[0][Line + 1];
+			M0 = info->EvenLines[1][Line + 1];
+			T0 = info->OddLines[1][Line];
+			B0 = info->OddLines[1][Line + 1];
+			Dest = info->Overlay + (Line * 2 + 3) * info->OverlayPitch;
+		}
+
+		// Always use the most recent data verbatim.  By definition it's correct (it'd
+		// be shown on an interlaced display) and our job is to fill in the spaces
+		// between the new lines.
+		info->pMemcpy(Dest, B1, info->LineLength);
+		Dest -= info->OverlayPitch;
+
+	    _asm
+	    {
+		    // We'll be using a couple registers that have meaning in the C code, so
+		    // save them.
+		    mov OldSI, esi
+		    mov OldSP, esp
+
+		    // Figure out what to do with the scanline above the one we just copied.
+		    // See above for a description of the algorithm.
+
+		    mov ecx, LineLength
+		    mov eax, dword ptr [T1]		
+		    mov ebx, dword ptr [M1]		
+		    mov edx, dword ptr [B1]		
+		    mov esi, dword ptr [M0]		
+		    mov esp, dword ptr [T0]
+		    shr ecx, 3						// there are LineLength / 8 qwords
+		    movq    mm6, Mask
 
 align 8
 MAINLOOP_LABEL:
 
-		mov edi, dword ptr [B0]
-		movq	mm1, qword ptr[eax]		// T1
-		movq	mm0, qword ptr[ebx]		// M1
-		movq	mm3, qword ptr[edx]		// B1
-		movq	mm2, qword ptr[esi]     // M0
+		    mov edi, dword ptr [B0]
+		    movq	mm1, qword ptr[eax]		// T1
+		    movq	mm0, qword ptr[ebx]		// M1
+		    movq	mm3, qword ptr[edx]		// B1
+		    movq	mm2, qword ptr[esi]     // M0
 
-		// Average T1 and B1 so we can do interpolated bobbing if we bob onto T1.
-		movq mm7, mm3					// mm7 = B1
-#ifdef IS_SSE
-		pavgb mm7, mm1
+		    // Average T1 and B1 so we can do interpolated bobbing if we bob onto T1.
+		    movq mm7, mm3					// mm7 = B1
+
+#if defined(IS_SSE)
+		    pavgb mm7, mm1
+#elif defined(IS_3DNOW)
+		    pavgusb mm7, mm1
+#else
+		    movq mm5, mm1					// mm5 = T1
+		    psrlw mm7, 1					// mm7 = B1 / 2
+		    pand mm7, mm6					// mask off lower bits
+		    psrlw mm5, 1					// mm5 = T1 / 2
+		    pand mm5, mm6					// mask off lower bits
+		    paddw mm7, mm5					// mm7 = (T1 + B1) / 2
 #endif
-#ifdef IS_3DNOW
-		pavgusb mm7, mm1
-#endif
-#ifdef IS_MMX
-		movq mm5, mm1					// mm5 = T1
-		psrlw mm7, 1					// mm7 = B1 / 2
-		pand mm7, mm6					// mask off lower bits
-		psrlw mm5, 1					// mm5 = T1 / 2
-		pand mm5, mm6					// mask off lower bits
-		paddw mm7, mm5					// mm7 = (T1 + B1) / 2
-#endif
 
-// calculate |M1-M0| put result in mm4 nned to keep mm0 intact
-		movq	mm4, mm0
-		psubusb mm4, mm2
-		psubusb mm2, mm0
-		por		mm4, mm2
-		psrlw	mm4, 1
-		pand	mm4, mm6
+            // calculate |M1-M0| put result in mm4 nned to keep mm0 intact
+		    movq	mm4, mm0
+		    psubusb mm4, mm2
+		    psubusb mm2, mm0
+		    por		mm4, mm2
+		    psrlw	mm4, 1
+		    pand	mm4, mm6
 
-// if |M1-M0| > Threshold we want dword worth of twos
-		pcmpgtb mm4, qwGreedyTwoFrameThreshold
-		pand	mm4, Mask				// get rid of any sign bit
-		pcmpgtd mm4, DwordOne			// do we want to bob
-		pandn   mm4, DwordTwo
+            // if |M1-M0| > Threshold we want dword worth of twos
+		    pcmpgtb mm4, qwGreedyTwoFrameThreshold
+		    pand	mm4, Mask				// get rid of any sign bit
+		    pcmpgtd mm4, DwordOne			// do we want to bob
+		    pandn   mm4, DwordTwo
 
-		movq	mm2, qword ptr[esp]		// mm2 = T0
+		    movq	mm2, qword ptr[esp]		// mm2 = T0
 
-// calculate |T1-T0| put result in mm5
-		movq	mm5, mm2
-		psubusb mm5, mm1
-		psubusb mm1, mm2
-		por		mm5, mm1
-		psrlw	mm5, 1
-		pand	mm5, mm6
+            // calculate |T1-T0| put result in mm5
+		    movq	mm5, mm2
+		    psubusb mm5, mm1
+		    psubusb mm1, mm2
+		    por		mm5, mm1
+		    psrlw	mm5, 1
+		    pand	mm5, mm6
 
-// if |T1-T0| > Threshold we want dword worth of ones
-		pcmpgtb mm5, qwGreedyTwoFrameThreshold
-		pand	mm5, mm6				// get rid of any sign bit
-		pcmpgtd mm5, DwordOne			
-		pandn   mm5, DwordOne
-		paddd mm4, mm5
+            // if |T1-T0| > Threshold we want dword worth of ones
+		    pcmpgtb mm5, qwGreedyTwoFrameThreshold
+		    pand	mm5, mm6				// get rid of any sign bit
+		    pcmpgtd mm5, DwordOne			
+		    pandn   mm5, DwordOne
+		    paddd mm4, mm5
 
-		movq	mm2, qword ptr[edi]     // B0
+		    movq	mm2, qword ptr[edi]     // B0
 
-// calculate |B1-B0| put result in mm5
-		movq	mm5, mm2
-		psubusb mm5, mm3
-		psubusb mm3, mm2
-		por		mm5, mm3
-		psrlw	mm5, 1
-		pand	mm5, mm6
+            // calculate |B1-B0| put result in mm5
+		    movq	mm5, mm2
+		    psubusb mm5, mm3
+		    psubusb mm3, mm2
+		    por		mm5, mm3
+		    psrlw	mm5, 1
+		    pand	mm5, mm6
 
-// if |B1-B0| > Threshold we want dword worth of ones
-		pcmpgtb mm5, qwGreedyTwoFrameThreshold
-		pand	mm5, mm6				// get rid of any sign bit
-		pcmpgtd mm5, DwordOne
-		pandn   mm5, DwordOne
-		paddd mm4, mm5
+            // if |B1-B0| > Threshold we want dword worth of ones
+		    pcmpgtb mm5, qwGreedyTwoFrameThreshold
+		    pand	mm5, mm6				// get rid of any sign bit
+		    pcmpgtd mm5, DwordOne
+		    pandn   mm5, DwordOne
+		    paddd mm4, mm5
 
-		// Get the dest pointer.
-		add edi, 8
-		mov dword ptr[B0], edi
-		mov edi, dword ptr[Dest]
+		    // Get the dest pointer.
+		    add edi, 8
+		    mov dword ptr[B0], edi
+		    mov edi, dword ptr[Dest]
 
-		pcmpgtd mm4, DwordTwo
+		    pcmpgtd mm4, DwordTwo
 
 // debugging feature
 // output the value of mm4 at this point which is pink where we will weave
 // and green were we are going to bob
 #ifdef CHECK_BOBWEAVE
 #ifdef IS_SSE
-		movntq qword ptr[edi], mm4
+		    movntq qword ptr[edi], mm4
 #else
-		movq qword ptr[edi], mm4
+		    movq qword ptr[edi], mm4
 #endif
 #else
 
-		movq mm5, mm4
-// mm4 now is 1 where we want to weave and 0 where we want to bob
-		pand	mm4, mm0				
-		pandn	mm5, mm7				
-		por		mm4, mm5				
+		    movq mm5, mm4
+             // mm4 now is 1 where we want to weave and 0 where we want to bob
+		    pand	mm4, mm0				
+		    pandn	mm5, mm7				
+		    por		mm4, mm5				
 #ifdef IS_SSE
-		movntq qword ptr[edi], mm4
+		    movntq qword ptr[edi], mm4
 #else
-		movq qword ptr[edi], mm4
+		    movq qword ptr[edi], mm4
 #endif
 #endif
-		// Advance to the next set of pixels.
-		add edi, 8
-		add eax, 8
-		add ebx, 8
-		add edx, 8
-		mov dword ptr[Dest], edi
-		add esi, 8
-		dec ecx
-		jne near MAINLOOP_LABEL
+		    // Advance to the next set of pixels.
+		    add edi, 8
+		    add eax, 8
+		    add ebx, 8
+		    add edx, 8
+		    mov dword ptr[Dest], edi
+		    add esi, 8
+		    dec ecx
+		    jne near MAINLOOP_LABEL
 
-		emms
+		    mov esi, OldSI
+		    mov esp, OldSP
+	    }
 
-		mov esi, OldSI
-		mov esp, OldSP
 	}
+
+	// Copy last odd line if we're processing an even field.
+	if (info->IsOdd)
+	{
+		info->pMemcpy(info->Overlay + (info->FrameHeight - 1) * info->OverlayPitch,
+				  info->OddLines[info->FieldHeight - 1],
+				  info->LineLength);
+	}
+    
+    
+    // clear out the MMX registers ready for doing floating point
+    // again
+    _asm
+    {
+        emms
+    }
+
+	return TRUE;
+}
+
 
 #undef MAINLOOP_LABEL
