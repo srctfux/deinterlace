@@ -25,28 +25,26 @@ height="97%" align="center">
 </tr>
 
 <tr bgcolor="#FFCC00">
-<td height="2" colspan="3"><img src="images/yellowspacer.gif"
+<td height="2" colspan="3"><img alt="bar" src="images/yellowspacer.gif"
 width="100%" height="2" border="0"></td>
 </tr>
 
 <tr>
 <td width="33%" valign="top" height="30%">
-<p><a href="about.htm" class="bland">About</a><br>
-        <a href="reviews/index.htm" class="bland">Press Reviews</a><br>
- <a href="screenshots/index.htm" class=
-"bland">Screenshots</a><br>
- <a href="downloads.htm" class="bland">DScaler News &
-Download</a><br>
- <a href="Filter.htm" class="bland">DirectShow Filter</a><br>
- <a href="Authors.htm" class="bland">Authors</a><br>
- <a href="Thanks.htm" class="bland">Thanks</a></p>
+<p>
+ <a href="about.htm" class="bland">What is DScaler?</a><br>
+ <a href="downloads.htm" class="bland">DScaler 4 News &amp; Download</a><br>
+ <a href="user_support.htm" class="bland">User Support</a><br>
+ <a href="docs.htm" class="bland">Documentation</a><br>
+ <a href="donate.htm" class="bland">Donations</a><br>
+ <a href="dscaler5.htm" class="bland">DScaler 5 News &amp; Download</a><br>
 </td>
 <td rowspan="3" height="90%" bordercolor="#999900" align="center"
 valign="middle"><img src="images/dscalerlogobig.jpg" alt=
 "DScaler Marquee"></td>
 <td width="33%" height="30%" valign="top">
 <div align="right"><a href="/developers.htm"><font size="1"><img
-src="images/developers.jpg" width="177" height="160" border=
+alt="developers" src="images/developers.jpg" width="177" height="160" border=
 "0"></font></a></div>
 </td>
 </tr>
@@ -61,13 +59,8 @@ src="images/developers.jpg" width="177" height="160" border=
 <td width="33%" valign="bottom" height="30%"><br>
       <p align="right"><a href="channels/index.htm" class=
 "bland">Channel Setup Catalogue</a><br>
-       <a href="setup/index.htm" class="bland">Setup</a><br>
-        <a href="FAQ.htm" class="bland">FAQ</a><br>
-        <a href="user_support.htm" class="bland">User Support<br>
-        </a><a href="keyboard.htm" class="bland">Keyboard Shortcuts</a><br>
-        <a href="developers.htm" class="bland">Developers<br>
-        </a><a href="http://sourceforge.net/mail/?group_id=7420" class=
-"bland">Mailing List</a><br>
+        <a href="contact.htm" class="bland">Contact the team</a><br>
+        <a href="developers.htm" class="bland">Developers</a><br>
         <a href="http://sourceforge.net/projects/deinterlace/" class=
 "bland">SourceForge.net Project Page</a><br>
         <a href="Links.htm" class="bland">Links</a></p>
@@ -75,7 +68,7 @@ src="images/developers.jpg" width="177" height="160" border=
 </tr>
 
 <tr bgcolor="#FFCC00">
-<td align="left" height="2" valign="middle" colspan="3"><img src=
+<td align="left" height="2" valign="middle" colspan="3"><img alt="bar" src=
 "images/yellowspacer.gif" width="100%" height="2"></td>
 </tr>
 
@@ -89,9 +82,16 @@ src="images/developers.jpg" width="177" height="160" border=
       &amp; T V</b></font></td>
 <td height="3%"> </td>
 <td height="3%" align="right">
-<p><a href="http://sourceforge.net"><img src=
-"http://sourceforge.net/sflogo.php?group_id=7420&type=1" width=
-"88" height="31" border="0" alt="SourceForge.net"></a></p>
+<p>
+<a href="http://sourceforge.net/donate/index.php?group_id=7420">
+ <img src="http://images.sourceforge.net/images/project-support.jpg" 
+ width="88" height="32" border="0" alt="Support This Project" /> 
+</a> 
+<a href="http://sourceforge.net">
+ <img src="http://sourceforge.net/sflogo.php?group_id=7420&type=1" 
+ width="88" height="31" border="0" alt="SourceForge.net" />
+</a>
+</p>
 </td>
 </tr>
 </table>

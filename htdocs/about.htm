@@ -30,7 +30,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
   <tr> 
     <td width="160"><img src="images/dscalerlogo.jpg" alt="DScaler logo"></td>
     <td colspan="2" align="right" valign="bottom">
-      <font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><!-- #BeginEditable "Page%20Title" -->About&nbsp;<!-- #EndEditable --></b></font></td>
+      <font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><!-- #BeginEditable "Page%20Title" -->About<!-- #EndEditable --></b></font></td>
   </tr>
   <tr bgcolor="#FFCC00" align="right"> 
     <td colspan="3"><img src="images/yellowspacer.gif" width="100%" height="2"></td>
@@ -39,13 +39,50 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
     <td colspan="3">&nbsp;</td>
   </tr>
   <tr>
-    <td colspan="3"><!-- #BeginEditable "Text" --> 
-      <p> DScaler is a piece of software that captures video, processes it, and 
-        scales it for presentation on a projector or computer monitor. Unlike 
-        most existing software that processes video, DScaler implements highly 
-        sophisticated algorithms that work in real-time, providing PC owners with 
-        a level of image quality unknown up to now.
-      <p>DScaler packages a variety of functions, including:
+    <td colspan="3"><!-- #BeginEditable "Text" -->
+			<h2>What is DScaler?</h2>
+		  <p>The DScaler project is an ongoing attempt to get the best video quality
+			possible from a Windows PC.  At the moment the project has several main strands.
+			<ul>
+			<li><a href="#dscaler4">DScaler 4</a></li>
+			<li><a href="#dscaler5">DScaler 5</a></li>
+			<li><a href="#deinterlacing">DScaler Deinterlacing</a></li>
+			<li><a href="#filters">DScaler Video Filters</a></li>
+			</ul></p>
+			<p>These are explained in more detail below. There are also some old strands
+			<ul>
+			<li><a href="#dtv">dTV</a></li>
+			<li><a href="#deintfilter">DScaler Deinterlace Filter</a></li>
+			</ul></p>
+			<p>That are also explained below for completeness.</p> 
+
+			<h2>Why do I need DScaler?</h2>
+			
+			<p>Video fed in from external sources is interlaced and if this interlacing 
+			is not taken into account when displaying the video on a PC nasty artifacts 
+			can often be seen.  A good description of the issues involved in converting
+			interlaced video into progressive scan as required for PC use can be found 
+			<a href="http://www.hometheaterhifi.com/volume_7_4/dvd-benchmark-part-5-progressive-10-2000.html">
+			here</a>.</p>
+
+			<p>We also have some screenshots which illustrate the issue 
+			<a href="screenshots/index.htm">here</a>.
+			
+			<h2>What do others say about DScaler?</h2>
+
+			<p>We maintain a list of reviews and articles about DScaler 
+			<a href="reviews/index">here</a>.</p>
+			
+			<a name="dscaler4"></a>
+			<h2>DScaler 4</h2>
+      <p>DScaler 4 is a piece of software that captures video, processes it, and 
+        scales it for presentation on a projector or computer monitor. DScaler 
+				implements highly sophisticated algorithms that work in real-time to 
+				provide PC owners with image quality matched only by very expensive
+				equipment.</p>
+			<p>In order to get the most out of DScaler 4 you will need a 
+			<a href="href=card-support/index.htm">supported capture card</a>.</p>
+      <p>DScaler performs a variety of functions:
       <ul>
         <li>Grabbing video from a DVD player, game console, laserdisc, or VCR 
           in a reliable fashion, in either analog or digital form;</li>
@@ -65,36 +102,82 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         Forum</a>. In addition, you will find knowledgeable discussion about this 
         and other computer A/V-related topics at <a href="http://www.avsforum.com/">AVS 
         Forum</a>. 
-      <p>Please see the <a href="downloads.htm">downloads page</a> to download 
-        the latest version.</p>
-      <!-- #EndEditable --></td>
-  </tr>
-  <tr> 
-    <td colspan="3">&nbsp;</td>
-  </tr>
-  <tr bgcolor="#FFCC00"> 
-    <td colspan="3"> 
-      <div align="center"><img src="images/yellowspacer.gif" width="100%" height="2"></div>
-    </td>
-  </tr>
-  <tr> 
-    <td colspan="3">&nbsp;</td>
-  </tr>
-  <tr> 
-    <td colspan="3"> 
-      <div align="center"><a class="bottommenu" href="index.php">home</a> | <a href="about.htm" class="bottommenu">about</a>
-        | <a href="/reviews/index.htm" class="bottommenu">reviews</a> |&nbsp;<a href="screenshots/index.htm" class="bottommenu">screenshots</a>
-        | <a href="downloads.htm" class="bottommenu">downloa d</a> | <a href="Authors.htm" class="bottommenu">authors</a>
-        | <a href="Thanks.htm" class="bottommenu">thanks</a> <br>
-        <a href="setup/index.htm" class="bottommenu">setup</a> | <a href="keyboard.htm" class="bottommenu">keyboard
-        shortcuts </a>| <a href="http://sourceforge.net/mail/?group_id=7420" class="bottommenu">mailing
-        list</a> | <a href="FAQ.htm" class="bottommenu">faq</a> | <a href="developers.htm" class="bottommenu">developers</a>
-        | <a href="Links.htm" class="bottommenu">links</a></div>
-    </td>
-  </tr>
+      <p>Please see the <a href="downloads.htm">download page</a> to download 
+        the latest version. There is also a <a href="FAQ.htm">FAQ</a> but sadly it is 
+				now a bit out of date.</p>
+			<a name="dscaler5"></a>
+			<h2>DScaler 5</h2>
+			<p>DScaler 5 is in the very early stages at the moment and is an attempt to
+			use DScaler's film detection, deinterlacing and filters in a way that works 
+			with internal sources as well as external sources.  It is also planned to 
+			eliminate the need for direct hardware access.</p>
+			<p>At the moment the project is in active development but there are some usable 
+			filters being produced.  Get the latest versions of these filters 
+			<a href="dscaler5.htm">here</a>.</p>
+			<a name="deinterlacing"></a>
+			<h2>DScaler Deinterlacing</h2>
+			<p>The DScaler 4 package contains many dlls that implement different deinterlacing
+			algorithms, these dlls can be used in certain other applications (e.g. 
+			<a href="http://ffdshow.sourceforge.net/tikiwiki/">ffdshow</a>) to perform 
+			deinterlacing.</p>
+			<a name="filters"></a>
+			<h2>DScaler Video Filters</h2>
+			<p>The DScaler 4 package contains many dlls that implement different video
+			filtering algorithms, these dlls can be used in certain other applications (e.g. 
+			<a href="http://ffdshow.sourceforge.net/tikiwiki/">ffdshow</a>).</p>
+			
+			<a name="dtv"></a>
+			<h2>dTV</h2>
+			<p>dTV was the old name for DScaler, we changed the name to avoid confusion with 
+			Digital TV.</p>
+			<a name="deintfilter"></a>
+			<h2>DScaler Deinterlace Filter</h2>
+			<p>This was an early attempt to use the DScaler deinterlacing algorithms 
+			in DirectShow.  For more information see <a href="Filter.htm">here</a>.</p>
+			
+<!-- #EndEditable --> 
+</td>
+</tr>
+<tr>
+<td colspan="3"> 
+</td>
+</tr>
+<tr bgcolor="#FFCC00">
+<td colspan="3">
+<div align="center"><img src="images/yellowspacer.gif" width=
+"100%" height="2"></div>
+</td>
+</tr>
+<tr>
+<td colspan="3"> </td>
+</tr>
+<tr>
+<td>
+</td>
+<td align="center">
+<a href="index.php" class="bottommenu">home</a>&nbsp;|&nbsp;<a href="about.htm" 
+class="bottommenu">about</a>&nbsp;|&nbsp;<a href="docs.htm" 
+class="bottommenu">documentation</a>&nbsp;|&nbsp;<a href="downloads.htm" 
+class="bottommenu">DScaler&nbsp;4</a>&nbsp;|&nbsp;<a href="Authors.htm" 
+class="bottommenu">authors</a><br><a href="Thanks.htm" 
+class="bottommenu">thanks</a>&nbsp;|&nbsp;<a href="user_support.htm" 
+class="bottommenu">user&nbsp;support</a>&nbsp;|&nbsp;<a href="donate.htm" 
+class="bottommenu">donate</a>&nbsp;|&nbsp;<a href="developers.htm" 
+class="bottommenu">developers</a>&nbsp;|&nbsp;<a href="Links.htm" 
+class="bottommenu">links</a>
+</td>
+<td align="right">
+<p>
+<a href="http://sourceforge.net/donate/index.php?group_id=7420">
+ <img src="http://images.sourceforge.net/images/project-support.jpg" 
+ width="88" height="32" border="0" alt="Support This Project" /> 
+</a><a href="http://sourceforge.net"><img src=
+"http://sourceforge.net/sflogo.php?group_id=7420&type=1" width=
+"88" height="31" border="0" alt="SourceForge.net" />
+</a></p>
+</td>
+</tr>
 </table>
-<p><a href="http://sourceforge.net"><img src="http://sourceforge.net/sflogo.php?group_id=7420&type=1" width="88" height="31" border="0"
-alt="SourceForge.net" align="right"></a></p>
-<p>&nbsp; </p>
-</body>
-<!-- #EndTemplate --></html>
+</body><!-- #EndTemplate -->
+
+</html>

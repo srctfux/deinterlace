@@ -3,7 +3,7 @@
 <!-- #BeginTemplate "/Templates/dtvnormal.dwt" -->
 <head>
 <!-- #BeginEditable "doctitle" -->
-<title>DirectShow Filter</title>
+<title>DScaler 5</title>
 <!-- #EndEditable -->
 <meta http-equiv="Content-Type" content=
 "text/html; charset=iso-8859-1">
@@ -25,50 +25,59 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
 <body bgcolor="#FFFFFF">
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
 <tr>
-<td height="1" width="160"><img src="images/spacer.gif" width="1"
+<td height="5" width="160"><img src="images/spacer.gif" width="1"
 height="1"></td>
-<td height="1" width="342"><img src="images/spacer.gif" width="1"
+<td height="5" width="342"><img src="images/spacer.gif" width="1"
 height="1"></td>
-<td height="1" width="501"><img src="images/spacer.gif" width="1"
+<td height="5" width="501"><img src="images/spacer.gif" width="1"
 height="1"></td>
 </tr>
 
 <tr>
-<td width="160"><img src="images/dscalerlogo.jpg" alt=
-"DScaler logo"></td>
-<td colspan="2" align="right" valign="bottom"><font face=
-"Verdana, Arial, Helvetica, sans-serif" size="5"><b>
-<!-- #BeginEditable "Page%20Title" -->
-DirectShow Filter 
+<td width="160" height="142"><img src="images/dscalerlogo.jpg"
+alt="DScaler logo"></td>
+<td colspan="2" align="right" valign="bottom" height="142"><font
+face="Verdana, Arial, Helvetica, sans-serif" size="5"><b>
+<!-- #BeginEditable "Page%20Title" -->DScaler 5 
 <!-- #EndEditable --></b></font></td>
 </tr>
 
 <tr bgcolor="#FFCC00" align="right">
-<td colspan="3"><img src="images/yellowspacer.gif" width="100%"
-height="2"></td>
+<td colspan="3" height="6"><img src="images/yellowspacer.gif"
+width="100%" height="2"></td>
 </tr>
 
 <tr>
-<td colspan="3"> </td>
+<td colspan="3" height="20"> </td>
 </tr>
 
 <tr>
-<td colspan="3"><!-- #BeginEditable "Text" -->
-
-      <p>The DScaler team also is working on adding support for its algorithms 
-        as DirectShow filters. This project is still in it's early stages but 
-        we have made some progress.</p>
-      <p>Our most recent code (1.2.0 released 17th November 2001) is available 
-        for download:</p>
+<td colspan="3">
+<!-- #BeginEditable "Text" -->
+<h2>About</h2>
+<p>DScaler 5 is a long term project to migrate the key DScaler features of film 
+detection and deinterlacing into the DirectShow world, this will mean that we will
+no longer require direct hardware access and should mean the we will be able to
+work with a wider range of hardware and also be able to process internal sources 
+such as DVD and digital TV entirely in the digital domain without complex hardware 
+solutions.</p>
+<h2>Where are we?</h2>
+<p>At the moment the focus of the developement is in getting  the core decoders up
+and running.  As each filter gets into a working state it will be released as part 
+of the alpha DScaler 5 package and will be announced in the 
+<a href="http://www.dscaler.org/phpBB/viewforum.php?f=8">DScaler 5  forum</a>.</p>
+<p>At the moment the MPEG audio and video filters are coming along.</p>
+<h2>Where are we going?</h2>
+<p>The plan for DScaler 5 keeps evolving and developement is slow but we plan to 
+attempt to attack some of the following issues next year (2005).</p>
 <ul>
-<li><a href="http://prdownloads.sourceforge.net/deinterlace/Deinterlace120ax.zip">Filter</a></li>
-<li><a href="http://prdownloads.sourceforge.net/deinterlace/Deinterlace120src.zip">Source code</a></li>
+<li>DScaler 4 quality film detection and deinterlacing on MPEG streams</li>
+<li>A method of decoding external spdif audio sources</li>
+<li>Assist other projects (probably MediaPortal &amp; Media Player Classic) in 
+creating a front end for the decoders.</li>
+<li>Add support for DVB features (subtitles, teletext etc) as required.</li>
 </ul>
-      <p>These files are not yet supported for end-users. Please refer all developer 
-        questions to the developer mailing list at this time.</p>
-      <p>If you wish to ship versions of these files with any commercial product, 
-        then please contact the developer mailing list for advice on how to make 
-        sure you are complying with the GNU General Public License.</p>
+
 
 <!-- #EndEditable --> 
 </td>
