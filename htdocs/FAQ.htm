@@ -74,13 +74,40 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         to refer to digital television and this was causing confusion. In the 
         source and on the website you will still see references to dTV but please 
         refer to the program as DScaler from now on. </p>
-      <h2>Who made what ?</h2>
+      <h2>History of DScaler</h2>
+      <p>The whole thing started in july 2000. See Cliff Watson's post regarding 
+        the home theater computer history in &quot;<a href="http://www.avsforum.com/ubb/Forum12/HTML/012706.html#7">Who 
+        are the pioneers of htpc ?</a>&quot;. Ali, one of the first French htpc 
+        addicts, was promoting a piece of software called <a href="http://www.borgtech.org/">BorgTV</a> 
+        (aka bTV) that allowed him to deinterlace analog sources with a level 
+        of quality unknown at this time. Thanks to threads like &quot;<a href="http://www.avsforum.com/ubb/Archives/Archive-000004/HTML/20010102-12-002950.html">Not 
+        so bad analog video deinterlacing with htpc</a>&quot;, people got interested 
+        in the subject. Among them was <a href="Authors.htm">John Adcock</a>.</p>
+      <p>He released a plugin for bTV that was doing realtime 2:2 pulldown for 
+        PAL movies that showed that deinterlacing of such sources was feasable 
+        in software (see &quot;<a href="http://www.avsforum.com/ubb/Archives/Archive-000004/HTML/20010102-12-003461.html">John 
+        Adock's great PALMovie plugin</a>&quot;).</p>
+      <p>The lack of NTSC support in bTV made the implementation of the more complex 
+        3:2 pulldown algorithm lead John to write his own application based on 
+        Multidec. Its name, based on its inspiration application ; dTV (see &quot;<a href="http://www.avsforum.com/ubb/Archives/Archive-000004/HTML/20010714-12-003790.html">First 
+        Version of NTSC/PAL TV deinterlacing program</a>&quot;).</p>
+      <p>This proved that complex deinterlacing techniques could be done in realtime 
+        and without additionnal dedicated hardware. Since this time, more and 
+        more users (and coders) have joined the dTV community and are using it 
+        on their htpc rather than using external line doublers.</p>
+      <p>In may 2001, <a href="http://www.avsforum.com/ubb/Forum12/HTML/010323.html">dTV 
+        got renamed to DScaler</a> to avoid any misunderstanding with the growing 
+        Digital TeleVision issue.</p>
       <p>See <a href="Authors.htm"> Authors</a> for the main contributors and 
         <a href="Thanks.htm">Thanks</a> for a list of people who have helped make 
         DScaler a success.</p>
+      <p>&nbsp;</p>
       <h2>How much does DScaler cost ?</h2>
       <p> $1000 (plus taxes) :-) Of course not, DScaler is fully free of charge, 
         open-source, coded under GPL. 
+      <h2>Where can I download DScaler ?</h2>
+      <p>On DScaler's site, in the <a href="http://www.dscaler.org/downloads.htm">download 
+        page</a> 
       <h1>General issues</h1>
       <h2>Should I use DScaler to deinterlace the output from my set-top dvd player 
         ?</h2>
@@ -141,7 +168,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         Odd Fields Only</h3>
       <p>These use only one field out of each pair and use hardware scaling.&nbsp; 
         This reduces bob artifacts at the cost of loss of information.&nbsp; These 
-        were originally intended to be used with game consoles.
+        were originally intended to be used with game consoles. 
       <h3>Adaptive Deinterlace</h3>
       <p>This method uses the amount of motion detected to select the best deinterlacing 
         alogoritm.&nbsp; Currently by default it switches between 2-Frame and 
@@ -153,7 +180,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         Quite by accident, it can also do a decent job on poorly mastered 3:2 
         or 2:2 pull down film source material like some anime movies, regardless 
         of low or high motion. Try it if you have a movie source that is not giving 
-        good results with normal Auto Pull Down processing.
+        good results with normal Auto Pull Down processing. 
       <h3>Greedy 2 Frame method</h3>
       <p>This method tries to combine the best features of the 2-frame algorithm 
         with the looking ahead ability of the greedy method.&nbsp; I find this 
@@ -249,7 +276,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         a couple ones that, at least, have been sucessfully used by some users. 
       </p>
       <ul>
-        <li>Zoltrix Genie TV <a href="http://www.zoltrix-int.com/products/video/8MMZXGENIE.htm">http://www.zoltrix-int.com/products/video/8MMZXGENIE.htm</a>
+        <li>Zoltrix Genie TV <a href="http://www.zoltrix-int.com/products/video/8MMZXGENIE.htm">http://www.zoltrix-int.com/products/video/8MMZXGENIE.htm</a> 
         <li>The WinTV series from Hauppage <a href="http://www.hauppage.com/html/products.htm">http://www.hauppage.com/html/products.htm</a> 
         <li>Guillemot maxi video 3 <a href="http://fr.guillemot.com/brand/gamme/video/mtvvidp3/mtvvidpci3.html">http://fr.guillemot.com/brand/gamme/video/mtvvidp3/mtvvidpci3.html</a> 
         <li>The Pinacle Studio PCTV <a href="http://www.pinnaclesys.com/ProductPage.asp?Product_ID=6">http://www.pinnaclesys.com/ProductPage.asp?Product_ID=6</a> 
@@ -285,7 +312,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         card and all your video devices to video in connectors. 
       <p>Also, some cards come with one, sometimes two composite input that you 
         can use separately from within DScaler. An svideo connection is also quite 
-        common, allowing you to switch easily from 2 or 3 sources.
+        common, allowing you to switch easily from 2 or 3 sources. 
       <p> <a name="TROUBLE"></a> 
       <h1>Troubleshooting</h1>
       <h2> I have problems with sound?</h2>
@@ -340,7 +367,15 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         at line 161</code><br>
         We don't have any full explanation of the problem but it happens when 
         resizing DScaler or making it go from fullscreen to window mode. Also 
-        the color depth, frequency and size of the desktop might be related. 
+        the color depth, frequency and size of the desktop might be related. </p>
+      <h2>What is the Crashlog.txt file, and where do I find it ?</h2>
+      <p>If one of the developers asks you for a crashlog.txt file you should 
+        find this file in the DScaler install directory. This file contains useful 
+        information that can be used to find bugs more easily. If you can't find 
+        one when you've been asked for one don't worry just inform the developer 
+        that one was not created. Also if you have this file but are not observing 
+        problems then don't worry. </p>
+      <p>&nbsp; 
       <h2>I still have a problem?</h2>
       <p>See <a href="user_support.htm">Support</a> for how to get support for 
         DScaler. </p>
@@ -358,7 +393,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <h2>Coding</h2>
       <p> Any help is welcome. Despite including very complex code, there are 
         a lot of features in it that are simple or that could be easily implemented 
-        without knowing anything about 3:2 pulldown detection.
+        without knowing anything about 3:2 pulldown detection. 
       <p> If you've got an idea, or feel like to trying to implement something 
         that is already in the <a href="http://sourceforge.net/pm/task.php?group_project_id=7174&group_id=7420&func=browse">Tasks 
         list</a>, join the <a href="http://lists.sourceforge.net/lists/listinfo/deinterlace-discuss">mailing 
