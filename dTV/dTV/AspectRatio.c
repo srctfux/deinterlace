@@ -147,6 +147,7 @@ int InitialOverscan    = 4;
 
 //----------------------------------------------------------------------------
 // Switch to a new aspect ratio and record it in the ratio history list.
+// Use nRatio = -1 to only switch between anamorphic/nonanamorphic
 void SwitchToRatio(int nMode, int nRatio)
 {
 	int now = GetTickCount();
@@ -335,7 +336,57 @@ int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
         }
 		break;
 
+	// Image position settings
+	case IDM_WINPOS_VERT_CENTRE:
+	case IDM_WINPOS_VERT_TOP:
+	case IDM_WINPOS_VERT_BOTTOM:
+		VerticalPos = wMenuID - IDM_WINPOS_VERT_BOTTOM; 
+		WorkoutOverlaySize();
+		break;
+
+	case IDM_WINPOS_HORZ_CENTRE:
+	case IDM_WINPOS_HORZ_LEFT:
+	case IDM_WINPOS_HORZ_RIGHT:
+		HorizontalPos = wMenuID - IDM_WINPOS_HORZ_RIGHT; 
+		WorkoutOverlaySize();
+		break;
+
+	// Autodetect aspect ratio toggles
+	case IDM_SASPECT_AUTO_ON:
+		AutoDetectAspect = TRUE;
+		ShowText(hWnd, "Auto Aspect Detect ON");
+        break;
+	case IDM_SASPECT_AUTO_OFF:
+		AutoDetectAspect = FALSE;
+		ShowText(hWnd, "Auto Aspect Detect OFF");
+        break;
+	case IDM_SASPECT_AUTO_TOGGLE:
+		AutoDetectAspect = ! AutoDetectAspect;
+		if (AutoDetectAspect)
+		{
+			ShowText(hWnd, "Auto Aspect Detect ON");
+		}
+		else
+		{
+			ShowText(hWnd, "Auto Aspect Detect OFF");
+		}
+		break;
+	//------------------------------------------------------------------
+	default:
+		// At this point, we want to reset the automatic aspect 
+		// because the end user selected an "Advanced Aspect Ratio"
+		// In this case, turn off automatic aspect ratio detect.
+
+		AutoDetectAspect = FALSE;
+		break;
+	}
+	// Now, restart the 'switch' statement because we may have 
+	// disabled the automatic aspect ratio detect in the 
+	// above 'default' clause.
+	//--------------------------------------------------------------
+
 	// Advanced Aspect Ratios
+	switch (wMenuID) {
 	case IDM_SASPECT_0:
 		SwitchToRatio(AR_STRETCH, 0);
 		ShowText(hWnd, "Stretch Video");
@@ -392,25 +443,6 @@ int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 		DetectAspectNow = TRUE;
 		break;
 
-	case IDM_SASPECT_AUTO_ON:
-		AutoDetectAspect = TRUE;
-		ShowText(hWnd, "Auto Aspect Detect ON");
-        break;
-	case IDM_SASPECT_AUTO_OFF:
-		AutoDetectAspect = FALSE;
-		ShowText(hWnd, "Auto Aspect Detect OFF");
-        break;
-	case IDM_SASPECT_AUTO_TOGGLE:
-		AutoDetectAspect = ! AutoDetectAspect;
-		if (AutoDetectAspect)
-		{
-			ShowText(hWnd, "Auto Aspect Detect ON");
-		}
-		else
-		{
-			ShowText(hWnd, "Auto Aspect Detect OFF");
-		}
-		break;
 
 	// Output Display Aspect Ratios
 	case IDM_TASPECT_0:
@@ -444,19 +476,6 @@ int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 	case IDM_TASPECT_CUSTOM:
 		target_aspect = custom_target_aspect;
 		ShowText(hWnd, "Custom Aspect Ratio Screen");
-		break;
-	case IDM_WINPOS_VERT_CENTRE:
-	case IDM_WINPOS_VERT_TOP:
-	case IDM_WINPOS_VERT_BOTTOM:
-		VerticalPos = wMenuID - IDM_WINPOS_VERT_BOTTOM; 
-		WorkoutOverlaySize();
-		break;
-
-	case IDM_WINPOS_HORZ_CENTRE:
-	case IDM_WINPOS_HORZ_LEFT:
-	case IDM_WINPOS_HORZ_RIGHT:
-		HorizontalPos = wMenuID - IDM_WINPOS_HORZ_RIGHT; 
-		WorkoutOverlaySize();
 		break;
 	default:
 		// It's not an aspect ratio related menu selection
