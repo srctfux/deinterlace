@@ -49,6 +49,7 @@ HANDLE VBIThread;
 BYTE VBI_thresh;
 BYTE VBI_off;
 int vtstep;
+int vpsstep;
 BOOL VTLarge=TRUE;
 
 BOOL Capture_VBI = FALSE;
@@ -73,7 +74,8 @@ void VBI_Exit()
 
 void VBI_DecodeLine(unsigned char *VBI_Buffer, int line, BOOL IsOdd)
 {
-	vtstep = (int) ((28.636363 / 5.72725) * FPFAC + 0.5);
+	vtstep = (int) ((35.468950 / 6.9375) * FPFAC + 0.5);
+	vpsstep = 2 * (int) ((35.468950 / 5.0) * FPFAC + 0.5);
 
 	// set up threshold and offset data
 	VBI_AGC(VBI_Buffer, 120, 450, 1);
