@@ -536,9 +536,8 @@ const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 	// MAE 20 Nov 2000 Start of change
 	{
 		"Conexant Bt878 NTSC XEVK",
-		3, 1, 0, 2, 0x007000,
+		3, 1, 0, 2, 0xFFFEFF,
 		{ 2, 3, 1, 1, 0, 0, 0, 0},
-		//{ 0xbc803f, 0, 0, 0xbcb03f, 0xbcb03f, 0},
 		{ 0x001000, 0x001000, 0x000000, 0x000000, 0x003000, 0x000000},
 		0,
 		1,0,0,0,0,0,0,0,
@@ -547,9 +546,8 @@ const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 	},
 	{
 		"Rockwell Bt878 NTSC XEVK",
-		3, 1, 0, 2, 0x007000,
+		3, 1, 0, 2, 0xFFFEFF,
 		{ 2, 3, 1, 1, 0, 0, 0, 0},
-		//{ 0xbc803f, 0, 0, 0xbcb03f, 0xbcb03f, 0},
 		{ 0x001000, 0x001000, 0x000000, 0x000000, 0x003000, 0x000000},
 		0,
 		1,0,0,0,0,0,0,0,
