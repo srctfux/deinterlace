@@ -148,10 +148,6 @@ void Timing_WaitForNextFieldNormal(DEINTERLACE_INFO* pInfo)
 			nDroppedFields++;
 			LOG("Running Late");
 		}
-		else
-		{
-			nUsedFields++;
-		}
 	}
 
 	switch(NewPos)
@@ -186,21 +182,18 @@ void Timing_WaitForNextFieldAccurate(DEINTERLACE_INFO* pInfo)
 	Diff = (10 + NewPos - OldPos) % 10;
 	if(Diff == 1)
 	{
-		nUsedFields++;
 	}
 	else if(Diff == 2) 
 	{
 		NewPos = (OldPos + 1) % 10;
 		FlipAdjust = TRUE;
 		LOG(" Slightly late");
-		nUsedFields++;
 	}
 	else if(Diff == 3) 
 	{
 		NewPos = (OldPos + 1) % 10;
 		FlipAdjust = TRUE;
 		LOG(" Very late");
-		nUsedFields++;
 	}
 	else
 	{
@@ -262,6 +255,10 @@ void Timing_WaitForNextField(DEINTERLACE_INFO* pInfo)
 	else
 	{
 		Timing_WaitForNextFieldNormal(pInfo);
+	}
+	if (!pInfo->bRunningLate)
+	{
+		nUsedFields++;
 	}
 }
 
