@@ -90,41 +90,51 @@ BOOL FillInfoStruct(DEINTERLACE_INFO* info, char* SnapshotFile)
 		return FALSE;
 	}
 	// read in odd fields
-	i = 0;
-	while(i < MAX_FIELD_HISTORY && info->OddLines[i] != NULL)
+	for (i = 0; i < MAX_FIELD_HISTORY; i++)
 	{
-		info->OddLines[i] = (short**)malloc(info->FieldHeight * sizeof(short*));
-		for(j = 0; j < info->FieldHeight; ++j)
+		if (info->OddLines[i] == NULL)
 		{
-			info->OddLines[i][j] = (short*)malloc(info->LineLength);
-			NumRead = fread(info->OddLines[i][j], 1, info->LineLength, file);
-			if(NumRead < info->LineLength)
+			printf("Odd field %d empty\n", i+1);
+		}
+		else
+		{
+			info->OddLines[i] = (short**)malloc(info->FieldHeight * sizeof(short*));
+			for(j = 0; j < info->FieldHeight; ++j)
 			{
-				printf("Error reading file %s\n", SnapshotFile);
-				fclose(file);      
-				return FALSE;
+				info->OddLines[i][j] = (short*)malloc(info->LineLength);
+				NumRead = fread(info->OddLines[i][j], 1, info->LineLength, file);
+				if(NumRead < info->LineLength)
+				{
+					printf("Error reading file %s\n", SnapshotFile);
+					fclose(file);      
+					return FALSE;
+				}
 			}
 		}
-		i++;
 	}
 
 	// read in even fields
-	i = 0;
-	while(i < MAX_FIELD_HISTORY && info->EvenLines[i] != NULL)
+	for (i = 0; i < MAX_FIELD_HISTORY; i++)
 	{
-		info->EvenLines[i] = (short**)malloc(info->FieldHeight * sizeof(short*));
-		for(j = 0; j < info->FieldHeight; ++j)
+		if (info->EvenLines[i] == NULL)
 		{
-			info->EvenLines[i][j] = (short*)malloc(info->LineLength);
-			NumRead = fread(info->EvenLines[i][j], 1, info->LineLength, file);
-			if(NumRead < info->LineLength)
+			printf("Even field %d empty\n", i+1);
+		}
+		else
+		{
+			info->EvenLines[i] = (short**)malloc(info->FieldHeight * sizeof(short*));
+			for(j = 0; j < info->FieldHeight; ++j)
 			{
-				printf("Error reading file %s\n", SnapshotFile);
-				fclose(file);      
-				return FALSE;
+				info->EvenLines[i][j] = (short*)malloc(info->LineLength);
+				NumRead = fread(info->EvenLines[i][j], 1, info->LineLength, file);
+				if(NumRead < info->LineLength)
+				{
+					printf("Error reading file %s\n", SnapshotFile);
+					fclose(file);      
+					return FALSE;
+				}
 			}
 		}
-		i++;
 	}
 
 	info->Overlay = (BYTE*)malloc(info->OverlayPitch * info->FrameHeight);
@@ -390,7 +400,7 @@ static void FillTiffHeader(struct TiffHeader *head, char *description, char *mak
 
 //-----------------------------------------------------------------------------
 // Save still image snapshot as TIFF format to disk
-BOOL MakeTifFile(DEINTERLACE_INFO* info, char* TifFile, int OddField, int EvenField)
+BOOL MakeTifFile(DEINTERLACE_INFO* info, char* TifFile, DEINTERLACE_METHOD* DeintMethod, int OddField, int EvenField)
 {
 	int y, cr, cb, r, g, b, i, j, n = 0;
 	FILE *file;
@@ -400,10 +410,21 @@ BOOL MakeTifFile(DEINTERLACE_INFO* info, char* TifFile, int OddField, int EvenFi
 	char description[] = "dTV image";
 	int NbLines;
 
+	if (OddField >= 0 && info->OddLines[OddField] == NULL)
+	{
+		printf("Odd field missing => file %s not generated\n",TifFile);
+		return FALSE;
+	}
+	if (EvenField >= 0 && info->EvenLines[EvenField] == NULL)
+	{
+		printf("Even field missing => file %s not generated\n",TifFile);
+		return FALSE;
+	}
+
 	file = fopen(TifFile,"wb");
 	if (!file)
 	{
-		printf("Could not open file %s", TifFile);
+		printf("Could not open file %s\n", TifFile);
 		return FALSE;
 	}
 
@@ -411,6 +432,8 @@ BOOL MakeTifFile(DEINTERLACE_INFO* info, char* TifFile, int OddField, int EvenFi
 		NbLines = info->FieldHeight * 2;
 	else if (OddField >= 0 || EvenField >= 0)
 		NbLines = info->FieldHeight;
+	else if (DeintMethod->bIsHalfHeight)
+		NbLines = info->FrameHeight / 2;
 	else
 		NbLines = info->FrameHeight;
 
@@ -520,27 +543,27 @@ int ProcessSnapShot(char* SnapshotFile, char* FilterPlugin, char* DeintPlugin, c
 		EvenField = 3;
 	else if (!strcmp(DeintPlugin, "even5"))
 		EvenField = 4;
-	else if (!strcmp(DeintPlugin, "field1"))
+	else if (!strcmp(DeintPlugin, "oddeven1"))
 	{
 		OddField = 0;
 		EvenField = 0;
 	}
-	else if (!strcmp(DeintPlugin, "field2"))
+	else if (!strcmp(DeintPlugin, "oddeven2"))
 	{
 		OddField = 1;
 		EvenField = 1;
 	}
-	else if (!strcmp(DeintPlugin, "field3"))
+	else if (!strcmp(DeintPlugin, "oddeven3"))
 	{
 		OddField = 2;
 		EvenField = 2;
 	}
-	else if (!strcmp(DeintPlugin, "field4"))
+	else if (!strcmp(DeintPlugin, "oddeven4"))
 	{
 		OddField = 3;
 		EvenField = 3;
 	}
-	else if (!strcmp(DeintPlugin, "field5"))
+	else if (!strcmp(DeintPlugin, "oddeven5"))
 	{
 		OddField = 4;
 		EvenField = 4;
@@ -573,7 +596,7 @@ int ProcessSnapShot(char* SnapshotFile, char* FilterPlugin, char* DeintPlugin, c
 
 	}
 
-	if(!MakeTifFile(&info, TifFile, OddField, EvenField))
+	if(!MakeTifFile(&info, TifFile, DeintMethod, OddField, EvenField))
 	{
 		return 1;
 	}
@@ -603,7 +626,13 @@ int main(int argc, char* argv[])
 
 	if(argc != 4 && argc != 5)
 	{
-		printf("Usage: PlugTest dTVSnapFile [FilterPlugIn] DeintPlugIn OutputTifFile\n");
+		printf("Usage: PlugTest dTVSnapFile [FilterPlugIn] DeintPlugIn OutputTifFile\n\n");
+		printf("  FilterPlugIn is a DLL file\n");
+		printf("  DeintPlugIn is either :\n");
+		printf("    - a DLL file\n");
+		printf("    - odd1|odd2|odd3|odd4|odd5 to save odd field\n");
+		printf("    - even1|even2|even3|even4|even5 to save even field\n");
+		printf("    - oddeven1|oddeven2|oddeven3|oddeven4|oddeven5 to save odd+even fields\n");
 		return 1;
 	}
 	if(argc == 4)
