@@ -236,6 +236,10 @@ AspectFilter* BuildFilterChain()
 // Takes into account of aspect ratio control.
 void _WorkoutOverlaySize(BOOL allowResize)
 {
+	static BOOL InFunction = FALSE;
+	if(InFunction == TRUE) return;
+
+	InFunction = TRUE;
 	UpdateWindowState();
 
 	AspectRectangles ar;
@@ -276,9 +280,10 @@ void _WorkoutOverlaySize(BOOL allowResize)
 	// Build filter chain and apply
 	// TODO: Filter chain should be saved and only rebuilt if options are changed
 	AspectFilter *head = BuildFilterChain();
-	if (head->applyFilters(ar,allowResize))
+	if (head->applyFilters(ar, allowResize))
 	{
 		delete head;
+		InFunction = FALSE;
 		_WorkoutOverlaySize(FALSE); // Prevent further recursion - only allow 1 level of request for readjusting the overlay
 		return;
 	} 
@@ -347,6 +352,7 @@ void _WorkoutOverlaySize(BOOL allowResize)
 		Overlay_Update(&aspectSettings.sourceRectangle, &aspectSettings.destinationRectangleWindow, DDOVER_SHOW, TRUE);
 		aspectSettings.overlayNeedsSetting = FALSE;
 	}
+	InFunction = FALSE;
 }
 
 void WorkoutOverlaySize()
