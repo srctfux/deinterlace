@@ -1,4 +1,4 @@
-/////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 // dTV.c
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2000 John Adcock.  All rights reserved.
@@ -332,8 +332,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			DialogBox(hInst, "SELECTCARD", hWnd, (DLGPROC) SelectCardProc);
 			Card_Init(CardType);
 			Tuner_Init(TunerType);
-			WorkoutOverlaySize();
-			Start_Capture();
+            Reset_Capture();
 			break;
 
 		case IDM_CLOSE_VT:
@@ -766,7 +765,8 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			}
 			ShowText(hWnd, Text);
 			break;
-		case IDM_VOLUMEMINUS:
+
+        case IDM_VOLUMEMINUS:
 			if (USE_MIXER == FALSE)
 			{
 				if (InitialVolume > 20)
@@ -881,7 +881,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_EXTERN3:
 		case IDM_EXTERN4:
 		case IDM_EXTERN5:
-
 			VideoSource = SOURCE_TUNER;
 			switch (LOWORD(wParam)) {
 			case IDM_EXTERN1: VideoSource = SOURCE_COMPOSITE;      break;
@@ -1158,7 +1157,8 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_TYPEFORMAT_7:
 		case IDM_TYPEFORMAT_8:
 		case IDM_TYPEFORMAT_9:
-			TVTYPE = LOWORD(wParam) - 1120;
+            // Video format (NTSC, PAL, etc)
+			TVTYPE = LOWORD(wParam) - IDM_TYPEFORMAT_0;
 			Stop_Capture();
 			BT848_SetGeoSize();
 			WorkoutOverlaySize();
