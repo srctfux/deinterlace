@@ -155,87 +155,65 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
               back to video video mode from a film mode.&nbsp;</p>
           </td>
         </tr>
-        <tr> 
+        <tr>
           <td colspan=3> 
-            <h3>[BTVPlugin]</h3>
+            <h3>[Threads]</h3>
           </td>
         </tr>
-        <tr> 
+        <tr>
           <td> 
-            <p>Name</p>
+            <p>Hurry_When_Late</p>
           </td>
           <td> 
-            <p align="center"><i>none</i></p>
+            <p align="center">0
           </td>
           <td> 
-            <p>Which bTV plug-in to load, the dll should be in the path or in 
-              the dTV directory.</p>
-          </td>
-        </tr>
-        <tr> 
-          <td> 
-            <p>Level1</p>
-          </td>
-          <td> 
-            <p align="center"><i>none</i></p>
-          </td>
-          <td> 
-            <p>Parameter passed to the plug-in</p>
+            <p>Performance parameter.&nbsp; If set to 1 will cause dTV to bypass
+            some processing to conserve CPU time if it seems to not be keeping
+            up with the input video stream. May be set to 1for slower machines.</p>
           </td>
         </tr>
-        <tr> 
+        <tr>
           <td> 
-            <p>Level2</p>
+            Wait_For_Flip
           </td>
           <td> 
-            <p align="center"><i>none</i></p>
+            <p align="center">1
           </td>
           <td> 
-            <p>Parameter passed to the plug-in</p>
-          </td>
-        </tr>
-        <tr> 
-          <td> 
-            <p>x</p>
-          </td>
-          <td> 
-            <p align="center"><i>none</i></p>
-          </td>
-          <td> 
-            <p>Parameter passed to the plug-in</p>
+            Performance parameter. Whether to wait for processing to complete
+            (or at least be properly set up) when flipping the video overlay
+            buffer.&nbsp; May be set to 0 for slower machines.
           </td>
         </tr>
-        <tr> 
+        <tr>
           <td> 
-            <p>y</p>
+            Sleep_Interval
           </td>
           <td> 
-            <p align="center"><i>none</i></p>
+            <p align="center">1
           </td>
           <td> 
-            <p>Parameter passed to the plug-in</p>
-          </td>
-        </tr>
-        <tr> 
-          <td> 
-            <p>UseKey1</p>
-          </td>
-          <td> 
-            <p align="center"><i>none</i></p>
-          </td>
-          <td> 
-            <p>Parameter passed to the plug-in</p>
+            Performance parameter. The number of milliseconds dTV will sleep,
+            waiting for the next video input buffer. May be set to 0 for slower
+            machines. If this is set to 0 it may appear on a CPU monitor that
+            dTV is using 100% of available CPU processor time but it will still
+            be a good citizen and yield control if another task is ready to run.
+            May be set to 0 for slower machines.
           </td>
         </tr>
-        <tr> 
+        <tr>
           <td> 
-            <p>UseKey2</p>
+            Back_Buffers
           </td>
           <td> 
-            <p align="center"><i>none</i></p>
+            <p align="center">2
           </td>
           <td> 
-            <p>Parameter passed to the plug-in</p>
+            The number of video overlay back buffers to use (in addition to the
+            normal front video display buffer).&nbsp; This may be set to only 1
+            if there is too little video memory on your graphics card, at a
+            small performance penalty.
           </td>
         </tr>
         <tr> 
@@ -245,7 +223,20 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         </tr>
         <tr> 
           <td> 
-            <p>EdgeDetect</p>
+            DeinterlaceMode
+          </td>
+          <td> 
+            <p align="center">&nbsp; 2
+          </td>
+          <td> 
+            The Deinterlace mode to be used. The best way to set this is run dTV
+            and set it from the menu.&nbsp; The current mode will be saved on
+            exit.
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            <p>EdgeDetect&nbsp;</p>
           </td>
           <td> 
             <p align="center">625</p>
@@ -269,24 +260,192 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
           </td>
         </tr>
         <tr> 
+          <td> 
+            BlcMinimumClip
+          </td>
+          <td> 
+            <p align="center">-15
+          </td>
+          <td> 
+            The Blended Clip "Minimum Clip" slider value.&nbsp; This can be used to increase the amount of Clip vs Weave
+            in the event that none of the other more specific values seem to work and you
+            still see too many Weave artifacts ("venetion blinds").  It's best to try everything
+            else first.<br>
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            BlcPixelMotionSense
+          </td>
+          <td> 
+            <p align="center">17
+          </td>
+          <td> 
+            The Blended Clip deinterlace method "Pixel Motion Sensitivity" slider:  This determines how
+            sensitive we are to motion.&nbsp; Motion is calculated as the maximum absolute change in luma
+            from the previous field in either of the two vertically adjacent pixels.  I was going to use the change in&nbsp;
+            luma of the Weave pixel but that is not current enough to prevent the "flash
+            attacks" of venetiaon blinds that can occur with sudden scene changes.  This value is
+            calculated separately for each pixel.
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            BlcRecentMotionSense<br>
+            <br>
+          </td>
+          <td> 
+            <p align="center">0
+          </td>
+          <td> 
+            The Blended Clip "Recent Motion Sensitivity" slider:  This increases the tendency to use Clip based
+            upon an n-period Exponential Moving Average of the recent motion.  Recent motion
+            is in turn an arithmetic average of how much each pixel's luma has changed from the
+            previous field.&nbsp;&nbsp;
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            BlcMotionAvgPeriod<br>
+          </td>
+          <td> 
+            <p align="center">20
+          </td>
+          <td> 
+            The Blended Clip "Motion Average Period" slider:  This sets the period of the moving average for Recent
+            Motion Sensitivity.&nbsp;
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            BlcPixelCombSense<br>
+          </td>
+          <td> 
+            <p align="center">27
+          </td>
+          <td> 
+            The Blended Clip "Pixel Comb Sensitivity" slider:  This determines how sensitive we are to the current
+            comb factor of each pixel. This uses a simplified comb factor C = abs(2*W - H - L)/2,
+            which is just the distance of the Weave pixel's luma from its interpolated value.&nbsp;
+            This value is calculated separately for each pixel.  This value along with the Pixel
+            Motion Sense seem to be the two main things to play with to get good results.  Generally,
+            increase one of these if you get Weave artifacts and decrease one if you get BOB artifacts.&nbsp;&nbsp;
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            BlcRecentCombSense<br>
+          </td>
+          <td> 
+            0
+          </td>
+          <td> 
+            The Blended Clip "Recent Comb Senseitivity" slider:&nbsp; Operates like the Recent Motion slider but
+            acts on the average Comb Factor.
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            BlcCombAvgPeriod
+          </td>
+          <td> 
+            <p align="center">20
+          </td>
+          <td> 
+            The Blended Clip "Comb Average Period" slider: Sets the period of the Comb exponential moving
+            average. See the comments on "Motion Average Period".
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            BlcHighCombSkip<br>
+          </td>
+          <td> 
+            <p align="center">&nbsp;10
+          </td>
+          <td> 
+            The Blended Clip "Skip High Comb Frames" slider: This was added in the hopes that it could help to
+            skip a frame in the event of a sudden flash attack on a rapid scene change or maybe
+            help to handle some very poorly mastered anime using ?:? pulldown.&nbsp;
+            It will give very ugly results if you set it too high.<br>
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            BlcLowMotionSkip<br>
+          </td>
+          <td> 
+            <p align="center">0
+          </td>
+          <td> 
+            The Blended Clip "Skip Low Motion Frames" slider:  This also is just experimental an probably of low
+            value. The idea here is that any frame with sufficiently low change from the previous
+            one is maybe a still frame with some video noise, and could be skipped.  Not for
+            normal use.  NOTE - This may go away in a future release.
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            BlcUseInterpBob<br>
+          </td>
+          <td> 
+            <p align="center">0
+          </td>
+          <td> 
+            The Blended Clip "Use Interpolated BOB instead of Clip" check box.  For those who don't like the
+            Clipped Weave, this will change it to an Interpolated Bob.  All other blending and
+            processing will still function. (but it probably won't look as good).
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            BlcBlendChroma<br>
+          </td>
+          <td> 
+            <p align="center">1
+          </td>
+          <td> 
+            The Blended Clip "Blend Chroma Value" check box:  Usually the chroma value for the Clipped Weave is
+            just taken from the pixel above it.  Checking this box causes the chroma values to
+            also use the clipping algorithm.&nbsp;<br>
+            Checking this box seems to get richer color detail and a more theater like picture
+            but it sometimes seems to create some softness or shimmering on my stock ticker or
+            rapidly moving objects with lots of detail like a hockey game.
+            Generally though it seems better.
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            BlcShowControls<br>
+          </td>
+          <td> 
+            <p align="center">1
+          </td>
+          <td> 
+            The Blended Clip control panel displays by default every time that
+            deinterlace method is selected.&nbsp; Setting this to 0 suppresses
+            that display.
+          </td>
+        </tr>
+        <tr> 
           <td colspan=3> 
             <h3>[ASPECT]</h3>
           </td>
         </tr>
         <tr> 
           <td> 
-            <p>SourceAspect</p>
+            <p><font size="1">SourceAspect</font></p>
           </td>
           <td> 
-            <p align="center">0</p>
+            <p align="center"><font size="1">0</font></p>
           </td>
           <td> 
-            <p>The most recent aspect ratio used. This is the ratio multiplied 
+            <p><font size="1">The most recent aspect ratio used. This is the ratio multiplied 
               by 1000, e.g. a 4:3 ratio is (4 / 3 * 1000) or 1333. A value of 
               0 means to use the aspect ratio of the source material, either 4:3 
               or 16:9 depending on <tt>aspect_mode</tt>. This is settable via 
               various menu items in the Aspect menu, and may also be modified 
-              by the aspect ratio autodetect option.</p>
+              by the aspect ratio autodetect option.</font></p>
           </td>
         </tr>
         <tr> 
