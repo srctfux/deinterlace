@@ -102,7 +102,7 @@ void VBI_DecodeLine(unsigned char *VBI_Buffer, int line, BOOL IsOdd)
 	}
 
 	/* WSS information with source aspect ratio. */
-	if (DoWSS && (line == BT848_GetTVFormat()->WSS_Line))
+	if (DoWSS && !IsOdd && (line == BT848_GetTVFormat()->WSS_Line))
 	{
 		WSS_DecodeLine(VBI_Buffer);
 	}
