@@ -900,3 +900,9 @@ void Aspect_WriteSettingsToIni()
 		Setting_WriteToIni(&(AspectSettings[i]));
 	}
 }
+
+void Aspect_FinalSetup()
+{
+	Bounce_OnChange(aspectSettings.bounceEnabled);
+	Orbit_OnChange(aspectSettings.orbitEnabled);
+}

@@ -1900,6 +1900,10 @@ void MainWndOnInitBT(HWND hWnd)
 
 		StatusBar_ShowText(STATUS_KEY, GetSourceName(Setting_GetValue(BT848_GetSetting(VIDEOSOURCE))));
 
+		// do final setup routines for any files
+		// basically where we need the hWnd to be set
+		Aspect_FinalSetup();
+
         // OK we're ready to go
 		BT848_ResetHardware();
   		BT848_SetGeoSize();
@@ -1911,6 +1915,7 @@ void MainWndOnInitBT(HWND hWnd)
 		SetMenuAnalog();
 
 		SetTimer(hWnd, 10, 5000, NULL);
+
 		bDoResize = TRUE;
 		Start_Capture();
 	}

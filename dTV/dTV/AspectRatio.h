@@ -45,6 +45,7 @@
 SETTING* Aspect_GetSetting(ASPECT_SETTING Setting);
 void Aspect_ReadSettingsFromIni();
 void Aspect_WriteSettingsToIni();
+void Aspect_FinalSetup();
 
 #define DEFAULT_OVERSCAN_NTSC 12
 #define DEFAULT_OVERSCAN_PAL 4
