@@ -43,6 +43,7 @@
 #include "Tuner.h"
 #include "MixerDev.h"
 #include "ProgramList.h"
+#include "Other.h"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -167,7 +168,7 @@ int InitialSaturationU = DEFAULT_SAT_U_NTSC;
 int InitialSaturationV = DEFAULT_SAT_V_NTSC;
 
 long CurrentX = 720;
-long CustomPixelWidth = 720;
+long CustomPixelWidth = 754;
 int CurrentY;
 int CurrentVBILines = 0;
 
@@ -1426,6 +1427,7 @@ BOOL CurrentX_OnChange(long NewValue)
 	CurrentX = NewValue;
 	if(CurrentX != 768 &&
 		CurrentX != 720 &&
+		CurrentX != 640 &&
 		CurrentX != 384 &&
 		CurrentX != 320)
 	{
@@ -1578,12 +1580,12 @@ SETTING BT848Settings[BT848_SETTING_LASTONE] =
 	},
 	{
 		"Pixels per Line", SLIDER, 0, &CurrentX,
-		720, 0, 768, 0, NULL,
+		720, 0, DTV_MAX_WIDTH, 0, NULL,
 		"MainWindow", "CurrentX", CurrentX_OnChange,
 	},
 	{
 		"CustomPixelWidth", SLIDER, 0, &CustomPixelWidth,
-		754, 0, 768, 0, NULL,
+		754, 0, DTV_MAX_WIDTH, 0, NULL,
 		"MainWindow", "CustomPixelWidth", NULL,
 	},
 	{

@@ -74,6 +74,8 @@ DWORD SrcSizeAlign;
 COLORREF OverlayColor = RGB(255, 0, 255);
 DWORD PhysicalOverlayColor = RGB(255, 0, 255);
 long Back_Buffers = 2;		// Make new user parm, TRB 10/28/00
+BOOL bCanDoBob = FALSE;
+BOOL bCanDoColorKey = FALSE;
 
 //-----------------------------------------------------------------------------
 // Tells whether or not video overlay is active
@@ -175,18 +177,25 @@ BOOL Overlay_Update(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL Color
 		////////////////////////////////
 		// we are trying to show overlay
 		////////////////////////////////
-		dwFlags |= DDOVER_KEYDESTOVERRIDE;
-
-		PhysicalOverlayColor = Overlay_ColorMatch(lpDDSurface, OverlayColor);
-		if (PhysicalOverlayColor == 0)		// sometimes we glitch and can't get the value
+		if(bCanDoColorKey)
 		{
-			LOG(" Physical overlay color is zero!  Retrying.");
-			PhysicalOverlayColor = Overlay_ColorMatch(lpDDSurface, OverlayColor);
-		}
-		LOG(" Physical overlay color is %x", PhysicalOverlayColor);
+			dwFlags |= DDOVER_KEYDESTOVERRIDE;
 
-		DDOverlayFX.dckDestColorkey.dwColorSpaceHighValue = PhysicalOverlayColor;
-		DDOverlayFX.dckDestColorkey.dwColorSpaceLowValue = PhysicalOverlayColor;
+			PhysicalOverlayColor = Overlay_ColorMatch(lpDDSurface, OverlayColor);
+			if (PhysicalOverlayColor == 0)		// sometimes we glitch and can't get the value
+			{
+				LOG(" Physical overlay color is zero!  Retrying.");
+				PhysicalOverlayColor = Overlay_ColorMatch(lpDDSurface, OverlayColor);
+			}
+			LOG(" Physical overlay color is %x", PhysicalOverlayColor);
+
+			DDOverlayFX.dckDestColorkey.dwColorSpaceHighValue = PhysicalOverlayColor;
+			DDOverlayFX.dckDestColorkey.dwColorSpaceLowValue = PhysicalOverlayColor;
+		}
+		if(bCanDoBob)
+		{
+			dwFlags |= DDOVER_BOB;
+		}
 
 		ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, pSrcRect, lpDDSurface, pDestRect, dwFlags, &DDOverlayFX);
 		// if another device has requested exclusive access then we
@@ -202,26 +211,6 @@ BOOL Overlay_Update(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL Color
 		if(ddrval == DDERR_SURFACELOST)
 		{
 			return FALSE;
-		}
-		// we get unsupported error here for mpact2 cards
-		// so cope with this by not trying to update
-		// the color key value and just hoping it works
-		// with the existing one (black used to work)
-		if(ddrval == DDERR_UNSUPPORTED)
-		{
-			DDCOLORKEY ColorKey;
-
-			LOG(" Got unsupported error from Overlay Update");
-			ddrval = IDirectDrawSurface_GetColorKey(lpDDOverlay, DDCKEY_DESTOVERLAY, &ColorKey);
-			if(SUCCEEDED(ddrval))
-			{
-				OverlayColor = ColorKey.dwColorSpaceHighValue;
-				LOG(" Reset overlay color to %x", OverlayColor);
-			}
-			dwFlags &= ~DDOVER_KEYDESTOVERRIDE;
-			memset(&DDOverlayFX, 0x00, sizeof(DDOverlayFX));
-			DDOverlayFX.dwSize = sizeof(DDOverlayFX);
-			ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, pSrcRect, lpDDSurface, pDestRect, dwFlags, &DDOverlayFX);
 		}
 		if (FAILED(ddrval))
 		{
@@ -483,7 +472,7 @@ BOOL InitDD(HWND hWnd)
 	DriverCaps.dwSize = sizeof(DriverCaps);
 	ddrval = IDirectDraw_GetCaps(lpDD, &DriverCaps, NULL);
 
-	if (FAILED(ddrval))
+	if (SUCCEEDED(ddrval))
 	{
 		if (DriverCaps.dwCaps & DDCAPS_OVERLAY)
 		{
@@ -493,11 +482,7 @@ BOOL InitDD(HWND hWnd)
 				return FALSE;
 			}
 
-			if (!(DriverCaps.dwCKeyCaps & DDCKEYCAPS_DESTOVERLAY))
-			{
-				ErrorBox("Can't ColorKey Overlay");
-				return FALSE;
-			}
+			bCanDoColorKey = ((DriverCaps.dwCKeyCaps & DDCKEYCAPS_DESTOVERLAY) > 0);
 
 			if (DriverCaps.dwCaps & DDCAPS_ALIGNSIZESRC)
 			{
@@ -516,6 +501,7 @@ BOOL InitDD(HWND hWnd)
 			{
 				DestSizeAlign = 1;
 			}
+			bCanDoBob = ((DriverCaps.dwCaps2 & DDCAPS2_CANFLIPODDEVEN) != 0);
 		}
 		else
 		{
