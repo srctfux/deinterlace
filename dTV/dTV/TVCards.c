@@ -646,12 +646,12 @@ const AUTODETECT878 AutoDectect878[] =
 
 const TVTUNERSETUP Tuners[TUNER_LASTONE] =
 {
-	{ "Temic PAL", TEMIC, PAL, 2244, 7412, 0x02, 0x04, 0x01, 0x8e, 0xc2, 623, 0x00},
+	{ "NoTuner", NoTuner, NOTUNER, 	0, 0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 000,},
 	{ "Philips PAL_I", Philips, PAL_I, 2244, 7412, 0xa0, 0x90, 0x30, 0x8e, 0xc0, 623, 0x00},
 	{ "Philips NTSC", Philips, NTSC, 2516, 7220, 0xA0, 0x90, 0x30, 0x8e, 0xc0, 732, 0x00},
 	{ "Philips SECAM", Philips, SECAM, 2592, 7156, 0xA7, 0x97, 0x37, 0x8e, 0xc0, 623, 0x02},
-	{ "NoTuner", NoTuner, NOTUNER, 	0, 0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 000,},
 	{ "Philips PAL", Philips, PAL, 2592, 7156, 0xA0, 0x90, 0x30, 0x8e,  0xc0, 623, 0x00},
+	{ "Temic PAL", TEMIC, PAL, 2244, 7412, 0x02, 0x04, 0x01, 0x8e, 0xc2, 623, 0x00},
 	{ "Temic NTSC", TEMIC, NTSC, 2516, 7412, 0x02, 0x04, 0x01, 0x8e, 0xc2, 732, 0x00},
 	{ "Temic PAL_I", TEMIC, PAL_I, 2720, 7200, 0x02, 0x04, 0x01, 0x8e, 0xc2, 623, 0x00},
 	{ "Temic 4036 FY5 NTSC", TEMIC, NTSC, 2516, 7412, 0xa0, 0x90, 0x30, 0x8e, 0xc2, 732, 0x00},
@@ -815,6 +815,30 @@ void TVCard_ChangeDefault(SETTING* pSetting, long Default)
 	pSetting->Default = Default;
 	*pSetting->pValue = Default;
 }
+
+void ChangeTVSettingsBasedOnTuner()
+{
+	// default the TVTYPE dependant on the Tuner selected
+	// should be OK most of the time
+	if(TunerType != TUNER_ABSENT)
+	{
+		switch(Tuners[TunerType].Type)
+		{
+		case PAL:
+		case PAL_I:
+			TVCard_ChangeDefault(BT848_GetSetting(TVFORMAT), FORMAT_PAL_BDGHI);
+			break;
+		case SECAM:
+			TVCard_ChangeDefault(BT848_GetSetting(TVFORMAT), FORMAT_SECAM);
+			break;
+		case NTSC:
+		default:
+			TVCard_ChangeDefault(BT848_GetSetting(TVFORMAT), FORMAT_NTSC);
+			break;
+		}
+	}
+}
+
 	
 void ChangeDefaultsBasedOnHardware()
 {
@@ -945,10 +969,13 @@ BOOL APIENTRY SelectCardProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 			ProcessorSpeed = SendMessage(GetDlgItem(hDlg, IDC_PROCESSOR_SPEED), CB_GETCURSEL, 0, 0);
 			TradeOff = SendMessage(GetDlgItem(hDlg, IDC_TRADEOFF), CB_GETCURSEL, 0, 0);
 			if(OrigProcessorSpeed != ProcessorSpeed || 
-				OrigTradeOff != TradeOff ||
-				OrigTuner != TunerType)
+				OrigTradeOff != TradeOff)
 			{
 				ChangeDefaultsBasedOnHardware();
+			}
+			if(OrigTuner != TunerType)
+			{
+				ChangeTVSettingsBasedOnTuner();
 			}
 			EndDialog(hDlg, TRUE);
 			break;
@@ -993,7 +1020,7 @@ SETTING TVCardSettings[TVCARD_SETTING_LASTONE] =
 	},
 	{
 		"Tuner Type", NUMBER, 0, &TunerType,
-		 TUNER_ABSENT, TUNER_TEMIC_PAL, TUNER_LASTONE - 1, 0, NULL,
+		 TUNER_ABSENT, TUNER_ABSENT, TUNER_LASTONE - 1, 0, NULL,
 		"Hardware", "TunerType", NULL,
 	},
 	{

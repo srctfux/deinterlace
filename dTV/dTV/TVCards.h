@@ -108,12 +108,12 @@ typedef enum
 {
 	TUNER_AUTODETECT = -2,
 	TUNER_USER_SETUP = -1,
-	TUNER_TEMIC_PAL = 0,
+	TUNER_ABSENT = 0,			
 	TUNER_PHILIPS_PAL_I,		
 	TUNER_PHILIPS_NTSC,		
 	TUNER_PHILIPS_SECAM,		
-	TUNER_ABSENT,			
 	TUNER_PHILIPS_PAL,		
+	TUNER_TEMIC_PAL,
 	TUNER_TEMIC_NTSC,		
 	TUNER_TEMIC_PAL_I,		
 	TUNER_TEMIC_4036FY5_NTSC,
@@ -215,7 +215,6 @@ void init_PXC200();
 const TVCARDSETUP* GetCardSetup();
 const TVTUNERSETUP* GetTunerSetup();
 void TVCard_FirstTimeSetupHardware(HINSTANCE hInst, HWND hWnd);
-void ChangeDefaultsBasedOnHardware();
 
 BOOL APIENTRY SelectCardProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 
