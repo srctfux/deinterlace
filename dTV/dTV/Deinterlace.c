@@ -28,6 +28,7 @@
 #include "stdafx.h"
 #include "deinterlace.h"
 #include "globals.h"
+#include "cpu.h"
 
 long BitShift = 13;
 long EdgeDetect = 625;
@@ -40,7 +41,7 @@ long SimilarityThreshold = 25;
 /////////////////////////////////////////////////////////////////////////////
 // memcpyMMX
 // Uses MMX instructions to move memory around
-// does as much as we can in 64 byte chunks
+// does as much as we can in 64 byte chunks (128-byte on SSE machines)
 // using MMX instructions
 // then copies any extra bytes
 // assumes there will be at least 64 bytes to copy
@@ -48,9 +49,57 @@ long SimilarityThreshold = 25;
 /////////////////////////////////////////////////////////////////////////////
 void memcpyMMX(void *Dest, void *Src, size_t nBytes)
 {
-	size_t nCharsLeft = nBytes & 0x3F;
-	__asm
-	{
+#ifdef USE_SSE
+	// On SSE machines, we can use the 128-bit floating-point registers and
+	// bypass write caching to copy a bit faster.  The destination has to be
+	// 16-byte aligned.  
+	if ((CpuFeatureFlags & FEATURE_SSE) && (((long) Dest) & 15) == 0)
+	__asm {
+		mov		esi, dword ptr[Src]
+		mov		edi, dword ptr[Dest]
+		mov		ecx, nBytes
+		shr     ecx, 7                      // nBytes / 128
+align 8
+CopyLoopSSE:
+		// movaps would be slightly more efficient but the capture data
+		// isn't reliably 16-byte aligned.
+		movups	xmm0, xmmword ptr[esi]
+		movups	xmm1, xmmword ptr[esi+16*1]
+		movups	xmm2, xmmword ptr[esi+16*2]
+		movups	xmm3, xmmword ptr[esi+16*3]
+		movups	xmm4, xmmword ptr[esi+16*4]
+		movups	xmm5, xmmword ptr[esi+16*5]
+		movups	xmm6, xmmword ptr[esi+16*6]
+		movups	xmm7, xmmword ptr[esi+16*7]
+		movntps	xmmword ptr[edi], xmm0
+		movntps	xmmword ptr[edi+16*1], xmm1
+		movntps	xmmword ptr[edi+16*2], xmm2
+		movntps	xmmword ptr[edi+16*3], xmm3
+		movntps	xmmword ptr[edi+16*4], xmm4
+		movntps	xmmword ptr[edi+16*5], xmm5
+		movntps	xmmword ptr[edi+16*6], xmm6
+		movntps	xmmword ptr[edi+16*7], xmm7
+		add		esi, 128
+		add		edi, 128
+		loop CopyLoopSSE
+		mov		ecx, nBytes
+		and     ecx, 127
+		cmp     ecx, 0
+		je EndCopyLoopSSE
+align 8
+CopyLoop2SSE:
+		mov dl, byte ptr[esi] 
+		mov byte ptr[edi], dl
+		inc esi
+		inc edi
+		dec ecx
+		jne near CopyLoop2SSE
+EndCopyLoopSSE:
+		emms
+	}
+	else
+#endif /* USE_SSE */
+	__asm {
 		mov		esi, dword ptr[Src]
 		mov		edi, dword ptr[Dest]
 		mov		ecx, nBytes
