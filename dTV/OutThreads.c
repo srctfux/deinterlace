@@ -200,6 +200,47 @@ void Stop_Capture()
 	}
 }
 
+BOOL WaitForNextField(BOOL LastField)
+{
+	BOOL bIsOddField;
+	DWORD stat = BT848_ReadDword(BT848_INT_STAT);
+
+	while(LastField == ((stat & BT848_INT_FIELD) == BT848_INT_FIELD))
+	{
+		Sleep(5);
+		stat = BT848_ReadDword(BT848_INT_STAT);
+	}
+
+	bIsOddField = ((stat & BT848_INT_FIELD) == BT848_INT_FIELD);
+
+	switch(stat >> 28)
+	{
+	case 1:
+		CurrentFrame = 0;
+		break;
+	case 2:
+		CurrentFrame = 1;
+		break;
+	case 3:
+		CurrentFrame = 2;
+		break;
+	case 4:
+		CurrentFrame = 3;
+		break;
+	case 5:
+		CurrentFrame = 4;
+		break;
+	default:
+		break;
+	}
+	if (VBI_Flags > 0 && bIsOddField == FALSE)
+	{
+		SetEvent(VBI_Event);
+	}
+
+	return bIsOddField;
+}
+
 void SetupProcessorAndThread()
 {
 	DWORD rc;
@@ -692,7 +733,10 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 					pDest += 2 * OverlayPitch;
 				}
 				bFlipNow = TRUE;
-				nFrame++;
+				if(LastEvenFrame != CurrentFrame)
+				{
+					nFrame++;
+				}
 			}
 			else if(gPulldownMode == VIDEO_MODE)
 			{
@@ -700,6 +744,7 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 				memcpyBOBMMX(pDest,
 							ppOddLines[CurrentFrame][0], 
 							CurrentX * 2);
+				pDest += 2 * OverlayPitch;
 				// copy each middle odd line and interpolate even lines
 				for (nLineTarget = 1; nLineTarget < CurrentY / 2; nLineTarget++)
 				{
@@ -767,7 +812,10 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 					pDest += 2 * OverlayPitch;
 				}
 				bFlipNow = TRUE;
-				nFrame++;
+				if(LastEvenFrame != CurrentFrame)
+				{
+					nFrame++;
+				}
 			}
 			else if(gPulldownMode == VIDEO_MODE)
 			{
@@ -775,6 +823,7 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 				memcpyBOBMMX(pDest,
 							ppOddLines[LastOddFrame][0], 
 							CurrentX * 2);
+				pDest += 2 * OverlayPitch;
 				// copy each middle odd line and interpolate even lines
 				for (nLineTarget = 1; nLineTarget < CurrentY / 2; nLineTarget++)
 				{
@@ -926,7 +975,10 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 					pDest += 2 * OverlayPitch;
 				}
 				bFlipNow = TRUE;
-				nFrame++;
+				if(LastEvenFrame != CurrentFrame)
+				{
+					nFrame++;
+				}
 			}
 			else if(gPulldownMode == VIDEO_MODE)
 			{
@@ -934,12 +986,13 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 				memcpyBOBMMX(pDest,
 							ppOddLines[CurrentFrame][0], 
 							CurrentX * 2);
+				pDest += 2 * OverlayPitch;
 				// copy each middle odd line and interpolate even lines
 				for (nLineTarget = 1; nLineTarget < CurrentY / 2; nLineTarget++)
 				{
 					VideoDeinterlaceMMX(pDest, 
 									ppOddLines[CurrentFrame][nLineTarget - 1], 
-									ppEvenLines[CurrentFrame][nLineTarget], 
+									ppEvenLines[LastEvenFrame][nLineTarget], 
 									ppOddLines[CurrentFrame][nLineTarget], 
 									CurrentX * 2);
 					pDest += 2 * OverlayPitch;
@@ -1001,29 +1054,28 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 					pDest += 2 * OverlayPitch;
 				}
 				bFlipNow = TRUE;
-				nFrame++;
+				if(LastEvenFrame != CurrentFrame)
+				{
+					nFrame++;
+				}
 			}
 			else if(gPulldownMode == VIDEO_MODE)
 			{
-				// copy first line
-				memcpyMMX(pDest, 
-						ppEvenLines[CurrentFrame][0], 
-						CurrentX * 2);
-				pDest += OverlayPitch;
+				// copy first line in bob way
+				memcpyBOBMMX(pDest,
+							ppOddLines[LastOddFrame][0], 
+							CurrentX * 2);
+				pDest += 2 * OverlayPitch;
 				// copy each middle odd line and interpolate even lines
 				for (nLineTarget = 1; nLineTarget < CurrentY / 2; nLineTarget++)
 				{
 					VideoDeinterlaceMMX(pDest, 
-									ppEvenLines[CurrentFrame][nLineTarget - 1], 
-									ppOddLines[CurrentFrame][nLineTarget - 1], 
+									ppOddLines[LastOddFrame][nLineTarget - 1], 
 									ppEvenLines[CurrentFrame][nLineTarget], 
+									ppOddLines[LastOddFrame][nLineTarget], 
 									CurrentX * 2);
 					pDest += 2 * OverlayPitch;
 				}
-				// copy last line in a bob way
-				memcpyMMX(pDest, 
-						ppEvenLines[CurrentFrame][CurrentY / 2 - 1], 
-						CurrentX * 2);
 			}
 			else if(gPulldownMode == SIMPLE_WEAVE)
 			{
@@ -1091,46 +1143,5 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 	}
 	ExitThread(0);
 	return 0;
-}
-
-BOOL WaitForNextField(BOOL LastField)
-{
-	BOOL bIsOddField;
-	DWORD stat = BT848_ReadDword(BT848_INT_STAT);
-
-	while(LastField == ((stat & BT848_INT_FIELD) == BT848_INT_FIELD))
-	{
-		Sleep(5);
-		stat = BT848_ReadDword(BT848_INT_STAT);
-	}
-
-	bIsOddField = ((stat & BT848_INT_FIELD) == BT848_INT_FIELD);
-
-	switch(stat >> 28)
-	{
-	case 1:
-		CurrentFrame = 0;
-		break;
-	case 2:
-		CurrentFrame = 1;
-		break;
-	case 3:
-		CurrentFrame = 2;
-		break;
-	case 4:
-		CurrentFrame = 3;
-		break;
-	case 5:
-		CurrentFrame = 4;
-		break;
-	default:
-		break;
-	}
-	if (VBI_Flags > 0 && bIsOddField == FALSE)
-	{
-		SetEvent(VBI_Event);
-	}
-
-	return bIsOddField;
 }
 

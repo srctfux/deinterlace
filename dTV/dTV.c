@@ -1730,11 +1730,12 @@ void Init_Screen_Struct()
 	CurrentY = TVSettings[TVTYPE].wCropHeight;
 
 	// to start off with we will display the whole
-	// input area
-	rOverlaySrc.left = 2;
-	rOverlaySrc.top = 2;
-	rOverlaySrc.right = CurrentX - 2;
-	rOverlaySrc.bottom = CurrentY - 2;
+	// input area less a little bit
+	// use the alignment restrictions for this
+	rOverlaySrc.left = SrcSizeAlign;
+	rOverlaySrc.top  = SrcSizeAlign;
+	rOverlaySrc.right = CurrentX - SrcSizeAlign;
+	rOverlaySrc.bottom = CurrentY - SrcSizeAlign;
 
 	// get main window client area
 	// and convert to screen coordinates
@@ -1777,6 +1778,23 @@ void Init_Screen_Struct()
 		rOverlaySrc.bottom -= (rOverlayDest.bottom - GetSystemMetrics(SM_CYSCREEN)) * 
 							CurrentY / DestHeight;
 		rOverlayDest.bottom = GetSystemMetrics(SM_CYSCREEN);
+	}
+
+	// amke sure that any alignment restrictions are taken care of
+	if(SrcSizeAlign > 1)
+	{
+		rOverlaySrc.left += SrcSizeAlign - rOverlaySrc.left % SrcSizeAlign;
+		rOverlaySrc.top += SrcSizeAlign - rOverlaySrc.top % SrcSizeAlign;
+		rOverlaySrc.right -= rOverlaySrc.right % SrcSizeAlign;
+		rOverlaySrc.bottom -= rOverlaySrc.bottom % SrcSizeAlign;
+	}
+
+	if(DestSizeAlign > 1)
+	{
+		rOverlayDest.left += DestSizeAlign - rOverlayDest.left % DestSizeAlign;
+		rOverlayDest.top += DestSizeAlign - rOverlayDest.top % DestSizeAlign;
+		rOverlayDest.right -= rOverlayDest.right % DestSizeAlign;
+		rOverlayDest.bottom -= rOverlayDest.bottom % DestSizeAlign;
 	}
 
 	OverlayUpdate(&rOverlaySrc, &rOverlayDest, DDOVER_SHOW, TRUE);

@@ -45,4 +45,8 @@ BOOL OverlayUpdate(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL ColorK
 BOOL CreateOverlay();
 void Clean_Overlays();
 
+extern DWORD DestSizeAlign;
+extern DWORD SrcSizeAlign;
+
+
 #endif

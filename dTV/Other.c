@@ -63,6 +63,8 @@ BYTE* lpOverlay = NULL;
 BYTE* lpOverlayBack = NULL;
 long OverlayPitch = 0;
 BOOL Can_ColorKey=FALSE;
+DWORD DestSizeAlign;
+DWORD SrcSizeAlign;
 
 void ExitDD(void)
 {
@@ -129,7 +131,6 @@ BOOL OverlayUpdate(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL ColorK
 {
 	HRESULT ddrval;
 	DDOVERLAYFX DDOverlayFX;
-	int i = 0;
 
 	if ((lpDD == NULL) || (lpDDSurface == NULL) || (lpDDOverlay == NULL))
 	{
@@ -142,10 +143,12 @@ BOOL OverlayUpdate(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL ColorK
 	if (pSrcRect == NULL)
 	{
 		ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, NULL, lpDDSurface, NULL, dwFlags, &DDOverlayFX);
+		if (ddrval != DD_OK)
+		{
+			ErrorBox("Error hiding Overlay");
+		}
 		return (TRUE);
 	}
-
-	i = dwFlags;
 
 	dwFlags |= DDOVER_KEYDESTOVERRIDE;
 	DDOverlayFX.dckDestColorkey.dwColorSpaceHighValue = RGB(255, 0, 255);
@@ -154,20 +157,8 @@ BOOL OverlayUpdate(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL ColorK
 	ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, pSrcRect, lpDDSurface, pDestRect, dwFlags, &DDOverlayFX);
 	if (ddrval != DD_OK)
 	{
-		dwFlags = i;
-		memset(&DDOverlayFX, 0x00, sizeof(DDOverlayFX));
-		DDOverlayFX.dwSize = sizeof(DDOverlayFX);
-
-		ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, pSrcRect, lpDDSurface, pDestRect, dwFlags, &DDOverlayFX);
-		if (ddrval != DD_OK)
-		{
-			ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, pSrcRect, lpDDSurface, pDestRect, dwFlags, &DDOverlayFX);
-
-			if (ddrval != DD_OK)
-			{
-				return (FALSE);
-			}
-		}
+		ErrorBox("Error calling OverlayUpdate");
+		return (FALSE);
 	}
 
 	return TRUE;
@@ -198,16 +189,29 @@ BOOL CreateOverlay()
 	ddsd.dwBackBufferCount = 1;
 
 	ddsd.ddpfPixelFormat = PixelFormat;
-	if (IDirectDraw_CreateSurface(lpDD, &ddsd, &lpDDOverlay, NULL) != DD_OK)
+	ddrval = IDirectDraw_CreateSurface(lpDD, &ddsd, &lpDDOverlay, NULL);
+	if (FAILED(ddrval))
 	{
 		ErrorBox("Can't create Overlay Surface");
 		lpDDOverlay = NULL;
 		return FALSE;
 	}
+
 	ddrval = IDirectDrawSurface_Lock(lpDDOverlay, NULL, &ddsd, 0, NULL);
+	if (FAILED(ddrval))
+	{
+		ErrorBox("Can't Lock Surface");
+		return (FALSE);
+	}
 	OverlayPitch = ddsd.lPitch;
 	lpOverlay = ddsd.lpSurface;
+	
 	ddrval = IDirectDrawSurface_Unlock(lpDDOverlay, ddsd.lpSurface);
+	if (FAILED(ddrval))
+	{
+		ErrorBox("Can't Unlock Surface");
+		return (FALSE);
+	}
 	
 	caps.dwCaps = DDSCAPS_BACKBUFFER;
 	ddrval = IDirectDrawSurface_GetAttachedSurface(lpDDOverlay, &caps, &lpDDOverlayBack);
@@ -220,8 +224,18 @@ BOOL CreateOverlay()
 	else
 	{
 		ddrval = IDirectDrawSurface_Lock(lpDDOverlayBack, NULL, &ddsd, 0, NULL);
+		if (FAILED(ddrval))
+		{
+			ErrorBox("Can't Lock Back Surface");
+			return (FALSE);
+		}
 		lpOverlayBack = ddsd.lpSurface;
 		ddrval = IDirectDrawSurface_Unlock(lpDDOverlayBack, ddsd.lpSurface);
+		if (FAILED(ddrval))
+		{
+			ErrorBox("Can't Unlock Back Surface");
+			return (FALSE);
+		}
 	}
 
 	return (TRUE);
@@ -259,6 +273,25 @@ BOOL InitDD(HWND hWnd)
 				ErrorBox("Can't ColorKey Overlay");
 				return FALSE;
 			}
+
+			if (DriverCaps.dwCaps & DDCAPS_ALIGNSIZESRC)
+			{
+				SrcSizeAlign = DriverCaps.dwAlignSizeSrc;
+			}
+			else
+			{
+				SrcSizeAlign = 1;
+			}
+
+			if (DriverCaps.dwCaps & DDCAPS_ALIGNSIZEDEST)
+			{
+				DestSizeAlign = DriverCaps.dwAlignSizeDest;
+			}
+			else
+			{
+				DestSizeAlign = 1;
+			}
+
 		}
 		else
 		{
