@@ -32,9 +32,9 @@ long BitShift = 13;
 long EdgeDetect = 625;
 long JaggieThreshold = 73;
 long DiffThreshold = 224;
-long TemporalTolerance = 200;
+long TemporalTolerance = 300;
 long SpatialTolerance = 600;
-long SimilarityThreshold = 190;
+long SimilarityThreshold = 25;
 
 /////////////////////////////////////////////////////////////////////////////
 // memcpyMMX
