@@ -101,9 +101,13 @@ void LoadSettingsFromIni()
 	char szKey[128];
 	int i;
 
-	// TVCard setting smust be called first as this modifys some defaults for the
+	// TVCard setting must be called first as this modifys some defaults for the
 	// other settings, but we need to be able to override the defaults.
 	TVCard_ReadSettingsFromIni();
+
+	// Video Settings Also modifies defaults and ini sections in other
+	// files so must be called early
+	VideoSettings_ReadSettingsFromIni();
 
 	// Read in rest of settings from each source files read method
 	Aspect_ReadSettingsFromIni();
@@ -120,7 +124,6 @@ void LoadSettingsFromIni()
 	DI_TwoFrame_ReadSettingsFromIni();
 	Deinterlace_ReadSettingsFromIni();
 	FLT_TNoise_ReadSettingsFromIni();
-	VideoSettings_ReadSettingsFromIni();
 	OSD_ReadSettingsFromIni();
 
 	VBI_Flags = 0;

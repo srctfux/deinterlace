@@ -1439,18 +1439,24 @@ BOOL CurrentX_OnChange(long NewValue)
 BOOL HDelay_OnChange(long NewValue)
 {
 	HDelay = NewValue;
-	Stop_Capture();
-	BT848_SetGeoSize();
-	Start_Capture();
+	if(hBT8X8 != NULL)
+	{
+		Stop_Capture();
+		BT848_SetGeoSize();
+		Start_Capture();
+	}
 	return FALSE;
 }
 
 BOOL VDelay_OnChange(long NewValue)
 {
 	VDelay = NewValue;
-	Stop_Capture();
-	BT848_SetGeoSize();
-	Start_Capture();
+	if(hBT8X8 != NULL)
+	{
+		Stop_Capture();
+		BT848_SetGeoSize();
+		Start_Capture();
+	}
 	return FALSE;
 }
 
