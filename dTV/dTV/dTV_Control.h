@@ -79,13 +79,64 @@
 #define IDM_OVERLAY_STOP                590
 #define IDM_OVERLAY_START               591
 #define IDM_HIDE_OSD                    592
-#define IDM_SHOW_OSD                    593
-// IDM_SET_OSD_TEXT the lParam must be the handle of a global atom
+#define IDM_SHOW_OSD                    593 // IDM_SET_OSD_TEXT the lParam must be the handle of a global atom
 #define IDM_SET_OSD_TEXT                594
+#define IDM_FAST_REPAINT                599
+#define IDM_ASPECT_FULLSCREEN           701
+#define IDM_ASPECT_LETTERBOX            702
+#define IDM_ASPECT_ANAMORPHIC           703
+
+// Messages for the Source Aspect Ratio Menu
+#define IDM_SASPECT_0                   710
+#define IDM_SASPECT_133                 711
+#define IDM_SASPECT_166                 712
+#define IDM_SASPECT_178                 713
+#define IDM_SASPECT_185                 714
+#define IDM_SASPECT_200                 715
+#define IDM_SASPECT_235                 716
+#define IDM_SASPECT_166A                720
+#define IDM_SASPECT_178A                721
+#define IDM_SASPECT_185A                722
+#define IDM_SASPECT_200A                723
+#define IDM_SASPECT_235A                724
 #define IDM_SASPECT_COMPUTE             731
+
+// Messages for the Screen Aspect Ratio Menu
+#define IDM_TASPECT_0                   740
+#define IDM_TASPECT_133                 741
+#define IDM_TASPECT_166                 742
+#define IDM_TASPECT_178                 743
+#define IDM_TASPECT_185                 744
+#define IDM_TASPECT_200                 745
+#define IDM_TASPECT_235                 746
 
 #endif
 
+/////////////////////////////////////////////////////////////////////////////
+// For setting of certain values
+//
+typedef enum
+{
+	SOURCE_TUNER = 0,
+	SOURCE_COMPOSITE,
+	SOURCE_SVIDEO,
+	SOURCE_OTHER1,
+	SOURCE_OTHER2,
+	SOURCE_COMPVIASVIDEO,
+    SOURCE_CCIR656
+} VIDEOSOURCETYPE;
+
+typedef enum
+{
+	FORMAT_PAL_BDGHI = 0,
+	FORMAT_NTSC,
+	FORMAT_SECAM,
+	FORMAT_PAL_M,
+	FORMAT_PAL_N,
+	FORMAT_NTSC_J,
+	FORMAT_PAL60,
+    FORMAT_LASTONE,
+} VIDEOFORMAT;
 
 /////////////////////////////////////////////////////////////////////////////
 // Constants for WM_????_CHANGEVALUE messages
@@ -97,19 +148,16 @@ typedef enum
 	ADJUSTDOWN,           // Decrease value, with acceleration [display OSD]
 	INCREMENT,            // Increase value by 1 [display OSD]
 	DECREMENT,            // Decrease value by 1 [display OSD]
-	STEPUP,				  // Increase value by the step value [display OSD]
-	STEPUPDOWN,           // Decrease value by the step value [display OSD]
 	RESET,                // Reset value to default [display OSD]
 	TOGGLEBOOL,           // Toggle a boolean setting [display OSD]
 	ADJUSTUP_SILENT,      // Same, but no OSD
-	ADJUSTDOWN_SILENT,      // Same, but no OSD
+	ADJUSTDOWN_SILENT,    // Same, but no OSD
 	INCREMENT_SILENT,     // Same, but no OSD
 	DECREMENT_SILENT,     // Same, but no OSD
-	STEPUP_SILENT,		  // Increase value by the step value [display OSD]
-	STEPUPDOWN_SILENT,    // Decrease value by the step value [display OSD]
 	RESET_SILENT,         // Same, but no OSD
 	TOGGLEBOOL_SILENT,    // Same, but no OSD
 } eCHANGEVALUE;
+
 
 /////////////////////////////////////////////////////////////////////////////
 // Control settings contained in AspectRatio.c
@@ -144,13 +192,13 @@ typedef enum
 
 typedef enum
 {
-	BRIGHTNESS = 0,
-	CONTRAST,
-	HUE,
-	SATURATION,
-	SATURATIONU,
-	SATURATIONV,
-	BDELAY,
+	V_BRIGHTNESS = 0,
+	V_CONTRAST,
+	V_HUE,
+	V_SATURATION,
+	V_SATURATIONU,
+	V_SATURATIONV,
+	V_BDELAY,
 	BTAGCDISABLE,
 	BTCRUSH,
 	BTEVENCHROMAAGC,
@@ -170,12 +218,12 @@ typedef enum
 	BTCOLORKILL,
 	BTWHITECRUSHUP,
 	BTWHITECRUSHDOWN,
-	CURRENTX,
-	CUSTOMPIXELWIDTH,
-	VIDEOSOURCE,
-	TVFORMAT,
-	HDELAY,
-	VDELAY,
+	V_CURRENTX,
+	V_CUSTOMPIXELWIDTH,
+	V_VIDEOSOURCE,
+	V_TVFORMAT,
+	V_HDELAY,
+	V_VDELAY,
 	BT848_SETTING_LASTONE,
 } BT848_SETTING;
 
@@ -396,6 +444,19 @@ typedef enum
 #define WM_DEINTERLACE_CHANGEVALUE	(WM_USER + 213)
 
 /////////////////////////////////////////////////////////////////////////////
+// Control settings contained in DI_Greedy.c
+/////////////////////////////////////////////////////////////////////////////
+
+typedef enum
+{
+	GREEDYMAXCOMB = 0,
+	DI_GREEDY_SETTING_LASTONE,
+} DI_GREEDY_SETTING;
+#define WM_DI_GREEDY_GETVALUE		(WM_USER + 15)
+#define WM_DI_GREEDY_SETVALUE		(WM_USER + 115)
+#define WM_DI_GREEDY_CHANGEVALUE	(WM_USER + 215)
+
+/////////////////////////////////////////////////////////////////////////////
 // Control settings contained in FLT_TNoise.c
 /////////////////////////////////////////////////////////////////////////////
 
@@ -410,19 +471,6 @@ typedef enum
 #define WM_FLT_TNOISE_GETVALUE		(WM_USER + 14)
 #define WM_FLT_TNOISE_SETVALUE		(WM_USER + 114)
 #define WM_FLT_TNOISE_CHANGEVALUE	(WM_USER + 214)
-
-/////////////////////////////////////////////////////////////////////////////
-// Control settings contained in Greedy.c
-/////////////////////////////////////////////////////////////////////////////
-
-typedef enum
-{
-	GREEDYMAXCOMB = 0,
-	DI_GREEDY_SETTING_LASTONE,
-} DI_GREEDY_SETTING;
-#define WM_DI_GREEDY_GETVALUE		(WM_USER + 15)
-#define WM_DI_GREEDY_SETVALUE		(WM_USER + 115)
-#define WM_DI_GREEDY_CHANGEVALUE	(WM_USER + 215)
 
 /////////////////////////////////////////////////////////////////////////////
 // Control settings contained in TVCards.c
