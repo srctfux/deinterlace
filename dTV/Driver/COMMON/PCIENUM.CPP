@@ -29,6 +29,10 @@
 // 24 Jul 2000   John Adcock           Original dTV Release
 //                                     Added Memory Alloc functions
 //
+//  1 Nov 2000   Michael Eskin         Fixed Win95 PCI device enum for systems
+//               Conexant Systems      that have had several boards installed
+//                                     over the life of the system.
+//									   
 /////////////////////////////////////////////////////////////////////////////
 
 #include "ioclass.h"
@@ -152,24 +156,34 @@ NTSTATUS CIOAccessDevice::pciGetDeviceConfig(DWORD dwBusNumber, DWORD dwSlotNumb
 }
 
 #else
-
+//---------------------------------------------------------------------------
+//
+// MAE 30 Oct 2000 - Original code only attempted to open the first match found
+// in the registry. This fails if other boards have been installed in the past, and the
+// registry entryies are still in ENUM\PCI, but not physically installed.
+// Changed code to continue to enumerate if match found, but devnode open failed
+//
 //---------------------------------------------------------------------------
 // We can find some PCI information for WINDOWS 9x in the registry
 //---------------------------------------------------------------------------
 NTSTATUS CIOAccessDevice::pciFindDevice(USHORT  vendorID, USHORT  deviceID, DWORD* pdwBusNumber, DWORD* pdwSlotNumber)
 {
-	CHAR                  registryKeyPath[128];
-	CHAR                  registrySubkeyPath[128];
+	CHAR                  devicePath[128];
+	CHAR                  subkeyPath[128];
+	CHAR				  workingPath[128];
+	CHAR				  workingPath2[128];
 	CHAR                  hardwareID[128];
-	HKEY                  registryKey;
+	HKEY                  pciKey;
+	HKEY				  deviceKey;
 	DWORD                 status;
-	int                   iIndex;
+	DWORD				  status2;
+	int                   iIndex,jIndex;
 	CONFIGRET             cr;
 	int                   bFound;
 
-	sprintf(registryKeyPath, "VEN_%04X&DEV_%04X", vendorID, deviceID);
+	sprintf(devicePath, "VEN_%04X&DEV_%04X", vendorID, deviceID);
 
-	debugOut(dbTrace,"search for <%s>",registryKeyPath);
+	debugOut(dbTrace,"search for <%s>",devicePath);
 
 	//
 	// Typically this is the key, since some revision information are avail we must
@@ -180,67 +194,68 @@ NTSTATUS CIOAccessDevice::pciFindDevice(USHORT  vendorID, USHORT  deviceID, DWOR
 	*pdwSlotNumber = 0;
 	bFound         = 0;
 
-	status = _RegOpenKey(HKEY_LOCAL_MACHINE,"ENUM\\PCI",&registryKey);
+	status = _RegOpenKey(HKEY_LOCAL_MACHINE,"ENUM\\PCI",&pciKey);
 	if ( status != STATUS_SUCCESS)
 	{
 		debugOut(dbError,"! cannot open HKL\\ENUM\\PCI error %X",status);
 		return status;
 	}
+	
+	bFound = FALSE;
 
 	for ( iIndex = 0; ! bFound && (status == STATUS_SUCCESS); iIndex++)
 	{
-		status = _RegEnumKey(registryKey, iIndex, registrySubkeyPath, sizeof(registrySubkeyPath));
+		status = _RegEnumKey(pciKey, iIndex, subkeyPath, sizeof(subkeyPath));
 
 		if ( status == STATUS_SUCCESS)
 		{
-			debugOut(dbTrace," found <%s>", registrySubkeyPath);
-			bFound = (strstr(registrySubkeyPath, registryKeyPath ) != NULL);
-		}
-	}
-
-	_RegCloseKey(registryKey);
-
-	if(bFound)
-	{
-		//
-		// Now we have the full path name for given vendor ID
-		//
-		sprintf( registryKeyPath, "ENUM\\PCI\\%s",registrySubkeyPath );
-
-		debugOut(dbTrace," found pci board %s, get configuration",registryKeyPath);
-
-		status = _RegOpenKey(HKEY_LOCAL_MACHINE, registryKeyPath, &registryKey );
-		if ( status == STATUS_SUCCESS)
-		{
-			debugOut(dbTrace,"found hardware key <%s>",registryKeyPath );
-
-			bFound = FALSE;
-
-			for ( iIndex = 0; ! bFound && (status == STATUS_SUCCESS); iIndex++)
+			debugOut(dbTrace," found <%s>", subkeyPath);
+			if (strstr(subkeyPath, devicePath ) != NULL)
 			{
-				status = _RegEnumKey(registryKey, iIndex, registrySubkeyPath, sizeof(registrySubkeyPath));
+				//
+				// Now we have the full path name for given vendor ID
+				//
+				sprintf( workingPath, "ENUM\\PCI\\%s",subkeyPath );
+
+				debugOut(dbTrace," found pci board %s, get configuration",workingPath);
+
+				status = _RegOpenKey(HKEY_LOCAL_MACHINE, workingPath, &deviceKey );
 
 				if ( status == STATUS_SUCCESS)
 				{
-					debugOut(dbTrace," subkey  <%s>", registrySubkeyPath);
-					sprintf(hardwareID,"%s\\%s",&registryKeyPath[5],registrySubkeyPath);
-					debugOut(dbTrace," locate device node for <%s>",hardwareID);
+					debugOut(dbTrace,"found hardware key <%s>",workingPath );
 
-					cr = _CONFIGMG_Locate_DevNode((DEVNODE *)pdwSlotNumber, hardwareID, 0);
-					if (cr == STATUS_SUCCESS)
+					status2 = STATUS_SUCCESS;
+
+					for ( jIndex = 0; ! bFound && (status2 == STATUS_SUCCESS); jIndex++)
 					{
-						bFound = TRUE;
-						debugOut(dbTrace," device node %X found", *pdwSlotNumber);
+						status2 = _RegEnumKey(deviceKey, jIndex, workingPath2, sizeof(workingPath2));
+
+						if ( status2 == STATUS_SUCCESS)
+						{
+							debugOut(dbTrace," subkey <%s>", workingPath2);
+							sprintf(hardwareID,"%s\\%s",&workingPath[5],workingPath2);
+							debugOut(dbTrace," locate device node for <%s>",hardwareID);
+
+							cr = _CONFIGMG_Locate_DevNode((DEVNODE *)pdwSlotNumber, hardwareID, 0);
+							if (cr == STATUS_SUCCESS)
+							{
+								bFound = TRUE;
+								debugOut(dbTrace," device node %X found", *pdwSlotNumber);
+							}
+						}
 					}
+					_RegCloseKey(deviceKey);
+				}
+				else
+				{
+					debugOut(dbError,"! cannot open key <%s>",workingPath);
 				}
 			}
-			_RegCloseKey(registryKey);
 		}
-		else
-		{
-			debugOut(dbError,"! cannot open key <%s>",registryKeyPath);
-		}
-	}  // root key found
+	}
+
+	_RegCloseKey(pciKey);
 
 	if ( *pdwSlotNumber == 0)
 	{
@@ -250,6 +265,7 @@ NTSTATUS CIOAccessDevice::pciFindDevice(USHORT  vendorID, USHORT  deviceID, DWOR
 
 	return STATUS_SUCCESS;
 }
+
 
 
 //---------------------------------------------------------------------------
