@@ -55,6 +55,8 @@
 //                                     2 lines from WM_PAINT which should not be
 //                                     needed and may have caused flashing.
 //
+// 31 Mar 2001   Laurent Garnier       Single click replaced by double click
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -197,7 +199,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		ShowSpashScreen();
 	}
 
-	wc.style = 0;
+	wc.style = CS_DBLCLKS;		// Allow double click
 	wc.lpfnWndProc = (WNDPROC) MainWndProcSafe;
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = sizeof(LONG);
@@ -1236,7 +1238,8 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		}
 		break;
 
-	case WM_LBUTTONUP:
+//	case WM_LBUTTONUP:
+	case WM_LBUTTONDBLCLK:
 		SendMessage(hWnd, WM_COMMAND, IDM_FULL_SCREEN, 0);
 		break;
 
