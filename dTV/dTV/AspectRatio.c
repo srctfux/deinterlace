@@ -56,6 +56,7 @@
 //
 // 23 Feb 2001   Michael Samblanet     Added experemental orbiting code
 // 24 Feb 2001   Michael Samblanet     Minor bug fixes to invalidate code
+// 10 Mar 2001   Michael Samblanet     Added first draft auto-resize window code
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -188,6 +189,7 @@ time_t orbitPeriodX = 60; // Time to move across the entire orbit area on X axis
 time_t orbitPeriodY = 60; // Time to move across the entire orbit area on Y axis (seconds)
 long timerOrbitMS = 1000; // # of miliseconds between aspect updates for orbiting (miliseconds)
 
+BOOL autoResizeWindow = FALSE; // If TRUE, resize non-fullscreen window to fit image exactly
 
 BOOL Bounce_OnChange(long NewValue); // Forward declaration to reuse this code...
 BOOL Orbit_OnChange(long NewValue); // Forward declaration to reuse this code...
@@ -341,6 +343,9 @@ void AspectRatio_SetMenu(HMENU hMenu)
 	CheckMenuItem(hMenu, IDM_WINPOS_BOUNCE, (bounceEnabled)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_WINPOS_ORBIT, (orbitEnabled)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_ASPECT_DEFER_OVERLAY, (deferedSetOverlay)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_WINPOS_AUTOSIZE, (autoResizeWindow)?MF_CHECKED:MF_UNCHECKED);
+
+
 }
 
 //----------------------------------------------------------------------------
@@ -426,6 +431,11 @@ int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 	case IDM_WINPOS_ORBIT:
 		Orbit_OnChange(!orbitEnabled);
 		ShowText(hWnd, orbitEnabled ? "Orbit ON" : "Orbit OFF");
+		break;
+
+	case IDM_WINPOS_AUTOSIZE:
+		autoResizeWindow = !autoResizeWindow;
+		ShowText(hWnd, bounceEnabled ? "Auto-Size Window ON" : "Auto-Size Window OFF");
 		break;
 
 	case IDM_ASPECT_DEFER_OVERLAY:
@@ -689,7 +699,7 @@ double GetActualSourceFrameAspect()
 //----------------------------------------------------------------------------
 // Calculate size and position coordinates for video overlay
 // Takes into account of aspect ratio control.
-void WorkoutOverlaySize()
+void _WorkoutOverlaySize(BOOL allowResize)
 {
 	RECT rOverlayDest;
 	RECT rOverlaySrc;
@@ -737,7 +747,7 @@ void WorkoutOverlaySize()
 	ClientToScreen(hWnd, (POINT *) &(rOverlayDest.right));
 	if (IsStatusBarVisible())
 	{
-		rOverlayDest.bottom -= 21;
+		rOverlayDest.bottom -= StatusBar_Height();
 	}
 
 	// MRS 9-2-00 - Adjust for aspect ratio preservation
@@ -970,6 +980,42 @@ void WorkoutOverlaySize()
 	if (rOverlaySrc.left  >= rOverlaySrc.right)   rOverlaySrc.right   = rOverlaySrc.left  + 1;
 	if (rOverlaySrc.top   >= rOverlaySrc.bottom)  rOverlaySrc.bottom  = rOverlaySrc.top   + 1;
 
+	if (autoResizeWindow && allowResize && !bIsFullScreen) {
+		// See if we need to resize the window
+		RECT currentClientRect;
+		RECT newRect = rOverlayDest;
+		GetClientRect(hWnd, &rOverlayDest);
+		ClientToScreen(hWnd, (POINT *) &(currentClientRect.left));
+		ClientToScreen(hWnd, (POINT *) &(currentClientRect.right));
+		if (IsStatusBarVisible()) newRect.bottom += StatusBar_Height();
+		
+		#define DELTA(aa) ABS(currentClientRect.aa-newRect.aa)
+		if (DELTA(left) > 4 || DELTA(right) > 4 ||
+			DELTA(top) > 4 || DELTA(bottom) > 4) {
+		#undef DELTA
+			// Rectangles do not match!  Resize window...
+
+			// !!!!!!! Note - this will cause the window to shrink every
+			// time a aspect change occurs.  Needs to be altered...
+			// Please keep in mind that the new size needs to be adjusted for overlay alignments
+			
+			// Convert client rect to window rect...
+			AdjustWindowRectEx(&newRect,GetWindowLong(hWnd,GWL_STYLE),TRUE,0);
+			
+			// Size the window
+			if (RWIDTH(newRect) > 8 &&
+				RHEIGHT(newRect) > 8) {
+				// Sanity check - new window pos must be at least 8 pixels x 8 pixels
+				SetWindowPos(hWnd,NULL,newRect.left,newRect.top,RWIDTH(newRect),RHEIGHT(newRect),
+							 SWP_NOZORDER);
+
+				// Resize message will force an aspect adjust, so no need to do it now...
+				_WorkoutOverlaySize(FALSE);
+				return;
+			}
+		}
+	} 
+
 	destinationRectangle = rOverlayDest;
 	destinationRectangleWindow = rOverlayDest; 
 	if (!deferedSetOverlay) // MRS 2-22-01 - Defered overlay set
@@ -995,6 +1041,7 @@ void WorkoutOverlaySize()
 
 	return;
 }
+void WorkoutOverlaySize() {_WorkoutOverlaySize(TRUE);}
 
 
 //----------------------------------------------------------------------------
@@ -1521,6 +1568,12 @@ SETTING AspectSettings[ASPECT_SETTING_LASTONE] =
 		NULL,
 		"ASPECT", "OrbitTimerPeriod", NULL,
 	},
+	{
+		"Auto-Size Window", ONOFF, 0, &autoResizeWindow,
+		FALSE, 0, 1, 1, 1,
+		NULL,
+		"ASPECT", "AutoSizeWindow", NULL,
+	},	
 };
 
 SETTING* Aspect_GetSetting(ASPECT_SETTING Setting)

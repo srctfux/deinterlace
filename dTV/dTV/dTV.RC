@@ -788,23 +788,23 @@ BEGIN
             MENUITEM "2.35\tAlt+6",                 IDM_TASPECT_235
             MENUITEM "Custom  (from .INI file)\tAlt+9", IDM_TASPECT_CUSTOM
         END
-        POPUP "Window Vertical Position"
+        POPUP "Window Position"
         BEGIN
             MENUITEM "&Top\tCtrl+Numpad-Up",        IDM_WINPOS_VERT_TOP
             MENUITEM "&Centre\tCtrl+Numpad 5",      IDM_WINPOS_VERT_CENTRE
             MENUITEM "&Bottom\tCtrl+Numpad-Down",   IDM_WINPOS_VERT_BOTTOM
-        END
-        POPUP "Window Horizontal Position"
-        BEGIN
+            MENUITEM SEPARATOR
             MENUITEM "&Left",                       IDM_WINPOS_HORZ_LEFT
             MENUITEM "&Centre",                     IDM_WINPOS_HORZ_CENTRE
             MENUITEM "&Right",                      IDM_WINPOS_HORZ_RIGHT
+            MENUITEM SEPARATOR
+            MENUITEM "Bounce Window Position (Experimental)\tCtrl+B", 
+                                                    IDM_WINPOS_BOUNCE
+            MENUITEM "Defer Setting Overlay (Experimental)", 
+                                                    IDM_ASPECT_DEFER_OVERLAY
+            MENUITEM "Orbiting (Experimental)\tCtrl+O", IDM_WINPOS_ORBIT
+            MENUITEM "Auto-Size Window (Experimental)", IDM_WINPOS_AUTOSIZE
         END
-        MENUITEM "Bounce Window Position (Experimental)\tCtrl+B", 
-                                                IDM_WINPOS_BOUNCE
-        MENUITEM "Defer Setting Overlay (Experimental)", 
-                                                IDM_ASPECT_DEFER_OVERLAY
-        MENUITEM "Orbiting (Experimental)\tCtrl+O", IDM_WINPOS_ORBIT
     END
     POPUP "&Settings"
     BEGIN
