@@ -114,6 +114,10 @@ void LoadSettingsFromIni()
 	PulldownSwitchInterval = GetPrivateProfileInt("Pulldown", "PulldownSwitchInterval", PulldownSwitchInterval, szIniFile);
 	PulldownSwitchMax = GetPrivateProfileInt("Pulldown", "PulldownSwitchMax", PulldownSwitchMax, szIniFile);
 	StaticImageFieldCount = GetPrivateProfileInt("Pulldown", "StaticImageFieldCount", StaticImageFieldCount, szIniFile);
+	LowMotionFieldCount = GetPrivateProfileInt("Pulldown", "LowMotionFieldCount", LowMotionFieldCount, szIniFile);
+	StaticImageMode = GetPrivateProfileInt("Pulldown", "StaticImageMode", StaticImageMode, szIniFile);
+	LowMotionMode = GetPrivateProfileInt("Pulldown", "LowMotionMode", LowMotionMode, szIniFile);
+	HighMotionMode = GetPrivateProfileInt("Pulldown", "HighMotionMode", HighMotionMode, szIniFile);
 	// TRB 12/00
 	gPulldownMode = GetPrivateProfileInt("Deinterlace", "DeinterlaceMode", gPulldownMode, szIniFile);
 
@@ -401,6 +405,10 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("Pulldown", "PulldownSwitchInterval", PulldownSwitchInterval, szIniFile);
 	WritePrivateProfileInt("Pulldown", "PulldownSwitchMax", PulldownSwitchMax, szIniFile);
 	WritePrivateProfileInt("Pulldown", "StaticImageFieldCount", StaticImageFieldCount, szIniFile);
+	WritePrivateProfileInt("Pulldown", "LowMotionFieldCount", LowMotionFieldCount, szIniFile);
+	WritePrivateProfileInt("Pulldown", "StaticImageMode", StaticImageMode, szIniFile);
+	WritePrivateProfileInt("Pulldown", "LowMotionMode", LowMotionMode, szIniFile);
+	WritePrivateProfileInt("Pulldown", "HighMotionMode", HighMotionMode, szIniFile);
 
 	// TRB 12/00
 	WritePrivateProfileInt("Deinterlace", "DeinterlaceMode", gPulldownMode, szIniFile);

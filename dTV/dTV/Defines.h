@@ -35,25 +35,30 @@
 #ifndef __DEFINES_H___
 #define __DEFINES_H___
 
+// Deinterlace modes.  Since these modes are referred to by number in the
+// INI file, it's desirable to keep the numbers consistent between releases.
+// Otherwise users will end up in the wrong modes when they upgrade.  If
+// you renumber or add/remove modes, be sure to update inifile.htm, which
+// documents the mode IDs!
 typedef enum
 {
 	VIDEO_MODE_BOB = 0,
-	VIDEO_MODE_WEAVE,
-	VIDEO_MODE_2FRAME,
-	SIMPLE_WEAVE,
-	SIMPLE_BOB,
-	BTV_PLUGIN,
-	FILM_22_PULLDOWN_ODD,
-	FILM_22_PULLDOWN_EVEN,
-	FILM_32_PULLDOWN_0,
-	FILM_32_PULLDOWN_1,
-	FILM_32_PULLDOWN_2,
-	FILM_32_PULLDOWN_3,
-	FILM_32_PULLDOWN_4,
-	EVEN_ONLY,
-	ODD_ONLY,
-	BLENDED_CLIP,
-	PULLDOWNMODES_LAST_ONE
+	VIDEO_MODE_WEAVE = 1,
+	VIDEO_MODE_2FRAME = 2,
+	SIMPLE_WEAVE = 3,
+	SIMPLE_BOB = 4,
+	BTV_PLUGIN = 5,
+	FILM_22_PULLDOWN_ODD = 6,
+	FILM_22_PULLDOWN_EVEN = 7,
+	FILM_32_PULLDOWN_0 = 8,
+	FILM_32_PULLDOWN_1 = 9,
+	FILM_32_PULLDOWN_2 = 10,
+	FILM_32_PULLDOWN_3 = 11,
+	FILM_32_PULLDOWN_4 = 12,
+	EVEN_ONLY = 13,
+	ODD_ONLY = 14,
+	BLENDED_CLIP = 15,
+	PULLDOWNMODES_LAST_ONE = 16
 } ePULLDOWNMODES;
 
 #define IS_PULLDOWN_MODE(x) ((x) == FILM_22_PULLDOWN_ODD || \

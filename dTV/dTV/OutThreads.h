@@ -63,6 +63,9 @@ char *DeinterlaceModeName(int mode);
 BYTE * LockOverlay();		// Lock overlay, returns ptr to buffer
 
 extern ePULLDOWNMODES gPulldownMode;
+extern ePULLDOWNMODES StaticImageMode;
+extern ePULLDOWNMODES LowMotionMode;
+extern ePULLDOWNMODES HighMotionMode;
 
 extern long PulldownThresholdLow;
 extern long PulldownThresholdHigh;
@@ -76,6 +79,7 @@ extern long PulldownSwitchMax;
 extern long Threshold32Pulldown;
 extern long ThresholdPulldownMismatch;
 extern long ThresholdPulldownComb;
+extern long LowMotionFieldCount;
 extern long StaticImageFieldCount;
 extern BOOL bAutoDetectMode;
 extern BOOL bFallbackToVideo;

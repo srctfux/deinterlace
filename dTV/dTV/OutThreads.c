@@ -79,9 +79,12 @@ long                ThresholdPulldownComb = 150;
 long                PulldownSwitchInterval = 3000;
 long                PulldownSwitchMax = 4;
 long				StaticImageFieldCount = 100;
-long				VideoWeaveFieldCount = 4;
+long				LowMotionFieldCount = 4;
 BOOL                bAutoDetectMode = TRUE;
 BOOL                bFallbackToVideo = TRUE;
+ePULLDOWNMODES		StaticImageMode = SIMPLE_WEAVE;
+ePULLDOWNMODES		LowMotionMode = VIDEO_MODE_2FRAME;
+ePULLDOWNMODES		HighMotionMode = VIDEO_MODE_2FRAME;
 
 // TRB 10/28/00 changes, parms, and new fields for sync problem fixes
 BYTE			    * lpCurOverlay;				// made static for Lock rtn, curr vid buff ptr
@@ -354,7 +357,6 @@ void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField)
 		LastCombFactor = 0;
 		RepeatCount = 0;
 		LastPolarity = -1;
-//		gPulldownMode = VIDEO_MODE_BOB;     // TRB 12-23-00 allow parm
 		LastDiff = 0;
 		UpdatePulldownStatus();
 		dwLastFlipTicks = -1;
@@ -462,7 +464,7 @@ void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField)
 // Mark Rejhon can be reached at dtv@marky.com
 // Discussion forum is http://www.avsforum.com - AVSCIENCE HTPC Forum
 //
-// The alogoritm and comments below are taken from Mark's post to the AVSCIENCE
+// The algorithm and comments below are taken from Mark's post to the AVSCIENCE
 // Home Theater Computer Forum reproduced in the file 32Spec.htm that should be
 // with this source.  The key to getting this to work will be choosing the right 
 // value for the Threshold32Pulldown variable and others.  This should probably 
@@ -474,6 +476,19 @@ void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField)
 // than the field before the previous one, we check the comb factor of the
 // woven-together frame.  If it's too high, we immediately switch to video
 // deinterlace mode to prevent weave artifacts from appearing.
+//
+// In video mode, we support three styles of deinterlacing and switch among
+// them depending on the amount of motion in the scene.  If there's a lot of
+// motion, we use HighMotionMode.  If there's little or no motion for at least
+// LowMotionFieldCount fields, we switch to LowMotionMode.  And if, after that,
+// there's no motion for StaticImageFieldCount fields, we switch to
+// StaticImageMode.
+//
+// Exactly which modes are used in these three cases is configurable in the INI
+// file. It is entirely legal for some or all of the three video modes to be the
+// same; by default, VIDEO_MODE_2FRAME is used for both the high and low motion
+// modes.  On slower machines VIDEO_MODE_BOB (high) and VIDEO_MODE_WEAVE (low)
+// can be used instead since they're less CPU-intensive.
 //
 // This function normally gets called 60 times per second.
 ///////////////////////////////////////////////////////////////////////////////
@@ -500,7 +515,6 @@ void UpdateNTSCPulldownMode(long FieldDiff,
         MOVIE_FIELD_CYCLE = 0;
 		MISMATCH_COUNT = 0;
 		MATCH_COUNT = 0;
-//		gPulldownMode = VIDEO_MODE_WEAVE;   // TRB 12/20/00 Allow from parm
 		UpdatePulldownStatus();
 		dwLastFlipTicks = -1;
 		memset(&ModeSwitchTimestamps[0], 0, sizeof(ModeSwitchTimestamps));
@@ -517,10 +531,10 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 	{
 		MATCH_COUNT = 0;
 
-		if (gPulldownMode == SIMPLE_WEAVE)
+		if (gPulldownMode == StaticImageMode)
 		{
-			// We're in weave mode and the image is no longer static.  Go
-			// back to video mode immediately.
+			// We're in still-image mode and the image is no longer static.  Go
+			// back to a motion mode immediately.
 			SwitchToVideo = TRUE;
 		}
 
@@ -538,10 +552,10 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 		}
 
 		if (FieldDiff >= ThresholdPulldownMismatch &&
-			gPulldownMode == VIDEO_MODE_WEAVE)
+			gPulldownMode == LowMotionMode)
 		{
-			// A big field difference; video-weave mode probably
-			// isn't the best choice.
+			// A big field difference; switch to high-motion mode
+			// if we're in low-motion mode.
 			SwitchToVideo = TRUE;
 		}
 
@@ -562,16 +576,16 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 
 		if (SwitchToVideo)
 		{
-			// If we're in weave mode, it might be okay to drop to video
-			// weave mode.
-			if (gPulldownMode == SIMPLE_WEAVE &&
+			// If we're in still mode, it might be okay to drop to
+			// low-motion mode.
+			if (gPulldownMode == StaticImageMode &&
 				FieldDiff < ThresholdPulldownMismatch)
 			{
-				gPulldownMode = VIDEO_MODE_WEAVE;
+				gPulldownMode = LowMotionMode;
 			}
 			else
 			{
-				gPulldownMode = VIDEO_MODE_BOB;
+				gPulldownMode = HighMotionMode;
 				MOVIE_VERIFY_CYCLE = 0;
 				MOVIE_FIELD_CYCLE = 0;
 			}
@@ -663,7 +677,7 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 					// the film mode we just dropped out of was correct.
 					if (bFallbackToVideo && TrackModeSwitches(gPulldownMode))
 					{
-						gPulldownMode = VIDEO_MODE_BOB;
+						gPulldownMode = HighMotionMode;
 						MOVIE_VERIFY_CYCLE = 0;
 						MOVIE_FIELD_CYCLE = 0;
 						UpdatePulldownStatus();
@@ -731,18 +745,18 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 		}
 		MISMATCH_COUNT = 0;
 
-		if (MATCH_COUNT >= VideoWeaveFieldCount &&
-			gPulldownMode == VIDEO_MODE_BOB)
+		if (MATCH_COUNT >= LowMotionFieldCount &&
+			gPulldownMode == HighMotionMode)
 		{
-			gPulldownMode = VIDEO_MODE_WEAVE;
-			LOG(" Match count %ld, switching to video-weave", MATCH_COUNT);
+			gPulldownMode = LowMotionMode;
+			LOG(" Match count %ld, switching to low-motion", MATCH_COUNT);
 			UpdatePulldownStatus();
 		}
 		if (MATCH_COUNT >= StaticImageFieldCount &&
-			gPulldownMode == VIDEO_MODE_WEAVE)
+			gPulldownMode == LowMotionMode)
 		{
-			gPulldownMode = SIMPLE_WEAVE;
-			LOG(" Match count %ld, switching to weave", MATCH_COUNT);
+			gPulldownMode = StaticImageMode;
+			LOG(" Match count %ld, switching to static-image", MATCH_COUNT);
 			UpdatePulldownStatus();
 		}
 	}
