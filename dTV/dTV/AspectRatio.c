@@ -95,10 +95,12 @@ double GetActualSourceFrameAspect()
 	switch (aspectSettings.aspect_mode) {
 	case 1:
 		// Letterboxed or full-frame
-		return 4.0/3.0;
+		// JA 24/3/01 Hopefully fix rounding errors
+		return 1.333;
 	case 2:
 		// Anamorphic
-		return 16.0/9.0;
+		// JA 24/3/01 Hopefully fix rounding errors
+		return 1.778;
 	default:
 		// User-specified
 		return aspectSettings.source_aspect/1000.0;

@@ -63,10 +63,12 @@ BOOL Filter_Gamma(DEINTERLACE_INFO *info)
 LOOP_LABEL:
 			mov al,byte ptr[edx]
 			xlatb
+			//mov al, 127
 			mov byte ptr[edx], al
 			add edx, 2			
 			mov al,byte ptr[edx]
 			xlatb
+			//mov al, 127
 			mov byte ptr[edx], al
 			add edx, 2			
 			loop LOOP_LABEL

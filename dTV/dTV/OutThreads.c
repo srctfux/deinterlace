@@ -110,6 +110,11 @@ BOOL bWaitForVsync = FALSE;
 // FIXME: should be able to get of this variable
 long OverlayPitch = 0;
 
+// cope with older DX header files
+#if !defined(DDFLIP_DONOTWAIT)
+	#define DDFLIP_DONOTWAIT 0
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 void Start_Thread()
 {
