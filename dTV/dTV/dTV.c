@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// dTV.h
+// dTV.c
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2000 John Adcock.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -823,7 +823,19 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_EXTERN2:
 		case IDM_EXTERN3:
 		case IDM_EXTERN4:
-			VideoSource = wParam - IDM_TUNER;
+		case IDM_EXTERN5:
+
+			// 10/16/2000 by Mark Rejhon:
+			// More guaranteed to work than mathematics with wParam
+			VideoSource = 0;
+			switch (wParam) {
+			case IDM_EXTERN1: VideoSource = 1; break;
+			case IDM_EXTERN2: VideoSource = 2; break;
+			case IDM_EXTERN3: VideoSource = 3; break;
+			case IDM_EXTERN4: VideoSource = 4; break;
+			case IDM_EXTERN5: VideoSource = 5; break;
+			}
+
 			AudioSource = AUDIOMUX_EXTERNAL;
 			Stop_Capture();
 			BT848_ResetHardware();
@@ -1440,18 +1452,16 @@ void MainWndOnInitBT(HWND hWnd)
 		}
 
 		AudioSource = AUDIOMUX_EXTERNAL;
-		if (VideoSource == 1)
-			sprintf(Text, "Composite");
-		else if (VideoSource == 2)
-			sprintf(Text, "S-Video");
-		else if (VideoSource == 3)
-			sprintf(Text, "Other 1");
-		else if (VideoSource == 4)
-			sprintf(Text, "Other 2");
-		else
-		{
+		switch (VideoSource) {
+		case 1:	sprintf(Text, "Composite");             break;
+		case 2: sprintf(Text, "S-Video");               break;
+		case 3: sprintf(Text, "Other 1");               break;
+		case 4: sprintf(Text, "Other 2");               break;
+		case 5: sprintf(Text, "Composite via S-Video"); break;
+		default:
 			AudioSource = AUDIOMUX_TUNER;
 			ChangeChannel(CurrentProgramm);
+			break;
 		}
 
 		if (bDisplayStatusBar == TRUE)
@@ -1736,12 +1746,14 @@ void SetMenuAnalog()
 		EnableMenuItem(GetMenu(hWnd), IDM_EXTERN2, MF_GRAYED);
 		EnableMenuItem(GetMenu(hWnd), IDM_EXTERN3, (TVCards[TVTYPE].nVideoInputs > 2)?MF_ENABLED:MF_GRAYED);
 		EnableMenuItem(GetMenu(hWnd), IDM_EXTERN4, (TVCards[TVTYPE].nVideoInputs > 3)?MF_ENABLED:MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_EXTERN5, MF_GRAYED);
 	}
 	else
 	{
 		EnableMenuItem(GetMenu(hWnd), IDM_EXTERN2, MF_ENABLED);
 		EnableMenuItem(GetMenu(hWnd), IDM_EXTERN3, (TVCards[TVTYPE].nVideoInputs > 3)?MF_ENABLED:MF_GRAYED);
 		EnableMenuItem(GetMenu(hWnd), IDM_EXTERN4, (TVCards[TVTYPE].nVideoInputs > 4)?MF_ENABLED:MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_EXTERN5, MF_ENABLED);
 	}
 
 	CheckMenuItem(GetMenu(hWnd), IDM_TUNER, (VideoSource == 0)?MF_CHECKED:MF_UNCHECKED);
@@ -1749,6 +1761,7 @@ void SetMenuAnalog()
 	CheckMenuItem(GetMenu(hWnd), IDM_EXTERN2, (VideoSource == 2)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_EXTERN3, (VideoSource == 3)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_EXTERN4, (VideoSource == 4)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_EXTERN5, (VideoSource == 5)?MF_CHECKED:MF_UNCHECKED);
 
 	CheckMenuItem(GetMenu(hWnd), IDM_AUDIO_0, (AudioSource == 0)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_AUDIO_1, (AudioSource == 1)?MF_CHECKED:MF_UNCHECKED);

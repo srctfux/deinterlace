@@ -975,7 +975,8 @@ BEGIN
             MENUITEM "&Tuner",                      IDM_TUNER
             MENUITEM "&Composite",                  IDM_EXTERN1
             MENUITEM "&S-Video",                    IDM_EXTERN2
-            MENUITEM "&Other 1",                    IDM_EXTERN2
+            MENUITEM "Co&mposite via S-Video",      IDM_EXTERN5
+            MENUITEM "&Other 1",                    IDM_EXTERN3
             MENUITEM "&Other 2",                    IDM_EXTERN4
         END
         POPUP "Video &Format"

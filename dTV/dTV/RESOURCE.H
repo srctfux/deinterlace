@@ -132,6 +132,7 @@
 #define IDM_EXTERN2                     1091
 #define IDM_EXTERN3                     1092
 #define IDM_EXTERN4                     1093
+#define IDM_EXTERN5                     1094
 #define IDM_AUDIO_0                     1110
 #define IDM_AUDIO_1                     1111
 #define IDM_AUDIO_2                     1112
@@ -658,7 +659,7 @@
 #define _APS_NO_MFC                     1
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        153
-#define _APS_NEXT_COMMAND_VALUE         544
+#define _APS_NEXT_COMMAND_VALUE         545
 #define _APS_NEXT_CONTROL_VALUE         1774
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

@@ -572,6 +572,11 @@ BOOL BT848_SetVideoSource(int nInput)
 		BT848_OrDataByte(BT848_O_CONTROL, BT848_CONTROL_COMP);
 		MuxSel = TVCards[CardType].MuxSelect[TVCards[CardType].SVideoInput & 7];
 		break;
+	case 5:
+		BT848_AndDataByte(BT848_E_CONTROL, ~BT848_CONTROL_COMP);
+		BT848_AndDataByte(BT848_O_CONTROL, ~BT848_CONTROL_COMP);
+		MuxSel = TVCards[CardType].MuxSelect[TVCards[CardType].SVideoInput & 7];
+		break;
 	case 1:
 	case 3:
 	case 4:
