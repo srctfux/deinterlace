@@ -61,6 +61,7 @@
 // 23 Mar 2001   Michael Samblanet     Reworked code to use filter chain, major testing and debugging
 // 03 May 2001   Michael Samblanet     Moved half-height logic to correct location in aspect code
 //                                     Expieremental inversion code (invert source rect if options are enabled)
+// 07 May 2001   John Adcock           Reformmated code
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -90,12 +91,17 @@ int HalfHeight = FALSE;
 #define AR_ANAMORPHIC    2
 
 
-AspectSettingsStruct aspectSettings = {1333,0,1,0,0,30,0,FALSE,60,300,15,20,
-									2000,VERT_POS_CENTRE,HORZ_POS_CENTRE,
-									{0,0,0,0},{0,0,0,0},{0,0,0,0},TRUE,FALSE,4,TRUE,FALSE,
-									0,60*30,1000,FALSE,8,60,60,1000,FALSE,FALSE,
-									1.0,1.0,0.5,0.5,
-									};
+AspectSettingsStruct aspectSettings = 
+{
+	1333,0,1,0,0,30,0,FALSE,60,300,15,20,
+	2000,VERT_POS_CENTRE,HORZ_POS_CENTRE,
+	{0,0,0,0},
+	{0,0,0,0},
+	{0,0,0,0},
+	TRUE,FALSE,4,TRUE,FALSE,
+	0,60*30,1000,FALSE,8,60,60,1000,FALSE,FALSE,
+	1.0,1.0,0.5,0.5,
+};
 
 BOOL Bounce_OnChange(long NewValue); // Forward declaration to reuse this code...
 BOOL Orbit_OnChange(long NewValue); // Forward declaration to reuse this code...
@@ -105,7 +111,8 @@ BOOL Orbit_OnChange(long NewValue); // Forward declaration to reuse this code...
 // grab or display resolutions.
 double GetActualSourceFrameAspect()
 {
-	switch (aspectSettings.aspect_mode) {
+	switch (aspectSettings.aspect_mode) 
+	{
 	case 1:
 		// Letterboxed or full-frame
 		return 1.333; //4.0/3.0;
@@ -133,39 +140,67 @@ void SetHalfHeight(int IsHalfHeight)
 // All the code for the aspect ratio filters is in this module to leave this one easier to read...
 #include "AspectFilters.hpp"
 
-AspectFilter* BuildFilterChain() {
+AspectFilter* BuildFilterChain()
+{
 	AspectFilter *head, *cur;
-	if (aspectSettings.orbitEnabled) { 
+	if (aspectSettings.orbitEnabled)
+	{ 
 		int overscan = aspectSettings.InitialOverscan;
-		if (aspectSettings.orbitEnabled && overscan*2 < aspectSettings.orbitSize) overscan = (aspectSettings.orbitSize+1)/2;
+		if (aspectSettings.orbitEnabled && overscan*2 < aspectSettings.orbitSize)
+		{
+			overscan = (aspectSettings.orbitSize+1)/2;
+		}
 		head = cur = new OverscanAspectFilter(aspectSettings.InitialOverscan);
-		cur->next = new OrbitAspectFilter(aspectSettings.orbitPeriodX, aspectSettings.orbitPeriodY, aspectSettings.orbitSize); cur = cur->next;
-	} else {
+		cur->next = new OrbitAspectFilter(aspectSettings.orbitPeriodX, aspectSettings.orbitPeriodY, aspectSettings.orbitSize); 
+		cur = cur->next;
+	}
+	else 
+	{
 		head = cur = new OverscanAspectFilter(aspectSettings.InitialOverscan);
 	}
-	if (aspectSettings.aspect_mode) { 
+	if (aspectSettings.aspect_mode)
+	{ 
 		AspectFilter *position;
 		
-		if (aspectSettings.bounceEnabled) position = new BounceDestinationAspectFilter(aspectSettings.bouncePeriod);
-		else {
+		if (aspectSettings.bounceEnabled)
+		{
+			position = new BounceDestinationAspectFilter(aspectSettings.bouncePeriod);
+		}
+		else
+		{
 			double xPos, yPos;
-			switch (aspectSettings.HorizontalPos) {
-				case HORZ_POS_LEFT: xPos = -1; break;
-				case HORZ_POS_RIGHT: xPos = 1; break;
-				default: xPos = 0; break;
+			switch (aspectSettings.HorizontalPos)
+			{
+			case HORZ_POS_LEFT:
+				xPos = -1; 
+				break;
+			case HORZ_POS_RIGHT:
+				xPos = 1; 
+				break;
+			default: 
+				xPos = 0; 
+				break;
 			}
-			switch (aspectSettings.VerticalPos) {
-				case VERT_POS_TOP: yPos = -1; break;
-				case VERT_POS_BOTTOM: yPos = 1; break;
-				default: yPos = 0; break;
+			switch (aspectSettings.VerticalPos)
+			{
+			case VERT_POS_TOP: 
+				yPos = -1;
+				break;
+			case VERT_POS_BOTTOM: 
+				yPos = 1; 
+				break;
+			default:
+				yPos = 0; 
+				break;
 			}
 			position = new PositionDestinationAspectFilter(xPos,yPos);
 		}
 		
 		cur->next = position;
-			cur->next->firstChild = new CropAspectFilter();
+		cur->next->firstChild = new CropAspectFilter();
 
-		if (!aspectSettings.aspectImageClipped) {
+		if (!aspectSettings.aspectImageClipped)
+		{
 			AspectFilter *uncrop = new UncropAspectFilter(); 
 			uncrop->firstChild = cur->next;
 			cur->next = uncrop;
@@ -185,8 +220,13 @@ AspectFilter* BuildFilterChain() {
 		cur = cur->next;
 	}
 
-	cur->next = new ScreenSanityAspectFilter(); cur = cur->next;
-	if (aspectSettings.autoResizeWindow) { cur->next = new ResizeWindowAspectFilter(); cur = cur->next; }
+	cur->next = new ScreenSanityAspectFilter();
+	cur = cur->next;
+	if (aspectSettings.autoResizeWindow)
+	{
+		cur->next = new ResizeWindowAspectFilter();
+		cur = cur->next;
+	}
 	
 	return head;
 }
@@ -199,95 +239,120 @@ void _WorkoutOverlaySize(BOOL allowResize)
 	UpdateWindowState();
 
 	AspectRectangles ar;
-	// Setup the rectangles...
-		// Previous ones...
-			ar.rPrevDest = aspectSettings.destinationRectangle;
-			ar.rPrevSrc = aspectSettings.sourceRectangle;
-		// Source frame
-			ar.rOriginalOverlaySrc.left = 0;
-			ar.rOriginalOverlaySrc.right = CurrentX;
-			ar.rOriginalOverlaySrc.top = 0;
-			ar.rOriginalOverlaySrc.bottom = CurrentY;
-			// Set the aspect adjustment factor...
-			ar.rOriginalOverlaySrc.setAspectAdjust((double)CurrentX/(double)CurrentY,
-										 GetActualSourceFrameAspect());
 
-		// Destination rectangle
-			ar.rOriginalOverlayDest.setToClient(hWnd,TRUE);
-			// Adjust for status bar...
-			if (IsStatusBarVisible()) ar.rOriginalOverlayDest.bottom -= StatusBar_Height();
-			// Set the aspect adjustment factor if the screen aspect is specified...
-			if (aspectSettings.target_aspect)
-				ar.rOriginalOverlayDest.setAspectAdjust((double) GetSystemMetrics(SM_CXSCREEN) / (double) GetSystemMetrics(SM_CYSCREEN),
-											 aspectSettings.target_aspect/1000.0);
+	// Setup the rectangles...
+	// Previous ones...
+	ar.rPrevDest = aspectSettings.destinationRectangle;
+	ar.rPrevSrc = aspectSettings.sourceRectangle;
+	// Source frame
+	ar.rOriginalOverlaySrc.left = 0;
+	ar.rOriginalOverlaySrc.right = CurrentX;
+	ar.rOriginalOverlaySrc.top = 0;
+	ar.rOriginalOverlaySrc.bottom = CurrentY;
+	// Set the aspect adjustment factor...
+	ar.rOriginalOverlaySrc.setAspectAdjust((double)CurrentX/(double)CurrentY,
+											GetActualSourceFrameAspect());
+
+	// Destination rectangle
+	ar.rOriginalOverlayDest.setToClient(hWnd,TRUE);
 	
-		// Set current values to original for starters...
-		ar.rCurrentOverlaySrc = ar.rOriginalOverlaySrc;
-		ar.rCurrentOverlayDest = ar.rOriginalOverlayDest;
+	// Adjust for status bar...
+	if (IsStatusBarVisible())
+	{
+		ar.rOriginalOverlayDest.bottom -= StatusBar_Height();
+	}
+
+	// Set the aspect adjustment factor if the screen aspect is specified...
+	if (aspectSettings.target_aspect)
+	{
+		ar.rOriginalOverlayDest.setAspectAdjust((double) GetSystemMetrics(SM_CXSCREEN) / (double) GetSystemMetrics(SM_CYSCREEN),
+												 aspectSettings.target_aspect/1000.0);
+	}
+	
+	// Set current values to original for starters...
+	ar.rCurrentOverlaySrc = ar.rOriginalOverlaySrc;
+	ar.rCurrentOverlayDest = ar.rOriginalOverlayDest;
 
 	// Build filter chain and apply
-		// TODO: Filter chain should be saved and only rebuilt if options are changed
-		AspectFilter *head = BuildFilterChain();
-		if (head->applyFilters(ar,allowResize)) {
-			delete head;
-			_WorkoutOverlaySize(FALSE); // Prevent further recursion - only allow 1 level of request for readjusting the overlay
-			return;
-		} else delete head;
+	// TODO: Filter chain should be saved and only rebuilt if options are changed
+	AspectFilter *head = BuildFilterChain();
+	if (head->applyFilters(ar,allowResize))
+	{
+		delete head;
+		_WorkoutOverlaySize(FALSE); // Prevent further recursion - only allow 1 level of request for readjusting the overlay
+		return;
+	} 
+	else 
+	{
+		delete head;
+	}
 
 	// If we're in half-height mode, squish the source rectangle accordingly.  This
 	// allows the overlay hardware to do our bobbing for us.
-	if (HalfHeight)	{ ar.rCurrentOverlaySrc.top /= 2; ar.rCurrentOverlaySrc.bottom /= 2; }
+	if (HalfHeight)
+	{
+		ar.rCurrentOverlaySrc.top /= 2;
+		ar.rCurrentOverlaySrc.bottom /= 2;
+	}
 
 	// Save the settings....
-		aspectSettings.sourceRectangle = ar.rCurrentOverlaySrc;
-		aspectSettings.destinationRectangleWindow = ar.rCurrentOverlayDest; 
-		aspectSettings.destinationRectangle = ar.rCurrentOverlayDest;
-		ScreenToClient(hWnd,((PPOINT)&aspectSettings.destinationRectangle));
-		ScreenToClient(hWnd,((PPOINT)&aspectSettings.destinationRectangle)+1);
+	aspectSettings.sourceRectangle = ar.rCurrentOverlaySrc;
+	aspectSettings.destinationRectangleWindow = ar.rCurrentOverlayDest; 
+	aspectSettings.destinationRectangle = ar.rCurrentOverlayDest;
+	ScreenToClient(hWnd,((PPOINT)&aspectSettings.destinationRectangle));
+	ScreenToClient(hWnd,((PPOINT)&aspectSettings.destinationRectangle)+1);
 
 	// Invert the rectangle if necessary...
-		/*
-		// Removed for now - seems to cause application to crash - looks
-		// like video drivers can't deal with this...
-		if (( aspectSettings.invertX && aspectSettings.sourceRectangle.right > aspectSettings.sourceRectangle.left) 
-			||
-			(!aspectSettings.invertX && aspectSettings.sourceRectangle.right < aspectSettings.sourceRectangle.left)) {
-			int t = aspectSettings.sourceRectangle.right;
-			aspectSettings.sourceRectangle.right = aspectSettings.sourceRectangle.left;
-			aspectSettings.sourceRectangle.left = t;
-		}
-		if (( aspectSettings.invertY && aspectSettings.sourceRectangle.bottom > aspectSettings.sourceRectangle.top) 
-			||
-			(!aspectSettings.invertY && aspectSettings.sourceRectangle.bottom < aspectSettings.sourceRectangle.top)) {
-			int t = aspectSettings.sourceRectangle.top;
-			aspectSettings.sourceRectangle.top = aspectSettings.sourceRectangle.bottom;
-			aspectSettings.sourceRectangle.bottom = t;
-		}
-		*/
+	/*
+	// Removed for now - seems to cause application to crash - looks
+	// like video drivers can't deal with this...
+	if (( aspectSettings.invertX && aspectSettings.sourceRectangle.right > aspectSettings.sourceRectangle.left) 
+		||
+		(!aspectSettings.invertX && aspectSettings.sourceRectangle.right < aspectSettings.sourceRectangle.left)) {
+		int t = aspectSettings.sourceRectangle.right;
+		aspectSettings.sourceRectangle.right = aspectSettings.sourceRectangle.left;
+		aspectSettings.sourceRectangle.left = t;
+	}
+	if (( aspectSettings.invertY && aspectSettings.sourceRectangle.bottom > aspectSettings.sourceRectangle.top) 
+		||
+		(!aspectSettings.invertY && aspectSettings.sourceRectangle.bottom < aspectSettings.sourceRectangle.top)) {
+		int t = aspectSettings.sourceRectangle.top;
+		aspectSettings.sourceRectangle.top = aspectSettings.sourceRectangle.bottom;
+		aspectSettings.sourceRectangle.bottom = t;
+	}
+	*/
 	
 	// Set the overlay
-		if (!aspectSettings.deferedSetOverlay) // MRS 2-22-01 - Defered overlay set
-			Overlay_Update(&aspectSettings.sourceRectangle, &aspectSettings.destinationRectangleWindow, DDOVER_SHOW, TRUE);
-		else aspectSettings.overlayNeedsSetting = TRUE;
+	if (!aspectSettings.deferedSetOverlay) // MRS 2-22-01 - Defered overlay set
+	{
+		Overlay_Update(&aspectSettings.sourceRectangle, &aspectSettings.destinationRectangleWindow, DDOVER_SHOW, TRUE);
+	}
+	else
+	{
+		aspectSettings.overlayNeedsSetting = TRUE;
+	}
 
 	// Save the Overlay Destination and force a repaint 
-
-		// MRS 2-23-01 Only invalidate if we changed something
-		if (memcmp(&ar.rPrevDest,&aspectSettings.destinationRectangle,sizeof(ar.rPrevDest))) { 
-			// MRS 2-22-01 Invalidate just the union of the old region and the new region - no need to invalidate all of the window.
-			RECT invalidate;
-			UnionRect(&invalidate,&ar.rPrevDest,&aspectSettings.destinationRectangle);
-			InvalidateRect(hWnd,&invalidate,FALSE);
-		} else if (aspectSettings.overlayNeedsSetting) {
-			// If not invalidating, we need to update the overlay now...
-			Overlay_Update(&aspectSettings.sourceRectangle, &aspectSettings.destinationRectangleWindow, DDOVER_SHOW, TRUE);
-			aspectSettings.overlayNeedsSetting = FALSE;
-		}
-
-	return;
+	// MRS 2-23-01 Only invalidate if we changed something
+	if (memcmp(&ar.rPrevDest,&aspectSettings.destinationRectangle,sizeof(ar.rPrevDest)))
+	{ 
+		// MRS 2-22-01 Invalidate just the union of the old region and the new region - no need to invalidate all of the window.
+		RECT invalidate;
+		UnionRect(&invalidate,&ar.rPrevDest,&aspectSettings.destinationRectangle);
+		InvalidateRect(hWnd,&invalidate,FALSE);
+	}
+	else if (aspectSettings.overlayNeedsSetting)
+	{
+		// If not invalidating, we need to update the overlay now...
+		Overlay_Update(&aspectSettings.sourceRectangle, &aspectSettings.destinationRectangleWindow, DDOVER_SHOW, TRUE);
+		aspectSettings.overlayNeedsSetting = FALSE;
+	}
 }
 
-void WorkoutOverlaySize() {_WorkoutOverlaySize(TRUE);}
+void WorkoutOverlaySize()
+{
+	_WorkoutOverlaySize(TRUE);
+}
 
 //----------------------------------------------------------------------------
 // Returns the current source rectangle.
