@@ -95,6 +95,9 @@ void LoadSettingsFromIni(LPSTR Name)
 
 	EdgeDetect = GetPrivateProfileInt("Deinterlace", "EdgeDetect", EdgeDetect, szIniFile);
 	JaggieThreshold = GetPrivateProfileInt("Deinterlace", "JaggieThreshold", JaggieThreshold, szIniFile);
+	SpatialTolerance = GetPrivateProfileInt("Deinterlace", "SpatialTolerance", SpatialTolerance, szIniFile);
+	TemporalTolerance = GetPrivateProfileInt("Deinterlace", "TemporalTolerance", TemporalTolerance, szIniFile);
+	SimilarityThreshold = GetPrivateProfileInt("Deinterlace", "SimilarityThreshold", SimilarityThreshold, szIniFile);
 
 	VBI_Flags = 0;
 	if(GetPrivateProfileInt("VBI", "VT", 0, szIniFile) != 0)
@@ -333,6 +336,9 @@ void WriteSettingsToIni()
 
 	WritePrivateProfileInt("Deinterlace", "EdgeDetect", EdgeDetect, szIniFile);
 	WritePrivateProfileInt("Deinterlace", "JaggieThreshold", JaggieThreshold, szIniFile);
+	WritePrivateProfileInt("Deinterlace", "SpatialTolerance", SpatialTolerance, szIniFile);
+	WritePrivateProfileInt("Deinterlace", "TemporalTolerance", TemporalTolerance, szIniFile);
+	WritePrivateProfileInt("Deinterlace", "SimilarityThreshold", SimilarityThreshold, szIniFile);
 
 
 	WritePrivateProfileInt("Show", "StatusBar", bDisplayStatusBar, szIniFile);

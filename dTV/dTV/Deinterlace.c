@@ -32,6 +32,9 @@ long BitShift = 13;
 long EdgeDetect = 625;
 long JaggieThreshold = 73;
 long DiffThreshold = 224;
+long TemporalTolerance = 200;
+long SpatialTolerance = 600;
+long SimilarityThreshold = 190;
 
 /////////////////////////////////////////////////////////////////////////////
 // memcpyMMX
@@ -305,8 +308,9 @@ EndCopyLoop:
 	}
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////
-// DeinterlaceField
+// DeinterlaceField (old version)
 //
 // The algorithm for this was taken from the 
 // Deinterlace - area based Vitual Dub Plug-in by
@@ -320,7 +324,7 @@ EndCopyLoop:
 // to write 32 byte sequential chunks.  This function now assumes the lines we write
 // are a multiple of 32 bytes.  It used to assume only 8.  -  Tom Barry 10/11/00
 ///////////////////////////////////////////////////////////////////////////////
-void DeinterlaceField(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay, BOOL bIsOdd)
+void OldDeinterlaceField(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay, BOOL bIsOdd)
 {
 	int Line;
 	short* YVal1;
@@ -402,7 +406,7 @@ DoNext32Bytes:
 			movq qword ptr[edi+16], mm4
 			movq qword ptr[edi+24], mm5
 
-			// get intensities in mm3 - 5
+			// get intensities in mm3 - 4
 			movq mm3, mm0
 			movq mm4, mm1
 			movq mm5, mm2
@@ -428,10 +432,10 @@ DoNext32Bytes:
 			psrlw mm5, 01
 
 			movq mm6, mm3
-			psubw mm6, mm4		//mm6 = O1 - E
+			psubw mm6, mm4	//mm6 = O1 - E
 
 			movq mm7, mm5
-			psubw mm7, mm4		//mm7 = O2 - E
+			psubw mm7, mm4	//mm7 = O2 - E
 
 			pmullw mm6, mm7		// mm0 = (O1 - E) * (O2 - E)
 
@@ -460,7 +464,7 @@ DoNext32Bytes:
 			movq mm1, qword ptr[ebx+8] 
 			movq mm2, qword ptr[edx+8]
 
-			// get intensities in mm3 - 5
+			// get intensities in mm3 - 4
 			movq mm3, mm0
 			movq mm4, mm1
 			movq mm5, mm2
@@ -484,10 +488,10 @@ DoNext32Bytes:
 			psrlw mm5, 01
 
 			movq mm6, mm3
-			psubw mm6, mm4		//mm6 = O1 - E
+			psubw mm6, mm4	//mm6 = O1 - E
 
 			movq mm7, mm5
-			psubw mm7, mm4		//mm7 = O2 - E
+			psubw mm7, mm4	//mm7 = O2 - E
 
 			pmullw mm6, mm7		// mm0 = (O1 - E) * (O2 - E)
 
@@ -516,7 +520,7 @@ DoNext32Bytes:
 			movq mm1, qword ptr[ebx+16] 
 			movq mm2, qword ptr[edx+16]
 
-			// get intensities in mm3 - 5
+			// get intensities in mm3 - 4
 			movq mm3, mm0
 			movq mm4, mm1
 			movq mm5, mm2
@@ -540,10 +544,10 @@ DoNext32Bytes:
 			psrlw mm5, 01
 
 			movq mm6, mm3
-			psubw mm6, mm4		//mm6 = O1 - E
+			psubw mm6, mm4	//mm6 = O1 - E
 
 			movq mm7, mm5
-			psubw mm7, mm4		//mm7 = O2 - E
+			psubw mm7, mm4	//mm7 = O2 - E
 
 			pmullw mm6, mm7		// mm0 = (O1 - E) * (O2 - E)
 
@@ -572,7 +576,7 @@ DoNext32Bytes:
 			movq mm1, qword ptr[ebx+24] 
 			movq mm2, qword ptr[edx+24]
 
-			// get intensities in mm3 - 5
+			// get intensities in mm3 - 4
 			movq mm3, mm0
 			movq mm4, mm1
 			movq mm5, mm2
@@ -596,10 +600,10 @@ DoNext32Bytes:
 			psrlw mm5, 01
 
 			movq mm6, mm3
-			psubw mm6, mm4		//mm6 = O1 - E
+			psubw mm6, mm4	//mm6 = O1 - E
 
 			movq mm7, mm5
-			psubw mm7, mm4		//mm7 = O2 - E
+			psubw mm7, mm4	//mm7 = O2 - E
 
 			pmullw mm6, mm7		// mm0 = (O1 - E) * (O2 - E)
 
@@ -636,6 +640,320 @@ DoNext32Bytes:
 
 	// Copy last odd line if we're processing an even field.
 	if (! bIsOdd)
+		memcpyMMX(lpCurOverlay + (CurrentY - 1) * OverlayPitch, pOddLines[CurrentY / 2 - 1], CurrentX * 2);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Deinterlace the latest field, attempting to weave wherever it won't cause
+// visible artifacts.
+//
+// The algorithm is described in comments below.
+//
+void DeinterlaceField(short** pOddLines, short** pEvenLines, short** pPrevLines, BYTE* lpCurOverlay, BOOL bIsOdd)
+{
+	int Line;
+	short* YVal1;
+	short* YVal2;
+	short* YVal3;
+	short* YVal4;
+	BYTE* OldStack;
+	BYTE* Dest;
+
+	const __int64 YMask    = 0x00ff00ff00ff00ff;
+	const __int64 UVMask    = 0xff00ff00ff00ff00;
+
+	__int64 qwSpatialTolerance;
+	__int64 qwTemporalTolerance;
+	__int64 qwThreshold;
+	const __int64 Mask = 0xfefefefefefefefe;
+
+	qwSpatialTolerance = SpatialTolerance;
+	qwSpatialTolerance += (qwSpatialTolerance << 48) + (qwSpatialTolerance << 32) + (qwSpatialTolerance << 16);
+	qwTemporalTolerance = TemporalTolerance;
+	qwTemporalTolerance += (qwTemporalTolerance << 48) + (qwTemporalTolerance << 32) + (qwTemporalTolerance << 16);
+	qwThreshold = SimilarityThreshold;
+	qwThreshold += (qwThreshold << 48) + (qwThreshold << 32) + (qwThreshold << 16);
+
+	// copy first even line no matter what, and the first odd line if we're
+	// processing an even field.
+	memcpyMMX(lpCurOverlay, pEvenLines[0], CurrentX * 2);
+	if (! bIsOdd)
+		memcpyMMX(lpCurOverlay + OverlayPitch, pOddLines[0], CurrentX * 2);
+
+	for (Line = 0; Line < (CurrentY / 2 - 1); ++Line)
+	{
+		if (bIsOdd)
+		{
+			YVal1 = pEvenLines[Line];
+			YVal2 = pOddLines[Line];
+			YVal3 = pEvenLines[Line + 1];
+			YVal4 = pPrevLines[Line];
+			Dest = lpCurOverlay + (Line * 2 + 1) * OverlayPitch;
+		}
+		else
+		{
+			YVal1 = pOddLines[Line];
+			YVal2 = pEvenLines[Line + 1];
+			YVal3 = pOddLines[Line + 1];
+			YVal4 = pPrevLines[Line + 1];
+			Dest = lpCurOverlay + (Line * 2 + 2) * OverlayPitch;
+		}
+
+		// For ease of reading, the comments below assume that we're operating on an odd
+		// field (i.e., that bIsOdd is true).  The exact same processing is done when we
+		// operate on an even field, but the roles of the odd and even fields are reversed.
+		// It's just too cumbersome to explain the algorithm in terms of "the next odd
+		// line if we're doing an odd field, or the next even line if we're doing an
+		// even field" etc.  So wherever you see "odd" or "even" below, keep in mind that
+		// half the time this function is called, those words' meanings will invert.
+
+		_asm
+		{
+			mov dword ptr[OldStack], esi
+
+			mov ecx, CurrentX
+			mov eax, dword ptr [YVal1]
+			mov ebx, dword ptr [YVal2]
+			mov edx, dword ptr [YVal3]
+			mov esi, dword ptr [YVal4]
+			mov edi, dword ptr [Dest]
+			shr ecx, 4       // there are ActiveX * 2 / 8 qwords, now done 4 at a time
+
+align 8
+DoNext32Bytes:			
+			// Copy the even scanline below this one to the overlay buffer, since we'll be
+			// adapting the current scanline to the even lines surrounding it.  The scanline
+			// above has already been copied by the previous pass through the loop.
+			add edi, OverlayPitch
+			movq mm2, qword ptr[edx]
+			movq mm3, qword ptr[edx+8] 
+			movq mm4, qword ptr[edx+16] 
+			movq mm5, qword ptr[edx+24] 
+			movq qword ptr[edi], mm2
+			movq qword ptr[edi+8], mm3
+			movq qword ptr[edi+16], mm4
+			movq qword ptr[edi+24], mm5
+			sub edi, OverlayPitch
+
+// Loop pass 1, unrolled
+			
+			movq mm0, qword ptr[eax]		// mm0 = E1
+			movq mm1, qword ptr[ebx]		// mm1 = O
+			movq mm2, qword ptr[edx]		// mm2 = E2
+
+			movq mm3, mm0					// mm3 = intensity(E1)
+			movq mm4, mm1					// mm4 = intensity(O)
+			movq mm6, mm2					// mm6 = intensity(E2)
+			pand mm3, YMask
+			pand mm4, YMask
+			pand mm6, YMask
+
+			// Average E1 and E2 for interpolated bobbing.  This is the hex encoding
+			// for "pavg mm0,mm2" which VC++'s assembler doesn't seem to recognize.
+			_emit 0x0F						// mm0 = avg(E1, E2)
+			_emit 0xE0
+			_emit 0xC2
+
+			// The meat of the work is done here.  We want to see whether this pixel is
+			// close in luminosity to ANY of: its top neighbor, its bottom neighbor,
+			// or its predecessor.  To do this without branching, we use MMX's
+			// saturation feature, which gives us Z(x) = x if x>=0, or 0 if x<0.
+			//
+			// The formula we're computing here is
+			//		Z(ST - (E1 - O) ^ 2) + Z(ST - (E2 - O) ^ 2) + Z(TT - (Oold - O) ^ 2)
+			// where ST is spatial tolerance and TT is temporal tolerance.  The idea
+			// is that if a pixel is similar to none of its neighbors, the resulting
+			// value will be pretty low, probably zero.  A high value therefore indicates
+			// that the pixel had a similar neighbor.  The pixel in the same position
+			// in the field before last (Oold) is considered a neighbor since we want
+			// to be able to display 1-pixel-high horizontal lines.
+
+			movq mm7, qwSpatialTolerance
+			movq mm5, mm3					// mm5 = E1
+			psubsw mm5, mm4					// mm5 = E1 - O
+			pmullw mm5, mm5					// mm5 = (E1 - O) ^ 2
+			psubusw mm7, mm5				// mm7 = ST - (E1 - O) ^ 2, or 0 if that's negative
+
+			movq mm3, qwSpatialTolerance
+			movq mm5, mm6					// mm5 = E2
+			psubsw mm5, mm4					// mm5 = E2 - O
+			pmullw mm5, mm5					// mm5 = (E2 - O) ^ 2
+			psubusw mm3, mm5				// mm0 = ST - (E2 - O) ^ 2, or 0 if that's negative
+			paddusw mm7, mm3				// mm7 = (ST - (E1 - O) ^ 2) + (ST - (E2 - O) ^ 2)
+
+			movq mm3, qwTemporalTolerance
+			movq mm5, qword ptr[esi]		// mm5 = Oold
+			pand mm5, YMask
+			psubsw mm5, mm4					// mm5 = Oold - O
+			pmullw mm5, mm5					// mm5 = (Oold - O) ^ 2
+			psubusw mm3, mm5				// mm0 = TT - (Oold - O) ^ 2, or 0 if that's negative
+			paddusw mm7, mm3				// mm7 = our magic number
+
+			// Now compare the similarity totals against our threshold.  The pcmpgtw
+			// instruction will populate the target register with a bunch of mask bits,
+			// filling words where the comparison is true with 1s and ones where it's
+			// false with 0s.  A few ANDs and NOTs and an OR later, we have bobbed
+			// values for pixels under the similarity threshold and weaved ones for
+			// pixels over the threshold.
+
+			pcmpgtw mm7, qwThreshold		// mm7 = 0xffff where we're greater than the threshold, 0 elsewhere
+			movq mm6, mm7					// mm6 = 0xffff where we're greater than the threshold, 0 elsewhere
+			pand mm7, mm1					// mm7 = weaved data where we're greater than the threshold, 0 elsewhere
+			pandn mm6, mm0					// mm6 = bobbed data where we're not greater than the threshold, 0 elsewhere
+			por mm7, mm6					// mm7 = bobbed and weaved data
+
+			movq qword ptr[edi], mm7
+
+// Loop pass 2, unrolled
+			movq mm0, qword ptr[eax+8] 
+			movq mm1, qword ptr[ebx+8] 
+			movq mm2, qword ptr[edx+8]
+
+			movq mm3, mm0					// mm3 = intensity(E1)
+			movq mm4, mm1					// mm4 = intensity(O)
+			movq mm6, mm2					// mm6 = intensity(E2)
+			pand mm3, YMask
+			pand mm4, YMask
+			pand mm6, YMask
+
+			_emit 0x0F						// mm0 = avg(E1, E2)
+			_emit 0xE0
+			_emit 0xC2
+
+			movq mm7, qwSpatialTolerance
+			movq mm5, mm3					// mm5 = E1
+			psubsw mm5, mm4					// mm5 = E1 - O
+			pmullw mm5, mm5					// mm5 = (E1 - O) ^ 2
+			psubusw mm7, mm5				// mm7 = ST - (E1 - O) ^ 2, or 0 if that's negative
+
+			movq mm3, qwSpatialTolerance
+			movq mm5, mm6					// mm5 = E2
+			psubsw mm5, mm4					// mm5 = E2 - O
+			pmullw mm5, mm5					// mm5 = (E2 - O) ^ 2
+			psubusw mm3, mm5				// mm0 = ST - (E2 - O) ^ 2, or 0 if that's negative
+			paddusw mm7, mm3				// mm7 = (ST - (E1 - O) ^ 2) + (ST - (E2 - O) ^ 2)
+
+			movq mm3, qwTemporalTolerance
+			movq mm5, qword ptr[esi+8]		// mm5 = Oold
+			pand mm5, YMask
+			psubsw mm5, mm4					// mm5 = Oold - O
+			pmullw mm5, mm5					// mm5 = (Oold - O) ^ 2
+			psubusw mm3, mm5				// mm0 = TT - (Oold - O) ^ 2, or 0 if that's negative
+			paddusw mm7, mm3				// mm7 = our magic number
+
+			pcmpgtw mm7, qwThreshold		// mm7 = 0xffff where we're greater than the threshold, 0 elsewhere
+			movq mm6, mm7					// mm6 = 0xffff where we're greater than the threshold, 0 elsewhere
+			pand mm7, mm1					// mm7 = weaved data where we're greater than the threshold, 0 elsewhere
+			pandn mm6, mm0					// mm6 = bobbed data where we're not greater than the threshold, 0 elsewhere
+			por mm7, mm6					// mm7 = bobbed and weaved data
+
+			movq qword ptr[edi+8], mm7
+	
+// Loop pass 3, unrolled
+			movq mm0, qword ptr[eax+16] 
+			movq mm1, qword ptr[ebx+16] 
+			movq mm2, qword ptr[edx+16]
+
+			movq mm3, mm0					// mm3 = intensity(E1)
+			movq mm4, mm1					// mm4 = intensity(O)
+			movq mm6, mm2					// mm6 = intensity(E2)
+			pand mm3, YMask
+			pand mm4, YMask
+			pand mm6, YMask
+
+			_emit 0x0F						// mm0 = avg(E1, E2)
+			_emit 0xE0
+			_emit 0xC2
+
+			movq mm7, qwSpatialTolerance
+			movq mm5, mm3					// mm5 = E1
+			psubsw mm5, mm4					// mm5 = E1 - O
+			pmullw mm5, mm5					// mm5 = (E1 - O) ^ 2
+			psubusw mm7, mm5				// mm7 = ST - (E1 - O) ^ 2, or 0 if that's negative
+
+			movq mm3, qwSpatialTolerance
+			movq mm5, mm6					// mm5 = E2
+			psubsw mm5, mm4					// mm5 = E2 - O
+			pmullw mm5, mm5					// mm5 = (E2 - O) ^ 2
+			psubusw mm3, mm5				// mm0 = ST - (E2 - O) ^ 2, or 0 if that's negative
+			paddusw mm7, mm3				// mm7 = (ST - (E1 - O) ^ 2) + (ST - (E2 - O) ^ 2)
+
+			movq mm3, qwTemporalTolerance
+			movq mm5, qword ptr[esi+16]		// mm5 = Oold
+			pand mm5, YMask
+			psubsw mm5, mm4					// mm5 = Oold - O
+			pmullw mm5, mm5					// mm5 = (Oold - O) ^ 2
+			psubusw mm3, mm5				// mm0 = TT - (Oold - O) ^ 2, or 0 if that's negative
+			paddusw mm7, mm3				// mm7 = our magic number
+
+			pcmpgtw mm7, qwThreshold		// mm7 = 0xffff where we're greater than the threshold, 0 elsewhere
+			movq mm6, mm7					// mm6 = 0xffff where we're greater than the threshold, 0 elsewhere
+			pand mm7, mm1					// mm7 = weaved data where we're greater than the threshold, 0 elsewhere
+			pandn mm6, mm0					// mm6 = bobbed data where we're not greater than the threshold, 0 elsewhere
+			por mm7, mm6					// mm7 = bobbed and weaved data
+
+			movq qword ptr[edi+16], mm7
+	
+// Loop pass 4, unrolled
+			movq mm0, qword ptr[eax+24] 
+			movq mm1, qword ptr[ebx+24] 
+			movq mm2, qword ptr[edx+24]
+
+			movq mm3, mm0					// mm3 = intensity(E1)
+			movq mm4, mm1					// mm4 = intensity(O)
+			movq mm6, mm2					// mm6 = intensity(E2)
+			pand mm3, YMask
+			pand mm4, YMask
+			pand mm6, YMask
+
+			_emit 0x0F						// mm0 = avg(E1, E2)
+			_emit 0xE0
+			_emit 0xC2
+
+			movq mm7, qwSpatialTolerance
+			movq mm5, mm3					// mm5 = E1
+			psubsw mm5, mm4					// mm5 = E1 - O
+			pmullw mm5, mm5					// mm5 = (E1 - O) ^ 2
+			psubusw mm7, mm5				// mm7 = ST - (E1 - O) ^ 2, or 0 if that's negative
+
+			movq mm3, qwSpatialTolerance
+			movq mm5, mm6					// mm5 = E2
+			psubsw mm5, mm4					// mm5 = E2 - O
+			pmullw mm5, mm5					// mm5 = (E2 - O) ^ 2
+			psubusw mm3, mm5				// mm0 = ST - (E2 - O) ^ 2, or 0 if that's negative
+			paddusw mm7, mm3				// mm7 = (ST - (E1 - O) ^ 2) + (ST - (E2 - O) ^ 2)
+
+			movq mm3, qwTemporalTolerance
+			movq mm5, qword ptr[esi+24]		// mm5 = Oold
+			pand mm5, YMask
+			psubsw mm5, mm4					// mm5 = Oold - O
+			pmullw mm5, mm5					// mm5 = (Oold - O) ^ 2
+			psubusw mm3, mm5				// mm0 = TT - (Oold - O) ^ 2, or 0 if that's negative
+			paddusw mm7, mm3				// mm7 = our magic number
+
+			pcmpgtw mm7, qwThreshold		// mm7 = 0xffff where we're greater than the threshold, 0 elsewhere
+			movq mm6, mm7					// mm6 = 0xffff where we're greater than the threshold, 0 elsewhere
+			pand mm7, mm1					// mm7 = weaved data where we're greater than the threshold, 0 elsewhere
+			pandn mm6, mm0					// mm6 = bobbed data where we're not greater than the threshold, 0 elsewhere
+			por mm7, mm6					// mm7 = bobbed and weaved data
+
+			movq qword ptr[edi+24], mm7
+
+			add eax, 32
+			add ebx, 32
+			add edx, 32
+			add edi, 32
+			add esi, 32
+			dec ecx
+			jne near DoNext32Bytes
+			emms
+
+			mov esi, dword ptr[OldStack]
+		}
+	}
+
+	// Copy last odd line if we're processing an odd field.
+	if (bIsOdd)
 		memcpyMMX(lpCurOverlay + (CurrentY - 1) * OverlayPitch, pOddLines[CurrentY / 2 - 1], CurrentX * 2);
 }
 
@@ -883,3 +1201,5 @@ Next8Bytes:
 	}
 	return CombFactor;
 }
+
+

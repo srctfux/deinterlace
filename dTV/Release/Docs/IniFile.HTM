@@ -159,6 +159,40 @@ dtection, use higher values if you get problems with small text</td>
 </tr>
 
 <tr>
+<td>SimilarityThreshold</td>
+<td>180</td>
+<td>How similar to its neighbors a pixel has to be before we'll weave it
+rather than bob over it in video deinterlace mode.  The total similarity
+value is the sum of a pixel's similarity values with its upper neighbor,
+its lower neighbor, and its predecessor.  If the total similarity is greater
+than this threshold, the pixel is rendered as is; otherwise the adjacent
+pixels are averaged together.
+</td>
+</tr>
+
+<tr>
+<td>SpatialTolerance</td>
+<td>600</td>
+<td>How much luminance difference the video deinterlace code will tolerate
+between a pixel and its upper and lower neighbors on
+adjacent scanlines.  Luminance levels range from 0 to 127; the
+square of the difference between luminances is subtracted from this
+tolerance, and if the result is greater than 0, the difference is added
+to the pixel's total similarity value.  For example, a tolerance of 144
+would mean that a difference greater than 12 with a neighbor
+wouldn't count toward a pixel's similarity value, while a difference of 10
+would add 44 to the value.  See also SimilarityThreshold.</td>
+</tr>
+
+<tr>
+<td>TemporalTolerance</td>
+<td>200</td>
+<td>How much luminance difference the video deinterlace code will tolerate
+between a pixel and its predecessor from two fields ago.  The same computation
+described in the SpatialTolerance entry is applied.</td>
+</tr>
+
+<tr>
 <td colspan=3><h3>[ASPECT]</h3></td>
 </tr>
 
