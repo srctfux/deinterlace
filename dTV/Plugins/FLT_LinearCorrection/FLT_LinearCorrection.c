@@ -58,7 +58,7 @@ void UpdLinearFilterTables(int Width)
 	int i, j;
 	double Start, End;
 	double pixel, pixel_before, pixel_after;
-//	short pixel1Y, pixel2Y, pixel1UV, pixel2UV;
+	short pixel1Y, pixel2Y, pixel1UV, pixel2UV;
 
 	for (i=0 ; i<=Width ; i++)
 	{
@@ -88,10 +88,11 @@ void UpdLinearFilterTables(int Width)
 				pixel_before = floor(pixel);
 				pixel_after = ceil(pixel);
 
-				/*
 				pixel1Y = (short)pixel_before;
 				pixel2Y = (short)pixel_after;
-
+				LinearFilterTab[i][j].pixel1Y = pixel1Y * 2;
+				LinearFilterTab[i][j].pixel2Y = pixel2Y * 2;
+	
 				if (pixel1Y == pixel2Y)
 				{
 					if ((j % 2) == (pixel1Y % 2))
@@ -137,61 +138,8 @@ void UpdLinearFilterTables(int Width)
 						}
 					}
 				}
-
-				LinearFilterTab[i][j].pixel1Y = pixel1Y;
-				LinearFilterTab[i][j].pixel2Y = pixel2Y;
-				LinearFilterTab[i][j].pixel1UV = pixel1UV;
-				LinearFilterTab[i][j].pixel2UV = pixel2UV;
-				*/
-
-				LinearFilterTab[i][j].pixel1Y = (short)pixel_before;
-				LinearFilterTab[i][j].pixel2Y = (short)pixel_after;
-
-				if (LinearFilterTab[i][j].pixel1Y == LinearFilterTab[i][j].pixel2Y)
-				{
-					if ((j % 2) == (LinearFilterTab[i][j].pixel1Y % 2))
-					{
-						LinearFilterTab[i][j].pixel1UV = LinearFilterTab[i][j].pixel1Y;
-					}
-					else if ((j % 2) == 0)
-					{
-						LinearFilterTab[i][j].pixel1UV = LinearFilterTab[i][j].pixel1Y - 1;
-					}
-					else
-					{
-						LinearFilterTab[i][j].pixel1UV = LinearFilterTab[i][j].pixel1Y + 1;
-					}
-					LinearFilterTab[i][j].pixel2UV = LinearFilterTab[i][j].pixel1UV;
-				}
-				else
-				{
-					if ((j % 2) == (LinearFilterTab[i][j].pixel1Y % 2))
-					{
-						if ((j % 2) == 0)
-						{
-							LinearFilterTab[i][j].pixel1UV = LinearFilterTab[i][j].pixel1Y;
-							LinearFilterTab[i][j].pixel2UV = LinearFilterTab[i][j].pixel1Y;
-						}
-						else
-						{
-							LinearFilterTab[i][j].pixel1UV = LinearFilterTab[i][j].pixel1Y;
-							LinearFilterTab[i][j].pixel2UV = LinearFilterTab[i][j].pixel2Y + 1;
-						}
-					}
-					else if ((j % 2) == (LinearFilterTab[i][j].pixel2Y % 2))
-					{
-						if ((j % 2) == 0)
-						{
-							LinearFilterTab[i][j].pixel1UV = LinearFilterTab[i][j].pixel1Y - 1;
-							LinearFilterTab[i][j].pixel2UV = LinearFilterTab[i][j].pixel2Y;
-						}
-						else
-						{
-							LinearFilterTab[i][j].pixel1UV = LinearFilterTab[i][j].pixel2Y;
-							LinearFilterTab[i][j].pixel2UV = LinearFilterTab[i][j].pixel2Y;
-						}
-					}
-				}
+				LinearFilterTab[i][j].pixel1UV = pixel1UV * 2 + 1;
+				LinearFilterTab[i][j].pixel2UV = pixel2UV * 2 + 1;
 
 				if (pixel_before < pixel_after)
 				{
@@ -293,10 +241,8 @@ void ApplyLinearFilter(BYTE* pLine, int NewWidth, MEMCPY_FUNC *pCopy)
 			}
 			else
 			{
-				t[0] = (pLine[tab->pixel1Y*2] * tab->coef1 + pLine[tab->pixel2Y*2] * tab->coef2) / 1024;
-				t[1] = (pLine[tab->pixel1UV*2+1] * tab->coef1 + pLine[tab->pixel2UV*2+1] * tab->coef2) / 1024;
-//				t[0] = (pLine[tab->pixel1Y] * tab->coef1 + pLine[tab->pixel2Y] * tab->coef2) / 1024;
-//				t[1] = (pLine[tab->pixel1UV] * tab->coef1 + pLine[tab->pixel2UV] * tab->coef2) / 1024;
+				t[0] = (pLine[tab->pixel1Y] * tab->coef1 + pLine[tab->pixel2Y] * tab->coef2) / 1024;
+				t[1] = (pLine[tab->pixel1UV] * tab->coef1 + pLine[tab->pixel2UV] * tab->coef2) / 1024;
 			}
 		}
 
