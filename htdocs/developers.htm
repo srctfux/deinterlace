@@ -12,7 +12,7 @@
 p {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
 .bottommenu {  font-family: Arial, Helvetica, sans-serif; font-size: 8pt; font-style: normal; text-decoration: none}
 h3 {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt; font-style: normal; font-weight: bold}
-h1 {  font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 18pt; font-weight: bold}
+h2 {  font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 18pt; font-weight: bold}
 li {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
 h2 {  font-family: Arial, Helvetica, sans-serif; font-size: 14pt; font-weight: bold}
 ol {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
@@ -38,7 +38,7 @@ height="1"></td>
 "DScaler logo"></td>
 <td colspan="2" align="right" valign="bottom"><font face=
 "Verdana, Arial, Helvetica, sans-serif" size="5"><b>
-<!-- #BeginEditable "Page%20Title" -->Developers 
+<!-- #BeginEditable "Page%20Title" -->Developers  
 <!-- #EndEditable --></b></font></td>
 </tr>
 
@@ -53,19 +53,145 @@ height="2"></td>
 
 <tr>
 <td colspan="3"><!-- #BeginEditable "Text" -->
-<p><b>Additional developers are always needed for DScaler!</b></p>
-<p> In only a short time, this project has garnered a <b>large, loyal, active,
-and knowledgable user-base</b> of videophiles. This project is
-making waves in the home theater industry! The project is
-currently in need of developers with a broad range of skills
-(C++, assembly, user interface, video internals, etc.). Your
-skills will be utilized immediately, as we seek to keep this
+<h2>Welcome</h2>
+
+<p><b>Additional developers are always welcome on the DScaler
+project!</b></p>
+
+<p>Over the last year, this project has garnered a <b>large,
+loyal, active, and knowledgable user-base</b> of videophiles.
+This project is making waves in the home theater industry! The
+project is currently in need of developers with a broad range of
+skills (C++, assembly, user interface, video internals, etc.).
+Your skills will be utilized immediately, as we seek to keep this
 extraordinary momentum going.</p>
 
-<p>To get started on DScaler development browse through the source and check out 
-some of the documents linked below and then introduce yourself to the <a target="_blank" 
-href="http://lists.sourceforge.net/lists/listinfo/deinterlace-discuss">
+<p>DScaler is released under the GNU Public License. This means
+that you are free to make changes to the source and make it do
+all the things you want it to.</p>
+
+<h2>Getting Started</h2>
+
+<p>DScaler is a large and fairly complex program, however we are
+starting to break the program apart and make it less monolithic.
+This should make it easier to get up to speed quickly on the
+parts of the program you want to work on.</p>
+
+<p>To get started on DScaler development browse through the
+source for the most recent public release and check out some of
+the documents linked below and then introduce yourself to the <a
+target="_blank" href=
+"http://lists.sourceforge.net/lists/listinfo/deinterlace-discuss">
 developers mailing list</a>.</p>
+
+<p>The list is the best place to answer questions as the program
+is such that no one person understands everything that goes
+on.</p>
+
+<h2>What tools do I need?</h2>
+
+<p>The source compiles under MS Visual C++ 6.0 service pack 3 and
+above with the processor pack installed. To compile the drivers
+you will need the latest DDK from <a target="_blank" href=
+"http://www.microsoft.com/ddk/W2kDDK.asp">here</a>.</p>
+
+<h2>Essential Reading</h2>
+
+<p><a target="_blank" href=
+"http://www.dscaler.org/devdocs/index.html">Auto Generated Code
+Documentation</a></p>
+
+<p>Mark Rejhon's <a href="32Spec.htm">3:2 Pulldown Algorithm
+specification</a>. This forms the basis for the 3:2 pulldown
+detection routine currently in DScaler.</p>
+
+<p>A <a target="_blank" href=
+"http://www.video-demystified.com/mm/tutor/ch08.pdf">chapter from
+Video Demystified</a> dealing with the PAL, NTSC, and SECAM
+standards as well as Teletext and Closed-Captioning.</p>
+
+<p><a target="_blank" href=
+"http://www.dscaler.org/Help/index.php?helppage=Standards.htm">Project
+Coding Standards</a></p>
+
+<h2>Getting Latest Source Code</h2>
+
+<p>The code for this project is held in a CVS server at
+SourceForge. To get the latest version of the code you will need
+to have a copy of CVS on your machine. CVS is installed as part
+of <a target="_blank" href=
+"http://cvsgui.sourceforge.net/">WinCVS
+(http://cvsgui.sourceforge.net/)</a> and this is probably the
+easiest way of setting things up.</p>
+
+<p>Once you have installed WinCVS make sure that the CVS.exe is
+in your path. This can be achieved by adding the directory where
+you installed CVS to your path.</p>
+
+<p>To get the latest source goto the directory below where you
+wish to extract the source and type:</p>
+
+<pre>
+cvs -d:pserver:anoymous@cvs.sf.net:/cvsroot/deinterlace login
+</pre>
+
+<p>Then press return when asked for a password, then type</p>
+
+<pre>
+cvs -z3 -d:pserver:anoymous@cvs.sf.net:/cvsroot/deinterlace co DScaler
+</pre>
+
+<p>To get the DScaler source tree or</p>
+
+<pre>
+cvs -z3 -d:pserver:anoymous@cvs.sf.net:/cvsroot/deinterlace co Deinterlace
+</pre>
+
+<p>To get the DirectShow filter tree</p>
+
+<p>This will get the latest source from the server.</p>
+
+<h2>Updating your local copy</h2>
+
+<p>Before starting any work on the source make sure you have the
+latest copy of the source by going into the tree to either the
+DScaler or Deinterlace directory and typing:</p>
+
+<pre>
+cvs update -d -P
+</pre>
+
+<p>This will update your copy of the code with all the latest
+changes</p>
+
+<h2>Creating a Patch</h2>
+
+<p>OK so you've got the latest source and you want to add a new
+feature or fix a bug, what do you do?</p>
+
+<p>The best way to supply changes to the project is to supply a
+patch, this lists the changes you have made in a compact way and
+allows the team to examine the change before adding it into the
+next version.</p>
+
+<p>To create a patch type:</p>
+
+<pre>
+cvs diff -c &gt; ..\patch.txt
+</pre>
+
+<p>You can post patch files <a target="_blank" href=
+"http://sourceforge.net/tracker/?func=add&group_id=7420&atid=307420">
+Here</a>. Also you should notify the mailing list about your
+patch explaining what you've done. Your patch will be reviewed
+before being committed to CVS.</p>
+
+<p>You will make the project admins very happy if you have read
+and kept to the <a href=
+"http://www.dscaler.org/Help/index.php?helppage=Standards.htm">project
+coding standards</a></p>
+
+<h2>What needs Doing?</h2>
 
 <p>Please refer to the <a target="_blank" href=
 "http://sourceforge.net/tracker/?group_id=7420&atid=107420">bugs</a>
@@ -77,66 +203,52 @@ yourself up to date!). If you think that you can take on a part
 of one of these tasks, everyone on the mailing list would love to
 hear from you.</p>
 
-<p>DScaler is released under the GNU Public License. Browse the
-<a target="_blank" href=
-"http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/deinterlace/">
-CVS repository</a> and take a look at the code, then <a target="_blank" href=
-"http://www.dscaler.org/downloads.htm">download</a> the latest release source zipped. In
-addition to the latest release source, you may be interested in
-reviewing the latest beta source, updated from CVS four times
-daily (<a target="_blank" href="http://www.dscaler.org/downloads/dscalermodule.zip">application</a>, 
-<a target="_blank" href="http://www.dscaler.org/downloads/directshowmodule.zip">test deinterlace DirectShow module</a>).</p>
+<h2>I want to make a big change or join the project properly</h2>
 
-<p>The source compiles under MS Visual C++ 6.0. The application
-has grown out of the GPL code base of MultiDec and MoreTV, two
-cable descrambling programs.  By combining the GPL parts of both
-and extending them both, we were able to create a new legal
-totally open source project.</p>
+<p>We are usually happy to take new developers on board the
+project, join the mailing list and talk about your ideas, we
+would love to hear from you.</p>
 
-<p>The individual source files are in the <a target="_blank" href=
-"http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/deinterlace/">CVS
-Repository</a>.  To get check-out and check-in access, you will
-need to get cvs and to make a few configuration changes see the
-project <a href="CVS_Instructions.htm">CVS Instructions</a> for
-more details. Please e-mail your Sourceforge username to the <a
-href="mailto:dschmelzer@hotmail.com">webmaster</a> to be added to
-the project and for CVS check-out and check-in permission.</p>
+<p>If you are invited to join the project you will need to set
+yourself up as a user on SourceForge <a target="_blank" href=
+"http://sourceforge.net/account/register.php">here</a> and let
+the list know your id. Once you have joined the project you will
+be given commit access to CVS and you will need to set up your
+CVS differently see <a href="CVS_Instructions.htm">here for the
+instructions</a>.</p>
 
 <h2>Sourceforge Project Developer Links</h2>
 
-<p><a target="_blank" href="http://sourceforge.net/project/?group_id=7420">Main
-Project page</a></p>
+<p><a target="_blank" href=
+"http://sourceforge.net/project/?group_id=7420">Main Project
+page</a></p>
 
-<p><a target="_blank" href="http://sourceforge.net/mail/?group_id=7420">Mailing
-List</a></p>
+<p><a target="_blank" href=
+"http://sourceforge.net/mail/?group_id=7420">Mailing List</a></p>
 
 <p><a target="_blank" href=
 "http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/deinterlace/">Browse
 CVS Repository</a></p>
 
-<p><a target="_blank" href="http://www.dscaler.org/downloads/dscalermodule.zip">Application Source
-Zip</a></p>
+<p><a target="_blank" href=
+"http://www.dscaler.org/downloads/dscalermodule.zip">Application
+Source Zip</a></p>
 
-<p><a target="_blank" href="http://www.dscaler.org/downloads/directshowmodule.zip">Test Deinterlace
-DirectShow Module Source Zip</a></p>
+<p><a target="_blank" href=
+"http://www.dscaler.org/downloads/directshowmodule.zip">Test
+Deinterlace DirectShow Module Source Zip</a></p>
 
 <h2>Deinterlace Project Developer Resources</h2>
 
-<p>Mark Rejhon's <a href="32Spec.htm">Spec of His 3:2 Pulldown
-Algorithm</a>.</p>
-
-<p>John Adcock's <a target="_blank" href="http://www.dscaler.org/palmovie/index.htm">PALMovie
-deinterlace plugin</a> for bTV.</p>
-
-<p>A <a href=
-"http://www.video-demystified.com/mm/tutor/ch08.pdf">chapter from
-Video Demystified</a> dealing with the PAL, NTSC, and SECAM
-standards as well as Teletext and Closed-Captioning.</p>
+<p>John Adcock's <a target="_blank" href=
+"http://www.dscaler.org/palmovie/index.htm">PALMovie deinterlace
+plugin</a> for bTV.</p>
 
 <p>An explanation of the <a href="IniFile.HTM">options
 available</a> in the DScaler.ini file.</p>
 
-<p>Conexant's <a href=http://www.dscaler.org/distributions/btregtools.zip">Bt 8x8
+<p>Conexant's <a href=
+"http://www.dscaler.org/distributions/btregtools.zip">Bt 8x8
 register tools</a> for Windows 9x.</p>
 
 <h2>BT848 Links</h2>
@@ -145,20 +257,24 @@ register tools</a> for Windows 9x.</p>
 "http://ebiz4.conexant.com/default.sph/SaServletEngine.class/Web/products/products.jsp?Type=Prod&ProdFamId=10&ProdCatId=0&ProdSubCatId=397&PartId=227">
 BT878a page at Conexant</a></p>
 
-<p><a target="_blank" href="http://me.in-berlin.de/~kraxel/bttv.html">bttv -
-Linux Driver</a> - Without this none of this would have been
+<p><a target="_blank" href=
+"http://me.in-berlin.de/~kraxel/bttv.html">bttv - Linux
+Driver</a> - Without this none of this would have been
 possible</p>
 
-<p><a target="_blank" href="http://vulture.dmem.strath.ac.uk/bt848/">FreeBSD
-bt848</a> Driver Project</p>
+<p><a target="_blank" href=
+"http://vulture.dmem.strath.ac.uk/bt848/">FreeBSD bt848</a>
+Driver Project</p>
 
 <h2>Sound Links</h2>
 
-<p>This <a target="_blank" href="ftp://telepresence.dmem.strath.ac.uk/pub/bt848/spec/">FTP 
-site</a> contains documents on the MSP sound chips and Phillips and Temic 
-tuners that would be useful for anyone looking to improve these areas. 
-I only recently found this site and have had a quick look and found that 
-most of the information you need should be buried in this lot.</p>
+<p>This <a target="_blank" href=
+"ftp://telepresence.dmem.strath.ac.uk/pub/bt848/spec/">FTP
+site</a> contains documents on the MSP sound chips and Phillips
+and Temic tuners that would be useful for anyone looking to
+improve these areas. I only recently found this site and have had
+a quick look and found that most of the information you need
+should be buried in this lot.</p>
 
 <!-- #EndEditable --></td>
 </tr>
