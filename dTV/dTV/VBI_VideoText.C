@@ -125,7 +125,7 @@ unsigned short UTPages[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
 
 BITMAPINFO* VTCharSetLarge = NULL;
 BITMAPINFO* VTCharSetSmall = NULL;
-BITMAPINFO* VTScreen;
+BITMAPINFO* VTScreen = NULL;
 
 VT_STATE VTState = VT_OFF;
 
@@ -175,9 +175,17 @@ void VBI_VT_Init()
 
 void VBI_VT_Exit()
 {
-	free(VTScreen);
+    if(VTScreen != NULL)
+    {
+	    free(VTScreen);
+        VTScreen = NULL;
+    }
 	
-	DeleteObject(VTCharSetLarge);
+    if(VTCharSetLarge != NULL)
+    {
+    	DeleteObject(VTCharSetLarge);
+        VTCharSetLarge = NULL;
+    }
 }
 
 void VBI_decode_vps(unsigned char *data)

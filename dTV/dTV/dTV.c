@@ -87,14 +87,13 @@
 #include "VBI_VideoText.h"
 #include "deinterlace.h"
 #include "DebugLog.h"
-
+#include "HtmlHelp.h"
 
 HWND hWnd = NULL;
 HANDLE hInst = NULL;
 
 // Used to call MainWndOnInitBT
 #define INIT_BT 1800
-
 
 BOOL bDoResize = FALSE;
 
@@ -1387,23 +1386,23 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_HELP_FAQ:
-			ShellExecute(hWnd, "open", ".\\Docs\\FAQ.htm", NULL, NULL, SW_SHOWNORMAL);
+            HtmlHelp(hWnd, "DScaler.chm::/FAQ.htm", HH_DISPLAY_TOPIC, 0);
 			break;
 
 		case IDM_HELP_SUPPORT:
-			ShellExecute(hWnd, "open", ".\\Docs\\user_support.htm", NULL, NULL, SW_SHOWNORMAL);
+            HtmlHelp(hWnd, "DScaler.chm::/user_support.htm", HH_DISPLAY_TOPIC, 0);
 			break;
 
 		case IDM_HELP_KEYBOARD:
-			ShellExecute(hWnd, "open", ".\\Docs\\keyboard.htm", NULL, NULL, SW_SHOWNORMAL);
+            HtmlHelp(hWnd, "DScaler.chm::/keyboard.htm", HH_DISPLAY_TOPIC, 0);
 			break;
 
 		case IDM_HELP_GPL:
-			ShellExecute(hWnd, "open", ".\\Docs\\COPYING.html", NULL, NULL, SW_SHOWNORMAL);
+            HtmlHelp(hWnd, "DScaler.chm::/COPYING.html", HH_DISPLAY_TOPIC, 0);
 			break;
 
 		case IDM_HELP_README:
-			ShellExecute(hWnd, "open", ".\\Docs\\dTV_Readme.htm", NULL, NULL, SW_SHOWNORMAL);
+            HtmlHelp(hWnd, "DScaler.chm::/DScaler_Readme.htm", HH_DISPLAY_TOPIC, 0);
 			break;
 
         default:
