@@ -14,10 +14,25 @@ Use this info to check what are the changes that you still haven't reported on t
 
 Please add your name to your updates.
 
-Any questions regarding the FAQ should go to me, Yvonus, at yvonus@removethis_bigfoot.com
+Any questions regarding the FAQ should go to me, Yvonus. Use AVSForum to contact me.
 
 
 --8<----------------
+
+15/9 Yvonus
+. removed the individual algorithms description, linking to the Help file now (no need to translate any more)
+. putting back the link to DScaler's export group for Girder
+. adding SnapStream PVS to the alternative for recording video.
+. adding the calibration feature with link to the online Help files
+
+
+Just for sync, latest updates not originally written in here ;
+. Update of the "download" .. link to the Sourceforge repository with alpha/beta builds
+. Added the "Can I redistribute/Bundling Dscaler with my machine"
+. added the "Can I record video to my hard disc".. part
+
+
+
 7/9 John
 - Added EFF donation link
 - Updated History

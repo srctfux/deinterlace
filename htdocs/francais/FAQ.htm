@@ -46,7 +46,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <h1>Introduction</h1>
       <p> 
       <h2>Qu'est ce que DScaler ?</h2>
-      <p> dTV est une application qui capture une source analogique entrelacée, 
+      <p> DScaler est une application qui capture une source analogique entrelacée, 
         la désentrelace afin de générer un flux d'images progressives, &agrave; 
         la r&eacute;solution d&eacute;sir&eacute;e, en vue d'une utilisation sur 
         un moniteur informatique ou sur un projecteur. 
@@ -103,6 +103,10 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         bas&eacute; sur l'application d'ou il a pris son inspiration ; dTV (voir 
         &quot;<a href="http://www.avsforum.com/ubb/Archives/Archive-000004/HTML/20010714-12-003790.html">First 
         Version of NTSC/PAL TV deinterlacing program</a>&quot;).</p>
+      <p>Les premi&egrave;res versions ne poss&eacute;daient qu'un m&eacute;canisme 
+        de s&eacute;lection manuelle de l'algorithme de d&eacute;sentrelacement. 
+        La perc&eacute;e suivante fut l'impl&eacute;mentation par John de l'algorithme 
+        de s&eacute;quencement 3:2 de Mark Rejhon.</p>
       <p>Ceci apporta la preuve que de telles techniques complexes de d&eacute;sentrelacement 
         &eacute;tait faisables en temps r&eacute;el et sans l'ajout de mat&eacute;riel 
         d&eacute;di&eacute;. Depuis lors, de plus en plus d'utilisateurs (et de 
@@ -116,10 +120,32 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         principaux d&eacute;veloppeurs ainsi que la liste des <a href="../Thanks.htm">remerciements</a> 
         pour quelques noms de personnes qui contribuent au succ&egrave;s de DScaler.</p>
       <h2>Combien co&ucirc;te DScaler ?</h2>
-      <p>5000 FF (HT) :-) Non bien sur, DScaler est totalement gratuit, issue 
-        de l'<i>open source</i>, est r&eacute;gie par la licence GPL.</p>
+      <p>DScaler est un logiciel gratuit, d&eacute;velopp&eacute; dans un cadre 
+        &quot;open-source&quot;, et prot&eacute;g&eacute; par la <a href="http://www.april.org/gnu/gpl_french.html">license 
+        GNU GPL</a>.</p>
+      <h2>Que puis-je faire si je d&eacute;sire contribuer financi&egrave;rement 
+        &agrave; DScaler ?</h2>
+      <p>Sans obligation aucune, nous vous sugg&eacute;rons de supporter l'organisme 
+        &quot;<a href="http://www.eff.org/">Electronic Frontier Foundation</a>&quot; 
+        en leur apportant votre contribution via ce <a href="http://www.eff.org/support/">formulaire</a>.</p>
       <h2>Ou puis-je t&eacute;l&eacute;charger DScaler ?</h2>
       <p>Sur le site de DScaler, dans la page de <a href="http://www.dscaler.org/downloads.htm">t&eacute;l&eacute;chargement</a>.</p>
+      <p>De temps en temps, les d&eacute;veloppeurs construisent des versions 
+        interm&eacute;diaires de test. Celles-ci sont souvent instables mais contiennent 
+        les derniers d&eacute;veloppements. Ces versions ne sont pas recommend&eacute;es 
+        et ne seront support&eacute;es que via la <a href="http://sourceforge.net/mail/?group_id=7420">mailing 
+        list de d&eacute;veloppement</a>. Ces versions se trouvent <a href="http://sourceforge.net/project/showfiles.php?group_id=7420">ici</a>.</p>
+      <h2>Puis je livrer DScaler sur des machines que je fabrique ?<br>
+        Puis je redistribuer DScaler ?</h2>
+      <p>DScaler est prot&eacute;g&eacute; par la license <a href="http://www.april.org/gnu/gpl_french.html">GNU 
+        GPL</a>. A ce titre, vous &ecirc;tes libres de redistribuer DScaler dans 
+        la mesure ou vous acceptez de redistribuer &eacute;galement le code source. 
+        <b>Un simple lien vers notre site n'est pas suffisant ! </b>Egalement, 
+        il serait courtois d'&eacute;tablir un <a href="mailto:deinterlace-discuss@lists.sourceforge.net">contact</a> 
+        avec les gens qui redistribuent notre produit. Nous pouvons ainsi ajouter 
+        une r&eacute;f&eacute;rence &agrave; votre site sur le n&ocirc;tre et 
+        savoir un peu mieux qui utilise notre produit.</p>
+      <p>&nbsp;</p>
       <p> 
       <p> 
       <h1>Points généraux</h1>
@@ -148,6 +174,9 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         Linux non, mais si vous voulez travailler au portage, <a href="#HELP">contactez 
         nous</a><br>
         OS/2 definitivement non ;-) 
+      <h2>En quoi consistent tous ces algorithmes de d&eacute;sentrelacement ?</h2>
+      <p>Vous trouverez une description d&eacute;taill&eacute;e de ceux ci dans 
+        <a href="Help/Deinterlace.HTM">l'aide en ligne</a>.
       <p> 
       <h2>Puis je contrôler à distance DScaler ? <b>OUI</b></h2>
       <p> Absolument. DScaler a été développé principalement par des personnes 
@@ -158,6 +187,8 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         pour la plupart des opérations courantes afin de faciliter sa manipulation.<br>
         Nous suggérons l'usage de <a href="http://www.girder.nl">Girder</a> de 
         Ron Bessems comme solution de choix pour contrôler à distance son ordinateur. 
+      <p>Un fichier de configuration pour contr&ocirc;ler DScaler avec Girder 
+        est disponible <a href="http://www.girder.nl/download.php?Link=172">ici</a>.
       <p> 
       <h1>Questions de matériel</h1>
       <p> 
@@ -298,7 +329,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         utilis&eacute;es pour localiser plus facilement certains bugs. Si vous 
         n'en trouvez pas, ne vous inqui&eacute;tez pas ; informez le d&eacute;veloppeur 
         qu'il n'y en a pas. Enfin, si vous avez ce fichier mais n'observez pas 
-        de probl&egrave;mes, vous pouvez l'ignorer sans soucis.
+        de probl&egrave;mes, vous pouvez l'ignorer sans soucis. 
       <p><br>
       <p><a name="HELP"></a> 
       <h1>Comment puis je contribuer ?</h1>
