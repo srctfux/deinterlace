@@ -694,6 +694,10 @@ void Setting_OSDShow(SETTING* pSetting, HWND hWnd)
 		{
 			sprintf(szBuffer, "%s %d", pSetting->szDisplayName, *(pSetting->pValue));
 		}
+		else if(pSetting->OSDDivider == 8)
+		{
+			sprintf(szBuffer, "%s %.3f", pSetting->szDisplayName, (float)*(pSetting->pValue) / (float)pSetting->OSDDivider);
+		}
 		else
 		{
 			sprintf(szBuffer, "%s %.*f", pSetting->szDisplayName, (int)log10(pSetting->OSDDivider), (float)*(pSetting->pValue) / (float)pSetting->OSDDivider);
