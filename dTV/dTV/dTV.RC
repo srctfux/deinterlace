@@ -930,7 +930,18 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Video&Text",                  IDM_VBI_VT, GRAYED
         MENUITEM "V&PS-Data",                   IDM_VBI_VPS, GRAYED
-        MENUITEM "&Closed Captions",            IDM_CLOSEDCAPTION, GRAYED
+        POPUP "&Closed Captions"
+        BEGIN
+            MENUITEM "CC &Off",                     IDM_CCOFF
+            MENUITEM "CC &1",                       IDM_CC1
+            MENUITEM "CC &2",                       IDM_CC2
+            MENUITEM "CC &3",                       IDM_CC3
+            MENUITEM "CC &4",                       IDM_CC4
+            MENUITEM "Text 1",                      IDM_TEXT1
+            MENUITEM "Text 2",                      IDM_TEXT2
+            MENUITEM "Text 3",                      IDM_TEXT3
+            MENUITEM "Text 4",                      IDM_TEXT4
+        END
         MENUITEM SEPARATOR
         MENUITEM "&Small VideoText Window",     IDM_CALL_VIDEOTEXTSMALL
         , GRAYED

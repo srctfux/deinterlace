@@ -179,6 +179,15 @@
 #define IDM_VDELAY_PLUS                 792
 #define IDM_VDELAY_CURRENT              793
 #define IDM_GAMMA_FILTER                794
+#define IDM_CCOFF                       795
+#define IDM_CC1                         796
+#define IDM_CC2                         797
+#define IDM_CC3                         798
+#define IDM_CC4                         799
+#define IDM_TEXT1                       800
+#define IDM_TEXT2                       801
+#define IDM_TEXT3                       802
+#define IDM_TEXT4                       803
 #define IDM_END                         1032
 #define IDM_SOURCE_TUNER                1089
 #define IDM_SOURCE_COMPOSITE            1090
@@ -771,7 +780,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        158
-#define _APS_NEXT_COMMAND_VALUE         795
+#define _APS_NEXT_COMMAND_VALUE         804
 #define _APS_NEXT_CONTROL_VALUE         1879
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

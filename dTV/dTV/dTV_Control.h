@@ -571,4 +571,21 @@ typedef enum
 #define WM_FLT_GAMMA_SETVALUE		(WM_USER + 120)
 #define WM_FLT_GAMMA_CHANGEVALUE	(WM_USER + 220)
 
+/////////////////////////////////////////////////////////////////////////////
+// Control settings contained in VBI.c
+/////////////////////////////////////////////////////////////////////////////
+
+typedef enum
+{
+	CAPTURE_VBI = 0,
+	CLOSEDCAPTIONMODE,
+	DOTELETEXT,
+	DOVPS,
+	VBI_SETTING_LASTONE,
+} VBI_SETTING;
+
+#define WM_VBI_GETVALUE		(WM_USER + 21)
+#define WM_VBI_SETVALUE		(WM_USER + 121)
+#define WM_VBI_CHANGEVALUE	(WM_USER + 221)
+
 #endif

@@ -38,6 +38,15 @@
 #ifndef __VBI_H___
 #define __VBI_H___
 
+#include "settings.h"
+
+// Get Hold of the FD_50Hz.c file settings
+SETTING* VBI_GetSetting(VBI_SETTING Setting);
+void VBI_ReadSettingsFromIni();
+void VBI_WriteSettingsToIni();
+void VBI_SetMenu(HMENU hMenu);
+
+
 #define MAXVTDIALOG 8
 
 #define VBI_VT  1
@@ -121,7 +130,6 @@ void VBI_Exit();
 void VBI_DecodeLine(unsigned char *VBI_Buffer, int line, BOOL IsOdd);
 void VBI_AGC(BYTE * Buffer, int start, int stop, int step);
 
-extern int VBI_Flags;
 extern int VBI_FPS;
 extern BYTE VBI_thresh;
 extern BYTE VBI_off;

@@ -267,7 +267,7 @@ void VBI_decode_vt(unsigned char *dat)
 	switch (pack)
 	{
 	case 0:
-		if (VBI_Flags & VBI_VT)
+		if (1)
 		{
 
 			//hdump(udat,4); cout << " HD\n";
@@ -438,7 +438,7 @@ void VBI_decode_vt(unsigned char *dat)
 	case 24:
 
 /* ALT
-	  if (VBI_Flags&VBI_VT ) {
+	  if (1) {
 
 	  if (( VBI_CURRENT_PAGE >= 0 ) && ( VBI_CURRENT_PAGE < 800 ) &&
 		( VBI_CURRENT_SUB >= 0 ) && ( VBI_CURRENT_SUB < 64 ) &&
@@ -454,7 +454,7 @@ void VBI_decode_vt(unsigned char *dat)
 }
 */
 // NEU
-		if (VBI_Flags & VBI_VT)
+		if (1)
 		{
 
 			if ((VBI_CURRENT_PAGE >= 0) && (VBI_CURRENT_PAGE < 800) && (VBI_CURRENT_SUB >= 0) && (VBI_CURRENT_SUB < 64) && (VBI_CURRENT_MAG == mag))
@@ -949,28 +949,6 @@ void VT_ChannelChange()
 		UTPages[i] = 0;
 	UTCount = 0;
 
-	if (VBI_Flags & VBI_VT)
-	{
-		VBI_Flags -= VBI_VT;
-		Sleep(2);
-		Sleep(0);
-		Sleep(2);
-		Sleep(0);
-		Sleep(2);
-		Sleep(2);
-		Sleep(0);
-		Sleep(2);
-		Sleep(0);
-		Sleep(2);
-		Sleep(2);
-		Sleep(0);
-		Sleep(2);
-		Sleep(0);
-		Sleep(2);
-	}
-	else
-		return;
-
 	for (i = 0; i < 800; i++)
 	{
 		VTFrame[i].SubCount = 0;
@@ -979,7 +957,6 @@ void VT_ChannelChange()
 		VTFrame[i].SubPage = NULL;
 	}
 	VT_Cache = 0;
-	VBI_Flags += VBI_VT;
 }
 
 BOOL APIENTRY VideoTextProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)

@@ -53,11 +53,24 @@ typedef struct
 
 typedef enum
 {
-	CCMODE_TEXT,
-	CCMODE_ROLL_UP,
-	CCMODE_POP_ON,
-	CCMODE_PAINT_ON,
+	CCMODE_OFF,
+	CCMODE_CC1,
+	CCMODE_CC2,
+	CCMODE_CC3,
+	CCMODE_CC4,
+	CCMODE_TEXT1,
+	CCMODE_TEXT2,
+	CCMODE_TEXT3,
+	CCMODE_TEXT4,
 } CCMODE;
+
+typedef enum
+{
+	TEXT,
+	ROLL_UP,
+	POP_ON,
+	PAINT_ON,
+} CAPTIONMODE;
 
 #define CC_CHARS_PER_LINE 48
 
@@ -66,7 +79,7 @@ typedef struct
 	CC_Char ScreenData[15][CC_CHARS_PER_LINE];
 } CC_Screen;
 
-int CC_DecodeLine(BYTE* vbiline);
+int CC_DecodeLine(BYTE* vbiline, CCMODE CCMode, BOOL IsOdd);
 void CC_PaintScreen(HWND hWnd, CC_Screen* Screen, HDC hDC, RECT* PaintRect);
 
 

@@ -939,36 +939,26 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_VBI_VT:
-			if (VBI_Flags & VBI_VT)
-			{
-				VBI_Flags -= VBI_VT;
-			}
-			else
-			{
-				VBI_Flags += VBI_VT;
-			}
+			Setting_SetValue(VBI_GetSetting(DOTELETEXT), 
+				!Setting_GetValue(VBI_GetSetting(DOTELETEXT)));
 			break;
 
-		case IDM_CLOSEDCAPTION:
-			if (VBI_Flags & VBI_CC)
-			{
-				VBI_Flags -= VBI_CC;
-			}
-			else
-			{
-				VBI_Flags += VBI_CC;
-			}
+		case IDM_CCOFF:
+		case IDM_CC1:
+		case IDM_CC2:
+		case IDM_CC3:
+		case IDM_CC4:
+		case IDM_TEXT1:
+		case IDM_TEXT2:
+		case IDM_TEXT3:
+		case IDM_TEXT4:
+			Setting_SetValue(VBI_GetSetting(CLOSEDCAPTIONMODE), 
+				LOWORD(wParam) - IDM_CCOFF);
 			break;
 
 		case IDM_VBI_VPS:
-			if (VBI_Flags & VBI_VPS)
-			{
-				VBI_Flags -= VBI_VPS;
-			}
-			else
-			{
-				VBI_Flags += VBI_VPS;
-			}
+			Setting_SetValue(VBI_GetSetting(DOVPS), 
+				!Setting_GetValue(VBI_GetSetting(DOVPS)));
 			break;
 
 		case IDM_CALL_VIDEOTEXTSMALL:
@@ -1888,38 +1878,6 @@ void SetMenuAnalog()
 	CheckMenuItem(hMenu, ThreadClassId + 1150, MF_CHECKED);
 	CheckMenuItem(hMenu, PriorClassId + 1160, MF_CHECKED);
 
-	EnableMenuItem(hMenu, IDM_PDC_OUT, MF_GRAYED);
-	EnableMenuItem(hMenu, IDM_VT_OUT, MF_GRAYED);
-	EnableMenuItem(hMenu, IDM_VPS_OUT, MF_GRAYED);
-
-	CheckMenuItem(hMenu, IDM_VBI, Capture_VBI?MF_CHECKED:MF_UNCHECKED);
-	if (Capture_VBI == TRUE)
-	{
-		// set vt dialog menu items up
-		EnableMenuItem(hMenu, IDM_CALL_VIDEOTEXTSMALL, (VBI_Flags & VBI_VT)?MF_ENABLED:MF_GRAYED);
-		EnableMenuItem(hMenu, IDM_CALL_VIDEOTEXT, (VBI_Flags & VBI_VT)?MF_ENABLED:MF_GRAYED);
-		EnableMenuItem(hMenu, IDM_VT_RESET, (VBI_Flags & VBI_VT)?MF_ENABLED:MF_GRAYED);
-		EnableMenuItem(hMenu, IDM_VT_OUT, (VBI_Flags & VBI_VT)?MF_ENABLED:MF_GRAYED);
-		EnableMenuItem(hMenu, IDM_VPS_OUT, (VBI_Flags & VBI_VPS)?MF_ENABLED:MF_GRAYED);
-		EnableMenuItem(hMenu, IDM_VBI_VT, MF_ENABLED);
-		EnableMenuItem(hMenu, IDM_VBI_VPS, MF_ENABLED);
-		EnableMenuItem(hMenu, IDM_CLOSEDCAPTION, MF_ENABLED);
-		CheckMenuItem(hMenu, IDM_VBI_VT, (VBI_Flags & VBI_VT)?MF_CHECKED:MF_UNCHECKED);
-		CheckMenuItem(hMenu, IDM_VBI_VPS, (VBI_Flags & VBI_VPS)?MF_CHECKED:MF_UNCHECKED);
-		CheckMenuItem(hMenu, IDM_CLOSEDCAPTION, (VBI_Flags & VBI_CC)?MF_CHECKED:MF_UNCHECKED);
-	}
-	else
-	{
-		EnableMenuItem(hMenu, IDM_VBI_VT, MF_GRAYED);
-		EnableMenuItem(hMenu, IDM_VBI_VPS, MF_GRAYED);
-		EnableMenuItem(hMenu, IDM_CALL_VIDEOTEXTSMALL, MF_GRAYED);
-		EnableMenuItem(hMenu, IDM_CALL_VIDEOTEXT, MF_GRAYED);
-		EnableMenuItem(hMenu, IDM_VT_RESET, MF_GRAYED);
-		EnableMenuItem(hMenu, IDM_VT_OUT, MF_GRAYED);
-		EnableMenuItem(hMenu, IDM_VPS_OUT, MF_GRAYED);
-		EnableMenuItem(hMenu, IDM_CLOSEDCAPTION, MF_GRAYED);
-	}
-
 	CheckMenuItem(hMenu, IDM_TREADPRIOR_0, (ThreadClassId == 0)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_TREADPRIOR_1, (ThreadClassId == 1)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_TREADPRIOR_2, (ThreadClassId == 2)?MF_CHECKED:MF_UNCHECKED);
@@ -1976,6 +1934,7 @@ void SetMenuAnalog()
 	Filter_SetMenu(hMenu);
 	BT848_SetMenu(hMenu);
 	TVCard_SetMenu(hMenu);
+	VBI_SetMenu(hMenu);
 }
 
 //---------------------------------------------------------------------------

@@ -373,7 +373,7 @@ void webtv_check(char * buf,int len)
 }
 
 
-int CCdecode(int data)
+int CCdecode(int data, BOOL CaptionMode, int Channel)
 {
 	int b1, b2, len, x;
 	static CC_Screen Screens[2];
@@ -381,7 +381,7 @@ int CCdecode(int data)
 	static int CursorPos = 0;
 	static int CursorRow = 14;
 	static char ForeColor = 0;
-	static CCMODE Mode = 0;
+	static CAPTIONMODE Mode = 0;
 	static int ModeRows = 0;
 	static int LastIndent = -1;
 	static CC_Char CurrentState =
@@ -460,105 +460,117 @@ int CCdecode(int data)
 		}
 		else if ((b1&0x10) && (b2>0x1F) && (data != lastcode)) //codes are always transmitted twice (apparently not, ignore the second occurance)
 		{
-			// don't do data channel 2 yet!
-			if((b1>>3)&1 == 1) return -1;
-
+			// if we have been asked for the other channel
+			// need to ignore any text that follows
+			if(((b1>>3)&1) != Channel)
+			{
+				bCaptureText = FALSE;
+				return 0;
+			}
 			len = strlen(ccbuf[ccmode]);
 
 			if (b2 & 0x40)	//preamble address code (row & indent)
 			{
-				// reset state
-				memcpy(&CurrentState, &ResetState, sizeof(CC_Char));
-
-				// row inofrmation ignored in text mode
-				if(Mode != CCMODE_TEXT && Mode != CCMODE_ROLL_UP)
+				if(bCaptureText == TRUE)
 				{
-					CursorRow = rowdata[((b1<<1)&14)|((b2>>5)&1)];
-				}
-				
-				CursorPos = 0;
+					// reset state
+					memcpy(&CurrentState, &ResetState, sizeof(CC_Char));
 
-				// get underline flag
-				CurrentState.bUnderline = b2&0x1;
-
-				// get indent info
-				if (b2&0x10)
-				{
-					//row contains indent flag
-					CurrentState.ForeColor = CC_WHITE;
-					CursorPos = b2&0x0E << 1; 
-					// there seems to be a problem with the pop on captions
-					// when you get the second or thrid line of data
-
-					for(x=0; x<CursorPos; x++)
+					// row inofrmation ignored in text mode
+					if(Mode != ROLL_UP)
 					{
-						Screens[ScreenToWrite].ScreenData[CursorRow][x].bIsActive = FALSE;
+						CursorRow = rowdata[((b1<<1)&14)|((b2>>5)&1)];
 					}
-					LastIndent = CursorPos;
-				}
-				else
-				{
-					// get color and indent info
-					if(b2&0x0E >> 1 == 0x8)
+					
+					CursorPos = 0;
+
+					// get underline flag
+					CurrentState.bUnderline = b2&0x1;
+
+					// get indent info
+					if (b2&0x10)
 					{
-						CurrentState.bItalics = TRUE;
+						//row contains indent flag
+						CurrentState.ForeColor = CC_WHITE;
+						CursorPos = b2&0x0E << 1; 
+						// there seems to be a problem with the pop on captions
+						// when you get the second or thrid line of data
+
+						for(x=0; x<CursorPos; x++)
+						{
+							Screens[ScreenToWrite].ScreenData[CursorRow][x].bIsActive = FALSE;
+						}
+						LastIndent = CursorPos;
 					}
 					else
 					{
-						CurrentState.ForeColor = b2&0x0E >> 1;
+						// get color and indent info
+						if(b2&0x0E >> 1 == 0x8)
+						{
+							CurrentState.bItalics = TRUE;
+						}
+						else
+						{
+							CurrentState.ForeColor = b2&0x0E >> 1;
+						}
 					}
-				}
-				bCaptureText = TRUE;
+				}				
 			}
 			else
 			{
 				switch (b1 & 0x07)
 				{
 					case 0x00:	//attribute
-						CurrentState.BackColor = b2&0x0E >> 1;
-						memcpy(&Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos], &CurrentState, sizeof(CC_Char));
-						Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos].Text = ' ';
-						if(CursorPos < CC_CHARS_PER_LINE - 1) CursorPos++;
-						bCaptureText = TRUE;
+						if(bCaptureText == TRUE)
+						{
+							CurrentState.BackColor = b2&0x0E >> 1;
+							memcpy(&Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos], &CurrentState, sizeof(CC_Char));
+							Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos].Text = ' ';
+							if(CursorPos < CC_CHARS_PER_LINE - 1) CursorPos++;
+						}
 						break;
 					case 0x01:	//midrow or char
-						switch (b2&0x70)
+						if(bCaptureText == TRUE)
 						{
-							case 0x20: //midrow attribute change
-								switch (b2&0x0e)
-								{
-									case 0x0e: //italics on
-										CurrentState.bItalics = TRUE;
-										break;
-									default:
-										CurrentState.ForeColor = b2&0x0E >> 1;
-										CurrentState.bItalics = FALSE;
-										break;
-								}
-								if (b2&0x01) //underline
-									CurrentState.bUnderline = TRUE;
-								else
-									CurrentState.bUnderline = FALSE;
-								memcpy(&Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos], &CurrentState, sizeof(CC_Char));
-								Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos].Text = ' ';
-								if(CursorPos < CC_CHARS_PER_LINE - 1) CursorPos++;
-								break;
-							case 0x30: //special character..
-								memcpy(&Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos], &CurrentState, sizeof(CC_Char));
-								Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos].Text = *(specialchar[b2&0x0f]);
-								if(CursorPos < CC_CHARS_PER_LINE - 1) CursorPos++;
-								break;
+							switch (b2&0x70)
+							{
+								case 0x20: //midrow attribute change
+									switch (b2&0x0e)
+									{
+										case 0x0e: //italics on
+											CurrentState.bItalics = TRUE;
+											break;
+										default:
+											CurrentState.ForeColor = b2&0x0E >> 1;
+											CurrentState.bItalics = FALSE;
+											break;
+									}
+									if (b2&0x01) //underline
+										CurrentState.bUnderline = TRUE;
+									else
+										CurrentState.bUnderline = FALSE;
+									memcpy(&Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos], &CurrentState, sizeof(CC_Char));
+									Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos].Text = ' ';
+									if(CursorPos < CC_CHARS_PER_LINE - 1) CursorPos++;
+									break;
+								case 0x30: //special character..
+									memcpy(&Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos], &CurrentState, sizeof(CC_Char));
+									Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos].Text = *(specialchar[b2&0x0f]);
+									if(CursorPos < CC_CHARS_PER_LINE - 1) CursorPos++;
+									break;
+							}
 						}
-						bCaptureText = TRUE;
 						break;
 					case 0x04:	//misc
 					case 0x05:	//misc + F
 						switch (b2)
 						{
-							// start pop on captioning
-							case 0x20:
+						// start pop on captioning
+						case 0x20:
+							if(CaptionMode)
+							{
 								ScreenToWrite = 1;
-								Mode = CCMODE_POP_ON;
+								Mode = POP_ON;
 								memset(&Screens[1],0,sizeof(CC_Screen));
 								memcpy(&CurrentState, &ResetState, sizeof(CC_Char));
 								CursorPos = 0;
@@ -566,30 +578,39 @@ int CCdecode(int data)
 								bPaintNow = FALSE;
 								LastIndent = -1;
 								bCaptureText = TRUE;
-								break;
+							}
+							break;
 
-							case 0x21: //backspace
+						case 0x21: //backspace
+							if(bCaptureText == TRUE)
+							{
 								if(CursorPos > 0)
 								{
 									CursorPos--;
 								}
 								Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos].bIsActive = FALSE;
 								bPaintNow = TRUE;
-								break;
+							}
+							break;
 
-							case 0x24: //delete to end of row
+						case 0x24: //delete to end of row
+							if(bCaptureText == TRUE)
+							{
 								for(x = CursorPos; x < CC_CHARS_PER_LINE; x++)
 								{
 									Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos].bIsActive = FALSE;
 								}
 								bPaintNow = TRUE;
-								break;
+							}
+							break;
 
-							// reset screen becase we've gone into roll up mode
-							case 0x25: //2 row caption
-							case 0x26: //3 row caption
-							case 0x27: //4 row caption
-								Mode = CCMODE_ROLL_UP;
+						// reset screen becase we've gone into roll up mode
+						case 0x25: //2 row caption
+						case 0x26: //3 row caption
+						case 0x27: //4 row caption
+							if(CaptionMode)
+							{
+								Mode = ROLL_UP;
 								ModeRows = b2 - 0x23;
 								memset(&Screens[0],0,sizeof(CC_Screen));
 								ScreenToWrite = 0;
@@ -598,20 +619,25 @@ int CCdecode(int data)
 								CursorRow = 14;
 								bPaintNow = TRUE;
 								bCaptureText = TRUE;
-								break;
+							}
+							break;
 
-							case 0x28: //flash on
+						case 0x28: //flash on
+							if(bCaptureText == TRUE)
+							{
 								CurrentState.bFlash = TRUE;
 								memcpy(&Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos], &CurrentState, sizeof(CC_Char));
 								Screens[ScreenToWrite].ScreenData[CursorRow][CursorPos].Text = '\0';
 								if(CursorPos < CC_CHARS_PER_LINE - 1) CursorPos++;
-								bCaptureText = TRUE;
-								break;
+							}
+							break;
 
-							// reset screen becase we've gone into paint on mode
-							case 0x29: //resume direct caption
+						// reset screen becase we've gone into paint on mode
+						case 0x29: //resume direct caption
+							if(CaptionMode)
+							{
 								ScreenToWrite = 0;
-								Mode = CCMODE_PAINT_ON;
+								Mode = PAINT_ON;
 								memset(&Screens[0],0,sizeof(CC_Screen));
 								ScreenToWrite = 0;
 								memcpy(&CurrentState, &ResetState, sizeof(CC_Char));
@@ -619,21 +645,29 @@ int CCdecode(int data)
 								CursorRow = 14;
 								bPaintNow = TRUE;
 								bCaptureText = TRUE;
-								break;
+							}
+							break;
 
-							case 0x2C: //erase displayed memory
+						case 0x2C: //erase displayed memory
+							if(CaptionMode)
+							{
 								memset(&Screens[0],0,sizeof(CC_Screen));
 								bPaintNow = TRUE;
-								break;
+							}
+							break;
 
-							case 0x2E: //erase non-displayed memory
+						case 0x2E: //erase non-displayed memory
+							if(CaptionMode)
+							{
 								memset(&Screens[1],0,sizeof(CC_Screen));
 								LastIndent = -1;
-								break;
+							}
+							break;
 
-							case 0x2A: //text restart
-							case 0x2B: //resume text display
-								Mode = CCMODE_TEXT;
+						case 0x2A: //text restart
+							if(!CaptionMode)
+							{
+								Mode = TEXT;
 								ModeRows = 9;
 								memset(&Screens[0],0,sizeof(CC_Screen));
 								ScreenToWrite = 0;
@@ -642,10 +676,20 @@ int CCdecode(int data)
 								CursorRow = 6;
 								bPaintNow = TRUE;
 								bCaptureText = TRUE;
-								break;
-								
-							case 0x2D: //carriage return
-								if(Mode == CCMODE_TEXT || Mode == CCMODE_ROLL_UP)
+							}
+							break;
+
+						case 0x2B: //resume text display
+							if(!CaptionMode)
+							{
+								bCaptureText = TRUE;
+							}
+							break;
+							
+						case 0x2D: //carriage return
+							if(bCaptureText == TRUE)
+							{
+								if(Mode == TEXT || Mode == ROLL_UP)
 								{
 									if(CursorRow < 14)
 									{
@@ -661,24 +705,27 @@ int CCdecode(int data)
 									}
 									memcpy(&CurrentState, &ResetState, sizeof(CC_Char));
 									CursorPos = 0;
-									bCaptureText = FALSE;
 								}
-								break;
-							
-							case 0x2F: //end caption + swap memory
+							}
+							break;
+						
+						case 0x2F: //end caption + swap memory
+							if(CaptionMode)
+							{
 								memcpy(Screens, Screens + 1, sizeof(CC_Screen));
 								memcpy(&CurrentState, &ResetState, sizeof(CC_Char));
-								Mode = CCMODE_TEXT;
 								ScreenToWrite = 0;
 								CursorPos = 0;
 								CursorRow = 14;
 								bPaintNow = TRUE;
 								LastIndent = -1;
-								bCaptureText = FALSE;
-								break;
-						}
-						break;
-					case 0x07:	//misc (TAB)
+							}
+							break;
+					}
+					break;
+				case 0x07:	//misc (TAB)
+					if(bCaptureText == TRUE)
+					{
 						switch(b2)
 						{
 						case 0x23:
@@ -704,8 +751,8 @@ int CCdecode(int data)
 							if(CursorPos < CC_CHARS_PER_LINE - 1) CursorPos++;
 							break;
 						}
-						bCaptureText = TRUE;
-						break;
+					}
+					break;
 				}
 			}
 		}
@@ -718,9 +765,48 @@ int CCdecode(int data)
 	return 0;
 }
 
-int CC_DecodeLine(BYTE* vbiline)
+int CC_DecodeLine(BYTE* vbiline, CCMODE CCMode, BOOL IsOdd)
 {
-	CCdecode(decode(vbiline));
+	if(IsOdd)
+	{
+		switch(CCMode)
+		{
+		case CCMODE_CC1:
+			CCdecode(decode(vbiline), TRUE, 0);
+			break;
+		case CCMODE_CC2:
+			CCdecode(decode(vbiline), TRUE, 1);
+			break;
+		case CCMODE_TEXT1:
+			CCdecode(decode(vbiline), FALSE, 0);
+			break;
+		case CCMODE_TEXT2:
+			CCdecode(decode(vbiline), TRUE, 1);
+			break;
+		default:
+			break;
+		}
+	}
+	else
+	{
+		switch(CCMode)
+		{
+		case CCMODE_CC3:
+			CCdecode(decode(vbiline), TRUE, 0);
+			break;
+		case CCMODE_CC4:
+			CCdecode(decode(vbiline), TRUE, 1);
+			break;
+		case CCMODE_TEXT3:
+			CCdecode(decode(vbiline), FALSE, 0);
+			break;
+		case CCMODE_TEXT4:
+			CCdecode(decode(vbiline), TRUE, 1);
+			break;
+		default:
+			break;
+		}
+	}
 	return 0;
 }
 
@@ -907,7 +993,6 @@ void CC_PaintScreen(HWND hWnd, CC_Screen* Screen, HDC hDC, RECT* PaintRect)
 			LineRect.left = PaintRect->left;
 			LineRect.right = PaintRect->right;
 			CC_PaintLine(hWnd, &Screen->ScreenData[i][0], hDC, &LineRect, nFontsize);
-
 		}
 	}
 }

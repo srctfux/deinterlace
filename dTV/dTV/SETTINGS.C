@@ -131,20 +131,7 @@ void LoadSettingsFromIni()
 	FLT_Gamma_ReadSettingsFromIni();
 	OSD_ReadSettingsFromIni();
 	Filter_ReadSettingsFromIni();
-
-	VBI_Flags = 0;
-	if(GetPrivateProfileInt("VBI", "VT", 0, szIniFile) != 0)
-	{
-		VBI_Flags += VBI_VT;
-	}
-	if(GetPrivateProfileInt("VBI", "VPS", 0, szIniFile) != 0)
-	{
-		VBI_Flags += VBI_VPS;
-	}
-	if(GetPrivateProfileInt("VBI", "CC", 0, szIniFile) != 0)
-	{
-		VBI_Flags += VBI_CC;
-	}
+	VBI_ReadSettingsFromIni();
 
 	GetPrivateProfileString("Files", "DebugLogFilename", DebugLogFilename, DebugLogFilename, MAX_PATH, szIniFile);
 	DebugLogEnabled = GetPrivateProfileInt("Files", "DebugLogEnabled", DebugLogEnabled, szIniFile);
@@ -288,6 +275,9 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 		case WM_FLT_GAMMA_GETVALUE:		
 			return Setting_GetValue(FLT_Gamma_GetSetting((FLT_GAMMA_SETTING)wParam));
 			break;
+		case WM_VBI_GETVALUE:		
+			return Setting_GetValue(VBI_GetSetting((VBI_SETTING)wParam));
+			break;
 
 		case WM_ASPECT_SETVALUE:
 			Setting_SetValue(Aspect_GetSetting((ASPECT_SETTING)wParam), lParam);
@@ -348,6 +338,9 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 			break;
 		case WM_FLT_GAMMA_SETVALUE:		
 			Setting_SetValue(FLT_Gamma_GetSetting((FLT_GAMMA_SETTING)wParam), lParam);
+			break;
+		case WM_VBI_SETVALUE:		
+			Setting_SetValue(VBI_GetSetting((VBI_SETTING)wParam), lParam);
 			break;
 
 		case WM_ASPECT_CHANGEVALUE:
@@ -410,6 +403,9 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 		case WM_FLT_GAMMA_CHANGEVALUE:		
 			Setting_ChangeValue(FLT_Gamma_GetSetting((FLT_GAMMA_SETTING)wParam), lParam);
 			break;
+		case WM_VBI_CHANGEVALUE:		
+			Setting_ChangeValue(VBI_GetSetting((VBI_SETTING)wParam), lParam);
+			break;
 		
 		default:
 			break;
@@ -454,10 +450,7 @@ void WriteSettingsToIni()
 	VideoSettings_WriteSettingsToIni();
 	OSD_WriteSettingsToIni();
 	Filter_WriteSettingsToIni();
-
-	WritePrivateProfileInt("VBI", "VT", VBI_Flags & VBI_VT, szIniFile);
-	WritePrivateProfileInt("VBI", "VPS", VBI_Flags & VBI_VPS, szIniFile);
-	WritePrivateProfileInt("VBI", "CC", VBI_Flags & VBI_CC, szIniFile);
+	VBI_WriteSettingsToIni();
 
 	WritePrivateProfileString("Files", "DebugLogFilename", DebugLogFilename, szIniFile);
 	WritePrivateProfileInt("Files", "DebugLogEnabled", DebugLogEnabled, szIniFile);

@@ -43,8 +43,6 @@
 #include "VBI_VideoText.h"
 #include "VBI_CCdecode.h"
 
-int VBI_Flags = VBI_VT | VBI_VPS | VBI_CC;
-
 BOOL bStopVBI;
 HANDLE VBIThread;
 
@@ -54,6 +52,9 @@ int vtstep;
 BOOL VTLarge=TRUE;
 
 BOOL Capture_VBI = FALSE;
+BOOL DoTeletext = FALSE;
+BOOL DoVPS = FALSE;
+CCMODE CCMode = CCMODE_OFF;
 
 HWND ShowVTInfo=NULL;
 HWND ShowVPSInfo=NULL;
@@ -78,7 +79,7 @@ void VBI_DecodeLine(unsigned char *VBI_Buffer, int line, BOOL IsOdd)
 	VBI_AGC(VBI_Buffer, 120, 450, 1);
 
 	/* all kinds of data with videotext data format: videotext, intercast, ... */
-	if (VBI_Flags & VBI_VT)
+	if (DoTeletext)
 	{
 		VT_DecodeLine(VBI_Buffer);
 	}
@@ -87,13 +88,13 @@ void VBI_DecodeLine(unsigned char *VBI_Buffer, int line, BOOL IsOdd)
 	// it also appears on PAL videos at line 22
 	// see http://www.wgbh.org/wgbh/pages/captioncenter/cctechfacts4.html
 	// for more infomation
-	if ((VBI_Flags & VBI_CC) && line == BT848_GetTVFormat()->CC_Line && IsOdd == FALSE) 
+	if ((CCMode != CCMODE_OFF) && line == BT848_GetTVFormat()->CC_Line) 
 	{
-		CC_DecodeLine(VBI_Buffer);
+		CC_DecodeLine(VBI_Buffer, CCMode, IsOdd);
 	}
 
 	/* VPS information with channel name, time, VCR programming info, etc. */
-	if ((VBI_Flags & VBI_VPS) && (line == 9))
+	if (DoVPS && (line == 9))
 	{
 		VTS_DecodeLine(VBI_Buffer);
 	}
@@ -116,4 +117,108 @@ void VBI_AGC(BYTE * Buffer, int start, int stop, int step)
 	}
 	VBI_thresh = (max + min) / 2;
 	VBI_off = 128 - VBI_thresh;
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+// Start of Settings related code
+/////////////////////////////////////////////////////////////////////////////
+SETTING VBISettings[VBI_SETTING_LASTONE] =
+{
+	{
+		"Capture VBI", ONOFF, 0, &Capture_VBI,
+		FALSE, 0, 1, 1, 1,
+		NULL,
+		"Show", "CaptureVBI", NULL,
+	},
+	{
+		"CC Mode", NUMBER, 0, &CCMode,
+		CCMODE_OFF, CCMODE_OFF, CCMODE_TEXT4, 1, 1,
+		NULL,
+		"VBI", "CCMode", NULL,
+	},
+	{
+		"Teletext", ONOFF, 0, &DoTeletext,
+		FALSE, 0, 1, 1, 1,
+		NULL,
+		"VBI", "DoTeletext", NULL,
+	},
+	{
+		"VPS", ONOFF, 0, &DoVPS,
+		FALSE, 0, 1, 1, 1,
+		NULL,
+		"VBI", "DoVPS", NULL,
+	},
+};
+
+SETTING* VBI_GetSetting(VBI_SETTING Setting)
+{
+	if(Setting > -1 && Setting < VBI_SETTING_LASTONE)
+	{
+		return &(VBISettings[Setting]);
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+void VBI_ReadSettingsFromIni()
+{
+	int i;
+	for(i = 0; i < VBI_SETTING_LASTONE; i++)
+	{
+		Setting_ReadFromIni(&(VBISettings[i]));
+	}
+}
+
+void VBI_WriteSettingsToIni()
+{
+	int i;
+	for(i = 0; i < VBI_SETTING_LASTONE; i++)
+	{
+		Setting_WriteToIni(&(VBISettings[i]));
+	}
+}
+
+void VBI_SetMenu(HMENU hMenu)
+{
+	int i;
+	EnableMenuItem(hMenu, IDM_PDC_OUT, MF_GRAYED);
+	EnableMenuItem(hMenu, IDM_VT_OUT, MF_GRAYED);
+	EnableMenuItem(hMenu, IDM_VPS_OUT, MF_GRAYED);
+
+	CheckMenuItem(hMenu, IDM_VBI, Capture_VBI?MF_CHECKED:MF_UNCHECKED);
+	if (Capture_VBI == TRUE)
+	{
+		// set vt dialog menu items up
+		EnableMenuItem(hMenu, IDM_CALL_VIDEOTEXTSMALL, (DoTeletext)?MF_ENABLED:MF_GRAYED);
+		EnableMenuItem(hMenu, IDM_CALL_VIDEOTEXT, (DoTeletext)?MF_ENABLED:MF_GRAYED);
+		EnableMenuItem(hMenu, IDM_VT_RESET, (DoTeletext)?MF_ENABLED:MF_GRAYED);
+		EnableMenuItem(hMenu, IDM_VT_OUT, (DoTeletext)?MF_ENABLED:MF_GRAYED);
+		EnableMenuItem(hMenu, IDM_VPS_OUT, (DoVPS)?MF_ENABLED:MF_GRAYED);
+		EnableMenuItem(hMenu, IDM_VBI_VT, MF_ENABLED);
+		EnableMenuItem(hMenu, IDM_VBI_VPS, MF_ENABLED);
+		CheckMenuItem(hMenu, IDM_VBI_VT, (DoTeletext)?MF_CHECKED:MF_UNCHECKED);
+		CheckMenuItem(hMenu, IDM_VBI_VPS, (DoVPS)?MF_CHECKED:MF_UNCHECKED);
+		for(i = CCMODE_OFF; i <= CCMODE_TEXT4; i++)
+		{
+			EnableMenuItem(hMenu, IDM_CCOFF + i, MF_ENABLED);
+			CheckMenuItem(hMenu, IDM_CCOFF + i, (CCMode == i)?MF_CHECKED:MF_UNCHECKED);
+		}
+	}
+	else
+	{
+		EnableMenuItem(hMenu, IDM_VBI_VT, MF_GRAYED);
+		EnableMenuItem(hMenu, IDM_VBI_VPS, MF_GRAYED);
+		EnableMenuItem(hMenu, IDM_CALL_VIDEOTEXTSMALL, MF_GRAYED);
+		EnableMenuItem(hMenu, IDM_CALL_VIDEOTEXT, MF_GRAYED);
+		EnableMenuItem(hMenu, IDM_VT_RESET, MF_GRAYED);
+		EnableMenuItem(hMenu, IDM_VT_OUT, MF_GRAYED);
+		EnableMenuItem(hMenu, IDM_VPS_OUT, MF_GRAYED);
+		for(i = CCMODE_OFF; i <= CCMODE_TEXT4; i++)
+		{
+			EnableMenuItem(hMenu, IDM_CCOFF + i, MF_GRAYED);
+		}
+	}
 }
