@@ -156,11 +156,7 @@ BOOL LoadFilterPlugins()
 
 	if(NumFilters > 0)
 	{
-		hMenu = GetMenu(hWnd);
-		if(hMenu == NULL) return FALSE;
-		hMenu = GetSubMenu(hMenu, 4);
-		if(hMenu == NULL) return FALSE;
-		hMenu = GetSubMenu(hMenu, 6);
+		hMenu = GetFiltersSubmenu();
 		if(hMenu == NULL) return FALSE;
 
 		for(i = 0; i < NumFilters; i++)

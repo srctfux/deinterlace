@@ -2039,6 +2039,39 @@ void SetMenuAnalog()
 	Channels_SetMenu(hMenu);
 }
 
+HMENU GetFiltersSubmenu()
+{
+	HMENU hSubMenu;
+
+	if(hMenu == NULL) return NULL;
+	hSubMenu = GetSubMenu(hMenu, 4);
+	if(hSubMenu == NULL) return NULL;
+	hSubMenu = GetSubMenu(hSubMenu, 6);
+	return hSubMenu;
+}
+
+HMENU GetVideoDeinterlaceSubmenu()
+{
+	HMENU hSubMenu;
+
+	if(hMenu == NULL) return NULL;
+	hSubMenu = GetSubMenu(hMenu, 4);
+	if(hMenu == NULL) return NULL;
+	hSubMenu = GetSubMenu(hSubMenu, 1);
+	return hSubMenu;
+}
+
+HMENU GetChannelsSubmenu()
+{
+	HMENU hSubMenu;
+
+	if(hMenu == NULL) return NULL;
+	hSubMenu = GetSubMenu(hMenu, 1);
+	if(hSubMenu == NULL) return NULL;
+	hSubMenu = GetSubMenu(hSubMenu, 2);
+	return hSubMenu;
+}
+
 //---------------------------------------------------------------------------
 void CleanUpMemory()
 {
@@ -2345,7 +2378,7 @@ SETTING dTVSettings[DTV_SETTING_LASTONE] =
 		"Auto Hide Cursor", ONOFF, 0, &bAutoHideCursor,
 		FALSE, 0, 1, 1, 1,
 		NULL,
-		"MainWindow", "AutoHideCursor", NULL,
+		"Show", "AutoHideCursor", NULL,
 	},
 	{
 		"Window Processor", NUMBER, 0, &MainProcessor,

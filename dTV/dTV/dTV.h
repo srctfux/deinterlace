@@ -66,6 +66,10 @@ void Overlay_Start(HWND hWnd);
 void ShowText(HWND hWnd, LPCTSTR szText);
 BOOL IsStatusBarVisible();
 
+extern HMENU GetFiltersSubmenu();
+extern HMENU GetVideoDeinterlaceSubmenu();
+extern HMENU GetChannelsSubmenu();
+
 #define TIMER_STATUS        1
 #define TIMER_STATUS_MS     2000
 

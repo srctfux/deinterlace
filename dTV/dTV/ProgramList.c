@@ -647,8 +647,8 @@ void Channels_UpdateMenu(HMENU hMenu)
 	MENUITEMINFO	MenuItemInfo;
 	int				i, j;
 
-	hMenuChannels = GetSubMenu(hMenu, 1);
-	hMenuChannels = GetSubMenu(hMenuChannels, 2);
+	hMenuChannels = GetChannelsSubmenu();
+	if(hMenuChannels == NULL) return;
 
 	i = GetMenuItemCount(hMenuChannels) - 1;
 	while (i>=2)
@@ -679,8 +679,8 @@ void Channels_SetMenu(HMENU hMenu)
 	int		i;
 	int		nb;
 
-	hMenuChannels = GetSubMenu(hMenu, 1);
-	hMenuChannels = GetSubMenu(hMenuChannels, 2);
+	hMenuChannels = GetChannelsSubmenu();
+	if(hMenuChannels == NULL) return;
 
 	nb = GetMenuItemCount(hMenuChannels) - 2;
 	i = nb + 1;

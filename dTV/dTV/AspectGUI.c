@@ -406,7 +406,8 @@ BOOL ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 	}
 
     WorkoutOverlaySize();
-	AspectRatio_SetMenu(GetMenu(hWnd));
+	if (GetMenu(hWnd) != NULL)
+		AspectRatio_SetMenu(GetMenu(hWnd));
 
 	// Yes, we processed the menu selection.
 	return TRUE;
