@@ -392,6 +392,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 	LARGE_INTEGER CurrentFieldTime;
 	LARGE_INTEGER LastFlipTime;
 	LARGE_INTEGER CurrentFlipTime;
+	int nTimeFields = 1;
 	BOOL RunningLate = FALSE;
 	double Weight = 0.005;
 
@@ -444,6 +445,9 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 		// display the current pulldown mode
 		UpdatePulldownStatus();
 		
+		LastFieldTime.QuadPart = 0;
+		nTimeFields = 1;
+		
 		// start the capture off
 		BT848_Restart_RISC_Code();
 
@@ -466,7 +470,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 						if(LastFieldTime.QuadPart != 0)
 						{
 							// gets the last ticks odd - odd
-							double RecentTicks = (double)(CurrentFieldTime.QuadPart - LastFieldTime.QuadPart);
+							double RecentTicks = (double)(CurrentFieldTime.QuadPart - LastFieldTime.QuadPart) / (double)nTimeFields;
 							// only allow values within 5% if current value
 							// should prevent spurious values getting through
 							if(RecentTicks > RunningAverageCounterTicks * 0.95 &&
@@ -477,7 +481,10 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 								// it has lots of nice properties
 								// especially that we don't need to keep a 
 								// data history
-								RunningAverageCounterTicks = Weight * RecentTicks + (1.0 - Weight) * RunningAverageCounterTicks;
+								while(--nTimeFields)
+								{
+									RunningAverageCounterTicks = Weight * RecentTicks + (1.0 - Weight) * RunningAverageCounterTicks;
+								}
 								LOG(" Last %f", RecentTicks);
 								LOG(" Running Average %f", RunningAverageCounterTicks);
 							}
@@ -489,13 +496,19 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 						}
 						// save current value for next time
 						LastFieldTime.QuadPart = CurrentFieldTime.QuadPart;
+						nTimeFields = 1;
 					}
 					else
 					{
 						// if we're running late then
 						// time will be rubbish
-						// so make sure it won't be used
-						LastFieldTime.QuadPart = 0;
+						// but we should catch up some time
+						nTimeFields++;
+						if(nTimeFields > 10)
+						{
+							FlipAdjust = TRUE;
+							LOG(" Try to hurry up haven't locked for %d", nTimeFields);
+						}
 					}
 				}
 				// we have to sleep somewhere might as well be here
@@ -592,6 +605,8 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 						if(DoAccurateFlips)
 						{
 							RunningAverageCounterTicks = StartAverageCounterTicks;
+							LastFieldTime.QuadPart = 0;
+							nTimeFields = 1;
 						}
 					}
 					memmove(&info.OddLines[1], &info.OddLines[0], sizeof(info.OddLines) - sizeof(info.OddLines[0]));
@@ -615,6 +630,8 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 						if(DoAccurateFlips)
 						{
 							RunningAverageCounterTicks = StartAverageCounterTicks;
+							LastFieldTime.QuadPart = 0;
+							nTimeFields = 1;
 						}
 					}
 					memmove(&info.EvenLines[1], &info.EvenLines[0], sizeof(info.EvenLines) - sizeof(info.EvenLines[0]));
@@ -770,6 +787,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 									QueryPerformanceCounter(&CurrentFlipTime);
 								}
 							}
+							LastFlipTime.QuadPart += TicksToWait;
 						}
 
 						FlipResult = IDirectDrawSurface_Flip(lpDDOverlay, NULL, FlipFlag); 
@@ -785,7 +803,6 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 						if(DoAccurateFlips)
 						{
 							FlipAdjust = FALSE;
-							LastFlipTime.QuadPart = CurrentFlipTime.QuadPart;
 						}
 
 						if(PrevPulldownMode != gPulldownMode)
