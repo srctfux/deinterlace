@@ -85,6 +85,10 @@ void OSD_ShowTextOverride(HWND hWnd, LPCTSTR szText, double dfSize);
 void OSD_Redraw(HWND hWnd, HDC hDC);
 void OSD_Clear(HWND hWnd);
 void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType);
-void OSD_ShowInfosScreen(HWND hWnd, double dfSize);
+void OSD_ShowNextInfosScreen(HWND hWnd, double dfSize);
+void OSD_ShowInfosScreen(HWND hWnd, int IdxScreen, double dfSize);
+void OSD_ActivateInfosScreen(HWND hWnd, int IdxScreen, double dfSize);
+void OSD_UpdateMenu(HMENU hMenu);
+void OSD_SetMenu(HMENU hMenu);
 
 #endif

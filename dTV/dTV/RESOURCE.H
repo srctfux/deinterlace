@@ -202,6 +202,12 @@
 #define IDM_AUTOHIDE_OSD                815
 #define ID_SETTINGS_FILTERS_FILTERS     816
 #define IDM_AUTOHIDE_CURSOR             817
+// Warning : block from IDM_OSDSCREEN_SHOW
+// to IDM_OSDSCREEN_SHOW + 10 is reserved
+#define IDM_OSDSCREEN_SHOW              820
+// Warning : block from IDM_OSDSCREEN_ACTIVATE
+// to IDM_OSDSCREEN_ACTIVATE + 10 is reserved
+#define IDM_OSDSCREEN_ACTIVATE          840
 #define IDM_END                         1032
 #define IDM_SOURCE_TUNER                1089
 #define IDM_SOURCE_COMPOSITE            1090
@@ -486,6 +492,8 @@
 #define IDM_MSPSTEREO_3                 1633
 #define IDC_LNBSWITSH22KHZ3             1634
 #define IDM_MSPSTEREO_4                 1634
+// Warning : block from IDM_CHANNEL_SELECT
+// to IDM_CHANNEL_SELECT + MAXPROGS is reserved
 #define IDM_CHANNEL_SELECT              1635
 #define IDC_LOF_LOW4                    1635
 #define IDC_LOF_HIGH4                   1636
@@ -799,7 +807,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        159
-#define _APS_NEXT_COMMAND_VALUE         1902
+#define _APS_NEXT_COMMAND_VALUE         1901
 #define _APS_NEXT_CONTROL_VALUE         1879
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

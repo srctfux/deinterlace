@@ -69,6 +69,8 @@ BOOL IsStatusBarVisible();
 extern HMENU GetFiltersSubmenu();
 extern HMENU GetVideoDeinterlaceSubmenu();
 extern HMENU GetChannelsSubmenu();
+extern HMENU GetOSDSubmenu1();
+extern HMENU GetOSDSubmenu2();
 
 #define TIMER_STATUS        1
 #define TIMER_STATUS_MS     2000

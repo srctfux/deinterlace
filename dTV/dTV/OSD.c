@@ -76,17 +76,6 @@
 extern long NumFilters;
 extern FILTER_METHOD* Filters[];
 
-#define	OSD_SCREEN_1	1
-#define	OSD_SCREEN_2	2
-#define	OSD_SCREEN_3	3
-#define	OSD_SCREEN_4	4
-#define	OSD_SCREEN_5	5
-#define	OSD_SCREEN_6	6
-#define	OSD_SCREEN_7	7
-#define	OSD_SCREEN_8	8
-#define	OSD_SCREEN_9	9
-#define	OSD_SCREEN_10	10
-
 #define	OSD_COLOR_TITLE		RGB(255,150,150)
 #define	OSD_COLOR_SECTION	RGB(150,150,255)
 #define	OSD_COLOR_CURRENT	RGB(200,150,0)
@@ -106,20 +95,13 @@ BOOL bAutoHide = TRUE;
 OSD_INFO    grOSD[OSD_MAX_TEXT];
 static int	NbText = 0;
 static struct {
-	int		screen_id;		// OSD screen identifier
+	char	name[24];		// Name of the screen
 	int		refresh_delay;	// Refresh period in ms (0 means no refresh)
 	BOOL	active;			// Screen to take into account or not
 } ActiveScreens[] = {
- 	{	OSD_SCREEN_1,	OSD_TIMER_REFRESH_DELAY,	TRUE	},
-	{	OSD_SCREEN_3,	1000,						TRUE	},
-	{	OSD_SCREEN_2,	OSD_TIMER_REFRESH_DELAY,	TRUE	},
-	{	OSD_SCREEN_4,	0,							FALSE	},
-	{	OSD_SCREEN_5,	0,							FALSE	},
-	{	OSD_SCREEN_6,	0,							FALSE	},
-	{	OSD_SCREEN_7,	0,							FALSE	},
-	{	OSD_SCREEN_8,	0,							FALSE	},
-	{	OSD_SCREEN_9,	0,							FALSE	},
-	{	OSD_SCREEN_10,	0,							FALSE	},
+ 	{	"General screen",		OSD_TIMER_REFRESH_DELAY,	TRUE	},
+	{	"Statistics screen",	1000,						FALSE	},
+	{	"WSS decoding screen",	OSD_TIMER_REFRESH_DELAY,	FALSE	},
 };
 static int	IdxCurrentScreen = -1;	// index of the current displayed OSD screen
 static BOOL	bRestoreScreen = FALSE;	// Restore info screen when clear OSD
@@ -257,7 +239,7 @@ void OSD_Clear(HWND hWnd)
 	{
 		InvalidateRect(hWnd, &(grOSD[i].currentRect), FALSE);
 	}
-	if (bRestoreScreen && (IdxCurrentScreen != -1))
+	if (bRestoreScreen && (IdxCurrentScreen != -1) && ActiveScreens[IdxCurrentScreen].active)
 	{
 		OSD_RefreshInfosScreen(hWnd, 0, bAutoHide ? OSD_AUTOHIDE : OSD_PERSISTENT);
 	}
@@ -487,10 +469,10 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 
 	OSD_ClearAllTexts();
 
-	switch (ActiveScreens[IdxCurrentScreen].screen_id)
+	switch (IdxCurrentScreen)
 	{
 	// GENERAL SCREEN
-	case OSD_SCREEN_1:
+	case 0:
 		// dTV version
 		OSD_AddText(GetProductNameAndVersion(), dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (1, dfMargin, dfSize));
 
@@ -660,7 +642,7 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 		break;
 
 	// WSS DATA DECODING SCREEN
-	case OSD_SCREEN_2:
+	case 2:
 		// Title
 		OSD_AddText("WSS data decoding", dfSize*1.5, OSD_COLOR_TITLE, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (1, dfMargin, dfSize*1.5));
 
@@ -747,7 +729,8 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 		}
 		break;
 
-	case OSD_SCREEN_3:
+	// STATISTICS SCREEN
+	case 1:
 		// Title
 		OSD_AddText("Statistics", dfSize*1.5, OSD_COLOR_TITLE, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (1, dfMargin, dfSize*1.5));
 
@@ -819,27 +802,6 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 		}
 		break;
 
-	case OSD_SCREEN_4:
-		break;
-
-	case OSD_SCREEN_5:
-		break;
-
-	case OSD_SCREEN_6:
-		break;
-
-	case OSD_SCREEN_7:
-		break;
-
-	case OSD_SCREEN_8:
-		break;
-
-	case OSD_SCREEN_9:
-		break;
-
-	case OSD_SCREEN_10:
-		break;
-
 	default:
 		break;
 	}
@@ -851,30 +813,24 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 //---------------------------------------------------------------------------
 // Display on screen the first information screen if no screen is already
 // displayed, or the next one
-void OSD_ShowInfosScreen(HWND hWnd, double dfSize)
+void OSD_ShowNextInfosScreen(HWND hWnd, double dfSize)
 {
 	int		NbScreens;			// number of OSD scrrens
-	int		NbActiveScreens;	// number of active OSD screens
 	int		IdxScreen;
 	int		PrevIdxScreen;
-	int		i, idx;
+	int		i;
 
 	// determine which screen to display
-	PrevIdxScreen = IdxCurrentScreen;
 	NbScreens = sizeof (ActiveScreens) / sizeof (ActiveScreens[0]);
+	PrevIdxScreen = IdxCurrentScreen;
 	IdxScreen = IdxCurrentScreen + 1;
-	if (IdxScreen >= NbScreens)
-		IdxScreen = 0;
 	IdxCurrentScreen = -1;
-//	for (i = IdxScreen ; i < (IdxScreen+NbScreens) ; i++)
 	for (i = IdxScreen ; i < NbScreens ; i++)
 	{
-		idx = i % NbScreens;
-		if (ActiveScreens[idx].active)
+		if (ActiveScreens[i].active)
 		{
-			NbActiveScreens++;
 			if (IdxCurrentScreen == -1)
-				IdxCurrentScreen = idx;
+				IdxCurrentScreen = i;
 		}
 	}
 	// Case : no screen to display
@@ -887,6 +843,122 @@ void OSD_ShowInfosScreen(HWND hWnd, double dfSize)
 	}
 
 	OSD_RefreshInfosScreen(hWnd, dfSize, bAutoHide ? OSD_AUTOHIDE : OSD_PERSISTENT);
+}
+
+//---------------------------------------------------------------------------
+// Display on screen the information screen whose number is given as parameter
+void OSD_ShowInfosScreen(HWND hWnd, int IdxScreen, double dfSize)
+{
+	int		NbScreens;		// number of OSD scrrens
+	int		PrevIdxScreen;
+
+	PrevIdxScreen = IdxCurrentScreen;
+	NbScreens = sizeof (ActiveScreens) / sizeof (ActiveScreens[0]);
+	if ((IdxScreen < 0) || (IdxScreen >= NbScreens))
+		IdxCurrentScreen = -1;
+	else if (! ActiveScreens[IdxScreen].active)
+		IdxCurrentScreen = -1;
+	else
+		IdxCurrentScreen = IdxScreen;
+
+	// Case : no screen to display
+	if (IdxCurrentScreen == -1)
+	{
+		// If there was a screen displayed
+		if (PrevIdxScreen != -1)
+			OSD_Clear(hWnd);
+		return;
+	}
+
+	OSD_RefreshInfosScreen(hWnd, dfSize, bAutoHide ? OSD_AUTOHIDE : OSD_PERSISTENT);
+}
+
+//---------------------------------------------------------------------------
+// Activate or desactivate the information screen whose number is given as parameter
+void OSD_ActivateInfosScreen(HWND hWnd, int IdxScreen, double dfSize)
+{
+	int		NbScreens;		// number of OSD scrrens
+
+	NbScreens = sizeof (ActiveScreens) / sizeof (ActiveScreens[0]);
+	if ((IdxScreen >= 0) && (IdxScreen < NbScreens))
+	{
+		ActiveScreens[IdxScreen].active = ! ActiveScreens[IdxScreen].active;
+		if (IdxScreen == IdxCurrentScreen)
+			OSD_Clear(hWnd);
+	}
+}
+
+void OSD_UpdateMenu(HMENU hMenu)
+{
+	HMENU			hMenuOSD1;
+	HMENU			hMenuOSD2;
+	MENUITEMINFO	MenuItemInfo;
+	int				i, j;
+	int				NbScreens;
+
+	hMenuOSD1 = GetOSDSubmenu1();
+	hMenuOSD2 = GetOSDSubmenu2();
+	if ((hMenuOSD1 == NULL) || (hMenuOSD2 == NULL)) return;
+
+	i = GetMenuItemCount(hMenuOSD1) - 1;
+	while (i>=2)
+	{
+		RemoveMenu(hMenuOSD1, i, MF_BYPOSITION);
+		i--;
+	}
+	i = GetMenuItemCount(hMenuOSD2) - 1;
+	while (i>=2)
+	{
+		RemoveMenu(hMenuOSD2, i, MF_BYPOSITION);
+		i--;
+	}
+	NbScreens = sizeof (ActiveScreens) / sizeof (ActiveScreens[0]);
+	for (i=0,j=2 ; i<NbScreens ; i++)
+	{
+		if (strlen (ActiveScreens[i].name) > 0)
+		{
+			MenuItemInfo.cbSize = sizeof (MenuItemInfo);
+			MenuItemInfo.fType = MFT_STRING;
+			MenuItemInfo.dwTypeData = ActiveScreens[i].name;
+			MenuItemInfo.cch = strlen (ActiveScreens[i].name);
+
+			MenuItemInfo.fMask = MIIM_TYPE | MIIM_ID;
+			MenuItemInfo.wID = IDM_OSDSCREEN_SHOW + i + 1;
+			InsertMenuItem(hMenuOSD1, j, TRUE, &MenuItemInfo);
+
+			MenuItemInfo.fMask = MIIM_TYPE | MIIM_ID | MIIM_STATE;
+			MenuItemInfo.wID = IDM_OSDSCREEN_ACTIVATE + i + 1;
+			MenuItemInfo.fState = ActiveScreens[i].active ? MFS_CHECKED : MFS_ENABLED;
+			InsertMenuItem(hMenuOSD2, j, TRUE, &MenuItemInfo);
+
+			j++;
+		}
+	}
+}
+
+void OSD_SetMenu(HMENU hMenu)
+{
+	HMENU	hMenuOSD1;
+	HMENU	hMenuOSD2;
+	int		i, j;
+	int		NbItems;
+	int		NbScreens;
+
+	hMenuOSD1 = GetOSDSubmenu1();
+	hMenuOSD2 = GetOSDSubmenu2();
+	if ((hMenuOSD1 == NULL) || (hMenuOSD2 == NULL)) return;
+
+	NbItems = GetMenuItemCount(hMenuOSD2);
+	NbScreens = sizeof (ActiveScreens) / sizeof (ActiveScreens[0]);
+	for (i=0,j=2 ; (j<NbItems) && (i<NbScreens) ; i++)
+	{
+		if (strlen (ActiveScreens[i].name) > 0)
+		{
+			EnableMenuItem(hMenuOSD1, i+2, ActiveScreens[i].active ? MF_BYPOSITION | MF_ENABLED : MF_BYPOSITION | MF_GRAYED);
+			CheckMenuItem(hMenuOSD2, i+2, ActiveScreens[i].active ? MF_BYPOSITION | MF_CHECKED : MF_BYPOSITION | MF_UNCHECKED);
+			j++;
+		}
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////

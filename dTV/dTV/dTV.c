@@ -294,6 +294,15 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 			MenuItemInfo.hSubMenu = hSubMenu;
 			SetMenuItemInfo(hMenuPopup,7,TRUE,&MenuItemInfo);
 		}
+
+		hSubMenu = GetSubMenu(hMenu, 2);
+		if(hSubMenu != NULL)
+			hSubMenu = GetSubMenu(hSubMenu, 6);
+		if(hSubMenu != NULL)
+		{
+			MenuItemInfo.hSubMenu = hSubMenu;
+			SetMenuItemInfo(hMenuPopup,8,TRUE,&MenuItemInfo);
+		}
 	}
 
 	// 2000-10-31 Added by Mark: Changed to WS_POPUP for more cosmetic direct-to-full-screen startup,
@@ -408,6 +417,16 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		if ( (LOWORD(wParam) > IDM_CHANNEL_SELECT) && (LOWORD(wParam) <= (IDM_CHANNEL_SELECT+MAXPROGS)) )
 		{
 			PostMessage(hWnd, WM_COMMAND, IDM_CHANNEL_SELECT, LOWORD(wParam)-IDM_CHANNEL_SELECT-1);
+			break;
+		}
+		if ( (LOWORD(wParam) > IDM_OSDSCREEN_SHOW) && (LOWORD(wParam) <= (IDM_OSDSCREEN_SHOW+10)) )
+		{
+			PostMessage(hWnd, WM_COMMAND, IDM_OSDSCREEN_SHOW, LOWORD(wParam)-IDM_OSDSCREEN_SHOW-1);
+			break;
+		}
+		if ( (LOWORD(wParam) > IDM_OSDSCREEN_ACTIVATE) && (LOWORD(wParam) <= (IDM_OSDSCREEN_ACTIVATE+10)) )
+		{
+			PostMessage(hWnd, WM_COMMAND, IDM_OSDSCREEN_ACTIVATE, LOWORD(wParam)-IDM_OSDSCREEN_ACTIVATE-1);
 			break;
 		}
 
@@ -1231,7 +1250,15 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
 
 		case IDM_SHOW_OSD:
-			OSD_ShowInfosScreen(hWnd, 0);
+			OSD_ShowNextInfosScreen(hWnd, 0);
+			break;
+
+		case IDM_OSDSCREEN_SHOW:
+			OSD_ShowInfosScreen(hWnd, lParam, 0);
+			break;
+
+		case IDM_OSDSCREEN_ACTIVATE:
+			OSD_ActivateInfosScreen(hWnd, lParam, 0);
 			break;
 
 		case IDM_HIDE_OSD:
@@ -1831,6 +1858,7 @@ void MainWndOnInitBT(HWND hWnd)
 		WorkoutOverlaySize();
 		
 		Channels_UpdateMenu(hMenu);
+		OSD_UpdateMenu(hMenu);
 
 		SetMenuAnalog();
 
@@ -2112,6 +2140,7 @@ void SetMenuAnalog()
 	TVCard_SetMenu(hMenu);
 	VBI_SetMenu(hMenu);
 	Channels_SetMenu(hMenu);
+	OSD_SetMenu(hMenu);
 }
 
 HMENU GetFiltersSubmenu()
@@ -2147,12 +2176,42 @@ HMENU GetChannelsSubmenu()
 	return hSubMenu;
 }
 
+HMENU GetOSDSubmenu1()
+{
+	HMENU hSubMenu;
+
+	if(hMenu == NULL) return NULL;
+	hSubMenu = GetSubMenu(hMenu, 2);
+	if(hSubMenu == NULL) return NULL;
+	hSubMenu = GetSubMenu(hSubMenu, 6);
+	if(hSubMenu == NULL) return NULL;
+	hSubMenu = GetSubMenu(hSubMenu, 2);
+	return hSubMenu;
+}
+
+HMENU GetOSDSubmenu2()
+{
+	HMENU hSubMenu;
+
+	if(hMenu == NULL) return NULL;
+	hSubMenu = GetSubMenu(hMenu, 2);
+	if(hSubMenu == NULL) return NULL;
+	hSubMenu = GetSubMenu(hSubMenu, 6);
+	if(hSubMenu == NULL) return NULL;
+	hSubMenu = GetSubMenu(hSubMenu, 3);
+	return hSubMenu;
+}
+
 //---------------------------------------------------------------------------
 void CleanUpMemory()
 {
 	Mixer_Exit();
 	VBI_Exit();
 	BT848_MemoryFree();
+	if ((hMenu != NULL) && (GetMenu(hWnd) == NULL))
+		DestroyMenu(hMenu);
+	if (hMenuPopup != NULL)
+		DestroyMenu(hMenuPopup);
 }
 
 //---------------------------------------------------------------------------

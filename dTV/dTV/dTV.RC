@@ -756,8 +756,20 @@ BEGIN
         MENUITEM "&Always on Top",              IDM_ON_TOP
         POPUP "&OSD"
         BEGIN
-            MENUITEM "&Show\tEnter",                IDM_SHOW_OSD
+            MENUITEM "Show &Next\tEnter",           IDM_SHOW_OSD
             MENUITEM "&Hide\tBackspace",            IDM_HIDE_OSD
+            POPUP "&Show Screen"
+            BEGIN
+                MENUITEM "___Screens___",               IDM_OSDSCREEN_SHOW
+                , GRAYED
+                MENUITEM SEPARATOR
+            END
+            POPUP "A&ctivate Screens"
+            BEGIN
+                MENUITEM "___Screens___",               IDM_OSDSCREEN_ACTIVATE
+                , GRAYED
+                MENUITEM SEPARATOR
+            END
             MENUITEM "&Autohide",                   IDM_AUTOHIDE_OSD
             , CHECKED
         END
@@ -1023,7 +1035,7 @@ BEGIN
         MENUITEM "Aspect &Ratio",               65535
         MENUITEM "Fi&lters",                    65535
         MENUITEM "&Datacasting",                65535
-        MENUITEM "Show &OSD",                   IDM_SHOW_OSD
+        MENUITEM "&OSD",                        65535
         MENUITEM "Full &Screen",                IDM_FULL_SCREEN
         MENUITEM "E&xit",                       IDM_END
     END
