@@ -1,3 +1,7 @@
+25/1
+. (JA) Corrected Video deinterlacing modes comments
+. (JA) Corrected OS section
+
 24/1
 . Description of "Blended clip updated"
 . Added description of "Greedy deinterlace"

@@ -23,9 +23,9 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
 <body bgcolor="#FFFFFF">
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr> 
-    <td height="1" width="160"><img src="/images/spacer.gif" width="1" height="1"></td>
-    <td height="1" width="342"><img src="/images/spacer.gif" width="1" height="1"></td>
-    <td height="1" width="501"><img src="/images/spacer.gif" width="1" height="1"></td>
+    <td height="1" width="160"><img src="images/spacer.gif" width="1" height="1"></td>
+    <td height="1" width="342"><img src="images/spacer.gif" width="1" height="1"></td>
+    <td height="1" width="501"><img src="images/spacer.gif" width="1" height="1"></td>
   </tr>
   <tr> 
     <td width="160"><img src="images/dtvlogotvthumb.jpg" width="160" height="140" alt="dTV Logo"></td>
@@ -33,13 +33,48 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><!-- #BeginEditable "Page%20Title" -->News&nbsp;<!-- #EndEditable --></b></font></td>
   </tr>
   <tr bgcolor="#FFCC00" align="right"> 
-    <td colspan="3"><img src="/images/yellowspacer.gif" width="100%" height="2"></td>
+    <td colspan="3"><img src="images/yellowspacer.gif" width="100%" height="2"></td>
   </tr>
   <tr> 
     <td colspan="3">&nbsp;</td>
   </tr>
   <tr>
     <td colspan="3"><!-- #BeginEditable "Text" --> 
+      <p><b>2.1.1<br>
+      </b>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Preliminary judder fix<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Steve's new 2-Frame Deinterlacing algorithm<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tom's new Greedy Deinterlacing algorithm
+      (this is low CPU, it is greedy because it eats one field)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Steve's new Temporal Noise Filter (to
+      switch on/off press n)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Better PAL 2:2 pulldown detection (It's
+      still not perfect though)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pixel width selection for game console
+      support<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Window Position selection for use with
+      aspect ratio controls<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Snapshots now in TIFF format<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Should start correctly from a shortcut<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Many code optimizations for SSE and 3DNOW!
+      processors<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font SIZE="2">Adaptive deinterlace now
+      separate method<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Scaler bob deinterlacing method<br>
+      </font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font SIZE="2">Extensive card and
+      audio recognition improvements from Mike<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Extensive reworking of parameters and
+      defaults.<br>
+      </font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font SIZE="2">Audio
+      start/stop/save/restore on entry<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The ability to have multiple named .ini
+      files.<br>
+      </font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font SIZE="2">Adv Video Flags now
+      saved and specified in ini file<br>
+      </font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font SIZE="2">Deinterlace mode and
+      many other status items now kept in ini file.
+      </p>
+      </font> 
       <p><b>2.0.0</b><a href="distributions/dTV200exe.zip"> </a><br>
         &nbsp;&nbsp;&nbsp;&nbsp; Bug fixed - Tearing is gone at all refresh rates!<br>
         &nbsp;&nbsp;&nbsp;&nbsp; Bug fixed - Error message no longer pops up if 
@@ -104,7 +139,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Documentation (.HTM files) moved into separate 
         subdirectory<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Note: No TV tuner card related bugfixes 
-        over 1.6; see <a href="Bugs_107.htm">Known Bugs</a> for current list<br>
+        over 1.6; see <a href="bugs/Bugs_107.htm">Known Bugs</a> for current list<br>
       </p>
       <p><b>1.6 Beta 4<br>
         </b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Auto detect enabled by default<br>
@@ -115,7 +150,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;More reliable config defaults for 3/2 pulldown 
         detection<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Changes to synchronization code<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Note: See <a href="Bugs_106b4.htm">Known 
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Note: See <a href="bugs/Bugs_106b4.htm">Known 
         Bugs</a> for additional details</p>
       <p><b>1.5</b><br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Changed deinterlacing routine to adaptive 
@@ -151,7 +186,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
   </tr>
   <tr bgcolor="#FFCC00"> 
     <td colspan="3"> 
-      <div align="center"><img src="/images/yellowspacer.gif" width="100%" height="2"></div>
+      <div align="center"><img src="images/yellowspacer.gif" width="100%" height="2"></div>
     </td>
   </tr>
   <tr> 
