@@ -139,6 +139,9 @@ todos *.hhk *.hhc *.rtf
 cd /home/groups/d/de/deinterlace/DScaler/Plugins/FLT_Sharpness
 todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
 todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/Plugins/FLT_TemporalComb
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
 cd /home/groups/d/de/deinterlace/DScaler/PlugTest
 todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
 todos *.hhk *.hhc *.rtf
