@@ -73,7 +73,7 @@ class AspectRect : public RECT {
 		void setTargetAspect(double target) { m_outputAdjustment = target / sourceAspect(); }
 		void setAspectAdjust(double source, double target) { m_outputAdjustment = target/source; }
 
-		void normalize() {
+		void normalizeRect() {
 			// Ensure left and top are less than bottom and right.
 			if (left > right) {
 				int t = left;
@@ -91,7 +91,7 @@ class AspectRect : public RECT {
 		void align(int n = 4) { align(n,n,n,n); }
 		void align(int x, int y) { align(x,x,y,y); }
 		void align(int l, int r, int t, int b) {
-			normalize(); // Need a normalized rectangle
+			normalizeRect(); // Need a normalized rectangle
 			int i = left % l; if (i > 0) left += l-i;
 			right -= right % r;
 			top += top % t;
@@ -104,7 +104,7 @@ class AspectRect : public RECT {
 		void shrink(int n = 4) { shrink(n,n,n,n); }
 		void shrink(int x, int y) { shrink(x,x,y,y); }
 		void shrink(int l, int r, int t, int b) {
-			normalize(); // Need a normalized rectangle
+			normalizeRect(); // Need a normalized rectangle
 			left += l; right -= r;
 			top += t; bottom -= b;
 		}
@@ -112,7 +112,7 @@ class AspectRect : public RECT {
 		// Ensure the rectangle is at least n pixels in size...
 		void enforceMinSize(int n = 4) { enforceMinSize(n,n); }
 		void enforceMinSize(int x, int y) {
-			normalize(); // Need a normalized rectangle
+			normalizeRect(); // Need a normalized rectangle
 			if (width() < x) right = left + x;
 			if (height() < y) bottom = top + y;
 		}

@@ -794,7 +794,6 @@
 #define IDM_ZOOM_MINUS                  2007
 #define IDM_ZOOM_PLUS                   2008
 #define IDM_XINVERT                     2009
-#define IDM_YINVERT                     2010
 #define IDC_STATIC                      -1
 
 // Next default values for new objects

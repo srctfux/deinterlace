@@ -176,9 +176,6 @@ void AspectRatio_SetMenu(HMENU hMenu)
 	CheckMenuItem(hMenu, IDM_ZOOM_35, (aspectSettings.xZoomFactor == 3.5 && aspectSettings.yZoomFactor == 3.5)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_ZOOM_40, (aspectSettings.xZoomFactor == 4.0 && aspectSettings.yZoomFactor == 4.0)?MF_CHECKED:MF_UNCHECKED);
 
-	// Image inverstion
-	CheckMenuItem(hMenu, IDM_XINVERT, aspectSettings.invertX?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_YINVERT, aspectSettings.invertY?MF_CHECKED:MF_UNCHECKED);
 }
 
 //----------------------------------------------------------------------------
@@ -298,16 +295,6 @@ BOOL ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 		{
 			ShowText(hWnd, "Auto Aspect Detect OFF");
 		}
-		break;
-
-	// Image inverstion
-	case IDM_XINVERT:
-		aspectSettings.invertX = !aspectSettings.invertX;
-		ShowText(hWnd,aspectSettings.AutoDetectAspect ? "X-Axis Inversion ON" : "X-Axis Inversion OFF");
-		break;
-	case IDM_YINVERT:
-		aspectSettings.invertY = !aspectSettings.invertY;
-		ShowText(hWnd,aspectSettings.AutoDetectAspect ? "Y-Axis Inversion ON" : "Y-Axis Inversion OFF");
 		break;
 
 
@@ -871,18 +858,6 @@ SETTING AspectSettings[ASPECT_SETTING_LASTONE] =
 		NULL,
 		"ASPECT", "AutoSizeWindow", NULL,
 	},
-	{
-		"Invert X", ONOFF, 0, &aspectSettings.invertX,
-		FALSE, 0, 1, 1, 1,
-		NULL,
-		"ASPECT", "invertX", NULL,
-	},
-	{
-		"Invert Y", ONOFF, 0, &aspectSettings.invertY,
-		FALSE, 0, 1, 1, 1,
-		NULL,
-		"ASPECT", "invertY", NULL,
-	},	
 };
 
 SETTING* Aspect_GetSetting(ASPECT_SETTING Setting)

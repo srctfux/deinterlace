@@ -95,7 +95,6 @@ AspectSettingsStruct aspectSettings = {1333,0,1,0,0,30,0,FALSE,60,300,15,20,
 									{0,0,0,0},{0,0,0,0},{0,0,0,0},TRUE,FALSE,4,TRUE,FALSE,
 									0,60*30,1000,FALSE,8,60,60,1000,FALSE,FALSE,
 									1.0,1.0,0.5,0.5,
-									FALSE,FALSE, // invertX, invertY
 									};
 
 BOOL Bounce_OnChange(long NewValue); // Forward declaration to reuse this code...
@@ -237,37 +236,42 @@ void _WorkoutOverlaySize(BOOL allowResize)
 
 	// If we're in half-height mode, squish the source rectangle accordingly.  This
 	// allows the overlay hardware to do our bobbing for us.
-	// Note: this could be put in a filter but it seems more approproiate to use a part
-	// of setting the overlay...
-		if (HalfHeight)	{ ar.rOriginalOverlaySrc.top /= 2; ar.rOriginalOverlaySrc.bottom /= 2; }
+	if (HalfHeight)	{ ar.rOriginalOverlaySrc.top /= 2; ar.rOriginalOverlaySrc.bottom /= 2; }
 
 	// Save the settings....
+		aspectSettings.sourceRectangle = ar.rCurrentOverlaySrc;
+		aspectSettings.destinationRectangleWindow = ar.rCurrentOverlayDest; 
 		aspectSettings.destinationRectangle = ar.rCurrentOverlayDest;
 		ScreenToClient(hWnd,((PPOINT)&aspectSettings.destinationRectangle));
 		ScreenToClient(hWnd,((PPOINT)&aspectSettings.destinationRectangle)+1);
 
-		aspectSettings.destinationRectangleWindow = ar.rCurrentOverlayDest; 
-		
-		ar.rCurrentOverlaySrc.normalize(); aspectSettings.sourceRectangle = ar.rCurrentOverlaySrc;
-		
 	// Invert the rectangle if necessary...
-		if (aspectSettings.invertX) {
+		/*
+		// Removed for now - seems to cause application to crash - looks
+		// like video drivers can't deal with this...
+		if (( aspectSettings.invertX && aspectSettings.sourceRectangle.right > aspectSettings.sourceRectangle.left) 
+			||
+			(!aspectSettings.invertX && aspectSettings.sourceRectangle.right < aspectSettings.sourceRectangle.left)) {
 			int t = aspectSettings.sourceRectangle.right;
 			aspectSettings.sourceRectangle.right = aspectSettings.sourceRectangle.left;
 			aspectSettings.sourceRectangle.left = t;
 		}
-		if (!aspectSettings.invertY) {
+		if (( aspectSettings.invertY && aspectSettings.sourceRectangle.bottom > aspectSettings.sourceRectangle.top) 
+			||
+			(!aspectSettings.invertY && aspectSettings.sourceRectangle.bottom < aspectSettings.sourceRectangle.top)) {
 			int t = aspectSettings.sourceRectangle.top;
 			aspectSettings.sourceRectangle.top = aspectSettings.sourceRectangle.bottom;
 			aspectSettings.sourceRectangle.bottom = t;
 		}
+		*/
 	
-	// Set or defer the overlay...
+	// Set the overlay
 		if (!aspectSettings.deferedSetOverlay) // MRS 2-22-01 - Defered overlay set
 			Overlay_Update(&aspectSettings.sourceRectangle, &aspectSettings.destinationRectangleWindow, DDOVER_SHOW, TRUE);
 		else aspectSettings.overlayNeedsSetting = TRUE;
 
 	// Save the Overlay Destination and force a repaint 
+
 		// MRS 2-23-01 Only invalidate if we changed something
 		if (memcmp(&ar.rPrevDest,&aspectSettings.destinationRectangle,sizeof(ar.rPrevDest))) { 
 			// MRS 2-22-01 Invalidate just the union of the old region and the new region - no need to invalidate all of the window.
@@ -282,6 +286,7 @@ void _WorkoutOverlaySize(BOOL allowResize)
 
 	return;
 }
+
 void WorkoutOverlaySize() {_WorkoutOverlaySize(TRUE);}
 
 //----------------------------------------------------------------------------
