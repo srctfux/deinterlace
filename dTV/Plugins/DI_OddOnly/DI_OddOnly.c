@@ -51,7 +51,6 @@ DEINTERLACE_METHOD OddOnlyMethod =
 {
 	"Odd Scanlines Only", 
 	"Odd",
-	"O&dd Fields Only",
 	TRUE, 
 	FALSE, 
 	DeinterlaceOddOnly, 
@@ -59,13 +58,18 @@ DEINTERLACE_METHOD OddOnlyMethod =
 	30,
 	0,
 	NULL,
-	14,
-	NULL,
-	NULL,
 	INDEX_ODD_ONLY,
+	NULL,
+	NULL,
+	NULL,
+	1,
 	0,
 	0,
 	-1,
+	NULL,
+	0,
+	FALSE,
+	FALSE,
 };
 
 

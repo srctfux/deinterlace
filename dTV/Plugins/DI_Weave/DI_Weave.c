@@ -51,7 +51,6 @@ DEINTERLACE_METHOD WeaveMethod =
 {
 	"Simple Weave", 
 	NULL,
-	"Simple &Weave",
 	FALSE, 
 	FALSE, 
 	DeinterlaceWeave, 
@@ -59,13 +58,18 @@ DEINTERLACE_METHOD WeaveMethod =
 	60,
 	0,
 	NULL,
-	3,
+	INDEX_WEAVE,
 	NULL,
 	NULL,
-	INDEX_VIDEO_WEAVE,
+	NULL,
+	2,
 	0,
 	0,
 	-1,
+	NULL,
+	0,
+	FALSE,
+	FALSE,
 };
 
 

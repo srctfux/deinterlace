@@ -115,8 +115,6 @@ long nSecTicks = 0;
 long nInitialTicks = -1;
 long nLastTicks = 0;
 long nTotalDeintModeChanges = 0;
-//long nDeintModeChanges[PULLDOWNMODES_LAST_ONE] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
-//long nDeintModeTicks[PULLDOWNMODES_LAST_ONE] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
 
 // cope with older DX header files
 #if !defined(DDFLIP_DONOTWAIT)
@@ -356,6 +354,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 	DEINTERLACE_INFO info;
 	DWORD FlipFlag;
 	DEINTERLACE_METHOD* PrevDeintMethod = NULL;
+	DEINTERLACE_METHOD* CurrentMethod = NULL;
 	BOOL FlipAdjust;
 	LARGE_INTEGER TimerFrequency;
 	BOOL bIsPAL = BT848_GetTVFormat()->Is25fps;
@@ -368,6 +367,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 	BOOL RunningLate = FALSE;
 	double Weight = 0.005;
 	DWORD CurrentTickCount;
+	int nHistory = 0;
 
 	// get the Frequency of the high resolution timer
 	QueryPerformanceFrequency(&TimerFrequency);
@@ -416,7 +416,6 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				ppEvenLines[j][i / 2] = (short *) pDisplay[j] + i * 1024;
 			}
 		}
-
 		PrevDeintMethod = GetCurrentDeintMethod();
 
 		// reset the static variables in the detection code
@@ -431,6 +430,9 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 		dwLastSecondTicks = GetTickCount();
 		while(!bStopThread)
 		{
+			// update with any changes
+			CurrentMethod = GetCurrentDeintMethod();
+			
 			info.IsOdd = WaitForNextField(info.IsOdd, &RunningLate);
 			if(DoAccurateFlips)
 			{
@@ -627,6 +629,18 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 					{
 						UpdateNTSCPulldownMode(&info);
 					}
+					
+					if(CurrentMethod->bNeedCombFactor && info.CombFactor == -1)
+					{
+						GetCombFactor(&info);
+					}
+
+					if(CurrentMethod->bNeedFieldDiff && info.FieldDiff == -1)
+					{
+						CompareFields(&info);
+					}
+
+
 				}
 
 				if (Capture_VBI == TRUE)
@@ -659,27 +673,67 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 						info.Overlay = pDest;
 					}
 
+					if(info.IsOdd)
+					{
+						if(info.EvenLines[0] == NULL)
+						{
+							nHistory = 1;
+						}
+						else if(info.OddLines[0] == NULL)
+						{
+							nHistory = 2;
+						}
+						else if(info.EvenLines[1] == NULL)
+						{
+							nHistory = 3;
+						}
+						else
+						{
+							nHistory = 4;
+						}
+					}
+					else
+					{
+						if(info.OddLines[0] == NULL)
+						{
+							nHistory = 1;
+						}
+						else if(info.EvenLines[0] == NULL)
+						{
+							nHistory = 2;
+						}
+						else if(info.OddLines[1] == NULL)
+						{
+							nHistory = 3;
+						}
+						else
+						{
+							nHistory = 4;
+						}
+					}
+
 					if (RunningLate)
 					{
 						;     // do nothing
 					}
 					// if we have dropped a field then do BOB 
+					// or if we need to get more history
 					// if we are doing a half height mode then just do that
 					// anyway as it will be just as fast
-					else if(bMissedFrame && !GetCurrentDeintMethod()->bIsHalfHeight)
+					else if(!CurrentMethod->bIsHalfHeight && (bMissedFrame || nHistory < CurrentMethod->nFieldsRequired))
 					{
 						bFlipNow = Bob(&info);
 					}
 					// When we first detect film mode we will be on the right flip mode in PAL
 					// and at the end of a three series in NTSC this will be the starting point for
 					// our 2.5 field timings
-					else if(PrevDeintMethod != GetCurrentDeintMethod() && IsFilmMode())
+					else if(PrevDeintMethod != CurrentMethod && IsFilmMode())
 					{
 						bFlipNow = Weave(&info);
 					}
 					else
 					{
-						bFlipNow = GetCurrentDeintMethod()->pfnAlgorithm(&info);
+						bFlipNow = CurrentMethod->pfnAlgorithm(&info);
 					}
 					
 					AdjustAspectRatio(ppEvenLines[LastEvenFrame], ppOddLines[LastOddFrame]);
@@ -712,33 +766,24 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 						// the odd and even flags may help the scaled bob
 						// on some cards
 						FlipFlag = (Wait_For_Flip)?DDFLIP_WAIT:DDFLIP_DONOTWAIT;
-						if(GetCurrentDeintMethod()->nMethodIndex == INDEX_SCALER_BOB)
+						if(CurrentMethod->nMethodIndex == INDEX_SCALER_BOB)
 						{
 							FlipFlag |= (info.IsOdd)?DDFLIP_ODD:DDFLIP_EVEN;
 						}
 
 						// Need to wait for a good time to flip
 						// only if we have been in the same mode for at least one flip
-						if(DoAccurateFlips && PrevDeintMethod == GetCurrentDeintMethod())
+						if(DoAccurateFlips && PrevDeintMethod == CurrentMethod)
 						{
 							LONGLONG TicksToWait;
 							// work out the required ticks between flips
 							if(bIsPAL)
 							{
-								TicksToWait = (LONGLONG)(RunningAverageCounterTicks * 25.0 / (double)GetCurrentDeintMethod()->FrameRate50Hz);
+								TicksToWait = (LONGLONG)(RunningAverageCounterTicks * 25.0 / (double)CurrentMethod->FrameRate50Hz);
 							}
 							else
 							{
-								TicksToWait = (LONGLONG)(RunningAverageCounterTicks * 30.0 / (double)GetCurrentDeintMethod()->FrameRate60Hz);
-							}
-							// if we are geting behind then we need to speed up
-							// slightly however don't ever go more than 3% off spec
-							if(FlipAdjust == TRUE)
-							{
-								if(RunningAverageCounterTicks > StartAverageCounterTicks * 0.97)
-								{
-									//RunningAverageCounterTicks *= 0.999;
-								}
+								TicksToWait = (LONGLONG)(RunningAverageCounterTicks * 30.0 / (double)CurrentMethod->FrameRate60Hz);
 							}
 							QueryPerformanceCounter(&CurrentFlipTime);
 							if(bMissedFrame == FALSE && FlipAdjust == FALSE)
@@ -769,9 +814,6 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				}
 			}
 			
-			// save the last pulldown mode so that we know if its changed
-			PrevDeintMethod = GetCurrentDeintMethod();
-
 			CurrentTickCount = GetTickCount();
 			if (dwLastSecondTicks + 1000 < CurrentTickCount)
 			{
@@ -780,7 +822,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				nFrame = 0;
 				nSecTicks += CurrentTickCount - dwLastSecondTicks;
 				dwLastSecondTicks = CurrentTickCount;
-				GetCurrentDeintMethod()->ModeTicks += CurrentTickCount - nLastTicks;
+				CurrentMethod->ModeTicks += CurrentTickCount - nLastTicks;
 				nLastTicks = CurrentTickCount;
 				if (IsStatusBarVisible())
 				{
@@ -788,6 +830,9 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 					StatusBar_ShowText(STATUS_FPS, Text);
 				}
 			}
+
+			// save the last pulldown mode so that we know if its changed
+			PrevDeintMethod = CurrentMethod;
 		}
 
 		BT848_SetDMA(FALSE);

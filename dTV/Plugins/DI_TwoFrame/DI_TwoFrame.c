@@ -198,7 +198,6 @@ DEINTERLACE_METHOD TwoFrameMethod =
 {
 	"Video Deinterlace (2-Frame)", 
 	"2-Frame", 
-	"Video Dei&nterlace (2-Frame)",
 	FALSE, 
 	FALSE, 
 	DeinterlaceFieldTwoFrame, 
@@ -206,13 +205,18 @@ DEINTERLACE_METHOD TwoFrameMethod =
 	60,
 	DI_TWOFRAME_SETTING_LASTONE,
 	DI_TwoFrameSettings,
-	0,
-	NULL,
-	NULL,
 	INDEX_VIDEO_2FRAME,
+	NULL,
+	NULL,
+	NULL,
+	4,
 	0,
 	0,
-	WM_DI_GREEDY_GETVALUE - WM_USER,
+	WM_DI_TWOFRAME_GETVALUE - WM_USER,
+	NULL,
+	0,
+	FALSE,
+	FALSE,
 };
 
 

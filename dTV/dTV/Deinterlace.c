@@ -50,23 +50,32 @@
 #include "AspectRatio.h"
 #include "Status.h"
 #include "OSD.h"
+#define DOLOGGING
+#include "DebugLog.h"
 
 DEINTERLACE_METHOD FilmDeintMethods[FILMPULLDOWNMODES_LAST_ONE] =
 {
 	// FILM_22_PULLDOWN_ODD
-	{"2:2 Pulldown Flip on Odd", "2:2 Odd", NULL, FALSE, TRUE, FilmModePALOdd, 25, 30, 0, NULL, 0, NULL, NULL, 2, 0, 0, -1,},
+	{"2:2 Pulldown Flip on Odd", "2:2 Odd", FALSE, TRUE, FilmModePALOdd, 25, 30, 
+		6, NULL, 0, NULL, NULL, NULL, 2, 0, 0, -1, NULL, 0, FALSE, FALSE, },
 	// FILM_22_PULLDOWN_EVEN
-	{"2:2 Pulldown Flip on Even", "2:2 Even", NULL, FALSE, TRUE, FilmModePALEven, 25, 30, 0, NULL, 0, NULL, NULL, 2, 0, 0, -1,},
+	{"2:2 Pulldown Flip on Even", "2:2 Even", FALSE, TRUE, FilmModePALEven, 25, 30, 
+		7, NULL, 0, NULL, NULL, NULL, 2, 0, 0, -1, NULL, 0, FALSE, FALSE, },
 	// FILM_32_PULLDOWN_0
-	{"3:2 Pulldown Skip 1st Full Frame", "3:2 1st", NULL, FALSE, TRUE, FilmModeNTSC1st, 1000, 24, 0, NULL, 0, NULL, NULL, 2, 0, 0, -1,},
+	{"3:2 Pulldown Skip 1st Full Frame", "3:2 1st", FALSE, TRUE, FilmModeNTSC1st, 1000, 24, 
+		8, NULL, 0, NULL, NULL, NULL, 2, 0, 0, -1, NULL, 0, FALSE, FALSE, },
 	// FILM_32_PULLDOWN_1
-	{"3:2 Pulldown Skip 2nd Full Frame", "3:2 2nd", NULL, FALSE, TRUE, FilmModeNTSC2nd, 1000, 24, 0, NULL, 0, NULL, NULL, 2, 0, 0, -1,},
+	{"3:2 Pulldown Skip 2nd Full Frame", "3:2 2nd", FALSE, TRUE, FilmModeNTSC2nd, 1000, 24, 
+		9, NULL, 0, NULL, NULL, NULL, 2, 0, 0, -1, NULL, 0, FALSE, FALSE, },
 	// FILM_32_PULLDOWN_2
-	{"3:2 Pulldown Skip 3rd Full Frame", "3:2 3rd", NULL, FALSE, TRUE, FilmModeNTSC3rd, 1000, 24, 0, NULL, 0, NULL, NULL, 2, 0, 0, -1,},
+	{"3:2 Pulldown Skip 3rd Full Frame", "3:2 3rd", FALSE, TRUE, FilmModeNTSC3rd, 1000, 24, 
+		10, NULL, 0, NULL, NULL, NULL, 2, 0, 0, -1, NULL, 0, FALSE, FALSE, },
 	// FILM_32_PULLDOWN_3
-	{"3:2 Pulldown Skip 4th Full Frame", "3:2 4th", NULL, FALSE, TRUE, FilmModeNTSC4th, 1000, 24, 0, NULL, 0, NULL, NULL, 2, 0, 0, -1,},
+	{"3:2 Pulldown Skip 4th Full Frame", "3:2 4th", FALSE, TRUE, FilmModeNTSC4th, 1000, 24, 
+		11, NULL, 0, NULL, NULL, NULL, 2, 0, 0, -1, NULL, 0, FALSE, FALSE, },
 	// FILM_32_PULLDOWN_4
-	{"3:2 Pulldown Skip 5th Full Frame", "3:2 5th", NULL, FALSE, TRUE, FilmModeNTSC5th, 1000, 24, 0, NULL, 0, NULL, NULL, 2, 0, 0, -1,},
+	{"3:2 Pulldown Skip 5th Full Frame", "3:2 5th", FALSE, TRUE, FilmModeNTSC5th, 1000, 24, 
+		12, NULL, 0, NULL, NULL, NULL, 2, 0, 0, -1, NULL, 0, FALSE, FALSE, },
 };
 
 long NumVideoModes = 0;
@@ -199,6 +208,10 @@ void SetVideoDeinterlaceMode(int mode)
 		gVideoPulldownMode = mode;
 		bIsFilmMode = FALSE;
 		nLastTicks = CurrentTickCount;
+		if(!bIsFilmMode && VideoDeintMethods[gVideoPulldownMode]->pfnPluginSwitchTo != NULL)
+		{
+			VideoDeintMethods[gVideoPulldownMode]->pfnPluginSwitchTo(hWnd, StatusBar_GetHWnd(STATUS_PAL));
+		}
 		StatusBar_ShowText(STATUS_PAL, GetDeinterlaceModeName());
 		nTotalDeintModeChanges++;
 		VideoDeintMethods[gVideoPulldownMode]->ModeChanges++;
@@ -320,11 +333,22 @@ BOOL ProcessDeinterlaceSelection(HWND hWnd, WORD wMenuID)
 	{
 		if(wMenuID == VideoDeintMethods[i]->MenuId)
 		{
-			SetVideoDeinterlaceMode(i);
-			OSD_ShowText(hWnd, GetDeinterlaceModeName(), 0);
-			if(!bIsFilmMode && VideoDeintMethods[i]->pfnPluginStart != NULL)
+			if(!bIsFilmMode)
 			{
-				VideoDeintMethods[i]->pfnPluginStart();
+				SetVideoDeinterlaceMode(i);
+				OSD_ShowText(hWnd, GetDeinterlaceModeName(), 0);
+			}
+			else
+			{
+				gVideoPulldownMode = i;
+			}
+			if(BT848_GetTVFormat()->Is25fps)
+			{
+				Setting_SetValue(FD50_GetSetting(PALFILMFALLBACKMODE), VideoDeintMethods[i]->nMethodIndex);
+			}
+			else
+			{
+				Setting_SetValue(FD60_GetSetting(NTSCFILMFALLBACKMODE), VideoDeintMethods[i]->nMethodIndex);
 			}
 			return TRUE;
 		}
@@ -397,14 +421,7 @@ void AddUIForDeintPlugin(HMENU hMenu, DEINTERLACE_METHOD* DeintMethod)
 	{
 		DeintMethod->MenuId = MenuId++;
 	}
-	if(DeintMethod->szMenuName != NULL)
-	{
-		AppendMenu(hMenu, MF_STRING | MF_ENABLED, DeintMethod->MenuId, DeintMethod->szMenuName);
-	}
-	else
-	{
-		AppendMenu(hMenu, MF_STRING | MF_ENABLED, DeintMethod->MenuId, DeintMethod->szName);
-	}
+	AppendMenu(hMenu, MF_STRING | MF_ENABLED, DeintMethod->MenuId, DeintMethod->szName);
 }
 
 BOOL LoadDeinterlacePlugins()
@@ -421,7 +438,14 @@ BOOL LoadDeinterlacePlugins()
 		BOOL RetVal = TRUE;
     	while(RetVal != 0)
 		{
-			LoadDeintPlugin(FindFileData.cFileName);
+			__try
+			{
+				LoadDeintPlugin(FindFileData.cFileName);
+			}
+			__except (EXCEPTION_EXECUTE_HANDLER) 
+			{ 
+				LOG(" Crash Loading %s", FindFileData.cFileName);
+			}
 			RetVal = FindNextFile(hFindFile, &FindFileData);
 		}
 	}
@@ -443,6 +467,10 @@ BOOL LoadDeinterlacePlugins()
 
 		for(i = 0; i < NumVideoModes; i++)
 		{
+			if(VideoDeintMethods[i]->pfnPluginStart != NULL)
+			{
+				VideoDeintMethods[i]->pfnPluginStart(NumVideoModes, VideoDeintMethods);
+			}
 			AddUIForDeintPlugin(hMenu, VideoDeintMethods[i]);
 		}
 		return TRUE;
@@ -586,7 +614,43 @@ SETTING* Deinterlace_GetSetting(long nIndex, long Setting)
 
 LONG Deinterlace_HandleSettingsMsg(HWND hWnd, UINT message, UINT wParam, LONG lParam, BOOL* bDone)
 {
-	return 0;
+	int i;
+	LONG RetVal = 0;
+	SETTING* pSetting;
+	for(i = 0; i < NumVideoModes; i++)
+	{
+		if(message == (UINT)(WM_USER + VideoDeintMethods[i]->nSettingsOffset))
+		{
+			*bDone = TRUE;
+			pSetting = Deinterlace_GetSetting(i, wParam);
+			if(pSetting != NULL)
+			{
+				RetVal =  Setting_GetValue(pSetting);
+			}
+			break;
+		}
+		else if(message == (UINT)(WM_USER + VideoDeintMethods[i]->nSettingsOffset + 100))
+		{
+			*bDone = TRUE;
+			pSetting = Deinterlace_GetSetting(i, wParam);
+			if(pSetting != NULL)
+			{
+				Setting_SetValue(pSetting, lParam);
+			}
+			break;
+		}
+		else if(message == (UINT)(WM_USER + VideoDeintMethods[i]->nSettingsOffset + 200))
+		{
+			*bDone = TRUE;
+			pSetting = Deinterlace_GetSetting(i, wParam);
+			if(pSetting != NULL)
+			{
+				Setting_ChangeValue(pSetting, lParam);
+			}
+			break;
+		}
+	}
+	return RetVal;
 }
 
 

@@ -250,7 +250,6 @@ DEINTERLACE_METHOD VideoWeaveMethod =
 {
 	"Video Deinterlace (Weave)", 
 	"Weave", 
-	"V&ideo Deinterlace (Weave)",
 	FALSE, 
 	FALSE, 
 	DeinterlaceFieldWeave, 
@@ -258,13 +257,18 @@ DEINTERLACE_METHOD VideoWeaveMethod =
 	60,
 	DI_VIDEOWEAVE_SETTING_LASTONE,
 	DI_VideoWeaveSettings,
-	0,
-	NULL,
-	NULL,
 	INDEX_VIDEO_WEAVE,
+	NULL,
+	NULL,
+	NULL,
+	2,
 	0,
 	0,
 	WM_DI_VIDEOWEAVE_GETVALUE - WM_USER,
+	NULL,
+	0,
+	FALSE,
+	FALSE,
 };
 
 

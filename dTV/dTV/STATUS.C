@@ -161,6 +161,31 @@ void StatusBar_ShowText(eSTATUSBAR_BOX Box, LPCTSTR szText)
 	}
 }
 
+HWND StatusBar_GetHWnd(eSTATUSBAR_BOX Box)
+{
+	switch(Box)
+	{
+	case STATUS_KEY:
+		return hwndKeyField;
+		break;
+	case STATUS_FPS:
+		return hwndFPSField;
+		break;
+	case STATUS_PAL:
+		return hwndPalField;
+		break;
+	case STATUS_TEXT:
+		return hwndTextField;
+		break;
+	case STATUS_AUDIO:
+		return hwndAudioField;
+		break;
+	default:
+		break;
+	}
+	return NULL;
+}
+
 BOOL StatusBar_Adjust(HWND hwnd)
 {
 	RECT rect;

@@ -53,7 +53,6 @@ DEINTERLACE_METHOD EvenOnlyMethod =
 {
 	"Even Scanlines Only", 
 	"Even",
-	"E&ven Fields Only",
 	TRUE, 
 	FALSE, 
 	DeinterlaceEvenOnly, 
@@ -61,13 +60,18 @@ DEINTERLACE_METHOD EvenOnlyMethod =
 	30,
 	0,
 	NULL,
-	13,
-	NULL,
-	NULL,
 	INDEX_EVEN_ONLY,
+	NULL,
+	NULL,
+	NULL,
+	1,
 	0,
 	0,
 	-1,
+	NULL,
+	0,
+	FALSE,
+	FALSE,
 };
 
 

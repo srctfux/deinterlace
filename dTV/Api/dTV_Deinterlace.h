@@ -27,17 +27,19 @@
 #include "dTV_Control.h"
 #include "dTV_ApiCommon.h"
 
-typedef void (__stdcall DEINTERLACEPLUGINSTART)(void);
+struct _DEINTERLACE_METHOD;
+
+typedef void (__stdcall DEINTERLACEPLUGINSTART)(long NumPlugIns, struct _DEINTERLACE_METHOD** OtherPlugins);
+typedef void (__stdcall DEINTERLACEPLUGINSWITCHTO)(HWND hwndMain, HWND hwndStatus);
 typedef void (__stdcall DEINTERLACEPLUGINEXIT)(void);
 
-typedef struct
+typedef struct _DEINTERLACE_METHOD
 {
 	// What to display when selected
 	char* szName;
+	// Short Name
 	// What to display when used in adaptive mode (NULL to use szName)
-	char* szAdaptiveName;
-	// What to put in the Menu (NULL to use szName)
-	char* szMenuName;
+	char* szShortName;
 	// Do we need to shrink the overlay by half
 	BOOL bIsHalfHeight;
 	// Is this a film mode
@@ -57,6 +59,8 @@ typedef struct
 	long nMethodIndex;
 	// call this if plugin needs to do anything before it is used
 	DEINTERLACEPLUGINSTART* pfnPluginStart;
+	// call this if plugin needs to do anything before it is used
+	DEINTERLACEPLUGINSWITCHTO* pfnPluginSwitchTo;
 	// call this if plugin needs to deallocate anything
 	DEINTERLACEPLUGINEXIT* pfnPluginExit;
 	// how many fields are required to run this plug-in
@@ -69,8 +73,12 @@ typedef struct
 	long nSettingsOffset;
 	// Dll module so that we can unload the dll cleanly at the end
 	HMODULE hModule;
-	// Menu Id used for this plug-in
+	// Menu Id used for this plug-in, use 0 to automatically allocate one
 	DWORD MenuId;
+	// do we need FieldDiff filled in in info
+	BOOL bNeedFieldDiff;
+	// do we need CombFactor filled in in info
+	BOOL bNeedCombFactor;
 } DEINTERLACE_METHOD;
 
 // Call this function to init a plug-in

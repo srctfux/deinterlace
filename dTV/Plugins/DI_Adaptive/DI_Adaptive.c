@@ -35,33 +35,43 @@ long		AdaptiveThres32Pulldown = 15;
 long		AdaptiveThresPulldownMismatch = 900;
 
 
-long CurrentMode = -1;		// Will use HighMotionMode after ini file is read
-DEINTERLACE_METHOD* DeintMethods[100] = {NULL,};
+long NumVideoModes = 0;
+long CurrentIndex = -1;
+DEINTERLACE_METHOD** DeintMethods = NULL;
+DEINTERLACE_METHOD* CurrentMethod = NULL;
+HWND ghwndStatus = NULL;
 
 ///////////////////////////////////////////////////////////////////////////////
 // UpdateAdaptiveMode
 //
 // Switches to a new adaptive mode.  Updates the status bar if needed.
 ///////////////////////////////////////////////////////////////////////////////
-void UpdateAdaptiveMode(long mode)
+void UpdateAdaptiveMode(long Index)
 {
 	char AdaptiveName[200], *ModeName;
+	int i;
 
-	if (CurrentMode == mode)
+	if (CurrentIndex == Index)
 		return;
 
-	ModeName = DeintMethods[mode]->szAdaptiveName;
-	if (ModeName == NULL)
-		ModeName = DeintMethods[mode]->szName;
-
-	wsprintf(AdaptiveName, "Adaptive - %s", ModeName);
-	//StatusBar_ShowText(STATUS_PAL, AdaptiveName);
-	CurrentMode = mode;
+	for(i = 0; i < NumVideoModes; i++)
+	{
+		if(DeintMethods[i]->nMethodIndex == Index)
+		{
+			CurrentMethod = DeintMethods[i];
+			ModeName = DeintMethods[i]->szShortName;
+			if (ModeName == NULL)
+				ModeName = DeintMethods[i]->szName;
+			wsprintf(AdaptiveName, "Adaptive - %s", ModeName);
+			SendMessage(ghwndStatus, WM_SETTEXT, 0, (LPARAM) AdaptiveName);
+			CurrentIndex = Index;
+		}
+	}
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// AdaptiveDeinterlace
+// DeinterlaceAdaptive
 //
 // This mode supports three styles of deinterlacing and switch among
 // them depending on the amount of motion in the scene.  If there's a lot of
@@ -82,7 +92,7 @@ BOOL DeinterlaceAdaptive(DEINTERLACE_INFO *info)
 
 	// If this is our first time, update the current adaptive mode to whatever
 	// the ini file said our high-motion mode should be.
-	if (CurrentMode == -1)
+	if (CurrentIndex == -1)
 		UpdateAdaptiveMode(HighMotionMode);
 
 	// reset MATCH_COUNT when we are called and the info
@@ -103,12 +113,12 @@ BOOL DeinterlaceAdaptive(DEINTERLACE_INFO *info)
 
 		// If we're in still mode, it might be okay to drop to
 		// low-motion mode.
-		if (CurrentMode == StaticImageMode &&
+		if (CurrentIndex == StaticImageMode &&
 			info->FieldDiff < AdaptiveThresPulldownMismatch)
 		{
 			UpdateAdaptiveMode(LowMotionMode);
 		}
-		else if(CurrentMode != HighMotionMode)
+		else if(CurrentIndex != HighMotionMode)
 		{
 			UpdateAdaptiveMode(HighMotionMode);
 		}
@@ -118,17 +128,52 @@ BOOL DeinterlaceAdaptive(DEINTERLACE_INFO *info)
 		MATCH_COUNT++;
 
 		if (MATCH_COUNT >= LowMotionFieldCount &&
-			CurrentMode == HighMotionMode)
+			CurrentIndex == HighMotionMode)
 		{
 			UpdateAdaptiveMode(LowMotionMode);
 		}
 		if (MATCH_COUNT >= StaticImageFieldCount &&
-			CurrentMode == LowMotionMode)
+			CurrentIndex == LowMotionMode)
 		{
 			UpdateAdaptiveMode(StaticImageMode);
 		}
 	}
-	return DeintMethods[CurrentMode]->pfnAlgorithm(info);
+	if(CurrentMethod != NULL)
+	{
+		return CurrentMethod->pfnAlgorithm(info);
+	}
+	else
+	{
+		return FALSE;
+	}
+}
+
+void __stdcall AdaptiveSwitchTo(HWND hwndMain, HWND hwndStatus)
+{
+	ghwndStatus = hwndStatus;
+}
+
+void __stdcall AdaptiveStart(long NumPlugIns, DEINTERLACE_METHOD** OtherPlugins)
+{
+	DeintMethods = OtherPlugins;
+	NumVideoModes = NumPlugIns;
+}
+
+// we olny use this function from CRT
+// so copy it in rather than load up the whole CRT
+int __cdecl mystricmp(const char * dst, const char * src)
+{
+    int f,l;
+    do
+	{
+        if ( ((f = (unsigned char)(*(dst++))) >= 'A') && (f <= 'Z') )
+            f -= ('A' - 'a');
+
+        if ( ((l = (unsigned char)(*(src++))) >= 'A') && (l <= 'Z') )
+            l -= ('A' - 'a');
+    } while ( f && (f == l) );
+
+    return(f - l);
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -184,7 +229,6 @@ DEINTERLACE_METHOD AdaptiveMethod =
 {
 	"Adaptive", 
 	NULL, 
-	"Ada&ptive Deinterlace",
 	FALSE, 
 	FALSE, 
 	DeinterlaceAdaptive, 
@@ -192,13 +236,18 @@ DEINTERLACE_METHOD AdaptiveMethod =
 	60,
 	DI_ADAPTIVE_SETTING_LASTONE,
 	DI_AdaptiveSettings,
-	9,
-	NULL,
-	NULL,
 	INDEX_ADAPTIVE,
+	AdaptiveStart,
+	AdaptiveSwitchTo,
+	NULL,
+	4,
 	0,
 	0,
-	-1,
+	WM_DI_ADAPTIVE_GETVALUE - WM_USER,
+	NULL,
+	0,
+	TRUE,
+	FALSE,
 };
 
 __declspec(dllexport) DEINTERLACE_METHOD* GetDeinterlacePluginInfo(long CpuFeatureFlags)

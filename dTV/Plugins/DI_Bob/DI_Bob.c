@@ -227,7 +227,6 @@ DEINTERLACE_METHOD BobMethod =
 {
 	"Simple Bob", 
 	NULL,
-	"Simple &Bob",
 	FALSE, 
 	FALSE, 
 	DeinterlaceBob, 
@@ -235,13 +234,18 @@ DEINTERLACE_METHOD BobMethod =
 	60,
 	0,
 	NULL,
-	4,
-	NULL,
-	NULL,
 	INDEX_BOB,
+	NULL,
+	NULL,
+	NULL,
+	1,
 	0,
 	0,
 	-1,
+	NULL,
+	0,
+	FALSE,
+	FALSE,
 };
 
 

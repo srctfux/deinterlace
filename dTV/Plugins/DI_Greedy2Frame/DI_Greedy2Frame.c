@@ -165,7 +165,6 @@ DEINTERLACE_METHOD Greedy2FrameMethod =
 {
 	"Greedy 2 Frame", 
 	NULL,
-	"Greedy &2 Frame",
 	FALSE, 
 	FALSE, 
 	DeinterlaceGreedy2Frame, 
@@ -173,13 +172,18 @@ DEINTERLACE_METHOD Greedy2FrameMethod =
 	60,
 	DI_GREEDY2FRAME_SETTING_LASTONE,
 	DI_Greedy2FrameSettings,
-	18,
-	NULL,
-	NULL,
 	INDEX_VIDEO_GREEDY2FRAME,
+	NULL,
+	NULL,
+	NULL,
+	4,
 	0,
 	0,
 	WM_DI_GREEDY2FRAME_GETVALUE - WM_USER,
+	NULL,
+	0,
+	FALSE,
+	FALSE,
 };
 
 

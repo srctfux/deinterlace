@@ -29,6 +29,8 @@
 #include "cpu.h"
 #include "dTV.h"
 #include "OSD.h"
+#define DOLOGGING
+#include "DebugLog.h"
 
 long NumFilters = 0;
 BOOL TNoiseFilterOn;
@@ -140,7 +142,14 @@ BOOL LoadFilterPlugins()
 		BOOL RetVal = TRUE;
     	while(RetVal != 0)
 		{
-			LoadFilterPlugin(FindFileData.cFileName);
+			__try
+			{
+				LoadFilterPlugin(FindFileData.cFileName);
+			}
+			__except (EXCEPTION_EXECUTE_HANDLER) 
+			{ 
+				LOG(" Crash Loading %s", FindFileData.cFileName);
+			}
 			RetVal = FindNextFile(hFindFile, &FindFileData);
 		}
 	}
@@ -212,7 +221,43 @@ SETTING* Filter_GetSetting(long nIndex, long Setting)
 
 LONG Filter_HandleSettingsMsg(HWND hWnd, UINT message, UINT wParam, LONG lParam, BOOL* bDone)
 {
-	return 0;
+	int i;
+	LONG RetVal = 0;
+	SETTING* pSetting;
+	for(i = 0; i < NumFilters; i++)
+	{
+		if(message == (UINT)(WM_USER + Filters[i]->nSettingsOffset))
+		{
+			*bDone = TRUE;
+			pSetting = Filter_GetSetting(i, wParam);
+			if(pSetting != NULL)
+			{
+				RetVal =  Setting_GetValue(pSetting);
+			}
+			break;
+		}
+		else if(message == (UINT)(WM_USER + Filters[i]->nSettingsOffset + 100))
+		{
+			*bDone = TRUE;
+			pSetting = Filter_GetSetting(i, wParam);
+			if(pSetting != NULL)
+			{
+				Setting_SetValue(pSetting, lParam);
+			}
+			break;
+		}
+		else if(message == (UINT)(WM_USER + Filters[i]->nSettingsOffset + 200))
+		{
+			*bDone = TRUE;
+			pSetting = Filter_GetSetting(i, wParam);
+			if(pSetting != NULL)
+			{
+				Setting_ChangeValue(pSetting, lParam);
+			}
+			break;
+		}
+	}
+	return RetVal;
 }
 
 void Filter_ReadSettingsFromIni()

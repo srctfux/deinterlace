@@ -206,7 +206,6 @@ DEINTERLACE_METHOD VideoBobMethod =
 {
 	"Video Deinterlace (Bob)", 
 	"Bob",
-	"&Video Deinterlace (Bob)", 
 	FALSE, 
 	FALSE, 
 	DeinterlaceFieldBob, 
@@ -214,14 +213,18 @@ DEINTERLACE_METHOD VideoBobMethod =
 	60,
 	DI_VIDEOBOB_SETTING_LASTONE,
 	DI_VideoBobSettings,
-	0,
-	NULL,
-	NULL,
 	INDEX_VIDEO_BOB,
+	NULL,
+	NULL,
+	NULL,
+	1,
 	0,
 	0,
 	WM_DI_VIDEOBOB_GETVALUE - WM_USER,
-
+	NULL,
+	0,
+	FALSE,
+	FALSE,
 };
 
 

@@ -59,6 +59,8 @@ typedef struct
 	long nSettings;
 	// pointer to start of Settings[nSettings]
 	SETTING* pSettings;
+	// the offset used by the external settings API
+	long nSettingsOffset;
 } FILTER_METHOD;
 
 

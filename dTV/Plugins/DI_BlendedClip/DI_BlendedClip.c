@@ -791,6 +791,14 @@ BOOL APIENTRY BlendedClipProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 	return (FALSE);
 }
 
+void __stdcall BlendedClipSwitchTo(HWND hwndMain, HWND hwndStatus)
+{
+	if(BlcShowControls)
+	{
+		DialogBox(hInst, "BLENDED_CLIP", hwndMain, BlendedClipProc);
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////
 // Start of Settings related code
 /////////////////////////////////////////////////////////////////////////////
@@ -876,19 +884,10 @@ SETTING DI_BlendedClipSettings[DI_BLENDEDCLIP_SETTING_LASTONE] =
 	},
 };
 
-void __stdcall BlendedClipStart(void)
-{
-	if(BlcShowControls)
-	{
-		DialogBox(hInst, "BLENDED_CLIP", NULL, BlendedClipProc);
-	}
-}
-
 DEINTERLACE_METHOD BlendedClipMethod =
 {
 	"Blended Clip", 
 	NULL,
-	"Blended &Clip...",
 	FALSE, 
 	FALSE, 
 	DeinterlaceBlendedClip, 
@@ -896,13 +895,18 @@ DEINTERLACE_METHOD BlendedClipMethod =
 	60,
 	0,
 	NULL,
-	15,
-	BlendedClipStart,
-	NULL,
 	INDEX_BLENDED_CLIP,
+	NULL,
+	BlendedClipSwitchTo,
+	NULL,
+	3,
 	0,
 	0,
 	WM_DI_BLENDEDCLIP_GETVALUE - WM_USER,
+	NULL,
+	0,
+	FALSE,
+	FALSE,
 };
 
 

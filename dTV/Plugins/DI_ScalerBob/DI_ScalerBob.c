@@ -53,7 +53,6 @@ DEINTERLACE_METHOD ScalerBobMethod =
 {
 	"Scaler Bob", 
 	NULL,
-	"S&caler BOB",
 	TRUE,
 	FALSE,
 	DeinterlaceScalerBob,
@@ -61,13 +60,18 @@ DEINTERLACE_METHOD ScalerBobMethod =
 	60,
 	0,
 	NULL,
-	5,
-	NULL,
-	NULL,
 	INDEX_SCALER_BOB,
+	NULL,
+	NULL,
+	NULL,
+	1,
 	0,
 	0,
 	-1,
+	NULL,
+	0,
+	FALSE,
+	FALSE,
 };
 
 

@@ -210,9 +210,8 @@ SETTING DI_GreedySettings[DI_GREEDY_SETTING_LASTONE] =
 
 DEINTERLACE_METHOD GreedyMethod =
 {
-	"Video (Greedy)", 
+	"Video (Greedy, Low Motion)", 
 	"Greedy",
-	"Video (&Greedy, Low Motion)",
 	FALSE, 
 	FALSE, 
 	DeinterlaceGreedy, 
@@ -220,13 +219,18 @@ DEINTERLACE_METHOD GreedyMethod =
 	60,
 	DI_GREEDY_SETTING_LASTONE,
 	DI_GreedySettings,
-	17,
-	NULL,
-	NULL,
 	INDEX_VIDEO_GREEDY,
+	NULL,
+	NULL,
+	NULL,
+	3,
 	0,
 	0,
 	WM_DI_GREEDY_GETVALUE - WM_USER,
+	NULL,
+	0,
+	FALSE,
+	FALSE,
 };
 
 
