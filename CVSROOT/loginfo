@@ -27,4 +27,5 @@
 
 
 CVSROOT $CVSROOT/CVSROOT/syncmail %{sVv} dschmelzer@hotmail.com
-DEFAULT $CVSROOT/CVSROOT/syncmail %{sVv} deinterlace-checkins@lists.sourceforge.net
+dTV $CVSROOT/CVSROOT/syncmail %{sVv} deinterlace-checkins@lists.sourceforge.net
+htdocs $CVSROOT/CVSROOT/syncmail %{sVv} deinterlace-checkins@lists.sourceforge.net
