@@ -196,7 +196,10 @@
 #define IDM_SOURCE_OTHER1               1092
 #define IDM_SOURCE_OTHER2               1093
 #define IDM_SOURCE_COMPVIASVIDEO        1094
-#define IDM_SOURCE_CCIR656              1095
+#define IDM_SOURCE_CCIR656_1            1095
+#define IDM_SOURCE_CCIR656_2            1096
+#define IDM_SOURCE_CCIR656_3            1097
+#define IDM_SOURCE_CCIR656_4            1098
 #define IDM_AUDIO_0                     1110
 #define IDM_AUDIO_1                     1111
 #define IDM_AUDIO_2                     1112

@@ -602,8 +602,9 @@ const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 	// MAE 5 Dec 2000 End of change
 	{
 		"RS BT Card",
-		3, 4, 0, 2, 0xfff,
-		{ 2, 3, 1, 1, 0, 0, 0, 0},
+		3, 4, 0, 2, 0x1f800,
+		{ 0x010002, 0x000003, 0x000001, 0x000001, 0x000001, 0x000001, 
+			0x000000, 0x080000, 0x100000, 0x180000},
 		{ 13, 14, 11, 7, 0, 0},
 		0,
 		1,1,1,1,0,0,0,1,
@@ -1107,5 +1108,8 @@ void TVCard_SetMenu(HMENU hMenu)
 		EnableMenuItem(hMenu, IDM_SOURCE_OTHER2, (TVCards[CardType].nVideoInputs > 4)?MF_ENABLED:MF_GRAYED);
 		EnableMenuItem(hMenu, IDM_SOURCE_COMPVIASVIDEO, MF_ENABLED);
 	}
-	EnableMenuItem(hMenu, IDM_SOURCE_CCIR656, (CardType == TVCARD_RS_BT)?MF_ENABLED:MF_GRAYED);
+	EnableMenuItem(hMenu, IDM_SOURCE_CCIR656_1, (CardType == TVCARD_RS_BT)?MF_ENABLED:MF_GRAYED);
+	EnableMenuItem(hMenu, IDM_SOURCE_CCIR656_2, (CardType == TVCARD_RS_BT)?MF_ENABLED:MF_GRAYED);
+	EnableMenuItem(hMenu, IDM_SOURCE_CCIR656_3, (CardType == TVCARD_RS_BT)?MF_ENABLED:MF_GRAYED);
+	EnableMenuItem(hMenu, IDM_SOURCE_CCIR656_4, (CardType == TVCARD_RS_BT)?MF_ENABLED:MF_GRAYED);
 }

@@ -824,7 +824,10 @@ BOOL BT848_SetVideoSource(VIDEOSOURCETYPE nInput)
 	case SOURCE_COMPOSITE:
 	case SOURCE_OTHER1:
 	case SOURCE_OTHER2:
-	case SOURCE_CCIR656:
+	case SOURCE_CCIR656_1:
+	case SOURCE_CCIR656_2:
+	case SOURCE_CCIR656_3:
+	case SOURCE_CCIR656_4:
 	default:
 		BT848_AndDataByte(BT848_E_CONTROL, ~BT848_CONTROL_COMP);
 		BT848_AndDataByte(BT848_O_CONTROL, ~BT848_CONTROL_COMP);
@@ -1403,7 +1406,10 @@ BOOL VideoSource_OnChange(long NewValue)
 		break;
 
 	// MAE 13 Dec 2000 for CCIR656 Digital input
-    case SOURCE_CCIR656:
+    case SOURCE_CCIR656_1:
+    case SOURCE_CCIR656_2:
+    case SOURCE_CCIR656_3:
+    case SOURCE_CCIR656_4:
 		BT848_ResetHardware();
 		BT848_Enable656();
 		WorkoutOverlaySize();
@@ -1781,7 +1787,7 @@ SETTING BT848Settings[BT848_SETTING_LASTONE] =
 	},
 	{
 		"Video Source", SLIDER, 0, &VideoSource,
-		SOURCE_COMPOSITE, SOURCE_TUNER, SOURCE_CCIR656, 1, 1,
+		SOURCE_COMPOSITE, SOURCE_TUNER, SOURCE_CCIR656_4, 1, 1,
 		NULL,
 		"Hardware", "VideoSource", VideoSource_OnChange,
 	},
@@ -1843,7 +1849,10 @@ void BT848_SetMenu(HMENU hMenu)
 	CheckMenuItem(hMenu, IDM_SOURCE_OTHER1,        (VideoSource == 3)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_SOURCE_OTHER2,        (VideoSource == 4)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_SOURCE_COMPVIASVIDEO, (VideoSource == 5)?MF_CHECKED:MF_UNCHECKED);
-    CheckMenuItem(hMenu, IDM_SOURCE_CCIR656,       (VideoSource == 6)?MF_CHECKED:MF_UNCHECKED);
+    CheckMenuItem(hMenu, IDM_SOURCE_CCIR656_1,       (VideoSource == 6)?MF_CHECKED:MF_UNCHECKED);
+    CheckMenuItem(hMenu, IDM_SOURCE_CCIR656_2,       (VideoSource == 7)?MF_CHECKED:MF_UNCHECKED);
+    CheckMenuItem(hMenu, IDM_SOURCE_CCIR656_3,       (VideoSource == 8)?MF_CHECKED:MF_UNCHECKED);
+    CheckMenuItem(hMenu, IDM_SOURCE_CCIR656_4,       (VideoSource == 9)?MF_CHECKED:MF_UNCHECKED);
 
 	CheckMenuItem(hMenu, ID_SETTINGS_PIXELWIDTH_768, (CurrentX == 768)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, ID_SETTINGS_PIXELWIDTH_720, (CurrentX == 720)?MF_CHECKED:MF_UNCHECKED);

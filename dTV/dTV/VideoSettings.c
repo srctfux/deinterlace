@@ -251,7 +251,10 @@ void VideoSettings_SetupDefaults()
 	
 	switch(Setting_GetValue(BT848_GetSetting(VIDEOSOURCE)))
 	{
-	case SOURCE_CCIR656:
+	case SOURCE_CCIR656_1:
+	case SOURCE_CCIR656_2:
+	case SOURCE_CCIR656_3:
+	case SOURCE_CCIR656_4:
 		BT848_GetSetting(BRIGHTNESS)->Default = 0;
 		BT848_GetSetting(CONTRAST)->Default = 0x80;
 		BT848_GetSetting(SATURATION)->Default = 0x80;

@@ -928,7 +928,10 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_SOURCE_OTHER1:
 		case IDM_SOURCE_OTHER2:
 		case IDM_SOURCE_COMPVIASVIDEO:
-        case IDM_SOURCE_CCIR656:
+        case IDM_SOURCE_CCIR656_1:
+        case IDM_SOURCE_CCIR656_2:
+        case IDM_SOURCE_CCIR656_3:
+        case IDM_SOURCE_CCIR656_4:
 			nValue = LOWORD(wParam) - IDM_SOURCE_TUNER;
 			OSD_ShowText(hWnd, GetSourceName(nValue), 0);
 			StatusBar_ShowText(STATUS_KEY, GetSourceName(nValue));
@@ -1650,7 +1653,7 @@ void MainWndOnInitBT(HWND hWnd)
 
         // OK we're ready to go
 		BT848_ResetHardware();
-        if (Setting_GetValue(BT848_GetSetting(VIDEOSOURCE)) == SOURCE_CCIR656)
+        if (Setting_GetValue(BT848_GetSetting(VIDEOSOURCE)) >= SOURCE_CCIR656_1)
         {
     		BT848_Enable656();
         }
@@ -1987,7 +1990,10 @@ const char * GetSourceName(int nVideoSource)
 	case SOURCE_OTHER1:        return "Other 1"; break;
 	case SOURCE_OTHER2:        return "Other 2"; break;
 	case SOURCE_COMPVIASVIDEO: return "Composite via S-Video"; break;
-	case SOURCE_CCIR656:       return "CCIR656"; break; // MAE 13 Dec 2000 For CCIR656 input
+	case SOURCE_CCIR656_1:     return "CCIR656 1"; break;
+	case SOURCE_CCIR656_2:     return "CCIR656 2"; break;
+	case SOURCE_CCIR656_3:     return "CCIR656 3"; break;
+	case SOURCE_CCIR656_4:     return "CCIR656 4"; break;
 	}
 	return "Unknown";
 }

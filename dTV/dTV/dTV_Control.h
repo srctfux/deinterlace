@@ -113,7 +113,10 @@
 // Messages for the Input Select Menu
 #define IDM_COMPOSITE                   1090
 #define IDM_SVIDEO                      1091
-#define IDM_CCIR656                     1095
+#define IDM_CCIR656_1                   1095
+#define IDM_CCIR656_2                   1096
+#define IDM_CCIR656_3                   1097
+#define IDM_CCIR656_4                   1098
 
 // Messages for the Screen Aspect Ratio Menu
 #define IDM_TASPECT_0                   740
@@ -135,7 +138,10 @@ typedef enum
 	SOURCE_OTHER1,
 	SOURCE_OTHER2,
 	SOURCE_COMPVIASVIDEO,
-    SOURCE_CCIR656
+    SOURCE_CCIR656_1,
+    SOURCE_CCIR656_2,
+    SOURCE_CCIR656_3,
+    SOURCE_CCIR656_4,
 } VIDEOSOURCETYPE;
 
 typedef enum

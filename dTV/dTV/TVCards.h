@@ -163,7 +163,7 @@ typedef struct
 	int TunerInput;
 	int SVideoInput;
 	DWORD GPIOMask;
-	DWORD MuxSelect[8];
+	DWORD MuxSelect[10];
 	DWORD AudioMuxSelect[6]; /* Tuner, Radio, external, internal, mute, stereo */
 	DWORD GPIOMuxMask;   /* GPIO MUX mask */
 
