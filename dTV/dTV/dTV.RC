@@ -913,6 +913,8 @@ BEGIN
         MENUITEM "16:9 Anamorphic\t3",          IDM_ASPECT_ANAMORPHIC
         POPUP "Advanced Image Aspect Ratios"
         BEGIN
+            MENUITEM "Autodetect (experimental)\tA", IDM_SASPECT_AUTO
+            MENUITEM "Detect from Current Image\t`", IDM_SASPECT_COMPUTE
             MENUITEM "Stretch to Window\tCtrl+0",   IDM_SASPECT_0
             MENUITEM "1.33\tCtrl+1",                IDM_SASPECT_133
             MENUITEM "1.66   Letterboxed\tCtrl+2",  IDM_SASPECT_166
@@ -925,9 +927,7 @@ BEGIN
             MENUITEM "1.85   Anamorphic\tCtrl+Shift+4", IDM_SASPECT_185A
             MENUITEM "2.00   Anamorphic\tCtrl+Shift+5", IDM_SASPECT_200A
             MENUITEM "2.35   Anamorphic\tCtrl+Shift+6", IDM_SASPECT_235A
-            MENUITEM "Current Image\t9",            IDM_SASPECT_COMPUTE
             MENUITEM "Custom  (from .INI file)\tCtrl+9", IDM_SASPECT_CUSTOM
-            MENUITEM "Autodetect (experimental)\tA", IDM_SASPECT_AUTO
         END
         POPUP "Aspect Ratio of Display Screen"
         BEGIN
@@ -1296,7 +1296,6 @@ BEGIN
     "6",            IDM_TASPECT_235,        VIRTKEY, ALT, NOINVERT
     "6",            IDM_SASPECT_235A,       VIRTKEY, SHIFT, CONTROL, 
                                                     NOINVERT
-    "9",            IDM_SASPECT_COMPUTE,    VIRTKEY, NOINVERT
     "9",            IDM_SASPECT_CUSTOM,     VIRTKEY, CONTROL, NOINVERT
     "9",            IDM_TASPECT_CUSTOM,     VIRTKEY, ALT, NOINVERT
     "A",            IDM_SASPECT_AUTO,       VIRTKEY, NOINVERT
@@ -1336,6 +1335,7 @@ BEGIN
     "X",            IDM_R_BALANCE,          VIRTKEY, SHIFT, NOINVERT
     "Y",            IDM_L_BALANCE,          VIRTKEY, NOINVERT
     "Y",            IDM_L_BALANCE,          VIRTKEY, SHIFT, NOINVERT
+    "`",            IDM_SASPECT_COMPUTE,    ASCII,  NOINVERT
 END
 
 
