@@ -60,12 +60,19 @@ int aspect_mode = 0;
 int custom_source_aspect = 0;
 int custom_target_aspect = 0;
 
-// Luminance cutoff for a black pixel for letterbox detection.  0-255.
+// Luminance cutoff for a black pixel for letterbox detection.  0-127.
 long LuminanceThreshold = 15;
 
 // Ignore this many non-black pixels when detecting letterbox.  0 means
 // use a reasonable default.
 long IgnoreNonBlackPixels = 0;
+
+// Nonzero to continuously scan for aspect ratio changes.
+long AutoDetectAspect = 0;
+
+// For aspect autodetect, require the same aspect ratio for this number of
+// frames before zooming in.
+long ZoomInFrameCount = 120;
 
 
 RECT destinationRectangle = {0,0,0,0};
@@ -92,8 +99,13 @@ void SetMenuAspectRatio(HWND hWnd)
 	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_185A, MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_200A, MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_235A, MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_AUTO, MF_UNCHECKED);
 
-	if (aspect_mode == 1)
+	if (AutoDetectAspect)
+	{
+		CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_AUTO, MF_CHECKED);
+	}
+	else if (aspect_mode == 1)
 	{
 		switch (source_aspect)
 		{
@@ -179,6 +191,7 @@ int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 	case IDM_SASPECT_235A:
 	case IDM_SASPECT_COMPUTE:
 	case IDM_SASPECT_CUSTOM:
+	case IDM_SASPECT_AUTO:
 	case IDM_TASPECT_0:
 	case IDM_TASPECT_133:
 	case IDM_TASPECT_166:
@@ -208,7 +221,12 @@ int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 			case IDM_SASPECT_200A:    aspect_mode = 2;  source_aspect = 2000;  break;
 			case IDM_SASPECT_235A:    aspect_mode = 2;  source_aspect = 2350;  break;
 			case IDM_SASPECT_CUSTOM:  aspect_mode = 2;  source_aspect = custom_source_aspect;  break;
-			case IDM_SASPECT_COMPUTE: FindAspectRatio();  break;
+			case IDM_SASPECT_COMPUTE: source_aspect = FindAspectRatio();  break;
+
+			case IDM_SASPECT_AUTO:
+				source_aspect = FindAspectRatio();
+				AutoDetectAspect = ! AutoDetectAspect;
+				break;
 
 			// Output Display Aspect Ratios
 			case IDM_TASPECT_0:       target_aspect = 0;     break;
@@ -554,8 +572,7 @@ void WorkoutOverlaySize()
 // produce good results if the aspect ratio analysis is done on a bright scene.
 //
 // This function can almost certainly be made more efficient using MMX
-// instructions, but since (for the moment, at least) it's only executed
-// once at a time on user request, it's probably not worth it.
+// instructions.
 int FindTopOfImage(BYTE *Overlay)
 {
 	int y, x;
@@ -563,23 +580,74 @@ int FindTopOfImage(BYTE *Overlay)
 	int maxY = CurrentY / 2 - InitialOverscan;
 	BYTE *pixel;
 	int ignoreCount = IgnoreNonBlackPixels;
+	int pixelCount;
+	const int BytesBetweenLuminanceValues = 2;	// just for clarity's sake
+	const int SkipPixels = 16;			// check fewer pixels to reduce CPU hit
 
 	if (ignoreCount == 0)
 	{
 		// The user didn't specify an ignore count.  Default to 20%
 		// of the horizontal size of the image.
-		ignoreCount = CurrentX / 5;
+		ignoreCount = (CurrentX / 5) / SkipPixels;
+	}
+	else
+	{
+		ignoreCount /= SkipPixels;
+		if (ignoreCount == 0)
+			ignoreCount = 1;
 	}
 
 	for (y = InitialOverscan; y < maxY; y++)
 	{
-		int pixelCount = -ignoreCount;
-		pixel = &Overlay[OverlayPitch * y];
-		for (x = InitialOverscan; x < maxX; x++)
+		pixelCount = -ignoreCount;
+		pixel = &Overlay[OverlayPitch * y + (InitialOverscan * BytesBetweenLuminanceValues)];
+		for (x = InitialOverscan; x < maxX; x += SkipPixels)
 		{
-			if (*pixel > LuminanceThreshold)
+			if (((*pixel) & 0x7f) > LuminanceThreshold)
 				pixelCount++;
-			pixel += 2;	// Skip past the chroma information
+			pixel += BytesBetweenLuminanceValues * SkipPixels;
+		}
+
+		if (pixelCount > 0)
+			break;
+	}
+
+	return y;
+}
+
+int FindBottomOfImage(BYTE *Overlay)
+{
+	int y, x;
+	int maxX = CurrentX - InitialOverscan * 2;
+	int maxY = CurrentY - InitialOverscan * 2;
+	BYTE *pixel;
+	int ignoreCount = IgnoreNonBlackPixels;
+	int pixelCount;
+	const int BytesBetweenLuminanceValues = 2;	// just for clarity's sake
+	const int SkipPixels = 32;			// check fewer pixels to reduce CPU hit
+
+	if (ignoreCount == 0)
+	{
+		// The user didn't specify an ignore count.  Default to 20%
+		// of the horizontal size of the image.
+		ignoreCount = (CurrentX / 5) / SkipPixels;
+	}
+	else
+	{
+		ignoreCount /= SkipPixels;
+		if (ignoreCount == 0)
+			ignoreCount = 1;
+	}
+
+	for (y = maxY; y >= maxY / 2; y--)
+	{
+		pixelCount = -ignoreCount;
+		pixel = &Overlay[OverlayPitch * y + (InitialOverscan * BytesBetweenLuminanceValues)];
+		for (x = InitialOverscan; x < maxX; x += SkipPixels)
+		{
+			if (((*pixel) & 0x7f) > LuminanceThreshold)
+				pixelCount++;
+			pixel += BytesBetweenLuminanceValues * SkipPixels;
 		}
 
 		if (pixelCount > 0)
@@ -592,9 +660,10 @@ int FindTopOfImage(BYTE *Overlay)
 
 //----------------------------------------------------------------------------
 // Adjust the source aspect ratio to fit whatever is currently onscreen.
-void FindAspectRatio(void)
+int FindAspectRatio(void)
 {
-	int top;
+	int ratio;
+	int topBorder, bottomBorder, border;
 	int imageHeight = CurrentY - InitialOverscan * 2;
 	DDSURFACEDESC ddsd;
 
@@ -621,18 +690,21 @@ void FindAspectRatio(void)
 	// Find the top of the image relative to the overscan area.  Overscan has to
 	// be discarded from the computations since it can't really be regarded as
 	// part of the picture.
-	top = FindTopOfImage(ddsd.lpSurface) - InitialOverscan;
+	topBorder = FindTopOfImage(ddsd.lpSurface) - InitialOverscan;
+
+	// Now find the size of the border at the bottom of the image.
+	bottomBorder = CurrentY - FindBottomOfImage(ddsd.lpSurface) - InitialOverscan;
+
+	// The border size is the smaller of the two.
+	border = (topBorder < bottomBorder) ? topBorder : bottomBorder;
 
 	// Now the material aspect ratio is simply
 	//
 	//	effective width / (total image height - number of black lines at top and bottom)
 	//
 	// We compute effective width from height using the source-frame aspect ratio, since
-	// this will change depending on whether or not the image is anamorphic.  And we
-	// assume that the total number of black lines above and below the image is simply
-	// twice the number on top, which will be true for centered images.
-	source_aspect = (int)((imageHeight * 1000) * GetActualSourceFrameAspect() / (imageHeight - top * 2));
-	LOG("Top of picture: %d   Aspect: %d", top, source_aspect);
+	// this will change depending on whether or not the image is anamorphic.
+	ratio = (int)((imageHeight * 1000) * GetActualSourceFrameAspect() / (imageHeight - border * 2));
 
 	/* Uncomment whenever we stop keeping the surfaces locked.
 	ddrval = IDirectDrawSurface_Unlock(lpDDOverlay, ddsd.lpSurface);
@@ -643,5 +715,46 @@ void FindAspectRatio(void)
 	}
 	*/
 
-	WorkoutOverlaySize();
+	return ratio;
+}
+
+//----------------------------------------------------------------------------
+// Continuously adjust the source aspect ratio.  This is called once per frame.
+void AdjustAspectRatio(void)
+{
+	static int lastNewRatio = 0;
+	static int newRatioFrameCount = 0;
+	int newRatio;
+
+	if (AutoDetectAspect)
+	{
+		newRatio = FindAspectRatio();
+		
+		// If the new ratio is less than the old one -- that is, if we've just
+		// become less letterboxed -- switch to the new ratio immediately to
+		// avoid cutting the image off.
+		if (newRatio < source_aspect)
+		{
+			LOG("Zooming out to ratio %d", newRatio);
+			source_aspect = newRatio;
+			WorkoutOverlaySize();
+		}
+		else if (newRatio != source_aspect && newRatio == lastNewRatio)
+		{
+			// Require the same aspect ratio for some number of frames before
+			// zooming in.
+			if (++newRatioFrameCount >= ZoomInFrameCount)
+			{
+				LOG("Zooming in to ratio %d", newRatio);
+				source_aspect = newRatio;
+				WorkoutOverlaySize();
+			}
+		}
+		else
+		{
+			if (lastNewRatio != newRatio)
+				newRatioFrameCount = 0;
+			lastNewRatio = newRatio;
+		}
+	}
 }

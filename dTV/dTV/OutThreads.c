@@ -45,6 +45,7 @@
 #include "VBI_VideoText.h"
 #include "vbi.h"
 #include "deinterlace.h"
+#include "AspectRatio.h"
 #define DOLOGGING
 #include "DebugLog.h"
 #include "vbi.h"
@@ -980,6 +981,7 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 
 			if(DoWeWantToFlip(bFlipNow, bIsOddField))
 			{
+				AdjustAspectRatio();
 				IDirectDrawSurface_Flip(lpDDOverlay, lpDDOverlayBack, DDFLIP_WAIT);
 				dwLastFlipTicks = GetTickCount();
 				if(lpCurOverlay == lpOverlay)
@@ -1228,6 +1230,7 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 
 			if(DoWeWantToFlip(bFlipNow, bIsOddField))
 			{
+				AdjustAspectRatio();
 				IDirectDrawSurface_Flip(lpDDOverlay, lpDDOverlayBack, DDFLIP_WAIT);
 				dwLastFlipTicks = GetTickCount();
 				if(lpCurOverlay == lpOverlay)

@@ -927,6 +927,7 @@ BEGIN
             MENUITEM "2.35   Anamorphic\tCtrl+Shift+6", IDM_SASPECT_235A
             MENUITEM "Current Image\t9",            IDM_SASPECT_COMPUTE
             MENUITEM "Custom  (from .INI file)\tCtrl+9", IDM_SASPECT_CUSTOM
+            MENUITEM "Autodetect (experimental)\tA", IDM_SASPECT_AUTO
         END
         POPUP "Aspect Ratio of Display Screen"
         BEGIN
@@ -1292,6 +1293,7 @@ BEGIN
     "9",            IDM_SASPECT_COMPUTE,    VIRTKEY, NOINVERT
     "9",            IDM_SASPECT_CUSTOM,     VIRTKEY, CONTROL, NOINVERT
     "9",            IDM_TASPECT_CUSTOM,     VIRTKEY, ALT, NOINVERT
+    "A",            IDM_SASPECT_AUTO,       VIRTKEY, NOINVERT
     "B",            IDM_BRIGHTNESSMINUS,    VIRTKEY, NOINVERT
     "B",            IDM_BRIGHTNESSPLUS,     VIRTKEY, SHIFT, NOINVERT
     "C",            IDM_COLORMINUS,         VIRTKEY, NOINVERT

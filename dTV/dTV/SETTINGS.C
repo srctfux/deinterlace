@@ -273,6 +273,8 @@ void LoadSettingsFromIni(LPSTR Name)
 	// END MRS 9/2/00
 	LuminanceThreshold = GetPrivateProfileInt("ASPECT", "LuminanceThreshold", LuminanceThreshold, szIniFile);
 	IgnoreNonBlackPixels = GetPrivateProfileInt("ASPECT", "IgnoreNonBlackPixels", IgnoreNonBlackPixels, szIniFile);
+	AutoDetectAspect = GetPrivateProfileInt("ASPECT", "AutoDetectAspect", AutoDetectAspect, szIniFile);
+	ZoomInFrameCount = GetPrivateProfileInt("ASPECT", "ZoomInFrameCount", ZoomInFrameCount, szIniFile);
 }
 
 void WriteSettingsToIni()
@@ -473,6 +475,8 @@ void WriteSettingsToIni()
 	// END MRS 9/2/00
 	WritePrivateProfileInt("ASPECT", "LuminanceThreshold", LuminanceThreshold, szIniFile);
 	WritePrivateProfileInt("ASPECT", "IgnoreNonBlackPixels", IgnoreNonBlackPixels, szIniFile);
+	WritePrivateProfileInt("ASPECT", "AutoDetectAspect", AutoDetectAspect, szIniFile);
+	WritePrivateProfileInt("ASPECT", "ZoomInFrameCount", ZoomInFrameCount, szIniFile);
 }
 
 void WritePrivateProfileInt(LPCTSTR lpAppName,  LPCTSTR lpKeyName,  int nValue, LPCTSTR lpFileName)
