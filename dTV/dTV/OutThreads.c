@@ -138,9 +138,9 @@ void Stop_Thread()
 	if (OutThread != NULL)
 	{
 		i = 5;
-		SetThreadPriority(OutThread, THREAD_PRIORITY_NORMAL);
+		SetThreadPriority(OutThread, THREAD_PRIORITY_ABOVE_NORMAL);
 		bStopThread = TRUE;
-		while(i > 0 && !Thread_Stopped)
+		while(i-- > 0 && !Thread_Stopped)
 		{
 			if (GetExitCodeThread(OutThread, &ExitCode) == TRUE)
 			{
@@ -148,20 +148,22 @@ void Stop_Thread()
 				{
 					Thread_Stopped = TRUE;
 				}
+				else
+				{
+					Sleep(100);
+				}
 			}
 			else
 			{
 				Thread_Stopped = TRUE;
 			}
-			Sleep(100);
-			i--;
 		}
 
 		if (Thread_Stopped == FALSE)
 		{
 			TerminateThread(OutThread, 0);
+			Sleep(100);
 		}
-		Sleep(50);
 		CloseHandle(OutThread);
 		OutThread = NULL;
 	}
@@ -584,7 +586,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 							// (1000 / Refresh rate is time between each flip
 							// the - 3 is just some margin for error and should
 							// give us enough time to get to the flip call
-							while((GetTickCount() - FlipTicks) < (1000 / RefreshRate) * FlipsToWait - 3);
+							while(!bStopThread && (GetTickCount() - FlipTicks) < (1000 / RefreshRate) * FlipsToWait - 3);
 						}
 
 						// setup flip flag

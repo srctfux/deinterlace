@@ -616,7 +616,7 @@ void Setting_ReadFromIni(SETTING* pSetting)
 		{
 			nValue = pSetting->Default;
 		}
-		Setting_SetValue(pSetting, nValue);
+		*pSetting->pValue = nValue;
 		pSetting->OriginalValue = *pSetting->pValue;
 	}
 }
@@ -625,16 +625,16 @@ void Setting_WriteToIni(SETTING* pSetting)
 {
 	if(pSetting->szIniSection != NULL)
 	{
-		if(pSetting->OriginalValue != *pSetting->pValue)
+//		if(pSetting->OriginalValue != *pSetting->pValue)
 		{
-			if(pSetting->Default != *pSetting->pValue)
+//			if(pSetting->Default != *pSetting->pValue)
 			{
 				WritePrivateProfileInt(pSetting->szIniSection, pSetting->szIniEntry, *pSetting->pValue, szIniFile);
 			}
-			else
-			{
-				WritePrivateProfileInt(pSetting->szIniSection, pSetting->szIniEntry, pSetting->MinValue - 100, szIniFile);
-			}
+//			else
+//			{
+//				WritePrivateProfileInt(pSetting->szIniSection, pSetting->szIniEntry, pSetting->MinValue - 100, szIniFile);
+//			}
 		}
 	}
 }

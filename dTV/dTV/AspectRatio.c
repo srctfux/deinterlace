@@ -157,7 +157,7 @@ void SwitchToRatio(int nMode, int nRatio)
     // Update aspect ratio only if a nonnegative one is specified
     if (nRatio >= 0)
     {
-    	LOG("Switching to ratio %d", nRatio);
+    	LOG(" Switching to ratio %d", nRatio);
 
 	    // If the most recent ratio switch just happened, don't remember it since it
 	    // was probably a transient ratio due to improperly locking onto a dark scene.
@@ -940,7 +940,7 @@ int FindAspectRatio(short** EvenField, short** OddField)
 	// We compute effective width from height using the source-frame aspect ratio, since
 	// this will change depending on whether or not the image is anamorphic.
 	ratio = (int)((imageHeight * 1000) * GetActualSourceFrameAspect() / (imageHeight - border * 2));
-	//LOG("top %d bot %d bord %d rat %d", topBorder, bottomBorder, border, ratio);
+	//LOG(" top %d bot %d bord %d rat %d", topBorder, bottomBorder, border, ratio);
 
 	return ratio;
 }

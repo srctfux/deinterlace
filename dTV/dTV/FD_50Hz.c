@@ -90,16 +90,16 @@ void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 					}
 					else
 					{
-						LOG("Film Detect Gap %d", (GetTickCount() - StartFilmTicks));
+						LOG(" Film Detect Gap %d", (GetTickCount() - StartFilmTicks));
 						if((GetTickCount() - StartFilmTicks) < 100)
 						{
 							RepeatCount++;
-							LOG("Upped RepeatCount %d", RepeatCount);
+							LOG(" Upped RepeatCount %d", RepeatCount);
 						}
 						else
 						{
 							RepeatCount = 1;					
-							LOG("Upped RepeatCount - Too long", RepeatCount);
+							LOG(" Upped RepeatCount - Too long", RepeatCount);
 						}
 					}
 				}
@@ -109,13 +109,13 @@ void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 					{
 						gPulldownMode = FILM_22_PULLDOWN_ODD;
 						UpdatePulldownStatus();
-						LOG("Gone to Odd");
+						LOG(" Gone to Odd");
 					}
 					if(pInfo->IsOdd == FALSE)
 					{
 						gPulldownMode = FILM_22_PULLDOWN_EVEN;
 						UpdatePulldownStatus();
-						LOG("Gone to Even");
+						LOG(" Gone to Even");
 					}
 				}
 			}
@@ -123,7 +123,7 @@ void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 			{
 				LastPolarity = pInfo->IsOdd;
 				RepeatCount = 1;
-				LOG("Reset RepeatCount %d", RepeatCount);
+				LOG(" Reset RepeatCount %d", RepeatCount);
 			}
 			StartFilmTicks = GetTickCount();
 		}
@@ -137,7 +137,7 @@ void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 				if(LastDiff > PulldownThresholdLow)
 				{
 					RepeatCount--;
-					LOG("Downed RepeatCount 1 %d", RepeatCount);
+					LOG(" Downed RepeatCount 1 %d", RepeatCount);
 				}
 			}
 			else
@@ -145,7 +145,7 @@ void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 				if(RepeatCount < PALPulldownRepeatCount)
 				{
 					RepeatCount++;
-					LOG("Upped RepeatCount 1 %d", RepeatCount);
+					LOG(" Upped RepeatCount 1 %d", RepeatCount);
 				}
 			}
 		}
@@ -155,12 +155,12 @@ void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 			if(gPulldownMode == FILM_22_PULLDOWN_ODD && pInfo->IsOdd == TRUE)
 			{
 				RepeatCount--;
-				LOG("Downed RepeatCount 2 %d", RepeatCount);
+				LOG(" Downed RepeatCount 2 %d", RepeatCount);
 			}
 			if(gPulldownMode == FILM_22_PULLDOWN_EVEN && pInfo->IsOdd == FALSE)
 			{
 				RepeatCount--;
-				LOG("Downed RepeatCount 2 %d", RepeatCount);
+				LOG(" Downed RepeatCount 2 %d", RepeatCount);
 			}
 		}
 		// FIXME: Should have a different parameter here
@@ -168,7 +168,7 @@ void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 		{
 			gPulldownMode = gPALFilmFallbackMode;
 			UpdatePulldownStatus();
-			LOG("Back To Video Mode");
+			LOG(" Back To Video Mode");
 			RepeatCount = PALPulldownRepeatCount - 1;
 			LastPolarity = !pInfo->IsOdd;
 			StartFilmTicks = GetTickCount();
