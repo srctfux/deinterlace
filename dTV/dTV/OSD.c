@@ -101,8 +101,8 @@ BOOL bAutoHide = TRUE;
 //---------------------------------------------------------------------------
 // Global OSD Information structure
 OSD_INFO    grOSD[OSD_MAX_TEXT];
-int         NbText = 0;
-struct {
+static int	NbText = 0;
+static struct {
 	int		screen_id;		// OSD screen identifier
 	int		refresh_delay;	// Refresh period in ms (0 means no refresh)
 	BOOL	active;			// Screen to take into account or not
@@ -118,8 +118,8 @@ struct {
 	{	OSD_SCREEN_9,	0,							FALSE	},
 	{	OSD_SCREEN_10,	0,							FALSE	},
 };
-int	IdxCurrentScreen = -1;	// index of the current displayed OSD screen
-
+static int	IdxCurrentScreen = -1;	// index of the current displayed OSD screen
+static BOOL	bRestoreScreen = FALSE;	// Restore info screen when clear OSD
 
 BOOL        bOverride = FALSE;
 
@@ -196,7 +196,9 @@ void OSD_ShowText(HWND hWnd, LPCTSTR szText, double dfSize)
 		OSD_ClearAllTexts();
 		OSD_AddText(szText, dfSize, 0, OSD_XPOS_RIGHT, 0.9, 0.1);
 		OSD_Show(hWnd, OSD_AUTOHIDE, 0);
-		IdxCurrentScreen = -1;
+		if (bAutoHide)
+			IdxCurrentScreen = -1;
+		bRestoreScreen = (IdxCurrentScreen != -1);
 	}
 	else
 	{
@@ -216,7 +218,9 @@ void OSD_ShowTextPersistent(HWND hWnd, LPCTSTR szText, double dfSize)
 		OSD_ClearAllTexts();
 		OSD_AddText(szText, dfSize, 0, OSD_XPOS_RIGHT, 0.9, 0.1);
 		OSD_Show(hWnd, OSD_PERSISTENT, 0);
-		IdxCurrentScreen = -1;
+		if (bAutoHide)
+			IdxCurrentScreen = -1;
+		bRestoreScreen = (IdxCurrentScreen != -1);
 	}
 	else
 	{
@@ -250,8 +254,15 @@ void OSD_Clear(HWND hWnd)
 	{
 		InvalidateRect(hWnd, &(grOSD[i].currentRect), FALSE);
 	}
-	OSD_ClearAllTexts();
-	IdxCurrentScreen = -1;
+	if (bRestoreScreen && (IdxCurrentScreen != -1))
+	{
+		OSD_RefreshInfosScreen(hWnd, 0, bAutoHide ? OSD_AUTOHIDE : OSD_PERSISTENT);
+	}
+	else
+	{
+		OSD_ClearAllTexts();
+		IdxCurrentScreen = -1;
+	}
 	StatusBar_Repaint();
 }
 
@@ -462,6 +473,7 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 	int				nLine;
 	int				i;
 	long			Color;
+	double			pos;
 
 	// Case : no OSD screen
 	if (IdxCurrentScreen == -1)
@@ -647,24 +659,38 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 
 		nLine = 3;
 
-		OSD_AddText("Status", dfSize, OSD_COLOR_SECTION, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+		OSD_AddText("Status", dfSize, OSD_COLOR_SECTION, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 
-		sprintf (szInfo, "Decoding errors : %d", WSSNbDecodeErr);
-		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-		sprintf (szInfo, "Decoding OK : %d", WSSNbDecodeOk);
-		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+		sprintf (szInfo, "Errors : %d", WSSNbDecodeErr);
+		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+		sprintf (szInfo, "Ok : %d", WSSNbDecodeOk);
+		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 		if ((WSSNbDecodeErr+WSSNbDecodeOk) > 0)
 		{
-			sprintf (szInfo, "Last decode status : %s", WSSDecodeOk ? "OK" : "ERROR");		
-			OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+			sprintf (szInfo, "Last : %s", WSSDecodeOk ? "OK" : "ERROR");
+			OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 		}
 
 		if ((WSSNbDecodeOk+WSSNbDecodeErr) > 0)
 		{
 
+			nLine = -1;
+
+			// Debug informations
+			if (WSSNbDecodeOk > 0)
+			{
+				sprintf (szInfo, "Start position min / max : %d / %d", WSSMinPos, WSSMaxPos);
+				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine--, dfMargin, dfSize));
+			}
+			sprintf (szInfo, "Errors searching start position : %d", WSSNbErrPos);
+			OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine--, dfMargin, dfSize));
+			OSD_AddText("Debug", dfSize, OSD_COLOR_SECTION, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine--, dfMargin, dfSize));
+
 			if (WSSDecodeOk)
 			{
-				OSD_AddText("Data", dfSize, OSD_COLOR_SECTION, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+				nLine = 3;
+
+				OSD_AddText("Data", dfSize, OSD_COLOR_SECTION, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 
 				// WSS data
 				if (WSSAspectRatio > 0)
@@ -679,50 +705,37 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 				{
 					strcpy (szInfo, "Aspect ratio : undefined");
 				}
-				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 				sprintf (szInfo, "Mode : %s", WSSFilmMode ? "film mode" : "camera mode");		
-				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-				sprintf (szInfo, "Color encoding : %s", WSSColorPlus ? "Motion Adaptative ColorPlus" : "normal Pal");
-				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 				sprintf (szInfo, "Helper signals : %s", WSSHelperSignals ? "yes" : "no");		
-				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+				sprintf (szInfo, "Color encoding : %s", WSSColorPlus ? "ColorPlus" : "normal");
+				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 				sprintf (szInfo, "Teletext subtitles : %s", WSSTeletextSubtitle ? "yes" : "no");		
-				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 				switch (WSSOpenSubtitles)
 				{
 				case WSS625_SUBTITLE_NO:
 					strcpy (szInfo, "Open subtitles : no");
 					break;
 				case WSS625_SUBTITLE_INSIDE:
-					strcpy (szInfo, "Open subtitles : inside active picture");
+					strcpy (szInfo, "Open subtitles : inside picture");
 					break;
 				case WSS625_SUBTITLE_OUTSIDE:
-					strcpy (szInfo, "Open subtitles : outside active picture");
+					strcpy (szInfo, "Open subtitles : outside picture");
 					break;
 				default:
 					strcpy (szInfo, "Open subtitles : ???");
 					break;
 				}
-				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 				sprintf (szInfo, "Surround sound : %s", WSSSurroundSound ? "yes" : "no");		
-				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 				sprintf (szInfo, "Copyright asserted : %s", WSSCopyrightAsserted ? "yes" : "no");		
-				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 				sprintf (szInfo, "Copy protection : %s", WSSCopyProtection ? "yes" : "no");		
-				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-			}
-
-			OSD_AddText("Debug", dfSize, OSD_COLOR_SECTION, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-
-			// Debug informations
-			sprintf (szInfo, "Errors searching start position : %d", WSSNbErrPos);
-			OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-			if (WSSNbDecodeOk > 0)
-			{
-				sprintf (szInfo, "Minimum start position : %d", WSSMinPos);
-				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-				sprintf (szInfo, "Maximum start position : %d", WSSMaxPos);
-				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 			}
 		}
 		break;
@@ -737,9 +750,9 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 
 		sprintf (szInfo, "Number : %ld", nTotalDropFrames);
 		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-		sprintf (szInfo, "In last second : %ld", nDropFramesLastSec);
+		sprintf (szInfo, "Last second : %ld", nDropFramesLastSec);
 		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-		sprintf (szInfo, "Average / second : %d", nTotalDropFrames * 1000 / nSecTicks);
+		sprintf (szInfo, "Average / s : %d", nTotalDropFrames * 1000 / nSecTicks);
 		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 
 		nLine = 3;
@@ -748,21 +761,27 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 
 		sprintf (szInfo, "Number of changes : %ld", nTotalDeintModeChanges);
 		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+		nLine++;
 		OSD_AddText("changes - % of time - mode", dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 		for (i = 0 ; i < PULLDOWNMODES_LAST_ONE ; i++)
 		{
 			if (nDeintModeChanges[i] > 0)
 			{
-				if (i == gPulldownMode)
+				pos = OSD_GetLineYpos (nLine, dfMargin, dfSize);
+				if (pos > 0)
 				{
-					Color = OSD_COLOR_CURRENT;
+					if (i == gPulldownMode)
+					{
+						Color = OSD_COLOR_CURRENT;
+					}
+					else
+					{
+						Color = 0;
+					}
+					sprintf (szInfo, "%04d - %05.1f %% - %s", nDeintModeChanges[i], nDeintModeTicks[i] * 100 / (double)(nLastTicks - nInitialTicks), DeintModeNames[i]);
+					OSD_AddText(szInfo, dfSize, Color, OSD_XPOS_LEFT, dfMargin, pos);
+					nLine++;
 				}
-				else
-				{
-					Color = 0;
-				}
-				sprintf (szInfo, "%04d - %05.1f %% - %s", nDeintModeChanges[i], nDeintModeTicks[i] * 100 / (double)(nLastTicks - nInitialTicks), DeintModeNames[i]);
-				OSD_AddText(szInfo, dfSize, Color, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 			}
 		}
 		break;
@@ -793,6 +812,7 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 	}
 
 	OSD_Show(hWnd, ShowType, ActiveScreens[IdxCurrentScreen].refresh_delay);
+	bRestoreScreen = FALSE;
 }
 
 //---------------------------------------------------------------------------
@@ -803,15 +823,18 @@ void OSD_ShowInfosScreen(HWND hWnd, double dfSize)
 	int		NbScreens;			// number of OSD scrrens
 	int		NbActiveScreens;	// number of active OSD screens
 	int		IdxScreen;
+	int		PrevIdxScreen;
 	int		i, idx;
 
 	// determine which screen to display
+	PrevIdxScreen = IdxCurrentScreen;
 	NbScreens = sizeof (ActiveScreens) / sizeof (ActiveScreens[0]);
 	IdxScreen = IdxCurrentScreen + 1;
 	if (IdxScreen >= NbScreens)
 		IdxScreen = 0;
 	IdxCurrentScreen = -1;
-	for (i = IdxScreen ; i < (IdxScreen+NbScreens) ; i++)
+//	for (i = IdxScreen ; i < (IdxScreen+NbScreens) ; i++)
+	for (i = IdxScreen ; i < NbScreens ; i++)
 	{
 		idx = i % NbScreens;
 		if (ActiveScreens[idx].active)
@@ -821,9 +844,14 @@ void OSD_ShowInfosScreen(HWND hWnd, double dfSize)
 				IdxCurrentScreen = idx;
 		}
 	}
-	// Case : no OSD screen
+	// Case : no screen to display
 	if (IdxCurrentScreen == -1)
+	{
+		// If there was a screen displayed
+		if (PrevIdxScreen != -1)
+			OSD_Clear(hWnd);
 		return;
+	}
 
 	OSD_RefreshInfosScreen(hWnd, dfSize, bAutoHide ? OSD_AUTOHIDE : OSD_PERSISTENT);
 }
@@ -831,6 +859,13 @@ void OSD_ShowInfosScreen(HWND hWnd, double dfSize)
 /////////////////////////////////////////////////////////////////////////////
 // Start of Settings related code
 /////////////////////////////////////////////////////////////////////////////
+
+BOOL OSD_AutoHide_OnChange(long NewValue)
+{
+	bRestoreScreen = FALSE;
+	bAutoHide = NewValue;
+	return TRUE;
+}
 
 SETTING OSDSettings[OSD_SETTING_LASTONE] =
 {
@@ -854,7 +889,7 @@ SETTING OSDSettings[OSD_SETTING_LASTONE] =
 	},
 	{
 		"OSD Default Small Size", NUMBER, 0, &DefaultSmallSizePerc,
-		 4, 0, 100, 1, 1,
+		 5, 0, 100, 1, 1,
 		 NULL,
 		"OSD", "DefaultSmallSizePerc", NULL,
 	},
@@ -880,7 +915,7 @@ SETTING OSDSettings[OSD_SETTING_LASTONE] =
 		"OSD Auto Hide Texts", ONOFF, 0, &bAutoHide,
 		 TRUE, 0, 1, 1, 1,
 		 NULL,
-		"OSD", "AutoHide", NULL,
+		"OSD", "AutoHide", OSD_AutoHide_OnChange,
 	},
 };
 
