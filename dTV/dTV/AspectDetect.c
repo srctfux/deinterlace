@@ -270,14 +270,13 @@ void AdjustAspectRatio(short** EvenField, short** OddField)
 	int tickCutoff = tick_count - (aspectSettings.AspectHistoryTime * 1000);
 	int i;
 	int haveSeenThisRatio, haveSeenSmallerRatio;
-	int wss_source_mode, wss_source_ratio;
+	int WssSourceRatio;
+	int maxRatio;
 
 	if(EvenField == NULL || OddField == NULL)
 	{
 		return;
 	}
-
-	newMode = aspectSettings.aspect_mode;
 
 	// ADDED by Mark Rejhon: Eliminates the "tiny slit" problem in starry 
 	// scenes such as those in Star Wars or start of Toy Story 2,
@@ -288,33 +287,37 @@ void AdjustAspectRatio(short** EvenField, short** OddField)
 	{
 		newRatio = FindAspectRatio(EvenField, OddField);
 
-		// Take into account aspect ratio from WSS data
-		// * wss_source_mode = 1 for non anamorphic source
-		//   and 2 for anamorphic source
-		// * wss_source_ratio = -1 if ratio is not defined
-		//   in WSS data
-		if (WSS_GetRecommendedAR(&wss_source_mode, &wss_source_ratio))
+		// Get aspect ratio from WSS data
+		// (WssSourceRatio = -1 if ratio is not defined in WSS data)
+		if (! WSS_GetRecommendedAR(&newMode, &WssSourceRatio))
 		{
-			if (wss_source_mode != aspectSettings.aspect_mode)
-			{
-				newMode = wss_source_mode;
-			}
-			// If source is anamorphic
-			if (wss_source_mode == 2)
-			{
-				// Convert ratio to a 16/9 ratio
-				newRatio *= 1333 / 1000;
-			}
-			// The ratio must at least the ratio defined in WSS data
-			if (newRatio < wss_source_ratio)
-			{
-				newRatio = wss_source_ratio;
-			}
+			newMode = aspectSettings.aspect_mode;
+			WssSourceRatio = -1;
 		}
 
-		if (bIsFullScreen && aspectSettings.target_aspect && (newRatio > aspectSettings.target_aspect))
+		// If source is anamorphic
+		if (newMode == 2)
 		{
-//			newRatio = aspectSettings.target_aspect;
+			// Convert ratio to a 16/9 ratio
+			newRatio *= 1333 / 1000;
+		}
+
+		// The ratio must be at least the ratio defined in WSS data
+		if (newRatio < WssSourceRatio)
+		{
+			newRatio = WssSourceRatio;
+		}
+
+		if (bIsFullScreen && aspectSettings.target_aspect)
+		{
+			if (aspectSettings.target_aspect > WssSourceRatio)
+				maxRatio = aspectSettings.target_aspect;
+			else
+				maxRatio = WssSourceRatio;
+			if (newRatio > maxRatio)
+			{
+				newRatio = maxRatio;
+			}
 		}
 	}
 
