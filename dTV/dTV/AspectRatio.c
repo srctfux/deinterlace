@@ -112,6 +112,9 @@ static int ratio_used[RATIO_HISTORY_CHANGES];
 // When we switched to each of the ratios in ratio_used[].
 static int ratio_time[RATIO_HISTORY_CHANGES];
 
+// True if we want to use whatever ratio is present on the next frame.
+static int DetectAspectNow = FALSE;
+
 RECT destinationRectangle = {0,0,0,0};
 
 
@@ -280,12 +283,10 @@ int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 			case IDM_SASPECT_200A:    aspect_mode = 2;  SwitchToRatio(2000);  break;
 			case IDM_SASPECT_235A:    aspect_mode = 2;  SwitchToRatio(2350);  break;
 			case IDM_SASPECT_CUSTOM:  aspect_mode = 2;  SwitchToRatio(custom_source_aspect);  break;
-			case IDM_SASPECT_COMPUTE: SwitchToRatio(FindAspectRatio());  break;
+			case IDM_SASPECT_COMPUTE: DetectAspectNow = TRUE; break;
 
 			case IDM_SASPECT_AUTO:
 				AutoDetectAspect = ! AutoDetectAspect;
-				if (AutoDetectAspect)
-					SwitchToRatio(FindAspectRatio());
 				break;
 
 			// Output Display Aspect Ratios
@@ -636,7 +637,7 @@ void WorkoutOverlaySize()
 //
 // This function can almost certainly be made more efficient using MMX
 // instructions.
-int FindTopOfImage(BYTE *Overlay)
+int FindTopOfImage(short** EvenField, short **OddField)
 {
 	int y, x;
 	int maxX = CurrentX - InitialOverscan * 2;
@@ -645,13 +646,13 @@ int FindTopOfImage(BYTE *Overlay)
 	int ignoreCount = IgnoreNonBlackPixels;
 	int pixelCount;
 	const int BytesBetweenLuminanceValues = 2;	// just for clarity's sake
-	const int SkipPixels = 16;			// check fewer pixels to reduce CPU hit
+	const int SkipPixels = 8;			// check fewer pixels to reduce CPU hit
 
 	if (ignoreCount == 0)
 	{
-		// The user didn't specify an ignore count.  Default to 20%
+		// The user didn't specify an ignore count.  Default to ~15%
 		// of the horizontal size of the image.
-		ignoreCount = (CurrentX / 5) / SkipPixels;
+		ignoreCount = (CurrentX / 7) / SkipPixels;
 	}
 	else
 	{
@@ -662,8 +663,14 @@ int FindTopOfImage(BYTE *Overlay)
 
 	for (y = InitialOverscan; y < maxY; y++)
 	{
+		if (y & 1)
+			pixel = (BYTE *)OddField[y / 2];
+		else
+			pixel = (BYTE *)EvenField[y / 2];
+
+		pixel += InitialOverscan * BytesBetweenLuminanceValues;
+
 		pixelCount = -ignoreCount;
-		pixel = &Overlay[OverlayPitch * y + (InitialOverscan * BytesBetweenLuminanceValues)];
 		for (x = InitialOverscan; x < maxX; x += SkipPixels)
 		{
 			if (((*pixel) & 0x7f) > LuminanceThreshold)
@@ -678,7 +685,7 @@ int FindTopOfImage(BYTE *Overlay)
 	return y;
 }
 
-int FindBottomOfImage(BYTE *Overlay)
+int FindBottomOfImage(short** EvenField, short** OddField)
 {
 	int y, x;
 	int maxX = CurrentX - InitialOverscan * 2;
@@ -687,13 +694,13 @@ int FindBottomOfImage(BYTE *Overlay)
 	int ignoreCount = IgnoreNonBlackPixels;
 	int pixelCount;
 	const int BytesBetweenLuminanceValues = 2;	// just for clarity's sake
-	const int SkipPixels = 16;			// check fewer pixels to reduce CPU hit
+	const int SkipPixels = 8;			// check fewer pixels to reduce CPU hit
 
 	if (ignoreCount == 0)
 	{
-		// The user didn't specify an ignore count.  Default to 20%
+		// The user didn't specify an ignore count.  Default to ~15%
 		// of the horizontal size of the image.
-		ignoreCount = (CurrentX / 5) / SkipPixels;
+		ignoreCount = (CurrentX / 7) / SkipPixels;
 	}
 	else
 	{
@@ -704,8 +711,14 @@ int FindBottomOfImage(BYTE *Overlay)
 
 	for (y = maxY; y >= maxY / 2; y--)
 	{
+		if (y & 1)
+			pixel = (BYTE *)OddField[y / 2];
+		else
+			pixel = (BYTE *)EvenField[y / 2];
+
+		pixel += InitialOverscan * BytesBetweenLuminanceValues;
+
 		pixelCount = -ignoreCount;
-		pixel = &Overlay[OverlayPitch * y + (InitialOverscan * BytesBetweenLuminanceValues)];
 		for (x = InitialOverscan; x < maxX; x += SkipPixels)
 		{
 			if (((*pixel) & 0x7f) > LuminanceThreshold)
@@ -723,26 +736,11 @@ int FindBottomOfImage(BYTE *Overlay)
 
 //----------------------------------------------------------------------------
 // Adjust the source aspect ratio to fit whatever is currently onscreen.
-int FindAspectRatio(void)
+int FindAspectRatio(short** EvenField, short** OddField)
 {
 	int ratio;
 	int topBorder, bottomBorder, border;
 	int imageHeight = CurrentY - InitialOverscan * 2;
-	DDSURFACEDESC ddsd;
-
-	/* Should have to lock the surface!  But it looks like it's kept locked all the time.
-
-    HRESULT ddrval;
-	memset(&ddsd, 0, sizeof(ddsd));
-	ddsd.dwSize = sizeof(ddsd);
-	ddrval = IDirectDrawSurface_Lock(lpDDOverlay, NULL, &ddsd, DDLOCK_WAIT, NULL);
-	if (FAILED(ddrval))
-	{
-		ErrorBox("Can't Lock Surface");
-		ddrval = DDERR_WASSTILLDRAWING;
-		return;
-	}
-	*/ ddsd.lpSurface = lpOverlay;	// Remove this when surface locking is fixed.
 
 	// If the aspect mode is set to "use source", revert to assuming that the
 	// source frame is 4:3.  We have to assume *some* source-frame aspect ratio
@@ -753,10 +751,10 @@ int FindAspectRatio(void)
 	// Find the top of the image relative to the overscan area.  Overscan has to
 	// be discarded from the computations since it can't really be regarded as
 	// part of the picture.
-	topBorder = FindTopOfImage(ddsd.lpSurface) - InitialOverscan;
+	topBorder = FindTopOfImage(EvenField, OddField) - InitialOverscan;
 
 	// Now find the size of the border at the bottom of the image.
-	bottomBorder = CurrentY - FindBottomOfImage(ddsd.lpSurface) - InitialOverscan;
+	bottomBorder = CurrentY - FindBottomOfImage(EvenField, OddField) - InitialOverscan;
 
 	// The border size is the smaller of the two.
 	border = (topBorder < bottomBorder) ? topBorder : bottomBorder;
@@ -770,21 +768,12 @@ int FindAspectRatio(void)
 	ratio = (int)((imageHeight * 1000) * GetActualSourceFrameAspect() / (imageHeight - border * 2));
 	//LOG("top %d bot %d bord %d rat %d", topBorder, bottomBorder, border, ratio);
 
-	/* Uncomment whenever we stop keeping the surfaces locked.
-	ddrval = IDirectDrawSurface_Unlock(lpDDOverlay, ddsd.lpSurface);
-	if (FAILED(ddrval))
-	{
-		ErrorBox("Can't Unlock Surface");
-		return;
-	}
-	*/
-
 	return ratio;
 }
 
 //----------------------------------------------------------------------------
 // Continuously adjust the source aspect ratio.  This is called once per frame.
-void AdjustAspectRatio(void)
+void AdjustAspectRatio(short** EvenField, short** OddField)
 {
 	static int lastNewRatio = 0;
 	static int newRatioFrameCount = 0;
@@ -794,9 +783,19 @@ void AdjustAspectRatio(void)
 	int i;
 	int haveSeenThisRatio, haveSeenSmallerRatio;
 
+	// If the user told us to detect the current ratio, do it.
+	if (DetectAspectNow)
+	{
+		newRatio = FindAspectRatio(EvenField, OddField);
+		SwitchToRatio(newRatio);
+		newRatioFrameCount = 0;
+		DetectAspectNow = FALSE;
+		return;
+	}
+
 	if (AutoDetectAspect)
 	{
-		newRatio = FindAspectRatio();
+		newRatio = FindAspectRatio(EvenField, OddField);
 
 		// If we've just crossed a 1-second boundary, scroll the aspect ratio
 		// histories.  If not, update the max ratio found in the current second.

@@ -1137,6 +1137,8 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				LastEvenFrame = CurrentFrame;
 			}
 
+			AdjustAspectRatio(ppEvenLines[LastEvenFrame], ppOddLines[LastOddFrame]);
+
 			// somewhere above we will have locked the buffer, unlock before flip
 			if (!RunningLate)
 			{
@@ -1144,7 +1146,6 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 
 				if(DoWeWantToFlip(bFlipNow, bIsOddField) )
 				{
-					AdjustAspectRatio();
 					if (Wait_For_Flip)			// user parm
 					{
 						FlipResult =

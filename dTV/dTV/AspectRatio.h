@@ -35,8 +35,8 @@ int     ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID);
 void    SetMenuAspectRatio(HWND hWnd);
 void    WorkoutOverlaySize();
 void    PaintOverlay(HWND hWnd);
-int		FindAspectRatio(void);
-void	AdjustAspectRatio(void);
+int		FindAspectRatio(short** EvenField, short** OddField);
+void	AdjustAspectRatio(short** EvenField, short** OddField);
 
 extern long LuminanceThreshold;
 extern long IgnoreNonBlackPixels;
