@@ -32,6 +32,11 @@
 // 08 Jan 2001   John Adcock           Global Variable Tidy up
 //                                     Got rid of global.h structs.h defines.h
 //
+// 09 Jan 2001   John Adcock           Split out memcpySSE as separate function
+//                                     Changed DeintMethods to reflect the two
+//                                     film mode functions replacing the one before
+//                                     Moved CombFactor and CompareFields to new file
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"

@@ -33,6 +33,8 @@
 // 08 Jan 2001   John Adcock           Global Variable Tidy up
 //                                     Got rid of global.h structs.h defines.h
 //
+// 08 Jan 2001   John Adcock           Added Version info to about box
+//
 // 09 Jan 2001   Tom Barry             Added Chip type to hardware dialog
 //
 /////////////////////////////////////////////////////////////////////////////
