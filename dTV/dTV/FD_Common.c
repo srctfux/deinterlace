@@ -282,25 +282,25 @@ SETTING FD_CommonSettings[FD_COMMON_SETTING_LASTONE] =
 {
 	{
 		"Bit Shift", SLIDER, 0, &BitShift,
-		13, 0, 15, 2, NULL,
+		13, 0, 15, 1, NULL,
 		"Pulldown", "BitShift", NULL,
 
 	},
 	{
 		"Comb Edge Detect", SLIDER, 0, &CombEdgeDetect,
-		625, 0, 10000, 50, NULL,
+		625, 0, 10000, 5, NULL,
 		"Pulldown", "EdgeDetect", NULL,
 
 	},
 	{
 		"Comb Jaggie Threshold", SLIDER, 0, &CombJaggieThreshold,
-		73, 0, 5000, 50, NULL,
+		73, 0, 5000, 5, NULL,
 		"Pulldown", "JaggieThreshold", NULL,
 
 	},
 	{
 		"DiffThreshold", SLIDER, 0, &DiffThreshold,
-		224, 0, 5000, 50, NULL,
+		224, 0, 5000, 5, NULL,
 		"Pulldown", "DiffThreshold", NULL,
 
 	},

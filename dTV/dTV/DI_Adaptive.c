@@ -152,12 +152,12 @@ SETTING DI_AdaptiveSettings[DI_ADAPTIVE_SETTING_LASTONE] =
 {
 	{
 		"Low Motion Field Count", SLIDER, 0, &LowMotionFieldCount,
-		4, 1, 1000, 50, NULL,
+		4, 1, 1000, 1, NULL,
 		"Pulldown", "LowMotionFieldCount", NULL,
 	},
 	{
 		"Static Image Field Count", SLIDER, 0, &StaticImageFieldCount,
-		100, 1, 1000, 50, NULL,
+		100, 1, 1000, 1, NULL,
 		"Pulldown", "StaticImageFieldCount", NULL,
 	},
 	{
@@ -177,12 +177,12 @@ SETTING DI_AdaptiveSettings[DI_ADAPTIVE_SETTING_LASTONE] =
 	},
 	{
 		"Adaptive Threshold 3:2 Pulldown", SLIDER, 0, &AdaptiveThres32Pulldown,
-		15, 1, 5000, 10, NULL,
+		15, 1, 5000, 5, NULL,
 		"Pulldown", "AdaptiveThres32Pulldown", NULL,
 	},
 	{
 		"Adaptive Threshold 3:2 Pulldown Mismatch", SLIDER, 0, &AdaptiveThresPulldownMismatch,
-		900, 1, 10000, 100, NULL,
+		900, 1, 10000, 10, NULL,
 		"Pulldown", "AdaptiveThresPulldownMismatch", NULL,
 	},
 };

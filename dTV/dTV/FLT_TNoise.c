@@ -99,18 +99,18 @@ BOOL NoiseFilter_Temporal(DEINTERLACE_INFO *info)
 SETTING FLT_TNoiseSettings[FLT_TNOISE_SETTING_LASTONE] =
 {
 	{
-		"Use Temporal Noise Filter", YESNO, 0, &UseTemporalNoiseFilter,
-		FALSE, 0, 1, 0, NULL,
+		"Temporal Noise Filter", ONOFF, 0, &UseTemporalNoiseFilter,
+		FALSE, 0, 1, 1, NULL,
 		"NoiseFilter", "UseTemporalNoiseFilter", NULL,
 	},
 	{
 		"Temporal Luminance Threshold", SLIDER, 0, &TemporalLuminanceThreshold,
-		10, 0, 255, 10, NULL,
+		10, 0, 255, 1, NULL,
 		"NoiseFilter", "TemporalLuminanceThreshold", NULL,
 	},
 	{
 		"TemporalChromaThreshold", SLIDER, 0, &TemporalChromaThreshold,
-		12, 0, 255, 10, NULL,
+		12, 0, 255, 1, NULL,
 		"NoiseFilter", "TemporalChromaThreshold", NULL,
 	},
 };

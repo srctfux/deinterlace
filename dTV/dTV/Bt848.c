@@ -135,26 +135,47 @@ long    BtWhiteCrushDown = 0x7f;	// Crush down - entire register value
 TTVFORMAT TVFormats[FORMAT_LASTONE] =
 {
 	/* PAL-BDGHI */
-	{ "PAL DBGHI", 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_BDGHI|BT848_IFORM_XT1),
-	    186, 922, 0x20, 0, TRUE, 511, 19},
+	{ 
+		"PAL DBGHI", 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_BDGHI|BT848_IFORM_XT1),
+	    186, 922, 0x20, 0, TRUE, 511, 19,
+		4.43361875, TRUE, 0.5
+	},
 	/* NTSC */
-	{ "NTSC", 480, 910, 0x68, 0x5c, (BT848_IFORM_NTSC|BT848_IFORM_XT0),
-	    137, 754, 0x1a, 0, FALSE, 400, 13},
+	{
+		"NTSC", 480, 910, 0x68, 0x5c, (BT848_IFORM_NTSC|BT848_IFORM_XT0),
+	    137, 754, 0x1a, 0, FALSE, 400, 13,
+		3.579545,  FALSE, 0.5035,
+	},
 	/* SECAM */
-	{ "SECAM", 576, 1135, 0x7f, 0xb0, (BT848_IFORM_SECAM|BT848_IFORM_XT1),
-	    186, 922, 0x20, 0, TRUE, 511, 19},
+	{
+		"SECAM", 576, 1135, 0x7f, 0xb0, (BT848_IFORM_SECAM|BT848_IFORM_XT1),
+	    186, 922, 0x20, 0, TRUE, 511, 19,
+		4.43361875, TRUE, 0.5
+	},
 	/* PAL-M */
-	{ "PAL-M", 480,  910, 0x68, 0x5c, (BT848_IFORM_PAL_M|BT848_IFORM_XT0),
-	    137, 754, 0x1a, 0, FALSE, 400, 13},
+	{
+		"PAL-M", 480,  910, 0x68, 0x5c, (BT848_IFORM_PAL_M|BT848_IFORM_XT0),
+	    137, 754, 0x1a, 0, FALSE, 400, 13,
+		3.579545,  FALSE, 0.5035,
+	},
     /* PAL-N */
-    { "PAL-M", 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_N|BT848_IFORM_XT1),
-        186, 922, 0x20, 0, TRUE, 511, 19},
+    {
+		"PAL-M", 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_N|BT848_IFORM_XT1),
+        186, 922, 0x20, 0, TRUE, 511, 19,
+		4.43361875, TRUE,  0.5
+	},
 	/* NTSC Japan*/
-	{ "NTSC Japan", 480,  910, 0x70, 0x5c, (BT848_IFORM_NTSC_JAP|BT848_IFORM_XT0),
-	    135, 754, 0x1a, 0, FALSE, 400, 13},
+	{
+		"NTSC Japan", 480,  910, 0x70, 0x5c, (BT848_IFORM_NTSC_JAP|BT848_IFORM_XT0),
+	    135, 754, 0x1a, 0, FALSE, 400, 13,
+		3.579545, FALSE, 0.5035,
+	},
     /* PAL-60 */
-	{ "PAL 60", 480, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_BDGHI|BT848_IFORM_XT1),
-	    186, 922, 0x1a, 0, TRUE, 400, 13},
+	{
+		"PAL 60", 480, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_BDGHI|BT848_IFORM_XT1),
+	    186, 922, 0x1a, 0, FALSE, 400, 13,
+		4.43361875, TRUE, 0.5035,
+	},
 };
 
 long TVFormat = -1;
@@ -539,7 +560,7 @@ BOOL BT848_SetGeoSize()
 	CurrentVBILines = TVFormats[TVFormat].VBILines;
 
 	// set the pll on the card if appropriate
-	if(TVFormats[TVFormat].Is25fps == TRUE && GetCardSetup()->pll != PLL_NONE)
+	if(TVFormats[TVFormat].NeedsPLL == TRUE && GetCardSetup()->pll != PLL_NONE)
 	{
 		BT848_SetPLL(GetCardSetup()->pll);
 	}
@@ -596,6 +617,12 @@ BOOL BT848_SetGeoSize()
 	else
 	{
 		hdelay = ((CurrentX * HDelay) / TVFormats[TVFormat].wHActivex1) & 0x3fe;
+	}
+
+	if(TVFormat == FORMAT_PAL60)
+	{
+		BT848_WriteByte(BT848_VTOTAL_LO, (BYTE)(525 & 0xff));
+		BT848_WriteByte(BT848_VTOTAL_HI, (BYTE)(525 >> 8));
 	}
 
 	sr = (TVFormats[TVFormat].wCropHeight * 512) / CurrentY - 512;
@@ -1587,162 +1614,162 @@ SETTING BT848Settings[BT848_SETTING_LASTONE] =
 {
 	{
 		"Brightness", SLIDER, 0, &InitialBrightness,
-		DEFAULT_BRIGHTNESS_NTSC, -128, 127, 10, NULL,
+		DEFAULT_BRIGHTNESS_NTSC, -128, 127, 1, NULL,
 		"Hardware", "InitialBrightness", BT848_Brightness_OnChange,
 	},
 	{
 		"Contrast", SLIDER, 0, &InitialContrast,
-		DEFAULT_CONTRAST_NTSC, 0, 255, 10, NULL,
+		DEFAULT_CONTRAST_NTSC, 0, 255, 1, NULL,
 		"Hardware", "InitialContrast", BT848_Contrast_OnChange,
 	},
 	{
 		"Hue", SLIDER, 0, &InitialHue,
-		DEFAULT_HUE_NTSC, -128, 127, 10, NULL,
+		DEFAULT_HUE_NTSC, -128, 127, 1, NULL,
 		"Hardware", "InitialHue", BT848_Hue_OnChange,
 	},
 	{
 		"Saturation", SLIDER, 0, &InitialSaturation,
-		(DEFAULT_SAT_V_NTSC + DEFAULT_SAT_U_NTSC) / 2, 0, 255, 10, NULL,
+		(DEFAULT_SAT_V_NTSC + DEFAULT_SAT_U_NTSC) / 2, 0, 255, 1, NULL,
 		NULL, NULL, BT848_Saturation_OnChange,
 	},
 	{
 		"SaturationU", SLIDER, 0, &InitialSaturationU,
-		DEFAULT_SAT_U_NTSC, 0, 255, 10, NULL,
+		DEFAULT_SAT_U_NTSC, 0, 255, 1, NULL,
 		"Hardware", "InitialSaturationU", BT848_SaturationU_OnChange,
 	},
 	{
 		"SaturationV", SLIDER, 0, &InitialSaturationV,
-		DEFAULT_SAT_V_NTSC, 0, 255, 10, NULL,
+		DEFAULT_SAT_V_NTSC, 0, 255, 1, NULL,
 		"Hardware", "InitialSaturationV", BT848_SaturationV_OnChange,
 	},
 	{
 		"BDelay", SLIDER, 0, &InitialBDelay,
-		0, 0, 255, 10, NULL,
+		0, 0, 255, 1, NULL,
 		"Hardware", "InitialBDelay", BT848_BDelay_OnChange,
 	},
 	{
-		"BtAgcDisable", YESNO, 0, &BtAgcDisable,
-		FALSE, 0, 1, 0, NULL,
+		"BtAgcDisable", ONOFF, 0, &BtAgcDisable,
+		FALSE, 0, 1, 1, NULL,
 		"Hardware", "BtAgcDisable", BtAgcDisable_OnChange,
 	},
 	{
-		"BtCrush", YESNO, 0, &BtCrush,
-		TRUE, 0, 1, 0, NULL,
+		"BtCrush", ONOFF, 0, &BtCrush,
+		TRUE, 0, 1, 1, NULL,
 		"Hardware", "BtCrush", BtCrush_OnChange,
 	},
 	{
-		"BtEvenChromaAGC", YESNO, 0, &BtEvenChromaAGC,
-		TRUE, 0, 1, 0, NULL,
+		"BtEvenChromaAGC", ONOFF, 0, &BtEvenChromaAGC,
+		TRUE, 0, 1, 1, NULL,
 		"Hardware", "BtEvenChromaAGC", BtEvenChromaAGC_OnChange,
 	},
 	{
-		"BtOddChromaAGC", YESNO, 0, &BtOddChromaAGC,
-		TRUE, 0, 1, 0, NULL,
+		"BtOddChromaAGC", ONOFF, 0, &BtOddChromaAGC,
+		TRUE, 0, 1, 1, NULL,
 		"Hardware", "BtOddChromaAGC", BtOddChromaAGC_OnChange,
 	},
 	{
-		"BtEvenLumaPeak", YESNO, 0, &BtEvenLumaPeak,
-		FALSE, 0, 1, 0, NULL,
+		"BtEvenLumaPeak", ONOFF, 0, &BtEvenLumaPeak,
+		FALSE, 0, 1, 1, NULL,
 		"Hardware", "BtEvenLumaPeak", BtEvenLumaPeak_OnChange,
 	},
 	{
-		"BtOddLumaPeak", YESNO, 0, &BtOddLumaPeak,
-		FALSE, 0, 1, 0, NULL,
+		"BtOddLumaPeak", ONOFF, 0, &BtOddLumaPeak,
+		FALSE, 0, 1, 1, NULL,
 		"Hardware", "BtOddLumaPeak", BtOddLumaPeak_OnChange,
 	},
 	{
-		"BtFullLumaRange", YESNO, 0, &BtFullLumaRange,
-		TRUE, 0, 1, 0, NULL,
+		"BtFullLumaRange", ONOFF, 0, &BtFullLumaRange,
+		TRUE, 0, 1, 1, NULL,
 		"Hardware", "BtFullLumaRange", BtFullLumaRange_OnChange,
 	},
 	{
-		"BtEvenLumaDec", YESNO, 0, &BtEvenLumaDec,
-		FALSE, 0, 1, 0, NULL,
+		"BtEvenLumaDec", ONOFF, 0, &BtEvenLumaDec,
+		FALSE, 0, 1, 1, NULL,
 		"Hardware", "BtEvenLumaDec", BtEvenLumaDec_OnChange,
 	},
 	{
-		"BtOddLumaDec", YESNO, 0, &BtOddLumaDec,
-		FALSE, 0, 1, 0, NULL,
+		"BtOddLumaDec", ONOFF, 0, &BtOddLumaDec,
+		FALSE, 0, 1, 1, NULL,
 		"Hardware", "BtOddLumaDec", BtOddLumaDec_OnChange,
 	},
 	{
-		"BtEvenComb", YESNO, 0, &BtEvenComb,
-		TRUE, 0, 1, 0, NULL,
+		"BtEvenComb", ONOFF, 0, &BtEvenComb,
+		TRUE, 0, 1, 1, NULL,
 		"Hardware", "BtEvenComb", BtEvenComb_OnChange,
 	},
 	{
-		"BtOddComb", YESNO, 0, &BtOddComb,
-		TRUE, 0, 1, 0, NULL,
+		"BtOddComb", ONOFF, 0, &BtOddComb,
+		TRUE, 0, 1, 1, NULL,
 		"Hardware", "BtOddComb", BtOddComb_OnChange,
 	},
 	{
-		"BtColorBars", YESNO, 0, &BtColorBars,
-		FALSE, 0, 1, 0, NULL,
+		"BtColorBars", ONOFF, 0, &BtColorBars,
+		FALSE, 0, 1, 1, NULL,
 		"Hardware", "BtColorBars", BtColorBars_OnChange,
 	},
 	{
-		"BtGammaCorrection", YESNO, 0, &BtGammaCorrection,
-		FALSE, 0, 1, 0, NULL,
+		"BtGammaCorrection", ONOFF, 0, &BtGammaCorrection,
+		FALSE, 0, 1, 1, NULL,
 		"Hardware", "BtGammaCorrection", BtGammaCorrection_OnChange,
 	},
 	{
-		"BtCoring", YESNO, 0, &BtCoring,
-		FALSE, 0, 1, 0, NULL,
+		"BtCoring", ONOFF, 0, &BtCoring,
+		FALSE, 0, 1, 1, NULL,
 		"Hardware", "BtCoring", BtCoring_OnChange,
 	},
 	{
-		"BtHorFilter", YESNO, 0, &BtHorFilter,
-		FALSE, 0, 1, 0, NULL,
+		"BtHorFilter", ONOFF, 0, &BtHorFilter,
+		FALSE, 0, 1, 1, NULL,
 		"Hardware", "BtHorFilter", BtHorFilter_OnChange,
 	},
 	{
-		"BtVertFilter", YESNO, 0, &BtVertFilter,
-		FALSE, 0, 1, 0, NULL,
+		"BtVertFilter", ONOFF, 0, &BtVertFilter,
+		FALSE, 0, 1, 1, NULL,
 		"Hardware", "BtVertFilter", BtVertFilter_OnChange,
 	},
 	{
-		"BtColorKill", YESNO, 0, &BtColorKill,
-		TRUE, 0, 1, 0, NULL,
+		"BtColorKill", ONOFF, 0, &BtColorKill,
+		TRUE, 0, 1, 1, NULL,
 		"Hardware", "BtColorKill", BtColorKill_OnChange,
 	},
 	{
 		"BtWhiteCrushUp", SLIDER, 0, &BtWhiteCrushUp,
-		0xcf, 0, 255, 10, NULL,
+		0xcf, 0, 255, 1, NULL,
 		"Hardware", "BtWhiteCrushUp", BT848_WhiteCrushUp_OnChange,
 	},
 	{
 		"BtWhiteCrushDown", SLIDER, 0, &BtWhiteCrushDown,
-		0x7f, 0, 255, 10, NULL,
+		0x7f, 0, 255, 1, NULL,
 		"Hardware", "BtWhiteCrushDown", BT848_WhiteCrushDown_OnChange,
 	},
 	{
 		"Sharpness", SLIDER, 0, &CurrentX,
-		720, 0, DTV_MAX_WIDTH, 0, NULL,
+		720, 0, DTV_MAX_WIDTH, 2, NULL,
 		"MainWindow", "CurrentX", CurrentX_OnChange,
 	},
 	{
 		"CustomPixelWidth", SLIDER, 0, &CustomPixelWidth,
-		754, 0, DTV_MAX_WIDTH, 0, NULL,
+		754, 0, DTV_MAX_WIDTH, 2, NULL,
 		"MainWindow", "CustomPixelWidth", NULL,
 	},
 	{
 		"Video Source", SLIDER, 0, &VideoSource,
-		SOURCE_COMPOSITE, SOURCE_TUNER, SOURCE_CCIR656, 0, NULL,
+		SOURCE_COMPOSITE, SOURCE_TUNER, SOURCE_CCIR656, 1, NULL,
 		"Hardware", "VideoSource", VideoSource_OnChange,
 	},
 	{
 		"Video Format", NUMBER, 0, &TVFormat,
-		FORMAT_NTSC, 0, FORMAT_LASTONE - 1, 0, NULL,
+		FORMAT_NTSC, 0, FORMAT_LASTONE - 1, 1, NULL,
 		"Hardware", "TVType", TVFormat_OnChange,
 	},
 	{
 		"Horizontal Pos", SLIDER, 0, &HDelay,
-		0, 0, 255, 0, NULL,
+		0, 0, 255, 1, NULL,
 		"Hardware", "HDelay", HDelay_OnChange,
 	},
 	{
 		"Vertical Pos", SLIDER, 0, &VDelay,
-		0, 0, 255, 0, NULL,
+		0, 0, 255, 1, NULL,
 		"Hardware", "VDelay", VDelay_OnChange,
 	},
 };

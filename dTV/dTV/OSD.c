@@ -209,7 +209,7 @@ void OSD_Redraw(HWND hWnd, HDC hDC)
 					hBrushOld = SelectObject(hDC, hBrush);
 					if(bOutline)
 					{
-						PatBlt(hDC, nXpos - 2, nYpos - 2, sizeText.cx + 4, sizeText.cy + 4, PATCOPY);
+						PatBlt(hDC, nXpos - 1, nYpos - 1, sizeText.cx + 2, sizeText.cy + 2, PATCOPY);
 					}
 					else
 					{
@@ -228,10 +228,10 @@ void OSD_Redraw(HWND hWnd, HDC hDC)
 			{
 				// Draw OSD outline if required
 				SetTextColor(hDC, OutlineColor);
-				TextOut(hDC, nXpos - 2, nYpos, grOSD.szText, strlen(grOSD.szText));
-				TextOut(hDC, nXpos + 2, nYpos, grOSD.szText, strlen(grOSD.szText));
-				TextOut(hDC, nXpos, nYpos - 2, grOSD.szText, strlen(grOSD.szText));
-				TextOut(hDC, nXpos, nYpos + 2, grOSD.szText, strlen(grOSD.szText));
+				TextOut(hDC, nXpos - 1, nYpos, grOSD.szText, strlen(grOSD.szText));
+				TextOut(hDC, nXpos + 1, nYpos, grOSD.szText, strlen(grOSD.szText));
+				TextOut(hDC, nXpos, nYpos - 1, grOSD.szText, strlen(grOSD.szText));
+				TextOut(hDC, nXpos, nYpos + 1, grOSD.szText, strlen(grOSD.szText));
 			}
 
 			// Draw OSD text
@@ -253,32 +253,32 @@ SETTING OSDSettings[OSD_SETTING_LASTONE] =
 {
 	{
 		"OSD Outline Color", NUMBER, 0, &OutlineColor,
-		 RGB(0,0,0), 0, RGB(255,255,255), 0, NULL,
+		 RGB(0,0,0), 0, RGB(255,255,255), 1, NULL,
 		"OSD", "OutlineColor", NULL,
 	},
 	{
 		"OSD Text Color", NUMBER, 0, &TextColor,
-		 RGB(0,255,0), 0, RGB(255,255,255), 0, NULL,
+		 RGB(0,255,0), 0, RGB(255,255,255), 1, NULL,
 		"OSD", "TextColor", NULL,
 	},
 	{
 		"OSD Default Size", NUMBER, 0, &DefaultSizePerc,
-		 10, 0, 100, 0, NULL,
+		 10, 0, 100, 1, NULL,
 		"OSD", "DefaultSizePerc", NULL,
 	},
 	{
-		"OSD Anti Alias", YESNO, 0, &bAntiAlias,
-		 TRUE, 0, 1, 0, NULL,
+		"OSD Anti Alias", ONOFF, 0, &bAntiAlias,
+		 TRUE, 0, 1, 1, NULL,
 		"OSD", "AntiAlias", NULL,
 	},
 	{
 		"OSD Background", NUMBER, 0, &Background,
-		 OSDB_TRANSPARENT, 0, OSDBACK_LASTONE - 1, 0, NULL,
+		 OSDB_TRANSPARENT, 0, OSDBACK_LASTONE - 1, 1, NULL,
 		"OSD", "Background", NULL,
 	},
 	{
-		"OSD Outline Text", YESNO, 0, &bOutline,
-		 TRUE, 0,  1, 0, NULL,
+		"OSD Outline Text", ONOFF, 0, &bOutline,
+		 TRUE, 0,  1, 1, NULL,
 		"OSD", "Outline", NULL,
 	},
 };

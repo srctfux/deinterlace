@@ -790,67 +790,67 @@ SETTING DI_BlendedClipSettings[DI_BLENDEDCLIP_SETTING_LASTONE] =
 {
 	{
 		"BlcMinimumClip", SLIDER, 0, &BlcMinimumClip,
-		-15, -100, 100, 10, NULL,
+		-15, -100, 100, 1, NULL,
 		"Deinterlace", "BlcMinimumClip", NULL,
 	},
 	{
 		"BlcPixelMotionSense", SLIDER, 0, &BlcPixelMotionSense,
-		17, 0, 255, 10, NULL,
+		17, 0, 255, 1, NULL,
 		"Deinterlace", "BlcPixelMotionSense", NULL,
 	},
 	{
 		"BlcMotionAvgPeriod", SLIDER, 0, &BlcMotionAvgPeriod,
-		20, -100, 100, 10, NULL,
+		20, -100, 100, 1, NULL,
 		"Deinterlace", "BlcMotionAvgPeriod", NULL,
 	},
 	{
 		"BlcPixelMotionSense", SLIDER, 0, &BlcPixelMotionSense,
-		17, 0, 200, 10, NULL,
+		17, 0, 200, 1, NULL,
 		"Deinterlace", "BlcPixelMotionSense", NULL,
 	},
 	{
 		"BlcPixelCombSense", SLIDER, 0, &BlcPixelCombSense,
-		27, 0, 200, 10, NULL,
+		27, 0, 200, 1, NULL,
 		"Deinterlace", "BlcPixelCombSense", NULL,
 	},
 	{
 		"BlcRecentCombSense", SLIDER, 0, &BlcRecentCombSense,
-		0, 0, 200, 10, NULL,
+		0, 0, 200, 1, NULL,
 		"Deinterlace", "BlcRecentCombSense", NULL,
 	},
 	{
 		"BlcCombAvgPeriod", SLIDER, 0, &BlcCombAvgPeriod,
-		20, 0, 200, 10, NULL,
+		20, 0, 200, 1, NULL,
 		"Deinterlace", "BlcCombAvgPeriod", NULL,
 	},
 	{
 		"BlcHighCombSkip", SLIDER, 0, &BlcHighCombSkip,
-		10, 0, 200, 10, NULL,
+		10, 0, 200, 1, NULL,
 		"Deinterlace", "BlcHighCombSkip", NULL,
 	},
 	{
 		"BlcLowMotionSkip", SLIDER, 0, &BlcLowMotionSkip,
-		0, 0, 200, 10, NULL,
+		0, 0, 200, 1, NULL,
 		"Deinterlace", "BlcLowMotionSkip", NULL,
 	},
 	{
 		"BlcVerticalSmoothing", SLIDER, 0, &BlcVerticalSmoothing,
-		0, 0, 200, 10, NULL,
+		0, 0, 200, 1, NULL,
 		"Deinterlace", "BlcVerticalSmoothing", NULL,
 	},
 	{
-		"BlcUseInterpBob", YESNO, 0, &BlcUseInterpBob,
-		FALSE, 0, 1, 0, NULL,
+		"BlcUseInterpBob", ONOFF, 0, &BlcUseInterpBob,
+		FALSE, 0, 1, 1, NULL,
 		"Deinterlace", "BlcUseInterpBob", NULL,
 	},
 	{
-		"BlcBlendChroma", YESNO, 0, &BlcBlendChroma,
-		TRUE, 0, 1, 0, NULL,
+		"BlcBlendChroma", ONOFF, 0, &BlcBlendChroma,
+		TRUE, 0, 1, 1, NULL,
 		"Deinterlace", "BlcBlendChroma", NULL,
 	},
 	{
-		"BlcShowControls", YESNO, 0, &BlcShowControls,
-		TRUE, 0, 1, 0, NULL,
+		"BlcShowControls", ONOFF, 0, &BlcShowControls,
+		TRUE, 0, 1, 1, NULL,
 		"Deinterlace", "BlcShowControls", NULL,
 	},
 };

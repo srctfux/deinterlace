@@ -1085,27 +1085,27 @@ SETTING AspectSettings[ASPECT_SETTING_LASTONE] =
 {
 	{
 		"Overscan", SLIDER, 0, &InitialOverscan,
-		DEFAULT_OVERSCAN_NTSC, 0, 150, 10, NULL,
+		DEFAULT_OVERSCAN_NTSC, 0, 150, 1, NULL,
 		"Hardware", "InitialOverscan", Aspect_Overscan_OnChange,
 	},
 	{
 		"Source Aspect", NUMBER, 0, &source_aspect,
-		1333, 0, 4000, 100, NULL,
+		1333, 0, 4000, 10, NULL,
 		"ASPECT", "SourceAspect", SourceAspect_OnChange,
 	},
 	{
 		"Custom Source Aspect", SLIDER, 0, &custom_source_aspect,
-		0, 0, 4000, 100, NULL,
+		0, 0, 4000, 10, NULL,
 		"ASPECT", "CustomSourceAspect", NULL,
 	},
 	{
 		"Target Aspect", NUMBER, 0, &target_aspect,
-		0, 0, 4000, 100, NULL,
+		0, 0, 4000, 10, NULL,
 		"ASPECT", "TargetAspect", TargetAspect_OnChange,
 	},
 	{
 		"Custom Target Aspect", SLIDER, 0, &custom_target_aspect,
-		0, 0, 4000, 100, NULL,
+		0, 0, 4000, 10, NULL,
 		"ASPECT", "CustomTargetAspect", NULL,
 	},
 	{
@@ -1115,7 +1115,7 @@ SETTING AspectSettings[ASPECT_SETTING_LASTONE] =
 	},
 	{
 		"Luminance Threshold", SLIDER, 0, &LuminanceThreshold,
-		30, 0, 2000, 10, NULL,
+		30, 0, 2000, 1, NULL,
 		"ASPECT", "LuminanceThreshold", NULL,
 	},
 	{
@@ -1124,8 +1124,8 @@ SETTING AspectSettings[ASPECT_SETTING_LASTONE] =
 		"ASPECT", "IgnoreNonBlackPixels", NULL,
 	},
 	{
-		"Auto Detect Aspect", YESNO, 0, &AutoDetectAspect,
-		FALSE, 0, 1, 0, NULL,
+		"Auto Detect Aspect", ONOFF, 0, &AutoDetectAspect,
+		FALSE, 0, 1, 1, NULL,
 		"ASPECT", "AutoDetectAspect", NULL,
 	},
 	{
@@ -1135,12 +1135,12 @@ SETTING AspectSettings[ASPECT_SETTING_LASTONE] =
 	},
 	{
 		"Aspect History Time", SLIDER, 0, &AspectHistoryTime,
-		300, 0, 3000, 100, NULL,
+		300, 0, 3000, 10, NULL,
 		"ASPECT", "AspectHistoryTime", NULL,
 	},
 	{
 		"AspectConsistencyTime", SLIDER, 0, &AspectConsistencyTime,
-		15, 0, 300, 10, NULL,
+		15, 0, 300, 5, NULL,
 		"ASPECT", "AspectConsistencyTime", NULL,
 	},
 	{

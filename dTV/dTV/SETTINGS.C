@@ -528,6 +528,7 @@ long Setting_GetValue(SETTING* pSetting)
 	switch(pSetting->Type)
 	{
 	case YESNO:
+	case ONOFF:
 		return (BOOL) *pSetting->pValue;
 		break;
 	case ITEMFROMLIST:
@@ -551,6 +552,7 @@ BOOL Setting_SetValue(SETTING* pSetting, long Value)
 	switch(pSetting->Type)
 	{
 	case YESNO:
+	case ONOFF:
 		 NewValue = (Value != 0);
 		break;
 	case ITEMFROMLIST:
@@ -607,6 +609,7 @@ void Setting_SetControlValue(SETTING* pSetting, HWND hControl)
 	switch(pSetting->Type)
 	{
 	case YESNO:
+	case ONOFF:
 		Button_SetCheck(hControl, *pSetting->pValue);
 		break;
 
@@ -634,6 +637,7 @@ BOOL Setting_SetFromControl(SETTING* pSetting, HWND hControl)
 	switch(pSetting->Type)
 	{
 	case YESNO:
+	case ONOFF:
 		nValue = (Button_GetCheck(hControl) != 0);
 		break;
 
@@ -662,6 +666,7 @@ HWND Setting_CreateControl(SETTING* pSetting, HWND hDlg, int* VertPos)
 	switch(pSetting->Type)
 	{
 	case YESNO:
+	case ONOFF:
 		break;
 	case ITEMFROMLIST:
 		break;
@@ -745,6 +750,9 @@ void Setting_OSDShow(SETTING* pSetting, HWND hWnd)
 	case YESNO:
 		sprintf(szBuffer, "%s %s", pSetting->szDisplayName, *(pSetting->pValue)?"YES":"NO");
 		break;
+	case ONOFF:
+		sprintf(szBuffer, "%s %s", pSetting->szDisplayName, *(pSetting->pValue)?"ON":"OFF");
+		break;
 	case SLIDER:
 	case NUMBER:
 		sprintf(szBuffer, "%s %d", pSetting->szDisplayName, *(pSetting->pValue));
@@ -758,7 +766,7 @@ void Setting_OSDShow(SETTING* pSetting, HWND hWnd)
 // This function allows for accelerated slider adjustments
 // For example, adjusting Contrast or Brightness faster the longer 
 // you hold down the adjustment key.
-int GetCurrentAdjustmentStepCount()
+int GetCurrentAdjustmentStepCount(SETTING* pSetting)
 {
     static DWORD        dwLastTick = 0;
     static DWORD        dwFirstTick = 0;
@@ -767,6 +775,15 @@ int GetCurrentAdjustmentStepCount()
     DWORD               dwElapsedSinceLastCall;
     DWORD               dwElapsedSinceFirstTick;
     int                 nStepCount;
+	static SETTING* 	LastSetting = NULL;
+
+	if(LastSetting != pSetting)
+	{
+		dwLastTick = 0;
+		dwFirstTick = 0;
+		dwTaps = 0;
+		LastSetting = pSetting;
+	}
 
     dwTick = GetTickCount();
     dwElapsedSinceLastCall = dwTick - dwLastTick;
@@ -832,7 +849,7 @@ void Setting_Up(SETTING* pSetting)
 
     if (*pSetting->pValue < pSetting->MaxValue)
     {
-        nStep = GetCurrentAdjustmentStepCount();
+        nStep = GetCurrentAdjustmentStepCount(pSetting) * pSetting->StepValue;
 		Setting_SetValue(pSetting, *pSetting->pValue + nStep);
     }
 }
@@ -843,7 +860,7 @@ void Setting_Down(SETTING* pSetting)
 
     if (*pSetting->pValue > pSetting->MinValue)
     {
-        nStep = GetCurrentAdjustmentStepCount();
+        nStep = GetCurrentAdjustmentStepCount(pSetting) * pSetting->StepValue;
 		Setting_SetValue(pSetting, *pSetting->pValue - nStep);
     }
 }
@@ -856,41 +873,57 @@ void Setting_ChangeValue(SETTING* pSetting, eCHANGEVALUE NewValue)
 	}
 	switch(NewValue)
 	{
-	case DISPLAYVALUE:
+	case DISPLAY:
 		Setting_OSDShow(pSetting, hWnd);
 		break;
-	case INCREMENTVALUE:
+	case ADJUSTUP:
 		Setting_Up(pSetting);
 		Setting_OSDShow(pSetting, hWnd);
 		break;
-	case DECREMENTVALUE:
+	case ADJUSTDOWN:
 		Setting_Down(pSetting);
 		Setting_OSDShow(pSetting, hWnd);
 		break;
-	case RESETVALUE:
+	case INCREMENT:
+		Setting_SetValue(pSetting, Setting_GetValue(pSetting) + pSetting->StepValue);
+		Setting_OSDShow(pSetting, hWnd);
+		break;
+	case DECREMENT:
+		Setting_SetValue(pSetting, Setting_GetValue(pSetting) - pSetting->StepValue);
+		Setting_OSDShow(pSetting, hWnd);
+		break;
+	case RESET:
 		Setting_SetDefault(pSetting);
 		Setting_OSDShow(pSetting, hWnd);
 		break;
 	case TOGGLEBOOL:
-		if(pSetting->Type == YESNO)
+		if(pSetting->Type == YESNO || pSetting->Type == ONOFF)
 		{
 			Setting_SetValue(pSetting, !Setting_GetValue(pSetting));
 			Setting_OSDShow(pSetting, hWnd);
 		}
-	case INCREMENTVALUE_SILENT:
+		break;
+	case ADJUSTUP_SILENT:
 		Setting_Up(pSetting);
 		break;
-	case DECREMENTVALUE_SILENT:
+	case ADJUSTDOWN_SILENT:
 		Setting_Down(pSetting);
 		break;
-	case RESETVALUE_SILENT:
+	case INCREMENT_SILENT:
+		Setting_SetValue(pSetting, Setting_GetValue(pSetting) + pSetting->StepValue);
+		break;
+	case DECREMENT_SILENT:
+		Setting_SetValue(pSetting, Setting_GetValue(pSetting) - pSetting->StepValue);
+		break;
+	case RESET_SILENT:
 		Setting_SetDefault(pSetting);
 		break;
 	case TOGGLEBOOL_SILENT:
-		if(pSetting->Type == YESNO)
+		if(pSetting->Type == YESNO || pSetting->Type == ONOFF)
 		{
 			Setting_SetValue(pSetting, !Setting_GetValue(pSetting));
 		}
+		break;
 	default:
 		break;
 	}

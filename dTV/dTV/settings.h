@@ -49,6 +49,7 @@
 typedef enum
 {
 	NOT_PRESENT = 0,
+	ONOFF,
 	YESNO,
 	ITEMFROMLIST,
 	SLIDER,

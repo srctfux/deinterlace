@@ -37,6 +37,7 @@
 #define DOLOGGING
 #include "DebugLog.h"
 #include "dTV.h"
+#include "BT848.h"
 
 
 /* #define XWIN 1   /* visual debugging */
@@ -121,9 +122,46 @@ int decodebit(unsigned char *data, int threshold)
     return (sum > threshold*23);
 }
 
+int FindClock(unsigned char *vbiline, double ClockPixels)
+{
+	int i;
+	DWORD MinTotal = 0;
+	int MinCount = 0;
+	DWORD MaxTotal = 0;
+	int MaxCount = 0;
+	double Integer;
+	double Remainder;
+	for(i = 0; i < (int)(ClockPixels * 6.5); i++)
+	{
+		Remainder = modf((double)i / ClockPixels, &Integer);
+		if(Remainder < 0.25 || Remainder > 0.75)
+		{
+			MinTotal += vbiline[i];
+			MinCount++;
+		}
+		else
+		{
+			MaxTotal += vbiline[i];
+			MaxCount++;
+		}
+	}
+	if(MinCount == 0 || MaxCount == 0)
+	{
+		return 0;	
+	}
+	else
+	{
+		return (MaxTotal / MaxCount) - (MinTotal / MinCount);
+	}
+}
+
 int decode(unsigned char *vbiline)
 {
-    int max[7], min[7], val[7], i, clk, tmp, sample, packedbits = 0;
+    int max[7], min[7], val[7], i, clk, tmp, packedbits = 0;
+	double ClockPixels;
+	int ClockMax = -1;
+	int ClockPos = -1;
+	int ClockCur;
     
     for (clk=0; clk<7; clk++)
 	{
@@ -131,95 +169,44 @@ int decode(unsigned char *vbiline)
 	}
     clk = tmp = 0;
 
-    i=30;
+	ClockPixels = 8.0 * BT848_GetTVFormat()->Fsc / BT848_GetTVFormat()->CC_Clock;
 
-    while (i < 700 && clk < 7)
+    i=35;
+
+    while (i < 50)
 	{
-		/* find and lock all 7 clocks */
-		sample = (vbiline[i] + vbiline[i + 1] + vbiline[i + 2] + vbiline[i - 1] + vbiline[i - 2]) / 5;
-		if (max[clk] < 0) 
-		{ 
-			/* find maximum value before drop */
-			if (sample > 85 && sample > val[clk])
-			{
-				/* mark new maximum found */
-				val[clk] = sample;
-				tmp = i;
-			}
-			else if (val[clk] - sample > 30)
-			{
-				/* far enough */
-				max[clk] = tmp;
-				i = tmp + 10;
-			}
-		}
-		else
-		{ 
-			/* find minimum value after drop */
-		    if (sample < 85 && sample < val[clk])
-			{
-				/* mark new minimum found */
-				val[clk] = sample; 
-				tmp = i;
-			}
-			else if (sample - val[clk] > 30)
-			{
-				/* searched far enough */
-				min[clk++] = tmp;
-				i = tmp + 10;
-			}
+		ClockCur = FindClock(vbiline + i, ClockPixels);
+		if(ClockCur > ClockMax)
+		{
+			ClockMax = ClockCur;
+			ClockPos = i;
 		}
 		i++;
-	} 
+	}
 
-	i= min[6] = min[5] - max[5] + max[6]; 
-   
-    if (clk != 7) /* || vbiline[max[3]] - vbiline[min[5]] < 45) */
+	//LOGD("Failed to Detect 7 clocks %d\n", clk);
+	if(ClockMax < 45)
 	{
-		/* failure to locate clock lead-in */
-		//LOGD("Failed to Detect 7 clocks %d\n", clk);
 		return -1;
 	}
 
-#ifdef XWIN
-   for (clk=0; clk<7; clk++)
-   {
-	   XDrawLine(dpy,Win,WinGC,min[clk]/2,0,min[clk]/2,128);
-	   XDrawLine(dpy,Win,WinGC1,max[clk]/2,0,max[clk]/2,128);
-   }
-   XFlush(dpy);
-#endif
- 
-    
-    /* calculate threshold */
-    for (i=0, sample=0; i < 7; i++)
+    tmp = ClockPos + 512;
+	if(!decodebit(&vbiline[tmp], 0x90))
 	{
-	    sample = (sample + vbiline[min[i]] + vbiline[max[i]])/3;
+		// no start bit
+		return -1;
 	}
-
-    for(i=min[6];vbiline[i]<sample;i++)
-	{
-		;
-	}
-
-#ifdef XWIN
-   for (clk=i;clk<i+57*18;clk+=57)
-	   XDrawLine(dpy,Win,WinGC,clk/2,0,clk/2,128);
-   XFlush(dpy);
-#endif
- 
-    
-    tmp = i+57;
+	tmp += 57;
     for (i = 0; i < 16; i++)
 	{
-		if(decodebit(&vbiline[tmp + i * 57], sample))
+		if(decodebit(&vbiline[tmp + i * 57], 0x90))
 		{
 			packedbits |= 1<<i;
 		}
 	}
-    return packedbits & parityok(packedbits);
-	//LOGD("%c%c\n", packedbits & 0x7F, (packedbits>>8) & 0x7F);
-	//return packedbits;
+    //return packedbits & parityok(packedbits);
+	LOGD("%c%c\n", packedbits & 0x7F, (packedbits>>8) & 0x7F);
+	return packedbits;
 } /* decode */
 
 int XDSdecode(int data)

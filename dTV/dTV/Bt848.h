@@ -83,6 +83,9 @@ typedef struct
 	BOOL Is25fps;
 	WORD VBIPacketSize;
 	WORD VBILines;
+	double Fsc;
+	BOOL NeedsPLL;
+	double CC_Clock;
 } TTVFORMAT;
 
 

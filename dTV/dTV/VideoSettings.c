@@ -371,12 +371,12 @@ SETTING VideoSettingsSettings[VIDEOSETTINGS_SETTING_LASTONE] =
 {
 	{
 		"Save Settings Per Input", YESNO, 0, &bSavePerInput,
-		 FALSE, 0, 1, 0, NULL,
+		 FALSE, 0, 1, 1, NULL,
 		"VideoSettings", "SavePerInput", SavePerInput_OnChange,
 	},
 	{
 		"Save Settings Per Format", YESNO, 0, &bSavePerFormat,
-		 FALSE, 0, 1, 0, NULL,
+		 FALSE, 0, 1, 1, NULL,
 		"VideoSettings", "SavePerFormat", SavePerFormat_OnChange,
 	},
 };

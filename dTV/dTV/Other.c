@@ -803,12 +803,12 @@ SETTING OtherSettings[OTHER_SETTING_LASTONE] =
 {
 	{
 		"Back Buffers", NUMBER, 0, &Back_Buffers,
-		2, 2, 3, 0, NULL,
+		2, 2, 3, 1, NULL,
 		"Overlay", "Back_Buffers", NULL,
 	},
 	{
 		"Overlay Color", NUMBER, 0, &OverlayColor,
-		RGB(255,0,255), 0, RGB(255,255,255), 0, NULL,
+		RGB(255,0,255), 0, RGB(255,255,255), 1, NULL,
 		"Overlay", "OverlayColor", NULL,
 	},
 };

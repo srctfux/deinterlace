@@ -459,27 +459,27 @@ SETTING FD60Settings[FD60_SETTING_LASTONE] =
 	},
 	{
 		"Threshold 3:2 Pulldown", SLIDER, 0, &Threshold32Pulldown,
-		15, 1, 5000, 10, NULL,
+		15, 1, 5000, 5, NULL,
 		"Pulldown", "Threshold32Pulldown", NULL,
 	},
 	{
 		"Threshold 3:2 Pulldown Mismatch", SLIDER, 0, &ThresholdPulldownMismatch,
-		900, 1, 10000, 100, NULL,
+		900, 1, 10000, 10, NULL,
 		"Pulldown", "ThresholdPulldownMismatch", NULL,
 	},
 	{
 		"Threshold 3:2 Pulldown Comb", SLIDER, 0, &ThresholdPulldownComb,
-		150, 1, 5000, 50, NULL,
+		150, 1, 5000, 10, NULL,
 		"Pulldown", "ThresholdPulldownComb", NULL,
 	},
 	{
-		"Fallback To Video", YESNO, 0, &bFallbackToVideo,
-		TRUE, 0, 1, 0, NULL,
+		"Bad Pulldown Filter", ONOFF, 0, &bFallbackToVideo,
+		TRUE, 0, 1, 1, NULL,
 		"Pulldown", "bFallbackToVideo", NULL,
 	},
 	{
 		"Pulldown Switch Interval", SLIDER, 0, &PulldownSwitchInterval,
-		3000, 0, 10000, 1000, NULL,
+		3000, 0, 10000, 10, NULL,
 		"Pulldown", "PulldownSwitchInterval", NULL,
 
 	},

@@ -541,27 +541,27 @@ SETTING DI_BobWeaveSettings[DI_BOBWEAVE_SETTING_LASTONE] =
 {
 	{
 		"Weae Edge Detect", SLIDER, 0, &EdgeDetect,
-		625, 0, 10000, 50, NULL,
+		625, 0, 10000, 5, NULL,
 		"Deinterlace", "EdgeDetect", NULL,
 	},
 	{
 		"Weave Jaggie Threshold", SLIDER, 0, &JaggieThreshold,
-		73, 0, 5000, 50, NULL,
+		73, 0, 5000, 5, NULL,
 		"Deinterlace", "JaggieThreshold", NULL,
 	},
 	{
 		"Temporal Tolerance", SLIDER, 0, &TemporalTolerance,
-		300, 0, 5000, 50, NULL,
+		300, 0, 5000, 10, NULL,
 		"Deinterlace", "TemporalTolerance", NULL,
 	},
 	{
 		"Spatial Tolerance", SLIDER, 0, &SpatialTolerance,
-		600, 0, 5000, 50, NULL,
+		600, 0, 5000, 10, NULL,
 		"Deinterlace", "SpatialTolerance", NULL,
 	},
 	{
 		"Similarity Threshold", SLIDER, 0, &SimilarityThreshold,
-		25, 0, 255, 10, NULL,
+		25, 0, 255, 1, NULL,
 		"Deinterlace", "SimilarityThreshold", NULL,
 	},
 };

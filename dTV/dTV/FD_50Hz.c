@@ -220,12 +220,12 @@ SETTING FD50Settings[FD50_SETTING_LASTONE] =
 {
 	{
 		"Pulldown Threshold Low", SLIDER, 0, &PulldownThresholdLow,
-		40, 0, 100, 5, NULL,
+		40, 0, 100, 2, NULL,
 		"Pulldown", "PulldownThresholdLow", NULL,
 	},
 	{
 		"Pulldown Threshold High", SLIDER, 0, &PulldownThresholdHigh,
-		10, 0, 200, 5, NULL,
+		10, 0, 200, 2, NULL,
 		"Pulldown", "PulldownThresholdHigh", NULL,
 	},
 	{

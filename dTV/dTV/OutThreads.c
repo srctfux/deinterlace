@@ -842,28 +842,28 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 SETTING OutThreadsSettings[OUTTHREADS_SETTING_LASTONE] =
 {
 	{
-		"Hurry When Late", YESNO, 0, &Hurry_When_Late,
-		FALSE, 0, 1, 0, NULL,
+		"Hurry When Late", ONOFF, 0, &Hurry_When_Late,
+		FALSE, 0, 1, 1, NULL,
 		"Threads", "Hurry_When_Late", NULL,
 	},
 	{
-		"Wait For Flip", YESNO, 0, &Wait_For_Flip,
-		TRUE, 0, 1, 0, NULL,
+		"Wait For Flip", ONOFF, 0, &Wait_For_Flip,
+		TRUE, 0, 1, 1, NULL,
 		"Threads", "Wait_For_Flip", NULL,
 	},
 	{
-		"Do Accurate Flips", YESNO, 0, &DoAccurateFlips,
-		FALSE, 0, 1, 0, NULL,
+		"Do Accurate Flips", ONOFF, 0, &DoAccurateFlips,
+		FALSE, 0, 1, 1, NULL,
 		"Threads", "DoAccurateFlips", NULL,
 	},
 	{
 		"Sleep Interval", SLIDER, 0, &Sleep_Interval,
-		0, 0, 100, 0, NULL,
+		0, 0, 100, 1, NULL,
 		"Threads", "Sleep_Interval", NULL,
 	},
 	{
-		"Auto Detect Mode", YESNO, 0, &bAutoDetectMode,
-		TRUE, 0, 1, 0, NULL,
+		"Auto Detect Mode", ONOFF, 0, &bAutoDetectMode,
+		TRUE, 0, 1, 1, NULL,
 		"Pulldown", "bAutoDetectMode", NULL,
 	},
 	{
@@ -873,12 +873,12 @@ SETTING OutThreadsSettings[OUTTHREADS_SETTING_LASTONE] =
 	},
 	{
 		"Refresh Rate", SLIDER, 0, &RefreshRate,
-		0, 0, 120, 0, NULL,
+		0, 0, 120, 1, NULL,
 		"Pulldown", "RefreshRate", NULL,
 	},
 	{
-		"Wait For VSync", YESNO, 0, &bWaitForVsync,
-		FALSE, 0, 1, 0, NULL,
+		"Wait For VSync", ONOFF, 0, &bWaitForVsync,
+		FALSE, 0, 1, 1, NULL,
 		"Threads", "bWaitForVsync", NULL,
 	},
 };

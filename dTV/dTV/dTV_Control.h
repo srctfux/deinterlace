@@ -92,15 +92,23 @@
 /////////////////////////////////////////////////////////////////////////////
 typedef enum
 {
-	DISPLAYVALUE = 0,
-	INCREMENTVALUE,
-	DECREMENTVALUE,
-	RESETVALUE,
-	TOGGLEBOOL,
-	INCREMENTVALUE_SILENT,
-	DECREMENTVALUE_SILENT,
-	RESETVALUE_SILENT,
-	TOGGLEBOOL_SILENT,
+	DISPLAY = 0,          // Display OSD value.
+	ADJUSTUP,             // Increase value, with acceleration [display OSD]
+	ADJUSTDOWN,           // Decrease value, with acceleration [display OSD]
+	INCREMENT,            // Increase value by 1 [display OSD]
+	DECREMENT,            // Decrease value by 1 [display OSD]
+	STEPUP,				  // Increase value by the step value [display OSD]
+	STEPUPDOWN,           // Decrease value by the step value [display OSD]
+	RESET,                // Reset value to default [display OSD]
+	TOGGLEBOOL,           // Toggle a boolean setting [display OSD]
+	ADJUSTUP_SILENT,      // Same, but no OSD
+	ADJUSTDOWN_SILENT,      // Same, but no OSD
+	INCREMENT_SILENT,     // Same, but no OSD
+	DECREMENT_SILENT,     // Same, but no OSD
+	STEPUP_SILENT,		  // Increase value by the step value [display OSD]
+	STEPUPDOWN_SILENT,    // Decrease value by the step value [display OSD]
+	RESET_SILENT,         // Same, but no OSD
+	TOGGLEBOOL_SILENT,    // Same, but no OSD
 } eCHANGEVALUE;
 
 /////////////////////////////////////////////////////////////////////////////
