@@ -70,29 +70,10 @@
 extern int decodebit(unsigned char *data, int threshold, int NumPixels);
 
 // WSS decoded data
-int		WSSAspectRatio = -1;
-int		WSSAspectMode = -1;
-BOOL	WSSFilmMode = FALSE;
-BOOL	WSSColorPlus = FALSE;
-BOOL	WSSHelperSignals = FALSE;
-BOOL	WSSTeletextSubtitle = FALSE;
-int		WSSOpenSubtitles = WSS625_SUBTITLE_NO;
-BOOL	WSSSurroundSound = FALSE;
-BOOL	WSSCopyrightAsserted = FALSE;
-BOOL	WSSCopyProtection = FALSE;
+WSS_DataStruct WSS_Data = { -1,-1,FALSE,FALSE,FALSE,FALSE,WSS625_SUBTITLE_NO,FALSE,FALSE,FALSE };
 
 // WSS control data
-BOOL	WSSDecodeOk = FALSE;		// Status of last decoding
-int		WSSNbDecodeErr = 0;			// Number of decoding errors
-int		WSSNbDecodeOk = 0;			// Number of correct decoding
-int		WSSMinPos = WSS625_START_POS_MAX;
-int		WSSMaxPos = WSS625_START_POS_MIN;
-int		WSSTotalPos = 0;
-int		WSSNbErrPos = 0;
-static int	WSSNbSuccessiveErr = WSS_MAX_SUCCESSIVE_ERR;	// Number of successive decoding errors
-
-static int	WSSAspectRatioWhenErr = -1;
-static int	WSSAspectModeWhenErr = -1;
+WSS_CtrlDataStruct WSS_CtrlData = { FALSE,0,0,WSS_MAX_SUCCESSIVE_ERR,WSS625_START_POS_MAX,WSS625_START_POS_MIN,0,0,-1,-1};
 
 // Offsets of each clock pixels (7.09379) in VBI buffer line
 static int offsets[] = {   0,   7,  14,  21,  28,  35,  43,  50,  57,  64,
@@ -125,33 +106,32 @@ static int WSS625_1[WSS625_DATA_BIT_LENGTH] = { 1,1,1,0,0,0 };
 // Clear WSS decoded data
 static void WSS_clear_data ()
 {
-	WSSAspectRatio = -1;
-	WSSAspectMode = -1;
-	WSSFilmMode = FALSE;
-	WSSColorPlus = FALSE;
-	WSSHelperSignals = FALSE;
-	WSSTeletextSubtitle = FALSE;
-	WSSOpenSubtitles = WSS625_SUBTITLE_NO;
-	WSSSurroundSound = FALSE;
-	WSSCopyrightAsserted = FALSE;
-	WSSCopyProtection = FALSE;
+	WSS_Data.AspectRatio = -1;
+	WSS_Data.AspectMode = -1;
+	WSS_Data.FilmMode = FALSE;
+	WSS_Data.ColorPlus = FALSE;
+	WSS_Data.HelperSignals = FALSE;
+	WSS_Data.TeletextSubtitle = FALSE;
+	WSS_Data.OpenSubtitles = WSS625_SUBTITLE_NO;
+	WSS_Data.SurroundSound = FALSE;
+	WSS_Data.CopyrightAsserted = FALSE;
+	WSS_Data.CopyProtection = FALSE;
 }
 
 // Clear WSS decoded data and WSS control data
 void WSS_init ()
 {
 	// Clear WSS control data
-	WSSDecodeOk = FALSE;
-	WSSNbDecodeErr = 0;
-	WSSNbDecodeOk = 0;
-	WSSMinPos = WSS625_START_POS_MAX;
-	WSSMaxPos = WSS625_START_POS_MIN;
-	WSSTotalPos = 0;
-	WSSNbErrPos = 0;
-	WSSNbSuccessiveErr = WSS_MAX_SUCCESSIVE_ERR;
-
-	WSSAspectRatioWhenErr = -1;
-	WSSAspectModeWhenErr = -1;
+	WSS_CtrlData.DecodeOk = FALSE;
+	WSS_CtrlData.NbDecodeErr = 0;
+	WSS_CtrlData.NbDecodeOk = 0;
+	WSS_CtrlData.NbSuccessiveErr = WSS_MAX_SUCCESSIVE_ERR;
+	WSS_CtrlData.MinPos = WSS625_START_POS_MAX;
+	WSS_CtrlData.MaxPos = WSS625_START_POS_MIN;
+	WSS_CtrlData.TotalPos = 0;
+	WSS_CtrlData.NbErrPos = 0;
+	WSS_CtrlData.AspectRatioWhenErr = -1;
+	WSS_CtrlData.AspectModeWhenErr = -1;
 
 	// Clear WSS decoded data
 	WSS_clear_data ();
@@ -243,7 +223,7 @@ static BOOL WSS625_DecodeLine(BYTE* vbiline)
 				}
 			}
 		}
-		WSSNbErrPos++;
+		WSS_CtrlData.NbErrPos++;
 	}
 
 	if (DecodeOk)
@@ -262,11 +242,11 @@ static BOOL WSS625_DecodeLine(BYTE* vbiline)
 //		}
 
 		// Decoding statistics
-		WSSTotalPos += StartPos;
-		if (StartPos < WSSMinPos)
-			WSSMinPos = StartPos;
-		if (StartPos > WSSMaxPos)
-			WSSMaxPos = StartPos;
+		WSS_CtrlData.TotalPos += StartPos;
+		if (StartPos < WSS_CtrlData.MinPos)
+			WSS_CtrlData.MinPos = StartPos;
+		if (StartPos > WSS_CtrlData.MaxPos)
+			WSS_CtrlData.MaxPos = StartPos;
 
 		packedbits = 0;
 		for (j = 0 ; j < WSS625_NB_DATA_BITS ; j++)
@@ -276,41 +256,41 @@ static BOOL WSS625_DecodeLine(BYTE* vbiline)
 		switch (packedbits & 0x000f)
 		{
 		case WSS625_RATIO_133:
-			WSSAspectMode = AR_NONANAMORPHIC;
-			WSSAspectRatio = 1333;
+			WSS_Data.AspectMode = AR_NONANAMORPHIC;
+			WSS_Data.AspectRatio = 1333;
 			break;
 		case WSS625_RATIO_177_ANAMORPHIC:
-			WSSAspectMode = AR_ANAMORPHIC;
-			WSSAspectRatio = 1778;
+			WSS_Data.AspectMode = AR_ANAMORPHIC;
+			WSS_Data.AspectRatio = 1778;
 			break;
 		case WSS625_RATIO_155:
 		case WSS625_RATIO_155_LETTERBOX_CENTER:
 		case WSS625_RATIO_155_LETTERBOX_TOP:
-			WSSAspectMode = AR_NONANAMORPHIC;
-			WSSAspectRatio = 1555;
+			WSS_Data.AspectMode = AR_NONANAMORPHIC;
+			WSS_Data.AspectRatio = 1555;
 			break;
 		case WSS625_RATIO_177_LETTERBOX_CENTER:
 		case WSS625_RATIO_177_LETTERBOX_TOP:
-			WSSAspectMode = AR_NONANAMORPHIC;
-			WSSAspectRatio = 1778;
+			WSS_Data.AspectMode = AR_NONANAMORPHIC;
+			WSS_Data.AspectRatio = 1778;
 			break;
 		case WSS625_RATIO_BIG_LETTERBOX_CENTER:
-			WSSAspectMode = AR_NONANAMORPHIC;
-			WSSAspectRatio = -1;
+			WSS_Data.AspectMode = AR_NONANAMORPHIC;
+			WSS_Data.AspectRatio = -1;
 			break;
 		default:
-			WSSAspectMode = -1;
-			WSSAspectRatio = -1;
+			WSS_Data.AspectMode = -1;
+			WSS_Data.AspectRatio = -1;
 			break;
 		}
-		WSSFilmMode = (packedbits & 0x0010) ? TRUE : FALSE;
-		WSSColorPlus = (packedbits & 0x0020) ? TRUE : FALSE;
-		WSSHelperSignals = (packedbits & 0x0040) ? TRUE : FALSE;
-		WSSTeletextSubtitle = (packedbits & 0x0100) ? TRUE : FALSE;
-		WSSOpenSubtitles = packedbits & 0x0600;
-		WSSSurroundSound = (packedbits & 0x0800) ? TRUE : FALSE;
-		WSSCopyrightAsserted = (packedbits & 0x1000) ? TRUE : FALSE;
-		WSSCopyProtection = (packedbits & 0x2000) ? TRUE : FALSE;
+		WSS_Data.FilmMode = (packedbits & 0x0010) ? TRUE : FALSE;
+		WSS_Data.ColorPlus = (packedbits & 0x0020) ? TRUE : FALSE;
+		WSS_Data.HelperSignals = (packedbits & 0x0040) ? TRUE : FALSE;
+		WSS_Data.TeletextSubtitle = (packedbits & 0x0100) ? TRUE : FALSE;
+		WSS_Data.OpenSubtitles = packedbits & 0x0600;
+		WSS_Data.SurroundSound = (packedbits & 0x0800) ? TRUE : FALSE;
+		WSS_Data.CopyrightAsserted = (packedbits & 0x1000) ? TRUE : FALSE;
+		WSS_Data.CopyProtection = (packedbits & 0x2000) ? TRUE : FALSE;
 	}
 //	else
 //	{
@@ -342,16 +322,16 @@ static BOOL WSS525_DecodeLine(BYTE* vbiline)
 		{
 		case WSS525_RATIO_133:
 		case WSS525_RATIO_133_LETTERBOX:
-			WSSAspectMode = AR_NONANAMORPHIC;
-			WSSAspectRatio = 1333;
+			WSS_Data.AspectMode = AR_NONANAMORPHIC;
+			WSS_Data.AspectRatio = 1333;
 			break;
 		case WSS525_RATIO_177_ANAMORPHIC:
-			WSSAspectMode = AR_ANAMORPHIC;
-			WSSAspectRatio = 1778;
+			WSS_Data.AspectMode = AR_ANAMORPHIC;
+			WSS_Data.AspectRatio = 1778;
 			break;
 		default:
-			WSSAspectMode = -1;
-			WSSAspectRatio = -1;
+			WSS_Data.AspectMode = -1;
+			WSS_Data.AspectRatio = -1;
 			break;
 		}
 	}
@@ -361,9 +341,9 @@ static BOOL WSS525_DecodeLine(BYTE* vbiline)
 
 int WSS_DecodeLine(BYTE* vbiline)
 {
-	int		PrevAspectMode = WSSAspectMode;
-	int		PrevAspectRatio = WSSAspectRatio;
-	BOOL	PrevDecodeOk = WSSDecodeOk;
+	int		PrevAspectMode = WSS_Data.AspectMode;
+	int		PrevAspectRatio = WSS_Data.AspectRatio;
+	BOOL	PrevDecodeOk = WSS_CtrlData.DecodeOk;
 	int		NewAspectMode;
 	int		NewAspectRatio;
 	BOOL	bSwitch = FALSE;
@@ -373,66 +353,66 @@ int WSS_DecodeLine(BYTE* vbiline)
 	{
 	// 625-line systems
 	case 576:
-		WSSDecodeOk = WSS625_DecodeLine(vbiline);
+		WSS_CtrlData.DecodeOk = WSS625_DecodeLine(vbiline);
 		break;
 
 	// 525-line systems
 	case 400:
-		WSSDecodeOk = WSS525_DecodeLine(vbiline);
+		WSS_CtrlData.DecodeOk = WSS525_DecodeLine(vbiline);
 		break;
 
 	default:
-		WSSDecodeOk = FALSE;
+		WSS_CtrlData.DecodeOk = FALSE;
 		break;
 	}
 
-	if (! WSSDecodeOk)
+	if (! WSS_CtrlData.DecodeOk)
 	{
-		WSSNbDecodeErr++;
-		WSSNbSuccessiveErr++;
+		WSS_CtrlData.NbDecodeErr++;
+		WSS_CtrlData.NbSuccessiveErr++;
 		// Clear WSS decoded data
 		// after two many successive decoding errors
-		if (WSSNbSuccessiveErr == WSS_MAX_SUCCESSIVE_ERR)
+		if (WSS_CtrlData.NbSuccessiveErr == WSS_MAX_SUCCESSIVE_ERR)
 		{
 			WSS_clear_data();
 			bSwitch = TRUE;
-			NewAspectMode = WSSAspectModeWhenErr;
-			NewAspectRatio = WSSAspectRatioWhenErr;
+			NewAspectMode = WSS_CtrlData.AspectModeWhenErr;
+			NewAspectRatio = WSS_CtrlData.AspectRatioWhenErr;
 		}
 	}
 	else
 	{
-		if (! PrevDecodeOk && (WSSNbSuccessiveErr >= WSS_MAX_SUCCESSIVE_ERR))
+		if (! PrevDecodeOk && (WSS_CtrlData.NbSuccessiveErr >= WSS_MAX_SUCCESSIVE_ERR))
 		{
-			WSSAspectModeWhenErr = aspectSettings.aspect_mode;
-			WSSAspectRatioWhenErr = aspectSettings.source_aspect;
+			WSS_CtrlData.AspectModeWhenErr = aspectSettings.aspect_mode;
+			WSS_CtrlData.AspectRatioWhenErr = aspectSettings.source_aspect;
 		}
 
-		WSSNbDecodeOk++;
-		WSSNbSuccessiveErr = 0;
+		WSS_CtrlData.NbDecodeOk++;
+		WSS_CtrlData.NbSuccessiveErr = 0;
 
 		// Manage WSS ratio information
-		if ( (WSSAspectMode != -1)
-		  && (WSSAspectRatio != -1) )
+		if ( (WSS_Data.AspectMode != -1)
+		  && (WSS_Data.AspectRatio != -1) )
 		{
-			if ( (WSSAspectMode != PrevAspectMode)
-			  || (WSSAspectRatio != PrevAspectRatio) )
+			if ( (WSS_Data.AspectMode != PrevAspectMode)
+			  || (WSS_Data.AspectRatio != PrevAspectRatio) )
 			{
 				bSwitch = TRUE;
-				NewAspectMode = WSSAspectMode;
-				NewAspectRatio = WSSAspectRatio;
+				NewAspectMode = WSS_Data.AspectMode;
+				NewAspectRatio = WSS_Data.AspectRatio;
 			}
 			else
 			{
-				NewAspectMode = WSSAspectMode;
-				if (WSSAspectMode != aspectSettings.aspect_mode)
+				NewAspectMode = WSS_Data.AspectMode;
+				if (WSS_Data.AspectMode != aspectSettings.aspect_mode)
 				{
 					bSwitch = TRUE;
 				}
-				if (WSSAspectRatio > aspectSettings.source_aspect)
+				if (WSS_Data.AspectRatio > aspectSettings.source_aspect)
 				{
 					bSwitch = TRUE;
-					NewAspectRatio = WSSAspectRatio;
+					NewAspectRatio = WSS_Data.AspectRatio;
 				}
 				else
 				{
@@ -465,5 +445,5 @@ int WSS_DecodeLine(BYTE* vbiline)
 		OSD_ShowText(hWnd, szInfo, 0);
 	}
 
-	return (WSSDecodeOk ? 0 : -1);
+	return (WSS_CtrlData.DecodeOk ? 0 : -1);
 }

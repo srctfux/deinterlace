@@ -650,44 +650,44 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 
 		OSD_AddText("Status", dfSize, OSD_COLOR_SECTION, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 
-		sprintf (szInfo, "Errors : %d", WSSNbDecodeErr);
+		sprintf (szInfo, "Errors : %d", WSS_CtrlData.NbDecodeErr);
 		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-		sprintf (szInfo, "Ok : %d", WSSNbDecodeOk);
+		sprintf (szInfo, "Ok : %d", WSS_CtrlData.NbDecodeOk);
 		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-		if ((WSSNbDecodeErr+WSSNbDecodeOk) > 0)
+		if ((WSS_CtrlData.NbDecodeErr+WSS_CtrlData.NbDecodeOk) > 0)
 		{
-			sprintf (szInfo, "Last : %s", WSSDecodeOk ? "OK" : "ERROR");
+			sprintf (szInfo, "Last : %s", WSS_CtrlData.DecodeOk ? "OK" : "ERROR");
 			OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 		}
 
-		if ((WSSNbDecodeOk+WSSNbDecodeErr) > 0)
+		if ((WSS_CtrlData.NbDecodeOk+WSS_CtrlData.NbDecodeErr) > 0)
 		{
 
 			nLine = -1;
 
 			// Debug informations
-			if (WSSNbDecodeOk > 0)
+			if (WSS_CtrlData.NbDecodeOk > 0)
 			{
-				sprintf (szInfo, "Start position min / max : %d / %d", WSSMinPos, WSSMaxPos);
+				sprintf (szInfo, "Start position min / max : %d / %d", WSS_CtrlData.MinPos, WSS_CtrlData.MaxPos);
 				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine--, dfMargin, dfSize));
 			}
-			sprintf (szInfo, "Errors searching start position : %d", WSSNbErrPos);
+			sprintf (szInfo, "Errors searching start position : %d", WSS_CtrlData.NbErrPos);
 			OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine--, dfMargin, dfSize));
 			OSD_AddText("Debug", dfSize, OSD_COLOR_SECTION, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine--, dfMargin, dfSize));
 
-			if (WSSDecodeOk)
+			if (WSS_CtrlData.DecodeOk)
 			{
 				nLine = 3;
 
 				OSD_AddText("Data", dfSize, OSD_COLOR_SECTION, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 
 				// WSS data
-				if (WSSAspectRatio > 0)
+				if (WSS_Data.AspectRatio > 0)
 				{
-					sprintf (szInfo, "Aspect ratio : %.3f", WSSAspectRatio / 1000.0);
-					if (WSSAspectMode == 1)
+					sprintf (szInfo, "Aspect ratio : %.3f", WSS_Data.AspectRatio / 1000.0);
+					if (WSS_Data.AspectMode == 1)
 						strcat (szInfo, " Letterboxed");
-					else if (WSSAspectMode == 2)
+					else if (WSS_Data.AspectMode == 2)
 						strcat (szInfo, " Anamorphic");
 				}
 				else
@@ -695,15 +695,15 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 					strcpy (szInfo, "Aspect ratio : undefined");
 				}
 				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-				sprintf (szInfo, "Mode : %s", WSSFilmMode ? "film mode" : "camera mode");		
+				sprintf (szInfo, "Mode : %s", WSS_Data.FilmMode ? "film mode" : "camera mode");		
 				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-				sprintf (szInfo, "Helper signals : %s", WSSHelperSignals ? "yes" : "no");		
+				sprintf (szInfo, "Helper signals : %s", WSS_Data.HelperSignals ? "yes" : "no");		
 				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-				sprintf (szInfo, "Color encoding : %s", WSSColorPlus ? "ColorPlus" : "normal");
+				sprintf (szInfo, "Color encoding : %s", WSS_Data.ColorPlus ? "ColorPlus" : "normal");
 				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-				sprintf (szInfo, "Teletext subtitles : %s", WSSTeletextSubtitle ? "yes" : "no");		
+				sprintf (szInfo, "Teletext subtitles : %s", WSS_Data.TeletextSubtitle ? "yes" : "no");		
 				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-				switch (WSSOpenSubtitles)
+				switch (WSS_Data.OpenSubtitles)
 				{
 				case WSS625_SUBTITLE_NO:
 					strcpy (szInfo, "Open subtitles : no");
@@ -719,11 +719,11 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 					break;
 				}
 				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-				sprintf (szInfo, "Surround sound : %s", WSSSurroundSound ? "yes" : "no");		
+				sprintf (szInfo, "Surround sound : %s", WSS_Data.SurroundSound ? "yes" : "no");		
 				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-				sprintf (szInfo, "Copyright asserted : %s", WSSCopyrightAsserted ? "yes" : "no");		
+				sprintf (szInfo, "Copyright asserted : %s", WSS_Data.CopyrightAsserted ? "yes" : "no");		
 				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-				sprintf (szInfo, "Copy protection : %s", WSSCopyProtection ? "yes" : "no");		
+				sprintf (szInfo, "Copy protection : %s", WSS_Data.CopyProtection ? "yes" : "no");		
 				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 			}
 		}

@@ -31,25 +31,34 @@
 #define WSS625_SUBTITLE_OUTSIDE		2
 
 // WSS data
-extern int	WSSAspectRatio;
-extern int	WSSAspectMode;
-extern BOOL	WSSFilmMode;
-extern BOOL	WSSColorPlus;
-extern BOOL	WSSHelperSignals;
-extern BOOL	WSSTeletextSubtitle;
-extern int	WSSOpenSubtitles;
-extern BOOL	WSSSurroundSound;
-extern BOOL	WSSCopyrightAsserted;
-extern BOOL	WSSCopyProtection;
+typedef struct _WSS_DataStruct {
+	int		AspectRatio;
+	int		AspectMode;
+	BOOL	FilmMode;
+	BOOL	ColorPlus;
+	BOOL	HelperSignals;
+	BOOL	TeletextSubtitle;
+	int		OpenSubtitles;
+	BOOL	SurroundSound;
+	BOOL	CopyrightAsserted;
+	BOOL	CopyProtection;
+} WSS_DataStruct;
+extern WSS_DataStruct WSS_Data;
 
 // WSS control data
-extern BOOL	WSSDecodeOk;	// Status of last decoding
-extern int	WSSNbDecodeErr;	// Number of decoding errors
-extern int	WSSNbDecodeOk;	// Number of correct decoding
-extern int	WSSMinPos;
-extern int	WSSMaxPos;
-extern int	WSSTotalPos;
-extern int	WSSNbErrPos;
+typedef struct _WSS_CtrlDataStruct {
+	BOOL	DecodeOk;			// Status of last decoding
+	int		NbDecodeErr;		// Number of decoding errors
+	int		NbDecodeOk;			// Number of correct decoding
+	int		NbSuccessiveErr;	// Number of successive decoding errors
+	int		MinPos;
+	int		MaxPos;
+	int		TotalPos;
+	int		NbErrPos;
+	int		AspectRatioWhenErr;
+	int		AspectModeWhenErr;
+} WSS_CtrlDataStruct;
+extern WSS_CtrlDataStruct WSS_CtrlData;
 
 void WSS_init ();
 int WSS_DecodeLine(BYTE* vbiline);
