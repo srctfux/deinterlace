@@ -142,24 +142,28 @@ BOOL Overlay_Update(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL Color
 	if (pSrcRect == NULL)
 	{
 		ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, NULL, lpDDSurface, NULL, dwFlags, &DDOverlayFX);
+		// if another device has requested exclusive access then we
+		// can get the no hardware error, just wait a bit and try again
+		while(ddrval == DDERR_NOOVERLAYHW)
+		{
+			Sleep(100);
+			ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, NULL, lpDDSurface, NULL, dwFlags, &DDOverlayFX);
+		}
+		// just return if we get this here
+		// all DDERR_SURFACELOST will be handled by
+		// the main processing loop
+		if(ddrval == DDERR_SURFACELOST)
+		{
+			return FALSE;
+		}
 		if (FAILED(ddrval))
 		{
-			// just return if we get this here
-			// all DDERR_SURFACELOST will be handled by
-			// the main processing loop
-			if(ddrval == DDERR_SURFACELOST)
-			{
-				return FALSE;
-			}
-			if (FAILED(ddrval))
-			{
-				// 2001-01-06 John Adcock
-				// Now show return code
-				char szErrorMsg[200];
-				sprintf(szErrorMsg, "Error %x calling UpdateOverlay (Hide)", ddrval);
-				ErrorBox(szErrorMsg);
-				return (TRUE);
-			}
+			// 2001-01-06 John Adcock
+			// Now show return code
+			char szErrorMsg[200];
+			sprintf(szErrorMsg, "Error %x calling UpdateOverlay (Hide)", ddrval);
+			ErrorBox(szErrorMsg);
+			return (TRUE);
 		}
 	}
 
@@ -177,32 +181,37 @@ BOOL Overlay_Update(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL Color
 	DDOverlayFX.dckDestColorkey.dwColorSpaceLowValue = PhysicalOverlayColor;
 
 	ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, pSrcRect, lpDDSurface, pDestRect, dwFlags, &DDOverlayFX);
+	// if another device has requested exclusive access then we
+	// can get the no hardware error, just wait a bit and try again
+	while(ddrval == DDERR_NOOVERLAYHW)
+	{
+		Sleep(100);
+		ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, NULL, lpDDSurface, NULL, dwFlags, &DDOverlayFX);
+	}
+	// just return if we get this here
+	// all DDERR_SURFACELOST will be handled by
+	// the main processing loop
+	if(ddrval == DDERR_SURFACELOST)
+	{
+		return FALSE;
+	}
 	if (FAILED(ddrval))
 	{
-		// just return if we get this here
-		// all DDERR_SURFACELOST will be handled by
-		// the main processing loop
-		if(ddrval == DDERR_SURFACELOST)
+		if ((pDestRect->top < pDestRect->bottom) && (pDestRect->left < pDestRect->right))
 		{
-			return FALSE;
+			// 2000-10-29 Added by Mark Rejhon
+			// Display error message only if rectangle dimensions are positive.
+			// Negative rectangle dimensions are frequently caused by the user
+			// resizing the window smaller than the video size.
+			// 2001-01-06 John Adcock
+			// Now show return code
+			char szErrorMsg[200];
+			sprintf(szErrorMsg, "Error %x in UpdateOverlay", ddrval);
+			ErrorBox(szErrorMsg);
 		}
-		if(FAILED(ddrval))
-		{
-			if ((pDestRect->top < pDestRect->bottom) && (pDestRect->left < pDestRect->right))
-			{
-				// 2000-10-29 Added by Mark Rejhon
-				// Display error message only if rectangle dimensions are positive.
-				// Negative rectangle dimensions are frequently caused by the user
-				// resizing the window smaller than the video size.
-				// 2001-01-06 John Adcock
-				// Now show return code
-				char szErrorMsg[200];
-				sprintf(szErrorMsg, "Error %x in UpdateOverlay", ddrval);
-				ErrorBox(szErrorMsg);
-			}
-			lpDDOverlay = NULL;
-			return (FALSE);
-		}
+		IDirectDrawSurface_Release(lpDDOverlay);
+		lpDDOverlay = NULL;
+		return (FALSE);
 	}
 	return TRUE;
 }
@@ -265,13 +274,31 @@ BOOL Overlay_Create()
 	}
 
 	ddrval = IDirectDrawSurface_Lock(lpDDOverlay, NULL, &ddsd, DDLOCK_WAIT, NULL);
+	// sometimes in win98 we get weird error messages here
+	// so we need to loop until it's OK or we get a surface lost message
+	while(ddrval == DDERR_NOOVERLAYHW || ddrval == DDERR_SURFACEBUSY)
+	{
+		Sleep(100);
+		ddrval = IDirectDrawSurface_Lock(lpDDOverlay, NULL, &ddsd, DDLOCK_WAIT, NULL);
+	}
+	if(ddrval == DDERR_SURFACELOST)
+	{
+		ddrval = IDirectDraw_CreateSurface(lpDD, &ddsd, &lpDDOverlay, NULL);
+		if (FAILED(ddrval))
+		{
+			ErrorBox("Can't create Overlay Surface");
+			lpDDOverlay = NULL;
+			return FALSE;
+		}
+		ddrval = IDirectDrawSurface_Lock(lpDDOverlay, NULL, &ddsd, DDLOCK_WAIT, NULL);
+	}
 	if (FAILED(ddrval))
 	{
-		ErrorBox("Can't Lock Surface");
-		ddrval = DDERR_WASSTILLDRAWING;
+		char szErrorMsg[200];
+		sprintf(szErrorMsg, "Error %x in Lock Surface", ddrval);
+		ErrorBox(szErrorMsg);
 		return (FALSE);
 	}
-	ddrval = DDERR_WASSTILLDRAWING;
 
 	ddrval = IDirectDrawSurface_Unlock(lpDDOverlay, ddsd.lpSurface);
 	if (FAILED(ddrval))
