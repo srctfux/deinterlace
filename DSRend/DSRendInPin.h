@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendInPin.h,v 1.8 2002-07-29 17:51:40 tobbej Exp $
+// $Id: DSRendInPin.h,v 1.9 2002-08-11 13:59:52 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,10 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.8  2002/07/29 17:51:40  tobbej
+// added vertical mirror.
+// fixed field ordering and even/odd flags, seems like it is working
+//
 // Revision 1.7  2002/07/15 18:21:37  tobbej
 // support for rgb24 input
 // new settings
@@ -147,6 +151,11 @@ END_PROP_MAP()
 
 // IAMFilterMiscFlags
 	ULONG STDMETHODCALLTYPE GetMiscFlags(void);
+
+// CPersistStream
+	long GetSize();
+	HRESULT SaveToStream(IStream *pStream);
+	HRESULT LoadFromStream(IStream *pStream,DWORD dwVersion);
 
 public:
 	/// @return true if connected

@@ -412,6 +412,10 @@ SOURCE=.\memalloc.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\PersistStream.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\SettingsPage.cpp
 # End Source File
 # Begin Source File
@@ -469,6 +473,10 @@ SOURCE=.\mem.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\PersistStream.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\Resource.h
 # End Source File
 # Begin Source File
@@ -502,17 +510,17 @@ SOURCE=.\SettingsPage.rgs
 # End Group
 # End Target
 # End Project
-# Section DSRend : {69562074-7573-6C61-2053-747564696F5C}
-# 	1:22:IDS_TITLECSettingsPage:108
-# 	1:17:IDR_CSETTINGSPAGE:111
-# 	1:25:IDS_HELPFILECSettingsPage:109
-# 	1:26:IDS_DOCSTRINGCSettingsPage:110
-# 	1:17:IDD_CSETTINGSPAGE:112
-# End Section
 # Section DSRend : {03014021-60FF-0321-FF40-0103FF6825E3}
 # 	1:30:IDS_DOCSTRINGDSRendQualityPage:105
 # 	1:21:IDD_DSRENDQUALITYPAGE:107
 # 	1:26:IDS_TITLEDSRendQualityPage:103
 # 	1:29:IDS_HELPFILEDSRendQualityPage:104
 # 	1:21:IDR_DSRENDQUALITYPAGE:106
+# End Section
+# Section DSRend : {69562074-7573-6C61-2053-747564696F5C}
+# 	1:22:IDS_TITLECSettingsPage:108
+# 	1:17:IDR_CSETTINGSPAGE:111
+# 	1:25:IDS_HELPFILECSettingsPage:109
+# 	1:26:IDS_DOCSTRINGCSettingsPage:110
+# 	1:17:IDD_CSETTINGSPAGE:112
 # End Section

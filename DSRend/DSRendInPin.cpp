@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendInPin.cpp,v 1.11 2002-07-29 17:51:40 tobbej Exp $
+// $Id: DSRendInPin.cpp,v 1.12 2002-08-11 13:59:52 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,10 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.11  2002/07/29 17:51:40  tobbej
+// added vertical mirror.
+// fixed field ordering and even/odd flags, seems like it is working
+//
 // Revision 1.10  2002/07/15 18:21:37  tobbej
 // support for rgb24 input
 // new settings
@@ -127,6 +131,7 @@ STDMETHODIMP CDSRendInPin::put_SwapFields(BOOL pVal)
 {
 	ATLTRACE(_T("%s(%d) : CDSRendInPin::put_SwapFields\n"),__FILE__,__LINE__);
 	m_pFilter->m_FieldBuffer.SetSwapFields(pVal!=FALSE);
+	m_pFilter->SetDirty(true);
 	return S_OK;
 }
 
@@ -144,6 +149,7 @@ STDMETHODIMP CDSRendInPin::put_ForceYUY2(BOOL pVal)
 {
 	ATLTRACE(_T("%s(%d) : CDSRendInPin::put_ForceYUY2\n"),__FILE__,__LINE__);
 	m_bForceYUY2=pVal;
+	m_pFilter->SetDirty(true);
 	return S_OK;
 }
 
@@ -160,6 +166,7 @@ STDMETHODIMP CDSRendInPin::put_FieldFormat(DSREND_FIELD_FORMAT pVal)
 {
 	ATLTRACE(_T("%s(%d) : CDSRendInPin::put_FieldFormat\n"),__FILE__,__LINE__);
 	m_FieldFormat=pVal;
+	m_pFilter->SetDirty(true);
 	return S_OK;
 }
 
@@ -176,6 +183,7 @@ STDMETHODIMP CDSRendInPin::put_VertMirror(BOOL newVal)
 {
 	ATLTRACE(_T("%s(%d) : CDSRendInPin::put_VertMirror\n"),__FILE__,__LINE__);
 	m_pFilter->m_FieldBuffer.SetVertMirror(newVal!=FALSE);
+	m_pFilter->SetDirty(true);
 	return S_OK;
 }
 
@@ -745,3 +753,113 @@ HRESULT CDSRendInPin::CheckMediaType(const AM_MEDIA_TYPE *pmt)
 	return E_FAIL;
 }
 
+long CDSRendInPin::GetSize()
+{
+	return sizeof(m_FieldFormat)+sizeof(m_bForceYUY2)+sizeof(BOOL)*2;
+}
+
+HRESULT CDSRendInPin::SaveToStream(IStream *pStream)
+{
+	DSREND_FIELD_FORMAT fmt;
+	BOOL bForceYUY2;
+	BOOL bSwapFields;
+	BOOL bVertMirror;
+	
+	HRESULT hr=get_FieldFormat(&fmt);
+	if(FAILED(hr))
+	{
+		return hr;
+	}
+	hr=get_ForceYUY2(&bForceYUY2);
+	if(FAILED(hr))
+	{
+		return hr;
+	}
+	hr=get_SwapFields(&bSwapFields);
+	if(FAILED(hr))
+	{
+		return hr;
+	}
+	hr=get_VertMirror(&bVertMirror);
+	if(FAILED(hr))
+	{
+		return hr;
+	}
+
+	hr=pStream->Write(&fmt,sizeof(fmt),NULL);
+	if(FAILED(hr))
+	{
+		return hr;
+	}
+	hr=pStream->Write(&bForceYUY2,sizeof(bForceYUY2),NULL);
+	if(FAILED(hr))
+	{
+		return hr;
+	}
+	hr=pStream->Write(&bSwapFields,sizeof(bSwapFields),NULL);
+	if(FAILED(hr))
+	{
+		return hr;
+	}
+	hr=pStream->Write(&bVertMirror,sizeof(bVertMirror),NULL);
+	if(FAILED(hr))
+	{
+		return hr;
+	}
+	return S_OK;
+}
+
+HRESULT CDSRendInPin::LoadFromStream(IStream *pStream,DWORD dwVersion)
+{
+	DSREND_FIELD_FORMAT fmt;
+	BOOL bForceYUY2;
+	BOOL bSwapFields;
+	BOOL bVertMirror;
+
+	if(dwVersion!=0)
+	{
+		return E_FAIL;
+	}
+	HRESULT hr=pStream->Read(&fmt,sizeof(fmt),NULL);
+	if(FAILED(hr))
+	{
+		return hr;
+	}
+	hr=pStream->Read(&bForceYUY2,sizeof(bForceYUY2),NULL);
+	if(FAILED(hr))
+	{
+		return hr;
+	}
+	hr=pStream->Read(&bSwapFields,sizeof(bSwapFields),NULL);
+	if(FAILED(hr))
+	{
+		return hr;
+	}
+	hr=pStream->Read(&bVertMirror,sizeof(bVertMirror),NULL);
+	if(FAILED(hr))
+	{
+		return hr;
+	}
+
+	hr=put_FieldFormat(fmt);
+	if(FAILED(hr))
+	{
+		return hr;
+	}
+	hr=put_ForceYUY2(bForceYUY2);
+	if(FAILED(hr))
+	{
+		return hr;
+	}
+	hr=put_SwapFields(bSwapFields);
+	if(FAILED(hr))
+	{
+		return hr;
+	}
+	hr=put_VertMirror(bVertMirror);
+	if(FAILED(hr))
+	{
+		return hr;
+	}
+	return S_OK;
+}

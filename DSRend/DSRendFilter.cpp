@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendFilter.cpp,v 1.11 2002-08-01 20:28:21 tobbej Exp $
+// $Id: DSRendFilter.cpp,v 1.12 2002-08-11 13:59:52 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.11  2002/08/01 20:28:21  tobbej
+// implemented IQualProp::get_AvgSyncOffset counter
+//
 // Revision 1.10  2002/07/06 19:18:21  tobbej
 // fixed sample scheduling, file playback shoud work now
 //
@@ -735,4 +738,20 @@ HRESULT CDSRendFilter::GetPreroll(LONGLONG *pllPreroll)
 		return E_NOTIMPL;
 
 	return pSeeking->GetPreroll(pllPreroll);
+}
+
+// CPersistStream
+long CDSRendFilter::GetSize()
+{
+	return m_InputPin.GetSize();
+}
+
+HRESULT CDSRendFilter::SaveToStream(IStream *pStream)
+{
+	return m_InputPin.SaveToStream(pStream);
+}
+
+HRESULT CDSRendFilter::LoadFromStream(IStream *pStream)
+{
+	return m_InputPin.LoadFromStream(pStream,m_dwVersion);
 }

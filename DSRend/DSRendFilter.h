@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendFilter.h,v 1.9 2002-08-01 20:28:21 tobbej Exp $
+// $Id: DSRendFilter.h,v 1.10 2002-08-11 13:59:52 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.9  2002/08/01 20:28:21  tobbej
+// implemented IQualProp::get_AvgSyncOffset counter
+//
 // Revision 1.8  2002/07/06 16:42:09  tobbej
 // new field buffering
 // changed fps counter
@@ -68,6 +71,7 @@
 #include "DSRendInPin.h"
 #include "AutoLockCriticalSection.h"
 #include "FieldBufferHandler.h"
+#include "PersistStream.h"
 
 /**
  * The filter itself.
@@ -80,9 +84,11 @@ class ATL_NO_VTABLE CDSRendFilter :
 	public CComCoClass<CDSRendFilter, &CLSID_DSRendFilter>,
 	public ISpecifyPropertyPagesImpl<CDSRendFilter>,
 	public IDSRendFilter,
+	//public IPersistImpl<CDSRendFilter>,
 	public IBaseFilter,
 	public IQualProp,
-	public IMediaSeeking
+	public IMediaSeeking,
+	public CPersistStream
 {
 public:
 	CDSRendFilter();
@@ -98,11 +104,15 @@ DECLARE_PROTECT_FINAL_CONSTRUCT()
 BEGIN_COM_MAP(CDSRendFilter)
 	COM_INTERFACE_ENTRY(ISpecifyPropertyPages)
 	COM_INTERFACE_ENTRY(IDSRendFilter)
-	COM_INTERFACE_ENTRY(IPersist)
 	COM_INTERFACE_ENTRY(IMediaFilter)
 	COM_INTERFACE_ENTRY(IBaseFilter)
 	COM_INTERFACE_ENTRY_IID(IID_IQualProp,IQualProp)
 	COM_INTERFACE_ENTRY(IMediaSeeking)
+	
+	//COM_INTERFACE_ENTRY2 is needed because of multiple inheritance
+	//IPersist exists in both IPersistStream and IBaseFilter
+	COM_INTERFACE_ENTRY2(IPersist,IBaseFilter)
+	COM_INTERFACE_ENTRY(IPersistStream)
 END_COM_MAP()
 
 BEGIN_PROP_MAP(CDSRendFilter)
@@ -160,6 +170,12 @@ END_PROP_MAP()
 	STDMETHOD(GetRate(double *pdRate));
 	STDMETHOD(GetPreroll(LONGLONG *pllPreroll));
 
+// CPersistStream
+	long GetSize();
+	HRESULT SaveToStream(IStream *pStream);
+	HRESULT LoadFromStream(IStream *pStream);
+	//DWORD GetVersion();
+	
 public:
 	/**
 	 *
