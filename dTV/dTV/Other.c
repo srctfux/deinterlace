@@ -72,8 +72,8 @@ LPDIRECTDRAWSURFACE     lpDDOverlayBack = NULL;
 BOOL Can_ColorKey=FALSE;
 DWORD DestSizeAlign;
 DWORD SrcSizeAlign;
-COLORREF OverlayColor = RGB(255, 0, 255);
-DWORD PhysicalOverlayColor = RGB(255, 0, 255);
+COLORREF OverlayColor = RGB(32, 16, 16);
+DWORD PhysicalOverlayColor = RGB(32, 16, 16);
 long Back_Buffers = -1;		// Make new user parm, TRB 10/28/00
 BOOL bCanDoBob = FALSE;
 BOOL bCanDoColorKey = FALSE;
@@ -889,7 +889,7 @@ SETTING OtherSettings[OTHER_SETTING_LASTONE] =
 	},
 	{
 		"Overlay Color", NUMBER, 0, &OverlayColor,
-		RGB(255,0,255), 0, RGB(255,255,255), 1, 1,
+		RGB(32,16,16), 0, RGB(255,255,255), 1, 1,
 		NULL,
 		"Overlay", "OverlayColor", NULL,
 	},
