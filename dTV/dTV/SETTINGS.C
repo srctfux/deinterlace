@@ -164,7 +164,7 @@ void LoadSettingsFromIni(LPSTR Name)
 	DebugLogEnabled = GetPrivateProfileInt("Files", "DebugLogEnabled", DebugLogEnabled, szIniFile);
 
 	CardType = GetPrivateProfileInt("Hardware", "CardType", TVCARD_UNKNOWN, szIniFile);
-	VideoSource = GetPrivateProfileInt("Hardware", "VideoSource", 1, szIniFile);
+	VideoSource = GetPrivateProfileInt("Hardware", "VideoSource", VideoSource, szIniFile);
 	TunerType = GetPrivateProfileInt("Hardware", "TunerType", TUNER_ABSENT, szIniFile); 
 	TVTYPE = GetPrivateProfileInt("Hardware", "TVType", -1, szIniFile); 
 	InitialHue = GetPrivateProfileInt("Hardware", "InitialHue", InitialHue, szIniFile); 
@@ -190,8 +190,8 @@ void LoadSettingsFromIni(LPSTR Name)
 	//Capture_VBI = (GetPrivateProfileInt("Show", "CaptureVBI", 0, szIniFile) != 0);  
 	InitialProg = GetPrivateProfileInt("Show", "LastProgram", 0, szIniFile);
 
+	AudioSource = GetPrivateProfileInt("Sound", "AudioSource", AudioSource, szIniFile);
 	LNB.Diseq = (GetPrivateProfileInt("Sound", "DiscEqu", 0, szIniFile) != 0);  
-
 	for(i = 0; i < 4; i++)
 	{
 		sprintf(szKey, "LNB%d_MinFreq", i + 1);
@@ -435,8 +435,8 @@ void WriteSettingsToIni(LPSTR Name)
 	WritePrivateProfileInt("Show", "CaptureVBI", Capture_VBI, szIniFile);
 	WritePrivateProfileInt("Show", "LastProgram", InitialProg, szIniFile);
 
+	WritePrivateProfileInt("Sound", "AudioSource", AudioSource, szIniFile);
 	WritePrivateProfileInt("Sound", "DiscEqu", LNB.Diseq, szIniFile);
-
 	for(i = 0; i < 4; i++)
 	{
 		sprintf(szKey, "LNB%d_MinFreq", i + 1);
