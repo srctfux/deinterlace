@@ -1,6 +1,6 @@
 [German Frequency]
-KanalLow=1
-KanalHigh=108
+ChannelLow=1
+ChannelHigh=108
 ;BAND I
    41250000     
    48250000	; E02
@@ -118,8 +118,8 @@ KanalHigh=108
 
 
 [USA Cable Frequency]
-KanalLow=1
-KanalHigh=158
+ChannelLow=1
+ChannelHigh=158
    73250000
    55250000
    61250000
@@ -280,8 +280,8 @@ KanalHigh=158
   997250000
 
 [USA Cable HRC Frequency]
-KanalLow=1
-KanalHigh=116
+ChannelLow=1
+ChannelHigh=116
    72000000
    54000000
    60000000
@@ -400,8 +400,8 @@ KanalHigh=116
   744000000
 
 [USA Air Frequency]
-KanalLow=2
-KanalHigh=69
+ChannelLow=2
+ChannelHigh=69
    55250000
    61250000
    67250000
@@ -472,8 +472,8 @@ KanalHigh=69
   801250000
 
 [Eastern European Cable Frequency]
-KanalLow=1
-KanalHigh=57
+ChannelLow=1
+ChannelHigh=57
     49750000
     57250000
     65250000
@@ -533,8 +533,8 @@ KanalHigh=57
    863250000
 
 [Eastern European Air Frequency]
-KanalLow=1
-KanalHigh=57
+ChannelLow=1
+ChannelHigh=57
     49750000
     57250000
     65250000
@@ -594,8 +594,8 @@ KanalHigh=57
    863250000
 
 [French Cable Frequency (Overseas)]
-KanalLow=1
-KanalHigh=6
+ChannelLow=1
+ChannelHigh=6
    175250000
    183250000
    191250000
@@ -604,8 +604,8 @@ KanalHigh=6
    215250000
 
 [French Air Frequency (Overseas)]
-KanalLow=1
-KanalHigh=6
+ChannelLow=1
+ChannelHigh=6
    175250000
    183250000
    191250000
@@ -614,8 +614,8 @@ KanalHigh=6
    215250000
 
 [French Cable Frequency]
-KanalLow=1
-KanalHigh=69
+ChannelLow=1
+ChannelHigh=69
      47750000
      55750000
      60500000
@@ -688,8 +688,8 @@ KanalHigh=69
 
 
 [French Air Frequency]
-KanalLow=1
-KanalHigh=69
+ChannelLow=1
+ChannelHigh=69
      47750000
      55750000
      60500000
@@ -761,8 +761,8 @@ KanalHigh=69
     855250000
 
 [Irish Cable Frequency]
-KanalLow=1
-KanalHigh=9
+ChannelLow=1
+ChannelHigh=9
        45750000
        53750000
        61750000
@@ -775,8 +775,8 @@ KanalHigh=9
 
 [Irish Air Frequency]
 
-KanalLow=1
-KanalHigh=9
+ChannelLow=1
+ChannelHigh=9
 
         45750000
         53750000
@@ -790,8 +790,8 @@ KanalHigh=9
 
 [Italian Kable Frequency]
 
-KanalLow=2
-KanalHigh=11
+ChannelLow=2
+ChannelHigh=11
        53750000
        62250000
        82250000
@@ -804,8 +804,8 @@ KanalHigh=11
       224250000
 
 [Japanese Cable Frequency]
-KanalLow=13
-KanalHigh=63
+ChannelLow=13
+ChannelHigh=63
    109250000
    115250000
    121250000
@@ -859,8 +859,8 @@ KanalHigh=63
    463250000
 
 [Japanese Air Frequency]
-KanalLow=1
-KanalHigh=62
+ChannelLow=1
+ChannelHigh=62
     91250000
     97250000
    103250000
@@ -926,8 +926,8 @@ KanalHigh=62
 
 [New Zealand Cable Frequency]
 
-KanalLow=1
-KanalHigh=9
+ChannelLow=1
+ChannelHigh=9
 
   45250000
   55250000
@@ -941,8 +941,8 @@ KanalHigh=9
 
 [New Zealand Air Frequency]
 
-KanalLow=1
-KanalHigh=9
+ChannelLow=1
+ChannelHigh=9
 
    45250000
    55250000
@@ -956,8 +956,8 @@ KanalHigh=9
 
 [Australian Cable Frequency]
 
-KanalLow=1
-KanalHigh=14
+ChannelLow=1
+ChannelHigh=14
 
     46250000
     57250000
@@ -977,8 +977,8 @@ KanalHigh=14
 
 [Australian Cable Frequency]
 
-KanalLow=1
-KanalHigh=14
+ChannelLow=1
+ChannelHigh=14
 
        46250000
        57250000
@@ -997,8 +997,8 @@ KanalHigh=14
 
 [UK Cable Frequency]
 
-KanalLow=2
-KanalHigh=56
+ChannelLow=2
+ChannelHigh=56
     48250000
     55250000
     62250000
@@ -1057,8 +1057,8 @@ KanalHigh=56
 
 [UK Air Frequency]
 
-KanalLow=2
-KanalHigh=69
+ChannelLow=2
+ChannelHigh=69
 
 	45750000
 	53750000
@@ -1131,8 +1131,8 @@ KanalHigh=69
 
 [European Air Frequency]
 
-KanalLow=21
-KanalHigh=69
+ChannelLow=21
+ChannelHigh=69
      471250000
      479250000
      487250000
