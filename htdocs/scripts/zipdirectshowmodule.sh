@@ -52,6 +52,12 @@ cvs -d:pserver:anonymous@cvs1:/cvsroot/deinterlace co DIDMO>/dev/null
 cd /home/groups/d/de/deinterlace/DIDMO
 todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
 todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DIDMO/DIDMO
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DIDMO/DITest
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
 cd /home/groups/d/de/deinterlace/
 
 
