@@ -88,13 +88,17 @@ void LoadFilterPlugin(LPCSTR szFileName)
 	pMethod = pfnGetFilterPluginInfo(CpuFeatureFlags);
 	if(pMethod != NULL)
 	{
-		Filters[NumFilters] = pMethod;
-		pMethod->hModule = hPlugInMod;
-		if(pMethod->pfnPluginStart != NULL)
+		if(pMethod->SizeOfStructure == sizeof(FILTER_METHOD) &&
+			pMethod->FilterStructureVersion >= FILTER_VERSION_1)
 		{
-			pMethod->pfnPluginStart();
+			Filters[NumFilters] = pMethod;
+			pMethod->hModule = hPlugInMod;
+			if(pMethod->pfnPluginStart != NULL)
+			{
+				pMethod->pfnPluginStart();
+			}
+			NumFilters++;
 		}
-		NumFilters++;
 	}
 }
 

@@ -56,6 +56,8 @@ BOOL DeinterlaceScalerBob(DEINTERLACE_INFO *info)
 
 DEINTERLACE_METHOD ScalerBobMethod =
 {
+	sizeof(DEINTERLACE_METHOD),
+	DEINTERLACE_CURRENT_VERSION,
 	"Scaler Bob", 
 	NULL,
 	TRUE,

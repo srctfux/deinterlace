@@ -33,8 +33,23 @@
 typedef void (__stdcall FILTERPLUGINSTART)(void);
 typedef void (__stdcall FILTERPLUGINEXIT)(void);
 
+// list of supported plugin versions
+#define FILTER_VERSION_1 1
+
+// The current version
+#define FILTER_CURRENT_VERSION FILTER_VERSION_1
+
+
 typedef struct
 {
+	// should be set up as sizeof(FILTER_METHOD)
+	// used to test that the program is using the same
+	// header as the plug-in
+	size_t SizeOfStructure;
+	// may be used in the future when backwards combatability may
+	// be required
+	// set to FILTER_CURRENT_VERSION
+	long FilterStructureVersion;
 	// What to display when selected
 	char* szName;
 	// What to put in the Menu (NULL to use szName)

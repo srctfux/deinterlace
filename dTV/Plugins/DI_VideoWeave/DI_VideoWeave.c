@@ -69,6 +69,8 @@ SETTING DI_VideoWeaveSettings[DI_VIDEOWEAVE_SETTING_LASTONE] =
 
 DEINTERLACE_METHOD VideoWeaveMethod =
 {
+	sizeof(DEINTERLACE_METHOD),
+	DEINTERLACE_CURRENT_VERSION,
 	"Video Deinterlace (Weave)", 
 	"Weave", 
 	FALSE, 

@@ -55,26 +55,47 @@
 DEINTERLACE_METHOD FilmDeintMethods[FILMPULLDOWNMODES_LAST_ONE] =
 {
 	// FILM_22_PULLDOWN_ODD
-	{"2:2 Pulldown Flip on Odd", "2:2 Odd", FALSE, TRUE, FilmModePALOdd, 25, 30, 
-		6, NULL, 0, NULL, NULL, NULL, 2, 0, 0, -1, NULL, 0, FALSE, FALSE, },
+	{
+		sizeof(DEINTERLACE_METHOD), DEINTERLACE_CURRENT_VERSION,
+		"2:2 Pulldown Flip on Odd", "2:2 Odd", FALSE, TRUE, FilmModePALOdd, 25, 30, 
+		6, NULL, 0, NULL, NULL, NULL, 2, 0, 0, -1, NULL, 0, FALSE, FALSE, 
+	},
 	// FILM_22_PULLDOWN_EVEN
-	{"2:2 Pulldown Flip on Even", "2:2 Even", FALSE, TRUE, FilmModePALEven, 25, 30, 
-		7, NULL, 0, NULL, NULL, NULL, 2, 0, 0, -1, NULL, 0, FALSE, FALSE, },
+	{
+		sizeof(DEINTERLACE_METHOD), DEINTERLACE_CURRENT_VERSION,
+		"2:2 Pulldown Flip on Even", "2:2 Even", FALSE, TRUE, FilmModePALEven, 25, 30, 
+		7, NULL, 0, NULL, NULL, NULL, 2, 0, 0, -1, NULL, 0, FALSE, FALSE,
+	},
 	// FILM_32_PULLDOWN_0
-	{"3:2 Pulldown Skip 1st Full Frame", "3:2 1st", FALSE, TRUE, FilmModeNTSC1st, 1000, 24, 
-		8, NULL, 0, NULL, NULL, NULL, 2, 0, 0, -1, NULL, 0, FALSE, FALSE, },
+	{
+		sizeof(DEINTERLACE_METHOD), DEINTERLACE_CURRENT_VERSION,
+		"3:2 Pulldown Skip 1st Full Frame", "3:2 1st", FALSE, TRUE, FilmModeNTSC1st, 1000, 24, 
+		8, NULL, 0, NULL, NULL, NULL, 2, 0, 0, -1, NULL, 0, FALSE, FALSE,
+	},
 	// FILM_32_PULLDOWN_1
-	{"3:2 Pulldown Skip 2nd Full Frame", "3:2 2nd", FALSE, TRUE, FilmModeNTSC2nd, 1000, 24, 
-		9, NULL, 0, NULL, NULL, NULL, 2, 0, 0, -1, NULL, 0, FALSE, FALSE, },
+	{
+		sizeof(DEINTERLACE_METHOD), DEINTERLACE_CURRENT_VERSION,
+		"3:2 Pulldown Skip 2nd Full Frame", "3:2 2nd", FALSE, TRUE, FilmModeNTSC2nd, 1000, 24, 
+		9, NULL, 0, NULL, NULL, NULL, 2, 0, 0, -1, NULL, 0, FALSE, FALSE,
+	},
 	// FILM_32_PULLDOWN_2
-	{"3:2 Pulldown Skip 3rd Full Frame", "3:2 3rd", FALSE, TRUE, FilmModeNTSC3rd, 1000, 24, 
-		10, NULL, 0, NULL, NULL, NULL, 2, 0, 0, -1, NULL, 0, FALSE, FALSE, },
+	{
+		sizeof(DEINTERLACE_METHOD), DEINTERLACE_CURRENT_VERSION,
+		"3:2 Pulldown Skip 3rd Full Frame", "3:2 3rd", FALSE, TRUE, FilmModeNTSC3rd, 1000, 24, 
+		10, NULL, 0, NULL, NULL, NULL, 2, 0, 0, -1, NULL, 0, FALSE, FALSE,
+	},
 	// FILM_32_PULLDOWN_3
-	{"3:2 Pulldown Skip 4th Full Frame", "3:2 4th", FALSE, TRUE, FilmModeNTSC4th, 1000, 24, 
-		11, NULL, 0, NULL, NULL, NULL, 2, 0, 0, -1, NULL, 0, FALSE, FALSE, },
+	{
+		sizeof(DEINTERLACE_METHOD), DEINTERLACE_CURRENT_VERSION,
+		"3:2 Pulldown Skip 4th Full Frame", "3:2 4th", FALSE, TRUE, FilmModeNTSC4th, 1000, 24, 
+		11, NULL, 0, NULL, NULL, NULL, 2, 0, 0, -1, NULL, 0, FALSE, FALSE,
+	},
 	// FILM_32_PULLDOWN_4
-	{"3:2 Pulldown Skip 5th Full Frame", "3:2 5th", FALSE, TRUE, FilmModeNTSC5th, 1000, 24, 
-		12, NULL, 0, NULL, NULL, NULL, 2, 0, 0, -1, NULL, 0, FALSE, FALSE, },
+	{
+		sizeof(DEINTERLACE_METHOD), DEINTERLACE_CURRENT_VERSION,
+		"3:2 Pulldown Skip 5th Full Frame", "3:2 5th", FALSE, TRUE, FilmModeNTSC5th, 1000, 24, 
+		12, NULL, 0, NULL, NULL, NULL, 2, 0, 0, -1, NULL, 0, FALSE, FALSE,
+	},
 };
 
 long NumVideoModes = 0;
@@ -135,6 +156,14 @@ BOOL InHalfHeightMode()
 	else
 	{
 		return VideoDeintMethods[gVideoPulldownMode]->bIsHalfHeight;
+	}
+}
+
+void ShowVideoModeUI()
+{
+	if(VideoDeintMethods[gVideoPulldownMode]->pfnPluginShowUI != NULL)
+	{
+		VideoDeintMethods[gVideoPulldownMode]->pfnPluginShowUI(hWnd, StatusBar_GetHWnd(STATUS_PAL));
 	}
 }
 
@@ -207,10 +236,6 @@ void SetVideoDeinterlaceMode(int mode)
 		gVideoPulldownMode = mode;
 		bIsFilmMode = FALSE;
 		nLastTicks = CurrentTickCount;
-		if(!bIsFilmMode && VideoDeintMethods[gVideoPulldownMode]->pfnPluginSwitchTo != NULL)
-		{
-			VideoDeintMethods[gVideoPulldownMode]->pfnPluginSwitchTo(hWnd, StatusBar_GetHWnd(STATUS_PAL));
-		}
 		StatusBar_ShowText(STATUS_PAL, GetDeinterlaceModeName());
 		nTotalDeintModeChanges++;
 		VideoDeintMethods[gVideoPulldownMode]->ModeChanges++;
@@ -398,9 +423,13 @@ void LoadDeintPlugin(LPCSTR szFileName)
 	pMethod = pfnGetDeinterlacePluginInfo(CpuFeatureFlags);
 	if(pMethod != NULL)
 	{
-		VideoDeintMethods[NumVideoModes] = pMethod;
-		pMethod->hModule = hPlugInMod;
-		NumVideoModes++;
+		if(pMethod->SizeOfStructure == sizeof(DEINTERLACE_METHOD) &&
+			pMethod->DeinterlaceStructureVersion >= DEINTERLACE_VERSION_1)
+		{
+			VideoDeintMethods[NumVideoModes] = pMethod;
+			pMethod->hModule = hPlugInMod;
+			NumVideoModes++;
+		}
 	}
 }
 

@@ -53,6 +53,8 @@ BOOL DeinterlaceWeave(DEINTERLACE_INFO *info)
 
 DEINTERLACE_METHOD WeaveMethod =
 {
+	sizeof(DEINTERLACE_METHOD),
+	DEINTERLACE_CURRENT_VERSION,
 	"Simple Weave", 
 	NULL,
 	FALSE, 

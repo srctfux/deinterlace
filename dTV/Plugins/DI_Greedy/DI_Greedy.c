@@ -55,6 +55,8 @@ SETTING DI_GreedySettings[DI_GREEDY_SETTING_LASTONE] =
 
 DEINTERLACE_METHOD GreedyMethod =
 {
+	sizeof(DEINTERLACE_METHOD),
+	DEINTERLACE_CURRENT_VERSION,
 	"Video (Greedy, Low Motion)", 
 	"Greedy",
 	FALSE, 

@@ -30,11 +30,25 @@
 struct _DEINTERLACE_METHOD;
 
 typedef void (__stdcall DEINTERLACEPLUGINSTART)(long NumPlugIns, struct _DEINTERLACE_METHOD** OtherPlugins);
-typedef void (__stdcall DEINTERLACEPLUGINSWITCHTO)(HWND hwndMain, HWND hwndStatus);
+typedef void (__stdcall DEINTERLACEPLUGINSHOWUI)(HWND hwndMain, HWND hwndStatus);
 typedef void (__stdcall DEINTERLACEPLUGINEXIT)(void);
+
+// list of supported plugin versions
+#define DEINTERLACE_VERSION_1 1
+
+// The current version
+#define DEINTERLACE_CURRENT_VERSION DEINTERLACE_VERSION_1
 
 typedef struct _DEINTERLACE_METHOD
 {
+	// should be set up as sizeof(DEINTERLACE_METHOD)
+	// used to test that the program is using the same
+	// header as the plug-in
+	size_t SizeOfStructure;
+	// may be used in the future when backwards combatability may
+	// be required
+	// set to DEINTERLACE_CURRENT_VERSION
+	long DeinterlaceStructureVersion;
 	// What to display when selected
 	char* szName;
 	// Short Name
@@ -59,8 +73,8 @@ typedef struct _DEINTERLACE_METHOD
 	long nMethodIndex;
 	// call this if plugin needs to do anything before it is used
 	DEINTERLACEPLUGINSTART* pfnPluginStart;
-	// call this if plugin needs to do anything before it is used
-	DEINTERLACEPLUGINSWITCHTO* pfnPluginSwitchTo;
+	// call this to display any UI, if NULL no UI is supoprted
+	DEINTERLACEPLUGINSHOWUI* pfnPluginShowUI;
 	// call this if plugin needs to deallocate anything
 	DEINTERLACEPLUGINEXIT* pfnPluginExit;
 	// how many fields are required to run this plug-in

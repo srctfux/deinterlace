@@ -205,7 +205,7 @@ int InitialSaturationU = DEFAULT_SAT_U_NTSC;
 int InitialSaturationV = DEFAULT_SAT_V_NTSC;
 
 long CurrentX = 720;
-long CustomPixelWidth = 754;
+long CustomPixelWidth = 750;
 int CurrentY;
 int CurrentVBILines = 0;
 
@@ -1582,6 +1582,7 @@ BOOL CurrentX_OnChange(long NewValue)
 	CurrentX = NewValue;
 
 	if(CurrentX != 768 &&
+	    CurrentX != 754 &&
 		CurrentX != 720 &&
 		CurrentX != 640 &&
 		CurrentX != 384 &&
@@ -1909,7 +1910,7 @@ SETTING BT848Settings[BT848_SETTING_LASTONE] =
 	},
 	{
 		"Custom Pixel Width", SLIDER, 0, &CustomPixelWidth,
-		754, 120, DTV_MAX_WIDTH, 2, 1,
+		750, 120, DTV_MAX_WIDTH, 2, 1,
 		NULL,
 		"MainWindow", "CustomPixelWidth", NULL,
 	},
@@ -1971,6 +1972,7 @@ void BT848_WriteSettingsToIni()
 
 void BT848_SetMenu(HMENU hMenu)
 {
+	BOOL DoneWidth = FALSE;
 	CheckMenuItem(hMenu, IDM_SOURCE_TUNER,         (VideoSource == 0)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_SOURCE_COMPOSITE,     (VideoSource == 1)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_SOURCE_SVIDEO,        (VideoSource == 2)?MF_CHECKED:MF_UNCHECKED);
@@ -1982,12 +1984,27 @@ void BT848_SetMenu(HMENU hMenu)
     CheckMenuItem(hMenu, IDM_SOURCE_CCIR656_3,       (VideoSource == 8)?MF_CHECKED:MF_UNCHECKED);
     CheckMenuItem(hMenu, IDM_SOURCE_CCIR656_4,       (VideoSource == 9)?MF_CHECKED:MF_UNCHECKED);
 
+	if(BT848_GetTVFormat()->wHActivex1 < 768)
+	{
+		EnableMenuItem(hMenu, ID_SETTINGS_PIXELWIDTH_768, MF_GRAYED);
+	}
+	else
+	{
+		EnableMenuItem(hMenu, ID_SETTINGS_PIXELWIDTH_768, MF_ENABLED);
+	}
 	CheckMenuItem(hMenu, ID_SETTINGS_PIXELWIDTH_768, (CurrentX == 768)?MF_CHECKED:MF_UNCHECKED);
+	DoneWidth |= (CurrentX == 768);
+	CheckMenuItem(hMenu, ID_SETTINGS_PIXELWIDTH_754, (CurrentX == 754)?MF_CHECKED:MF_UNCHECKED);
+	DoneWidth |= (CurrentX == 754);
 	CheckMenuItem(hMenu, ID_SETTINGS_PIXELWIDTH_720, (CurrentX == 720)?MF_CHECKED:MF_UNCHECKED);
+	DoneWidth |= (CurrentX == 720);
 	CheckMenuItem(hMenu, ID_SETTINGS_PIXELWIDTH_640, (CurrentX == 640)?MF_CHECKED:MF_UNCHECKED);
+	DoneWidth |= (CurrentX == 640);
 	CheckMenuItem(hMenu, ID_SETTINGS_PIXELWIDTH_384, (CurrentX == 384)?MF_CHECKED:MF_UNCHECKED);
+	DoneWidth |= (CurrentX == 384);
 	CheckMenuItem(hMenu, ID_SETTINGS_PIXELWIDTH_320, (CurrentX == 320)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, ID_SETTINGS_PIXELWIDTH_CUSTOM, (CurrentX == CustomPixelWidth)?MF_CHECKED:MF_UNCHECKED);
+	DoneWidth |= (CurrentX == 320);
+	CheckMenuItem(hMenu, ID_SETTINGS_PIXELWIDTH_CUSTOM, (!DoneWidth)?MF_CHECKED:MF_UNCHECKED);
 
 	CheckMenuItem(hMenu, IDM_TYPEFORMAT_0, (TVFormat == 0)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_TYPEFORMAT_1, (TVFormat == 1)?MF_CHECKED:MF_UNCHECKED);
@@ -1999,6 +2016,4 @@ void BT848_SetMenu(HMENU hMenu)
 	CheckMenuItem(hMenu, IDM_TYPEFORMAT_7, (TVFormat == 7)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_TYPEFORMAT_8, (TVFormat == 8)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_TYPEFORMAT_9, (TVFormat == 9)?MF_CHECKED:MF_UNCHECKED);
-
-
 }

@@ -393,6 +393,8 @@ SETTING FLT_LinearCorrSettings[FLT_LINEAR_CORR_SETTING_LASTONE] =
 
 FILTER_METHOD LinearCorrMethod =
 {
+	sizeof(FILTER_METHOD),
+	FILTER_CURRENT_VERSION,
 	"Linear Correction Filter",
 	"&Linear Correction (experimental)",
 	FALSE,

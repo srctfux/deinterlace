@@ -1210,6 +1210,10 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			Setting_SetValue(BT848_GetSetting(CURRENTX), 768);
 			break;
 
+		case ID_SETTINGS_PIXELWIDTH_754:
+			Setting_SetValue(BT848_GetSetting(CURRENTX), 754);
+			break;
+
 		case ID_SETTINGS_PIXELWIDTH_720:
 			Setting_SetValue(BT848_GetSetting(CURRENTX), 720);
 			break;
@@ -1363,6 +1367,9 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
                 ValidateRect(hWnd, &sPaint.rcPaint);
 			}
 		    break;
+		case IDM_SHOWPLUGINUI:
+			ShowVideoModeUI();
+			break;
 
 		case IDM_HELP_HOMEPAGE:
 			ShellExecute(hWnd, "open", "http://deinterlace.sourceforge.net/", NULL, NULL, SW_SHOWNORMAL);

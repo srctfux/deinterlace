@@ -64,12 +64,10 @@ BOOL FilterGamma(DEINTERLACE_INFO *info)
 LOOP_LABEL:
 			mov al,byte ptr[edx]
 			xlatb
-			//mov al, 127
 			mov byte ptr[edx], al
 			add edx, 2			
 			mov al,byte ptr[edx]
 			xlatb
-			//mov al, 127
 			mov byte ptr[edx], al
 			add edx, 2			
 			loop LOOP_LABEL
@@ -97,10 +95,13 @@ BOOL Gamma_OnChange(long NewValue)
 	double AdjustedValue;
 
 	Gamma = NewValue;
-	for (i = 0;  i < 256; i++)
+	if(!bUseStoredTable)
 	{
-		AdjustedValue = 255.0 * GetGammaAdjustedValue((double)(i) / 255.0, (double)Gamma / 1000.0);
-		GammaTable[i] = (unsigned char)AdjustedValue;
+		for (i = 0;  i < 256; i++)
+		{
+			AdjustedValue = 255.0 * GetGammaAdjustedValue((double)(i) / 255.0, (double)Gamma / 1000.0);
+			GammaTable[i] = (unsigned char)AdjustedValue;
+		}
 	}
 	return FALSE;
 }
@@ -152,12 +153,14 @@ SETTING FLT_GammaSettings[FLT_GAMMA_SETTING_LASTONE] =
 
 void __stdcall FilterStartGamma(void)
 {
-	Gamma_OnChange(Gamma);
+	// this will reset the table correctly
 	UseStoredTable_OnChange(bUseStoredTable);
 }
 
 FILTER_METHOD GammaMethod =
 {
+	sizeof(FILTER_METHOD),
+	FILTER_CURRENT_VERSION,
 	"Gamma Filter",
 	"&Gamma",
 	FALSE,

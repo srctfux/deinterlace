@@ -797,6 +797,8 @@ BEGIN
                 MENUITEM "2:2 Pulldown, Flip on &Even", IDM_22PULLEVEN
             END
             MENUITEM SEPARATOR
+            MENUITEM "Show Video Method &UI",       IDM_SHOWPLUGINUI
+            MENUITEM SEPARATOR
         END
         POPUP "&Audio Input"
         BEGIN
@@ -838,6 +840,8 @@ BEGIN
         POPUP "Pixel &Width"
         BEGIN
             MENUITEM "768",                         ID_SETTINGS_PIXELWIDTH_768
+
+            MENUITEM "754",                         ID_SETTINGS_PIXELWIDTH_754
 
             MENUITEM "720",                         ID_SETTINGS_PIXELWIDTH_720
             , CHECKED

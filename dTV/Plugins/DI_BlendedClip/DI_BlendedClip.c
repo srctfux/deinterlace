@@ -92,7 +92,7 @@ HINSTANCE hInst = NULL;
 // still see too many Weave artifacts ("venetion blinds").  It's best to try everything
 // else first.
 
-	long		BlcMinimumClip = -15;				// currently -100 .. 100
+long		BlcMinimumClip = -15;				// currently -100 .. 100
 
 // "Pixel Motion Sensitivity" slider:  This determines how sensitive we are to motion.
 // Motion is calculated as the maximum absolute change in luma from the previous field
@@ -101,7 +101,7 @@ HINSTANCE hInst = NULL;
 // of venetiaon blinds that can occur with sudden scene changes.  This value is
 // calculated separately for each pixel.
 
-	long	BlcPixelMotionSense = 17;
+long	BlcPixelMotionSense = 17;
 
 // "Recent Motion Sensitivity" slider:  This increases the tendency to use Clip based
 // upon an n-period Exponential Moving Average of the recent motion.  Recent motion
@@ -110,7 +110,7 @@ HINSTANCE hInst = NULL;
 // does not attempt to do 3:2 pulldown I believe the motion values could be of assistance
 // in the routines that do.  
 
-	long		BlcRecentMotionSense = 0;		// current -100 .. 100)		
+long		BlcRecentMotionSense = 0;		// current -100 .. 100)		
 
 // "Motion Average Period" slider:  This sets the period of the moving average for Recent
 // Motion Sensitivity.  
@@ -123,7 +123,7 @@ HINSTANCE hInst = NULL;
 
 //			X_new_avg = ( X_old_avg * (n-1) + 2 * X) / (n+1)
 
-	long	BlcMotionAvgPeriod = 20;		// currently 1..200
+long	BlcMotionAvgPeriod = 20;		// currently 1..200
 
 // "Pixel Comb Sensitivity" slider:  This determines how sensitive we are to the current
 // comb factor of each pixel.  I used a simplified comb factor C = abs(2*W - H - L)/2,
@@ -132,17 +132,17 @@ HINSTANCE hInst = NULL;
 // Motion Sense seem to be the two main things to play with to get good results.  Generally,
 // increase one of these if you get Weave artifacts and decrease one if you get BOB artifacts.
   
-	long	BlcPixelCombSense = 27;
+long	BlcPixelCombSense = 27;
 
 // "Recent Comb Senseitivity" slider:  Operates like the Recent Motion slider but operates
 // on the average Comb Factor.
 
-	long	BlcRecentCombSense = 0;
+long	BlcRecentCombSense = 0;
 
 // "Comb Average Period" slider: Sets the period of the Comb exponential moving average.
 // See the comments on "Motion Average Period".
 
-	long	BlcCombAvgPeriod = 20;			// currently 1.200
+long	BlcCombAvgPeriod = 20;			// currently 1.200
 
 // "Skip High Comb Frames" slider:  I added this one in the hopes that it could help to
 // skip a frame in the event of a sudden flash attack on a rapid scene change or maybe
@@ -150,7 +150,7 @@ HINSTANCE hInst = NULL;
 // a chance to experiment with it yet.  It will give very ugly results if you set it 
 // too high.
 
-	long	BlcHighCombSkip = 10;			// larger values skip more
+long	BlcHighCombSkip = 10;			// larger values skip more
 
 // "Skip Low Motion Frames" slider:  This also is just experimental an probably of low
 // value.  The idea here is that any frame with sufficiently low change from the previous
@@ -158,18 +158,18 @@ HINSTANCE hInst = NULL;
 // normal use.  NOTE - This slider (but not parm) will soon be replaced by the
 // Vertical Smoothing slider.
 
-	long	BlcLowMotionSkip = 0;			// larger values skip more
+long	BlcLowMotionSkip = 0;			// larger values skip more
 
 // "Vertical Smoothing" slider: Sets a smoothing constant to smooth between the even
 // and odd lines.  Not yet implemented, but the INI parm is there.
 
-	long    BlcVerticalSmoothing = 0;
+long    BlcVerticalSmoothing = 0;
 
 // "Use Interpolated BOB instead of Clip" check box.  For those who don't like the
 // Clipped Weave, this will change it to an Interpolated Bob.  All other blending and
 // processing will still function. (but it probably won't look as good).
 
-	BOOL	BlcUseInterpBob = FALSE;
+BOOL	BlcUseInterpBob = FALSE;
 
 // "Blend Chroma Value" check box:  Usually the chroma value for the Clipped Weave is
 // just taken from the pixel above it.  Checking this box causes the chroma values to 
@@ -179,22 +179,23 @@ HINSTANCE hInst = NULL;
 // but it sometimes seems to create some softness or shimmering on my stock ticker or
 // rapidly moving objects with lots of detail like a hockey game.
 
-	BOOL	BlcBlendChroma = TRUE;			// default should maybe be TRUE?
+BOOL	BlcBlendChroma = TRUE;			// default should maybe be TRUE?
 
 // Finally there is an INI parm, but not a contol to determine whether to even display
 // the Blended Clipping controls when that method is selected. If set to false then
 // Blended Clipping parms are determined only from the INI file.
 
-	BOOL	BlcShowControls = TRUE;
+BOOL	BlcShowControls = TRUE;
 
 // Other global values, not user parms:
 
-	long	BlcAverageMotions[5][2] = {0};  // reserved
-	long	BlcTotalAverageMotion = 0;
-	long	BlcAverageCombs[5][2] = {0};	// reserved
-	long	BlcTotalAverageComb = 0;
-	BOOL	BlcWantsToFlip;
+long	BlcAverageMotions[5][2] = {0};  // reserved
+long	BlcTotalAverageMotion = 0;
+long	BlcAverageCombs[5][2] = {0};	// reserved
+long	BlcTotalAverageComb = 0;
+BOOL	BlcWantsToFlip;
 
+HWND ghDlg = NULL;
 
 BOOL DeinterlaceBlendedClip(DEINTERLACE_INFO *info)
 {
@@ -659,8 +660,13 @@ BOOL APIENTRY BlendedClipProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 		TUseInterpBob = BlcUseInterpBob;
 		TBlendChroma = BlcBlendChroma;
 		SetBlcDisplayControls(hDlg);
+		return TRUE;
 
+		break;
 
+	case WM_DESTROY:
+		ghDlg = NULL;
+		return TRUE;
 		break;
 
 	case WM_MOUSEMOVE:
@@ -728,21 +734,15 @@ BOOL APIENTRY BlendedClipProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 					}
 				}
 			}
-		return (FALSE);
-/*	
-	case WM_GETTEXT:	
-	case WM_PAINT:
-		return FALSE;						// say we did not process this
+  		    return TRUE;
 
-	case WM_NCPAINT:
-		return FALSE;						// say we did not process this
-*/
 	case WM_COMMAND:
 
 		switch LOWORD(wParam)
 		{
 		case IDOK:							// Is Done, use our new parms
-			EndDialog(hDlg, TRUE);
+			DestroyWindow(hDlg);
+			return TRUE;
 			break;
 
 		case IDCANCEL:						
@@ -757,15 +757,18 @@ BOOL APIENTRY BlendedClipProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 			BlcLowMotionSkip = TLowMotionSkip;
 			BlcUseInterpBob = TUseInterpBob;
 			BlcBlendChroma = TBlendChroma;
-			EndDialog(hDlg, TRUE);
+			DestroyWindow(hDlg);
+			return TRUE;
 			break;
 
 		case IDC_BLEND_CHROMA:				// Blend chroma from mult pixels
 			BlcBlendChroma = (BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_BLEND_CHROMA));
+			return TRUE;
 			break;  
 
 		case IDC_USE_INTERP_BOB:				// Blend chroma from mult pixels
 			BlcUseInterpBob = (BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_USE_INTERP_BOB));
+			return TRUE;
 			break;  
 
 
@@ -783,6 +786,7 @@ BOOL APIENTRY BlendedClipProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 			BlcUseInterpBob = FALSE;
 			BlcBlendChroma = TRUE;			// default should maybe be TRUE?
 			SetBlcDisplayControls(hDlg);
+			return TRUE;
 			break;
 		
 		default:
@@ -797,11 +801,19 @@ BOOL APIENTRY BlendedClipProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 	return (FALSE);
 }
 
-void __stdcall BlendedClipSwitchTo(HWND hwndMain, HWND hwndStatus)
+void __stdcall BlendedClipShowUI(HWND hwndMain, HWND hwndStatus)
 {
-	if(BlcShowControls)
+	if(ghDlg == NULL)
 	{
-		DialogBox(hInst, "BLENDED_CLIP", hwndMain, BlendedClipProc);
+		ghDlg = CreateDialog(hInst, "BLENDED_CLIP", hwndMain, BlendedClipProc);
+	}
+}
+
+void __stdcall BlendedClipExit(void)
+{
+	if(ghDlg != NULL)
+	{
+		DestroyWindow(ghDlg);
 	}
 }
 
@@ -892,6 +904,8 @@ SETTING DI_BlendedClipSettings[DI_BLENDEDCLIP_SETTING_LASTONE] =
 
 DEINTERLACE_METHOD BlendedClipMethod =
 {
+	sizeof(DEINTERLACE_METHOD),
+	DEINTERLACE_CURRENT_VERSION,
 	"Blended Clip", 
 	NULL,
 	FALSE, 
@@ -903,8 +917,8 @@ DEINTERLACE_METHOD BlendedClipMethod =
 	NULL,
 	INDEX_BLENDED_CLIP,
 	NULL,
-	BlendedClipSwitchTo,
-	NULL,
+	BlendedClipShowUI,
+	BlendedClipExit,
 	3,
 	0,
 	0,

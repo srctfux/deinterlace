@@ -62,6 +62,8 @@ SETTING DI_TwoFrameSettings[DI_TWOFRAME_SETTING_LASTONE] =
 
 DEINTERLACE_METHOD TwoFrameMethod =
 {
+	sizeof(DEINTERLACE_METHOD),
+	DEINTERLACE_CURRENT_VERSION,
 	"Video Deinterlace (2-Frame)", 
 	"2-Frame", 
 	FALSE, 

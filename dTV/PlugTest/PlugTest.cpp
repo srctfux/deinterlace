@@ -240,10 +240,6 @@ BOOL LoadDeintPlugin(LPCSTR szFileName, DEINTERLACE_METHOD** DeintMethod)
 		{
 			pMethod->pfnPluginStart(0, NULL);
 		}
-		if(pMethod->pfnPluginSwitchTo != NULL)
-		{
-			pMethod->pfnPluginSwitchTo(NULL, NULL);
-		}
 		return TRUE;
 	}
 	else

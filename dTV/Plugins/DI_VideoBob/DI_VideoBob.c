@@ -63,6 +63,8 @@ SETTING DI_VideoBobSettings[DI_VIDEOBOB_SETTING_LASTONE] =
 
 DEINTERLACE_METHOD VideoBobMethod =
 {
+	sizeof(DEINTERLACE_METHOD),
+	DEINTERLACE_CURRENT_VERSION,
 	"Video Deinterlace (Bob)", 
 	"Bob",
 	FALSE, 

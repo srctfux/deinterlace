@@ -54,6 +54,8 @@ BOOL DeinterlaceOddOnly(DEINTERLACE_INFO *info)
 
 DEINTERLACE_METHOD OddOnlyMethod =
 {
+	sizeof(DEINTERLACE_METHOD),
+	DEINTERLACE_CURRENT_VERSION,
 	"Odd Scanlines Only", 
 	"Odd",
 	TRUE, 

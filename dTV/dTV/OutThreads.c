@@ -600,9 +600,16 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 					LOG(" Crash in output code");
 				}
 
-				// somewhere above we will have locked the buffer, unlock before flip
+				if (bFlipNow)
+				{
+					// Do any filters that run on the output
+					// need to do this while the surface is locked
+					Filter_DoOutput(&info, (info.bRunningLate || info.bMissedFrame));
+				}
+
 				if (!info.bRunningLate)
 				{
+					// somewhere above we will have locked the buffer, unlock before flip
 					ddrval = IDirectDrawSurface_Unlock(lpDDOverlayBack, NULL);
 					if(ddrval == DDERR_SURFACELOST)
 					{
@@ -615,9 +622,6 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 
 					if (bFlipNow)
 					{
-						// Do any filters that run on the output
-						Filter_DoOutput(&info, (info.bRunningLate || info.bMissedFrame));
-
 						// setup flip flag
 						// the odd and even flags may help the scaled bob
 						// on some cards

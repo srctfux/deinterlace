@@ -83,6 +83,7 @@ eFILMPULLDOWNMODES GetFilmMode();
 BOOL InHalfHeightMode();
 void SetFilmDeinterlaceMode(int mode);
 void SetVideoDeinterlaceIndex(int index);
+void ShowVideoModeUI();
 char* GetDeinterlaceModeName();
 void IncrementDeinterlaceMode();
 void DecrementDeinterlaceMode();

@@ -56,6 +56,8 @@ BOOL DeinterlaceEvenOnly(DEINTERLACE_INFO *info)
 
 DEINTERLACE_METHOD EvenOnlyMethod =
 {
+	sizeof(DEINTERLACE_METHOD),
+	DEINTERLACE_CURRENT_VERSION,
 	"Even Scanlines Only", 
 	"Even",
 	TRUE, 

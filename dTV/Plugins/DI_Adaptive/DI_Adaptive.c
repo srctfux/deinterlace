@@ -48,7 +48,6 @@ HWND ghwndStatus = NULL;
 ///////////////////////////////////////////////////////////////////////////////
 void UpdateAdaptiveMode(long Index)
 {
-	char AdaptiveName[200], *ModeName;
 	int i;
 
 	if (CurrentIndex == Index)
@@ -59,11 +58,19 @@ void UpdateAdaptiveMode(long Index)
 		if(DeintMethods[i]->nMethodIndex == Index)
 		{
 			CurrentMethod = DeintMethods[i];
-			ModeName = DeintMethods[i]->szShortName;
-			if (ModeName == NULL)
-				ModeName = DeintMethods[i]->szName;
-			wsprintf(AdaptiveName, "Adaptive - %s", ModeName);
-			SendMessage(ghwndStatus, WM_SETTEXT, 0, (LPARAM) AdaptiveName);
+			if(ghwndStatus != NULL)
+			{
+				char AdaptiveName[200];
+				char* ModeName;
+
+				ModeName = DeintMethods[i]->szShortName;
+				if (ModeName == NULL)
+				{
+					ModeName = DeintMethods[i]->szName;
+				}
+				wsprintf(AdaptiveName, "Adaptive - %s", ModeName);
+				SendMessage(ghwndStatus, WM_SETTEXT, 0, (LPARAM) AdaptiveName);
+			}
 			CurrentIndex = Index;
 		}
 	}
@@ -148,7 +155,7 @@ BOOL DeinterlaceAdaptive(DEINTERLACE_INFO *info)
 	}
 }
 
-void __stdcall AdaptiveSwitchTo(HWND hwndMain, HWND hwndStatus)
+void __stdcall AdaptiveShowUI(HWND hwndMain, HWND hwndStatus)
 {
 	ghwndStatus = hwndStatus;
 }
@@ -157,23 +164,6 @@ void __stdcall AdaptiveStart(long NumPlugIns, DEINTERLACE_METHOD** OtherPlugins)
 {
 	DeintMethods = OtherPlugins;
 	NumVideoModes = NumPlugIns;
-}
-
-// we olny use this function from CRT
-// so copy it in rather than load up the whole CRT
-int __cdecl mystricmp(const char * dst, const char * src)
-{
-    int f,l;
-    do
-	{
-        if ( ((f = (unsigned char)(*(dst++))) >= 'A') && (f <= 'Z') )
-            f -= ('A' - 'a');
-
-        if ( ((l = (unsigned char)(*(src++))) >= 'A') && (l <= 'Z') )
-            l -= ('A' - 'a');
-    } while ( f && (f == l) );
-
-    return(f - l);
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -227,6 +217,8 @@ SETTING DI_AdaptiveSettings[DI_ADAPTIVE_SETTING_LASTONE] =
 
 DEINTERLACE_METHOD AdaptiveMethod =
 {
+	sizeof(DEINTERLACE_METHOD),
+	DEINTERLACE_CURRENT_VERSION,
 	"Adaptive", 
 	NULL, 
 	FALSE, 
@@ -238,7 +230,7 @@ DEINTERLACE_METHOD AdaptiveMethod =
 	DI_AdaptiveSettings,
 	INDEX_ADAPTIVE,
 	AdaptiveStart,
-	AdaptiveSwitchTo,
+	AdaptiveShowUI,
 	NULL,
 	4,
 	0,

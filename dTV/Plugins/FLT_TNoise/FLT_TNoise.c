@@ -71,6 +71,8 @@ SETTING FLT_TNoiseSettings[FLT_TNOISE_SETTING_LASTONE] =
 
 FILTER_METHOD TemporalNoiseMethod =
 {
+	sizeof(FILTER_METHOD),
+	FILTER_CURRENT_VERSION,
 	"Temporal Noise Filter",
 	"Noise Reduction (Temporal)\tN",
 	FALSE,
