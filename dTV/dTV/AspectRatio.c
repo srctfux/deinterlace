@@ -1144,12 +1144,12 @@ SETTING AspectSettings[ASPECT_SETTING_LASTONE] =
 		"ASPECT", "AspectConsistencyTime", NULL,
 	},
 	{
-		"Vertical Pos", NUMBER, 0, &VerticalPos,
+		"Vert Delay", NUMBER, 0, &VerticalPos,
 		VERT_POS_CENTRE, 0, 1, 1, NULL,
 		"ASPECT", "VerticalPos", NULL,
 	},
 	{
-		"Horizontal Pos", NUMBER, 0, &HorizontalPos,
+		"Horiz Delay", NUMBER, 0, &HorizontalPos,
 		HORZ_POS_CENTRE, 0, 1, 1, NULL,
 		"ASPECT", "HorizontalPos", NULL,
 	},

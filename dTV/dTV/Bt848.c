@@ -1742,13 +1742,13 @@ SETTING BT848Settings[BT848_SETTING_LASTONE] =
 		"Hardware", "BtWhiteCrushDown", BT848_WhiteCrushDown_OnChange,
 	},
 	{
-		"Sharpness", SLIDER, 0, &CurrentX,
-		720, 64, DTV_MAX_WIDTH, 2, NULL,
+		"Horiz Pixels", SLIDER, 0, &CurrentX,
+		720, 120, DTV_MAX_WIDTH, 2, NULL,
 		"MainWindow", "CurrentX", CurrentX_OnChange,
 	},
 	{
 		"CustomPixelWidth", SLIDER, 0, &CustomPixelWidth,
-		754, 64, DTV_MAX_WIDTH, 2, NULL,
+		754, 120, DTV_MAX_WIDTH, 2, NULL,
 		"MainWindow", "CustomPixelWidth", NULL,
 	},
 	{
