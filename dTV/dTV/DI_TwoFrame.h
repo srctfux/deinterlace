@@ -29,13 +29,6 @@
 
 #include "settings.h"
 
-typedef enum
-{
-	TWOFRAMESPATIALTOLERANCE = 0,
-	TWOFRAMETEMPORALTOLERANCE,
-	DI_TWOFRAME_SETTING_LASTONE,
-} DI_TWOFRAME_SETTING;
-
 // Get Hold of the DI_Adaptive.c file settings
 SETTING* DI_TwoFrame_GetSetting(DI_TWOFRAME_SETTING Setting);
 void DI_TwoFrame_ReadSettingsFromIni();

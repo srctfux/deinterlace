@@ -36,11 +36,6 @@
 
 #include "settings.h"
 
-typedef enum
-{
-	DEINTERLACE_SETTING_LASTONE = 0,
-} DEINTERLACE_SETTING;
-
 // Get Hold of the Deinterlace.c file settings
 SETTING* Deinterlace_GetSetting(DEINTERLACE_SETTING Setting);
 void Deinterlace_ReadSettingsFromIni();

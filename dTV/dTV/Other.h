@@ -40,13 +40,6 @@
 
 #include "settings.h"
 
-typedef enum
-{
-	BACKBUFFERS = 0,
-	OVERLAYCOLOR,
-	OTHER_SETTING_LASTONE,
-} OTHER_SETTING;
-
 // Get Hold of the Other.c file settings
 SETTING* Other_GetSetting(OTHER_SETTING Setting);
 void Other_ReadSettingsFromIni();

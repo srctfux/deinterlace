@@ -1203,6 +1203,29 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		    OSD_Redraw(hWnd);
 		    break;
 
+		case IDM_HELP_HOMEPAGE:
+			ShellExecute(hWnd, "open", "http://deinterlace.sourceforge.net/", NULL, NULL, SW_SHOWNORMAL);
+			break;
+
+		case IDM_HELP_FAQ:
+			ShellExecute(hWnd, "open", "http://deinterlace.sourceforge.net/FAQ.htm", NULL, NULL, SW_SHOWNORMAL);
+			break;
+
+		case IDM_HELP_SUPPORT:
+			ShellExecute(hWnd, "open", ".\\Docs\\user_support.htm", NULL, NULL, SW_SHOWNORMAL);
+			break;
+
+		case IDM_HELP_KEYBOARD:
+			ShellExecute(hWnd, "open", ".\\Docs\\keyboard.htm", NULL, NULL, SW_SHOWNORMAL);
+			break;
+
+		case IDM_HELP_GPL:
+			ShellExecute(hWnd, "open", ".\\Docs\\COPYING.html", NULL, NULL, SW_SHOWNORMAL);
+			break;
+
+		case IDM_HELP_README:
+			ShellExecute(hWnd, "open", ".\\Docs\\dTV_Readme.htm", NULL, NULL, SW_SHOWNORMAL);
+			break;
 		default:
 			// Check whether menu ID is an aspect ratio related item
 			ProcessAspectRatioSelection(hWnd, LOWORD(wParam));
@@ -1439,6 +1462,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		break;
 
 	default:
+		return Settings_HandleSettingMsgs(hWnd, message, wParam, lParam);
 		break;
 	}
 	return DefWindowProc(hWnd, message, wParam, lParam);

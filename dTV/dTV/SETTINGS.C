@@ -205,6 +205,102 @@ void LoadSettingsFromIni()
 	}
 }
 
+LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lParam)
+{
+	switch(message)
+	{
+		case WM_ASPECT_GETVALUE:
+			return Setting_GetValue(Aspect_GetSetting((ASPECT_SETTING)wParam));
+			break;
+		case WM_BT848_GETVALUE:		
+			return Setting_GetValue(BT848_GetSetting((BT848_SETTING)wParam));
+			break;
+		case WM_DTV_GETVALUE:		
+			return Setting_GetValue(dTV_GetSetting((DTV_SETTING)wParam));
+			break;
+		case WM_OUTHREADS_GETVALUE:
+			return Setting_GetValue(OutThreads_GetSetting((OUTTHREADS_SETTING)wParam));
+			break;
+		case WM_OTHER_GETVALUE:		
+			return Setting_GetValue(Other_GetSetting((OTHER_SETTING)wParam));
+			break;
+		case WM_FD50_GETVALUE:		
+			return Setting_GetValue(FD50_GetSetting((FD50_SETTING)wParam));
+			break;
+		case WM_FD60_GETVALUE:		
+			return Setting_GetValue(FD60_GetSetting((FD60_SETTING)wParam));
+			break;
+		case WM_FD_COMMON_GETVALUE:
+			return Setting_GetValue(FD_Common_GetSetting((FD_COMMON_SETTING)wParam));
+			break;
+		case WM_DI_ADAPTIVE_GETVALUE:	
+			return Setting_GetValue(DI_Adaptive_GetSetting((DI_ADAPTIVE_SETTING)wParam));
+			break;
+		case WM_DI_BOBWEAVE_GETVALUE:	
+			return Setting_GetValue(DI_BobWeave_GetSetting((DI_BOBWEAVE_SETTING)wParam));
+			break;
+		case WM_DI_BLENDEDCLIP_GETVALUE:
+			return Setting_GetValue(DI_BlendedClip_GetSetting((DI_BLENDEDCLIP_SETTING)wParam));
+			break;
+		case WM_DI_TWOFRAME_GETVALUE:	
+			return Setting_GetValue(DI_TwoFrame_GetSetting((DI_TWOFRAME_SETTING)wParam));
+			break;
+		case WM_DEINTERLACE_GETVALUE:	
+			return Setting_GetValue(Deinterlace_GetSetting((DEINTERLACE_SETTING)wParam));
+			break;
+		case WM_FLT_TNOISE_GETVALUE:		
+			return Setting_GetValue(FLT_TNoise_GetSetting((FLT_TNOISE_SETTING)wParam));
+			break;
+
+		case WM_ASPECT_SETVALUE:
+			Setting_SetValue(Aspect_GetSetting((ASPECT_SETTING)wParam), lParam);
+			break;
+		case WM_BT848_SETVALUE:		
+			Setting_SetValue(BT848_GetSetting((BT848_SETTING)wParam), lParam);
+			break;
+		case WM_DTV_SETVALUE:		
+			Setting_SetValue(dTV_GetSetting((DTV_SETTING)wParam), lParam);
+			break;
+		case WM_OUTHREADS_SETVALUE:
+			Setting_SetValue(OutThreads_GetSetting((OUTTHREADS_SETTING)wParam), lParam);
+			break;
+		case WM_OTHER_SETVALUE:		
+			Setting_SetValue(Other_GetSetting((OTHER_SETTING)wParam), lParam);
+			break;
+		case WM_FD50_SETVALUE:		
+			Setting_SetValue(FD50_GetSetting((FD50_SETTING)wParam), lParam);
+			break;
+		case WM_FD60_SETVALUE:		
+			Setting_SetValue(FD60_GetSetting((FD60_SETTING)wParam), lParam);
+			break;
+		case WM_FD_COMMON_SETVALUE:
+			Setting_SetValue(FD_Common_GetSetting((FD_COMMON_SETTING)wParam), lParam);
+			break;
+		case WM_DI_ADAPTIVE_SETVALUE:	
+			Setting_SetValue(DI_Adaptive_GetSetting((DI_ADAPTIVE_SETTING)wParam), lParam);
+			break;
+		case WM_DI_BOBWEAVE_SETVALUE:	
+			Setting_SetValue(DI_BobWeave_GetSetting((DI_BOBWEAVE_SETTING)wParam), lParam);
+			break;
+		case WM_DI_BLENDEDCLIP_SETVALUE:
+			Setting_SetValue(DI_BlendedClip_GetSetting((DI_BLENDEDCLIP_SETTING)wParam), lParam);
+			break;
+		case WM_DI_TWOFRAME_SETVALUE:	
+			Setting_SetValue(DI_TwoFrame_GetSetting((DI_TWOFRAME_SETTING)wParam), lParam);
+			break;
+		case WM_DEINTERLACE_SETVALUE:	
+			Setting_SetValue(Deinterlace_GetSetting((DEINTERLACE_SETTING)wParam), lParam);
+			break;
+		case WM_FLT_TNOISE_SETVALUE:		
+			Setting_SetValue(FLT_TNoise_GetSetting((FLT_TNOISE_SETTING)wParam), lParam);
+			break;
+		default:
+			break;
+	}
+	return DefWindowProc(hWnd, message, wParam, lParam);
+}
+
+
 void WriteSettingsToIni()
 {
 	char szKey[128];
@@ -326,6 +422,10 @@ void SetControlVisibility(HWND hDlg, int ControlID, BOOL IsVisible)
 
 long Setting_GetValue(SETTING* pSetting)
 {
+	if(pSetting == NULL)
+	{
+		return -1;
+	}
 	switch(pSetting->Type)
 	{
 	case YESNO:
@@ -343,6 +443,11 @@ long Setting_GetValue(SETTING* pSetting)
 
 BOOL Setting_SetValue(SETTING* pSetting, long Value)
 {
+	if(pSetting == NULL)
+	{
+		return FALSE;
+	}
+
 	switch(pSetting->Type)
 	{
 	case YESNO:

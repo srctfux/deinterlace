@@ -29,16 +29,6 @@
 
 #include "settings.h"
 
-typedef enum
-{
-	WEAVEEDGEDETECT = 0,
-	WEAVEJAGGIETHRESHOLD,
-	TEMPORALTOLERANCE,
-	SPATIALTOLERANCE,
-	SIMILARITYTHRESHOLD,
-	DI_BOBWEAVE_SETTING_LASTONE,
-} DI_BOBWEAVE_SETTING;
-
 // Get Hold of the  DI_BobAndWeave.c file settings
 SETTING* DI_BobWeave_GetSetting(DI_BOBWEAVE_SETTING Setting);
 void DI_BobWeave_ReadSettingsFromIni();

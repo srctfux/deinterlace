@@ -39,6 +39,8 @@
 #ifndef __SETTINGS_H___
 #define __SETTINGS_H___
 
+#include "dTV_Control.h"
+
 // This is the Header for the new UI code
 // This is currently in developement and is not to be used
 // It has only been checked in so that I can work on the 
@@ -102,6 +104,7 @@ void Setting_OSDShow(SETTING* pSetting, HWND hWnd);
 void Setting_Up(SETTING* pSetting);
 void Setting_Down(SETTING* pSetting);
 
+LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lParam);
 
 // End of new UI code header
 

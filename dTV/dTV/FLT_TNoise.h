@@ -4,14 +4,6 @@
 #include "settings.h"
 #include "deinterlace.h"
 
-typedef enum
-{
-	USETEMPORALNOISEFILTER = 0,
-	TEMPORALLUMINANCETHRESHOLD,
-	TEMPORALCHROMATHRESHOLD,
-	FLT_TNOISE_SETTING_LASTONE,
-} FLT_TNOISE_SETTING;
-
 // Get Hold of the FD_50Hz.c file settings
 SETTING* FLT_TNoise_GetSetting(FLT_TNOISE_SETTING Setting);
 void FLT_TNoise_ReadSettingsFromIni();

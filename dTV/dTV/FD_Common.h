@@ -30,14 +30,6 @@
 #include "settings.h"
 #include "deinterlace.h"
 
-typedef enum
-{
-	BITSHIFT = 0,
-	EDGEDETECT,
-	JAGGIETHRESHOLD,
-	DIFFTHRESHOLD,
-	FD_COMMON_SETTING_LASTONE,
-} FD_COMMON_SETTING;
 
 // Get Hold of the FD_50Hz.c file settings
 SETTING* FD_Common_GetSetting(FD_COMMON_SETTING Setting);

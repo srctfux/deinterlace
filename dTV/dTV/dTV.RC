@@ -325,21 +325,6 @@ BEGIN
                     ES_READONLY
 END
 
-PLLINFO DIALOG DISCARDABLE  22, 17, 187, 90
-STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
-CAPTION "dTV PLL Parameters"
-FONT 8, "MS Sans Serif"
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,0,70,55,15
-    PUSHBUTTON      "Cancel",IDCANCEL,125,70,55,15
-    LTEXT           "TV cards of the type BT878/BT879 must be initialized accordingly. Mostly 28 MHz.",
-                    -1,15,6,165,25
-    CONTROL         "PLL ( 28 MHz crystal ) ",IDC_CHECK1,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,40,35,140,10
-    CONTROL         "PLL ( 35 MHz crystal ) ",IDC_CHECK2,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,40,50,140,10
-END
-
 MIXERSETTINGS DIALOG DISCARDABLE  22, 17, 402, 266
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
 CAPTION "dTV Mixer Setup"
@@ -476,8 +461,6 @@ BEGIN
     LTEXT           "MultiDec Source (c) Espresso (echter_espresso@hotmail.com)",
                     IDC_STATIC,13,154,348,9
     GROUPBOX        "Authors",IDC_STATIC,6,37,180,100
-    LTEXT           "John Adcock\nMark Rejhon\nSteve Grimm\nTom Barry\nMichael Eskin\nMichael Samblanet",
-                    IDC_STATIC,11,49,86,69
     CTEXT           "()()  http://deinterlace.sourceforge.net  ()()",
                     IDC_STATIC,0,11,293,10
     LTEXT           "bttv - Bt848 frame grabber driver Copyright (c) Ralph  Metzler && Marcus Metzler",
@@ -485,10 +468,14 @@ BEGIN
     LTEXT           "I2C Interface Copyright (c) Gerd Knorr",IDC_STATIC,13,
                     182,160,10
     GROUPBOX        "Support",IDC_STATIC,192,37,180,100
-    LTEXT           "The best place to get support for dTV is the Home Theater Computers foum at the AV Science Forums.\n\nhttp:\\\\www.avsforum.com\\\n\nPlease read the FAQ and the appropriate release thread for the version your using before posting here",
-                    IDC_STATIC,200,47,166,58
+    LTEXT           "The best place to get support for dTV is the Home Theater Computers foum at the AV Science Forums.",
+                    IDC_STATIC,200,47,166,18
     LTEXT           "John Adcock\nMark Rejhon\nSteve Grimm\nTom Barry\nMichael Eskin\nMichael Samblanet",
-                    IDC_STATIC,30,66,86,69
+                    IDC_STATIC,12,52,86,51
+    LTEXT           "Please read the FAQ and the appropriate release thread for the version your using before posting here",
+                    IDC_STATIC,200,104,166,20
+    CTEXT           "http://www.avsforum.com/",IDC_LINK,201,78,162,12,
+                    SS_CENTERIMAGE | SS_SUNKEN
 END
 
 ANALOGSCAN DIALOG DISCARDABLE  22, 17, 266, 117
@@ -956,6 +943,13 @@ BEGIN
     END
     POPUP "&Help"
     BEGIN
+        MENUITEM "&Read Me ...\tF1",            IDM_HELP_README
+        MENUITEM "dTV &Home Page ...",          IDM_HELP_HOMEPAGE
+        MENUITEM "&FAQ ...",                    IDM_HELP_FAQ
+        MENUITEM "&Support ...",                IDM_HELP_SUPPORT
+        MENUITEM "&Keyboard ...",               IDM_HELP_KEYBOARD
+        MENUITEM "&Licence ...",                IDM_HELP_GPL
+        MENUITEM SEPARATOR
         MENUITEM "&About dTV...",               IDM_ABOUT
     END
 END
@@ -1049,12 +1043,6 @@ BEGIN
     BEGIN
         RIGHTMARGIN, 185
         BOTTOMMARGIN, 63
-    END
-
-    "PLLINFO", DIALOG
-    BEGIN
-        RIGHTMARGIN, 180
-        BOTTOMMARGIN, 85
     END
 
     "MIXERSETTINGS", DIALOG
@@ -1183,6 +1171,7 @@ BEGIN
     "M",            IDM_MUTE,               VIRTKEY, NOINVERT
     "M",            IDM_MUTE,               VIRTKEY, SHIFT, NOINVERT
     "N",            IDM_NOISE_FILTER,       VIRTKEY, NOINVERT
+    "N",            IDM_NOISE_FILTER,       VIRTKEY, SHIFT, NOINVERT
     "O",            IDM_OVERSCAN_MINUS,     VIRTKEY, NOINVERT
     "O",            IDM_OVERSCAN_PLUS,      VIRTKEY, SHIFT, NOINVERT
     "O",            IDM_OVERSCAN_CURRENT,   VIRTKEY, SHIFT, CONTROL, 
@@ -1204,6 +1193,7 @@ BEGIN
     VK_BACK,        IDM_HIDE_OSD,           VIRTKEY, NOINVERT
     VK_DOWN,        IDM_VT_PAGE_DOWN,       VIRTKEY, NOINVERT
     VK_ESCAPE,      IDM_END,                VIRTKEY, NOINVERT
+    VK_F1,          IDM_HELP_README,        VIRTKEY, NOINVERT
     VK_F1,          IDM_SOURCE_TUNER,       VIRTKEY, CONTROL, ALT, NOINVERT
     VK_F1,          IDM_AUDIO_0,            VIRTKEY, SHIFT, CONTROL, 
                                                     NOINVERT
@@ -1251,13 +1241,6 @@ BEGIN
     "`",            IDM_SASPECT_COMPUTE,    ASCII,  NOINVERT
 END
 
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Cursor
-//
-
-CSIZEX                  CURSOR  DISCARDABLE     "res\\sizex.cur"
 
 #ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////

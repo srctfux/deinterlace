@@ -93,7 +93,7 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 ddraw.lib dxguid.lib kernel32.lib user32.lib gdi32.lib advapi32.lib winmm.lib comdlg32.lib ..\driver\bin\hwiodrv.lib /nologo /subsystem:windows /incremental:yes /machine:I386
 # SUBTRACT BASE LINK32 /profile /map /debug /nodefaultlib
-# ADD LINK32 ..\Driver\DLL\Release\dTVdrv.lib ddraw.lib dxguid.lib kernel32.lib user32.lib gdi32.lib advapi32.lib winmm.lib comdlg32.lib COMCTL32.LIB version.lib /nologo /subsystem:windows /incremental:yes /machine:I386 /out:"..\Release\dTV.exe"
+# ADD LINK32 ..\Driver\DLL\Release\dTVdrv.lib ddraw.lib dxguid.lib kernel32.lib user32.lib gdi32.lib advapi32.lib shell32.lib winmm.lib comdlg32.lib COMCTL32.LIB version.lib /nologo /subsystem:windows /incremental:yes /machine:I386 /out:"..\Release\dTV.exe"
 # SUBTRACT LINK32 /profile /map /debug /nodefaultlib
 
 !ENDIF 
@@ -288,6 +288,10 @@ SOURCE=.\Dialogs.h
 # Begin Source File
 
 SOURCE=.\dTV.H
+# End Source File
+# Begin Source File
+
+SOURCE=.\dTV_Control.h
 # End Source File
 # Begin Source File
 

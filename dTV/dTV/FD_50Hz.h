@@ -30,16 +30,6 @@
 #include "settings.h"
 #include "deinterlace.h"
 
-typedef enum
-{
-	PULLDOWNTHRESHHOLDLOW = 0,
-	PULLDOWNTHRESHHOLDHIGH,
-	PALFILMFALLBACKMODE,
-	PALFILMREPEATCOUNT,
-	PALFILMREPEATCOUNT2,
-	FD50_SETTING_LASTONE,
-} FD50_SETTING;
-
 // Get Hold of the FD_50Hz.c file settings
 SETTING* FD50_GetSetting(FD50_SETTING Setting);
 void FD50_ReadSettingsFromIni();

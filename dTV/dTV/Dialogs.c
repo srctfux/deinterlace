@@ -691,12 +691,20 @@ BOOL APIENTRY AboutProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 					}
 				}
 			} // if (dwVerInfoSize)
-
+			
 		break;
 	case WM_COMMAND:
-		if ((LOWORD(wParam) == IDOK) || (LOWORD(wParam) == IDCANCEL))
+		switch(LOWORD(wParam))
 		{
+		case IDOK:
+		case IDCANCEL:
 			EndDialog(hDlg, TRUE);
+			break;
+		case IDC_LINK:
+			ShellExecute(hDlg, "open", "http://www.avsforum.com/", NULL, NULL, SW_SHOWNORMAL);
+			break;
+		default:
+			break;
 		}
 		break;
 	}

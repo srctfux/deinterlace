@@ -43,17 +43,6 @@
 #include "settings.h"
 #include "deinterlace.h"
 
-typedef enum
-{
-	HURRYWHENLATE = 0,
-	WAITFORFLIP,
-	DOACCURATEFLIPS,
-	SLEEPINTERVAL,
-	AUTODETECT,
-	PULLDOWNMODE,
-	OUTTHREADS_SETTING_LASTONE,
-} OUTTHREADS_SETTING;
-
 // Get Hold of the OutThreads.c file settings
 SETTING* OutThreads_GetSetting(OUTTHREADS_SETTING Setting);
 void OutThreads_ReadSettingsFromIni();

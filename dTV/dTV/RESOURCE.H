@@ -160,6 +160,12 @@
 #define IDM_WINPOS_HORZ_CENTRE          773
 #define IDM_WINPOS_HORZ_LEFT            774
 #define IDM_WINPOS_HORZ_RIGHT           775
+#define IDM_HELP_HOMEPAGE               776
+#define IDM_HELP_FAQ                    777
+#define IDM_HELP_SUPPORT                778
+#define IDM_HELP_KEYBOARD               779
+#define IDM_HELP_GPL                    780
+#define IDM_HELP_README                 781
 #define IDM_END                         1032
 #define IDM_SOURCE_TUNER                1089
 #define IDM_SOURCE_COMPOSITE            1090
@@ -192,7 +198,6 @@
 #define IDM_PRIORCLASS_0                1160
 #define IDM_PRIORCLASS_1                1161
 #define IDM_PRIORCLASS_2                1162
-#define IDM_DECODING_NAGRA1             1200
 #define IDC_LIST1                       1521
 #define IDC_BUTTON1                     1522
 #define IDC_LIST2                       1522
@@ -739,6 +744,7 @@
 #define E32                             1871
 #define IDC_PNAME12                     1871
 #define IDC_CPU_TYPE                    1872
+#define IDC_LINK                        1873
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -746,8 +752,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        157
-#define _APS_NEXT_COMMAND_VALUE         776
-#define _APS_NEXT_CONTROL_VALUE         1873
+#define _APS_NEXT_COMMAND_VALUE         782
+#define _APS_NEXT_CONTROL_VALUE         1874
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif
