@@ -66,6 +66,7 @@
 #include "DI_BobAndWeave.h"
 #include "DI_TwoFrame.h"
 #include "DI_Greedy.h"
+#include "DI_Greedy2Frame.h"
 #include "other.h"
 #include "FD_50Hz.h"
 #include "FD_60Hz.h"
@@ -126,6 +127,7 @@ void LoadSettingsFromIni()
 	DI_BobWeave_ReadSettingsFromIni();
 	DI_BlendedClip_ReadSettingsFromIni();
 	DI_TwoFrame_ReadSettingsFromIni();
+	DI_Greedy2Frame_ReadSettingsFromIni();
 	Deinterlace_ReadSettingsFromIni();
 	FLT_TNoise_ReadSettingsFromIni();
 	FLT_Gamma_ReadSettingsFromIni();
@@ -278,6 +280,9 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 		case WM_VBI_GETVALUE:		
 			return Setting_GetValue(VBI_GetSetting((VBI_SETTING)wParam));
 			break;
+		case WM_DI_GREEDY2FRAME_GETVALUE:		
+			return Setting_GetValue(DI_Greedy2Frame_GetSetting((DI_GREEDY2FRAME_SETTING)wParam));
+			break;
 
 		case WM_ASPECT_SETVALUE:
 			Setting_SetValue(Aspect_GetSetting((ASPECT_SETTING)wParam), lParam);
@@ -341,6 +346,9 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 			break;
 		case WM_VBI_SETVALUE:		
 			Setting_SetValue(VBI_GetSetting((VBI_SETTING)wParam), lParam);
+			break;
+		case WM_DI_GREEDY2FRAME_SETVALUE:		
+			Setting_SetValue(DI_Greedy2Frame_GetSetting((DI_GREEDY2FRAME_SETTING)wParam), lParam);
 			break;
 
 		case WM_ASPECT_CHANGEVALUE:
@@ -406,6 +414,9 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 		case WM_VBI_CHANGEVALUE:		
 			Setting_ChangeValue(VBI_GetSetting((VBI_SETTING)wParam), lParam);
 			break;
+		case WM_DI_GREEDY2FRAME_CHANGEVALUE:		
+			Setting_ChangeValue(DI_Greedy2Frame_GetSetting((DI_GREEDY2FRAME_SETTING)wParam), lParam);
+			break;
 		
 		default:
 			break;
@@ -443,6 +454,7 @@ void WriteSettingsToIni()
 	DI_BobWeave_WriteSettingsToIni();
 	DI_BlendedClip_WriteSettingsToIni();
 	DI_TwoFrame_WriteSettingsToIni();
+	DI_Greedy2Frame_WriteSettingsToIni();
 	Deinterlace_WriteSettingsToIni();
 	FLT_TNoise_WriteSettingsToIni();
 	FLT_Gamma_WriteSettingsToIni();

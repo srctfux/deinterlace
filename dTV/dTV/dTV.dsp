@@ -147,6 +147,10 @@ SOURCE=.\DI_Greedy.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\DI_Greedy2Frame.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\DI_HalfHeight.c
 # End Source File
 # Begin Source File
@@ -296,6 +300,10 @@ SOURCE=.\DI_BobAndWeave.h
 # Begin Source File
 
 SOURCE=.\DI_Greedy.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\DI_Greedy2Frame.h
 # End Source File
 # Begin Source File
 
@@ -533,6 +541,10 @@ SOURCE=.\Todo.htm
 # Begin Group "Assembler Files"
 
 # PROP Default_Filter "*.asm"
+# Begin Source File
+
+SOURCE=.\DI_Greedy2Frame.asm
+# End Source File
 # Begin Source File
 
 SOURCE=.\DI_TwoFrame.asm

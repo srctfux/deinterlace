@@ -816,6 +816,7 @@ BEGIN
             MENUITEM "O&dd Fields Only",            IDM_ODD_ONLY
             MENUITEM "Ada&ptive Deinterlace",       IDM_ADAPTIVE
             MENUITEM "Video (&Greedy, Low Motion)", IDM_VIDEO_GREEDY
+            MENUITEM "Greedy &2 Frame",             IDM_VIDEO_GREEDY2FRAME
             MENUITEM SEPARATOR
             POPUP "&Manual Film Mode Select"
             BEGIN

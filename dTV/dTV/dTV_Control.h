@@ -588,4 +588,19 @@ typedef enum
 #define WM_VBI_SETVALUE		(WM_USER + 121)
 #define WM_VBI_CHANGEVALUE	(WM_USER + 221)
 
+/////////////////////////////////////////////////////////////////////////////
+// Control settings contained in DI_Greedy2Frame.c
+/////////////////////////////////////////////////////////////////////////////
+
+typedef enum
+{
+	GREEDYTWOFRAMETHRESHOLD = 0,
+	DI_GREEDY2FRAME_SETTING_LASTONE,
+} DI_GREEDY2FRAME_SETTING;
+
+#define WM_DI_GREEDY2FRAME_GETVALUE		(WM_USER + 22)
+#define WM_DI_GREEDY2FRAME_SETVALUE		(WM_USER + 122)
+#define WM_DI_GREEDY2FRAME_CHANGEVALUE	(WM_USER + 222)
+
+
 #endif

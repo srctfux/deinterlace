@@ -61,6 +61,7 @@ DEINTERLACE_FUNC FilmModePAL;
 DEINTERLACE_FUNC FilmModeNTSC;
 DEINTERLACE_FUNC AdaptiveDeinterlace;
 DEINTERLACE_FUNC GreedyClipping;
+DEINTERLACE_FUNC DeinterlaceFieldGreedy2Frame;
 
 DEINTERLACE_METHOD DeintMethods[PULLDOWNMODES_LAST_ONE] =
 {
@@ -100,6 +101,8 @@ DEINTERLACE_METHOD DeintMethods[PULLDOWNMODES_LAST_ONE] =
 	{"Adaptive", NULL, FALSE, FALSE, AdaptiveDeinterlace, 50, 60},
 	// GREEDY
 	{"Video (Greedy)", NULL, FALSE, FALSE, GreedyClipping, 50, 60},
+	// Greedy 2 frame
+	{"Greedy 2 Frame", NULL, FALSE, FALSE, DeinterlaceFieldGreedy2Frame, 50, 60},
 };
 
 char* DeintModeNames[PULLDOWNMODES_LAST_ONE];
@@ -274,4 +277,5 @@ void Deinterlace_SetMenu(HMENU hMenu)
 	CheckMenuItem(hMenu, IDM_BLENDED_CLIP, (ModeToShow == BLENDED_CLIP) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_ADAPTIVE, (ModeToShow == ADAPTIVE) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_VIDEO_GREEDY, (ModeToShow == GREEDY) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_VIDEO_GREEDY2FRAME, (ModeToShow == GREEDY2FRAME) ?MF_CHECKED:MF_UNCHECKED);
 }

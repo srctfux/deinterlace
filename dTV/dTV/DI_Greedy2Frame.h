@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
-// DI_TwoFrame.h
+// DI_Greedy2Frame.h
 /////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2000 Steve Grimm.  All rights reserved.
+// Copyright (c) 2000 John Adcock, Tom Barry, Steve Grimm  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
 //
 //	This file is subject to the terms of the GNU General Public License as
@@ -19,19 +19,18 @@
 //
 // Date          Developer             Changes
 //
-// 14 Jan 2001   John Adcock           Split into new file
-//                                     as part of global Variable Tidy up
+// 07 Feb 2001   John Adcock           Created new method based on 2-frame and greedy
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef __TWOFRAME_H___
-#define __TWOFRAME_H___
+#ifndef __GREEDY2FRAME_H___
+#define __GREEDY2FRAME_H___
 
 #include "settings.h"
 
 // Get Hold of the DI_Adaptive.c file settings
-SETTING* DI_TwoFrame_GetSetting(DI_TWOFRAME_SETTING Setting);
-void DI_TwoFrame_ReadSettingsFromIni();
-void DI_TwoFrame_WriteSettingsToIni();
+SETTING* DI_Greedy2Frame_GetSetting(DI_GREEDY2FRAME_SETTING Setting);
+void DI_Greedy2Frame_ReadSettingsFromIni();
+void DI_Greedy2Frame_WriteSettingsToIni();
 
 #endif

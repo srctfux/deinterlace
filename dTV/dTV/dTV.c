@@ -507,6 +507,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_BLENDED_CLIP:
 		case IDM_ADAPTIVE:
 		case IDM_VIDEO_GREEDY:
+		case IDM_VIDEO_GREEDY2FRAME:
 			if(Setting_GetValue(OutThreads_GetSetting(AUTODETECT)))
 			{
 				if(BT848_GetTVFormat()->Is25fps)
