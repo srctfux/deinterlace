@@ -193,6 +193,17 @@ void Stop_Capture()
 	BT848_MaskDataByte(BT848_CAP_CTL, 0, 0x0f);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+void Reset_Capture()
+{
+	Stop_Capture();
+	Overlay_Clean();
+	BT848_ResetHardware();
+	BT848_SetGeoSize();
+	WorkoutOverlaySize();
+	Start_Capture();
+}
+
 ////////////////////////////////////////////////////////////////////////////////////
 // The following function will continually check the BT chip's Interupt Status Flag
 // (specifying even/odd field processing) until it is  is different from what we

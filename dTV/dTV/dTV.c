@@ -449,13 +449,8 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_RESET:
-			Stop_Capture();
-			Overlay_Clean();
-			BT848_ResetHardware();
-			BT848_SetGeoSize();
-			WorkoutOverlaySize();
-			Start_Capture();
-			Sleep(100);
+			Reset_Capture();
+			Sleep(50);
 			Audio_SetSource(AudioSource);
 			break;
 
@@ -1373,12 +1368,8 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		// so that end users can write scripts that sends this special message 
 		// to safely restart the video after a resolution or timings change.
 		Overlay_Create();
-		Overlay_Clean();
-		BT848_ResetHardware();
-		BT848_SetGeoSize();
-		WorkoutOverlaySize();
-		Start_Capture();
-		Sleep(100);
+		Reset_Capture();
+		Sleep(50);
 		Audio_SetSource(AudioSource);
 		break;
 

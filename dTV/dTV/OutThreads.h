@@ -41,6 +41,7 @@
 
 void Start_Capture();
 void Stop_Capture();
+void Reset_Capture();
 
 void Start_Thread();
 void Stop_Thread();
