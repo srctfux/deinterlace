@@ -115,12 +115,6 @@ typedef struct SOTREC
     char           Kommentar[512];    
 };
 
-typedef struct TCountries
-{
-        // Device data
-        char Name[128];
-};
-
 typedef struct TVTDialog
 {
 	HWND Dialog;
@@ -174,7 +168,7 @@ typedef struct TProgramm
     unsigned char   CA_ID;
 	unsigned short  Temp_Audio;
     unsigned char   Buffer[10];   // For later Use
-	unsigned short  Filteranzahl;
+	unsigned short  FilterNumber;
     struct PIDFilters Filters[12];
 };
 
@@ -250,32 +244,8 @@ struct TTVSetting
 	WORD wVDelay;
 	WORD wCropOffset;
 	BOOL Is25fps;
+	WORD VBIPacketSize;
 };
-
-struct TTunerType
-{
-	WORD thresh1; /* frequency Range for UHF,VHF-L, VHF_H */   
-	WORD thresh2;  
-	BYTE VHF_L;
-	BYTE VHF_H;
-	BYTE UHF;
-	BYTE config; 
-	BYTE I2C;
-	WORD IFPCoff;
-};
-
-
-
-typedef struct TChannels
-{
-	char Name[128];
-	int MinChannel;
-	int MaxChannel;
-	unsigned long freq[512];
-};
-
-
-typedef unsigned long PHYS;
 
 struct TMixerAccess
 {
@@ -302,7 +272,7 @@ struct TMixerLoad
 
 struct TMixerControls
 {
-	int AnzahlControls;
+	int ControlsCount;
 	MIXERCONTROL          *MixerControl;
 	MIXERCONTROLDETAILS   *MixerDetail;
 };
@@ -317,21 +287,21 @@ struct TBL
 
 struct TMixerConnections
 {
-	int AnzahlConnections;
+	int ConnectionsCount;
 	MIXERLINE *MixerConnections;
 	struct TMixerControls *To_Control;
 };
 
 struct TMixerLines 
 {
-	int AnzahlLines;
+	int LinesCount;
 	MIXERLINE *MixerLine;
 	struct TMixerConnections *To_Connection;
 };
 
 struct TSoundSystem
 {
-	int DeviceAnzahl;
+	int DeviceCount;
 	MIXERCAPS *MixerDev;
 	struct TMixerLines *To_Lines;
 };

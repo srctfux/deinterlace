@@ -32,11 +32,15 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
+#include "stdafx.h"
 #include "dialogs.h"
-#include "other.h"
+#include "bt848.h"
 #include "dTV.h"
 #include "OutThreads.h"
 #include "vt.h"
+#include "audio.h"
+#include "tuner.h"
+#include "vbi.h"
 
 struct TUT UT[128];
 int UTLoop=0;
@@ -135,7 +139,7 @@ BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 					else
 						i = -(256 - TBrightness);
 					SetDlgItemInt(hDlg, IDC_D1, i, TRUE);
-					SetBrightness(TBrightness);
+					BT848_SetBrightness(TBrightness);
 				}
 				if ((x >= 109) && (x <= 131))
 				{
@@ -148,7 +152,7 @@ BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 					MoveWindow(GetDlgItem(hDlg, IDC_S2), 109, y - 2, 22, 8, TRUE);
 					TContrast = i;
 					SetDlgItemInt(hDlg, IDC_D2, TContrast, FALSE);
-					SetContrast(TContrast);
+					BT848_SetContrast(TContrast);
 				}
 
 				if ((x >= 183) && (x <= 205))
@@ -166,7 +170,7 @@ BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 					else
 						i = -(256 - THue);
 					SetDlgItemInt(hDlg, IDC_D3, i, TRUE);
-					SetHue(THue);
+					BT848_SetHue(THue);
 				}
 				if ((x >= 258) && (x <= 280))
 				{
@@ -192,8 +196,8 @@ BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 						SetDlgItemInt(hDlg, IDC_D5, TSaturationU, FALSE);
 						SetDlgItemInt(hDlg, IDC_D6, TSaturationV, FALSE);
 						SetDlgItemInt(hDlg, IDC_D4, LastSaturation, FALSE);
-						SetSaturationU(TSaturationU);
-						SetSaturationV(TSaturationV);
+						BT848_SetSaturationU(TSaturationU);
+						BT848_SetSaturationV(TSaturationV);
 					}
 				}
 				if ((x >= 334) && (x <= 356))
@@ -212,7 +216,7 @@ BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 					MoveWindow(GetDlgItem(hDlg, IDC_S4), 258, y - 4, 22, 8, TRUE);
 
 					SetDlgItemInt(hDlg, IDC_D5, TSaturationU, FALSE);
-					SetSaturationU(TSaturationU);
+					BT848_SetSaturationU(TSaturationU);
 				}
 				if ((x >= 410) && (x <= 432))
 				{
@@ -230,7 +234,7 @@ BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 					MoveWindow(GetDlgItem(hDlg, IDC_S4), 258, y - 4, 22, 8, TRUE);
 
 					SetDlgItemInt(hDlg, IDC_D6, TSaturationV, FALSE);
-					SetSaturationV(TSaturationV);
+					BT848_SetSaturationV(TSaturationV);
 				}
 
 			}
@@ -249,11 +253,11 @@ BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 
 		if (LOWORD(wParam) == IDCANCEL)
 		{
-			SetBrightness(InitialBrightness);
-			SetContrast(InitialContrast);
-			SetHue(InitialHue);
-			SetSaturationU(InitialSaturationU);
-			SetSaturationV(InitialSaturationV);
+			BT848_SetBrightness(InitialBrightness);
+			BT848_SetContrast(InitialContrast);
+			BT848_SetHue(InitialHue);
+			BT848_SetSaturationU(InitialSaturationU);
+			BT848_SetSaturationV(InitialSaturationV);
 
 			EndDialog(hDlg, TRUE);
 		}
@@ -265,11 +269,11 @@ BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 			TContrast = 0xd8;
 			TSaturationU = 0xfe;
 			TSaturationV = 0xb4;
-			SetBrightness(TBrightness);
-			SetContrast(TContrast);
-			SetHue(THue);
-			SetSaturationU(TSaturationU);
-			SetSaturationV(TSaturationV);
+			BT848_SetBrightness(TBrightness);
+			BT848_SetContrast(TContrast);
+			BT848_SetHue(THue);
+			BT848_SetSaturationU(TSaturationU);
+			BT848_SetSaturationV(TSaturationV);
 			if (TBrightness < 128)
 				i = TBrightness;
 			else
@@ -324,7 +328,7 @@ BOOL APIENTRY AudioSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 	case WM_INITDIALOG:
 		if (Has_MSP == FALSE)
 		{
-			MessageBox(hWnd, "No MSP-Audio-Device found", "dTV", MB_ICONSTOP | MB_OK);
+			ErrorBox("No MSP-Audio-Device found");
 			EndDialog(hDlg, 0);
 		}
 
@@ -467,7 +471,7 @@ BOOL APIENTRY AudioSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 		if (LOWORD(wParam) == IDOK)
 		{
 
-			SetAudioSource(4);
+			Audio_SetSource(AUDIOMUX_MUTE);
 			Audio_SetSuperBass(IsDlgButtonChecked(hDlg, IDC_CHECK1));
 			Audio_SetVolume(InitialVolume);
 			Audio_SetSpatial(InitialSpatial);
@@ -476,13 +480,13 @@ BOOL APIENTRY AudioSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 			Audio_SetTreble(InitialTreble);
 			Audio_SetBalance(InitialBalance);
 
-			SetAudioSource(AudioSource);
+			Audio_SetSource(AudioSource);
 			EndDialog(hDlg, TRUE);
 		}
 
 		if (LOWORD(wParam) == IDCANCEL)
 		{
-			SetAudioSource(4);
+			Audio_SetSource(AUDIOMUX_MUTE);
 			Audio_SetSuperBass(TSuperBass);
 			Audio_SetVolume(TVolume);
 			Audio_SetSpatial(TSpecial);
@@ -490,7 +494,7 @@ BOOL APIENTRY AudioSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 			Audio_SetBass(TBass);
 			Audio_SetTreble(TTreble);
 			Audio_SetBalance(TBalance);
-			SetAudioSource(AudioSource);
+			Audio_SetSource(AudioSource);
 			EndDialog(hDlg, TRUE);
 		}
 
@@ -504,7 +508,7 @@ BOOL APIENTRY AudioSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 			TBass = 0x00;
 			TTreble = 0x00;
 			CheckDlgButton(hDlg, IDC_CHECK1, FALSE);
-			SetAudioSource(4);
+			Audio_SetSource(AUDIOMUX_MUTE);
 			Audio_SetSuperBass(FALSE);
 			Audio_SetVolume(TVolume);
 			Audio_SetSpatial(TSpecial);
@@ -519,7 +523,7 @@ BOOL APIENTRY AudioSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 			SetDlgItemInt(hDlg, IDC_D4, TBass, TRUE);
 			SetDlgItemInt(hDlg, IDC_D5, TTreble, TRUE);
 			SetDlgItemInt(hDlg, IDC_D6, TBalance, TRUE);
-			SetAudioSource(AudioSource);
+			Audio_SetSource(AudioSource);
 
 			y = (int) (235 - ((double) (TVolume + 1) / 1000 * 160));
 			MoveWindow(GetDlgItem(hDlg, IDC_S1), 33, y - 4, 22, 8, TRUE);
@@ -559,7 +563,7 @@ BOOL APIENTRY AudioSettingProc1(HWND hDlg, UINT message, UINT wParam, LONG lPara
 	case WM_INITDIALOG:
 		if (Has_MSP == FALSE)
 		{
-			MessageBox(hWnd, "No MSP-Audio-Device found", "dTV", MB_ICONSTOP | MB_OK);
+			ErrorBox("No MSP-Audio-Device found");
 			EndDialog(hDlg, 0);
 		}
 
@@ -652,29 +656,29 @@ BOOL APIENTRY AudioSettingProc1(HWND hDlg, UINT message, UINT wParam, LONG lPara
 	case WM_COMMAND:
 		if (LOWORD(wParam) == IDOK)
 		{
-			SetAudioSource(4);
+			Audio_SetSource(AUDIOMUX_MUTE);
 			for(i = 0; i < 5; i++)
 			{
 				Audio_SetEqualizer(i, InitialEqualizer[i]);
 			}
-			SetAudioSource(AudioSource);
+			Audio_SetSource(AudioSource);
 			EndDialog(hDlg, TRUE);
 		}
 
 		if (LOWORD(wParam) == IDCANCEL)
 		{
-			SetAudioSource(4);
+			Audio_SetSource(AUDIOMUX_MUTE);
 			for(i = 0; i < 5; i++)
 			{
 				Audio_SetEqualizer(i, TEqualizer[i]);
 			}
-			SetAudioSource(AudioSource);
+			Audio_SetSource(AudioSource);
 			EndDialog(hDlg, TRUE);
 		}
 
 		if (LOWORD(wParam) == IDDEFAULT)
 		{
-			SetAudioSource(4);
+			Audio_SetSource(AUDIOMUX_MUTE);
 			for(i = 0; i < 5; i++)
 			{
 				TEqualizer[i] = 0x00;
@@ -683,7 +687,7 @@ BOOL APIENTRY AudioSettingProc1(HWND hDlg, UINT message, UINT wParam, LONG lPara
 				y = (int) (157 - ((double) (TEqualizer[i]) / 192 * 210));
 				MoveWindow(GetDlgItem(hDlg, IDC_S1 + i), 33, y - 4, 22, 8, TRUE);
 			}
-			SetAudioSource(AudioSource);
+			Audio_SetSource(AudioSource);
 			break;
 		}
 
@@ -1364,4 +1368,176 @@ VOID APIENTRY DrawEntireItem(HWND hDlg, LPDRAWITEMSTRUCT lpdis, INT Typ)
 	TextOut(lpdis->hDC, 10, lpdis->rcItem.top + 1, UT[lpdis->itemData].Zeile, strlen(UT[lpdis->itemData].Zeile));
 	SelectObject(lpdis->hDC, OldFont);
 	return;
+}
+
+BOOL APIENTRY CardSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
+{
+	static int SaveTuner;
+	static int SaveVideoSource;
+
+	switch (message)
+	{
+	case WM_INITDIALOG:
+		SaveTuner = CardType;
+		SaveVideoSource = AudioSource;
+		PostMessage(hDlg, WM_USER, 1, 0);
+		break;
+
+	case WM_USER:
+
+		if (wParam == 1)
+		{
+			SetDlgItemInt(hDlg, IDC_EDIT1, ManuellAudio[0], FALSE);
+			SetDlgItemInt(hDlg, IDC_EDIT2, ManuellAudio[1], FALSE);
+			SetDlgItemInt(hDlg, IDC_EDIT3, ManuellAudio[2], FALSE);
+			SetDlgItemInt(hDlg, IDC_EDIT4, ManuellAudio[3], FALSE);
+			SetDlgItemInt(hDlg, IDC_EDIT5, ManuellAudio[4], FALSE);
+			SetDlgItemInt(hDlg, IDC_EDIT6, ManuellAudio[5], FALSE);
+			SetDlgItemInt(hDlg, IDC_EDIT7, ManuellAudio[6], FALSE);
+			SetDlgItemInt(hDlg, IDC_EDIT8, ManuellAudio[7], FALSE);
+
+		}
+
+		break;
+	case WM_COMMAND:
+
+		if (LOWORD(wParam) == IDSET)
+		{
+			CardType = 6;
+			AudioSource = 0;
+			if (IsDlgButtonChecked(hDlg, IDC_RADIO1))
+				AudioSource = 0;
+			if (IsDlgButtonChecked(hDlg, IDC_RADIO2))
+				AudioSource = 1;
+			if (IsDlgButtonChecked(hDlg, IDC_RADIO3))
+				AudioSource = 2;
+			if (IsDlgButtonChecked(hDlg, IDC_RADIO4))
+				AudioSource = 3;
+			if (IsDlgButtonChecked(hDlg, IDC_RADIO5))
+				AudioSource = 4;
+			if (IsDlgButtonChecked(hDlg, IDC_RADIO6))
+				AudioSource = 5;
+			ManuellAudio[0] = GetDlgItemInt(hDlg, IDC_EDIT1, NULL, FALSE);
+			ManuellAudio[1] = GetDlgItemInt(hDlg, IDC_EDIT2, NULL, FALSE);
+			ManuellAudio[2] = GetDlgItemInt(hDlg, IDC_EDIT3, NULL, FALSE);
+			ManuellAudio[3] = GetDlgItemInt(hDlg, IDC_EDIT4, NULL, FALSE);
+			ManuellAudio[4] = GetDlgItemInt(hDlg, IDC_EDIT5, NULL, FALSE);
+			ManuellAudio[5] = GetDlgItemInt(hDlg, IDC_EDIT6, NULL, FALSE);
+			ManuellAudio[6] = GetDlgItemInt(hDlg, IDC_EDIT7, NULL, FALSE);
+			ManuellAudio[7] = GetDlgItemInt(hDlg, IDC_EDIT8, NULL, FALSE);
+			Audio_SetSource(AudioSource);
+		}
+
+		if (LOWORD(wParam) == IDOK)
+		{
+			ManuellAudio[0] = GetDlgItemInt(hDlg, IDC_EDIT1, NULL, FALSE);
+			ManuellAudio[1] = GetDlgItemInt(hDlg, IDC_EDIT2, NULL, FALSE);
+			ManuellAudio[2] = GetDlgItemInt(hDlg, IDC_EDIT3, NULL, FALSE);
+			ManuellAudio[3] = GetDlgItemInt(hDlg, IDC_EDIT4, NULL, FALSE);
+			ManuellAudio[4] = GetDlgItemInt(hDlg, IDC_EDIT5, NULL, FALSE);
+			ManuellAudio[5] = GetDlgItemInt(hDlg, IDC_EDIT6, NULL, FALSE);
+			ManuellAudio[6] = GetDlgItemInt(hDlg, IDC_EDIT7, NULL, FALSE);
+			ManuellAudio[7] = GetDlgItemInt(hDlg, IDC_EDIT8, NULL, FALSE);
+			
+			SetMenuAnalog();
+			EndDialog(hDlg, TRUE);
+		}
+
+		if (LOWORD(wParam) == IDCANCEL)
+		{
+			CardType = SaveTuner;
+			AudioSource = SaveVideoSource;
+			Audio_SetSource(AudioSource);
+			EndDialog(hDlg, TRUE);
+		}
+		break;
+	}
+
+	return (FALSE);
+}
+
+BOOL APIENTRY ChipSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
+{
+	switch (message)
+	{
+	case WM_INITDIALOG:
+		SetDlgItemText(hDlg, IDC_TEXT6, BTVendorID);
+		SetDlgItemText(hDlg, IDC_TEXT7, BTDeviceID);
+
+		SetDlgItemText(hDlg, IDC_TEXT1, BTTyp);
+		SetDlgItemText(hDlg, IDC_TEXT13, TunerStatus);
+		SetDlgItemText(hDlg, IDC_TEXT14, MSPStatus);
+		SetDlgItemText(hDlg, IDC_TEXT16, MSPVersion);
+
+		SetDlgItemText(hDlg, IDC_TEXT18, "YUV2");
+
+		break;
+
+	case WM_COMMAND:
+
+		if ((LOWORD(wParam) == IDOK) || (LOWORD(wParam) == IDCANCEL))
+		{
+			EndDialog(hDlg, TRUE);
+		}
+
+		break;
+	}
+
+	return (FALSE);
+}
+
+BOOL APIENTRY SelectCardProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
+{
+	int i;
+	switch (message)
+	{
+	case WM_INITDIALOG:
+		SendMessage(GetDlgItem(hDlg, IDC_CARDSSELECT), CB_RESETCONTENT, 0, 0);
+		for(i = 0; i < TVCARD_LASTONE; i++)
+		{
+			SendMessage(GetDlgItem(hDlg, IDC_CARDSSELECT), CB_ADDSTRING, 0, (LONG)TVCards[i].szName);
+		}
+		SendMessage(GetDlgItem(hDlg, IDC_CARDSSELECT), CB_SETCURSEL, CardType, 0);
+
+		SendMessage(GetDlgItem(hDlg, IDC_TUNERSELECT), CB_RESETCONTENT, 0, 0);
+		for(i = 0; i < TUNER_LASTONE; i++)
+		{
+			SendMessage(GetDlgItem(hDlg, IDC_TUNERSELECT), CB_ADDSTRING, 0, (LONG)Tuners[i].szName);
+		}
+		SendMessage(GetDlgItem(hDlg, IDC_TUNERSELECT), CB_SETCURSEL, TunerType, 0);
+		break;
+	case WM_COMMAND:
+		switch(LOWORD(wParam))
+		{
+		case IDOK:
+			TunerType = SendMessage(GetDlgItem(hDlg, IDC_TUNERSELECT), CB_GETCURSEL, 0, 0);
+			CardType = SendMessage(GetDlgItem(hDlg, IDC_CARDSSELECT), CB_GETCURSEL, 0, 0);
+			EndDialog(hDlg, TRUE);
+			break;
+		case IDCANCEL:
+			EndDialog(hDlg, TRUE);
+			break;
+		case IDC_CARDSSELECT:
+			i = SendMessage(GetDlgItem(hDlg, IDC_CARDSSELECT), CB_GETCURSEL, 0, 0);
+			if(TVCards[i].TunerId == TUNER_USER_SETUP)
+			{
+				SendMessage(GetDlgItem(hDlg, IDC_TUNERSELECT), CB_SETCURSEL, TUNER_ABSENT, 0);
+			}
+			else if(TVCards[i].TunerId == TUNER_AUTODETECT)
+			{
+				SendMessage(GetDlgItem(hDlg, IDC_TUNERSELECT), CB_SETCURSEL, Card_AutoDetectTuner(i), 0);
+			}
+			else
+			{
+				SendMessage(GetDlgItem(hDlg, IDC_TUNERSELECT), CB_SETCURSEL, TVCards[i].TunerId, 0);
+			}
+			break;
+		default:
+			break;
+		}
+		break;
+	default:
+		break;
+	}
+	return (FALSE);
 }

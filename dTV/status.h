@@ -24,25 +24,17 @@
 //
 // Date          Developer             Changes
 //
-// 24 Jul 2000   John Adcock           Original Release
-//                                     Translated most code from German
-//                                     Combined Header files
-//                                     Cut out all decoding
-//                                     Cut out digital hardware stuff
+// 11 Aug 2000   John Adcock           Reorganised code
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef __OTHER_H___
-#define __OTHER_H___
+#ifndef __STATUS_H___
+#define __STATUS_H___
 
-#include "defines.h"
-#include "structs.h"
-#include "globals.h"
-
-void ExitDD(void);
-BOOL InitDD(HWND hWnd);
-BOOL OverlayUpdate(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL ColorKey);
-BOOL CreateOverlay();
-void Clean_Overlays();
+BOOL StatusBar_Init(HANDLE);
+BOOL StatusBar_Create(HWND, HANDLE, int);
+BOOL StatusBar_Adjust(HWND);
+HWND StatusBar_AddField(HANDLE, int, int, int, BOOL);
+BOOL StatusBar_Destry(void);
 
 #endif

@@ -32,12 +32,8 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#include <windows.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <mmsystem.h>
+#include "stdafx.h"
 #include "MixerDev.h"
-#include "resource.h"
 
 unsigned int LastOpenMixer=0xffffffff;
 int MIXER_MITTE;
@@ -54,25 +50,25 @@ void Enumerate_Sound_SubSystem(void)
 	int KanalLoop;
 	MIXERLINECONTROLS MixerLineControl;
 
-	SoundSystem.DeviceAnzahl = mixerGetNumDevs();
-	if (SoundSystem.DeviceAnzahl == 0)
+	SoundSystem.DeviceCount = mixerGetNumDevs();
+	if (SoundSystem.DeviceCount == 0)
 		return;
 
-	SoundSystem.MixerDev = (MIXERCAPS *) calloc(sizeof(MIXERCAPS), SoundSystem.DeviceAnzahl);
-	SoundSystem.To_Lines = (struct TMixerLines *) calloc(sizeof(struct TMixerLines), SoundSystem.DeviceAnzahl);
+	SoundSystem.MixerDev = (MIXERCAPS *) calloc(sizeof(MIXERCAPS), SoundSystem.DeviceCount);
+	SoundSystem.To_Lines = (struct TMixerLines *) calloc(sizeof(struct TMixerLines), SoundSystem.DeviceCount);
 
-	for (SoundSystemLoop = 0; SoundSystemLoop < SoundSystem.DeviceAnzahl; SoundSystemLoop++)
+	for (SoundSystemLoop = 0; SoundSystemLoop < SoundSystem.DeviceCount; SoundSystemLoop++)
 	{
 		mmresult = mixerGetDevCaps(SoundSystemLoop, &SoundSystem.MixerDev[SoundSystemLoop], sizeof(MIXERCAPS));
 
 		if (Open_HMixer(SoundSystemLoop) == TRUE)
 		{
 			// Enumerate Destinations
-			SoundSystem.To_Lines[SoundSystemLoop].AnzahlLines = SoundSystem.MixerDev[SoundSystemLoop].cDestinations;
+			SoundSystem.To_Lines[SoundSystemLoop].LinesCount = SoundSystem.MixerDev[SoundSystemLoop].cDestinations;
 			SoundSystem.To_Lines[SoundSystemLoop].MixerLine = (MIXERLINE *) calloc(sizeof(MIXERLINE), SoundSystem.MixerDev[SoundSystemLoop].cDestinations);
 			SoundSystem.To_Lines[SoundSystemLoop].To_Connection = (struct TMixerConnections *) calloc(sizeof(struct TMixerConnections), SoundSystem.MixerDev[SoundSystemLoop].cDestinations);
 
-			for (DestinationLoop = 0; DestinationLoop < SoundSystem.To_Lines[SoundSystemLoop].AnzahlLines; DestinationLoop++)
+			for (DestinationLoop = 0; DestinationLoop < SoundSystem.To_Lines[SoundSystemLoop].LinesCount; DestinationLoop++)
 			{
 				SoundSystem.To_Lines[SoundSystemLoop].MixerLine[DestinationLoop].cbStruct = sizeof(MIXERLINE);
 				SoundSystem.To_Lines[SoundSystemLoop].MixerLine[DestinationLoop].dwDestination = DestinationLoop;
@@ -80,13 +76,13 @@ void Enumerate_Sound_SubSystem(void)
 				if (mmresult == MMSYSERR_NOERROR)
 				{
 					// Enumerate Connection
-					SoundSystem.To_Lines[SoundSystemLoop].To_Connection[DestinationLoop].AnzahlConnections = SoundSystem.To_Lines[SoundSystemLoop].MixerLine[DestinationLoop].cConnections;
+					SoundSystem.To_Lines[SoundSystemLoop].To_Connection[DestinationLoop].ConnectionsCount = SoundSystem.To_Lines[SoundSystemLoop].MixerLine[DestinationLoop].cConnections;
 					SoundSystem.To_Lines[SoundSystemLoop].To_Connection[DestinationLoop].MixerConnections =
 						(MIXERLINE *) calloc(sizeof(MIXERLINE), SoundSystem.To_Lines[SoundSystemLoop].MixerLine[DestinationLoop].cConnections);
 					SoundSystem.To_Lines[SoundSystemLoop].To_Connection[DestinationLoop].To_Control =
 						(struct TMixerControls *) calloc(sizeof(struct TMixerConnections), SoundSystem.To_Lines[SoundSystemLoop].MixerLine[DestinationLoop].cConnections);
 
-					for (ConnectionLoop = 0; ConnectionLoop < SoundSystem.To_Lines[SoundSystemLoop].To_Connection[DestinationLoop].AnzahlConnections; ConnectionLoop++)
+					for (ConnectionLoop = 0; ConnectionLoop < SoundSystem.To_Lines[SoundSystemLoop].To_Connection[DestinationLoop].ConnectionsCount; ConnectionLoop++)
 					{
 						SoundSystem.To_Lines[SoundSystemLoop].To_Connection[DestinationLoop].MixerConnections[ConnectionLoop].cbStruct = sizeof(MIXERLINE);
 						SoundSystem.To_Lines[SoundSystemLoop].To_Connection[DestinationLoop].MixerConnections[ConnectionLoop].dwDestination = DestinationLoop;
@@ -97,13 +93,13 @@ void Enumerate_Sound_SubSystem(void)
 						{
 							// Enumerate Controls
 
-							SoundSystem.To_Lines[SoundSystemLoop].To_Connection[DestinationLoop].To_Control[ConnectionLoop].AnzahlControls =
+							SoundSystem.To_Lines[SoundSystemLoop].To_Connection[DestinationLoop].To_Control[ConnectionLoop].ControlsCount =
 								SoundSystem.To_Lines[SoundSystemLoop].MixerLine[DestinationLoop].cControls;
 							SoundSystem.To_Lines[SoundSystemLoop].To_Connection[DestinationLoop].To_Control[ConnectionLoop].MixerControl =
-								(MIXERCONTROL *) calloc(sizeof(MIXERCONTROL), SoundSystem.To_Lines[SoundSystemLoop].To_Connection[DestinationLoop].To_Control[ConnectionLoop].AnzahlControls);
+								(MIXERCONTROL *) calloc(sizeof(MIXERCONTROL), SoundSystem.To_Lines[SoundSystemLoop].To_Connection[DestinationLoop].To_Control[ConnectionLoop].ControlsCount);
 							SoundSystem.To_Lines[SoundSystemLoop].To_Connection[DestinationLoop].To_Control[ConnectionLoop].MixerDetail =
 								(MIXERCONTROLDETAILS *) calloc(sizeof(MIXERCONTROLDETAILS),
-															   SoundSystem.To_Lines[SoundSystemLoop].To_Connection[DestinationLoop].To_Control[ConnectionLoop].AnzahlControls);
+															   SoundSystem.To_Lines[SoundSystemLoop].To_Connection[DestinationLoop].To_Control[ConnectionLoop].ControlsCount);
 
 							MixerLineControl.cbStruct = sizeof(MixerLineControl);
 							MixerLineControl.dwLineID = SoundSystem.To_Lines[SoundSystemLoop].MixerLine[DestinationLoop].dwLineID;
@@ -112,7 +108,7 @@ void Enumerate_Sound_SubSystem(void)
 							MixerLineControl.pamxctrl = SoundSystem.To_Lines[SoundSystemLoop].To_Connection[DestinationLoop].To_Control[ConnectionLoop].MixerControl;
 							mmresult = mixerGetLineControls((HMIXEROBJ) hMixer, &MixerLineControl, MIXER_GETLINECONTROLSF_ALL);
 
-							for (ControlLoop = 0; ControlLoop < SoundSystem.To_Lines[SoundSystemLoop].To_Connection[DestinationLoop].To_Control[ConnectionLoop].AnzahlControls; ControlLoop++)
+							for (ControlLoop = 0; ControlLoop < SoundSystem.To_Lines[SoundSystemLoop].To_Connection[DestinationLoop].To_Control[ConnectionLoop].ControlsCount; ControlLoop++)
 							{
 								if (mmresult == ERROR_SUCCESS)
 								{
@@ -444,17 +440,16 @@ void Exit_Mixer(void)
 		hMixer = 0;
 	}
 
-	for (SoundSystemLoop = 0; SoundSystemLoop < SoundSystem.DeviceAnzahl; SoundSystemLoop++)
+	for (SoundSystemLoop = 0; SoundSystemLoop < SoundSystem.DeviceCount; SoundSystemLoop++)
 	{
 		SoundSystem.To_Lines[SoundSystemLoop].MixerLine = (MIXERLINE *) calloc(sizeof(MIXERLINE), SoundSystem.MixerDev[SoundSystemLoop].cDestinations);
 		SoundSystem.To_Lines[SoundSystemLoop].To_Connection = (struct TMixerConnections *) calloc(sizeof(struct TMixerConnections), SoundSystem.MixerDev[SoundSystemLoop].cDestinations);
 
-		for (DestinationLoop = 0; DestinationLoop < SoundSystem.To_Lines[SoundSystemLoop].AnzahlLines; DestinationLoop++)
+		for (DestinationLoop = 0; DestinationLoop < SoundSystem.To_Lines[SoundSystemLoop].LinesCount; DestinationLoop++)
 		{
-
-			for (ConnectionLoop = 0; ConnectionLoop < SoundSystem.To_Lines[SoundSystemLoop].To_Connection[DestinationLoop].AnzahlConnections; ConnectionLoop++)
+			for (ConnectionLoop = 0; ConnectionLoop < SoundSystem.To_Lines[SoundSystemLoop].To_Connection[DestinationLoop].ConnectionsCount; ConnectionLoop++)
 			{
-				for (ControlLoop = 0; ControlLoop < SoundSystem.To_Lines[SoundSystemLoop].To_Connection[DestinationLoop].To_Control[ConnectionLoop].AnzahlControls; ControlLoop++)
+				for (ControlLoop = 0; ControlLoop < SoundSystem.To_Lines[SoundSystemLoop].To_Connection[DestinationLoop].To_Control[ConnectionLoop].ControlsCount; ControlLoop++)
 				{
 					if (SoundSystem.To_Lines[SoundSystemLoop].To_Connection[DestinationLoop].To_Control[ConnectionLoop].MixerDetail[ControlLoop].paDetails != NULL)
 						free(SoundSystem.To_Lines[SoundSystemLoop].To_Connection[DestinationLoop].To_Control[ConnectionLoop].MixerDetail[ControlLoop].paDetails);
@@ -484,7 +479,7 @@ void Exit_Mixer(void)
 /******************************/
 MMRESULT Set_Control_Values(MIXERCONTROLDETAILS * Setting, int Device)
 {
-	if (SoundSystem.DeviceAnzahl == 0)
+	if (SoundSystem.DeviceCount == 0)
 		return (-1);
 
 	Open_HMixer(Device);
@@ -493,7 +488,7 @@ MMRESULT Set_Control_Values(MIXERCONTROLDETAILS * Setting, int Device)
 
 MMRESULT Get_Control_Values(MIXERCONTROLDETAILS * Setting, int Device)
 {
-	if (SoundSystem.DeviceAnzahl == 0)
+	if (SoundSystem.DeviceCount == 0)
 		return (-1);
 
 	Open_HMixer(Device);
@@ -552,7 +547,7 @@ void Get_Volume_Param(void)
 {
 	MixerVolumeMax = -1;
 	MixerVolumeStep = -1;
-	if (SoundSystem.DeviceAnzahl == 0)
+	if (SoundSystem.DeviceCount == 0)
 		return;
 	if (Volume.SoundSystem < 0)
 		return;
@@ -564,7 +559,7 @@ void Mixer_Get_Volume(int *Links, int *Rechts)
 {
 	MIXERCONTROLDETAILS_UNSIGNED UnsignedWert[4];
 
-	if (SoundSystem.DeviceAnzahl == 0)
+	if (SoundSystem.DeviceCount == 0)
 		return;
 	if (Volume.SoundSystem < 0)
 		return;
@@ -577,7 +572,7 @@ void Mixer_Set_Volume(int Links, int Rechts)
 {
 	MIXERCONTROLDETAILS_UNSIGNED UnsignedWert[4];
 
-	if (SoundSystem.DeviceAnzahl == 0)
+	if (SoundSystem.DeviceCount == 0)
 		return;
 	if (Volume.SoundSystem < 0)
 		return;
@@ -592,7 +587,7 @@ void Mixer_Set_Defaults(void)
 
 	MIXERCONTROLDETAILS_UNSIGNED UnsignedWert[4];
 
-	if (SoundSystem.DeviceAnzahl == 0)
+	if (SoundSystem.DeviceCount == 0)
 		return;
 	for (i = 0; i < 64; i++)
 	{
@@ -614,7 +609,7 @@ void Mixer_Mute(void)
 
 	if (Mute.SoundSystem < 0)
 		return;
-	if (SoundSystem.DeviceAnzahl == 0)
+	if (SoundSystem.DeviceCount == 0)
 		return;
 	BoolWert[0].fValue = 1;
 	BoolWert[1].fValue = 1;
@@ -629,7 +624,7 @@ void Mixer_UnMute(void)
 
 	if (Mute.SoundSystem < 0)
 		return;
-	if (SoundSystem.DeviceAnzahl == 0)
+	if (SoundSystem.DeviceCount == 0)
 		return;
 	BoolWert[0].fValue = 0;
 	BoolWert[1].fValue = 0;
@@ -662,7 +657,7 @@ BOOL APIENTRY MixerSetupProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 	{
 	case WM_INITDIALOG:
 	case WM_USER:
-		if ((SoundSystem.DeviceAnzahl == 0) || (USE_MIXER == FALSE))
+		if ((SoundSystem.DeviceCount == 0) || (USE_MIXER == FALSE))
 		{
 
 			SetDlgItemText(hDlg, TEXT1, "Kein Soundsystem gefunden oder nicht aktiviert");
@@ -774,7 +769,7 @@ BOOL APIENTRY MixerSetupProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 	case WM_MOUSEMOVE:
 		if (Volume.SoundSystem < 0)
 			break;
-		if (SoundSystem.DeviceAnzahl == 0)
+		if (SoundSystem.DeviceCount == 0)
 			break;
 		y = HIWORD(lParam);
 		x = LOWORD(lParam);
@@ -861,9 +856,9 @@ BOOL APIENTRY MixerSetupProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 		case IDC_CHECK2:
 			if (IsDlgButtonChecked(hDlg, IDC_CHECK2))
 			{
-				if (SoundSystem.DeviceAnzahl == 0)
+				if (SoundSystem.DeviceCount == 0)
 					Enumerate_Sound_SubSystem();
-				if (SoundSystem.DeviceAnzahl > 0)
+				if (SoundSystem.DeviceCount > 0)
 				{
 					if (MIXER_LINKER_KANAL == -1)
 						Mixer_Get_Volume(&MIXER_LINKER_KANAL, &MIXER_RECHTER_KANAL);
@@ -958,25 +953,25 @@ BOOL APIENTRY MixerSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 		SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_RESETCONTENT, 0, 0);
 		SendMessage(GetDlgItem(hDlg, IDC_COMBO4), CB_RESETCONTENT, 0, 0);
 
-		for (i = 0; i < SoundSystem.DeviceAnzahl; i++)
+		for (i = 0; i < SoundSystem.DeviceCount; i++)
 		{
 			SendMessage(GetDlgItem(hDlg, IDC_COMBO1), CB_ADDSTRING, 0, (LONG) (LPSTR) SoundSystem.MixerDev[i].szPname);
 		}
 		SendMessage(GetDlgItem(hDlg, IDC_COMBO1), CB_SETCURSEL, 0, 0);
 
-		for (i = 0; i < SoundSystem.To_Lines[0].AnzahlLines; i++)
+		for (i = 0; i < SoundSystem.To_Lines[0].LinesCount; i++)
 		{
 			SendMessage(GetDlgItem(hDlg, IDC_COMBO2), CB_ADDSTRING, 0, (LONG) (LPSTR) SoundSystem.To_Lines[0].MixerLine[i].szName);
 		}
 		SendMessage(GetDlgItem(hDlg, IDC_COMBO2), CB_SETCURSEL, 0, 0);
 
-		for (i = 0; i < SoundSystem.To_Lines[0].To_Connection[0].AnzahlConnections; i++)
+		for (i = 0; i < SoundSystem.To_Lines[0].To_Connection[0].ConnectionsCount; i++)
 		{
 			SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_ADDSTRING, 0, (LONG) (LPSTR) SoundSystem.To_Lines[0].To_Connection[0].MixerConnections[i].szName);
 		}
 		SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_SETCURSEL, 0, 0);
 
-		for (i = 0; i < SoundSystem.To_Lines[0].To_Connection[0].To_Control[0].AnzahlControls; i++)
+		for (i = 0; i < SoundSystem.To_Lines[0].To_Connection[0].To_Control[0].ControlsCount; i++)
 		{
 			SendMessage(GetDlgItem(hDlg, IDC_COMBO4), CB_ADDSTRING, 0, (LONG) (LPSTR) SoundSystem.To_Lines[0].To_Connection[0].To_Control[0].MixerControl[i].szName);
 		}
@@ -994,25 +989,25 @@ BOOL APIENTRY MixerSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 		if (wParam == 1)
 		{
 			C1 = SendMessage(GetDlgItem(hDlg, IDC_COMBO1), CB_GETCURSEL, 0, 0);
-			if ((C1 >= 0) && (C1 < SoundSystem.DeviceAnzahl))
+			if ((C1 >= 0) && (C1 < SoundSystem.DeviceCount))
 			{
 				SendMessage(GetDlgItem(hDlg, IDC_COMBO2), CB_RESETCONTENT, 0, 0);
 				SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_RESETCONTENT, 0, 0);
 				SendMessage(GetDlgItem(hDlg, IDC_COMBO4), CB_RESETCONTENT, 0, 0);
 
-				for (i = 0; i < SoundSystem.To_Lines[C1].AnzahlLines; i++)
+				for (i = 0; i < SoundSystem.To_Lines[C1].LinesCount; i++)
 				{
 					SendMessage(GetDlgItem(hDlg, IDC_COMBO2), CB_ADDSTRING, 0, (LONG) (LPSTR) SoundSystem.To_Lines[C1].MixerLine[i].szName);
 				}
 				SendMessage(GetDlgItem(hDlg, IDC_COMBO2), CB_SETCURSEL, 0, 0);
 
-				for (i = 0; i < SoundSystem.To_Lines[C1].To_Connection[0].AnzahlConnections; i++)
+				for (i = 0; i < SoundSystem.To_Lines[C1].To_Connection[0].ConnectionsCount; i++)
 				{
 					SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_ADDSTRING, 0, (LONG) (LPSTR) SoundSystem.To_Lines[C1].To_Connection[0].MixerConnections[i].szName);
 				}
 				SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_SETCURSEL, 0, 0);
 
-				for (i = 0; i < SoundSystem.To_Lines[C1].To_Connection[0].To_Control[0].AnzahlControls; i++)
+				for (i = 0; i < SoundSystem.To_Lines[C1].To_Connection[0].To_Control[0].ControlsCount; i++)
 				{
 					SendMessage(GetDlgItem(hDlg, IDC_COMBO4), CB_ADDSTRING, 0, (LONG) (LPSTR) SoundSystem.To_Lines[C1].To_Connection[0].To_Control[0].MixerControl[i].szName);
 				}
@@ -1024,18 +1019,18 @@ BOOL APIENTRY MixerSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 		{
 			C1 = SendMessage(GetDlgItem(hDlg, IDC_COMBO1), CB_GETCURSEL, 0, 0);
 			C2 = SendMessage(GetDlgItem(hDlg, IDC_COMBO2), CB_GETCURSEL, 0, 0);
-			if ((C2 >= 0) && (C2 < SoundSystem.To_Lines[C1].AnzahlLines))
+			if ((C2 >= 0) && (C2 < SoundSystem.To_Lines[C1].LinesCount))
 			{
 				SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_RESETCONTENT, 0, 0);
 				SendMessage(GetDlgItem(hDlg, IDC_COMBO4), CB_RESETCONTENT, 0, 0);
 
-				for (i = 0; i < SoundSystem.To_Lines[C1].To_Connection[C2].AnzahlConnections; i++)
+				for (i = 0; i < SoundSystem.To_Lines[C1].To_Connection[C2].ConnectionsCount; i++)
 				{
 					SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_ADDSTRING, 0, (LONG) (LPSTR) SoundSystem.To_Lines[C1].To_Connection[C2].MixerConnections[i].szName);
 				}
 				SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_SETCURSEL, 0, 0);
 
-				for (i = 0; i < SoundSystem.To_Lines[C1].To_Connection[C2].To_Control[0].AnzahlControls; i++)
+				for (i = 0; i < SoundSystem.To_Lines[C1].To_Connection[C2].To_Control[0].ControlsCount; i++)
 				{
 					SendMessage(GetDlgItem(hDlg, IDC_COMBO4), CB_ADDSTRING, 0, (LONG) (LPSTR) SoundSystem.To_Lines[C1].To_Connection[C2].To_Control[0].MixerControl[i].szName);
 				}
@@ -1048,11 +1043,11 @@ BOOL APIENTRY MixerSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 			C1 = SendMessage(GetDlgItem(hDlg, IDC_COMBO1), CB_GETCURSEL, 0, 0);
 			C2 = SendMessage(GetDlgItem(hDlg, IDC_COMBO2), CB_GETCURSEL, 0, 0);
 			C3 = SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_GETCURSEL, 0, 0);
-			if ((C3 >= 0) && (C3 < SoundSystem.To_Lines[C1].To_Connection[C2].AnzahlConnections))
+			if ((C3 >= 0) && (C3 < SoundSystem.To_Lines[C1].To_Connection[C2].ConnectionsCount))
 			{
 				SendMessage(GetDlgItem(hDlg, IDC_COMBO4), CB_RESETCONTENT, 0, 0);
 
-				for (i = 0; i < SoundSystem.To_Lines[C1].To_Connection[C2].To_Control[C3].AnzahlControls; i++)
+				for (i = 0; i < SoundSystem.To_Lines[C1].To_Connection[C2].To_Control[C3].ControlsCount; i++)
 				{
 					SendMessage(GetDlgItem(hDlg, IDC_COMBO4), CB_ADDSTRING, 0, (LONG) (LPSTR) SoundSystem.To_Lines[C1].To_Connection[C2].To_Control[C3].MixerControl[i].szName);
 				}
@@ -1066,7 +1061,7 @@ BOOL APIENTRY MixerSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 			C2 = SendMessage(GetDlgItem(hDlg, IDC_COMBO2), CB_GETCURSEL, 0, 0);
 			C3 = SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_GETCURSEL, 0, 0);
 			C4 = SendMessage(GetDlgItem(hDlg, IDC_COMBO4), CB_GETCURSEL, 0, 0);
-			if ((C4 >= 0) && (C4 < SoundSystem.To_Lines[C1].To_Connection[C2].To_Control[C3].AnzahlControls))
+			if ((C4 >= 0) && (C4 < SoundSystem.To_Lines[C1].To_Connection[C2].To_Control[C3].ControlsCount))
 			{
 				sprintf(Text, "%03d %03d %03d %03d", C1, C2, C3, C4);
 				GetDlgItemText(hDlg, TEXT20, (LPSTR) Text1, 128);
@@ -1414,7 +1409,7 @@ BOOL APIENTRY MixerSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 
 				if (i >= 64)
 				{
-					MessageBox(hDlg, "All Default-Slots full", "dTV", MB_ICONSTOP | MB_OK);
+					ErrorBoxDlg(hDlg, "All Default-Slots full");
 					return (TRUE);
 				}
 
@@ -1505,10 +1500,10 @@ BOOL APIENTRY MixerSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 				SendMessage(GetDlgItem(hDlg, IDC_LIST1), LB_GETTEXT, i, (LPARAM) Text);
 				if (strncmp(Text, "Volume-", 7) == 0)
 				{
-					if (((Volume.SoundSystem >= 0) && (Volume.SoundSystem < SoundSystem.DeviceAnzahl)) &&
-						((Volume.Destination >= 0) && (Volume.Destination < SoundSystem.To_Lines[Volume.SoundSystem].AnzahlLines)) &&
-						((Volume.Connection >= 0) && (Volume.Connection < SoundSystem.To_Lines[Volume.SoundSystem].To_Connection[Volume.Destination].AnzahlConnections)) &&
-						((Volume.Control >= 0) && (Volume.Control < SoundSystem.To_Lines[Volume.SoundSystem].To_Connection[Volume.Destination].To_Control[Volume.Connection].AnzahlControls)))
+					if (((Volume.SoundSystem >= 0) && (Volume.SoundSystem < SoundSystem.DeviceCount)) &&
+						((Volume.Destination >= 0) && (Volume.Destination < SoundSystem.To_Lines[Volume.SoundSystem].LinesCount)) &&
+						((Volume.Connection >= 0) && (Volume.Connection < SoundSystem.To_Lines[Volume.SoundSystem].To_Connection[Volume.Destination].ConnectionsCount)) &&
+						((Volume.Control >= 0) && (Volume.Control < SoundSystem.To_Lines[Volume.SoundSystem].To_Connection[Volume.Destination].To_Control[Volume.Connection].ControlsCount)))
 					{
 
 						SendMessage(GetDlgItem(hDlg, IDC_COMBO1), CB_SETCURSEL, Volume.SoundSystem, 0);
@@ -1519,15 +1514,15 @@ BOOL APIENTRY MixerSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 					}
 					else
 					{
-						MessageBox(hDlg, "Volume-Control incorrectly assigned", "dTV", MB_ICONSTOP | MB_OK);
+						ErrorBoxDlg(hDlg, "Volume-Control incorrectly assigned");
 					}
 				}
 				else if (strncmp(Text, "Mute-", 5) == 0)
 				{
-					if (((Mute.SoundSystem >= 0) && (Mute.SoundSystem < SoundSystem.DeviceAnzahl)) &&
-						((Mute.Destination >= 0) && (Mute.Destination < SoundSystem.To_Lines[Mute.SoundSystem].AnzahlLines)) &&
-						((Mute.Connection >= 0) && (Mute.Connection < SoundSystem.To_Lines[Mute.SoundSystem].To_Connection[Mute.Destination].AnzahlConnections)) &&
-						((Mute.Control >= 0) && (Mute.Control < SoundSystem.To_Lines[Mute.SoundSystem].To_Connection[Mute.Destination].To_Control[Mute.Connection].AnzahlControls)))
+					if (((Mute.SoundSystem >= 0) && (Mute.SoundSystem < SoundSystem.DeviceCount)) &&
+						((Mute.Destination >= 0) && (Mute.Destination < SoundSystem.To_Lines[Mute.SoundSystem].LinesCount)) &&
+						((Mute.Connection >= 0) && (Mute.Connection < SoundSystem.To_Lines[Mute.SoundSystem].To_Connection[Mute.Destination].ConnectionsCount)) &&
+						((Mute.Control >= 0) && (Mute.Control < SoundSystem.To_Lines[Mute.SoundSystem].To_Connection[Mute.Destination].To_Control[Mute.Connection].ControlsCount)))
 					{
 
 						SendMessage(GetDlgItem(hDlg, IDC_COMBO1), CB_SETCURSEL, Mute.SoundSystem, 0);
@@ -1537,7 +1532,7 @@ BOOL APIENTRY MixerSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 					}
 					else
 					{
-						MessageBox(hDlg, "Mute-Control incorrectly assigned", "dTV", MB_ICONSTOP | MB_OK);
+						ErrorBoxDlg(hDlg, "Mute-Control incorrectly assigned");
 					}
 				}
 				else if (strncmp(Text, "Startup-Sequenz", 15) == 0)
@@ -1545,15 +1540,15 @@ BOOL APIENTRY MixerSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 					ret = sscanf(Text, "%s %d", &Text1, &i);
 					if (ret == 2)
 					{
-						if (((MixerLoad[i].MixerAccess.SoundSystem >= 0) && (MixerLoad[i].MixerAccess.SoundSystem < SoundSystem.DeviceAnzahl)) &&
-							((MixerLoad[i].MixerAccess.Destination >= 0) && (MixerLoad[i].MixerAccess.Destination < SoundSystem.To_Lines[MixerLoad[i].MixerAccess.SoundSystem].AnzahlLines)) &&
+						if (((MixerLoad[i].MixerAccess.SoundSystem >= 0) && (MixerLoad[i].MixerAccess.SoundSystem < SoundSystem.DeviceCount)) &&
+							((MixerLoad[i].MixerAccess.Destination >= 0) && (MixerLoad[i].MixerAccess.Destination < SoundSystem.To_Lines[MixerLoad[i].MixerAccess.SoundSystem].LinesCount)) &&
 							((MixerLoad[i].MixerAccess.Connection >= 0)
 							 && (MixerLoad[i].MixerAccess.Connection <
-								 SoundSystem.To_Lines[MixerLoad[i].MixerAccess.SoundSystem].To_Connection[MixerLoad[i].MixerAccess.Destination].AnzahlConnections))
+								 SoundSystem.To_Lines[MixerLoad[i].MixerAccess.SoundSystem].To_Connection[MixerLoad[i].MixerAccess.Destination].ConnectionsCount))
 							&& ((MixerLoad[i].MixerAccess.Control >= 0)
 								&& (MixerLoad[i].MixerAccess.Control <
 									SoundSystem.To_Lines[MixerLoad[i].MixerAccess.SoundSystem].To_Connection[MixerLoad[i].MixerAccess.Destination].To_Control[MixerLoad[i].MixerAccess.Connection].
-									AnzahlControls)))
+									ControlsCount)))
 						{
 							SendMessage(GetDlgItem(hDlg, IDC_COMBO1), CB_SETCURSEL, MixerLoad[i].MixerAccess.SoundSystem, 0);
 							SendMessage(GetDlgItem(hDlg, IDC_COMBO2), CB_SETCURSEL, MixerLoad[i].MixerAccess.Destination, 0);
@@ -1570,7 +1565,7 @@ BOOL APIENTRY MixerSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 						}
 						else
 						{
-							MessageBox(hDlg, "Startup-Control incorrectly assigned", "dTV", MB_ICONSTOP | MB_OK);
+							ErrorBoxDlg(hDlg, "Startup-Control incorrectly assigned");
 						}
 					}
 				}

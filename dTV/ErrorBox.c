@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Other.h
+// ErrorBox.c
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2000 John Adcock.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -15,34 +15,31 @@
 //	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //	GNU General Public License for more details
 /////////////////////////////////////////////////////////////////////////////
-//
-// This software was based on Multidec 5.6 Those portions are
-// Copyright (C) 1999/2000 Espresso (echter_espresso@hotmail.com)
-//
-/////////////////////////////////////////////////////////////////////////////
 // Change Log
 //
 // Date          Developer             Changes
 //
-// 24 Jul 2000   John Adcock           Original Release
-//                                     Translated most code from German
-//                                     Combined Header files
-//                                     Cut out all decoding
-//                                     Cut out digital hardware stuff
+// 11 Aug 2000   John Adcock           Better support for error messages
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef __OTHER_H___
-#define __OTHER_H___
+#include "stdafx.h"
 
-#include "defines.h"
-#include "structs.h"
-#include "globals.h"
+extern HWND hWnd;
 
-void ExitDD(void);
-BOOL InitDD(HWND hWnd);
-BOOL OverlayUpdate(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL ColorKey);
-BOOL CreateOverlay();
-void Clean_Overlays();
+void _ErrorBox(HWND hwndParent, LPCSTR szFile, int Line, LPCSTR szMessage)
+{
+	char szDispMessage[1024];
 
-#endif
+	_snprintf(szDispMessage,1024, "%s\nThe error occured in %s at line %d", szMessage, szFile, Line);
+	if(hwndParent == NULL)
+	{
+		MessageBox(hWnd, szDispMessage, "dTV Error", MB_ICONSTOP | MB_OK); 
+	}
+	else
+	{
+		MessageBox(hwndParent, szDispMessage, "dTV Error", MB_ICONSTOP | MB_OK); 
+	}
+}
+
+

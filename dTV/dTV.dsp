@@ -44,7 +44,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /G6 /W3 /Gm /GX /Zi /Od /I "..\driver\include\\" /D "_DEBUG" /D "_WINDOWS" /D "WIN32" /D "_MBCS" /FR /YX /FD /c
-# ADD CPP /nologo /G6 /W3 /GX /Z7 /Od /I "..\driver\include\\" /D "_DEBUG" /D "_WINDOWS" /D "WIN32" /D "_MBCS" /FR /YX /FD /c
+# ADD CPP /nologo /G6 /W3 /GX /Z7 /Od /I "..\driver\include\\" /D "_DEBUG" /D "_WINDOWS" /D "WIN32" /D "_MBCS" /FR /YX"stdafx.h" /FD /c
 # ADD BASE MTL /D "_DEBUG" /mktyplib203 /win32
 # SUBTRACT BASE MTL /nologo
 # ADD MTL /D "_DEBUG" /mktyplib203 /win32
@@ -78,7 +78,7 @@ LINK32=link.exe
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /G6 /MT /W3 /Gi /Ot /I "..\driver\include\\" /D "NDEBUG" /D "_WINDOWS" /D "WIN32" /D "_MBCS" /YX /FD /c
 # SUBTRACT BASE CPP /Fr
-# ADD CPP /nologo /G6 /MT /W3 /Gi /Ot /I "..\driver\include\\" /D "NDEBUG" /D "_WINDOWS" /D "WIN32" /D "_MBCS" /Fr /YX /FD /c
+# ADD CPP /nologo /G6 /MT /W3 /Gi /Ot /I "..\driver\include\\" /D "NDEBUG" /D "_WINDOWS" /D "WIN32" /D "_MBCS" /Fr /YX"stdafx.h" /FD /c
 # ADD BASE MTL /D "NDEBUG" /mktyplib203 /win32
 # SUBTRACT BASE MTL /nologo
 # ADD MTL /D "NDEBUG" /mktyplib203 /win32
@@ -107,11 +107,23 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;for;f90"
 # Begin Source File
 
+SOURCE=.\Audio.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\Bt848.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\bTVPlugin.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\ccdecode.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\Deinterlace.c
 # End Source File
 # Begin Source File
 
@@ -127,7 +139,15 @@ SOURCE=.\dTV.RC
 # End Source File
 # Begin Source File
 
+SOURCE=.\ErrorBox.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\globals.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\i2c.c
 # End Source File
 # Begin Source File
 
@@ -155,6 +175,18 @@ SOURCE=.\STATUS.C
 # End Source File
 # Begin Source File
 
+SOURCE=.\Tuner.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\TVCards.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\vbi.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\vt.c
 # End Source File
 # End Group
@@ -163,11 +195,19 @@ SOURCE=.\vt.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl;fi;fd"
 # Begin Source File
 
+SOURCE=.\Audio.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\bt848.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\bTVPlugin.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ccdecode.h
 # End Source File
 # Begin Source File
 
@@ -183,7 +223,15 @@ SOURCE=.\dTV.H
 # End Source File
 # Begin Source File
 
+SOURCE=.\ErrorBox.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\globals.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\i2c.h
 # End Source File
 # Begin Source File
 
@@ -211,7 +259,27 @@ SOURCE=.\settings.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\status.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\stdafx.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\structs.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\Tuner.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\TVCards.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\vbi.h
 # End Source File
 # Begin Source File
 
@@ -235,15 +303,7 @@ SOURCE=.\RES\dTV.ico
 # End Source File
 # Begin Source File
 
-SOURCE=.\res\espresso.ico
-# End Source File
-# Begin Source File
-
 SOURCE=.\RES\sizex.cur
-# End Source File
-# Begin Source File
-
-SOURCE=.\sizex.cur
 # End Source File
 # Begin Source File
 
@@ -284,7 +344,39 @@ SOURCE=.\res\Vtx15x18.bmp
 # End Group
 # Begin Source File
 
+SOURCE=.\32Spec.htm
+# End Source File
+# Begin Source File
+
+SOURCE=.\Authors.htm
+# End Source File
+# Begin Source File
+
 SOURCE=.\Channel.lst
+# End Source File
+# Begin Source File
+
+SOURCE=.\COPYING.html
+# End Source File
+# Begin Source File
+
+SOURCE=.\dTV_Readme.htm
+# End Source File
+# Begin Source File
+
+SOURCE=.\News.htm
+# End Source File
+# Begin Source File
+
+SOURCE=.\Thanks.htm
+# End Source File
+# Begin Source File
+
+SOURCE=.\Thanks_MultiDec.txt
+# End Source File
+# Begin Source File
+
+SOURCE=.\Todo.htm
 # End Source File
 # End Target
 # End Project

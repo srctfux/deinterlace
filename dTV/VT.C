@@ -32,9 +32,11 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#include "resource.h"
+#include "stdafx.h"
 #include "vt.h"
-#include "other.h"
+#include "bt848.h"
+#include "ccdecode.h"
+#include "vbi.h"
 
 struct TVT VTFrame[800];
 
@@ -56,14 +58,6 @@ BOOL VT_HEADERS = TRUE;
 BOOL VT_STRIPPED = TRUE;
 BOOL VT_ALWAYS_EXPORT = FALSE;
 
-HANDLE OutThread;
-HANDLE VBI_Event=NULL;
-BOOL bStopVBI;
-
-int VBI_lpf = 16;   // lines per field
-int VBI_bpl = 2048;   // bytes per line
-BYTE VBI_thresh;
-BYTE VBI_off;
 BYTE VBI_vcbuf[25];
 BYTE VBI_vc2buf[25];
 
@@ -131,231 +125,7 @@ int VT_Cache=0;
 
 BYTE VT_Header_Line[40];
 
-
-
-void Start_VBI()
-{
-	//DWORD LinkThreadID;
-
-	if (VBI_Event == NULL)
-	{
-		VBI_Event = CreateEvent(NULL, FALSE, FALSE, NULL);
-	}
-
-	ResetEvent(VBI_Event);
-
-	bStopVBI = FALSE;
-	ResetEvent(VBI_Event);
-	//CloseHandle(CreateThread((LPSECURITY_ATTRIBUTES) NULL, (DWORD) 0, DoVBI, NULL, (DWORD) 0, (LPDWORD) & LinkThreadID));
-}
-
-void Stop_VBI()
-{
-	bStopVBI = TRUE;
-	SetEvent(VBI_Event);
-	Sleep(20);
-	bStopVBI = TRUE;
-	SetEvent(VBI_Event);
-	CloseHandle(VBI_Event);
-	VBI_Event = NULL;
-}
-
-DWORD WINAPI DoVBI(LPVOID lpThreadParameter)
-{
-	BYTE *pVBI;
-	DWORD VBI_Tic_Count = 0;
-	int vbi_frames;
-	int line;
-	int norm = 0;
-	double vtfreq;
-	double f = 0.0;
-	double vpsfreq = 5.0;		// does NTSC have VPS???
-	double vcfreq = 0.77;
-	double freq;
-	double vdatfreq = 2.0;
-
-	ProzessorMask = 1 << (VBIProzessor);
-	SetThreadAffinityMask(GetCurrentThread(), ProzessorMask);
-
-	vtfreq = norm ? 5.72725 : 6.9375;
-
-	/* if no frequency given, use standard ones for Bt848 and PAL/NTSC */
-	if (f == 0.0)
-		freq = norm ? 28.636363 : 35.468950;
-	else
-		freq = f;
-
-	vtstep = (int) ((freq / vtfreq) * FPFAC + 0.5);
-	/* VPS is shift encoded, so just sample first "state" */
-	vpsstep = 2 * (int) ((freq / vpsfreq) * FPFAC + 0.5);
-	vdatstep = (int) ((freq / vdatfreq) * FPFAC + 0.5);
-
-	vbi_frames = 0;
-	VBI_Tic_Count = GetTickCount();
-
-	while(!bStopVBI)
-	{
-		vbi_frames++;
-		if (WaitForSingleObject(VBI_Event, INFINITE) != WAIT_OBJECT_0)
-			continue;
-		ResetEvent(VBI_Event);
-		if (!VideoPresent)
-			continue;
-
-		pVBI = (LPBYTE) Vbi_dma[CurrentFrame]->dwUser;
-
-		for (line = 0; line < VBI_lpf * 2; line++)
-		{
-			VBI_decode_line(pVBI + line * 2048, line);
-		}
-
-		if (VBI_Tic_Count + 960 <= GetTickCount())
-		{
-			VBI_FPS = vbi_frames + 1;
-			if (VBI_FPS > 25)
-				VBI_FPS = 25;
-			vbi_frames = 0;
-			VBI_Tic_Count = GetTickCount();
-		}
-
-	}
-	ExitThread(0);
-	return 0;
-}
-
-void VBI_decode_line(unsigned char *VBI_Buffer, int line)
-{
-	unsigned char data[45];
-	int i, p;
-	BOOL VDat_Load;
-
-	if (line >= VBI_lpf)
-		line -= VBI_lpf;
-
-	VBI_AGC(VBI_Buffer, 120, 450, 1);
-
-	/* all kinds of data with videotext data format: videotext, intercast, ... */
-	if (((VBI_Flags & VBI_VT) || (VBI_Flags & VBI_IC)) && (line < 16))
-	{
-		// search for first 1 bit (VT always starts with 55 55 27 !!!)
-		p = 50;
-		while ((VBI_Buffer[p] < VBI_thresh) && (p < 350))
-			p++;
-		VBI_spos = (p << FPSHIFT) + vtstep / 2;
-
-		/* ignore first bit for now */
-		data[0] = VBI_Scan(VBI_Buffer, vtstep);
-		//cout << HEX(2) << (int)data[0] << endl;
-		if ((data[0] & 0xfe) == 0x54)
-		{
-			data[1] = VBI_Scan(VBI_Buffer, vtstep);
-			switch (data[1])
-			{
-			case 0xd5:			/* oops, missed first 1-bit: backup 2 bits */
-				VBI_spos -= 2 * vtstep;
-				data[1] = 0x55;
-			case 0x55:
-				data[2] = VBI_Scan(VBI_Buffer, vtstep);
-				switch (data[2])
-				{
-				case 0xd8:		/* this shows up on some channels?!?!? */
-					for (i = 3; i < 45; i++)
-					{
-						data[i] = VBI_Scan(VBI_Buffer, vtstep);
-					}
-					return;
-				case 0x27:
-					for (i = 3; i < 45; i++)
-					{
-						data[i] = VBI_Scan(VBI_Buffer, vtstep);
-					}
-					VBI_decode_vt(data);
-					return;
-				default:
-					break;
-				}
-			default:
-				break;
-			}
-		}
-	}
-
-	/* VPS information with channel name, time, VCR programming info, etc. */
-	if ((VBI_Flags & VBI_VPS) && (line == 9))
-	{
-		p = 150;
-		while ((VBI_Buffer[p] < VBI_thresh) && (p < 260))
-			p++;
-		p += 2;
-		VBI_spos = p << FPSHIFT;
-		if ((data[0] = VBI_Scan(VBI_Buffer, vpsstep)) != 0xff)
-			return;
-		if ((data[1] = VBI_Scan(VBI_Buffer, vpsstep)) != 0x5d)
-			return;
-		for (i = 2; i < 16; i++)
-		{
-			data[i] = VBI_Scan(VBI_Buffer, vpsstep);
-		}
-		VBI_decode_vps(data);
-	}
-
-	/* Video_Dat_Stuff  */
-	if ((VBI_Flags & VBI_VD) && ((line == 17) || (line == 18)))
-	{
-		p = 100;
-		VBI_off = 0;
-		while ((VBI_Buffer[p] < 100) && (p < 260))
-			p++;
-		if (p < 200)
-		{
-			VBI_spos = p << FPSHIFT;
-			VBI_spos += vdatstep / 2;
-			VDat_Load = TRUE;
-			for (i = 0; i < 10; i++)
-			{
-				if (VBI_VDatScan(VBI_Buffer, vdatstep, i) != 0)
-				{
-					strcpy(VDat.Error, "Kein StartBit gefunden");
-					VDat_Load = FALSE;
-					if (VDat.Index > 0)
-						VideoDat_Flush();
-					break;
-				}
-			}					// 10 Bytes geladen
-
-			if (VDat_Load == TRUE)
-			{
-				if (VD_RAW == TRUE)
-				{
-					VDat.BlocksOK++;
-					strcpy(VDat.Error, "                    ");
-					for (i = 0; i < 10; i++)
-						VDat.XDATA[VDat.Index++] = vdat[i];
-					if (VDat.Index > 1000)
-						VideoDat_Flush();
-				}
-				else
-					Work_VideoDat(vdat);
-			}
-			else
-			{
-				if (VDat.Index > 0)
-					VideoDat_Flush();
-				VDat.BlocksError++;
-			}
-
-		}
-		else
-		{
-			strcpy(VDat.Error, "Kein Videodat-Signal gefunden");
-			if (VDat.Index > 0)
-				VideoDat_Flush();
-			VDat.BlocksError = 0;
-			VDat.BlocksOK = 0;
-
-		}
-	}
-}
+#define GetBit(val,bit,mask) (BYTE)(((val)>>(bit))&(mask))
 
 void VBI_decode_vps(unsigned char *data)
 {
@@ -1089,21 +859,6 @@ void VBI_IC_Setblock(int nr, unsigned char *block)
 		VBI_IC_Procblocks();
 }
 
-void VBI_AGC(BYTE * Buffer, int start, int stop, int step)
-{
-	int i, min = 255, max = 0;
-
-	for (i = start; i < stop; i += step)
-	{
-		if (Buffer[i] < min)
-			min = Buffer[i];
-		else if (Buffer[i] > max)
-			max = Buffer[i];
-	}
-	VBI_thresh = (max + min) / 2;
-	VBI_off = 128 - VBI_thresh;
-}
-
 void VBI_decode_vt(unsigned char *dat)
 {
 	int i, FL, NR;
@@ -1146,18 +901,8 @@ void VBI_decode_vt(unsigned char *dat)
 			/* dat: 55 55 27 %MPAG% %PAGE% %SUB% 
 			   00 01 02  03 04  05 06 07-0a 
 			 */
-/*ALT
 			
-	page=unham(dat+5);
-    if ( page == 0x9f ) break;
-    sub=(unham(dat+9)<<8)|unham(dat+7);
-    if ( mag == 0 ) mag=8;
-    nPage=(page/16);
-	nPage1=page-(nPage*16);
-	pnum=100*mag+nPage*10+nPage1;
-
-*/
-// NEU
+	
 			page = unham(dat + 5);
 
 			if (page == 0x9f)
@@ -1168,16 +913,15 @@ void VBI_decode_vt(unsigned char *dat)
 			nPage = (page / 16);
 
 			if (nPage > 10)
-				break;			//DF um ungültige Seiten zu verhindern (z.B. f1 bei 251)
+				break;
 
 			nPage1 = page - (nPage * 16);
 
 			if (nPage1 > 10)
-				break;			//DF um ungültige Seiten zu verhindern
+				break;
 			pnum = 100 * mag + nPage * 10 + nPage1;
 
 			sub = (unham(dat + 9) << 8) | unham(dat + 7);
-// ENDE NEU
 
 			VBI_CURRENT_MAG = mag;
 
@@ -1954,7 +1698,7 @@ BOOL APIENTRY VideoTextProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 		Slot = New_Dialog_Slot(hDlg);
 		if (Slot < 0)
 		{
-			MessageBox(hWnd, "All Videotext Dialogs occupied", "dTV", MB_ICONSTOP | MB_OK);
+			ErrorBox("All Videotext Dialogs occupied");
 			EndDialog(hDlg, 0);
 			return (TRUE);
 
@@ -2011,7 +1755,7 @@ BOOL APIENTRY VideoTextProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 		Slot = Get_Dialog_Slot(hDlg);
 		if (Slot < 0)
 		{
-			MessageBox(hDlg, "Error :Unknown Videotext Dialog", "dTV", MB_ICONSTOP | MB_OK);
+			ErrorBoxDlg(hDlg, "Error :Unknown Videotext Dialog");
 			EndDialog(hDlg, 0);
 			return (TRUE);
 		}
@@ -2639,7 +2383,7 @@ int html_output(HWND hwnd, char *name, int latin1, BOOL HtmlNewLine, BOOL HtmlHe
 	fp = fopen(name, "w");
 	if (fp == NULL)
 	{
-		MessageBox(hwnd, "Error :HTML Export File cannot be opened", "dTV", MB_ICONSTOP | MB_OK);
+		ErrorBox("Error :HTML Export File cannot be opened");
 		return -1;
 	}
 
@@ -2850,3 +2594,130 @@ int html_output(HWND hwnd, char *name, int latin1, BOOL HtmlNewLine, BOOL HtmlHe
 }
 
 //////////////////////////////////////////////////////////////////////
+
+void VT_DecodeLine(BYTE* VBI_Buffer)
+{
+	unsigned char data[45];
+	int i, p;
+
+	// search for first 1 bit (VT always starts with 55 55 27 !!!)
+	p = 50;
+	while ((VBI_Buffer[p] < VBI_thresh) && (p < 350))
+		p++;
+	VBI_spos = (p << FPSHIFT) + vtstep / 2;
+
+	/* ignore first bit for now */
+	data[0] = VBI_Scan(VBI_Buffer, vtstep);
+	//cout << HEX(2) << (int)data[0] << endl;
+	if ((data[0] & 0xfe) == 0x54)
+	{
+		data[1] = VBI_Scan(VBI_Buffer, vtstep);
+		switch (data[1])
+		{
+		case 0xd5:			/* oops, missed first 1-bit: backup 2 bits */
+			VBI_spos -= 2 * vtstep;
+			data[1] = 0x55;
+		case 0x55:
+			data[2] = VBI_Scan(VBI_Buffer, vtstep);
+			switch (data[2])
+			{
+			case 0xd8:		/* this shows up on some channels?!?!? */
+				for (i = 3; i < 45; i++)
+				{
+					data[i] = VBI_Scan(VBI_Buffer, vtstep);
+				}
+				return;
+			case 0x27:
+				for (i = 3; i < 45; i++)
+				{
+					data[i] = VBI_Scan(VBI_Buffer, vtstep);
+				}
+				VBI_decode_vt(data);
+				return;
+			default:
+				break;
+			}
+		default:
+			break;
+		}
+	}
+}
+
+void VTS_DecodeLine(BYTE* VBI_Buffer)
+{
+	unsigned char data[45];
+	int i, p;
+
+	p = 150;
+	while ((VBI_Buffer[p] < VBI_thresh) && (p < 260))
+		p++;
+	p += 2;
+	VBI_spos = p << FPSHIFT;
+	if ((data[0] = VBI_Scan(VBI_Buffer, vpsstep)) != 0xff)
+		return;
+	if ((data[1] = VBI_Scan(VBI_Buffer, vpsstep)) != 0x5d)
+		return;
+	for (i = 2; i < 16; i++)
+	{
+		data[i] = VBI_Scan(VBI_Buffer, vpsstep);
+	}
+	VBI_decode_vps(data);
+}
+
+void VDAT_DecodeLine(BYTE* VBI_Buffer)
+{
+	int i, p;
+	BOOL VDat_Load;
+
+	p = 100;
+	VBI_off = 0;
+	while ((VBI_Buffer[p] < 100) && (p < 260))
+		p++;
+	if (p < 200)
+	{
+		VBI_spos = p << FPSHIFT;
+		VBI_spos += vdatstep / 2;
+		VDat_Load = TRUE;
+		for (i = 0; i < 10; i++)
+		{
+			if (VBI_VDatScan(VBI_Buffer, vdatstep, i) != 0)
+			{
+				strcpy(VDat.Error, "No StartBit Found");
+				VDat_Load = FALSE;
+				if (VDat.Index > 0)
+					VideoDat_Flush();
+				break;
+			}
+		}					// 10 Bytes geladen
+
+		if (VDat_Load == TRUE)
+		{
+			if (VD_RAW == TRUE)
+			{
+				VDat.BlocksOK++;
+				strcpy(VDat.Error, "                    ");
+				for (i = 0; i < 10; i++)
+					VDat.XDATA[VDat.Index++] = vdat[i];
+				if (VDat.Index > 1000)
+					VideoDat_Flush();
+			}
+			else
+				Work_VideoDat(vdat);
+		}
+		else
+		{
+			if (VDat.Index > 0)
+				VideoDat_Flush();
+			VDat.BlocksError++;
+		}
+
+	}
+	else
+	{
+		strcpy(VDat.Error, "No Videodat-Signal Found");
+		if (VDat.Index > 0)
+			VideoDat_Flush();
+		VDat.BlocksError = 0;
+		VDat.BlocksOK = 0;
+	}
+}

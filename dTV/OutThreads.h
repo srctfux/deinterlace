@@ -39,7 +39,14 @@
 #include "structs.h"
 #include "globals.h"
 
-void Set_Capture(int nState);
+typedef enum
+{
+	CAPTURE_STOP_ALL,
+	CAPTURE_START
+} CAPTURETYPE;
+
+void Start_Capture();
+void Stop_Capture();
 
 void Start_Thread();
 void Stop_Thread();
@@ -49,15 +56,14 @@ void SetupCaptureFlags();
 DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter);
 DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter);
 
-void memcpyMMX(void *Dest, void *Src, size_t nBytes);
-long GetCombFactor(short** pLines1, short** pLines2);
-
 void UpdatePALPulldownMode(struct TPulldowmMode* PulldownMode, long* CombFactors);
 void UpdateNTSCPulldownMode(struct TPulldowmMode* PulldownMode, long* CombFactors);
 
-BOOL DoWeWantToFlip();
+BOOL DoWeWantToFlip(BOOL bFlipNow, BOOL bIsOddField);
 void UpdatePulldownStatus();
 void Deinterlace(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay);
 void Weave(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay);
+BOOL WaitForNextField(BOOL LastField);
+
 
 #endif

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Other.h
+// ErrorBox.h
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2000 John Adcock.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -15,34 +15,20 @@
 //	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //	GNU General Public License for more details
 /////////////////////////////////////////////////////////////////////////////
-//
-// This software was based on Multidec 5.6 Those portions are
-// Copyright (C) 1999/2000 Espresso (echter_espresso@hotmail.com)
-//
-/////////////////////////////////////////////////////////////////////////////
 // Change Log
 //
 // Date          Developer             Changes
 //
-// 24 Jul 2000   John Adcock           Original Release
-//                                     Translated most code from German
-//                                     Combined Header files
-//                                     Cut out all decoding
-//                                     Cut out digital hardware stuff
+// 11 Aug 2000   John Adcock           Better support for error messages
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef __OTHER_H___
-#define __OTHER_H___
+#ifndef __ERRORBOX_H___
+#define __ERRORBOX_H___
 
-#include "defines.h"
-#include "structs.h"
-#include "globals.h"
+void _ErrorBox(HWND hwndParent, LPCSTR szFile, int Line, LPCSTR szMessage);
 
-void ExitDD(void);
-BOOL InitDD(HWND hWnd);
-BOOL OverlayUpdate(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL ColorKey);
-BOOL CreateOverlay();
-void Clean_Overlays();
+#define ErrorBox(Message) _ErrorBox(NULL, __FILE__, __LINE__, Message);
+#define ErrorBoxDlg(hwnd,Message) _ErrorBox(hwnd, __FILE__, __LINE__, Message);
 
 #endif

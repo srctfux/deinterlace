@@ -23,6 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
+#include "stdafx.h"
 #include "bTVPlugin.h"
 
 typedef void (__cdecl * pfn_plugin_Initialize)();
@@ -38,13 +39,16 @@ typedef struct
 	pfn_plugin_Config plugin_Config;
 	pfn_plugin_GetProps plugin_GetProps;
 	pfn_plugin_DoField plugin_DoField;
-} BTV_PLUGIN;
+} BTVPLUGINFUNCTIONS;
 
-BTV_PLUGIN BTVPlugin;
-HMODULE hLibrary = NULL;;
+BTVPLUGINFUNCTIONS BTVPlugin;
+HMODULE hLibrary = NULL;
+BOOL bWantsToFlip;
 
 BOOL BTVPluginLoad(const char * szPluginName)
 {
+	BTV_V1_PROPS Props;
+
 	UINT nErrorMode;
 
 	if(hLibrary != NULL)
@@ -98,6 +102,19 @@ BOOL BTVPluginLoad(const char * szPluginName)
 	}
 
 	BTVPlugin.plugin_Initialize();
+	
+	//Props.szLongName = LongName;
+	//Props.szShortName = ShortName;
+	//Props.Flags = 0;
+	BTVPlugin.plugin_GetProps(&Props, 0);
+	if(Props.Flags | 0x00000002)
+	{
+		bWantsToFlip = TRUE;		
+	}
+	else
+	{
+		bWantsToFlip = FALSE;		
+	}
 
 	return TRUE;
 }
@@ -113,7 +130,12 @@ void BTVPluginUnload()
 
 void BTVPluginConfig(HWND hWnd)
 {
-	BTVPlugin.plugin_Config(hWnd, 0);
+	BTV_V1_PROPS Props;
+	BTVPlugin.plugin_GetProps(&Props, 0);
+	if(Props.Flags | 0x00000001)
+	{
+		BTVPlugin.plugin_Config(hWnd, 0);
+	}
 }
 
 int BTVPluginGetProps(BTV_V1_PROPS *pProps)
@@ -123,5 +145,13 @@ int BTVPluginGetProps(BTV_V1_PROPS *pProps)
 
 long BTVPluginDoField(BTV_V1_PARAMS *pParams)
 {
-	return BTVPlugin.plugin_DoField(pParams);
+	if(bWantsToFlip)
+	{
+		return BTVPlugin.plugin_DoField(pParams);
+	}
+	else
+	{
+		BTVPlugin.plugin_DoField(pParams);
+		return TRUE;
+	}
 }

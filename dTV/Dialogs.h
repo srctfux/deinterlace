@@ -56,6 +56,10 @@ BOOL APIENTRY AudioSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 BOOL APIENTRY AudioSettingProc1(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 BOOL APIENTRY AboutProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 VOID APIENTRY DrawEntireItem(HWND hDlg, LPDRAWITEMSTRUCT lpdis, INT Typ);
+BOOL APIENTRY CardSettingProc(HWND hDlg,UINT message,UINT wParam,LONG lParam);
+BOOL APIENTRY PLLSettingProc(HWND hDlg,UINT message,UINT wParam,LONG lParam);
+BOOL APIENTRY ChipSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
+BOOL APIENTRY SelectCardProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 
 #endif
 

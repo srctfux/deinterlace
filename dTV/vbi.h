@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// vt.h
+// vbi.h
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2000 John Adcock.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -32,56 +32,29 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef __VT_H___
-#define __VT_H___
+#ifndef __VBI_H___
+#define __VBI_H___
 
 #include "defines.h"
 #include "structs.h"
 #include "globals.h"
 
-void VideoDat_Exit( void );
-void VideoDat_Init( void );
-BYTE DeHam(BYTE byte);
-BYTE ReverseDeHam(BYTE b);
-void StorePage(BYTE mag, BYTE page);
-void StorePacket30();
+void VBI_Start();
+void VBI_Stop();
+DWORD WINAPI VBI_DecodeThread(LPVOID lpThreadParameter);
 
-int VBI_VDatScan(BYTE * VBI_Buffer, unsigned int step, int BytePos);
-void Work_VideoDat(unsigned char *Buffer);
-void VBI_VDat_Blockaustausch(void);
-int VBI_VDAT_DecodeBlockz(void);
-void VBI_VDat_Filename(struct TVDatBlockz Block, char *fNames);
-void VBI_VDAT_SOTInfo(struct TVDatBlockz Block, struct SOTREC *Info);
-BOOL VBI_VDat_WriteData(struct TVDatBlockz Block);
-unsigned int VBI_VDat_FileSize(struct TVDatBlockz Block);
-void VideoDat_Flush(void);
 
-void VBI_decode_vps(unsigned char *data);
-unsigned char unham(unsigned char *d);
-unsigned char unham2(unsigned char *d);
-unsigned char VBI_Scan(BYTE * Buffer, unsigned int step);
-
-void VBI_decode_vt(unsigned char *dat);
-void VBI_decode_line(unsigned char *d, int line);
-
-int New_Dialog_Slot(HWND hwnd);
-int Get_Dialog_Slot(HWND hwnd);
-int Del_Dialog_Slot(HWND hwnd);
-void VT_ChannelChange();
-void format_page(int Page, int SubPage, BOOL reveal, struct fmt_page *pg);
-int html_output(HWND hwnd, char *name, int latin1, BOOL HtmlNewLine, BOOL HtmlHeaders, BOOL StrippedHtml, struct fmt_page *pg);
-void Export_VT_Page(HWND hwnd, int Page, int SubPage);
-
-void InterCast_Init();
-void InterCast_Exit();
+void VBI_DecodeLine(unsigned char *VBI_Buffer, int line);
+void VBI_AGC(BYTE * Buffer, int start, int stop, int step);
 
 // used to signal to the VBI decoder that there is something to display
 extern HANDLE VBI_Event;
 
-void VT_DecodeLine(BYTE* VBI_Buffer);
-void VTS_DecodeLine(BYTE* VBI_Buffer);
-void VDAT_DecodeLine(BYTE* VBI_Buffer);
-
-
+extern int VBI_lpf;
+extern int VBI_Flags;
+extern int VBI_FPS;
+extern BYTE VBI_thresh;
+extern BYTE VBI_off;
+extern int VBIProcessor;
 
 #endif

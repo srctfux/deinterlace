@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Other.h
+// Tuner.h
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2000 John Adcock.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,25 +24,46 @@
 //
 // Date          Developer             Changes
 //
-// 24 Jul 2000   John Adcock           Original Release
-//                                     Translated most code from German
-//                                     Combined Header files
-//                                     Cut out all decoding
-//                                     Cut out digital hardware stuff
+// 11 Aug 2000   John Adcock           Moved Tuner Functions in here
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef __OTHER_H___
-#define __OTHER_H___
+#ifndef __TUNER_H___
+#define __TUNER_H___
 
-#include "defines.h"
-#include "structs.h"
-#include "globals.h"
+BOOL Tuner_Init(int TunerNr);
+BOOL Tuner_SetFrequency(int TunerTyp, int wFrequency);
+void Load_Country_Settings();
+void Load_Country_Specific_Settings(int LPos);
 
-void ExitDD(void);
-BOOL InitDD(HWND hWnd);
-BOOL OverlayUpdate(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL ColorKey);
-BOOL CreateOverlay();
-void Clean_Overlays();
+struct TTunerType
+{
+	WORD thresh1; /* frequency Range for UHF,VHF-L, VHF_H */   
+	WORD thresh2;  
+	BYTE VHF_L;
+	BYTE VHF_H;
+	BYTE UHF;
+	BYTE config; 
+	BYTE I2C;
+	WORD IFPCoff;
+};
+
+typedef struct TCountries
+{
+    char Name[128];
+};
+
+typedef struct TChannels
+{
+	char Name[128];
+	int MinChannel;
+	int MaxChannel;
+	unsigned long freq[512];
+};
+
+extern char TunerStatus[30];
+extern struct TCountries Countries[35];
+extern struct TChannels Channels;
+struct TCountries Countries[35];
 
 #endif

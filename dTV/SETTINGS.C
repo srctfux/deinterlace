@@ -23,7 +23,12 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
+#include "stdafx.h"
 #include "settings.h"
+#include "tuner.h"
+#include "audio.h"
+#include "bt848.h"
+#include "vbi.h"
 
 void LoadSettingsFromIni(LPSTR Name)
 {
@@ -54,9 +59,9 @@ void LoadSettingsFromIni(LPSTR Name)
 
 	PriorClassId = GetPrivateProfileInt("Threads", "ProcessPriority", 0, szIniFile);
 	ThreadClassId = GetPrivateProfileInt("Threads", "ThreadPriority", 1, szIniFile);
-	MainProzessor = GetPrivateProfileInt("Threads", "WindowProcessor", 0, szIniFile);
-	VBIProzessor = GetPrivateProfileInt("Threads", "VBIProcessor", 0, szIniFile);
-	AusgabeProzessor = GetPrivateProfileInt("Threads", "DecodeProcessor", 0, szIniFile);
+	MainProcessor = GetPrivateProfileInt("Threads", "WindowProcessor", 0, szIniFile);
+	VBIProcessor = GetPrivateProfileInt("Threads", "VBIProcessor", 0, szIniFile);
+	DecodeProcessor = GetPrivateProfileInt("Threads", "DecodeProcessor", 0, szIniFile);
 
 	bDisplayStatusBar = (GetPrivateProfileInt("Show", "StatusBar", 0, szIniFile) != 0);
 	Show_Menu = (GetPrivateProfileInt("Show", "Menu", 1, szIniFile) != 0);
@@ -78,6 +83,14 @@ void LoadSettingsFromIni(LPSTR Name)
 	{
 		VBI_Flags += VBI_VPS;
 	}
+	if(GetPrivateProfileInt("VBI", "VD", 0, szIniFile) != 0)
+	{
+		VBI_Flags += VBI_VD;
+	}
+	if(GetPrivateProfileInt("VBI", "CC", 0, szIniFile) != 0)
+	{
+		VBI_Flags += VBI_CC;
+	}
 
 	i = GetCurrentDirectory(sizeof(IC_BASE_DIR), IC_BASE_DIR);
 	strcat(IC_BASE_DIR, "\\I_Cast");
@@ -92,25 +105,15 @@ void LoadSettingsFromIni(LPSTR Name)
 
 	InitialLow  = GetPrivateProfileInt("Show", "BlackThreshold", 45, szIniFile);
 	
-	CardType = GetPrivateProfileInt("Hardware", "CardType", 0, szIniFile);
+	CardType = GetPrivateProfileInt("Hardware", "CardType", TVCARD_UNKNOWN, szIniFile);
 	VideoSource = GetPrivateProfileInt("Hardware", "VideoSource", 1, szIniFile);
-	AudioSource = GetPrivateProfileInt("Hardware", "AudioSource", 4, szIniFile);
-	TunerType = GetPrivateProfileInt("Hardware", "TunerType", 0, szIniFile); 
+	TunerType = GetPrivateProfileInt("Hardware", "TunerType", TUNER_ABSENT, szIniFile); 
 	TVTYPE = GetPrivateProfileInt("Hardware", "TVType", 0, szIniFile); 
 	InitialHue = GetPrivateProfileInt("Hardware", "InitialHue", 0, szIniFile); 
 	InitialContrast = GetPrivateProfileInt("Hardware", "InitialContrast", 0xd8, szIniFile); 
 	InitialBrightness = GetPrivateProfileInt("Hardware", "InitialBrightness", 0, szIniFile); 
 	InitialSaturationU = GetPrivateProfileInt("Hardware", "InitialSaturationU", 0xfe, szIniFile); 
 	InitialSaturationV = GetPrivateProfileInt("Hardware", "InitialSaturationV", 0xb4, szIniFile); 
-	InitialIFORM = GetPrivateProfileInt("Hardware", "InitialIFORM", 0, szIniFile); 
-	Tuners[8].thresh1 = GetPrivateProfileInt("Hardware", "TunerThreshold1", 0, szIniFile); 
-	Tuners[8].thresh2 = GetPrivateProfileInt("Hardware", "TunerThreshold2", 0, szIniFile); 
-	Tuners[8].VHF_L = GetPrivateProfileInt("Hardware", "TunerVHF_L", 0, szIniFile); 
-	Tuners[8].VHF_H = GetPrivateProfileInt("Hardware", "TunerVHF_H", 0, szIniFile); 
-	Tuners[8].UHF = GetPrivateProfileInt("Hardware", "TunerUHF", 0, szIniFile); 
-	Tuners[8].config = GetPrivateProfileInt("Hardware", "TunerConfig", 0, szIniFile); 
-	Tuners[8].I2C = GetPrivateProfileInt("Hardware", "TunerI2C", 0, szIniFile); 
-	Tuners[8].IFPCoff = GetPrivateProfileInt("Hardware", "TunerIFPCoff", 0, szIniFile); 
 
 	ManuellAudio[0] = GetPrivateProfileInt("Hardware", "GPIO_OUT_EN", 0, szIniFile); 
 	ManuellAudio[1] = GetPrivateProfileInt("Hardware", "GPIO_DATA_TUNER", 0, szIniFile);  
@@ -121,11 +124,6 @@ void LoadSettingsFromIni(LPSTR Name)
 	ManuellAudio[6] = GetPrivateProfileInt("Hardware", "GPIO_DATA_IN", 0, szIniFile);  
 	ManuellAudio[7] = GetPrivateProfileInt("Hardware", "GPIO_REG_INP", 0, szIniFile);  
 
-	INIT_PLL = GetPrivateProfileInt("Hardware", "Init_PLL", 0, szIniFile);  
-	
-	USETUNER = (GetPrivateProfileInt("Show", "UseTuner", 1, szIniFile) != 0);  
-	USECARD = (GetPrivateProfileInt("Show", "UseCard", 1, szIniFile) != 0);  
-	Capture_Video = (GetPrivateProfileInt("Show", "CaptureVideo", 1, szIniFile) != 0);  
 	Capture_VBI = (GetPrivateProfileInt("Show", "CaptureVBI", 1, szIniFile) != 0);  
 	InitialProg = GetPrivateProfileInt("Show", "LastProgram", 0, szIniFile);
 
@@ -155,7 +153,6 @@ void LoadSettingsFromIni(LPSTR Name)
 	
 	bSaveSettings = (GetPrivateProfileInt("Show", "SaveSettings", 1, szIniFile) != 0);
 	CountryCode = GetPrivateProfileInt("Show", "CountryCode", 1, szIniFile);
-	ColourFormat = GetPrivateProfileInt("Show", "ColorFormat", 4, szIniFile);
 
 	i = GetCurrentDirectory(sizeof(VT_BASE_DIR), VT_BASE_DIR);
 	strcat(VT_BASE_DIR, "\\VideoText");
@@ -275,9 +272,9 @@ void WriteSettingsToIni()
 
 	WritePrivateProfileInt("Threads", "ProcessPriority", PriorClassId, szIniFile);
 	WritePrivateProfileInt("Threads", "ThreadPriority", ThreadClassId, szIniFile);
-	WritePrivateProfileInt("Threads", "WindowProcessor", MainProzessor, szIniFile);
-	WritePrivateProfileInt("Threads", "VBIProcessor", VBIProzessor, szIniFile);
-	WritePrivateProfileInt("Threads", "DecodeProcessor", AusgabeProzessor, szIniFile);
+	WritePrivateProfileInt("Threads", "WindowProcessor", MainProcessor, szIniFile);
+	WritePrivateProfileInt("Threads", "VBIProcessor", VBIProcessor, szIniFile);
+	WritePrivateProfileInt("Threads", "DecodeProcessor", DecodeProcessor, szIniFile);
 
 	WritePrivateProfileInt("Pulldown", "PulldownThresholdLow", PulldownThresholdLow, szIniFile);
 	WritePrivateProfileInt("Pulldown", "PulldownThresholdHigh", PulldownThresholdHigh, szIniFile);
@@ -289,6 +286,8 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("VBI", "VT", VBI_Flags & VBI_VT, szIniFile);
 	WritePrivateProfileInt("VBI", "IC", VBI_Flags & VBI_IC, szIniFile);
 	WritePrivateProfileInt("VBI", "VPS", VBI_Flags & VBI_VPS, szIniFile);
+	WritePrivateProfileInt("VBI", "VD", VBI_Flags & VBI_VD, szIniFile);
+	WritePrivateProfileInt("VBI", "CC", VBI_Flags & VBI_CC, szIniFile);
 
 	WritePrivateProfileString("Files", "VBIDir", IC_BASE_DIR, szIniFile);
 	WritePrivateProfileString("Files", "VDDir", VD_DIR, szIniFile);
@@ -299,7 +298,6 @@ void WriteSettingsToIni()
 	
 	WritePrivateProfileInt("Hardware", "CardType", CardType, szIniFile);
 	WritePrivateProfileInt("Hardware", "VideoSource", VideoSource, szIniFile);
-	WritePrivateProfileInt("Hardware", "AudioSource", AudioSource, szIniFile);
 	WritePrivateProfileInt("Hardware", "TunerType", TunerType, szIniFile); 
 	WritePrivateProfileInt("Hardware", "TVType", TVTYPE, szIniFile); 
 	WritePrivateProfileInt("Hardware", "InitialHue", InitialHue, szIniFile); 
@@ -307,15 +305,6 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("Hardware", "InitialBrightness", InitialBrightness, szIniFile); 
 	WritePrivateProfileInt("Hardware", "InitialSaturationU", InitialSaturationU, szIniFile); 
 	WritePrivateProfileInt("Hardware", "InitialSaturationV", InitialSaturationV, szIniFile); 
-	WritePrivateProfileInt("Hardware", "InitialIFORM", InitialIFORM, szIniFile); 
-	WritePrivateProfileInt("Hardware", "TunerThreshold1", Tuners[8].thresh1, szIniFile); 
-	WritePrivateProfileInt("Hardware", "TunerThreshold2", Tuners[8].thresh2, szIniFile); 
-	WritePrivateProfileInt("Hardware", "TunerVHF_L", Tuners[8].VHF_L, szIniFile); 
-	WritePrivateProfileInt("Hardware", "TunerVHF_H", Tuners[8].VHF_H, szIniFile); 
-	WritePrivateProfileInt("Hardware", "TunerUHF", Tuners[8].UHF, szIniFile); 
-	WritePrivateProfileInt("Hardware", "TunerConfig", Tuners[8].config, szIniFile); 
-	WritePrivateProfileInt("Hardware", "TunerI2C", Tuners[8].I2C, szIniFile); 
-	WritePrivateProfileInt("Hardware", "TunerIFPCoff", Tuners[8].IFPCoff, szIniFile); 
 
 	WritePrivateProfileInt("Hardware", "GPIO_OUT_EN", ManuellAudio[0], szIniFile); 
 	WritePrivateProfileInt("Hardware", "GPIO_DATA_TUNER", ManuellAudio[1], szIniFile);  
@@ -326,11 +315,6 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("Hardware", "GPIO_DATA_IN", ManuellAudio[6], szIniFile);  
 	WritePrivateProfileInt("Hardware", "GPIO_REG_INP", ManuellAudio[7], szIniFile);  
 
-	WritePrivateProfileInt("Hardware", "Init_PLL", INIT_PLL, szIniFile);  
-	
-	WritePrivateProfileInt("Show", "UseTuner", USETUNER, szIniFile); 
-	WritePrivateProfileInt("Show", "UseCard", USECARD, szIniFile);
-	WritePrivateProfileInt("Show", "CaptureVideo", Capture_Video, szIniFile);
 	WritePrivateProfileInt("Show", "CaptureVBI", Capture_VBI, szIniFile);
 	WritePrivateProfileInt("Show", "LastProgram", InitialProg, szIniFile);
 
@@ -360,7 +344,6 @@ void WriteSettingsToIni()
 	
 	WritePrivateProfileInt("Show", "SaveSettings", bSaveSettings, szIniFile);
 	WritePrivateProfileInt("Show", "CountryCode", CountryCode, szIniFile);
-	WritePrivateProfileInt("Show", "ColorFormat", ColourFormat, szIniFile);
 
 	WritePrivateProfileString("VT", "VTDir", VT_BASE_DIR, szIniFile);
 	WritePrivateProfileInt("VT", "VTAlwayExport", VT_ALWAYS_EXPORT, szIniFile);

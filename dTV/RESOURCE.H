@@ -17,7 +17,6 @@
 #define IDGETSDT                        7
 #define ID_UPDATEONE                    7
 #define IDM_STATUSBAR                   133
-#define IDM_VIDEO                       230
 #define IDM_VBI                         231
 #define IDM_CAPTURE_PAUSE               232
 #define IDM_KANAL_LISTE                 242
@@ -30,12 +29,7 @@
 #define IDM_CHANNELMINUS                267
 #define IDM_TOGGLE_MENU                 268
 #define IDM_HWINFO                      270
-#define IDM_IFORM                       278
 #define IDM_RESET                       280
-#define IDM_MANUELL_TUNER               285
-#define IDM_DONT_TOUCH                  287
-#define IDM_MANUELL_CARD                302
-#define IDM_DONT_TOUCH_CARD             304
 #define IDM_ON_TOP                      309
 #define IDM_AUTOSTEREO                  345
 #define IDM_AUDIOSETTINGS1              350
@@ -51,7 +45,6 @@
 #define IDM_IC_OUT                      388
 #define IDM_VPS_OUT                     389
 #define IDM_INTERCAST_SETUP             392
-#define IDM_PLL                         393
 #define IDM_COLORPLUS                   394
 #define IDM_COLORMINUS                  395
 #define IDM_BRIGHTNESSPLUS              396
@@ -79,36 +72,20 @@
 #define IDM_VIDEODAT_SETUP              437
 #define IDM_PROGRAMPARAM                441
 #define IDM_ANALOGSCAN                  444
-#define IDM_VBI_WINBIS                  447
-#define IDM_WINBIS_OUT                  448
-#define IDM_WINBIS_SETUP                449
 #define IDM_VT_SETUP                    450
 #define IDM_EVENT_INFO                  451
 #define IDM_SPACEBAR                    477
 #define IDM_HUE_UP                      478
 #define IDM_HUE_DOWN                    479
 #define IDM_FULL_SCREEN                 480
+#define IDM_CLOSEDCAPTION               482
+#define IDM_SETUPCARD                   483
 #define IDM_ENDE                        1032
-#define IDM_KARTE0                      1080
-#define IDM_KARTE1                      1081
-#define IDM_KARTE2                      1082
-#define IDM_KARTE3                      1083
-#define IDM_KARTE4                      1084
-#define IDM_KARTE5                      1085
-#define IDM_KARTE6                      1086
 #define IDM_TUNER                       1089
 #define IDM_EXTERN1                     1090
 #define IDM_EXTERN2                     1091
 #define IDM_EXTERN3                     1092
-#define IDM_TUNER_0                     1100
-#define IDM_TUNER_1                     1101
-#define IDM_TUNER_2                     1102
-#define IDM_TUNER_3                     1103
-#define IDM_TUNER_4                     1104
-#define IDM_TUNER_5                     1105
-#define IDM_TUNER_6                     1106
-#define IDM_TUNER_7                     1107
-#define IDM_TUNER_8                     1108
+#define IDM_EXTERN4                     1093
 #define IDM_AUDIO_0                     1110
 #define IDM_AUDIO_1                     1111
 #define IDM_AUDIO_2                     1112
@@ -500,6 +477,8 @@
 #define IDC_EM10                        1769
 #define IDC_EM11                        1770
 #define IDC_EM12                        1771
+#define IDC_CARDSSELECT                 1771
+#define IDC_TUNERSELECT                 1772
 #define IDC_DT1                         1780
 #define IDC_DT2                         1781
 #define IDC_DT3                         1782
@@ -632,9 +611,9 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        152
-#define _APS_NEXT_COMMAND_VALUE         482
-#define _APS_NEXT_CONTROL_VALUE         1771
+#define _APS_NEXT_RESOURCE_VALUE        153
+#define _APS_NEXT_COMMAND_VALUE         485
+#define _APS_NEXT_CONTROL_VALUE         1773
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

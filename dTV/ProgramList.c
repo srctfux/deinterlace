@@ -32,8 +32,10 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
+#include "stdafx.h"
 #include "ProgramList.h"
-#include "other.h"
+#include "tuner.h"
+#include "bt848.h"
 
 int CurSel;
 unsigned short SelectButton;
@@ -481,7 +483,7 @@ BOOL APIENTRY KanalNummerProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 			i--;
 			if ((i < 0) || (i >= MAXPROGS))
 			{
-				MessageBox(hDlg, "Illegal Chanel Number", "dTV", MB_ICONSTOP);
+				ErrorBoxDlg(hDlg, "Illegal Chanel Number");
 				break;
 			}
 			if (i != EditProgramm)
@@ -755,7 +757,7 @@ void Write_Program_List()
 
 	if ((fd = open("Program.set", _O_WRONLY | _O_TRUNC | _O_CREAT | _O_BINARY, _S_IWRITE | _S_IREAD)) == -1)
 	{
-		MessageBox(hWnd, "Can't create program list \"program.set\"", "dTV", MB_ICONSTOP | MB_OK);
+		ErrorBox("Can't create program list \"program.set\"");
 		return;
 	}
 
@@ -906,15 +908,12 @@ BOOL APIENTRY AnalogScanProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 		SendMessage(GetDlgItem(hDlg, IDC_COMBO1), CB_SETCURSEL, CountryCode, 0);
 		Load_Country_Specific_Settings(CountryCode);
 		CheckDlgButton(hDlg, IDC_CHECK1, TRUE);
-		if (USETUNER == FALSE)
-			EnableWindow(GetDlgItem(hDlg, IDSTART), TRUE);
-
 		return (TRUE);
 
 	case WM_PAINT:
 		hdc = BeginPaint(hDlg, &wps);
 		hMemDC = CreateCompatibleDC(hdc);
-		if (VideoPresent() == TRUE)
+		if(BT848_IsVideoPresent() == TRUE)
 			hOldBm = SelectObject(hMemDC, BirneGruen);
 		else
 			hOldBm = SelectObject(hMemDC, BirneRot);
@@ -931,81 +930,84 @@ BOOL APIENTRY AnalogScanProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 	case WM_USER:
 		if (wParam == 0x101)
 		{
-			sprintf(zeile, "%10.2f", (float) Freq / 1000);
-			SetDlgItemText(hDlg, IDC_EDIT2, zeile);
-			SetDlgItemText(hDlg, IDC_TEXT20, "Scanne");
-			InvalidateRect(hDlg, NULL, FALSE);
-			UpdateWindow(hDlg);
-			i = 0;
-			if (IsDlgButtonChecked(hDlg, IDC_CHECK1) == TRUE)
-				Sleep(400);
-			SetDlgItemText(hDlg, IDC_TEXT20, "Sync");
-			while ((i < 75) && (VideoPresent() == FALSE))
+			if(Freq != 0)
 			{
-				i++;
-				if (PeekMessage(&msg, NULL, 0, 0xffffffff, PM_REMOVE) == TRUE)
+				sprintf(zeile, "%10.2f", (float) Freq / 1000);
+				SetDlgItemText(hDlg, IDC_EDIT2, zeile);
+				SetDlgItemText(hDlg, IDC_TEXT20, "Scanning");
+				InvalidateRect(hDlg, NULL, FALSE);
+				UpdateWindow(hDlg);
+				i = 0;
+				if (IsDlgButtonChecked(hDlg, IDC_CHECK1) == TRUE)
+					Sleep(400);
+				SetDlgItemText(hDlg, IDC_TEXT20, "Sync");
+				while ((i < 75) && (BT848_IsVideoPresent() == FALSE))
 				{
-					SendMessage(msg.hwnd, msg.message, msg.wParam, msg.lParam);
-				}
-				if (STOP == TRUE)
-					return (TRUE);
-				Sleep(1);
-			}
-
-			InvalidateRect(hDlg, NULL, FALSE);
-			UpdateWindow(hDlg);
-
-			if (VideoPresent())
-			{
-				if (FirstFreq == 0)
-					FirstFreq = Freq;
-				SetDlgItemText(hDlg, IDC_TEXT20, "VideoSignal gefunden");
-				VPS_lastname[0] = 0x00;
-				Packet30.Identifier[0] = 0x00;
-				j = 0;
-				while ((j < MAXPROGS) && (Programm[j].freq != Freq))
-					j++;
-
-				if (j >= MAXPROGS)
-				{
-					j = 0;
-					while ((j < MAXPROGS) && (Programm[j].freq != 0))
-						j++;
-					if (j > MAXPROGS)
+					i++;
+					if (PeekMessage(&msg, NULL, 0, 0xffffffff, PM_REMOVE) == TRUE)
 					{
-						MessageBox(hWnd, "All storage space occupied", "dTV", MB_ICONINFORMATION | MB_OK);
+						SendMessage(msg.hwnd, msg.message, msg.wParam, msg.lParam);
+					}
+					if (STOP == TRUE)
 						return (TRUE);
-					}
-				}
-				Programm[j].freq = Freq;
-				strcpy(Programm[j].Name, "<No PDC>");
-				Programm[j].Typ = 'A';
-				Freq = Freq + 2500;
-				if (Capture_VBI == TRUE)
-				{
-					i = 0;
-					while (i < 100)
-					{
-						if (PeekMessage(&msg, NULL, 0, 0xffffffff, PM_REMOVE) == TRUE)
-						{
-							SendMessage(msg.hwnd, msg.message, msg.wParam, msg.lParam);
-						}
-						Sleep(2);
-						if (VPS_lastname[0] != 0x00)
-						{
-							strcpy(Programm[j].Name, VPS_lastname);
-							i = 100;
-						}
-						else if (Packet30.Identifier[0] != 0x00)
-						{
-							strcpy(Programm[j].Name, Packet30.Identifier);
-							i = 100;
-						}
-						i++;
-					}
+					Sleep(3);
 				}
 
-				SetDlgItemText(hDlg, IDC_EDIT15, Programm[j].Name);
+				InvalidateRect(hDlg, NULL, FALSE);
+				UpdateWindow(hDlg);
+
+				if (BT848_IsVideoPresent())
+				{
+					if (FirstFreq == 0)
+						FirstFreq = Freq;
+					SetDlgItemText(hDlg, IDC_TEXT20, "Video Signal Found");
+					VPS_lastname[0] = 0x00;
+					Packet30.Identifier[0] = 0x00;
+					j = 0;
+					while ((j < MAXPROGS) && (Programm[j].freq != Freq))
+						j++;
+
+					if (j >= MAXPROGS)
+					{
+						j = 0;
+						while ((j < MAXPROGS) && (Programm[j].freq != 0))
+							j++;
+						if (j > MAXPROGS)
+						{
+							ErrorBox("All storage space occupied");
+							return (TRUE);
+						}
+					}
+					Programm[j].freq = Freq;
+					strcpy(Programm[j].Name, "<No PDC>");
+					Programm[j].Typ = 'A';
+					Freq = Freq + 2500;
+					if (Capture_VBI == TRUE)
+					{
+						i = 0;
+						while (i < 100)
+						{
+							if (PeekMessage(&msg, NULL, 0, 0xffffffff, PM_REMOVE) == TRUE)
+							{
+								SendMessage(msg.hwnd, msg.message, msg.wParam, msg.lParam);
+							}
+							Sleep(2);
+							if (VPS_lastname[0] != 0x00)
+							{
+								strcpy(Programm[j].Name, VPS_lastname);
+								i = 100;
+							}
+							else if (Packet30.Identifier[0] != 0x00)
+							{
+								strcpy(Programm[j].Name, Packet30.Identifier);
+								i = 100;
+							}
+							i++;
+						}
+					}
+
+					SetDlgItemText(hDlg, IDC_EDIT15, Programm[j].Name);
+				}
 			}
 
 			if (STOP == TRUE)
@@ -1018,19 +1020,23 @@ BOOL APIENTRY AnalogScanProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 					Freq = Channels.freq[ChannelNr];
 					if (!Tuner_SetFrequency(TunerType, MulDiv((Freq * 1000), 16, 1000000)))
 					{
-						sprintf(Text, "Frequency %10.2f Mhz not adjusted ", (float) Freq / 1000);
-						SetWindowText(hwndTextField, Text);
+						sprintf(Text, "SetFrequency %10.2f Failed.", (float) Freq / 1000);
+						ErrorBox(Text);
 						return (TRUE);
 					}
 					if (STOP == FALSE)
+					{
 						PostMessage(hDlg, WM_USER, 0x101, 0);
+					}
 				}
 				else
 				{
 					EnableWindow(GetDlgItem(hDlg, IDOK), TRUE);
 					EnableWindow(GetDlgItem(hDlg, IDSTART), TRUE);
 					if (FirstFreq != 0)
+					{
 						(void) Tuner_SetFrequency(TunerType, MulDiv((FirstFreq * 1000), 16, 1000000));
+					}
 				}
 			}
 			else
@@ -1057,7 +1063,6 @@ BOOL APIENTRY AnalogScanProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 				}
 			}
 		}
-
 		break;
 
 	case WM_COMMAND:

@@ -32,22 +32,9 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#include <windows.h>       /* required for all Windows applications */
-#include <stdio.h>
-#include <memory.h>
-#include <math.h>
-#include <process.h>       /* for _beginthread                      */
-#include <stdlib.h>        /* atoi                                  */
-#include <io.h>         
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <ddraw.h>
-
-#include "resource.h"
-#include "defines.h"
-#include "structs.h"
+#include "stdafx.h"
 #include "globals.h"
+#include "bt848.h"
 
 int InitialVolume = 1000;
 char InitialBalance = 0x00;
@@ -68,31 +55,31 @@ struct TTVSetting TVSettings[10] =
 {
 	/* PAL-BDGHI */
 	{ 768, 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_BDGHI|BT848_IFORM_XT1),
-	    944, 768, 186, 922, 0x20, 0, TRUE },
+	    944, 768, 186, 922, 0x1c, 0, TRUE, 511},
 	/* NTSC Square Pixel */ 
 	{ 640, 480,  910, 0x68, 0x5d, (BT848_IFORM_NTSC|BT848_IFORM_XT0),
-	    780, 640, 135, 754, 0x1a, 0, FALSE},
+	    780, 640, 135, 754, 0x1a, 0, FALSE, 400},
 	/* SECAM */
 	{ 922, 576, 1135, 0x7f, 0xa0, (BT848_IFORM_SECAM|BT848_IFORM_XT1),
-	    1135, 922, 186, 922, 0x20, 0, TRUE},
+	    1135, 922, 186, 922, 0x1c, 0, TRUE, 511},
 	/* PAL-M */
 	{ 754, 480,  910, 0x70, 0x5d, (BT848_IFORM_PAL_M|BT848_IFORM_XT0),
-	    910, 754, 135, 754, 0x1a, 0, FALSE},
+	    910, 754, 135, 754, 0x1a, 0, FALSE, 400},
 	/* PAL-N */
 	{ 922, 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_N|BT848_IFORM_XT1),
-	    1135, 922, 186, 922, 0x20, 0, TRUE},
+	    1135, 922, 186, 922, 0x1c, 0, TRUE, 400},
 	/* NTSC Japan*/
 	{ 754, 480,  910, 0x70, 0x5d, (BT848_IFORM_NTSC_JAP|BT848_IFORM_XT0),
-	    910, 754, 135, 754, 0x1a, 0, FALSE},
+	    910, 754, 135, 754, 0x1a, 0, FALSE, 400},
 	/* PAL Full Pixel */
 	{ 922, 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_BDGHI|BT848_IFORM_XT1),
-	    1135, 922, 186, 922, 0x20, 0 , TRUE},
+	    1135, 922, 186, 922, 0x1c, 0 , TRUE, 511},
 	/* NTSC Full Pixel */
 	{ 754, 480,  910, 0x70, 0x5d, (BT848_IFORM_NTSC|BT848_IFORM_XT0),
-	    910, 754, 135, 754, 0x1a, 0, FALSE},
+	    910, 754, 135, 754, 0x1a, 0, FALSE, 400},
 	/* NTSC CCIR601 */ 
 	{ 720, 480,  910, 0x68, 0x5d, (BT848_IFORM_NTSC|BT848_IFORM_XT0),
-	    858, 720, 135, 754, 0x1a, 0, FALSE},
+	    858, 720, 135, 754, 0x1a, 0, FALSE, 400},
 };
 
 
@@ -108,20 +95,6 @@ unsigned int ManuellAudio[8] =
 	0x0000
 };
 
-
-struct TTunerType Tuners[9] =
-{
-    { 2244/*16*140.25*/,7412/*16*463.25*/,0x02,0x04,0x01,0x8e,0xc2,623},
-	{ 2244/*16*140.25*/,7412/*16*463.25*/,0xa0,0x90,0x30,0x8e,0xc0,623},
-	{ 2516/*16*157.25*/,7220/*16*451.25*/,0xA0,0x90,0x30,0x8e,0xc0,732},
-	{ 2692/*16*168.25*/,7156/*16*447.25*/,0xA7,0x97,0x37,0x8e,0xc0,623},
-	{ 0        ,0        ,0x00,0x00,0x00,0x00,0x00,000},
-	{ 2692/*16*168.25*/,7156/*16*447.25*/,0xA0,0x90,0x30,0x8e,0xc0,623},
-	{ 2516/*16*157.25*/,7412/*16*463.25*/,0x02,0x04,0x01,0x8e,0xc2,732},
-	{ 2720/*16*170.00*/,7200/*16*450.00*/,0xa0,0x90,0x30,0x8e,0xc2,623},
-	{ 0        ,0        ,0x00,0x00,0x00,0x00,0x00,000},
-
-}; 
 
 BOOL System_In_Mute=FALSE;
 
@@ -171,16 +144,10 @@ PMemStruct Burst_dma[5];
 
 HANDLE Bt848Device=NULL;
 
-BOOL USETUNER=TRUE;
-BOOL USECARD=TRUE;
-
 int TVFormat;
-int ColourFormat = 4;
 int AudioSource = 4;
 int VideoSource = 1;
-int CardType = 0;
 int CountryCode=0;
-int TunerType = 0;
 int TVTYPE = 0;
 
 /// VideoText
@@ -199,7 +166,6 @@ unsigned short VTColourTable[9] =
 
 unsigned char InitialHue=0x00;
 unsigned char InitialBrightness=0x00;
-unsigned char InitialIFORM=0x00;
 int InitialContrast=0xd8;
 int InitialSaturationU=0xfe;
 int InitialSaturationV=0xb4;
@@ -207,7 +173,6 @@ int InitialLow=45;
 
 BOOL Has_MSP=FALSE;
 
-BOOL Capture_Video = TRUE;
 BOOL Capture_VBI = TRUE;
 
 LPDIRECTDRAW lpDD = NULL;
@@ -220,7 +185,6 @@ HFONT currFont = NULL;
 
 BOOL VD_RAW=FALSE;
 
-struct TChannels Channels;
 
 struct SOTREC SOTInfoRec;
 
@@ -253,3 +217,8 @@ BTV_V1_PARAMS BTVParams =
 };
 
 BOOL bIsFullScreen = FALSE;
+
+char BTVendorID[10];
+char BTDeviceID[10];
+char MSPVersion[16];
+

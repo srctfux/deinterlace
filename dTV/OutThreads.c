@@ -34,10 +34,14 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
+#include "stdafx.h"
 #include "OutThreads.h"
 #include "other.h"
 #include "bt848.h"
 #include "bTVPlugin.h"
+#include "vt.h"
+#include "vbi.h"
+#include "deinterlace.h"
 
 
 short pPALplusCode[] = {  18,  27,  36,  45,  54,  63,  72,  81,  90, 100, 110, 120, 134, 149};
@@ -119,7 +123,7 @@ void Stop_Thread()
 		i = 5;
 		SetThreadPriority(OutThread, THREAD_PRIORITY_NORMAL);
 		bStopThread = TRUE;
-		while(i > 0)
+		while(i > 0 && !Thread_Stopped)
 		{
 			if (GetExitCodeThread(OutThread, &ExitCode) == TRUE)
 			{
@@ -146,88 +150,63 @@ void Stop_Thread()
 	}
 }
 
-void Set_Capture(int nState)
+void Start_Capture()
 {
-	int nFlags = 0;
-
-	if (Capture_Video == TRUE)
-	{
-		nFlags |= BT848_CAP_CTL_CAPTURE_EVEN | BT848_CAP_CTL_CAPTURE_ODD;
-	}
+	int nFlags = BT848_CAP_CTL_CAPTURE_EVEN | BT848_CAP_CTL_CAPTURE_ODD;
 	if (Capture_VBI == TRUE)
 	{
 		nFlags |= BT848_CAP_CTL_CAPTURE_VBI_EVEN | BT848_CAP_CTL_CAPTURE_VBI_ODD;
 	}
 
-	MaskDataByte(BT848_CAP_CTL, 0, 0x0f);
+	BT848_MaskDataByte(BT848_CAP_CTL, 0, 0x0f);
 
-	switch (nState)
-	{
-	case 0:
+	// resety intercast settings
+	InterCast.esc = 0;
+	InterCast.done = 0;
+	InterCast.pnum = 0;
+	InterCast.ok = 0;
+	InterCast.datap = 0;
+	InterCast.lastci = 0xff;
 
-		nFlags = nFlags |= BT848_CAP_CTL_CAPTURE_EVEN | BT848_CAP_CTL_CAPTURE_ODD;
-		break;
-	case 1:
-		nFlags = nFlags &= ~(BT848_CAP_CTL_CAPTURE_EVEN | BT848_CAP_CTL_CAPTURE_ODD);
-		break;
-	case 2:
-		nFlags = nFlags |= BT848_CAP_CTL_CAPTURE_VBI_EVEN | BT848_CAP_CTL_CAPTURE_VBI_ODD;
-		break;
-	case 3:
-		nFlags = nFlags &= ~(BT848_CAP_CTL_CAPTURE_VBI_EVEN | BT848_CAP_CTL_CAPTURE_VBI_ODD);
-		break;
-	case 4:
-		nFlags = 0;
-		break;
-	case 5:
-		InterCast.esc = 0;
-		InterCast.done = 0;
-		InterCast.pnum = 0;
-		InterCast.ok = 0;
-		InterCast.datap = 0;
-		InterCast.lastci = 0xff;
-		break;
-	}
+	BT848_SetRiscJumpsDecode(nFlags);
 
-	CurrentCapture = nFlags;
+	BT848_MaskDataByte(BT848_CAP_CTL, (BYTE) nFlags, (BYTE) 0x0f);
 
-	if (!(nFlags & (BT848_CAP_CTL_CAPTURE_EVEN | BT848_CAP_CTL_CAPTURE_ODD)))
-	{
-		//  Stop The Output Thread
-		if (OutThread != NULL)
-		{
-			Stop_Thread();
-		}
-	}
-	
-	SetRiscJumpsDecode(nFlags);
-
-	MaskDataByte(BT848_CAP_CTL, (BYTE) nFlags, (BYTE) 0x0f);
 	if (nFlags & 0x0f)
 	{
-		SetDMA(TRUE);
+		BT848_SetDMA(TRUE);
 	}
 	else
 	{
-		SetDMA(FALSE);
+		BT848_SetDMA(FALSE);
 	}
 
-	if (nFlags & (BT848_CAP_CTL_CAPTURE_EVEN | BT848_CAP_CTL_CAPTURE_ODD))
+	Start_Thread();
+	if (Capture_VBI == TRUE)
 	{
-		//  Start the OutputThread 
-		if (OutThread == NULL)
-		{
-			Start_Thread();
-		}
+		VBI_Start();
 	}
 }
 
+void Stop_Capture()
+{
+	BT848_MaskDataByte(BT848_CAP_CTL, 0, 0x0f);
+
+	//  Stop The Output Thread
+	Stop_Thread();
+	if (Capture_VBI == TRUE)
+	{
+		VBI_Stop();
+	}
+}
 
 void SetupProcessorAndThread()
 {
 	DWORD rc;
-	ProzessorMask = 1 << (AusgabeProzessor);
-	rc = SetThreadAffinityMask(GetCurrentThread(), ProzessorMask);
+	int ProcessorMask;
+
+	ProcessorMask = 1 << (DecodeProcessor);
+	rc = SetThreadAffinityMask(GetCurrentThread(), ProcessorMask);
 	
 	if (ThreadClassId == 0)
 		SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_BELOW_NORMAL);
@@ -241,202 +220,6 @@ void SetupProcessorAndThread()
 		SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
 }
 
-long __inline Sq(long x) {return x*x;}
-
-///////////////////////////////////////////////////////////////////////////////
-// GetCombFactor
-//
-// This routine basically calculates how close the pixels in pLines2
-// are the interpelated pixels between pLines1
-// this idea was taken from the VirtualDub CVideoTelecineRemover class
-// at the moment it is the correct algoritm outlined in the comments
-// not the one used in that program
-// I only do this on the Y component as I assume that any noticable combing
-// will be visible in the black and white image
-// the relative sizes of the returns from this function will be used to 
-// determine the best ordering of the fields
-///////////////////////////////////////////////////////////////////////////////
-long GetCombFactor(short** pLines1, short** pLines2)
-{
-	int Line;
-	long LineFactor;
-	long CombFactor = 0;
-	short* YVal1;
-	short* YVal2;
-	short* YVal3;
-
-	const __int64 YMask    = 0x00ff00ff00ff00ff;
-
-	for (Line = 1; Line < (CurrentY / 2 - 2); ++Line)
-	{
-		YVal1 = pLines1[Line];
-		YVal2 = pLines2[Line];
-		YVal3 = pLines1[Line + 1];
-		_asm
-		{
-			mov ecx, CurrentX
-			mov eax,dword ptr [YVal1]
-			mov ebx,dword ptr [YVal2]
-			mov edx,dword ptr [YVal3]
-			shr ecx, 1
-		    movq mm1,qword ptr[YMask]  
-			pxor mm0, mm0    // mm0 = 0
-align 16
-Next8Bytes:
-			movq mm5, qword ptr[ebx] 
-			pxor mm3, mm3    // mm3 = 0
-			pand mm5, mm1
-			movq mm4, qword ptr[eax] 
-			psubw mm3, mm5
-			pand mm4, mm1
-			psubw mm3, mm5
-
-			movq mm6, qword ptr[edx]
-			paddw mm3, mm4
-			pand mm6, mm1
-			paddw mm3, mm6
-			
-			add eax, 8
-			pmaddwd mm3, mm3
-			add ebx, 8
-			paddd mm0, mm3
-			add edx, 8
-
-			loop Next8Bytes
-
-			movd eax, mm0
-			psrlq mm0,32
-			movd ecx, mm0
-			add ecx, eax
-			mov dword ptr[LineFactor], ecx
-			emms
-		}
-		CombFactor += (long)sqrt(LineFactor);
-	}
-	return CombFactor;
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// memcpyMMX
-// Uses MMX instructions to move memory around
-// does as much as we can in 64 byte chunks
-// using MMX instructions
-// then copies any extra bytes
-// assumes there will be at least 64 bytes to copy
-/////////////////////////////////////////////////////////////////////////////
-void memcpyMMX(void *Dest, void *Src, size_t nBytes)
-{
-	size_t nCharsLeft = nBytes & 0x3F;
-	__asm
-	{
-		mov		esi, dword ptr[Src]
-		mov		edi, dword ptr[Dest]
-		mov		ecx, nBytes
-		shr     ecx, 6                      // nBytes / 64
-align 16
-CopyLoop:
-		movq	mm0, qword ptr[esi]
-		movq	mm1, qword ptr[esi+8*1]
-		movq	mm2, qword ptr[esi+8*2]
-		movq	mm3, qword ptr[esi+8*3]
-		movq	mm4, qword ptr[esi+8*4]
-		movq	mm5, qword ptr[esi+8*5]
-		movq	mm6, qword ptr[esi+8*6]
-		movq	mm7, qword ptr[esi+8*7]
-		movq	qword ptr[edi], mm0
-		movq	qword ptr[edi+8*1], mm1
-		movq	qword ptr[edi+8*2], mm2
-		movq	qword ptr[edi+8*3], mm3
-		movq	qword ptr[edi+8*4], mm4
-		movq	qword ptr[edi+8*5], mm5
-		movq	qword ptr[edi+8*6], mm6
-		movq	qword ptr[edi+8*7], mm7
-		add		esi, 64
-		add		edi, 64
-		loop CopyLoop
-		mov		ecx, nBytes
-		and     ecx, 63
-		cmp     ecx, 0
-		je EndCopyLoop
-align 16
-CopyLoop2:
-		mov dl, byte ptr[esi] 
-		dec ecx
-		mov byte ptr[edi], dl
-		inc esi
-		inc edi
-		loop CopyLoop2
-EndCopyLoop:
-		emms
-	}
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// memcpyBOBMMX
-// Uses MMX instructions to move memory around to two places
-// does as much as we can in 64 byte chunks
-// using MMX instructions
-// then copies any extra bytes
-// assumes there will be at least 64 bytes to copy
-/////////////////////////////////////////////////////////////////////////////
-void memcpyBOBMMX(void *Dest1, void *Dest2, void *Src, size_t nBytes)
-{
-	size_t nCharsLeft = nBytes & 0x3F;
-	__asm
-	{
-		mov		esi, dword ptr[Src]
-		mov		ebx, dword ptr[Dest2]
-		mov		edi, dword ptr[Dest1]
-		mov		ecx, nBytes
-		shr     ecx, 6                      // nBytes / 64
-align 16
-CopyLoop:
-		movq	mm0, qword ptr[esi]
-		movq	mm1, qword ptr[esi+8*1]
-		movq	mm2, qword ptr[esi+8*2]
-		movq	mm3, qword ptr[esi+8*3]
-		movq	mm4, qword ptr[esi+8*4]
-		movq	mm5, qword ptr[esi+8*5]
-		movq	mm6, qword ptr[esi+8*6]
-		movq	mm7, qword ptr[esi+8*7]
-		movq	qword ptr[edi], mm0
-		movq	qword ptr[edi+8*1], mm1
-		movq	qword ptr[edi+8*2], mm2
-		movq	qword ptr[edi+8*3], mm3
-		movq	qword ptr[edi+8*4], mm4
-		movq	qword ptr[edi+8*5], mm5
-		movq	qword ptr[edi+8*6], mm6
-		movq	qword ptr[edi+8*7], mm7
-		movq	qword ptr[ebx], mm0
-		movq	qword ptr[ebx+8*1], mm1
-		movq	qword ptr[ebx+8*2], mm2
-		movq	qword ptr[ebx+8*3], mm3
-		movq	qword ptr[ebx+8*4], mm4
-		movq	qword ptr[ebx+8*5], mm5
-		movq	qword ptr[ebx+8*6], mm6
-		movq	qword ptr[ebx+8*7], mm7
-		add		esi, 64
-		add		edi, 64
-		add		ebx, 64
-		loop CopyLoop
-		mov		ecx, nBytes
-		and     ecx, 63
-		cmp     ecx, 0
-		je EndCopyLoop
-align 16
-CopyLoop2:
-		mov dl, byte ptr[esi] 
-		dec ecx
-		mov byte ptr[edi], dl
-		mov byte ptr[ebx], dl
-		inc esi
-		inc edi
-		inc ebx
-		loop CopyLoop2
-EndCopyLoop:
-		emms
-	}
-}
 
 ePULLDOWNMODES GuessCorrectPALPulldownMode(WORD Flags1, WORD Flags2)
 {
@@ -650,13 +433,22 @@ void UpdateNTSCPulldownMode(struct TPulldowmMode* PulldownMode, long* CombFactor
 	}
 }
 
-BOOL DoWeWantToFlip()
+BOOL DoWeWantToFlip(BOOL bFlipNow, BOOL bIsOddField)
 {
 	BOOL RetVal;
 	switch(gPulldownMode)
 	{
 	case VIDEO_MODE:
 		RetVal = TRUE;
+		break;
+	case SIMPLE_WEAVE:
+		RetVal = TRUE;
+		break;
+	case INTERPOLATE_BOB:
+		RetVal = TRUE;
+		break;
+	case BTV_PLUGIN:
+		RetVal = bFlipNow;
 		break;
 	case FILM_22_PULLDOWN_ODD:
 		RetVal = bIsOddField;
@@ -776,14 +568,16 @@ void UpdatePulldownStatus()
 	switch(gPulldownMode)
 	{
 	case VIDEO_MODE:
-		if(bUseBTVPlugin == TRUE)
-		{
-			SetWindowText(hwndPalField, "Using bTV Plugin");
-		}
-		else
-		{
-			SetWindowText(hwndPalField, "Simple Weave");
-		}
+		SetWindowText(hwndPalField, "Video Deinterlace");
+		break;
+	case SIMPLE_WEAVE:
+		SetWindowText(hwndPalField, "Simple Weave");
+		break;
+	case INTERPOLATE_BOB:
+		SetWindowText(hwndPalField, "Interpolated BOB");
+		break;
+	case BTV_PLUGIN:
+		SetWindowText(hwndPalField, "Using bTV Plugin");
 		break;
 	case FILM_22_PULLDOWN_ODD:
 		SetWindowText(hwndPalField, "2:2 Pulldown Flip on Odd");
@@ -812,131 +606,6 @@ void UpdatePulldownStatus()
 	}
 }
 
-void DeinterlaceOdd(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay)
-{
-	int nLineTarget;
-	short* pSource;
-	BYTE* ScreenPtr;
-
-	for (nLineTarget = 1; nLineTarget < CurrentY / 2 - 1; nLineTarget++)
-	{
-		pSource = pOddLines[nLineTarget];
-		ScreenPtr = lpCurOverlay + (nLineTarget * 2 + 1) * OverlayPitch;
-		memcpyMMX(ScreenPtr, pSource, CurrentX * 2);
-
-		pSource = pEvenLines[nLineTarget];
-		ScreenPtr = lpCurOverlay + (nLineTarget * 2) * OverlayPitch;
-		memcpyMMX(ScreenPtr, pSource, CurrentX * 2);
-	}
-	ScreenPtr = lpCurOverlay + CurrentY * OverlayPitch;
-	memcpyMMX(ScreenPtr, pEvenLines[CurrentY / 2], CurrentX * 2);
-}
-
-void DeinterlaceEven(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay)
-{
-	int Line;
-	int Column;
-	short* pSource;
-	BYTE* ScreenPtr;
-	short* YVal1;
-	short* YVal2;
-	short* YVal3;
-	BYTE* Dest;
-	
-	const __int64 YMask    = 0x00ff00ff00ff00ff;
-	const __int64 UVMask    = 0xff00ff00ff00ff00;
-	__int64 qwEdgeDetect;
-	__int64 qwThreshold;
-
-	qwEdgeDetect = (25 << 48) + (25 << 32) + (25 << 16) + 100;
-	qwThreshold = (27 << 48) + (27 << 32) + (27 << 16) + 100;
-
-	// copy first even and odd line anyway
-	memcpyMMX(lpCurOverlay, pEvenLines[0], CurrentX * 2);
-	memcpyMMX(lpCurOverlay + OverlayPitch, pOddLines[0], CurrentX * 2);
-	for (Line = 1; Line < (CurrentY / 2 - 1); ++Line)
-	{
-		YVal1 = pOddLines[Line];
-		YVal2 = pEvenLines[Line + 1];
-		YVal3 = pOddLines[Line + 1];
-		Dest = lpCurOverlay + (Line * 2 + 1) * OverlayPitch;
-		for(Column = 0; Column < CurrentY /2; Column++)
-		{
-			_asm
-			{
-				mov edi,dword ptr [Dest]
-				movq mm7,qword ptr[YMask]  
-				movq mm6,qword ptr[qwEdgeDetect]  
-
-				movq mm0, qword ptr[YVal1] 
-				movq mm1, qword ptr[YVal2] 
-				movq mm2, qword ptr[YVal3]
-
-				// copy the odd line to destination
-				movq mm2, qword ptr[edi]
-				sub edi, OverlayPitch
-
-				// get intensities in mm3 - 4
-				movq mm3, mm1
-				movq mm4, mm2
-				movq mm5, mm3
-
-				pand mm3, mm7
-				pand mm4, mm7
-				pand mm5, mm7
-
-				// work out (O1 - E) * (O2 - E) - EdgeDetect * (O1 - O2) ^ 2 >> 12
-				// result will be in mm0
-
-				movq mm0, mm3
-				psubw mm0, mm4		//mm0 = O1 - E
-
-				movq mm1, mm5
-				psubw mm1, mm4		//mm0 = O2 - e
-
-				pmullw mm0, mm1		// mm0 = (O1 - E) * (O2 - E)
-
-				movq mm1, mm3
-				psubw mm1, mm5		// mm1 = (O1 - O2)
-				pmullw mm1, mm1		// mm1 = (O1 - O2) ^ 2
-				psrlw mm1, 12		// mm1 = (O1 - O2) ^ 2 >> 12
-				pmullw mm1, mm6		// mm1  = EdgeDetect * (O1 - O2) ^ 2 >> 12
-
-				psubw mm0, mm1      // mm1 is what we want
-
-				
-				pcmpgtw mm0, qword ptr[qwThreshold]
-				
-				paddw mm3, mm4
-				pand mm6, mm1
-				paddw mm3, mm6
-				
-				add eax, 8
-				pmaddwd mm3, mm3
-				add ebx, 8
-				paddd mm0, mm3
-				add edx, 8
-
-
-				movd eax, mm0
-				psrlq mm0,32
-				movd ecx, mm0
-				add ecx, eax
-				emms
-			}
-		}
-		pSource = pOddLines[Line];
-		ScreenPtr = lpCurOverlay + (Line * 2 + 1) * OverlayPitch;
-		memcpyMMX(ScreenPtr, pSource, CurrentX * 2);
-
-		pSource = pEvenLines[Line];
-		ScreenPtr = lpCurOverlay + (Line * 2) * OverlayPitch;
-		memcpyMMX(ScreenPtr, pSource, CurrentX * 2);
-	}
-	ScreenPtr = lpCurOverlay + CurrentY * OverlayPitch;
-	memcpyMMX(ScreenPtr, pEvenLines[CurrentY / 2], CurrentX * 2);
-}
-
 void Weave(short** pOddLines, short** pEvenLines, BYTE* lpOverlay)
 {
 	int i;
@@ -953,24 +622,22 @@ void Weave(short** pOddLines, short** pEvenLines, BYTE* lpOverlay)
 
 DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 {
-	BYTE* ScreenPtr;
-	BYTE* ScreenPtr2;
 	char Text[128];
 	int i, j;
 	int nLineTarget;
-	short* pSource;
 	int nFrame = 0;
 	DWORD dwLastCount;
 	BYTE* lpCurOverlay = lpOverlayBack;
 	//long CombFactors[10];
 	short* ppEvenLines[5][CLEARLINES];
 	short* ppOddLines[5][CLEARLINES];
-	BYTE* pDestEven[CLEARLINES];
-	BYTE* pDestOdd[CLEARLINES];
+	BYTE* pDest;
 	//struct TPulldowmMode PulldownMode;
 	int LastEvenFrame = 0;
 	int LastOddFrame = 0;
 	int CombNum = 0;
+	BOOL bFlipNow = TRUE;
+	BOOL bIsOddField = FALSE;
 
 	if (lpDDOverlay == NULL || lpDDOverlay == NULL || lpOverlayBack == NULL || lpOverlay == NULL)
 	{
@@ -992,8 +659,7 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 	}
 
 	// make sure we start with a clean sheet of paper
-	Black_Surface();
-	Black_Overlays();
+	Clean_Overlays();
 
 	// display the current pulldown mode
 	UpdatePulldownStatus();
@@ -1002,17 +668,9 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 
 	while(!bStopThread)
 	{
-		nFrame++;
-		Get_Thread_Status();
+		bIsOddField = WaitForNextField(bIsOddField);
 
-		// set up desination pointers
-		// may need to optimize this later
-		for (i = 0; i < BTV_VER1_HEIGHT; i += 2)
-		{
-			pDestEven[i / 2] = lpCurOverlay + i * OverlayPitch;
-			pDestOdd[i / 2] = lpCurOverlay + (i + 1) * OverlayPitch;
-		}
-
+		pDest = lpCurOverlay;
 		if(bIsOddField)
 		{
 			//CombFactors[CurrentFrame * 2 + 1] = GetCombFactor(ppEvenLines[CurrentFrame], ppOddLines[CurrentFrame]);
@@ -1024,40 +682,71 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 				//UpdatePALPulldownMode(&PulldownMode, CombFactors);
 			}
 			// if we have dropped a field then do BOB 
-			if(LastEvenFrame != CurrentFrame)
+			if(LastEvenFrame != CurrentFrame || gPulldownMode == INTERPOLATE_BOB)
 			{
 				for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
 				{
-					memcpyBOBMMX(pDestEven[nLineTarget], 
-								pDestOdd[nLineTarget], 
+					memcpyBOBMMX(pDest,
 								ppOddLines[CurrentFrame][nLineTarget], 
 								CurrentX * 2);
+					pDest += 2 * OverlayPitch;
 				}
+				bFlipNow = TRUE;
+				nFrame++;
 			}
 			else if(gPulldownMode == VIDEO_MODE)
 			{
-				if(bUseBTVPlugin == TRUE)
+				// copy first line in bob way
+				memcpyBOBMMX(pDest,
+							ppOddLines[CurrentFrame][0], 
+							CurrentX * 2);
+				// copy each middle odd line and interpolate even lines
+				for (nLineTarget = 1; nLineTarget < CurrentY / 2; nLineTarget++)
 				{
-					BTVParams.IsOddField = 1;
-					BTVParams.ppCurrentField = ppOddLines[CurrentFrame];
-					BTVParams.ppLastField = ppEvenLines[CurrentFrame];
-					BTVParams.ppEvenDest = pDestEven;
-					BTVParams.ppOddDest = pDestOdd;
-					BTVPluginDoField(&BTVParams);
+					VideoDeinterlaceMMX(pDest, 
+									ppOddLines[CurrentFrame][nLineTarget - 1], 
+									ppEvenLines[CurrentFrame][nLineTarget], 
+									ppOddLines[CurrentFrame][nLineTarget], 
+									CurrentX * 2);
+					pDest += 2 * OverlayPitch;
 				}
-				else
+			}
+			else if(gPulldownMode == SIMPLE_WEAVE)
+			{
+				Weave(ppOddLines[CurrentFrame], ppEvenLines[LastEvenFrame], lpCurOverlay);
+			}
+			else if(gPulldownMode == BTV_PLUGIN)
+			{
+				BYTE* pDestEven[CLEARLINES];
+				BYTE* pDestOdd[CLEARLINES];
+				
+				// set up desination pointers
+				// may need to optimize this later
+				for (i = 0; i < BTV_VER1_HEIGHT; i += 2)
 				{
-					Weave(ppOddLines[CurrentFrame], ppEvenLines[CurrentFrame], lpCurOverlay);
+					pDestEven[i / 2] = pDest;
+					pDest += OverlayPitch;
+					pDestOdd[i / 2] = pDest;
+					pDest += OverlayPitch;
 				}
+				
+				BTVParams.IsOddField = 1;
+				BTVParams.ppCurrentField = ppOddLines[CurrentFrame];
+				BTVParams.ppLastField = ppEvenLines[LastEvenFrame];
+				BTVParams.ppEvenDest = pDestEven;
+				BTVParams.ppOddDest = pDestOdd;
+				bFlipNow = BTVPluginDoField(&BTVParams);
 			}
 			else
 			{
+				pDest += OverlayPitch;
 				for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
 				{
 					// copy latest data to destination buffer
-					memcpyMMX(pDestOdd[nLineTarget], 
+					memcpyMMX(pDest, 
 						ppOddLines[CurrentFrame][nLineTarget], 
 						CurrentX * 2);
+					pDest += 2 * OverlayPitch;
 				}
 			}
 			LastOddFrame = CurrentFrame;
@@ -1067,50 +756,82 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 			//CombFactors[CurrentFrame * 2] = GetCombFactor(ppOddLines[(CurrentFrame + 4) % 5], ppEvenLines[CurrentFrame] + 1);
 
 			// if we have dropped a field then do BOB
-			if(LastOddFrame != ((CurrentFrame + 4) % 5))
+			if(LastOddFrame != ((CurrentFrame + 4) % 5) || gPulldownMode == INTERPOLATE_BOB)
 			{
 				for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
 				{
 					// copy latest field data to both odd and even rows
-					pSource = ppEvenLines[CurrentFrame][nLineTarget];
-					ScreenPtr = lpCurOverlay + (nLineTarget * 2) * OverlayPitch;
-					ScreenPtr2 = lpCurOverlay + (nLineTarget * 2 + 1) * OverlayPitch;
-					memcpyBOBMMX(pDestEven[nLineTarget], 
-								pDestOdd[nLineTarget], 
+					memcpyBOBMMX(pDest, 
 								ppEvenLines[CurrentFrame][nLineTarget],
 								CurrentX * 2);
+					pDest += 2 * OverlayPitch;
 				}
+				bFlipNow = TRUE;
+				nFrame++;
 			}
 			else if(gPulldownMode == VIDEO_MODE)
 			{
-				if(bUseBTVPlugin == TRUE)
+				// copy first line
+				memcpyMMX(pDest, 
+						ppEvenLines[CurrentFrame][0], 
+						CurrentX * 2);
+				pDest += OverlayPitch;
+				// copy each middle odd line and interpolate even lines
+				for (nLineTarget = 1; nLineTarget < CurrentY / 2; nLineTarget++)
 				{
-					BTVParams.IsOddField = 0;
-					BTVParams.ppCurrentField = ppEvenLines[CurrentFrame];
-					BTVParams.ppLastField = ppOddLines[LastOddFrame];
-					BTVParams.ppEvenDest = pDestEven;
-					BTVParams.ppOddDest = pDestOdd;
-					BTVPluginDoField(&BTVParams);
+					VideoDeinterlaceMMX(pDest, 
+									ppEvenLines[CurrentFrame][nLineTarget - 1], 
+									ppOddLines[CurrentFrame][nLineTarget - 1], 
+									ppEvenLines[CurrentFrame][nLineTarget], 
+									CurrentX * 2);
+					pDest += 2 * OverlayPitch;
 				}
-				else
+				// copy last line in a bob way
+				memcpyMMX(pDest, 
+						ppEvenLines[CurrentFrame][CurrentY / 2 - 1], 
+						CurrentX * 2);
+			}
+			else if(gPulldownMode == SIMPLE_WEAVE)
+			{
+				Weave(ppOddLines[LastOddFrame], ppEvenLines[CurrentFrame], lpCurOverlay);
+			}
+			else if(gPulldownMode == BTV_PLUGIN)
+			{
+				BYTE* pDestEven[CLEARLINES];
+				BYTE* pDestOdd[CLEARLINES];
+				
+				// set up desination pointers
+				// may need to optimize this later
+				for (i = 0; i < BTV_VER1_HEIGHT; i += 2)
 				{
-					Weave(ppOddLines[LastOddFrame], ppEvenLines[CurrentFrame], lpCurOverlay);
+					pDestEven[i / 2] = pDest;
+					pDest += OverlayPitch;
+					pDestOdd[i / 2] = pDest;
+					pDest += OverlayPitch;
 				}
+				
+				BTVParams.IsOddField = 1;
+				BTVParams.ppCurrentField = ppOddLines[CurrentFrame];
+				BTVParams.ppLastField = ppEvenLines[LastEvenFrame];
+				BTVParams.ppEvenDest = pDestEven;
+				BTVParams.ppOddDest = pDestOdd;
+				bFlipNow = BTVPluginDoField(&BTVParams);
 			}
 			else
 			{
 				for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
 				{
 					// copy latest data to destination buffer
-					memcpyMMX(pDestEven[nLineTarget], 
+					memcpyMMX(pDest, 
 								ppEvenLines[CurrentFrame][nLineTarget], 
 								CurrentX  * 2);
+					pDest += 2 * OverlayPitch;
 				}
 			}
 			LastEvenFrame = CurrentFrame;
 		}
 
-		if(DoWeWantToFlip())
+		if(DoWeWantToFlip(bFlipNow, bIsOddField))
 		{
 			IDirectDrawSurface_Flip(lpDDOverlay, lpDDOverlayBack, DDFLIP_WAIT);
 			if(lpCurOverlay == lpOverlay)
@@ -1127,7 +848,7 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 		{
 			if (dwLastCount + 1000 < GetTickCount())
 			{
-				sprintf(Text, "%d FPS", nFrame);
+				sprintf(Text, "%d DF/S", nFrame);
 				SetWindowText(hwndFPSField, Text);
 				nFrame = 0;
 				dwLastCount = GetTickCount();
@@ -1140,24 +861,22 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 
 DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 {
-	BYTE* ScreenPtr;
-	BYTE* ScreenPtr2;
 	char Text[128];
 	int i, j;
 	int nLineTarget;
-	short* pSource;
 	int nFrame = 0;
 	DWORD dwLastCount;
 	BYTE* lpCurOverlay = lpOverlayBack;
 	//long CombFactors[10];
 	short* ppEvenLines[5][CLEARLINES];
 	short* ppOddLines[5][CLEARLINES];
-	BYTE* pDestEven[CLEARLINES];
-	BYTE* pDestOdd[CLEARLINES];
+	BYTE* pDest;
 	//struct TPulldowmMode PulldownMode;
 	int LastEvenFrame = 0;
 	int LastOddFrame = 0;
 	int CombNum = 0;
+	BOOL bFlipNow = TRUE;
+	BOOL bIsOddField = FALSE;
 
 	if (lpDDOverlay == NULL || lpDDOverlay == NULL || lpOverlayBack == NULL || lpOverlay == NULL)
 	{
@@ -1179,8 +898,7 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 	}
 
 	// make sure we start with a clean sheet of paper
-	Black_Surface();
-	Black_Overlays();
+	Clean_Overlays();
 
 	// display the current pulldown mode
 	UpdatePulldownStatus();
@@ -1189,17 +907,9 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 
 	while(!bStopThread)
 	{
-		nFrame++;
-		Get_Thread_Status();
+		bIsOddField = WaitForNextField(bIsOddField);
 
-		// set up desination pointers
-		// may need to optimize this later
-		for (i = 0; i < BTV_VER1_HEIGHT; i += 2)
-		{
-			pDestEven[i / 2] = lpCurOverlay + i * OverlayPitch;
-			pDestOdd[i / 2] = lpCurOverlay + (i + 1) * OverlayPitch;
-		}
-
+		pDest = lpCurOverlay;
 		if(bIsOddField)
 		{
 			//CombFactors[CurrentFrame * 2 + 1] = GetCombFactor(ppEvenLines[CurrentFrame], ppOddLines[CurrentFrame]);
@@ -1211,40 +921,71 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 				//UpdateNTSCPulldownMode(&PulldownMode, CombFactors);
 			}
 			// if we have dropped a field then do BOB 
-			if(LastEvenFrame != CurrentFrame)
+			if(LastEvenFrame != CurrentFrame || gPulldownMode == INTERPOLATE_BOB)
 			{
 				for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
 				{
-					memcpyBOBMMX(pDestEven[nLineTarget], 
-								pDestOdd[nLineTarget], 
+					memcpyBOBMMX(pDest,
 								ppOddLines[CurrentFrame][nLineTarget], 
 								CurrentX * 2);
+					pDest += 2 * OverlayPitch;
 				}
+				bFlipNow = TRUE;
+				nFrame++;
 			}
 			else if(gPulldownMode == VIDEO_MODE)
 			{
-				if(bUseBTVPlugin == TRUE)
+				// copy first line in bob way
+				memcpyBOBMMX(pDest,
+							ppOddLines[CurrentFrame][0], 
+							CurrentX * 2);
+				// copy each middle odd line and interpolate even lines
+				for (nLineTarget = 1; nLineTarget < CurrentY / 2; nLineTarget++)
 				{
-					BTVParams.IsOddField = 1;
-					BTVParams.ppCurrentField = ppOddLines[CurrentFrame];
-					BTVParams.ppLastField = ppEvenLines[CurrentFrame];
-					BTVParams.ppEvenDest = pDestEven;
-					BTVParams.ppOddDest = pDestOdd;
-					BTVPluginDoField(&BTVParams);
+					VideoDeinterlaceMMX(pDest, 
+									ppOddLines[CurrentFrame][nLineTarget - 1], 
+									ppEvenLines[CurrentFrame][nLineTarget], 
+									ppOddLines[CurrentFrame][nLineTarget], 
+									CurrentX * 2);
+					pDest += 2 * OverlayPitch;
 				}
-				else
+			}
+			else if(gPulldownMode == SIMPLE_WEAVE)
+			{
+				Weave(ppOddLines[CurrentFrame], ppEvenLines[LastEvenFrame], lpCurOverlay);
+			}
+			else if(gPulldownMode == BTV_PLUGIN)
+			{
+				BYTE* pDestEven[CLEARLINES];
+				BYTE* pDestOdd[CLEARLINES];
+				
+				// set up desination pointers
+				// may need to optimize this later
+				for (i = 0; i < BTV_VER1_HEIGHT; i += 2)
 				{
-					Weave(ppOddLines[CurrentFrame], ppEvenLines[CurrentFrame], lpCurOverlay);
+					pDestEven[i / 2] = pDest;
+					pDest += OverlayPitch;
+					pDestOdd[i / 2] = pDest;
+					pDest += OverlayPitch;
 				}
+				
+				BTVParams.IsOddField = 1;
+				BTVParams.ppCurrentField = ppOddLines[CurrentFrame];
+				BTVParams.ppLastField = ppEvenLines[LastEvenFrame];
+				BTVParams.ppEvenDest = pDestEven;
+				BTVParams.ppOddDest = pDestOdd;
+				bFlipNow = BTVPluginDoField(&BTVParams);
 			}
 			else
 			{
+				pDest += OverlayPitch;
 				for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
 				{
 					// copy latest data to destination buffer
-					memcpyMMX(pDestOdd[nLineTarget], 
+					memcpyMMX(pDest, 
 						ppOddLines[CurrentFrame][nLineTarget], 
 						CurrentX * 2);
+					pDest += 2 * OverlayPitch;
 				}
 			}
 			LastOddFrame = CurrentFrame;
@@ -1254,50 +995,82 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 			//CombFactors[CurrentFrame * 2] = GetCombFactor(ppOddLines[(CurrentFrame + 4) % 5], ppEvenLines[CurrentFrame] + 1);
 
 			// if we have dropped a field then do BOB
-			if(LastOddFrame != ((CurrentFrame + 4) % 5))
+			if(LastOddFrame != ((CurrentFrame + 4) % 5) || gPulldownMode == INTERPOLATE_BOB)
 			{
 				for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
 				{
 					// copy latest field data to both odd and even rows
-					pSource = ppEvenLines[CurrentFrame][nLineTarget];
-					ScreenPtr = lpCurOverlay + (nLineTarget * 2) * OverlayPitch;
-					ScreenPtr2 = lpCurOverlay + (nLineTarget * 2 + 1) * OverlayPitch;
-					memcpyBOBMMX(pDestEven[nLineTarget], 
-								pDestOdd[nLineTarget], 
+					memcpyBOBMMX(pDest, 
 								ppEvenLines[CurrentFrame][nLineTarget],
 								CurrentX * 2);
+					pDest += 2 * OverlayPitch;
 				}
+				bFlipNow = TRUE;
+				nFrame++;
 			}
 			else if(gPulldownMode == VIDEO_MODE)
 			{
-				if(bUseBTVPlugin == TRUE)
+				// copy first line
+				memcpyMMX(pDest, 
+						ppEvenLines[CurrentFrame][0], 
+						CurrentX * 2);
+				pDest += OverlayPitch;
+				// copy each middle odd line and interpolate even lines
+				for (nLineTarget = 1; nLineTarget < CurrentY / 2; nLineTarget++)
 				{
-					BTVParams.IsOddField = 0;
-					BTVParams.ppCurrentField = ppEvenLines[CurrentFrame];
-					BTVParams.ppLastField = ppOddLines[LastOddFrame];
-					BTVParams.ppEvenDest = pDestEven;
-					BTVParams.ppOddDest = pDestOdd;
-					BTVPluginDoField(&BTVParams);
+					VideoDeinterlaceMMX(pDest, 
+									ppEvenLines[CurrentFrame][nLineTarget - 1], 
+									ppOddLines[CurrentFrame][nLineTarget - 1], 
+									ppEvenLines[CurrentFrame][nLineTarget], 
+									CurrentX * 2);
+					pDest += 2 * OverlayPitch;
 				}
-				else
+				// copy last line in a bob way
+				memcpyMMX(pDest, 
+						ppEvenLines[CurrentFrame][CurrentY / 2 - 1], 
+						CurrentX * 2);
+			}
+			else if(gPulldownMode == SIMPLE_WEAVE)
+			{
+				Weave(ppOddLines[LastOddFrame], ppEvenLines[CurrentFrame], lpCurOverlay);
+			}
+			else if(gPulldownMode == BTV_PLUGIN)
+			{
+				BYTE* pDestEven[CLEARLINES];
+				BYTE* pDestOdd[CLEARLINES];
+				
+				// set up desination pointers
+				// may need to optimize this later
+				for (i = 0; i < BTV_VER1_HEIGHT; i += 2)
 				{
-					Weave(ppOddLines[LastOddFrame], ppEvenLines[CurrentFrame], lpCurOverlay);
+					pDestEven[i / 2] = pDest;
+					pDest += OverlayPitch;
+					pDestOdd[i / 2] = pDest;
+					pDest += OverlayPitch;
 				}
+				
+				BTVParams.IsOddField = 1;
+				BTVParams.ppCurrentField = ppOddLines[CurrentFrame];
+				BTVParams.ppLastField = ppEvenLines[LastEvenFrame];
+				BTVParams.ppEvenDest = pDestEven;
+				BTVParams.ppOddDest = pDestOdd;
+				bFlipNow = BTVPluginDoField(&BTVParams);
 			}
 			else
 			{
 				for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
 				{
 					// copy latest data to destination buffer
-					memcpyMMX(pDestEven[nLineTarget], 
+					memcpyMMX(pDest, 
 								ppEvenLines[CurrentFrame][nLineTarget], 
 								CurrentX  * 2);
+					pDest += 2 * OverlayPitch;
 				}
 			}
 			LastEvenFrame = CurrentFrame;
 		}
 
-		if(DoWeWantToFlip())
+		if(DoWeWantToFlip(bFlipNow, bIsOddField))
 		{
 			IDirectDrawSurface_Flip(lpDDOverlay, lpDDOverlayBack, DDFLIP_WAIT);
 			if(lpCurOverlay == lpOverlay)
@@ -1314,7 +1087,7 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 		{
 			if (dwLastCount + 1000 < GetTickCount())
 			{
-				sprintf(Text, "%d FPS", nFrame);
+				sprintf(Text, "%d DF/S", nFrame);
 				SetWindowText(hwndFPSField, Text);
 				nFrame = 0;
 				dwLastCount = GetTickCount();
@@ -1324,3 +1097,45 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 	ExitThread(0);
 	return 0;
 }
+
+BOOL WaitForNextField(BOOL LastField)
+{
+	BOOL bIsOddField;
+	DWORD stat = BT848_ReadDword(BT848_INT_STAT);
+
+	while(LastField == ((stat & BT848_INT_FIELD) == BT848_INT_FIELD))
+	{
+		Sleep(5);
+		stat = BT848_ReadDword(BT848_INT_STAT);
+	}
+
+	bIsOddField = ((stat & BT848_INT_FIELD) == BT848_INT_FIELD);
+
+	switch(stat >> 28)
+	{
+	case 1:
+		CurrentFrame = 0;
+		break;
+	case 2:
+		CurrentFrame = 1;
+		break;
+	case 3:
+		CurrentFrame = 2;
+		break;
+	case 4:
+		CurrentFrame = 3;
+		break;
+	case 5:
+		CurrentFrame = 4;
+		break;
+	default:
+		break;
+	}
+	if (VBI_Flags > 0 && bIsOddField == FALSE)
+	{
+		SetEvent(VBI_Event);
+	}
+
+	return bIsOddField;
+}
+

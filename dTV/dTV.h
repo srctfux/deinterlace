@@ -40,12 +40,6 @@
 #include "globals.h"
 
 
-BOOL InitStatusBar (HANDLE);
-BOOL CreateStatusBar (HWND, HANDLE, int);
-BOOL AdjustStatusBar (HWND);
-HWND AddStatusField (HANDLE, int, int, int, BOOL);
-BOOL DestroyStatusBar (void);
-
 /// Neu
 
 void Write_Nit_List();
@@ -70,6 +64,7 @@ LONG APIENTRY MainWndProc(HWND, UINT, UINT, LONG);
 void MainWndOnCreate(HWND hWnd);
 void MainWndOnInitBT(HWND hWnd);
 void SaveWindowPos(HWND hWnd);
+void CleanUpMemory();
 
 
 #endif

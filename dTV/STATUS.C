@@ -32,10 +32,8 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#define NOMINMAX
-#include <windows.h>
-
-#include <stdlib.h>				// For 'abs'
+#include "stdafx.h"
+#include "status.h"
 
 #if !defined (APIENTRY)
 #define APIENTRY FAR PASCAL
@@ -63,7 +61,7 @@ HBRUSH hbrBtnFace;
 LONG APIENTRY StatusProc(HWND, UINT, UINT, LONG);
 LONG APIENTRY StatusFieldProc(HWND, UINT, UINT, LONG);
 
-BOOL InitStatusBar(HANDLE hInstance)
+BOOL StatusBar_Init(HANDLE hInstance)
 {
 	WNDCLASS wndclass;
 
@@ -100,7 +98,7 @@ BOOL InitStatusBar(HANDLE hInstance)
 	return (TRUE);
 }
 
-BOOL CreateStatusBar(HWND hwnd, HANDLE hInst, int iId)
+BOOL StatusBar_Create(HWND hwnd, HANDLE hInst, int iId)
 {
 	cxStatusBorder = GetSystemMetrics(SM_CXBORDER);
 	cyStatusBorder = GetSystemMetrics(SM_CYBORDER);
@@ -114,7 +112,7 @@ BOOL CreateStatusBar(HWND hwnd, HANDLE hInst, int iId)
 	return TRUE;
 }
 
-BOOL AdjustStatusBar(HWND hwnd)
+BOOL StatusBar_Adjust(HWND hwnd)
 {
 	RECT rect;
 
@@ -123,7 +121,7 @@ BOOL AdjustStatusBar(HWND hwnd)
 	return TRUE;
 }
 
-HWND AddStatusField(HANDLE hInst, int iId, int iMin, int iMax, BOOL bNewGroup)
+HWND StatusBar_AddField(HANDLE hInst, int iId, int iMin, int iMax, BOOL bNewGroup)
 {
 	LONG lStyle;
 
@@ -163,7 +161,7 @@ HWND AddStatusField(HANDLE hInst, int iId, int iMin, int iMax, BOOL bNewGroup)
 	return statusField[cntStatusField++].hwnd;
 }
 
-BOOL DestroyStatusBar(void)
+BOOL StatusBar_Destroy(void)
 {
 	return DeleteObject(hbrBtnFace);
 }
@@ -190,14 +188,14 @@ LONG APIENTRY StatusProc(HWND hwnd, UINT msg, UINT wParam, LONG lParam)
 			}
 			else
 			{
-				MessageBox(GetFocus(), "Unable to get an unnamed variable pitch swiss font", "Status Bar CreateFont Error", MB_OK);
+				ErrorBox("Unable to get an unnamed variable pitch swiss font");
 				hfontStatus = CreateFont(14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, VARIABLE_PITCH | FF_SWISS, "Arial");
 			}
 		}
 
 		if (!hfontStatus)
 		{
-			MessageBox(GetFocus(), "Failed To Create Font", "StatusProc", MB_OK);
+			ErrorBox("Failed To Create Font");
 		}
 		hdc = GetDC(hwnd);
 		SelectObject(hdc, hfontStatus);

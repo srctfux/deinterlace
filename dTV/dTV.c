@@ -32,6 +32,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
+#include "stdafx.h"
 #include "other.h"
 #include "bt848.h"
 #include "mixerdev.h"
@@ -42,6 +43,10 @@
 #include "Dialogs.h"
 #include "OutThreads.h"
 #include "bTVPlugin.h"
+#include "audio.h"
+#include "tuner.h"
+#include "status.h"
+#include "vbi.h"
 
 HWND hwndStatusBar;
 HWND hwndTextField;
@@ -64,8 +69,6 @@ int PriorClassId;
 int ThreadClassId = 1;
 
 SYSTEM_INFO SysInfo;
-
-struct TCountries Countries[35];
 
 unsigned long freq;
 char Typ;
@@ -99,8 +102,7 @@ struct TPacket30 Packet30;
 char ChannelString[10];
 
 char BTTyp[30];
-char MSPStatus[30];
-char TunerStatus[30];
+char MSPStatus[30] = "";
 
 int LastFrame;
 
@@ -117,12 +119,7 @@ int  nPALplusData   =  0;
 
 BOOL  BlackSet[288];
 
-
-BYTE INIT_PLL = 0; 
-
 int CurrentFrame=0;
-
-BOOL bHardwareFound = FALSE;
 
 LOGFONT lf = {16,0,0,0,400,0,0,0,0,0,0,0,0,"MS Sans Serif"};   
 
@@ -142,14 +139,12 @@ short NullTable[4] = {8192, 0, 0, 8192};
 
 int InitialProg=-1;
 
-int AnzahlProzessor=1;
-int MainProzessor=0;
-int VBIProzessor=0;
-int AusgabeProzessor=0;
-int ProzessorMask;
+int NumberOfProcessors=1;
+int MainProcessor=0;
+int DecodeProcessor=0;
 
 
-BOOL CShowCursor = TRUE;
+BOOL bShowCursor = TRUE;
 
 /****************************************************************************
 
@@ -225,34 +220,29 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		return (FALSE);
 
 	statusbar = hInst;
-	if (!InitStatusBar(statusbar))
+	if (!StatusBar_Init(statusbar))
 	{
 		return FALSE;
 	}
 
-	if (CreateStatusBar(hWnd, statusbar, ID_STATUSBAR))
+	if (StatusBar_Create(hWnd, statusbar, ID_STATUSBAR))
 	{
-		hwndTextField = AddStatusField(statusbar, ID_TEXTFIELD, 110, 0, FALSE);
-		hwndAudioField = AddStatusField(statusbar, ID_AUDIOFIELD, 110, 0, FALSE);
-		hwndPalField = AddStatusField(statusbar, ID_CODEFIELD, 110, 0, FALSE);
-		hwndKeyField = AddStatusField(statusbar, ID_KENNUNGFFIELD, 90, 50, FALSE);
-		hwndFPSField = AddStatusField(statusbar, ID_FPSFIELD, 45, 45, TRUE);
+		hwndTextField = StatusBar_AddField(statusbar, ID_TEXTFIELD, 110, 0, FALSE);
+		hwndAudioField = StatusBar_AddField(statusbar, ID_AUDIOFIELD, 110, 0, FALSE);
+		hwndPalField = StatusBar_AddField(statusbar, ID_CODEFIELD, 110, 0, FALSE);
+		hwndKeyField = StatusBar_AddField(statusbar, ID_KENNUNGFFIELD, 90, 50, FALSE);
+		hwndFPSField = StatusBar_AddField(statusbar, ID_FPSFIELD, 45, 45, TRUE);
 	}
 	else
 	{
 		return FALSE;
 	}
 
-	AdjustStatusBar(hWnd);
+	StatusBar_Adjust(hWnd);
 
 	if (bDisplayStatusBar == FALSE)
 	{
-		CheckMenuItem(GetMenu(hWnd), IDM_STATUSBAR, MF_UNCHECKED);
 		ShowWindow(hwndStatusBar, SW_HIDE);
-	}
-	else
-	{
-		CheckMenuItem(GetMenu(hWnd), IDM_STATUSBAR, MF_CHECKED);
 	}
 
 	hGlobal = LoadResource(hInst, FindResource(hInst, "VTCHARLARGE", RT_BITMAP));
@@ -268,7 +258,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	PostMessage(hWnd, WM_SIZE, SIZENORMAL, MAKELONG(emsizex, emsizey));
 	if (!(hAccel = LoadAccelerators(hInstance, "ANALOGACCEL")))
 	{
-		(void) MessageBox(GetFocus(), "Accelerators not Loaded", "Error", MB_OK);
+		ErrorBox("Accelerators not Loaded");
 	}
 
 	while (GetMessage(&msg, NULL, 0, 0))
@@ -290,7 +280,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	BTVPluginUnload();
 
 	ExitDD();
-
+	// save settings
+	WriteSettingsToIni();
 	return msg.wParam;
 }
 
@@ -328,6 +319,15 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 	case WM_COMMAND:
 		switch (LOWORD(wParam))
 		{
+		case IDM_SETUPCARD:
+			Stop_Capture();
+			DialogBox(hInst, "SELECTCARD", hWnd, (DLGPROC) SelectCardProc);
+			//Card_Init(CardType);
+			//Tuner_Init(TunerType);
+			Init_Screen_Struct();
+			Start_Capture();
+			break;
+
 		case IDM_CLOSE_VT:
 			for (i = 0; i < MAXVTDIALOG; i++)
 			{
@@ -425,25 +425,12 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			return (TRUE);
 
 		case IDM_CHANNELPLUS:
-			if (USETUNER == FALSE)
-				break;
-			SetAudioSource(4);
-
-			i = CurrentProgramm + 1;
-			CurrentProgramm = -1;
-			while (i < MAXPROGS)
+			if (TunerType != TUNER_ABSENT)
 			{
-				if ((Programm[i].freq != 0) && (ValidModes(Programm[i].Typ) == TRUE))
-				{
-					CurrentProgramm = i;
-					break;
-				}
-				i++;
-			}
+				Audio_SetSource(AUDIOMUX_MUTE);
 
-			if (CurrentProgramm == -1)
-			{
-				i = 0;
+				i = CurrentProgramm + 1;
+				CurrentProgramm = -1;
 				while (i < MAXPROGS)
 				{
 					if ((Programm[i].freq != 0) && (ValidModes(Programm[i].Typ) == TRUE))
@@ -453,41 +440,42 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 					}
 					i++;
 				}
-			}
 
-			if (CurrentProgramm >= 0)
-			{
-				Tuner_SetFrequency(TunerType, MulDiv(Programm[CurrentProgramm].freq * 1000, 16, 1000000));
-
-				if (bDisplayStatusBar == TRUE)
+				if (CurrentProgramm == -1)
 				{
-					sprintf(Text, "%04d. %s ", CurrentProgramm + 1, Programm[CurrentProgramm].Name);
-					SetWindowText(hwndKeyField, Text);
+					i = 0;
+					while (i < MAXPROGS)
+					{
+						if ((Programm[i].freq != 0) && (ValidModes(Programm[i].Typ) == TRUE))
+						{
+							CurrentProgramm = i;
+							break;
+						}
+						i++;
+					}
 				}
-				VT_ChannelChange();
+
+				if (CurrentProgramm >= 0)
+				{
+					Tuner_SetFrequency(TunerType, MulDiv(Programm[CurrentProgramm].freq * 1000, 16, 1000000));
+
+					if (bDisplayStatusBar == TRUE)
+					{
+						sprintf(Text, "%04d. %s ", CurrentProgramm + 1, Programm[CurrentProgramm].Name);
+						SetWindowText(hwndKeyField, Text);
+					}
+					VT_ChannelChange();
+				}
+				Audio_SetSource(AudioSource);
 			}
-			SetAudioSource(AudioSource);
 			break;
 
 		case IDM_CHANNELMINUS:
-			if (USETUNER == FALSE)
-				break;
-			SetAudioSource(4);
-			i = CurrentProgramm - 1;
-			CurrentProgramm = -1;
-			while (i >= 0)
+			if (TunerType != TUNER_ABSENT)
 			{
-				if ((Programm[i].freq != 0) && (ValidModes(Programm[i].Typ) == TRUE))
-				{
-					CurrentProgramm = i;
-					break;
-				}
-				i--;
-			}
-
-			if (CurrentProgramm == -1)
-			{
-				i = MAXPROGS - 1;
+				Audio_SetSource(AUDIOMUX_MUTE);
+				i = CurrentProgramm - 1;
+				CurrentProgramm = -1;
 				while (i >= 0)
 				{
 					if ((Programm[i].freq != 0) && (ValidModes(Programm[i].Typ) == TRUE))
@@ -497,38 +485,51 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 					}
 					i--;
 				}
-			}
 
-			if (CurrentProgramm >= 0)
-			{
-
-				Tuner_SetFrequency(TunerType, MulDiv(Programm[CurrentProgramm].freq * 1000, 16, 1000000));
-
-				if (bDisplayStatusBar == TRUE)
+				if (CurrentProgramm == -1)
 				{
-					sprintf(Text, "%04d. %s ", CurrentProgramm + 1, Programm[CurrentProgramm].Name);
-					SetWindowText(hwndKeyField, Text);
+					i = MAXPROGS - 1;
+					while (i >= 0)
+					{
+						if ((Programm[i].freq != 0) && (ValidModes(Programm[i].Typ) == TRUE))
+						{
+							CurrentProgramm = i;
+							break;
+						}
+						i--;
+					}
 				}
-				VT_ChannelChange();
+
+				if (CurrentProgramm >= 0)
+				{
+
+					Tuner_SetFrequency(TunerType, MulDiv(Programm[CurrentProgramm].freq * 1000, 16, 1000000));
+
+					if (bDisplayStatusBar == TRUE)
+					{
+						sprintf(Text, "%04d. %s ", CurrentProgramm + 1, Programm[CurrentProgramm].Name);
+						SetWindowText(hwndKeyField, Text);
+					}
+					VT_ChannelChange();
+				}
+				Audio_SetSource(AudioSource);
 			}
-			SetAudioSource(AudioSource);
 			break;
 
 		case IDM_RESET:
-			Set_Capture(4);
-			Reset_BT_HardWare(hWnd);
+			Stop_Capture();
+			BT848_ResetHardware();
 			Init_Screen_Struct();
-			Set_Capture(5);
+			Start_Capture();
 			Sleep(100);
-			SetAudioSource(AudioSource);
+			Audio_SetSource(AudioSource);
 			break;
 
 		case IDM_TOGGLE_MENU:
 			Show_Menu = !Show_Menu;
-			Set_Capture(4);
+			Stop_Capture();
 			Init_Screen_Struct();
-			Set_Capture(5);
-			return (TRUE);
+			Start_Capture();
 			break;
 
 		case IDM_ABOUT:
@@ -547,7 +548,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				InitialBrightness = 256 + i;
 			else
 				InitialBrightness = i;
-			SetBrightness(InitialBrightness);
+			BT848_SetBrightness(InitialBrightness);
 			sprintf(Text, "Brightness %d", i);
 			if (bDisplayStatusBar == TRUE)
 				SetWindowText(hwndTextField, Text);
@@ -564,7 +565,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				InitialBrightness = 256 + i;
 			else
 				InitialBrightness = i;
-			SetBrightness(InitialBrightness);
+			BT848_SetBrightness(InitialBrightness);
 			sprintf(Text, "Brightness %d", i);
 			if (bDisplayStatusBar == TRUE)
 				SetWindowText(hwndTextField, Text);
@@ -578,8 +579,8 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				sprintf(Text, "Colour U %d V %d", InitialSaturationU, InitialSaturationV);
 				if (bDisplayStatusBar == TRUE)
 					SetWindowText(hwndTextField, Text);
-				SetSaturationU(InitialSaturationU);
-				SetSaturationV(InitialSaturationV);
+				BT848_SetSaturationU(InitialSaturationU);
+				BT848_SetSaturationV(InitialSaturationV);
 			}
 			break;
 
@@ -591,8 +592,8 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				sprintf(Text, "Colour U %d V %d", InitialSaturationU, InitialSaturationV);
 				if (bDisplayStatusBar == TRUE)
 					SetWindowText(hwndTextField, Text);
-				SetSaturationU(InitialSaturationU);
-				SetSaturationV(InitialSaturationV);
+				BT848_SetSaturationU(InitialSaturationU);
+				BT848_SetSaturationV(InitialSaturationV);
 			}
 			break;
 
@@ -603,7 +604,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				sprintf(Text, "Hue %d", InitialHue);
 				if (bDisplayStatusBar == TRUE)
 					SetWindowText(hwndTextField, Text);
-				SetHue(InitialHue);
+				BT848_SetHue(InitialHue);
 			}
 			break;
 
@@ -614,14 +615,14 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				sprintf(Text, "Hue %d", InitialHue);
 				if (bDisplayStatusBar == TRUE)
 					SetWindowText(hwndTextField, Text);
-				SetHue(InitialHue);
+				BT848_SetHue(InitialHue);
 			}
 			break;
 
 		case IDM_KONTRASTPLUS:
 			if (InitialContrast < 256)
 				InitialContrast++;
-			SetContrast(InitialContrast);
+			BT848_SetContrast(InitialContrast);
 			sprintf(Text, "Contrast %d", InitialContrast);
 			if (bDisplayStatusBar == TRUE)
 				SetWindowText(hwndTextField, Text);
@@ -630,7 +631,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_KONTRASTMINUS:
 			if (InitialContrast > 0)
 				InitialContrast--;
-			SetContrast(InitialContrast);
+			BT848_SetContrast(InitialContrast);
 			sprintf(Text, "Contrast %d", InitialContrast);
 			if (bDisplayStatusBar == TRUE)
 				SetWindowText(hwndTextField, Text);
@@ -642,7 +643,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				System_In_Mute = TRUE;
 				if (USE_MIXER == FALSE)
 				{
-					SetAudioSource(4);
+					Audio_SetSource(AUDIOMUX_MUTE);
 					sprintf(Text, "Mute BT");
 				}
 				if (USE_MIXER == TRUE)
@@ -656,7 +657,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				System_In_Mute = FALSE;
 				if (USE_MIXER == FALSE)
 				{
-					SetAudioSource(AudioSource);
+					Audio_SetSource(AudioSource);
 					sprintf(Text, "UnMute BT");
 				}
 				if (USE_MIXER == TRUE)
@@ -765,23 +766,11 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_TOGGLECURSOR:
-			CShowCursor = !CShowCursor;
-			i = ShowCursor(CShowCursor);
-			break;
-
-		case IDM_KARTE0:
-		case IDM_KARTE1:
-		case IDM_KARTE2:
-		case IDM_KARTE3:
-		case IDM_KARTE4:
-		case IDM_KARTE5:
-		case IDM_KARTE6:
-			CheckMenuItem(GetMenu(hWnd), CardType + 1080, MF_UNCHECKED);
-			CardType = wParam - 1080;
-			CheckMenuItem(GetMenu(hWnd), CardType + 1080, MF_CHECKED);
-			break;
-		case IDM_MANUELL_CARD:
-			DialogBox(hInst, "CARDTYPE", hWnd, (DLGPROC) CardSettingProc);
+			if(bIsFullScreen == FALSE)
+			{
+				bShowCursor = !bShowCursor;
+				ShowCursor(bShowCursor);
+			}
 			break;
 
 		case IDM_ENDE:
@@ -793,14 +782,16 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_MSPMODE_4:
 		case IDM_MSPMODE_5:
 		case IDM_MSPMODE_6:
-			MSP_SetMode(wParam - 1600);
+			Audio_MSP_SetMode(wParam - 1600);
+			SetMenuAnalog();
 			break;
 
 		case IDM_MAJOR_CARRIER_0:
 		case IDM_MAJOR_CARRIER_1:
 		case IDM_MAJOR_CARRIER_2:
 		case IDM_MAJOR_CARRIER_3:
-			MSP_Set_MajorMinor_Mode(wParam - 1610, MSPMinorMode);
+			Audio_MSP_Set_MajorMinor_Mode(wParam - 1610, MSPMinorMode);
+			SetMenuAnalog();
 			break;
 
 		case IDM_MINOR_CARRIER_0:
@@ -811,28 +802,21 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_MINOR_CARRIER_5:
 		case IDM_MINOR_CARRIER_6:
 		case IDM_MINOR_CARRIER_7:
-			MSP_Set_MajorMinor_Mode(MSPMajorMode, wParam - 1620);
+			Audio_MSP_Set_MajorMinor_Mode(MSPMajorMode, wParam - 1620);
+			SetMenuAnalog();
 			break;
 
 		case IDM_MSPSTEREO_1:
 		case IDM_MSPSTEREO_2:
 		case IDM_MSPSTEREO_3:
 		case IDM_MSPSTEREO_4:
-			MSP_SetStereo(MSPMajorMode, MSPMinorMode, wParam - 1630);
+			Audio_MSP_SetStereo(MSPMajorMode, MSPMinorMode, wParam - 1630);
+			SetMenuAnalog();
 			break;
 
 		case IDM_AUTOSTEREO:
-			if (AutoStereoSelect == FALSE)
-			{
-				AutoStereoSelect = TRUE;
-				CheckMenuItem(GetMenu(hWnd), IDM_AUTOSTEREO, MF_CHECKED);
-
-			}
-			else
-			{
-				AutoStereoSelect = FALSE;
-				CheckMenuItem(GetMenu(hWnd), IDM_AUTOSTEREO, MF_UNCHECKED);
-			}
+			AutoStereoSelect = !AutoStereoSelect;
+			SetMenuAnalog();
 			break;
 
 		case IDM_AUDIO_0:
@@ -841,109 +825,78 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_AUDIO_3:
 		case IDM_AUDIO_4:
 		case IDM_AUDIO_5:
-
-			CheckMenuItem(GetMenu(hWnd), AudioSource + 1110, MF_UNCHECKED);
 			AudioSource = wParam - 1110;
-			Set_Capture(4);
-			SetAudioSource(AudioSource);
-			Set_Capture(5);
-			CheckMenuItem(GetMenu(hWnd), AudioSource + 1110, MF_CHECKED);
+			Stop_Capture();
+			Audio_SetSource(AudioSource);
+			Start_Capture();
+			SetMenuAnalog();
 			break;
 
+		case IDM_TUNER:
+			VideoSource = 0;
+			AudioSource = AUDIOMUX_TUNER;
+			Stop_Capture();
+			BT848_SetVideoSource(VideoSource);
+			if (bDisplayStatusBar == TRUE)
+			{
+				sprintf(Text, "%04d. %s ", CurrentProgramm + 1, Programm[CurrentProgramm].Name);
+				SetWindowText(hwndKeyField, Text);
+			}
+			if(!System_In_Mute)
+			{
+				Audio_SetSource(AudioSource);
+			}
+			Start_Capture();
+			SetMenuAnalog();
+			break;
 		case IDM_EXTERN1:
 		case IDM_EXTERN2:
 		case IDM_EXTERN3:
-			CheckMenuItem(GetMenu(hWnd), VideoSource + 1089, MF_UNCHECKED);
-			VideoSource = wParam - 1089;
-			Set_Capture(4);
-			SetVideoSource(VideoSource);
-			sprintf(Text, "Extern %d", VideoSource);
+		case IDM_EXTERN4:
+			VideoSource = wParam - IDM_TUNER;
+			AudioSource = AUDIOMUX_EXTERNAL;
+			Stop_Capture();
+			BT848_SetVideoSource(VideoSource);
 			if (bDisplayStatusBar == TRUE)
-				SetWindowText(hwndKeyField, Text);
-			Set_Capture(5);
-			CheckMenuItem(GetMenu(hWnd), VideoSource + 1089, MF_CHECKED);
-			break;
+			{
 
-		case IDM_VIDEO:
-			if (Capture_Video == FALSE)
-			{
-				Capture_Video = TRUE;
-				Set_Capture(0);
-				CheckMenuItem(GetMenu(hWnd), IDM_VIDEO, MF_CHECKED);
+				sprintf(Text, "Extern %d", VideoSource);
+				SetWindowText(hwndKeyField, Text);
 			}
-			else
+			if(!System_In_Mute)
 			{
-				Set_Capture(1);
-				Capture_Video = FALSE;
-				CheckMenuItem(GetMenu(hWnd), IDM_VIDEO, MF_UNCHECKED);
+				Audio_SetSource(AudioSource);
 			}
+			Start_Capture();
+			SetMenuAnalog();
 			break;
 
 		case IDM_HWINFO:
 			DialogBox(hInst, "HWINFO", hWnd, (DLGPROC) ChipSettingProc);
 			break;
 
-		case IDM_PLL:
-			DialogBox(hInst, "PLLINFO", hWnd, (DLGPROC) PLLSettingProc);
-			break;
-
-		case IDM_IFORM:
-			DialogBox(hInst, "IFORMINFO", hWnd, (DLGPROC) IFormSettingProc);
-			break;
-
-		case IDM_DONT_TOUCH:
-			if (USETUNER == TRUE)
-			{
-				USETUNER = FALSE;
-				CheckMenuItem(GetMenu(hWnd), IDM_DONT_TOUCH, MF_CHECKED);
-			}
-			else
-			{
-				USETUNER = TRUE;
-				CheckMenuItem(GetMenu(hWnd), IDM_DONT_TOUCH, MF_UNCHECKED);
-			}
-			break;
-
-		case IDM_DONT_TOUCH_CARD:
-			if (USECARD == TRUE)
-			{
-				USECARD = FALSE;
-				CheckMenuItem(GetMenu(hWnd), IDM_DONT_TOUCH_CARD, MF_CHECKED);
-			}
-			else
-			{
-				USECARD = TRUE;
-				CheckMenuItem(GetMenu(hWnd), IDM_DONT_TOUCH_CARD, MF_UNCHECKED);
-			}
-			break;
-
-		case IDM_MANUELL_TUNER:
-			DialogBox(hInst, "TUNERSETTINGS", hWnd, (DLGPROC) TunerSettingProc);
-			break;
-
 		case IDM_VBI_VT:
 			if (VBI_Flags & VBI_VT)
 			{
 				VBI_Flags -= VBI_VT;
-				CheckMenuItem(GetMenu(hWnd), IDM_VBI_VT, MF_UNCHECKED);
-				EnableMenuItem(GetMenu(hWnd), IDM_VT_OUT, MF_GRAYED);
-				EnableMenuItem(GetMenu(hWnd), IDM_CALL_VIDEOTEXTSMALL, MF_GRAYED);
-				EnableMenuItem(GetMenu(hWnd), IDM_CALL_VIDEOTEXT, MF_GRAYED);
-				EnableMenuItem(GetMenu(hWnd), IDM_VT_RESET, MF_GRAYED);
-				EnableMenuItem(GetMenu(hWnd), IDM_UNTERTITEL, MF_GRAYED);
-				EnableMenuItem(GetMenu(hWnd), IDM_PDC_OUT, MF_GRAYED);
-				EnableMenuItem(GetMenu(hWnd), IDM_VT_OUT, MF_GRAYED);
-
-				break;
 			}
-			VBI_Flags += VBI_VT;
-			CheckMenuItem(GetMenu(hWnd), IDM_VBI_VT, MF_CHECKED);
-			EnableMenuItem(GetMenu(hWnd), IDM_CALL_VIDEOTEXTSMALL, MF_ENABLED);
-			EnableMenuItem(GetMenu(hWnd), IDM_CALL_VIDEOTEXT, MF_ENABLED);
-			EnableMenuItem(GetMenu(hWnd), IDM_VT_RESET, MF_ENABLED);
-			EnableMenuItem(GetMenu(hWnd), IDM_UNTERTITEL, MF_ENABLED);
-			EnableMenuItem(GetMenu(hWnd), IDM_PDC_OUT, MF_ENABLED);
-			EnableMenuItem(GetMenu(hWnd), IDM_VT_OUT, MF_ENABLED);
+			else
+			{
+				VBI_Flags += VBI_VT;
+			}
+			SetMenuAnalog();
+			break;
+	
+		case IDM_CLOSEDCAPTION:
+			if (VBI_Flags & VBI_CC)
+			{
+				VBI_Flags -= VBI_CC;
+			}
+			else
+			{
+				VBI_Flags += VBI_CC;
+			}
+			SetMenuAnalog();
 			break;
 
 		case IDM_VBI_VD:
@@ -951,83 +904,63 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			{
 				if (BeforeVD != 7)
 				{
-					Set_Capture(4);
+					Stop_Capture();
 					Sleep(30);
 					VBI_Flags -= VBI_VD;
 					VideoDat_Exit();
-					CheckMenuItem(GetMenu(hWnd), IDM_VBI_VD, MF_UNCHECKED);
-					VBI_lpf = 16;
-					for(i = 0; i < 5; i++)
-					{
-						MakeVBITable(i, VBI_lpf);
-					}
-					CheckMenuItem(GetMenu(hWnd), TVTYPE + 1120, MF_UNCHECKED);
+					VBI_lpf = 19;
+					BT848_MakeVBITable(VBI_lpf);
 					TVTYPE = BeforeVD;
-					CheckMenuItem(GetMenu(hWnd), TVTYPE + 1120, MF_CHECKED);
-					EnableMenuItem(GetMenu(hWnd), IDM_VD_OUT, MF_GRAYED);
 					Init_Screen_Struct();
-					Set_Capture(5);
+					Start_Capture();
 					break;
 				}
 				VBI_Flags -= VBI_VD;
-				CheckMenuItem(GetMenu(hWnd), IDM_VBI_VD, MF_UNCHECKED);
-				EnableMenuItem(GetMenu(hWnd), IDM_VD_OUT, MF_GRAYED);
-				break;
 			}
-
-			BeforeVD = TVTYPE;
-			if (TVTYPE != 7)
+			else
 			{
-				Set_Capture(4);
-				Sleep(30);
-				VideoDat_Init();
-				VBI_Flags += VBI_VD;	// 
-				CheckMenuItem(GetMenu(hWnd), IDM_VBI_VD, MF_CHECKED);
-				VBI_lpf = 19;
-				for(i = 0; i < 5; i++)
+				BeforeVD = TVTYPE;
+				if (TVTYPE != 7)
 				{
-					MakeVBITable(i, VBI_lpf);
+					Stop_Capture();
+					Sleep(30);
+					VideoDat_Init();
+					VBI_Flags += VBI_VD;	// 
+					VBI_lpf = 19;
+					BT848_MakeVBITable(VBI_lpf);
+					TVTYPE = 7;
+					Init_Screen_Struct();
+					Start_Capture();
+					break;
 				}
-				CheckMenuItem(GetMenu(hWnd), TVTYPE + 1120, MF_UNCHECKED);
-				TVTYPE = 7;
-				CheckMenuItem(GetMenu(hWnd), TVTYPE + 1120, MF_CHECKED);
-				EnableMenuItem(GetMenu(hWnd), IDM_VD_OUT, MF_ENABLED);
-				Init_Screen_Struct();
-				Set_Capture(5);
-				break;
+				VideoDat_Init();
+				VBI_Flags += VBI_VD;
 			}
-			VideoDat_Init();
-			VBI_Flags += VBI_VD;
-
-			CheckMenuItem(GetMenu(hWnd), IDM_VBI_VD, MF_CHECKED);
-			EnableMenuItem(GetMenu(hWnd), IDM_VD_OUT, MF_ENABLED);
+			SetMenuAnalog();
 			break;
 
 		case IDM_VBI_VPS:
 			if (VBI_Flags & VBI_VPS)
 			{
 				VBI_Flags -= VBI_VPS;
-				CheckMenuItem(GetMenu(hWnd), IDM_VBI_VPS, MF_UNCHECKED);
-				EnableMenuItem(GetMenu(hWnd), IDM_VPS_OUT, MF_GRAYED);
-				break;
 			}
-			VBI_Flags += VBI_VPS;
-			CheckMenuItem(GetMenu(hWnd), IDM_VBI_VPS, MF_CHECKED);
-			EnableMenuItem(GetMenu(hWnd), IDM_VPS_OUT, MF_ENABLED);
+			else
+			{
+				VBI_Flags += VBI_VPS;
+			}
+			SetMenuAnalog();
 			break;
 
 		case IDM_VBI_IC:
 			if (VBI_Flags & VBI_IC)
 			{
 				VBI_Flags -= VBI_IC;
-				CheckMenuItem(GetMenu(hWnd), IDM_VBI_IC, MF_UNCHECKED);
-				EnableMenuItem(GetMenu(hWnd), IDM_IC_OUT, MF_GRAYED);
-				break;
 			}
-			VBI_Flags += VBI_IC;
-			CheckMenuItem(GetMenu(hWnd), IDM_VBI_IC, MF_CHECKED);
-			EnableMenuItem(GetMenu(hWnd), IDM_IC_OUT, MF_ENABLED);
-
+			else
+			{
+				VBI_Flags += VBI_IC;
+			}
+			SetMenuAnalog();
 			break;
 
 		case IDM_UNTERTITEL:
@@ -1061,6 +994,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			if (bAlwaysOnTop == TRUE)
 				SetWindowPos(VThWnd, HWND_TOPMOST, 10, 10, 20, 20, SWP_NOMOVE | SWP_NOCOPYBITS | SWP_NOSIZE);
 			break;
+
 		case IDM_VT_RESET:
 			VT_ChannelChange();
 			break;
@@ -1097,75 +1031,24 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_VBI:
-			if (Capture_VBI == FALSE)
-			{
-				Start_VBI();
-				Set_Capture(2);
-				EnableMenuItem(GetMenu(hWnd), IDM_VBI_VT, MF_ENABLED);
-				EnableMenuItem(GetMenu(hWnd), IDM_VBI_WINBIS, MF_ENABLED);
-				EnableMenuItem(GetMenu(hWnd), IDM_VBI_IC, MF_ENABLED);
-				if (VBI_Flags & VBI_IC)
-				{
-					EnableMenuItem(GetMenu(hWnd), IDM_IC_OUT, MF_ENABLED);
-				}
-				EnableMenuItem(GetMenu(hWnd), IDM_VBI_VPS, MF_ENABLED);
-				if (VBI_Flags & VBI_VPS)
-				{
-					EnableMenuItem(GetMenu(hWnd), IDM_VPS_OUT, MF_ENABLED);
-				}
-
-				EnableMenuItem(GetMenu(hWnd), IDM_VBI_VD, MF_ENABLED);
-
-				if (VBI_Flags & VBI_VT)
-				{
-					EnableMenuItem(GetMenu(hWnd), IDM_CALL_VIDEOTEXTSMALL, MF_ENABLED);
-					EnableMenuItem(GetMenu(hWnd), IDM_CALL_VIDEOTEXT, MF_ENABLED);
-					EnableMenuItem(GetMenu(hWnd), IDM_VT_RESET, MF_ENABLED);
-					EnableMenuItem(GetMenu(hWnd), IDM_UNTERTITEL, MF_ENABLED);
-					EnableMenuItem(GetMenu(hWnd), IDM_PDC_OUT, MF_ENABLED);
-					EnableMenuItem(GetMenu(hWnd), IDM_VT_OUT, MF_ENABLED);
-				}
-
-				Capture_VBI = TRUE;
-				CheckMenuItem(GetMenu(hWnd), IDM_VBI, MF_CHECKED);
-			}
-			else
-			{
-				Capture_VBI = FALSE;
-				Set_Capture(4);
-				EnableMenuItem(GetMenu(hWnd), IDM_VBI_VT, MF_GRAYED);
-				EnableMenuItem(GetMenu(hWnd), IDM_VBI_IC, MF_GRAYED);
-				EnableMenuItem(GetMenu(hWnd), IDM_VBI_WINBIS, MF_GRAYED);
-				EnableMenuItem(GetMenu(hWnd), IDM_VBI_VPS, MF_GRAYED);
-				EnableMenuItem(GetMenu(hWnd), IDM_VBI_VD, MF_GRAYED);
-				EnableMenuItem(GetMenu(hWnd), IDM_CALL_VIDEOTEXTSMALL, MF_GRAYED);
-				EnableMenuItem(GetMenu(hWnd), IDM_CALL_VIDEOTEXT, MF_GRAYED);
-				EnableMenuItem(GetMenu(hWnd), IDM_VT_RESET, MF_GRAYED);
-				CheckMenuItem(GetMenu(hWnd), IDM_VBI, MF_UNCHECKED);
-				EnableMenuItem(GetMenu(hWnd), IDM_UNTERTITEL, MF_GRAYED);
-				EnableMenuItem(GetMenu(hWnd), IDM_PDC_OUT, MF_GRAYED);
-				EnableMenuItem(GetMenu(hWnd), IDM_VT_OUT, MF_GRAYED);
-				EnableMenuItem(GetMenu(hWnd), IDM_IC_OUT, MF_GRAYED);
-				EnableMenuItem(GetMenu(hWnd), IDM_VPS_OUT, MF_GRAYED);
-
-				Set_Capture(3);
-
-			}
+			Stop_Capture();
+			Capture_VBI = !Capture_VBI;
+			Start_Capture();
+			SetMenuAnalog();
 			break;
 
 		case IDM_CAPTURE_PAUSE:
 			if (Capture_Pause == FALSE)
 			{
 				Capture_Pause = TRUE;
-				Set_Capture(4);
-				CheckMenuItem(GetMenu(hWnd), IDM_CAPTURE_PAUSE, MF_CHECKED);
+				Stop_Capture();
 			}
 			else
 			{
-				Set_Capture(5);
 				Capture_Pause = FALSE;
-				CheckMenuItem(GetMenu(hWnd), IDM_CAPTURE_PAUSE, MF_UNCHECKED);
+				Start_Capture();
 			}
+			CheckMenuItem(GetMenu(hWnd), IDM_CAPTURE_PAUSE, Capture_Pause?MF_CHECKED:MF_UNCHECKED);
 			break;
 
 		case IDM_AUDIO_MIXER:
@@ -1173,34 +1056,29 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_STATUSBAR:
-			if (bDisplayStatusBar == TRUE)
+			bDisplayStatusBar = !bDisplayStatusBar;
+			if(bDisplayStatusBar == TRUE)
 			{
-
-				bDisplayStatusBar = FALSE;
-				KillTimer(hWnd, 1);
-				CheckMenuItem(GetMenu(hWnd), IDM_STATUSBAR, MF_UNCHECKED);
-				Set_Capture(4);
-				ShowWindow(hwndStatusBar, SW_HIDE);
-				Init_Screen_Struct();
-				Set_Capture(5);
-				break;
+				SetTimer(hWnd, 1, 2000, NULL);
+				ShowWindow(hwndStatusBar, SW_SHOW);
 			}
-			bDisplayStatusBar = TRUE;
-			SetTimer(hWnd, 1, 2000, NULL);
-			CheckMenuItem(GetMenu(hWnd), IDM_STATUSBAR, MF_CHECKED);
-			Set_Capture(4);
-			ShowWindow(hwndStatusBar, SW_SHOW);
+			else
+			{
+				KillTimer(hWnd, 1);
+				ShowWindow(hwndStatusBar, SW_HIDE);
+			}
+			Stop_Capture();
 			Init_Screen_Struct();
-			Set_Capture(5);
-
+			Start_Capture();
+			SetMenuAnalog();
 			break;
 
 		case IDM_ON_TOP:
 			bAlwaysOnTop = !bAlwaysOnTop;
-			Set_Capture(4);
+			Stop_Capture();
 			Init_Screen_Struct();
-			Set_Capture(5);
-
+			Start_Capture();
+			SetMenuAnalog();
 			break;
 
 		case IDM_ANALOGSCAN:
@@ -1216,20 +1094,17 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_TREADPRIOR_2:
 		case IDM_TREADPRIOR_3:
 		case IDM_TREADPRIOR_4:
-			CheckMenuItem(GetMenu(hWnd), ThreadClassId + 1150, MF_UNCHECKED);
 			ThreadClassId = wParam - 1150;
-			CheckMenuItem(GetMenu(hWnd), ThreadClassId + 1150, MF_CHECKED);
-			Set_Capture(4);
-			Sleep(100);
-			Set_Capture(5);
+			Stop_Capture();
+			Init_Screen_Struct();
+			Start_Capture();
+			SetMenuAnalog();
 			break;
 
 		case IDM_PRIORCLASS_0:
 		case IDM_PRIORCLASS_1:
 		case IDM_PRIORCLASS_2:
-			CheckMenuItem(GetMenu(hWnd), PriorClassId + 1160, MF_UNCHECKED);
 			PriorClassId = wParam - 1160;
-			CheckMenuItem(GetMenu(hWnd), PriorClassId + 1160, MF_CHECKED);
 			strcpy(Text, "Can't set Priority");
 			if (PriorClassId == 0)
 			{
@@ -1247,48 +1122,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 					strcpy(Text, "Real-Time Priority");
 			}
 			SetWindowText(hwndTextField, Text);
-			break;
-
-		case IDM_TUNER_4:
-			CheckMenuItem(GetMenu(hWnd), TunerType + 1100, MF_UNCHECKED);
-			CheckMenuItem(GetMenu(hWnd), IDM_EXTERN1, MF_UNCHECKED);
-			CheckMenuItem(GetMenu(hWnd), IDM_EXTERN2, MF_UNCHECKED);
-			CheckMenuItem(GetMenu(hWnd), IDM_EXTERN3, MF_UNCHECKED);
-			TunerType = wParam - 1100;
-			CheckMenuItem(GetMenu(hWnd), TunerType + 1100, MF_CHECKED);
-			Set_Capture(4);
-			VideoSource = 0;
-			SetVideoSource(VideoSource);
-			Set_Capture(5);
-			break;
-
-		case IDM_TUNER_0:
-		case IDM_TUNER_1:
-		case IDM_TUNER_2:
-		case IDM_TUNER_3:
-		case IDM_TUNER_5:
-		case IDM_TUNER_6:
-		case IDM_TUNER_7:
-		case IDM_TUNER_8:
-
-			CheckMenuItem(GetMenu(hWnd), TunerType + 1100, MF_UNCHECKED);
-			CheckMenuItem(GetMenu(hWnd), IDM_EXTERN1, MF_UNCHECKED);
-			CheckMenuItem(GetMenu(hWnd), IDM_EXTERN2, MF_UNCHECKED);
-			CheckMenuItem(GetMenu(hWnd), IDM_EXTERN3, MF_UNCHECKED);
-
-			VideoSource = 0;
-			TunerType = wParam - 1100;
-			Set_Capture(4);
-			Init_Tuner(TunerType);
-			SetVideoSource(VideoSource);
-			i = 0;
-			sprintf(Text, "%04d. %s ", CurrentProgramm + 1, Programm[CurrentProgramm].Name);
-			if (bDisplayStatusBar == TRUE)
-				SetWindowText(hwndKeyField, Text);
-
-			Set_Capture(5);
-
-			CheckMenuItem(GetMenu(hWnd), TunerType + 1100, MF_CHECKED);
+			SetMenuAnalog();
 			break;
 
 		case IDM_TYPEFORMAT_0:
@@ -1301,45 +1135,49 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_TYPEFORMAT_7:
 		case IDM_TYPEFORMAT_8:
 		case IDM_TYPEFORMAT_9:
-			CheckMenuItem(GetMenu(hWnd), TVTYPE + 1120, MF_UNCHECKED);
 			TVTYPE = wParam - 1120;
-			CheckMenuItem(GetMenu(hWnd), TVTYPE + 1120, MF_CHECKED);
-			Set_Capture(4);
+			Stop_Capture();
 			Init_Screen_Struct();
-			Set_Capture(5);
+			Start_Capture();
+			SetMenuAnalog();
 			break;
 
 		case IDM_SPACEBAR:
 			gPulldownMode++;
-			if(gPulldownMode == PULLDOWNMODES_LAST_ONE)
+			// if we can't use a bTV plug-in the skip it
+			if(gPulldownMode == BTV_PLUGIN && bUseBTVPlugin == FALSE)
+			{
+				gPulldownMode++;
+			}
+			else if(gPulldownMode == PULLDOWNMODES_LAST_ONE)
 			{
 				gPulldownMode = VIDEO_MODE;
 			}
 			UpdatePulldownStatus();
 			break;
+
 		case IDM_FULL_SCREEN:
 			bDoResize = FALSE;
 			bIsFullScreen = !bIsFullScreen;
 			if(bIsFullScreen == FALSE)
 			{
-				ShowCursor(CShowCursor);
-
 				SetWindowPos(hWnd, 0, emstartx, emstarty, emsizex, emsizey, SWP_SHOWWINDOW);
-				ShowWindow(hwndStatusBar, SW_SHOW);
-				SetMenu(hWnd, hMenu);
-				SetTimer(hWnd, 1, 2500, NULL);
+				if(bShowCursor)
+				{
+					ShowCursor(TRUE);
+				}
 			}
 			else
 			{
-				ShowCursor(FALSE);
 				SaveWindowPos(hWnd);
-				ShowWindow(hwndStatusBar, SW_HIDE);
-				SetMenu(hWnd, NULL);
-				KillTimer(hWnd, 1);
+				if(bShowCursor)
+				{
+					ShowCursor(FALSE);
+				}
 			}
-			Set_Capture(4);
+			Stop_Capture();
 			Init_Screen_Struct();
-			Set_Capture(5);
+			Start_Capture();
 			bDoResize = TRUE;
 			break;
 		}
@@ -1353,9 +1191,16 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		MainWndOnInitBT(hWnd);
 		return TRUE;
 
+	case WM_LBUTTONUP:
+		PostMessage(hWnd, WM_COMMAND, IDM_FULL_SCREEN, IDM_FULL_SCREEN);
+		break;
+
 	case WM_RBUTTONUP:
-		CShowCursor = !CShowCursor;
-		i = ShowCursor(CShowCursor);
+		if(bIsFullScreen == FALSE)
+		{
+			bShowCursor = !bShowCursor;
+			ShowCursor(bShowCursor);
+		}
 		break;
 
 	case WM_TIMER:
@@ -1369,21 +1214,18 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			return (TRUE);
 		}
 
-		if (CurrentCapture != 4)
+		if (wParam == 8)
 		{
-			if (wParam == 8)
-			{
-				if (bDisplayStatusBar == TRUE)
-					MSP_Print_Mode();
-				if (AutoStereoSelect == TRUE)
-					MSPWatch_Mode();
-				return (TRUE);
-			}
+			if (bDisplayStatusBar == TRUE)
+				Audio_MSP_Print_Mode();
+			if (AutoStereoSelect == TRUE)
+				Audio_MSP_Watch_Mode();
+			return (TRUE);
 		}
 
 		if (wParam == 1)
 		{
-			if (!VideoPresent())
+			if (!BT848_IsVideoPresent())
 			{
 				SetWindowText(hwndTextField, " No Video Signal Found");
 				return (TRUE);
@@ -1415,7 +1257,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			i = atoi(ChannelString);
 			ChannelString[0] = 0x00;
 			i = i - 1;
-			SetAudioSource(4);
+			Audio_SetSource(AUDIOMUX_MUTE);
 
 			if ((i >= 0) && (i < MAXPROGS))
 			{
@@ -1436,13 +1278,13 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
 				VT_ChannelChange();
 				Sleep(20);
-				SetAudioSource(AudioSource);
+				Audio_SetSource(AudioSource);
 			}
 
 		}
 		return (TRUE);
 
-	case WM_SYSCOMMAND:		//            Verhindern vom ScreenSaver 
+	case WM_SYSCOMMAND:
 		switch (wParam & 0xFFF0)
 		{
 		case SC_SCREENSAVE:
@@ -1453,19 +1295,12 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
 	case WM_SIZE:
 	case WM_MOVE:
-		AdjustStatusBar(hWnd);
+		StatusBar_Adjust(hWnd);
 		if (bDoResize == TRUE)
 		{
-			if (CurrentCapture != 0)
-			{
-				Set_Capture(4);
-				Init_Screen_Struct();
-				Set_Capture(5);
-			}
-			else
-			{
-				Init_Screen_Struct();
-			}
+			Stop_Capture();
+			Init_Screen_Struct();
+			Start_Capture();
 		}
 		break;
 
@@ -1480,60 +1315,31 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		}
 
 		break;
+	
+	case WM_PAINT:
+		{
+			PAINTSTRUCT sPaint;
+			BeginPaint(hWnd, &sPaint);
+			FillRect(sPaint.hdc, &sPaint.rcPaint, CreateSolidBrush(RGB(255, 0, 255)));
+			EndPaint(hWnd, &sPaint);
+		}
+		break;
 
 	case WM_QUERYENDSESSION:
 	case WM_DESTROY:
 		Stop_Thread();
-		WriteSettingsToIni();
+		VBI_Stop();
+		Audio_SetSource(AUDIOMUX_MUTE);
+		Stop_Capture();
 
-		if(bHardwareFound)
-		{
-			Stop_VBI();
-			SetAudioSource(4);
-			Set_Capture(4);
-		}
-
-		Sleep(100);
-		Exit_Mixer();
-		InterCast_Exit();
-		VideoDat_Exit();
-		for (i = 0; i < 800; i++)
-		{
-			if (VTFrame[i].SubPage != NULL)
-				free(VTFrame[i].SubPage);
-			VTFrame[i].SubPage = NULL;
-			VTFrame[i].SubCount = 0;
-		}
-		Free_DMA(&Risc_dma);
-		Free_DMA(&Vbi_dma[0]);
-		Free_DMA(&Vbi_dma[1]);
-		Free_DMA(&Vbi_dma[2]);
-		Free_DMA(&Vbi_dma[3]);
-		Free_DMA(&Vbi_dma[4]);
-
-		Free_Display_DMA(0);
-		Free_Display_DMA(1);
-		Free_Display_DMA(2);
-		Free_Display_DMA(3);
-		Free_Display_DMA(4);
-
-		Free_DMA(&Burst_dma[0]);
-		Free_DMA(&Burst_dma[1]);
-		Free_DMA(&Burst_dma[2]);
-		Free_DMA(&Burst_dma[3]);
-		Free_DMA(&Burst_dma[4]);
-
-		for (i = 0; i < MAXVTDIALOG; i++)
-		{
-			free(VTScreen[i]);
-		}
+		CleanUpMemory();
 
 		if(bIsFullScreen == FALSE)
 		{
 			SaveWindowPos(hWnd);
 		}
 
-		BT8X8_Close();
+		BT848_Close();
 
 		PostQuitMessage(0);
 		return (TRUE);
@@ -1550,121 +1356,100 @@ void SaveWindowPos(HWND hWnd)
 	emsizey = rScreen.bottom - rScreen.top; 
 	emstartx = rScreen.left;
 	emsizex = rScreen.right - rScreen.left;
-
 }
 
 void MainWndOnInitBT(HWND hWnd)
 {
 	char Text[128];
 	int i;
-
+	BOOL bInitOK = FALSE;
 	MSPStatus[0] = 0x00;
 	CurrentProgramm = InitialProg;
 
-	if (Init_TV_Karte(hWnd) == TRUE)
+	if (BT848_FindTVCard(hWnd) == TRUE)
 	{
-		if (Init_BT_Kernel_Memory())
+		if(InitDD(hWnd) == TRUE)
 		{
-			bHardwareFound = TRUE;
+			if(CreateOverlay() == TRUE)
+			{
+				if (BT848_MemoryInit() == TRUE)
+				{
+					bInitOK = TRUE;
+				}
+			}
 		}
-	}
-
-	// see if we can open all the overlays we need
-	if(InitDD(hWnd) == FALSE)
-	{
-		bHardwareFound = FALSE;
 	}
 	else
 	{
-		if(CreateOverlay() == FALSE)
-		{
-			bHardwareFound = FALSE;
-		}
+		SetDlgItemText(SplashWnd, IDC_TEXT1, "");
+		SetDlgItemText(SplashWnd, IDC_TEXT2, "No");
+		SetDlgItemText(SplashWnd, IDC_TEXT3, "Suitable");
+		SetDlgItemText(SplashWnd, IDC_TEXT4, "Hardware");
+		SetDlgItemText(SplashWnd, IDC_TEXT5, "");
 	}
+
+	if (bInitOK)
+	{
+		// if the user has not set up the card
+		// ask them for the id
+		if(CardType == TVCARD_UNKNOWN)
+		{
+			// try to detect the card
+			CardType = Card_AutoDetect();
+			Card_AutoDetectTuner(CardType);
+			// if we cannot detect the card of the tuner
+			// present them with the card setup dialog box
+			if(CardType == TVCARD_UNKNOWN || TunerType == TUNER_ABSENT)
+			{
+				DialogBox(hInst, "SELECTCARD", hWnd, (DLGPROC) SelectCardProc);
+			}
+		}
+		BT848_MakeVBITable(VBI_lpf);
 		
-
-	if (bHardwareFound)
-	{
-		if (Init_Memory() == FALSE)
+		WStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
+		if (bAlwaysOnTop == FALSE)
 		{
-
-			for (i = 0; i < 800; i++)
-			{
-				if (VTFrame[i].SubPage != NULL)
-					free(VTFrame[i].SubPage);
-				VTFrame[i].SubPage = NULL;
-				VTFrame[i].SubCount = 0;
-			}
-
-			InterCast_Exit();
-			Exit_Mixer();
-
-			Free_DMA(&Risc_dma);
-			Free_DMA(&Vbi_dma[0]);
-			Free_DMA(&Vbi_dma[1]);
-			Free_DMA(&Vbi_dma[2]);
-			Free_DMA(&Vbi_dma[3]);
-			Free_DMA(&Vbi_dma[4]);
-
-			Free_Display_DMA(0);
-			Free_Display_DMA(1);
-			Free_Display_DMA(2);
-			Free_Display_DMA(3);
-			Free_Display_DMA(4);
-
-			Free_DMA(&Burst_dma[0]);
-			Free_DMA(&Burst_dma[1]);
-			Free_DMA(&Burst_dma[2]);
-			Free_DMA(&Burst_dma[3]);
-			Free_DMA(&Burst_dma[4]);
-			BT8X8_Close();
-			bHardwareFound = FALSE;
-		}
-	}
-
-	WStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
-	if (bAlwaysOnTop == FALSE)
-	{
-		WStyle = WStyle ^ 8;
-		i = SetWindowLong(hWnd, GWL_EXSTYLE, WStyle);
-		SetWindowPos(hWnd, HWND_NOTOPMOST, 10, 10, 20, 20, SWP_NOMOVE | SWP_NOCOPYBITS | SWP_NOSIZE | SWP_SHOWWINDOW);
-		CheckMenuItem(GetMenu(hWnd), IDM_ON_TOP, MF_UNCHECKED);
-	}
-	else
-	{
-		WStyle = WStyle | 8;
-		i = SetWindowLong(hWnd, GWL_EXSTYLE, WStyle);
-		CheckMenuItem(GetMenu(hWnd), IDM_ON_TOP, MF_CHECKED);
-		SetWindowPos(hWnd, HWND_TOPMOST, 10, 10, 20, 20, SWP_NOMOVE | SWP_NOCOPYBITS | SWP_NOSIZE | SWP_SHOWWINDOW);
-	}
-
-	if (bHardwareFound)
-	{
-		Init_BT_HardWare(hWnd);
-		sprintf(TunerStatus, "No Device on I2C-Bus");
-		if (USETUNER == TRUE)
-		{
-			sprintf(Text, "No Tuner");
-			if (Init_Tuner(TunerType) == TRUE)
-			{
-				sprintf(Text, "Tuner OK");
-
-			}
-			SetDlgItemText(SplashWnd, IDC_TEXT4, Text);
-
+			WStyle = WStyle ^ 8;
+			i = SetWindowLong(hWnd, GWL_EXSTYLE, WStyle);
+			SetWindowPos(hWnd, HWND_NOTOPMOST, 10, 10, 20, 20, SWP_NOMOVE | SWP_NOCOPYBITS | SWP_NOSIZE | SWP_SHOWWINDOW);
 		}
 		else
 		{
-			sprintf(TunerStatus, "Tuner disabled");
-			sprintf(Text, "Tuner disabled.");
-			SetDlgItemText(SplashWnd, IDC_TEXT4, Text);
+			WStyle = WStyle | 8;
+			i = SetWindowLong(hWnd, GWL_EXSTYLE, WStyle);
+			SetWindowPos(hWnd, HWND_TOPMOST, 10, 10, 20, 20, SWP_NOMOVE | SWP_NOCOPYBITS | SWP_NOSIZE | SWP_SHOWWINDOW);
 		}
+
+		if (Show_Menu == FALSE)
+		{
+			Show_Menu = TRUE;
+			SendMessage(hWnd, WM_COMMAND, IDM_TOGGLE_MENU, 0);
+		}
+
+		if (Capture_VBI == TRUE)
+		{
+			VBI_Start();
+		}
+
+		sprintf(TunerStatus, "No Device on I2C-Bus");
+
+		sprintf(Text, "No Tuner");
+		if (TunerType != TUNER_ABSENT && Tuner_Init(TunerType) == TRUE)
+		{
+			sprintf(Text, "Tuner OK");
+			if (CurrentProgramm >= 0)
+			{
+				if ((Programm[CurrentProgramm].Typ == 'A'))
+					Tuner_SetFrequency(TunerType, MulDiv(Programm[CurrentProgramm].freq * 1000, 16, 1000000));
+			}
+		}
+		SetDlgItemText(SplashWnd, IDC_TEXT4, Text);
 
 		if (MSPStatus[0] == 0x00)
 		{
 			sprintf(MSPStatus, "No Device on I2C-Bus");
 			sprintf(Text, "No MSP-Device");
-			if (Init_Audio(0x80, 0x81) == TRUE)
+			if (Audio_Init(0x80, 0x81) == TRUE)
 			{
 				sprintf(Text, "MSP-Device OK");
 				sprintf(MSPStatus, "MSP-Device I2C-Bus I/O 0x80/0x81");
@@ -1679,80 +1464,59 @@ void MainWndOnInitBT(HWND hWnd)
 		if (Has_MSP == TRUE)
 		{
 			SetTimer(hWnd, 8, 10000, NULL);
-			if (AutoStereoSelect == TRUE)
-			{
-				CheckMenuItem(GetMenu(hWnd), IDM_AUTOSTEREO, MF_CHECKED);
-			}
 		}
 
+		AudioSource = AUDIOMUX_EXTERNAL;
 		if (VideoSource == 1)
-			sprintf(Text, "External 1");
+			sprintf(Text, "Composite");
 		else if (VideoSource == 2)
-			sprintf(Text, "External 2");
+			sprintf(Text, "S-Video");
 		else if (VideoSource == 3)
-			sprintf(Text, "External 3");
+			sprintf(Text, "Other 1");
+		else if (VideoSource == 4)
+			sprintf(Text, "Other 2");
 		else
 		{
 			if ((CurrentProgramm >= 0) && (CurrentProgramm < MAXPROGS))
 				sprintf(Text, "%04d. %s ", CurrentProgramm + 1, Programm[CurrentProgramm].Name);
+			AudioSource = AUDIOMUX_TUNER;
 		}
+
+		Audio_SetSource(AudioSource);
 
 		if (bDisplayStatusBar == TRUE)
 			SetWindowText(hwndKeyField, Text);
-	}
 
-	if (!bHardwareFound)
-	{
-		SetDlgItemText(SplashWnd, IDC_TEXT1, "");
-		SetDlgItemText(SplashWnd, IDC_TEXT2, "No");
-		SetDlgItemText(SplashWnd, IDC_TEXT3, "Suitable");
-		SetDlgItemText(SplashWnd, IDC_TEXT4, "Hardware");
-		SetDlgItemText(SplashWnd, IDC_TEXT5, "");
-		Sleep(5000);
-		PostMessage(hWnd, WM_DESTROY, 0, 0);
-		return;
-	}
-
-	if (Show_Menu == FALSE)
-	{
-		Show_Menu = TRUE;
-		SendMessage(hWnd, WM_COMMAND, IDM_TOGGLE_MENU, 0);
-	}
-
-	if (CurrentProgramm >= 0)
-	{
-		if ((Programm[CurrentProgramm].Typ == 'A') && (bHardwareFound))
-			Tuner_SetFrequency(TunerType, MulDiv(Programm[CurrentProgramm].freq * 1000, 16, 1000000));
-	}
-
-	if (bHardwareFound)
-	{
-		Stop_Thread();
-		DestroyMenu(hMenu);
-		hMenu = LoadMenu(hInst, "ANALOGMENU");
-		DestroyAcceleratorTable(hAccel);
-		hAccel = LoadAccelerators(hInst, "ANALOGACCEL");
-		bDoResize = TRUE;
 		for (i = 0; i < 5; i++)
 		{
 			pDisplay[i] = Display_dma[i]->dwUser;
 		}
 
 		Init_Screen_Struct();
-		Set_Capture(5);
+		Start_Capture();
 		Sleep(100);
-		SetAudioSource(AudioSource);
 
+		SetMenuAnalog();
+
+		SetTimer(hWnd, 10, 5000, NULL);
+		SetTimer(hWnd, 22, 1000, NULL);
+		SetTimer(hWnd, 1, 2500, NULL);
+		bDoResize = TRUE;
 	}
-
-	SetTimer(hWnd, 22, 1000, NULL);
-	SetTimer(hWnd, 1, 2500, NULL);
+	else
+	{
+		CleanUpMemory();
+		BT848_Close();
+		Sleep(2000);
+		PostQuitMessage(0);
+	}
 }
 
 void MainWndOnCreate(HWND hWnd)
 {
 	char Text[128];
 	int i;
+	int ProcessorMask;
 
 	GetSystemInfo(&SysInfo);
 	SetDlgItemText(SplashWnd, IDC_TEXT1, "Table Build");
@@ -1792,9 +1556,6 @@ void MainWndOnCreate(HWND hWnd)
 	// DIB-Bitmap VideoText erzeugen
 	SetDlgItemText(SplashWnd, IDC_TEXT4, "HQ-Color");
 
-	CheckMenuItem(GetMenu(hWnd), ThreadClassId + 1150, MF_CHECKED);
-	CheckMenuItem(GetMenu(hWnd), PriorClassId + 1160, MF_CHECKED);
-
 	if (USE_MIXER == TRUE)
 	{
 		Sleep(100);
@@ -1805,17 +1566,17 @@ void MainWndOnCreate(HWND hWnd)
 		SetDlgItemText(SplashWnd, IDC_TEXT5, "");
 
 		Enumerate_Sound_SubSystem();
-		if (SoundSystem.DeviceAnzahl == 0)
+		if (SoundSystem.DeviceCount == 0)
 		{
 			SetDlgItemText(SplashWnd, TEXT3, "No Soundsystem found");
 		}
 		else
 		{
-			if (SoundSystem.DeviceAnzahl >= 1)
+			if (SoundSystem.DeviceCount >= 1)
 				SetDlgItemText(SplashWnd, TEXT3, SoundSystem.MixerDev[0].szPname);
-			if (SoundSystem.DeviceAnzahl >= 2)
+			if (SoundSystem.DeviceCount >= 2)
 				SetDlgItemText(SplashWnd, TEXT4, SoundSystem.MixerDev[1].szPname);
-			if (SoundSystem.DeviceAnzahl >= 3)
+			if (SoundSystem.DeviceCount >= 3)
 				SetDlgItemText(SplashWnd, TEXT5, SoundSystem.MixerDev[2].szPname);
 			Sleep(100);
 			SetDlgItemText(SplashWnd, IDC_TEXT3, "");
@@ -1858,48 +1619,48 @@ void MainWndOnCreate(HWND hWnd)
 	SetDlgItemText(SplashWnd, IDC_TEXT5, "");
 
 	Sleep(100);
-	sprintf(Text, "Prozessor %d ", SysInfo.dwProcessorType);
+	sprintf(Text, "Processor %d ", SysInfo.dwProcessorType);
 	SetDlgItemText(SplashWnd, IDC_TEXT2, Text);
 	sprintf(Text, "Number %d ", SysInfo.dwNumberOfProcessors);
 	SetDlgItemText(SplashWnd, IDC_TEXT3, Text);
 
 	if (SysInfo.dwNumberOfProcessors > 1)
 	{
-		if (AusgabeProzessor == 0)
+		if (DecodeProcessor == 0)
 		{
 			if (SysInfo.dwNumberOfProcessors == 2)
 			{
-				MainProzessor = 0;
-				VBIProzessor = 0;
-				AusgabeProzessor = 1;
+				MainProcessor = 0;
+				VBIProcessor = 0;
+				DecodeProcessor = 1;
 			}
 			if (SysInfo.dwNumberOfProcessors == 3)
 			{
-				MainProzessor = 0;
-				VBIProzessor = 1;
-				AusgabeProzessor = 2;
+				MainProcessor = 0;
+				VBIProcessor = 1;
+				DecodeProcessor = 2;
 			}
 			if (SysInfo.dwNumberOfProcessors > 3)
 			{
-				MainProzessor = 0;
-				VBIProzessor = 2;
-				AusgabeProzessor = 3;
+				MainProcessor = 0;
+				VBIProcessor = 2;
+				DecodeProcessor = 3;
 			}
 
 		}
 
 		SetDlgItemText(SplashWnd, IDC_TEXT1, "Multi-Processor");
-		sprintf(Text, "Main-CPU %d ", MainProzessor);
+		sprintf(Text, "Main-CPU %d ", MainProcessor);
 		SetDlgItemText(SplashWnd, IDC_TEXT2, Text);
-		sprintf(Text, "VBI-CPU %d ", VBIProzessor);
+		sprintf(Text, "VBI-CPU %d ", VBIProcessor);
 		SetDlgItemText(SplashWnd, IDC_TEXT4, Text);
-		sprintf(Text, "DECODE-CPU %d ", AusgabeProzessor);
+		sprintf(Text, "DECODE-CPU %d ", DecodeProcessor);
 		SetDlgItemText(SplashWnd, IDC_TEXT5, Text);
 		Sleep(100);
 	}
 
-	ProzessorMask = 1 << (MainProzessor);
-	i = SetThreadAffinityMask(GetCurrentThread(), ProzessorMask);
+	ProcessorMask = 1 << (MainProcessor);
+	i = SetThreadAffinityMask(GetCurrentThread(), ProcessorMask);
 
 	SetDlgItemText(SplashWnd, IDC_TEXT1, "Hardware Analyse");
 	SetDlgItemText(SplashWnd, IDC_TEXT2, "");
@@ -1908,71 +1669,11 @@ void MainWndOnCreate(HWND hWnd)
 	SetDlgItemText(SplashWnd, IDC_TEXT5, "");
 	Sleep(200);
 
-	if (VBI_Flags & VBI_VT)
+	if(bIsFullScreen == TRUE)
 	{
-		CheckMenuItem(GetMenu(hWnd), IDM_VBI_VT, MF_CHECKED);
-		if (Capture_VBI == TRUE)
-		{
-			EnableMenuItem(GetMenu(hWnd), IDM_CALL_VIDEOTEXTSMALL, MF_ENABLED);
-			EnableMenuItem(GetMenu(hWnd), IDM_CALL_VIDEOTEXT, MF_ENABLED);
-			EnableMenuItem(GetMenu(hWnd), IDM_VT_RESET, MF_ENABLED);
-			EnableMenuItem(GetMenu(hWnd), IDM_UNTERTITEL, MF_ENABLED);
-			EnableMenuItem(GetMenu(hWnd), IDM_PDC_OUT, MF_ENABLED);
-			EnableMenuItem(GetMenu(hWnd), IDM_VT_OUT, MF_ENABLED);
-		}
+		SaveWindowPos(hWnd);
+		ShowCursor(FALSE);
 	}
-	if (VBI_Flags & VBI_IC)
-	{
-		CheckMenuItem(GetMenu(hWnd), IDM_VBI_IC, MF_CHECKED);
-		if (Capture_VBI == TRUE)
-		{
-			EnableMenuItem(GetMenu(hWnd), IDM_IC_OUT, MF_ENABLED);
-		}
-	}
-
-	if (VBI_Flags & VBI_VPS)
-	{
-		CheckMenuItem(GetMenu(hWnd), IDM_VBI_VPS, MF_CHECKED);
-		if (Capture_VBI == TRUE)
-		{
-			EnableMenuItem(GetMenu(hWnd), IDM_VPS_OUT, MF_ENABLED);
-		}
-	}
-
-	if (USECARD == FALSE)
-		CheckMenuItem(GetMenu(hWnd), IDM_DONT_TOUCH_CARD, MF_CHECKED);
-
-	if (USETUNER == FALSE)
-	{
-		TunerType = 4;
-		VideoSource = 0;
-		CheckMenuItem(GetMenu(hWnd), IDM_DONT_TOUCH, MF_CHECKED);
-		EnableMenuItem(GetMenu(hWnd), IDM_TUNER_0, MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_TUNER_1, MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_TUNER_2, MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_TUNER_3, MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_TUNER_5, MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_TUNER_6, MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_TUNER_7, MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_TUNER_8, MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_CHANNELPLUS, MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_CHANNELMINUS, MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_ANALOGSCAN, MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_MANUELL_TUNER, MF_GRAYED);
-	}
-
-	CheckMenuItem(GetMenu(hWnd), CardType + 1080, MF_CHECKED);
-	CheckMenuItem(GetMenu(hWnd), AudioSource + 1110, MF_CHECKED);
-	CheckMenuItem(GetMenu(hWnd), TVTYPE + 1120, MF_CHECKED);
-	CheckMenuItem(GetMenu(hWnd), ColourFormat + 1130, MF_CHECKED);
-	if (VideoSource > 0)
-		CheckMenuItem(GetMenu(hWnd), VideoSource + 1089, MF_CHECKED);
-	else
-	{
-		CheckMenuItem(GetMenu(hWnd), TunerType + 1100, MF_CHECKED);
-	}
-
-	SetTimer(hWnd, 10, 5000, NULL);
 
 	PostMessage(hWnd, INIT_BT, 0, 0);
 }
@@ -1996,6 +1697,9 @@ void Init_Screen_Struct()
 					GetSystemMetrics(SM_CYSCREEN),
 					SWP_SHOWWINDOW);
 		ShowWindow(hwndStatusBar, SW_HIDE);
+
+		KillTimer(hWnd, 1);
+		SetMenu(hWnd, NULL);
 	}
 	else
 	{
@@ -2003,14 +1707,13 @@ void Init_Screen_Struct()
 
 		if (Show_Menu == TRUE)
 		{
-			KillTimer(hWnd, 1);
-			SetMenu(hWnd, NULL);
+			SetTimer(hWnd, 1, 2500, NULL);
+			SetMenu(hWnd, hMenu);
 		}
 		else
 		{
-			SetTimer(hWnd, 1, 2500, NULL);
-			SetMenu(hWnd, hMenu);
-			SetMenuAnalog();
+			KillTimer(hWnd, 1);
+			SetMenu(hWnd, NULL);
 		}
 		
 		ShowWindow(hwndStatusBar, bDisplayStatusBar?SW_SHOW:SW_HIDE);
@@ -2064,23 +1767,20 @@ void Init_Screen_Struct()
 	{
 		rOverlaySrc.right -= (rOverlayDest.right - GetSystemMetrics(SM_CXSCREEN)) * 
 							CurrentX / DestWidth;
-		rOverlayDest.right = GetSystemMetrics(SM_CXSCREEN) - 1;
+		rOverlayDest.right = GetSystemMetrics(SM_CXSCREEN);
 	}
 	if (rOverlayDest.bottom >= GetSystemMetrics(SM_CYSCREEN) && DestHeight > 0)
 	{
 		rOverlaySrc.bottom -= (rOverlayDest.bottom - GetSystemMetrics(SM_CYSCREEN)) * 
 							CurrentY / DestHeight;
-		rOverlayDest.bottom = GetSystemMetrics(SM_CYSCREEN) - 1;
+		rOverlayDest.bottom = GetSystemMetrics(SM_CYSCREEN);
 	}
 
 	OverlayUpdate(&rOverlaySrc, &rOverlayDest, DDOVER_SHOW, TRUE);
 
-	Black_Surface();
+	Clean_Overlays();
 
-	if (bHardwareFound)
-	{
-		SetGeoSize(CurrentX, CurrentY);
-	}
+	BT848_SetGeoSize(CurrentX, CurrentY);
 	return;
 }
 
@@ -2089,82 +1789,168 @@ void SetMenuAnalog()
 	CheckMenuItem(GetMenu(hWnd), ThreadClassId + 1150, MF_CHECKED);
 	CheckMenuItem(GetMenu(hWnd), PriorClassId + 1160, MF_CHECKED);
 
-	if (VBI_Flags & VBI_VT)
-	{
-		CheckMenuItem(GetMenu(hWnd), IDM_VBI_VT, MF_CHECKED);
-		if (Capture_VBI == TRUE)
-		{
-			EnableMenuItem(GetMenu(hWnd), IDM_CALL_VIDEOTEXTSMALL, MF_ENABLED);
-			EnableMenuItem(GetMenu(hWnd), IDM_CALL_VIDEOTEXT, MF_ENABLED);
-			EnableMenuItem(GetMenu(hWnd), IDM_VT_RESET, MF_ENABLED);
-			EnableMenuItem(GetMenu(hWnd), IDM_UNTERTITEL, MF_ENABLED);
-			EnableMenuItem(GetMenu(hWnd), IDM_PDC_OUT, MF_ENABLED);
-			EnableMenuItem(GetMenu(hWnd), IDM_VT_OUT, MF_ENABLED);
-		}
-	}
-	if (VBI_Flags & VBI_IC)
-	{
-		CheckMenuItem(GetMenu(hWnd), IDM_VBI_IC, MF_CHECKED);
-		if (Capture_VBI == TRUE)
-		{
-			EnableMenuItem(GetMenu(hWnd), IDM_IC_OUT, MF_ENABLED);
-		}
-	}
+	EnableMenuItem(GetMenu(hWnd), IDM_UNTERTITEL, MF_GRAYED);
+	EnableMenuItem(GetMenu(hWnd), IDM_PDC_OUT, MF_GRAYED);
+	EnableMenuItem(GetMenu(hWnd), IDM_VT_OUT, MF_GRAYED);
+	EnableMenuItem(GetMenu(hWnd), IDM_IC_OUT, MF_GRAYED);
+	EnableMenuItem(GetMenu(hWnd), IDM_VPS_OUT, MF_GRAYED);
 
-	if (VBI_Flags & VBI_VPS)
-	{
-		CheckMenuItem(GetMenu(hWnd), IDM_VBI_VPS, MF_CHECKED);
-		if (Capture_VBI == TRUE)
-		{
-			EnableMenuItem(GetMenu(hWnd), IDM_VPS_OUT, MF_ENABLED);
-		}
-	}
-
-	if (USECARD == FALSE)
-		CheckMenuItem(GetMenu(hWnd), IDM_DONT_TOUCH_CARD, MF_CHECKED);
-
-	if (USETUNER == FALSE)
-	{
-		CheckMenuItem(GetMenu(hWnd), IDM_DONT_TOUCH, MF_CHECKED);
-		EnableMenuItem(GetMenu(hWnd), IDM_TUNER_0, MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_TUNER_1, MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_TUNER_2, MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_TUNER_3, MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_TUNER_5, MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_TUNER_6, MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_TUNER_7, MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_TUNER_8, MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_CHANNELPLUS, MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_CHANNELMINUS, MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_ANALOGSCAN, MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_MANUELL_TUNER, MF_GRAYED);
-	}
-
-	CheckMenuItem(GetMenu(hWnd), CountryCode + 5000, MF_CHECKED);
-	CheckMenuItem(GetMenu(hWnd), CardType + 1080, MF_CHECKED);
-	CheckMenuItem(GetMenu(hWnd), AudioSource + 1110, MF_CHECKED);
-	CheckMenuItem(GetMenu(hWnd), TVTYPE + 1120, MF_CHECKED);
-	CheckMenuItem(GetMenu(hWnd), ColourFormat + 1130, MF_CHECKED);
-	if (VideoSource > 0)
-		CheckMenuItem(GetMenu(hWnd), VideoSource + 1089, MF_CHECKED);
-	else
-	{
-		CheckMenuItem(GetMenu(hWnd), TunerType + 1100, MF_CHECKED);
-	}
-
-	CheckMenuItem(GetMenu(hWnd), 1600 + MSPMode, MF_CHECKED);
-	CheckMenuItem(GetMenu(hWnd), 1630 + MSPStereo, MF_CHECKED);
-	CheckMenuItem(GetMenu(hWnd), 1610 + MSPMajorMode, MF_CHECKED);
-	CheckMenuItem(GetMenu(hWnd), 1620 + MSPMinorMode, MF_CHECKED);
-	if (Capture_Video == TRUE)
-		CheckMenuItem(GetMenu(hWnd), IDM_VIDEO, MF_CHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_VBI, Capture_VBI?MF_CHECKED:MF_UNCHECKED);
 	if (Capture_VBI == TRUE)
 	{
-		CheckMenuItem(GetMenu(hWnd), IDM_VBI, MF_CHECKED);
+		// set vt dialog menu items up
+		EnableMenuItem(GetMenu(hWnd), IDM_CALL_VIDEOTEXTSMALL, (VBI_Flags & VBI_VT)?MF_ENABLED:MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_CALL_VIDEOTEXT, (VBI_Flags & VBI_VT)?MF_ENABLED:MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_VT_RESET, (VBI_Flags & VBI_VT)?MF_ENABLED:MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_UNTERTITEL, (VBI_Flags & VBI_VT)?MF_ENABLED:MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_PDC_OUT, (VBI_Flags & VBI_VT)?MF_ENABLED:MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_VT_OUT, (VBI_Flags & VBI_VT)?MF_ENABLED:MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_IC_OUT, (VBI_Flags & VBI_IC)?MF_ENABLED:MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_VPS_OUT, (VBI_Flags & VBI_VPS)?MF_ENABLED:MF_GRAYED);
 		EnableMenuItem(GetMenu(hWnd), IDM_VBI_VT, MF_ENABLED);
 		EnableMenuItem(GetMenu(hWnd), IDM_VBI_IC, MF_ENABLED);
-		EnableMenuItem(GetMenu(hWnd), IDM_VBI_VD, MF_ENABLED);
 		EnableMenuItem(GetMenu(hWnd), IDM_VBI_VPS, MF_ENABLED);
+		EnableMenuItem(GetMenu(hWnd), IDM_VBI_VD, MF_ENABLED);
+		EnableMenuItem(GetMenu(hWnd), IDM_CLOSEDCAPTION, MF_ENABLED);
+		CheckMenuItem(GetMenu(hWnd), IDM_VBI_VT, (VBI_Flags & VBI_VT)?MF_CHECKED:MF_UNCHECKED);
+		CheckMenuItem(GetMenu(hWnd), IDM_VBI_IC, (VBI_Flags & VBI_IC)?MF_CHECKED:MF_UNCHECKED);
+		CheckMenuItem(GetMenu(hWnd), IDM_VBI_VPS, (VBI_Flags & VBI_VPS)?MF_CHECKED:MF_UNCHECKED);
+		CheckMenuItem(GetMenu(hWnd), IDM_VBI_VD, (VBI_Flags & VBI_VD)?MF_CHECKED:MF_UNCHECKED);
+		CheckMenuItem(GetMenu(hWnd), IDM_CLOSEDCAPTION, (VBI_Flags & VBI_CC)?MF_CHECKED:MF_UNCHECKED);
 	}
+	else
+	{
+		EnableMenuItem(GetMenu(hWnd), IDM_VBI_VT, MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_VBI_IC, MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_VBI_VPS, MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_VBI_VD, MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_CALL_VIDEOTEXTSMALL, MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_CALL_VIDEOTEXT, MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_VT_RESET, MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_UNTERTITEL, MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_PDC_OUT, MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_VT_OUT, MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_IC_OUT, MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_VPS_OUT, MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_CLOSEDCAPTION, MF_GRAYED);
+	}
+
+
+	EnableMenuItem(GetMenu(hWnd), IDM_CHANNELPLUS, (TunerType != TUNER_ABSENT)?MF_ENABLED:MF_GRAYED);
+	EnableMenuItem(GetMenu(hWnd), IDM_CHANNELMINUS, (TunerType != TUNER_ABSENT)?MF_ENABLED:MF_GRAYED);
+	EnableMenuItem(GetMenu(hWnd), IDM_ANALOGSCAN, (TunerType != TUNER_ABSENT)?MF_ENABLED:MF_GRAYED);
+
+	CheckMenuItem(GetMenu(hWnd), IDM_TREADPRIOR_0, (ThreadClassId == 0)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_TREADPRIOR_1, (ThreadClassId == 1)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_TREADPRIOR_2, (ThreadClassId == 2)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_TREADPRIOR_3, (ThreadClassId == 3)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_TREADPRIOR_4, (ThreadClassId == 4)?MF_CHECKED:MF_UNCHECKED);
+
+	CheckMenuItem(GetMenu(hWnd), IDM_PRIORCLASS_0, (PriorClassId == 0)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_PRIORCLASS_1, (PriorClassId == 1)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_PRIORCLASS_2, (PriorClassId == 2)?MF_CHECKED:MF_UNCHECKED);
+
+	CheckMenuItem(GetMenu(hWnd), IDM_TYPEFORMAT_0, (TVTYPE == 0)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_TYPEFORMAT_1, (TVTYPE == 1)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_TYPEFORMAT_2, (TVTYPE == 2)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_TYPEFORMAT_3, (TVTYPE == 3)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_TYPEFORMAT_4, (TVTYPE == 4)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_TYPEFORMAT_5, (TVTYPE == 5)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_TYPEFORMAT_6, (TVTYPE == 6)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_TYPEFORMAT_7, (TVTYPE == 7)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_TYPEFORMAT_8, (TVTYPE == 8)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_TYPEFORMAT_9, (TVTYPE == 9)?MF_CHECKED:MF_UNCHECKED);
+
+	EnableMenuItem(GetMenu(hWnd), IDM_TUNER, (TVCards[TVTYPE].TunerInput != -1)?MF_ENABLED:MF_GRAYED);
+	if(TVCards[TVTYPE].SVideoInput == -1)
+	{
+		EnableMenuItem(GetMenu(hWnd), IDM_EXTERN2, MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_EXTERN3, (TVCards[TVTYPE].nVideoInputs > 2)?MF_ENABLED:MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_EXTERN4, (TVCards[TVTYPE].nVideoInputs > 3)?MF_ENABLED:MF_GRAYED);
+	}
+	else
+	{
+		EnableMenuItem(GetMenu(hWnd), IDM_EXTERN2, MF_ENABLED);
+		EnableMenuItem(GetMenu(hWnd), IDM_EXTERN3, (TVCards[TVTYPE].nVideoInputs > 3)?MF_ENABLED:MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_EXTERN4, (TVCards[TVTYPE].nVideoInputs > 4)?MF_ENABLED:MF_GRAYED);
+	}
+
+	CheckMenuItem(GetMenu(hWnd), IDM_TUNER, (VideoSource == 0)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_EXTERN1, (VideoSource == 1)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_EXTERN2, (VideoSource == 2)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_EXTERN3, (VideoSource == 3)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_EXTERN4, (VideoSource == 4)?MF_CHECKED:MF_UNCHECKED);
+
+
+	EnableMenuItem(GetMenu(hWnd), IDM_IC_OUT, MF_GRAYED);
+	EnableMenuItem(GetMenu(hWnd), IDM_VPS_OUT, MF_GRAYED);
+	EnableMenuItem(GetMenu(hWnd), IDM_CLOSEDCAPTION, MF_GRAYED);
+	
+
+	CheckMenuItem(GetMenu(hWnd), IDM_AUDIO_0, (AudioSource == 0)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_AUDIO_1, (AudioSource == 1)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_AUDIO_2, (AudioSource == 2)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_AUDIO_3, (AudioSource == 3)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_AUDIO_4, (AudioSource == 4)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_AUDIO_5, (AudioSource == 5)?MF_CHECKED:MF_UNCHECKED);
+
+	CheckMenuItem(GetMenu(hWnd), IDM_MSPMODE_2, (MSPMode == 2)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_MSPMODE_3, (MSPMode == 3)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_MSPMODE_4, (MSPMode == 4)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_MSPMODE_5, (MSPMode == 5)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_MSPMODE_6, (MSPMode == 6)?MF_CHECKED:MF_UNCHECKED);
+
+	CheckMenuItem(GetMenu(hWnd), IDM_MSPSTEREO_1, (MSPStereo == 1)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_MSPSTEREO_2, (MSPStereo == 2)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_MSPSTEREO_3, (MSPStereo == 3)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_MSPSTEREO_4, (MSPStereo == 4)?MF_CHECKED:MF_UNCHECKED);
+
+	CheckMenuItem(GetMenu(hWnd), IDM_MAJOR_CARRIER_0, (MSPMajorMode == 0)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_MAJOR_CARRIER_1, (MSPMajorMode == 1)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_MAJOR_CARRIER_2, (MSPMajorMode == 2)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_MAJOR_CARRIER_3, (MSPMajorMode == 3)?MF_CHECKED:MF_UNCHECKED);
+
+	CheckMenuItem(GetMenu(hWnd), IDM_MINOR_CARRIER_0, (MSPMinorMode == 0)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_MINOR_CARRIER_1, (MSPMinorMode == 1)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_MINOR_CARRIER_2, (MSPMinorMode == 2)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_MINOR_CARRIER_3, (MSPMinorMode == 3)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_MINOR_CARRIER_4, (MSPMinorMode == 4)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_MINOR_CARRIER_5, (MSPMinorMode == 5)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_MINOR_CARRIER_6, (MSPMinorMode == 6)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_MINOR_CARRIER_7, (MSPMinorMode == 7)?MF_CHECKED:MF_UNCHECKED);
+
+	CheckMenuItem(GetMenu(hWnd), IDM_STATUSBAR, bDisplayStatusBar?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_ON_TOP, bAlwaysOnTop?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_AUTOSTEREO, AutoStereoSelect?MF_CHECKED:MF_UNCHECKED);
 }
 
+void CleanUpMemory()
+{
+	int i;
+
+	Exit_Mixer();
+	InterCast_Exit();
+	VideoDat_Exit();
+	for (i = 0; i < 800; i++)
+	{
+		if (VTFrame[i].SubPage != NULL)
+		{
+			free(VTFrame[i].SubPage);
+		}
+		VTFrame[i].SubPage = NULL;
+		VTFrame[i].SubCount = 0;
+	}
+
+	Free_DMA(&Risc_dma);
+	for(i = 0; i < 5; i++)
+	{
+		Free_DMA(&Vbi_dma[i]);
+		Free_Display_DMA(i);
+		Free_DMA(&Burst_dma[i]);
+	}
+
+	for (i = 0; i < MAXVTDIALOG; i++)
+	{
+		free(VTScreen[i]);
+	}
+}
