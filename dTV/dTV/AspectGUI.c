@@ -560,7 +560,8 @@ void PaintColorkey(HWND hWnd, BOOL bEnable, HDC hDC, RECT* PaintRect)
 	
 	//TJ 010508 make sure we dont paint over the statusbar
 	//if we do, it will cause flashing
-	winRect.bottom-=StatusBar_Height();
+	if(IsStatusBarVisible())
+		winRect.bottom-=StatusBar_Height();
 
 	// Top
 	r2.left = 0;
