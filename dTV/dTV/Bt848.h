@@ -44,7 +44,8 @@ typedef enum
 	SOURCE_SVIDEO,
 	SOURCE_OTHER1,
 	SOURCE_OTHER2,
-	SOURCE_COMPVIASVIDEO
+	SOURCE_COMPVIASVIDEO,
+    SOURCE_CCIR656
 } VIDEOSOURCETYPE;
 
 // create new type for physical memory
@@ -103,6 +104,8 @@ void Free_DMA(PMemStruct * dma);
 void* GetFirstFullPage(PMemStruct pMem);
 PHYS GetPhysicalAddress(PMemStruct dma, LPBYTE pLinear, DWORD dwSizeWanted, DWORD * pdwSizeAvailable);
 
+// CCIR656 Digital input support
+BOOL BT848_Enable656(void);
 
 // Brooktree 848 registers
 #define BT848_DSTATUS          0x000
@@ -411,6 +414,24 @@ PHYS GetPhysicalAddress(PMemStruct dma, LPBYTE pLinear, DWORD dwSizeWanted, DWOR
 #define BT848_RISC_SKIP123     (0x0a<<28)
 #define BT848_RISC_WRITE1S23   (0x0b<<28)
 
+// 13 Dec 2000 - Michael Eskin, Conexant Systems
+// Added TGCTRL register masks for CCIR656 Input
+//
+#define BT848_TBLG 						0x80
+#define BT848_TGCTRL_TGMODE_ENABLE 		0x01
+#define BT848_TGCTRL_TGMODE_RESET 		0x02
+#define BT848_TGCTRL_TGMODE_INCREMENT 	0x04
+#define BT848_TGCTRL_TGCKI_GPCLK 		0x10
+#define BT848_TGCTRL_TGCKI_CPCLK_INV 	0x11
 
+#define BT848_DVSIF_CCIR656				0x01
+#define BT848_DVSIF_VSIF_SVREF			0x0C
+#define BT848_DVSIF_VSIF_ESO			0x20
+#define BT848_DVSIF_VSIF_BCF			0x40
+
+#define BT848_VTC_HSFMT_64        		0x00
+#define BT848_VTC_HSFMT_48       		0x40
+#define BT848_VTC_HSFMT_32       		0x80
+#define BT848_VTC_HSFMT_16       		0xC0
 
 #endif

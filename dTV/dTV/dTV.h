@@ -65,7 +65,6 @@ void MainWndOnInitBT(HWND hWnd);
 void SaveWindowPos(HWND hWnd);
 void SetMenuAnalog();
 void CleanUpMemory();
-UINT get_feature_flags(void);
 
 void Overlay_Stop(HWND hWnd);
 void Overlay_Start(HWND hWnd);

@@ -95,6 +95,7 @@
 #define IDM_OVERLAY_START               591
 #define IDM_HIDE_OSD                    592
 #define IDM_SHOW_OSD                    593
+#define IDM_SET_OSD_TEXT                594
 #define IDM_FAST_REPAINT                599
 #define IDM_BRIGHTNESS_PLUS             600
 #define IDM_BRIGHTNESS_MINUS            601
@@ -155,12 +156,13 @@
 #define ID_SETTINGS_PIXELWIDTH_384      764
 #define ID_SETTINGS_PIXELWIDTH_CUSTOM   765
 #define IDM_END                         1032
-#define IDM_TUNER                       1089
-#define IDM_EXTERN1                     1090
-#define IDM_EXTERN2                     1091
-#define IDM_EXTERN3                     1092
-#define IDM_EXTERN4                     1093
-#define IDM_EXTERN5                     1094
+#define IDM_SOURCE_TUNER                1089
+#define IDM_SOURCE_COMPOSITE            1090
+#define IDM_SOURCE_SVIDEO               1091
+#define IDM_SOURCE_OTHER1               1092
+#define IDM_SOURCE_OTHER2               1093
+#define IDM_SOURCE_COMPVIASVIDEO        1094
+#define IDM_SOURCE_CCIR656              1095
 #define IDM_AUDIO_0                     1110
 #define IDM_AUDIO_1                     1111
 #define IDM_AUDIO_2                     1112

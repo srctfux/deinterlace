@@ -1180,3 +1180,97 @@ void BT848_OrDataWord(int Offset, unsigned short d)
 	a |= d;
 	BT848_WriteWord(Offset, a);
 }
+
+//===========================================================================
+// CCIR656 Digital Input Support
+//
+// 13 Dec 2000 - Michael Eskin, Conexant Systems - Initial version
+//
+//===========================================================================
+// Timing generator SRAM table values for CCIR601 720x480 NTSC
+//===========================================================================
+BYTE SRAMTable[ 60 ] =
+{
+      0x33, // size of table = 51
+      0x0c, 0xc0, 0x00, 0x00, 0x90, 0xc2, 0x03, 0x10, 0x03, 0x06,
+      0x10, 0x34, 0x12, 0x12, 0x65, 0x02, 0x13, 0x24, 0x19, 0x00,
+      0x24, 0x39, 0x00, 0x96, 0x59, 0x08, 0x93, 0x83, 0x08, 0x97,
+      0x03, 0x50, 0x30, 0xc0, 0x40, 0x30, 0x86, 0x01, 0x01, 0xa6,
+      0x0d, 0x62, 0x03, 0x11, 0x61, 0x05, 0x37, 0x30, 0xac, 0x21, 0x50
+};
+
+//===========================================================================
+// Enable CCIR656 Input mode
+//===========================================================================
+BOOL BT848_Enable656()
+{
+	int vscale, hscale;
+	int hdelay, vdelay;
+	int hactive, vactive;
+	BYTE crop;
+	int i;
+
+	CurrentX = 720;
+	CurrentY = 480;
+
+	// Disable TG mode
+	BT848_MaskDataByte(BT848_TGCTRL, 0, BT848_TGCTRL_TGMODE_ENABLE);
+	
+	// Reset the TG address
+	BT848_MaskDataByte(BT848_TGCTRL, 0, BT848_TGCTRL_TGMODE_RESET);
+	BT848_MaskDataByte(BT848_TGCTRL, BT848_TGCTRL_TGMODE_RESET, BT848_TGCTRL_TGMODE_RESET);
+	BT848_MaskDataByte(BT848_TGCTRL, 0, BT848_TGCTRL_TGMODE_RESET);
+
+	// Load up the TG table for CCIR656
+	for (i=0;i<SRAMTable[0];++i)
+	{
+	  BT848_WriteByte(BT848_TBLG,SRAMTable[i+1]);
+	}
+	
+	// Enable TG mode
+	BT848_MaskDataByte(BT848_TGCTRL, BT848_TGCTRL_TGMODE_ENABLE, BT848_TGCTRL_TGMODE_ENABLE);
+
+	// Enable the GPCLOCK
+	BT848_MaskDataByte(BT848_TGCTRL, BT848_TGCTRL_TGCKI_GPCLK, BT848_TGCTRL_TGCKI_GPCLK);
+
+	// Set the PLL mode
+	BT848_WriteByte(BT848_PLL_XCI, 0x00);
+
+	// Enable 656 Mode, bypass chroma filters
+	BT848_WriteByte(BT848_DVSIF, BT848_DVSIF_VSIF_BCF | BT848_DVSIF_CCIR656);
+	
+	// Enable NTSC mode
+	BT848_MaskDataByte(BT848_IFORM, (BT848_IFORM_NTSC | BT848_IFORM_XTBOTH), (BT848_IFORM_NORM | BT848_IFORM_XTBOTH));
+
+	// Disable full range luma
+	BT848_WriteByte(BT848_OFORM, 0);
+
+	// Enable the SC loop luma peaking filters
+	BT848_WriteByte(BT848_E_SCLOOP, BT848_SCLOOP_LUMA_PEAK);
+	BT848_WriteByte(BT848_O_SCLOOP, BT848_SCLOOP_LUMA_PEAK);
+
+	// Standard NTSC 525 line count
+	BT848_WriteByte(BT848_VTOTAL_LO, 0x00);
+	BT848_WriteByte(BT848_VTOTAL_HI, 0x00);
+
+	// YUV 4:2:2 linear pixel format
+	BT848_WriteByte(BT848_COLOR_FMT, (BYTE)((BT848_COLOR_FMT_YUY2 << 4) | BT848_COLOR_FMT_YUY2));
+
+	// Setup parameters for overlay scale and crop calculation
+	hactive = CurrentX;
+	vactive = CurrentY;
+	hscale = 0;
+	vdelay = 16;
+	hdelay = 0x80;
+	vscale = 0;
+
+	crop = ((hactive >> 8) & 0x03) | ((hdelay >> 6) & 0x0c) | ((vactive >> 4) & 0x30) | ((vdelay >> 2) & 0xc0);
+
+	BT848_SetGeometryEvenOdd(FALSE, BT848_VTC_HSFMT_32, hscale, vscale, hactive, vactive, hdelay, vdelay, crop);
+	BT848_SetGeometryEvenOdd(TRUE, BT848_VTC_HSFMT_32, hscale, vscale, hactive, vactive, hdelay, vdelay, crop);
+
+	MakeVideoTableForDisplay();
+
+	return TRUE;
+}
+

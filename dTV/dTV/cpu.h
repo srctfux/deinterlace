@@ -27,12 +27,33 @@
 // at startup and sets flags in the global "CpuFeatureFlags" (see defines.h for
 // the list of flags) which the code uses to determine whether or not to use
 // each feature.
+///////////////////////////////////////////////////////////////////////////////
 
 #ifndef __CPU_H__
 #define __CPU_H__ 1
 
+#include "stdafx.h"
+
+// Symbolic constants for CpuFeatureFlags TRB 12/00
+#define FEATURE_CPUID           0x00000001
+#define FEATURE_STD_FEATURES    0x00000002
+#define FEATURE_EXT_FEATURES    0x00000004
+#define FEATURE_TSC             0x00000010
+#define FEATURE_MMX             0x00000020
+#define FEATURE_CMOV            0x00000040
+#define FEATURE_3DNOW           0x00000080
+#define FEATURE_3DNOWEXT        0x00000100
+#define FEATURE_MMXEXT          0x00000200
+#define FEATURE_SSEFP           0x00000400
+#define FEATURE_K6_MTRR         0x00000800
+#define FEATURE_P6_MTRR         0x00001000
+#define FEATURE_SSE				0x00002000
+#define FEATURE_SSE2            0x00004000
+
 #define USE_SSE		1		// Use Intel Streaming SIMD Extensions
 #define USE_3DNOW	1		// Use AMD 3DNow! extensions
 #define USE_SSE2	1		// Use Intel SSE version 2 (Pentium 4 and above)
+
+UINT get_feature_flags(void);
 
 #endif /* __CPU_H__ */

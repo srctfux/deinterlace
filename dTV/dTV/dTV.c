@@ -39,6 +39,7 @@
 #include "stdafx.h"
 #include "other.h"
 #include "bt848.h"
+#include "CPU.h"
 #include "mixerdev.h"
 #include "VBI_VideoText.h"
 #include "AspectRatio.h"
@@ -901,7 +902,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			Start_Capture();
 			break;
 
-		case IDM_TUNER:
+		case IDM_SOURCE_TUNER:
 			VideoSource = 0;
 			AudioSource = AUDIOMUX_TUNER;
 			Stop_Capture();
@@ -917,34 +918,66 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			OSD_ShowText(hWnd,Programm[CurrentProgramm].Name, 0);
 			break;
 
-		case IDM_EXTERN1:
-		case IDM_EXTERN2:
-		case IDM_EXTERN3:
-		case IDM_EXTERN4:
-		case IDM_EXTERN5:
+		case IDM_SOURCE_COMPOSITE:
+		case IDM_SOURCE_SVIDEO:
+		case IDM_SOURCE_OTHER1:
+		case IDM_SOURCE_OTHER2:
+		case IDM_SOURCE_COMPVIASVIDEO:
 			VideoSource = SOURCE_TUNER;
 			switch (LOWORD(wParam)) {
-			case IDM_EXTERN1: VideoSource = SOURCE_COMPOSITE;      break;
-			case IDM_EXTERN2: VideoSource = SOURCE_SVIDEO;         break;
-			case IDM_EXTERN3: VideoSource = SOURCE_OTHER1;         break;
-			case IDM_EXTERN4: VideoSource = SOURCE_OTHER2;         break;
-			case IDM_EXTERN5: VideoSource = SOURCE_COMPVIASVIDEO;  break;
+			case IDM_SOURCE_COMPOSITE:      VideoSource = SOURCE_COMPOSITE;      break;
+			case IDM_SOURCE_SVIDEO:         VideoSource = SOURCE_SVIDEO;         break;
+			case IDM_SOURCE_OTHER1:         VideoSource = SOURCE_OTHER1;         break;
+			case IDM_SOURCE_OTHER2:         VideoSource = SOURCE_OTHER2;         break;
+			case IDM_SOURCE_COMPVIASVIDEO:  VideoSource = SOURCE_COMPVIASVIDEO;  break;
 			}
 			OSD_ShowVideoSource(hWnd, VideoSource);
 			sprintf(Text, "Extern %d", VideoSource);
 			StatusBar_ShowText(hwndTextField, Text);
 
-			AudioSource = AUDIOMUX_EXTERNAL;
 			Stop_Capture();
 			BT848_ResetHardware();
 			BT848_SetGeoSize();
 			WorkoutOverlaySize();
 			BT848_SetVideoSource(VideoSource);
+			AudioSource = AUDIOMUX_EXTERNAL;
 			if(!System_In_Mute)
 			{
 				Audio_SetSource(AudioSource);
 			}
 			Start_Capture();
+			break;
+
+        // MAE 13 Dec 2000 for CCIR656 Digital input
+        case IDM_SOURCE_CCIR656:
+		        
+			VideoSource = SOURCE_CCIR656;
+			OSD_ShowVideoSource(hWnd, VideoSource);
+			sprintf(Text, "CCIR656 Digital", VideoSource);
+			StatusBar_ShowText(hwndTextField, Text);
+
+			Stop_Capture();
+			BT848_ResetHardware();
+			BT848_Enable656();
+			WorkoutOverlaySize();
+            AudioSource = AUDIOMUX_EXTERNAL;
+			if(!System_In_Mute)
+			{
+				Audio_SetSource(AudioSource);
+			}
+			Start_Capture();
+/*
+            // FIXME: We really need separate picture settings for each input.
+			// Reset defaults for brightness, contrast, color U and V
+			InitialBrightness = 0;
+			InitialContrast = 0x80;
+			InitialSaturationU = 0x80;
+			InitialSaturationV = 0x80;
+			BT848_SetBrightness(InitialBrightness);
+			BT848_SetContrast(InitialContrast);
+			BT848_SetSaturationU(InitialSaturationU);
+			BT848_SetSaturationV(InitialSaturationV);
+*/
 			break;
 
 		case IDM_HWINFO:
@@ -1135,7 +1168,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_ANALOGSCAN:
-			SendMessage(hWnd, WM_COMMAND, IDM_TUNER, 0);
+			SendMessage(hWnd, WM_COMMAND, IDM_SOURCE_TUNER, 0);
 			DialogBox(hInst, "ANALOGSCAN", hWnd, (DLGPROC) AnalogScanProc);
 			break;
 
@@ -1145,14 +1178,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				DialogBox(hInst, "CHANNELLIST", hWnd, (DLGPROC) ProgramListProc);
 				OSD_ShowText(hWnd,Programm[CurrentProgramm].Name, 0);
 			}
-			break;
-
-		case IDM_SHOW_OSD:
-			OSD_ShowVideoSource(hWnd, VideoSource);
-			break;
-
-		case IDM_HIDE_OSD:
-			OSD_Clear(hWnd);
 			break;
 
 		case IDM_TREADPRIOR_0:
@@ -1206,44 +1231,20 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case ID_SETTINGS_PIXELWIDTH_768:
-			ShowText(hWnd, "768 Pixels");
-			CurrentX = 768;
-			Stop_Capture();
-			BT848_SetGeoSize();
-			WorkoutOverlaySize();
-			Start_Capture();
-			break;
-
 		case ID_SETTINGS_PIXELWIDTH_720:
-			ShowText(hWnd, "720 Pixels");
-			CurrentX = 720;
-			Stop_Capture();
-			BT848_SetGeoSize();
-			WorkoutOverlaySize();
-			Start_Capture();
-			break;
-
 		case ID_SETTINGS_PIXELWIDTH_640:
-			ShowText(hWnd, "640 Pixels");
-			CurrentX = 640;
-			Stop_Capture();
-			BT848_SetGeoSize();
-			WorkoutOverlaySize();
-			Start_Capture();
-			break;
-
 		case ID_SETTINGS_PIXELWIDTH_384:
-			ShowText(hWnd, "384 Pixels");
-			CurrentX = 384;
-			Stop_Capture();
-			BT848_SetGeoSize();
-			WorkoutOverlaySize();
-			Start_Capture();
-			break;
-
 		case ID_SETTINGS_PIXELWIDTH_320:
-			ShowText(hWnd, "320 Pixels");
-			CurrentX = 320;
+            switch(LOWORD(wParam))
+            {
+            case ID_SETTINGS_PIXELWIDTH_768:  CurrentX = 768; break;
+		    case ID_SETTINGS_PIXELWIDTH_720:  CurrentX = 720; break;
+		    case ID_SETTINGS_PIXELWIDTH_640:  CurrentX = 640; break;
+		    case ID_SETTINGS_PIXELWIDTH_384:  CurrentX = 384; break; 
+		    case ID_SETTINGS_PIXELWIDTH_320:  CurrentX = 320; break;
+            default:                          CurrentX = 720; break;
+            }
+			sprintf(Text, "%d Pixel Sampling", CurrentX);
 			Stop_Capture();
 			BT848_SetGeoSize();
 			WorkoutOverlaySize();
@@ -1322,7 +1323,25 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			Sleep(100);
 			break;
 
-		case IDM_OVERLAY_STOP:
+		case IDM_SHOW_OSD:
+			OSD_ShowVideoSource(hWnd, VideoSource);
+			break;
+
+		case IDM_HIDE_OSD:
+			OSD_Clear(hWnd);
+			break;
+
+		case IDM_SET_OSD_TEXT:
+            // Useful for external programs for custom control of dTV's OSD display
+            // Such as macros in software such as Girder, etc.
+            if (lParam && GetAtomName((ATOM) lParam, Text, sizeof(Text)))
+            {
+                OSD_ShowText(hWnd, Text, 0);
+                GlobalDeleteAtom((ATOM) lParam);
+            }
+			break;
+
+        case IDM_OVERLAY_STOP:
 		    Overlay_Stop(hWnd);
 			break;
 
@@ -1402,7 +1421,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			// or a Sleep() operation.  To be on the safe side, I do both
 			// here.  Perhaps the video overlay drivers needed to reinitialize.
 			SendMessage(HWND_BROADCAST, WM_PAINT, 0, 0);
-			Sleep(100);
+			Sleep(500);
 			Overlay_Start(hWnd);
 			break;
 		}
@@ -1708,6 +1727,7 @@ void MainWndOnInitBT(HWND hWnd)
 		case SOURCE_OTHER1:        sprintf(Text, "Other 1");               break;
 		case SOURCE_OTHER2:        sprintf(Text, "Other 2");               break;
 		case SOURCE_COMPVIASVIDEO: sprintf(Text, "Composite via S-Video"); break;
+		case SOURCE_CCIR656:       sprintf(Text, "CCIR656");               break;
 		default:
             // EAS20001226: Leave AudioInput as it was read in from the ini.
 			//AudioSource = AUDIOMUX_TUNER;
@@ -1726,9 +1746,16 @@ void MainWndOnInitBT(HWND hWnd)
 			pDisplay[i] = GetFirstFullPage(Display_dma[i]);
 		}
 
-		// OK we're ready to go
+        // OK we're ready to go
 		BT848_ResetHardware();
-		BT848_SetGeoSize();
+        if (VideoSource == SOURCE_CCIR656)
+        {
+    		BT848_Enable656();
+        }
+        else
+        {
+    		BT848_SetGeoSize();
+        }
 		WorkoutOverlaySize();
 		Start_Capture();
 		Sleep(100);
@@ -1999,28 +2026,29 @@ void SetMenuAnalog()
 	CheckMenuItem(GetMenu(hWnd), ID_SETTINGS_PIXELWIDTH_384, (CurrentX == 384)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), ID_SETTINGS_PIXELWIDTH_320, (CurrentX == 320)?MF_CHECKED:MF_UNCHECKED);
 
-	EnableMenuItem(GetMenu(hWnd), IDM_TUNER, (TVCards[TVTYPE].TunerInput != -1)?MF_ENABLED:MF_GRAYED);
+	EnableMenuItem(GetMenu(hWnd), IDM_SOURCE_TUNER, (TVCards[TVTYPE].TunerInput != -1)?MF_ENABLED:MF_GRAYED);
 	if(TVCards[TVTYPE].SVideoInput == -1)
 	{
-		EnableMenuItem(GetMenu(hWnd), IDM_EXTERN2, MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_EXTERN3, (TVCards[TVTYPE].nVideoInputs > 2)?MF_ENABLED:MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_EXTERN4, (TVCards[TVTYPE].nVideoInputs > 3)?MF_ENABLED:MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_EXTERN5, MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_SOURCE_SVIDEO, MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_SOURCE_OTHER1, (TVCards[TVTYPE].nVideoInputs > 2)?MF_ENABLED:MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_SOURCE_OTHER2, (TVCards[TVTYPE].nVideoInputs > 3)?MF_ENABLED:MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_SOURCE_COMPVIASVIDEO, MF_GRAYED);
 	}
 	else
 	{
-		EnableMenuItem(GetMenu(hWnd), IDM_EXTERN2, MF_ENABLED);
-		EnableMenuItem(GetMenu(hWnd), IDM_EXTERN3, (TVCards[TVTYPE].nVideoInputs > 3)?MF_ENABLED:MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_EXTERN4, (TVCards[TVTYPE].nVideoInputs > 4)?MF_ENABLED:MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_EXTERN5, MF_ENABLED);
+		EnableMenuItem(GetMenu(hWnd), IDM_SOURCE_SVIDEO, MF_ENABLED);
+		EnableMenuItem(GetMenu(hWnd), IDM_SOURCE_OTHER1, (TVCards[TVTYPE].nVideoInputs > 3)?MF_ENABLED:MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_SOURCE_OTHER2, (TVCards[TVTYPE].nVideoInputs > 4)?MF_ENABLED:MF_GRAYED);
+		EnableMenuItem(GetMenu(hWnd), IDM_SOURCE_COMPVIASVIDEO, MF_ENABLED);
 	}
 
-	CheckMenuItem(GetMenu(hWnd), IDM_TUNER,   (VideoSource == 0)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_EXTERN1, (VideoSource == 1)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_EXTERN2, (VideoSource == 2)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_EXTERN3, (VideoSource == 3)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_EXTERN4, (VideoSource == 4)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_EXTERN5, (VideoSource == 5)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_SOURCE_TUNER,         (VideoSource == 0)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_SOURCE_COMPOSITE,     (VideoSource == 1)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_SOURCE_SVIDEO,        (VideoSource == 2)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_SOURCE_OTHER1,        (VideoSource == 3)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_SOURCE_OTHER2,        (VideoSource == 4)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_SOURCE_COMPVIASVIDEO, (VideoSource == 5)?MF_CHECKED:MF_UNCHECKED);
+    CheckMenuItem(GetMenu(hWnd), IDM_SOURCE_CCIR656,       (VideoSource == 6)?MF_CHECKED:MF_UNCHECKED);
 
 	CheckMenuItem(GetMenu(hWnd), IDM_MUTE,    System_In_Mute?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_AUDIO_0, (AudioSource == 0)?MF_CHECKED:MF_UNCHECKED);
@@ -2173,6 +2201,7 @@ void OSD_ShowVideoSource(HWND hWnd, int nVideoSource)
 	case SOURCE_OTHER1:        OSD_ShowText(hWnd,"Other 1", 0);                      break;
 	case SOURCE_OTHER2:        OSD_ShowText(hWnd,"Other 2", 0);                      break;
 	case SOURCE_COMPVIASVIDEO: OSD_ShowText(hWnd,"Composite via S-Video", 0);        break;
+	case SOURCE_CCIR656:       OSD_ShowText(hWnd,"CCIR656", 0);                      break; // MAE 13 Dec 2000 For CCIR656 input
 	}
 }
 
@@ -2286,215 +2315,4 @@ int AdjustSliderDown(int * pnValue, int nLower)
         *pnValue = nNewValue;
     }
     return nStep;
-}
-
-// Symbolic constants for feature flags in CPUID standard feature flags 
-
-#define CPUID_STD_FPU          0x00000001
-#define CPUID_STD_VME          0x00000002
-#define CPUID_STD_DEBUGEXT     0x00000004
-#define CPUID_STD_4MPAGE       0x00000008
-#define CPUID_STD_TSC          0x00000010
-#define CPUID_STD_MSR          0x00000020
-#define CPUID_STD_PAE          0x00000040
-#define CPUID_STD_MCHKXCP      0x00000080
-#define CPUID_STD_CMPXCHG8B    0x00000100
-#define CPUID_STD_APIC         0x00000200
-#define CPUID_STD_SYSENTER     0x00000800
-#define CPUID_STD_MTRR         0x00001000
-#define CPUID_STD_GPE          0x00002000
-#define CPUID_STD_MCHKARCH     0x00004000
-#define CPUID_STD_CMOV         0x00008000
-#define CPUID_STD_PAT          0x00010000
-#define CPUID_STD_PSE36        0x00020000
-#define CPUID_STD_MMX          0x00800000
-#define CPUID_STD_FXSAVE       0x01000000
-#define CPUID_STD_SSE          0x02000000
-#define CPUID_STD_SSE2         0x04000000
-
-/* Symbolic constants for feature flags in CPUID extended feature flags */
-
-#define CPUID_EXT_3DNOW        0x80000000
-#define CPUID_EXT_AMD_3DNOWEXT 0x40000000
-#define CPUID_EXT_AMD_MMXEXT   0x00400000
-
-
-
-
-
-//---------------------------------------------------------------------------
-// Get features of our CPU - modified from sample code from AMD & Intel
-
-UINT get_feature_flags(void)
-{
-   UINT result    = 0;
-   UINT signature = 0;
-	char vendor[13]        = "UnknownVendr";  /* Needs to be exactly 12 chars */
-
-   /* Define known vendor strings here */
-
-   char vendorAMD[13]     = "AuthenticAMD";  /* Needs to be exactly 12 chars */
-   char vendorIntel[13]   = "GenuineIntel";  /* Needs to be exactly 12 chars */
-
-   // Step 1: Check if processor has CPUID support. Processor faults
-   // with an illegal instruction exception if the instruction is not
-   // supported. This step catches the exception and immediately returns
-   // with feature string bits with all 0s, if the exception occurs.
-	__try {
-		__asm xor    eax, eax
-		__asm xor    ebx, ebx
-		__asm xor    ecx, ecx
-		__asm xor    edx, edx
-		__asm cpuid
-	}
-
-	__except (EXCEPTION_EXECUTE_HANDLER) {
-		return (0);
-	}
-	
-	result |= FEATURE_CPUID;
-
-	_asm {
-         // Step 2: Check if CPUID supports function 1 (signature/std features)
-         xor     eax, eax                      // CPUID function #0
-         cpuid                                 // largest std func/vendor string
-         mov     dword ptr [vendor], ebx       // save 
-         mov     dword ptr [vendor+4], edx     //  vendor
-         mov     dword ptr [vendor+8], ecx     //   string
-         test    eax, eax                      // largest standard function==0?
-         jz      $no_standard_features         // yes, no standard features func
-         or      [result], FEATURE_STD_FEATURES// does have standard features
-
-         // Step 3: Get standard feature flags and signature
-         mov     eax, 1                        // CPUID function #1 
-         cpuid                                 // get signature/std feature flgs
-         mov     [signature], eax              // save processor signature
-
-         // Step 4: Extract desired features from standard feature flags
-         // Check for time stamp counter support
-         mov     ecx, CPUID_STD_TSC            // bit 4 indicates TSC support
-         and     ecx, edx                      // supports TSC ? CPUID_STD_TSC:0
-         neg     ecx                           // supports TSC ? CY : NC
-         sbb     ecx, ecx                      // supports TSC ? 0xffffffff:0
-         and     ecx, FEATURE_TSC              // supports TSC ? FEATURE_TSC:0
-         or      [result], ecx                 // merge into feature flags
-
-         // Check for MMX support
-         mov     ecx, CPUID_STD_MMX            // bit 23 indicates MMX support
-         and     ecx, edx                      // supports MMX ? CPUID_STD_MMX:0
-         neg     ecx                           // supports MMX ? CY : NC
-         sbb     ecx, ecx                      // supports MMX ? 0xffffffff:0  
-         and     ecx, FEATURE_MMX              // supports MMX ? FEATURE_MMX:0
-         or      [result], ecx                 // merge into feature flags
-
-         // Check for CMOV support
-         mov     ecx, CPUID_STD_CMOV           // bit 15 indicates CMOV support
-         and     ecx, edx                      // supports CMOV?CPUID_STD_CMOV:0
-         neg     ecx                           // supports CMOV ? CY : NC
-         sbb     ecx, ecx                      // supports CMOV ? 0xffffffff:0
-         and     ecx, FEATURE_CMOV             // supports CMOV ? FEATURE_CMOV:0
-         or      [result], ecx                 // merge into feature flags
-         
-         // Check support for P6-style MTRRs
-         mov     ecx, CPUID_STD_MTRR           // bit 12 indicates MTRR support
-         and     ecx, edx                      // supports MTRR?CPUID_STD_MTRR:0
-         neg     ecx                           // supports MTRR ? CY : NC
-         sbb     ecx, ecx                      // supports MTRR ? 0xffffffff:0
-         and     ecx, FEATURE_P6_MTRR          // supports MTRR ? FEATURE_MTRR:0
-         or      [result], ecx                 // merge into feature flags
-
-         // Check for initial SSE support. There can still be partial SSE
-         // support. Step 9 will check for partial support.
-         mov     ecx, CPUID_STD_SSE            // bit 25 indicates SSE support
-         and     ecx, edx                      // supports SSE ? CPUID_STD_SSE:0
-         neg     ecx                           // supports SSE ? CY : NC
-         sbb     ecx, ecx                      // supports SSE ? 0xffffffff:0
-         and     ecx, (FEATURE_MMXEXT+FEATURE_SSEFP+FEATURE_SSE) // supports SSE ? 
-                                               // FEATURE_MMXEXT+FEATURE_SSEFP:0
-         or      [result], ecx                 // merge into feature flags
-
-         // Check for SSE2 support. (TRB - Was not part of sample code)
-         mov     ecx, CPUID_STD_SSE2            // bit 26 indicates SSE2 support
-         and     ecx, edx                      // supports SSE2 ? CPUID_STD_SSE2:0
-         neg     ecx                           // supports SSE2 ? CY : NC
-         sbb     ecx, ecx                      // supports SSE2 ? 0xffffffff:0
-         and     ecx, (FEATURE_SSE2)           // supports SSE2 ? 
-                                               // FEATURE_SSE2:0
-         or      [result], ecx                 // merge into feature flags
-
-         // Step 5: Check for CPUID extended functions
-         mov     eax, 0x80000000               // extended function 0x80000000
-         cpuid                                 // largest extended function
-         cmp     eax, 0x80000000               // no function > 0x80000000 ?
-         jbe     $no_extended_features         // yes, no extended feature flags
-         or      [result], FEATURE_EXT_FEATURES// does have ext. feature flags
-
-         // Step 6: Get extended feature flags 
-         mov     eax, 0x80000001               // CPUID ext. function 0x80000001
-         cpuid                                 // EDX = extended feature flags
-         
-         // Step 7: Extract vendor independent features from extended flags 
-         // Check for 3DNow! support (vendor independent)
-         mov     ecx, CPUID_EXT_3DNOW          // bit 31 indicates 3DNow! supprt
-         and     ecx, edx                      // supp 3DNow! ?CPUID_EXT_3DNOW:0
-         neg     ecx                           // supports 3DNow! ? CY : NC
-         sbb     ecx, ecx                      // supports 3DNow! ? 0xffffffff:0
-         and     ecx, FEATURE_3DNOW            // support 3DNow!?FEATURE_3DNOW:0
-         or      [result], ecx                 // merge into feature flags
-
-         // Step 8: Determine CPU vendor
-         lea     esi, vendorAMD                // AMD's vendor string
-         lea     edi, vendor                   // this CPU's vendor string
-         mov     ecx, 12                       // strings are 12 characters
-         cld                                   // compare lowest to highest
-         repe    cmpsb                         // current vendor str == AMD's ?
-         jnz     $not_AMD                      // no, CPU vendor is not AMD
-
-         // Step 9: Check AMD specific extended features
-         mov     ecx, CPUID_EXT_AMD_3DNOWEXT   // bit 30 indicates 3DNow! ext.
-         and     ecx, edx                      // 3DNow! ext? 
-         neg     ecx                           // 3DNow! ext ? CY : NC
-         sbb     ecx, ecx                      // 3DNow! ext ? 0xffffffff : 0
-         and     ecx, FEATURE_3DNOWEXT         // 3DNow! ext?FEATURE_3DNOWEXT:0
-         or      [result], ecx                 // merge into feature flags
-
-         test    [result], FEATURE_MMXEXT      // determined SSE MMX support?
-         jnz     $has_mmxext                   // yes, don't need to check again
-
-         // Check support for AMD's multimedia instruction set additions 
-
-         mov     ecx, CPUID_EXT_AMD_MMXEXT     // bit 22 indicates MMX extension
-         and     ecx, edx                      // MMX ext?CPUID_EXT_AMD_MMXEXT:0
-         neg     ecx                           // MMX ext? CY : NC
-         sbb     ecx, ecx                      // MMX ext? 0xffffffff : 0
-         and     ecx, FEATURE_MMXEXT           // MMX ext ? FEATURE_MMXEXT:0
-         or      [result], ecx                 // merge into feature flags
-        
-$has_mmxext:
-
-         // Step 10: Check AMD-specific features not reported by CPUID
-         // Check support for AMD-K6 processor-style MTRRs          
-         mov     eax, [signature] 	// get processor signature
-         and     eax, 0xFFF 		// extract family/model/stepping
-         cmp     eax, 0x588 		// CPU < AMD-K6-2/CXT ? CY : NC
-         sbb     edx, edx 		// CPU < AMD-K6-2/CXT ? 0xffffffff:0
-         not     edx 			// CPU < AMD-K6-2/CXT ? 0:0xffffffff
-         cmp     eax, 0x600 		// CPU < AMD Athlon ? CY : NC
-         sbb     ecx, ecx 		// CPU < AMD-K6 ? 0xffffffff:0
-         and     ecx, edx 		// (CPU>=AMD-K6-2/CXT)&& 
-					// (CPU<AMD Athlon) ? 0xffffffff:0
-         and     ecx, FEATURE_K6_MTRR 	// (CPU>=AMD-K6-2/CXT)&& 
-					// (CPU<AMD Athlon) ? FEATURE_K6_MTRR:0
-         or      [result], ecx 		// merge into feature flags
-
-         jmp     $all_done 		// desired features determined
-
-$not_AMD:
-         // Extract features specific to non AMD CPUs (except SSE2 already done)
-$no_extended_features:
-$no_standard_features:
-$all_done:
-   }
-
-   return (result);
 }

@@ -25,17 +25,23 @@ Step by step instructions:
 
 3. Upgrade your Visual Studio with the latest service pack from:
    http://msdn.microsoft.com/vstudio/
+   At this time of writing, SP4 or later is required.
 
-4. Get the Windows 2000 DDK from:
+4. Get the Visual C++ Processor Pack from:
+   http://msdn.microsoft.com/vstudio/downloads/ppack/download.asp
+   Install.  It will automatically upgrade Visual Studio.
+   This software adds SSE and SSE2 support for dTV's assembly code.
+
+5. Get the Windows 2000 DDK from:
    http://www.microsoft.com/ddk/W2kDDK.htm
    Install as D:\NTDDK or another drive of your choice.
    We'll use drive D: as an example here.
 
-5. Get the Windows 98 DDK from:
+6. Get the Windows 98 DDK from:
    http://www.microsoft.com/ddk/ddk98.htm
    Install as D:\98DDK or another drive of your choice.
 
-6. In Visual Studio, add the following to the list of directories, 
+7. In Visual Studio, add the following to the list of directories, 
    EXACTLY as ordered (NTDDK must be before 98DDK) and at the TOP of the
    list before the default directories.  This is VERY IMPORTANT, or the 
    project won't compile properly.  You can substitute the drive letter "D:", 
@@ -56,14 +62,14 @@ Step by step instructions:
    Visual Studio->Tools->Options->Directories->Executable Files
       D:\98ddk\bin\win98
 
-7. Do a "Build All"
+8. Do a "Build All"
 
-8. You have a ready-to-run ready-to-distribute dTV package in the 
+9. You have a ready-to-run ready-to-distribute dTV package in the 
   ..\Release directory.  (Or the ..\Debug directory, if you
   selected the Debug Configuration)
 
-9. If you make useful changes to the code, please make your changes
-   to the LATEST source code and submit to dtv@marky.com
+10. If you make useful changes to the code, please make your changes
+    to the LATEST source code and submit to dtv@marky.com
    
 
 ---END---
