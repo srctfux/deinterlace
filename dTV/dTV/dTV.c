@@ -422,10 +422,20 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
 		case IDM_CHANNELPLUS:
 			ChangeChannel(CurrentProgramm + 1);
+			if (bDisplayStatusBar == TRUE)
+			{
+				sprintf(Text, "Channel %d", CurrentProgramm);
+				SetWindowText(hwndTextField, Text);
+			}
 			break;
 
 		case IDM_CHANNELMINUS:
 			ChangeChannel(CurrentProgramm - 1);
+			if (bDisplayStatusBar == TRUE)
+			{
+				sprintf(Text, "Channel %d", CurrentProgramm);
+				SetWindowText(hwndTextField, Text);
+			}
 			break;
 
 		case IDM_RESET:
@@ -743,6 +753,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_END:
+			ShowWindow(hWnd, SW_HIDE);
 			PostMessage(hWnd, WM_DESTROY, wParam, lParam);
 			break;
 
@@ -751,7 +762,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_MSPMODE_4:
 		case IDM_MSPMODE_5:
 		case IDM_MSPMODE_6:
-			Audio_MSP_SetMode(wParam - 1600);
+			Audio_MSP_SetMode(LOWORD(wParam) - (IDM_MSPMODE_2 - 2));
 			SetMenuAnalog();
 			break;
 
@@ -759,7 +770,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_MAJOR_CARRIER_1:
 		case IDM_MAJOR_CARRIER_2:
 		case IDM_MAJOR_CARRIER_3:
-			Audio_MSP_Set_MajorMinor_Mode(wParam - 1610, MSPMinorMode);
+			Audio_MSP_Set_MajorMinor_Mode(LOWORD(wParam) - IDM_MAJOR_CARRIER_0, MSPMinorMode);
 			SetMenuAnalog();
 			break;
 
@@ -771,7 +782,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_MINOR_CARRIER_5:
 		case IDM_MINOR_CARRIER_6:
 		case IDM_MINOR_CARRIER_7:
-			Audio_MSP_Set_MajorMinor_Mode(MSPMajorMode, wParam - 1620);
+			Audio_MSP_Set_MajorMinor_Mode(MSPMajorMode, LOWORD(wParam) - IDM_MINOR_CARRIER_0);
 			SetMenuAnalog();
 			break;
 
@@ -779,7 +790,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_MSPSTEREO_2:
 		case IDM_MSPSTEREO_3:
 		case IDM_MSPSTEREO_4:
-			Audio_MSP_SetStereo(MSPMajorMode, MSPMinorMode, wParam - 1630);
+			Audio_MSP_SetStereo(MSPMajorMode, MSPMinorMode, LOWORD(wParam) - (IDM_MSPSTEREO_1 - 1));
 			SetMenuAnalog();
 			break;
 
@@ -794,7 +805,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_AUDIO_3:
 		case IDM_AUDIO_4:
 		case IDM_AUDIO_5:
-			AudioSource = wParam - 1110;
+			AudioSource = LOWORD(wParam) - IDM_AUDIO_0;
 			Stop_Capture();
 			Audio_SetSource(AudioSource);
 			Start_Capture();
@@ -828,7 +839,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			// 10/16/2000 by Mark Rejhon:
 			// More guaranteed to work than mathematics with wParam
 			VideoSource = 0;
-			switch (wParam) {
+			switch (LOWORD(wParam)) {
 			case IDM_EXTERN1: VideoSource = 1; break;
 			case IDM_EXTERN2: VideoSource = 2; break;
 			case IDM_EXTERN3: VideoSource = 3; break;
@@ -844,7 +855,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			BT848_SetVideoSource(VideoSource);
 			if (bDisplayStatusBar == TRUE)
 			{
-
 				sprintf(Text, "Extern %d", VideoSource);
 				SetWindowText(hwndKeyField, Text);
 			}
@@ -1061,7 +1071,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_TREADPRIOR_2:
 		case IDM_TREADPRIOR_3:
 		case IDM_TREADPRIOR_4:
-			ThreadClassId = wParam - 1150;
+			ThreadClassId = LOWORD(wParam) - IDM_TREADPRIOR_0;
 			Stop_Capture();
 			Start_Capture();
 			SetMenuAnalog();
@@ -1070,7 +1080,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_PRIORCLASS_0:
 		case IDM_PRIORCLASS_1:
 		case IDM_PRIORCLASS_2:
-			PriorClassId = wParam - 1160;
+			PriorClassId = LOWORD(wParam) - IDM_PRIORCLASS_0;
 			strcpy(Text, "Can't set Priority");
 			if (PriorClassId == 0)
 			{
@@ -1101,7 +1111,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_TYPEFORMAT_7:
 		case IDM_TYPEFORMAT_8:
 		case IDM_TYPEFORMAT_9:
-			TVTYPE = wParam - 1120;
+			TVTYPE = LOWORD(wParam) - 1120;
 			Stop_Capture();
 			BT848_SetGeoSize();
 			WorkoutOverlaySize();
@@ -1265,10 +1275,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				if(bIsFullScreen == FALSE)
 				{
 					bIsFullScreen = TRUE;
-					if(bShowCursor)
-					{
-						ShowCursor(FALSE);
-					}
+					ShowCursor(FALSE);
 					WorkoutOverlaySize();
 				}
 				break;
@@ -1295,7 +1302,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 	case WM_CHAR:
 		if (((char) wParam >= '0') && ((char) wParam <= '9'))
 		{
-			sprintf(Text, "%c", wParam);
+			sprintf(Text, "%c", LOWORD(wParam));
 			strcat(ChannelString, Text);
 			if (strlen(ChannelString) >= 3)
 			{
