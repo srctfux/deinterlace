@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DeinterlaceProperties.cpp,v 1.2 2001-08-07 17:43:52 tobbej Exp $
+// $Id: DeinterlaceProperties.cpp,v 1.3 2001-08-07 20:22:35 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2001 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.2  2001/08/07 17:43:52  tobbej
+// fixed NULL pointer crash in property page
+//
 // Revision 1.1.1.1  2001/07/30 16:14:44  tobbej
 // initial import of new dmo filter
 //
@@ -61,6 +64,11 @@ void CDeinterlaceProperties::UpdateUI()
 	{
 		SetDlgItemText(IDC_PLUGIN_NAME,"");
 	}
+	
+	BOOL hasUI=FALSE;
+	pDI->PluginHasUI(&hasUI);
+	::EnableWindow(GetDlgItem(IDC_PLUGIN_SHOWUI),hasUI);
+	
 }
 
 LRESULT CDeinterlaceProperties::OnPluginUnload(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled)
@@ -92,7 +100,7 @@ LRESULT CDeinterlaceProperties::OnPluginLoad(WORD wNotifyCode, WORD wID, HWND hW
 
 	TCHAR strFileName[255];
 	GetDlgItemText(IDC_PLUGIN_FILENAME,strFileName,255);
-	hr=pDI->LoadPlugin(strFileName,NULL,NULL);
+	hr=pDI->LoadPlugin(strFileName);
 	if(FAILED(hr))
 	{
 		CComPtr<IErrorInfo> pError;
@@ -140,8 +148,22 @@ LRESULT CDeinterlaceProperties::OnPluginBrowse(WORD wNotifyCode, WORD wID, HWND 
 	if(GetOpenFileName(&ofn)==TRUE)
 	{
 		SetDlgItemText(IDC_PLUGIN_FILENAME,ofn.lpstrFile);
+		BOOL dummy;
+		OnPluginLoad(0,0,NULL,dummy);
 	}
-	BOOL dummy;
-	OnPluginLoad(0,0,NULL,dummy);
+	
+	return 0;
+}
+
+LRESULT CDeinterlaceProperties::OnPluginShowUI(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled)
+{
+	ATLTRACE("%s(%d) : OnPluginShowUI\n",__FILE__,__LINE__);
+	CComQIPtr<IDeinterlace,&IID_IDeinterlace> pDI(m_ppUnk[0]);
+	
+	if(FAILED(pDI->ShowPluginUI((long*)m_hWnd)))
+	{
+		MessageBox(_T("Failed to show plugin UI"),_T("Error"));
+	}
+
 	return 0;
 }

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DeinterlaceDMO.idl,v 1.1.1.1 2001-07-30 16:14:44 tobbej Exp $
+// $Id: DeinterlaceDMO.idl,v 1.2 2001-08-07 20:22:35 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2001 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1.1.1  2001/07/30 16:14:44  tobbej
+// initial import of new dmo filter
+//
 //
 //////////////////////////////////////////////////////////////////////////////
 
@@ -77,7 +80,7 @@ import "ocidl.idl";
 	{
 		//import "DISetting.h";
 
-		[id(1), helpstring("method LoadPlugin")] HRESULT LoadPlugin([in]LPCSTR szFileName,[in] long *hwndMain, [in] long *hwndStatus);
+		[id(1), helpstring("method LoadPlugin")] HRESULT LoadPlugin([in]LPCSTR szFileName);
 		[id(2), helpstring("method UnloadPlugin")] HRESULT UnloadPlugin();
 		[id(3), helpstring("method IsPluginLoaded")] HRESULT IsPluginLoaded();
 		[id(4), helpstring("method GetPluginName")] HRESULT GetPluginName([out,string] unsigned char **szName);
@@ -85,6 +88,8 @@ import "ocidl.idl";
 		[id(6), helpstring("method GetSettingCount")] HRESULT GetSettingCount([out] long *pCount);
 		[id(7), helpstring("method put_SettingValue")] HRESULT put_SettingValue([in] int nIndex,[in] long lValue);
 		[id(8), helpstring("method get_SettingValue")] HRESULT get_SettingValue([in] int nIndex,[out] long *pValue);
+		[id(9), helpstring("method ShowPluginUI")] HRESULT ShowPluginUI(long *hwndParent);
+		[id(10), helpstring("method PluginHasUI")] HRESULT PluginHasUI(BOOL *hasUI);
 	};
 
 [

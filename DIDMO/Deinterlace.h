@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: Deinterlace.h,v 1.1.1.1 2001-07-30 16:14:44 tobbej Exp $
+// $Id: Deinterlace.h,v 1.2 2001-08-07 20:22:35 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2001 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1.1.1  2001/07/30 16:14:44  tobbej
+// initial import of new dmo filter
+//
 //
 //////////////////////////////////////////////////////////////////////////////
 
@@ -130,6 +133,8 @@ DECLARE_GET_CONTROLLING_UNKNOWN()
 
 // IDeinterlace
 public:
+	STDMETHOD(PluginHasUI)(BOOL *hasUI);
+	STDMETHOD(ShowPluginUI)(long *hwndParent);
 	STDMETHOD(get_SettingValue)(int nIndex, long *pValue);
 	STDMETHOD(put_SettingValue)(int nIndex,long lValue);
 	STDMETHOD(GetSettingCount)(long *pCount);
@@ -137,7 +142,7 @@ public:
 	STDMETHOD(GetPluginName)(unsigned char **szName);
 	STDMETHOD(IsPluginLoaded)();
 	STDMETHOD(UnloadPlugin)();
-	STDMETHOD(LoadPlugin)(LPCSTR szFileName,long *hwndMain, long *hwndStatus);
+	STDMETHOD(LoadPlugin)(LPCSTR szFileName);
 private:
 	HRESULT CanPerformDeinterlace(const DMO_MEDIA_TYPE *pmt);
 };

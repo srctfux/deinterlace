@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DeinterlaceSettings.h,v 1.1.1.1 2001-07-30 16:14:44 tobbej Exp $
+// $Id: DeinterlaceSettings.h,v 1.2 2001-08-07 20:22:35 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2001 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1.1.1  2001/07/30 16:14:44  tobbej
+// initial import of new dmo filter
+//
 //
 //////////////////////////////////////////////////////////////////////////////
 
@@ -95,10 +98,10 @@ END_MSG_MAP()
 		ATLTRACE(_T("%s(%d) : CDeinterlaceSettings::Apply\n"),__FILE__,__LINE__);
 		if (!m_ppUnk)
 			return E_UNEXPECTED;
-		if(!m_bDirty)
+		/*if(!m_bDirty)
 			return E_UNEXPECTED;
-		
-		m_bDirty = FALSE;
+		m_bDirty = FALSE;*/
+
 		return S_OK;
 	}
 	

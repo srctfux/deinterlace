@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: Deinterlace.cpp,v 1.1.1.1 2001-07-30 16:14:44 tobbej Exp $
+// $Id: Deinterlace.cpp,v 1.2 2001-08-07 20:22:35 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2001 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1.1.1  2001/07/30 16:14:44  tobbej
+// initial import of new dmo filter
+//
 //
 //////////////////////////////////////////////////////////////////////////////
 
@@ -498,7 +501,7 @@ HRESULT CDeinterlace::CanPerformDeinterlace(const DMO_MEDIA_TYPE *pmt)
 }
 
 
-STDMETHODIMP CDeinterlace::LoadPlugin(LPCSTR szFileName,long *hwndMain, long *hwndStatus)
+STDMETHODIMP CDeinterlace::LoadPlugin(LPCSTR szFileName)
 {
 	ATLTRACE("%s(%d) : LoadPlugin\n",__FILE__,__LINE__);
 	
@@ -574,11 +577,16 @@ STDMETHODIMP CDeinterlace::LoadPlugin(LPCSTR szFileName,long *hwndMain, long *hw
 		m_DIPlugin->hModule=hPlugInMod;
 
 		if(m_DIPlugin->pfnPluginStart!=NULL)
+		{
+			//FIXME: last param, status callbacks
 			m_DIPlugin->pfnPluginStart(0, NULL,NULL);
+		}
 		
 		//this needs moving
-		if(m_DIPlugin->pfnPluginShowUI!=NULL)
+		/*if(m_DIPlugin->pfnPluginShowUI!=NULL)
+		{
 			m_DIPlugin->pfnPluginShowUI((HWND)hwndMain);
+		}*/
 		
 		return S_OK;
 	}
@@ -719,5 +727,38 @@ STDMETHODIMP CDeinterlace::get_SettingValue(int nIndex, long *pValue)
 		return E_INVALIDARG;
 	
 	*pValue=*m_DIPlugin->pSettings[nIndex].pValue;
+	return S_OK;
+}
+
+STDMETHODIMP CDeinterlace::ShowPluginUI(long *hwndParent)
+{
+	ATLTRACE("%s(%d) : ShowUI\n",__FILE__,__LINE__);
+
+	if(m_DIPlugin==NULL)
+		return E_FAIL;
+	if(m_DIPlugin->pfnPluginShowUI==NULL)
+		return E_FAIL;
+	
+	//show plugin UI
+	m_DIPlugin->pfnPluginShowUI((HWND)hwndParent);
+
+	return S_OK;
+}
+
+STDMETHODIMP CDeinterlace::PluginHasUI(BOOL *hasUI)
+{
+	if(m_DIPlugin==NULL)
+	{
+		return E_FAIL;
+	}
+	
+	if(m_DIPlugin->pfnPluginShowUI==NULL)
+	{
+		*hasUI=FALSE;
+	}
+	else
+	{
+		*hasUI=TRUE;
+	}
 	return S_OK;
 }
