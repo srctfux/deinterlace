@@ -51,7 +51,6 @@ void Init_More();
 void More_Even(int pp);
 void More_Odd();
 void ChangeChannel(int NewChannel);
-void SetMenuAnalog();
 
 VOID APIENTRY HandleFocusState(HWND hDlg, LPDRAWITEMSTRUCT lpdis);
 
@@ -64,8 +63,11 @@ LONG APIENTRY MainWndProc(HWND, UINT, UINT, LONG);
 void MainWndOnCreate(HWND hWnd);
 void MainWndOnInitBT(HWND hWnd);
 void SaveWindowPos(HWND hWnd);
-void CleanUpMemory();
 void SetMenuAnalog();
+void CleanUpMemory();
+
+void Overlay_Stop(HWND hWnd);
+void Overlay_Start(HWND hWnd);
 void ShowText(HWND hWnd, LPCTSTR szText);
 void OSD_ShowVideoSource(HWND hWnd, int nVideoSource);
 

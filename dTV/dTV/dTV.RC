@@ -1186,8 +1186,8 @@ BEGIN
         END
         MENUITEM "&Advanced Video Flags ...",   IDM_ADV_VIDEOSETTINGS
         MENUITEM "&Splash Screen on Startup",   IDM_SPLASH_ON_STARTUP
-        MENUITEM "Stop Video Overlay",          IDM_STOP
-        MENUITEM "Start Video Overlay",         IDM_START
+        MENUITEM "Stop Video Overlay",          IDM_OVERLAY_STOP
+        MENUITEM "Start Video Overlay",         IDM_OVERLAY_START
     END
     POPUP "&Help"
     BEGIN
@@ -1433,23 +1433,34 @@ BEGIN
     "A",            IDM_SASPECT_AUTO,       VIRTKEY, NOINVERT
     "B",            IDM_BRIGHTNESSMINUS,    VIRTKEY, NOINVERT
     "B",            IDM_BRIGHTNESSPLUS,     VIRTKEY, SHIFT, NOINVERT
+    "B",            IDM_BRIGHTNESS_CURRENT, VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
     "C",            IDM_COLORMINUS,         VIRTKEY, NOINVERT
     "C",            IDM_COLORPLUS,          VIRTKEY, SHIFT, NOINVERT
+    "C",            IDM_COLOR_CURRENT,      VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
     "H",            IDM_HUE_DOWN,           VIRTKEY, NOINVERT
     "H",            IDM_HUE_UP,             VIRTKEY, SHIFT, NOINVERT
+    "H",            IDM_HUE_CURRENT,        VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
     "K",            IDM_KONTRASTMINUS,      VIRTKEY, NOINVERT
     "K",            IDM_KONTRASTPLUS,       VIRTKEY, SHIFT, NOINVERT
+    "K",            IDM_KONTRAST_CURRENT,   VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
     "L",            IDM_TAKESTILL,          VIRTKEY, NOINVERT
     "M",            IDM_MUTE,               VIRTKEY, NOINVERT
     "M",            IDM_MUTE,               VIRTKEY, SHIFT, NOINVERT
     "O",            IDM_OVERSCAN_MINUS,     VIRTKEY, NOINVERT
     "O",            IDM_OVERSCAN_PLUS,      VIRTKEY, SHIFT, NOINVERT
+    "O",            IDM_OVERSCAN_CURRENT,   VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
     "P",            IDM_CAPTURE_PAUSE,      VIRTKEY, NOINVERT
     "S",            IDM_STATUSBAR,          VIRTKEY, NOINVERT
     "T",            IDM_CALL_VIDEOTEXTSMALL, VIRTKEY, NOINVERT
     "T",            IDM_CLOSE_VT,           VIRTKEY, CONTROL, NOINVERT
     "T",            IDM_CALL_VIDEOTEXT,     VIRTKEY, SHIFT, NOINVERT
     VK_ADD,         IDM_VOLUMEPLUS,         VIRTKEY, NOINVERT
+    VK_BACK,        IDM_HIDE_OSD,           VIRTKEY, NOINVERT
     VK_DOWN,        IDM_VT_PAGE_DOWN,       VIRTKEY, NOINVERT
     VK_END,         IDM_SHOW_OSD,           VIRTKEY, NOINVERT
     VK_ESCAPE,      IDM_END,                VIRTKEY, NOINVERT

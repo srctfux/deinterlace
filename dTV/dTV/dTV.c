@@ -50,9 +50,6 @@
 #include "status.h"
 #include "vbi.h"
 
-#define WM_USER_OVERLAYSTART   (WM_USER + 101)
-#define WM_USER_OVERLAYSTOP    (WM_USER + 102)
-
 #define SOURCE_TUNER           0
 #define SOURCE_COMPOSITE       1
 #define SOURCE_SVIDEO          2
@@ -84,7 +81,7 @@ SYSTEM_INFO SysInfo;
 
 unsigned long freq;
 char Typ;
-unsigned int srate;         
+unsigned int srate;
 
 struct TBL ButtonList[15];
 
@@ -128,7 +125,7 @@ int PalFormat = 0;
 
 BOOL  BlackSet[288];
 
-LOGFONT lf = {16,0,0,0,400,0,0,0,0,0,0,0,0,"MS Sans Serif"};   
+LOGFONT lf = {16,0,0,0,400,0,0,0,0,0,0,0,0,"MS Sans Serif"};
 
 int BeforeVD=0;
 
@@ -227,7 +224,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	hWnd = CreateWindow("dTV", "dTV", WS_POPUP, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), NULL, NULL, hInstance, NULL);
 	if (!hWnd) return FALSE;
 	if (!bIsFullScreen) SetWindowPos(hWnd, 0, emstartx, emstarty, emsizex, emsizey, SWP_SHOWWINDOW);
-	
+
 	statusbar = hInst;
 	if (!StatusBar_Init(statusbar)) return FALSE;
 
@@ -286,7 +283,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	DeleteObject(VTCharSetSmall);
 	DeleteObject(RedBulb);
 	DeleteObject(GreenBulb);
-	
+
 	// unload any bTV plugin loaded
 	BTVPluginUnload();
 
@@ -476,12 +473,12 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 						ChangeChannel(0);
 					}
 				}
-					
+
 				sprintf(Text, "    Channel %s ",Programm[CurrentProgramm].Name);
 				StatusBar_ShowText(hwndTextField, Text);
 				OSD_ShowText(hWnd,Programm[CurrentProgramm].Name);
 			}
-			
+
 			break;
 
 		case IDM_RESET:
@@ -512,7 +509,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				bAutoDetectMode = FALSE;
 				ShowText(hWnd, "Auto Pulldown Detect OFF");
 			}
-			SetMenuAnalog();
 			break;
 
 		case IDM_FALLBACK:
@@ -525,7 +521,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			{
 				ShowText(hWnd, "Fallback on Bad Pulldown OFF");
 			}
-			SetMenuAnalog();
 			break;
 
 		case IDM_32PULL1:
@@ -568,6 +563,11 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			ShowText(hWnd, Text);
 			break;
 
+		case IDM_BRIGHTNESS_CURRENT:
+			sprintf(Text, "Brightness %d", InitialBrightness);
+			ShowText(hWnd, Text);
+			break;
+
 		case IDM_COLORPLUS:
 			if ((InitialSaturationU < 255) && (InitialSaturationV < 255))
 			{
@@ -592,6 +592,11 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			ShowText(hWnd, Text);
 			break;
 
+		case IDM_COLOR_CURRENT:
+			sprintf(Text, "Colour U %d V %d", InitialSaturationU, InitialSaturationV);
+			ShowText(hWnd, Text);
+			break;
+
 		case IDM_HUE_DOWN:
 			if (InitialHue > -127) InitialHue--;
 			BT848_SetHue(InitialHue);
@@ -606,6 +611,11 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			ShowText(hWnd, Text);
 			break;
 
+		case IDM_HUE_CURRENT:
+			sprintf(Text, "Hue %d", InitialHue);
+			ShowText(hWnd, Text);
+			break;
+
 		case IDM_KONTRASTPLUS:
 			if (InitialContrast < 256) InitialContrast++;
 			BT848_SetContrast(InitialContrast);
@@ -616,6 +626,11 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_KONTRASTMINUS:
 			if (InitialContrast > 0) InitialContrast--;
 			BT848_SetContrast(InitialContrast);
+			sprintf(Text, "Contrast %d", InitialContrast);
+			ShowText(hWnd, Text);
+			break;
+
+		case IDM_KONTRAST_CURRENT:
 			sprintf(Text, "Contrast %d", InitialContrast);
 			ShowText(hWnd, Text);
 			break;
@@ -636,6 +651,11 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				InitialOverscan--;
 				WorkoutOverlaySize();
 			}
+			sprintf(Text, "Overscan %d", InitialOverscan);
+			ShowText(hWnd, Text);
+			break;
+
+		case IDM_OVERSCAN_CURRENT:
 			sprintf(Text, "Overscan %d", InitialOverscan);
 			ShowText(hWnd, Text);
 			break;
@@ -669,7 +689,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				}
 				ShowText(hWnd,"UNMUTE");
 			}
-			SetMenuAnalog();
 			break;
 
 		case IDM_L_BALANCE:
@@ -764,7 +783,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				bShowCursor = !bShowCursor;
 				ShowCursor(bShowCursor);
 			}
-			SetMenuAnalog();
 			break;
 
 		case IDM_END:
@@ -778,7 +796,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_MSPMODE_5:
 		case IDM_MSPMODE_6:
 			Audio_MSP_SetMode(LOWORD(wParam) - (IDM_MSPMODE_2 - 2));
-			SetMenuAnalog();
 			break;
 
 		case IDM_MAJOR_CARRIER_0:
@@ -786,7 +803,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_MAJOR_CARRIER_2:
 		case IDM_MAJOR_CARRIER_3:
 			Audio_MSP_Set_MajorMinor_Mode(LOWORD(wParam) - IDM_MAJOR_CARRIER_0, MSPMinorMode);
-			SetMenuAnalog();
 			break;
 
 		case IDM_MINOR_CARRIER_0:
@@ -798,7 +814,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_MINOR_CARRIER_6:
 		case IDM_MINOR_CARRIER_7:
 			Audio_MSP_Set_MajorMinor_Mode(MSPMajorMode, LOWORD(wParam) - IDM_MINOR_CARRIER_0);
-			SetMenuAnalog();
 			break;
 
 		case IDM_MSPSTEREO_1:
@@ -806,12 +821,10 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_MSPSTEREO_3:
 		case IDM_MSPSTEREO_4:
 			Audio_MSP_SetStereo(MSPMajorMode, MSPMinorMode, LOWORD(wParam) - (IDM_MSPSTEREO_1 - 1));
-			SetMenuAnalog();
 			break;
 
 		case IDM_AUTOSTEREO:
 			AutoStereoSelect = !AutoStereoSelect;
-			SetMenuAnalog();
 			break;
 
 		case IDM_AUDIO_0:
@@ -832,7 +845,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			Stop_Capture();
 			Audio_SetSource(AudioSource);
 			Start_Capture();
-			SetMenuAnalog();
 			break;
 
 		case IDM_TUNER:
@@ -845,7 +857,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				Audio_SetSource(AudioSource);
 			}
 			Start_Capture();
-			SetMenuAnalog();
 
 			sprintf(Text, "Channel %s", Programm[CurrentProgramm].Name);
 			StatusBar_ShowText(hwndTextField, Text);
@@ -881,7 +892,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				Audio_SetSource(AudioSource);
 			}
 			Start_Capture();
-			SetMenuAnalog();
 			break;
 
 		case IDM_HWINFO:
@@ -897,9 +907,8 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			{
 				VBI_Flags += VBI_VT;
 			}
-			SetMenuAnalog();
 			break;
-	
+
 		case IDM_CLOSEDCAPTION:
 			if (VBI_Flags & VBI_CC)
 			{
@@ -909,7 +918,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			{
 				VBI_Flags += VBI_CC;
 			}
-			SetMenuAnalog();
 			break;
 
 		case IDM_VBI_VD:
@@ -931,7 +939,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				BeforeVD = TVTYPE;
 				if (TVTYPE != 7)
 				{
-					VBI_Flags += VBI_VD;	// 
+					VBI_Flags += VBI_VD;	//
 					VBI_lpf = 19;
 					BT848_MakeVBITable(VBI_lpf);
 					TVTYPE = 7;
@@ -940,7 +948,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				VideoDat_Init();
 				VBI_Flags += VBI_VD;
 			}
-			SetMenuAnalog();
 			break;
 
 		case IDM_VBI_VPS:
@@ -952,7 +959,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			{
 				VBI_Flags += VBI_VPS;
 			}
-			SetMenuAnalog();
 			break;
 
 		case IDM_VBI_IC:
@@ -964,7 +970,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			{
 				VBI_Flags += VBI_IC;
 			}
-			SetMenuAnalog();
 			break;
 
 		case IDM_UNTERTITEL:
@@ -1015,7 +1020,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			DialogBox(hInst, "VIDEOSETTINGS", hWnd, VideoSettingProc);
 			WorkoutOverlaySize();
 			break;
-		
+
 		case IDM_ADV_VIDEOSETTINGS:
 			DialogBox(hInst, "ADV_VIDEOSETTINGS", hWnd, AdvVideoSettingProc);
 			break;
@@ -1043,7 +1048,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			Stop_Capture();
 			Capture_VBI = !Capture_VBI;
 			Start_Capture();
-			SetMenuAnalog();
 			break;
 
 		case IDM_CAPTURE_PAUSE:
@@ -1066,18 +1070,15 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				KillTimer(hWnd, TIMER_STATUS);
 			}
 			WorkoutOverlaySize();
-			SetMenuAnalog();
 			break;
 
 		case IDM_ON_TOP:
 			bAlwaysOnTop = !bAlwaysOnTop;
 			WorkoutOverlaySize();
-			SetMenuAnalog();
 			break;
 
 		case IDM_SPLASH_ON_STARTUP:
 			bDisplaySplashScreen = !bDisplaySplashScreen;
-			SetMenuAnalog();
 			break;
 
 		case IDM_ANALOGSCAN:
@@ -1097,6 +1098,10 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			OSD_ShowVideoSource(hWnd, VideoSource);
 			break;
 
+		case IDM_HIDE_OSD:
+			OSD_Clear(hWnd);
+			break;
+
 		case IDM_TREADPRIOR_0:
 		case IDM_TREADPRIOR_1:
 		case IDM_TREADPRIOR_2:
@@ -1105,7 +1110,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			ThreadClassId = LOWORD(wParam) - IDM_TREADPRIOR_0;
 			Stop_Capture();
 			Start_Capture();
-			SetMenuAnalog();
 			break;
 
 		case IDM_PRIORCLASS_0:
@@ -1129,7 +1133,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 					strcpy(Text, "Real-Time Priority");
 			}
 			ShowText(hWnd, Text);
-			SetMenuAnalog();
 			break;
 
 		case IDM_TYPEFORMAT_0:
@@ -1147,7 +1150,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			BT848_SetGeoSize();
 			WorkoutOverlaySize();
 			Start_Capture();
-			SetMenuAnalog();
 			break;
 
 		case IDM_SPACEBAR:
@@ -1175,9 +1177,11 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
 				if (gPulldownMode == VIDEO_MODE_BOB)
 					NewPulldownMode = PULLDOWNMODES_LAST_ONE;
+
 				NewPulldownMode--;
 				if (NewPulldownMode == BTV_PLUGIN && bUseBTVPlugin == FALSE)
 					NewPulldownMode--;
+
 				SetDeinterlaceMode(NewPulldownMode);
 			}
 			break;
@@ -1218,12 +1222,12 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			Sleep(100);
 			break;
 
-		case IDM_STOP:
-			SendMessage(hWnd, WM_USER_OVERLAYSTOP, 0, 0);
+		case IDM_OVERLAY_STOP:
+		    Overlay_Stop(hWnd);
 			break;
 
-		case IDM_START:
-			SendMessage(hWnd, WM_USER_OVERLAYSTART, 0, 0);
+		case IDM_OVERLAY_START:
+            Overlay_Start(hWnd);
 			break;
 
 		default:
@@ -1231,7 +1235,9 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			ProcessAspectRatioSelection(hWnd, LOWORD(wParam));
 			break;
 		}
-		
+
+        // Updates the menu checkbox settings
+		SetMenuAnalog();
 		break;
 
 	case WM_CREATE:
@@ -1266,6 +1272,25 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 //		Audio_SetSource(AudioSource);
 //		break;
 
+	case WM_POWERBROADCAST:
+		// Handing to keep dTV running during computer suspend/resume
+		switch ((DWORD) wParam)
+		{
+		case PBT_APMSUSPEND:
+			// Stops video overlay upon suspend operation.
+			Overlay_Stop(hWnd);
+			break;
+		case PBT_APMRESUMESUSPEND:
+			// Restarts video overlay upon resume operation.
+			// The following crashes unless we do either a HWND_BROADCAST
+			// or a Sleep() operation.  To be on the safe side, I do both
+			// here.  Perhaps the video overlay drivers needed to reinitialize.
+			SendMessage(HWND_BROADCAST, WM_PAINT, 0, 0);
+			Sleep(100);
+			Overlay_Start(hWnd);
+			break;
+		}
+		break;
 
 	case WM_LBUTTONUP:
 		SendMessage(hWnd, WM_COMMAND, IDM_FULL_SCREEN, 0);
@@ -1388,36 +1413,10 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			}
 		}
 		break;
-	
+
 	case WM_PAINT:
 		PaintColorkey(hWnd, TRUE);
 		OSD_Redraw(hWnd);
-		break;
-
-	case WM_USER_OVERLAYSTART:
-		// 2000-10-31 Added by Mark Rejhon
-		// This rinitializes the video overlay to continue operation, 
-		// so that end users can write scripts that sends this special message 
-		// to safely restart the video after a resolution or timings change.
-		Overlay_Create();
-		Overlay_Clean();
-		BT848_ResetHardware();
-		BT848_SetGeoSize();
-		WorkoutOverlaySize();
-		Start_Capture();
-		Sleep(100);
-		Audio_SetSource(AudioSource);
-		break;
-
-	case WM_USER_OVERLAYSTOP:
-		// 2000-10-31 Added by Mark Rejhon
-		// This ends the video overlay from operating, so that end users can
-		// write scripts that sends this special message to safely stop the video
-		// before switching computer resolutions or timings.
-		InvalidateRect(hWnd, NULL, FALSE);
-		PaintColorkey(hWnd, FALSE);
-		Stop_Capture();
-		Overlay_Destroy();
 		break;
 
 	case WM_QUERYENDSESSION:
@@ -1440,23 +1439,25 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 	return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
+//---------------------------------------------------------------------------
 void SaveWindowPos(HWND hWnd)
 {
 	RECT rScreen;
 	GetWindowRect(hWnd, &rScreen);
 	emstarty = rScreen.top;
-	emsizey = rScreen.bottom - rScreen.top; 
+	emsizey = rScreen.bottom - rScreen.top;
 	emstartx = rScreen.left;
 	emsizex = rScreen.right - rScreen.left;
 }
 
+//---------------------------------------------------------------------------
 void MainWndOnInitBT(HWND hWnd)
 {
 	char Text[128];
 	int i;
 	BOOL bInitOK = FALSE;
 	MSPStatus[0] = 0x00;
-	
+
 	CurrentProgramm = InitialProg;
 
 	if (BT848_FindTVCard(hWnd) == TRUE)
@@ -1519,9 +1520,9 @@ void MainWndOnInitBT(HWND hWnd)
 				break;
 			}
 		}
-		
+
 		BT848_MakeVBITable(VBI_lpf);
-		
+
 		WStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
 		if (bAlwaysOnTop == FALSE)
 		{
@@ -1616,7 +1617,7 @@ void MainWndOnInitBT(HWND hWnd)
 	}
 }
 
-
+//---------------------------------------------------------------------------
 void MainWndOnCreate(HWND hWnd)
 {
 	char Text[128];
@@ -1630,7 +1631,7 @@ void MainWndOnCreate(HWND hWnd)
 	SetDlgItemText(SplashWnd, IDC_TEXT4, "");
 	SetDlgItemText(SplashWnd, IDC_TEXT5, "");
 	Sleep(100);
-	
+
 	SetDlgItemText(SplashWnd, IDC_TEXT2, "InterCast");
 	for (i = 0; i < 12; i++)
 	{
@@ -1784,6 +1785,7 @@ void MainWndOnCreate(HWND hWnd)
 	PostMessage(hWnd, INIT_BT, 0, 0);
 }
 
+//---------------------------------------------------------------------------
 void SetMenuAnalog()
 {
 	CheckMenuItem(GetMenu(hWnd), ThreadClassId + 1150, MF_CHECKED);
@@ -1943,6 +1945,7 @@ void SetMenuAnalog()
 	SetMenuAspectRatio(hWnd);
 }
 
+//---------------------------------------------------------------------------
 void CleanUpMemory()
 {
 	int i;
@@ -1974,6 +1977,7 @@ void CleanUpMemory()
 	}
 }
 
+//---------------------------------------------------------------------------
 void ChangeChannel(int NewChannel)
 {
 	if (TunerType != TUNER_ABSENT)
@@ -1992,6 +1996,38 @@ void ChangeChannel(int NewChannel)
 			}
 		}
 	}
+}
+
+//---------------------------------------------------------------------------
+// Stops video overlay - 2000-10-31 Added by Mark Rejhon
+// This ends the video overlay from operating, so that end users can
+// write scripts that sends this special message to safely stop the video
+// before switching computer resolutions or timings.
+// This is also called during a Suspend operation
+void Overlay_Stop(HWND hWnd)
+{
+    InvalidateRect(hWnd, NULL, FALSE);
+	PaintColorkey(hWnd, FALSE);
+	Stop_Capture();
+	Overlay_Destroy();
+}
+
+//---------------------------------------------------------------------------
+// Restarts video overlay - 2000-10-31 Added by Mark Rejhon
+// This reinitializes the video overlay to continue operation,
+// so that end users can write scripts that sends this special message
+// to safely restart the video after a resolution or timings change.
+// This is also called during a Resume operation
+void Overlay_Start(HWND hWnd)
+{
+	Overlay_Create();
+	Overlay_Clean();
+	BT848_ResetHardware();
+	BT848_SetGeoSize();
+	WorkoutOverlaySize();
+	Start_Capture();
+	Sleep(100);
+	Audio_SetSource(AudioSource);
 }
 
 //---------------------------------------------------------------------------
