@@ -27,6 +27,32 @@
 #ifndef __DEINTERLACE_H___
 #define __DEINTERLACE_H___
 
+// Deinterlace modes.  Since these modes are referred to by number in the
+// INI file, it's desirable to keep the numbers consistent between releases.
+// Otherwise users will end up in the wrong modes when they upgrade.  If
+// you renumber or add/remove modes, be sure to update inifile.htm, which
+// documents the mode IDs!
+typedef enum
+{
+	VIDEO_MODE_BOB = 0,
+	VIDEO_MODE_WEAVE = 1,
+	VIDEO_MODE_2FRAME = 2,
+	SIMPLE_WEAVE = 3,
+	SIMPLE_BOB = 4,
+	SCALER_BOB = 5,
+	FILM_22_PULLDOWN_ODD = 6,
+	FILM_22_PULLDOWN_EVEN = 7,
+	FILM_32_PULLDOWN_0 = 8,
+	FILM_32_PULLDOWN_1 = 9,
+	FILM_32_PULLDOWN_2 = 10,
+	FILM_32_PULLDOWN_3 = 11,
+	FILM_32_PULLDOWN_4 = 12,
+	EVEN_ONLY = 13,
+	ODD_ONLY = 14,
+	BLENDED_CLIP = 15,
+	PULLDOWNMODES_LAST_ONE = 16
+} ePULLDOWNMODES;
+
 #define MAX_FIELD_HISTORY 5
 
 /////////////////////////////////////////////////////////////////////////////
@@ -64,10 +90,33 @@ typedef struct {
 	// Number of scanlines per field.  FrameHeight / 2, mostly for
 	// cleanliness so we don't have to keep dividing FrameHeight by 2.
 	int FieldHeight;
+
+	// Results of the Field Diff
+	long CompareResult;
+	long CombFactor;
+
 } DEINTERLACE_INFO;
 
 // Deinterlace functions return true if the overlay is ready to be displayed.
 typedef BOOL (DEINTERLACE_FUNC)(DEINTERLACE_INFO *info);
+
+typedef struct
+{
+	// What to display when selected
+	char* szName;
+	// Do we need to calculate FieldDiff to use this Algorithm
+    BOOL bRequiresFieldDiff;
+    // Do we need to calculate CombFactor to use this Algorithm
+    BOOL bRequiresCombFactor;
+	// Do we need to shrink the overlay by half
+	BOOL bIsHalfHeight;
+	// Is this a film mode
+	BOOL bIsFilmMode;
+    // Pointer to Algorithm function (cannot be NULL)
+    DEINTERLACE_FUNC* pfnAlgorithm;
+} DEINTERLACE_METHOD;
+
+extern DEINTERLACE_METHOD DeintMethods[PULLDOWNMODES_LAST_ONE];
 
 DEINTERLACE_FUNC Bob;
 DEINTERLACE_FUNC Weave;
@@ -75,6 +124,10 @@ DEINTERLACE_FUNC DeinterlaceFieldWeave;
 DEINTERLACE_FUNC DeinterlaceFieldBob;
 DEINTERLACE_FUNC DeinterlaceFieldTwoFrame;
 DEINTERLACE_FUNC BlendedClipping;
+DEINTERLACE_FUNC HalfHeightBoth;
+DEINTERLACE_FUNC HalfHeightEvenOnly;
+DEINTERLACE_FUNC HalfHeightOddOnly;
+DEINTERLACE_FUNC FilmMode;
 
 void memcpyMMX(void *Dest, void *Src, size_t nBytes);
 void memcpyBOBMMX(void *Dest1, void *Dest2, void *Src, size_t nBytes);
@@ -88,6 +141,5 @@ extern long DiffThreshold;
 extern long SpatialTolerance;
 extern long TemporalTolerance;
 extern long SimilarityThreshold;
-
 
 #endif

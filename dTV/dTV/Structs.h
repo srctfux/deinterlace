@@ -346,13 +346,6 @@ struct fmt_page
     struct fmt_char data[25][40];
 };
 
-struct TPulldowmMode
-{
-	int nCount;
-	ePULLDOWNMODES LastGuess;
-	int LastGuessCount;
-};
-
 typedef struct
 {
 	char *szShortName;

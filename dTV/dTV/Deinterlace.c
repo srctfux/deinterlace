@@ -42,6 +42,43 @@ long TemporalTolerance = 300;
 long SpatialTolerance = 600;
 long SimilarityThreshold = 25;
 
+
+DEINTERLACE_METHOD DeintMethods[PULLDOWNMODES_LAST_ONE] =
+{
+	// VIDEO_MODE_BOB
+	{"Video Deinterlace (Bob)", FALSE, FALSE, FALSE, FALSE, DeinterlaceFieldBob},
+	// VIDEO_MODE_WEAVE
+	{"Video Deinterlace (Weave)", FALSE, FALSE, FALSE, FALSE, DeinterlaceFieldWeave},
+	// VIDEO_MODE_2FRAME
+	{"Video Deinterlace (2-Frame)", FALSE, FALSE, FALSE, FALSE, DeinterlaceFieldTwoFrame},
+	// SIMPLE_WEAVE
+	{"Sipmle Weave", FALSE, FALSE, FALSE, FALSE, Weave},
+	// SIMPLE_BOB
+	{"Sipmle Bob", FALSE, FALSE, FALSE, FALSE, Bob},
+	// SCALER_BOB
+	{"Scaler Bob", FALSE, FALSE, TRUE, FALSE, HalfHeightBoth},
+	// FILM_22_PULLDOWN_ODD
+	{"2:2 Pulldown Flip on Odd", FALSE, FALSE, FALSE, TRUE, FilmMode},
+	// FILM_22_PULLDOWN_EVEN
+	{"2:2 Pulldown Flip on Even", FALSE, FALSE, FALSE, TRUE, FilmMode},
+	// FILM_32_PULLDOWN_0
+	{"3:2 Pulldown Skip 1st Full Frame", FALSE, FALSE, FALSE, TRUE, FilmMode},
+	// FILM_32_PULLDOWN_1
+	{"3:2 Pulldown Skip 2nd Full Frame", FALSE, FALSE, FALSE, TRUE, FilmMode},
+	// FILM_32_PULLDOWN_2
+	{"3:2 Pulldown Skip 3rd Full Frame", FALSE, FALSE, FALSE, TRUE, FilmMode},
+	// FILM_32_PULLDOWN_3
+	{"3:2 Pulldown Skip 4th Full Frame", FALSE, FALSE, FALSE, TRUE, FilmMode},
+	// FILM_32_PULLDOWN_4
+	{"3:2 Pulldown Skip 5th Full Frame", FALSE, FALSE, FALSE, TRUE, FilmMode},
+	// EVEN_ONLY
+	{"Even Scanlines Only", FALSE, FALSE, TRUE, FALSE, HalfHeightEvenOnly},
+	// ODD_ONLY
+	{"Odd Scanlines Only", FALSE, FALSE, TRUE, FALSE, HalfHeightOddOnly},
+	// BLENDED_CLIP
+	{"Blended Clip", FALSE, FALSE, FALSE, FALSE, BlendedClipping},
+};
+
 /////////////////////////////////////////////////////////////////////////////
 // memcpyMMX
 // Uses MMX instructions to move memory around

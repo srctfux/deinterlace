@@ -322,7 +322,7 @@ void SetDeinterlaceMode(int mode)
 	bAutoDetectMode = FALSE;
 	gPulldownMode = mode;
 	UpdatePulldownStatus();
-	SetHalfHeight(IS_HALF_HEIGHT(mode));
+	SetHalfHeight(DeintMethods[mode].bIsHalfHeight);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -350,7 +350,7 @@ void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField)
 		dwLastFlipTicks = -1;
 		return;
 	}
-	if(IS_VIDEO_MODE(gPulldownMode))
+	if(!DeintMethods[gPulldownMode].bIsFilmMode)
 	{
 		OldPulldownMode = gPulldownMode;
 		if((CombFactor - LastCombFactor) < PulldownThresholdLow && LastDiff > PulldownThresholdLow)
@@ -552,7 +552,7 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 		// weave artifacts, optionally switch to video mode but make
 		// it very easy to get back into film mode in case this was
 		// just a glitchy scene change.
-		if (IS_PULLDOWN_MODE(gPulldownMode) &&
+		if (DeintMethods[gPulldownMode].bIsFilmMode &&
 			bFallbackToVideo &&							// let the user turn this on and off.
 			ThresholdPulldownMismatch > 0 &&		    // only do video-force check if there's a threshold.
 			FieldDiff >= ThresholdPulldownMismatch &&	// only force video if this field is very different,
@@ -825,44 +825,11 @@ BOOL DoWeWantToFlip(BOOL bIsOddField)
 // Parameter: mode to translate, or -1 to return name of current mode.
 char *DeinterlaceModeName(int mode)
 {
-	if (mode == -1)
+	if (mode < 0)
 		mode = gPulldownMode;
 
-	switch(mode)
-	{
-	case VIDEO_MODE_WEAVE:
-		return "Video Deinterlace (Weave)";
-	case VIDEO_MODE_BOB:
-		return "Video Deinterlace (Bob)";
-	case VIDEO_MODE_2FRAME:
-		return "Video Deinterlace (2-Frame)";
-	case SIMPLE_WEAVE:
-		return "Simple Weave";
-	case SIMPLE_BOB:
-		return "Simple Bob";
-	case BLENDED_CLIP:
-		return "Blended Clip";
-	case SCALER_BOB:
-		return "Scaler BOB";
-	case FILM_22_PULLDOWN_ODD:
-		return "2:2 Pulldown Flip on Odd";
-	case FILM_22_PULLDOWN_EVEN:
-		return "2:2 Pulldown Flip on Even";
-	case FILM_32_PULLDOWN_0:
-		return "3:2 Pulldown Skip 1st Full Frame";
-	case FILM_32_PULLDOWN_1:
-		return "3:2 Pulldown Skip 2nd Full Frame";
-	case FILM_32_PULLDOWN_2:
-		return "3:2 Pulldown Skip 3rd Full Frame";
-	case FILM_32_PULLDOWN_3:
-		return "3:2 Pulldown Skip 4th Full Frame";
-	case FILM_32_PULLDOWN_4:
-		return "3:2 Pulldown Skip 5th Full Frame";
-	case EVEN_ONLY:
-		return "Even Scanlines Only";
-	case ODD_ONLY:
-		return "Odd Scanlines Only";
-	}
+	if(mode < PULLDOWNMODES_LAST_ONE)
+		return DeintMethods[mode].szName;
 
 	return "Unknown Pulldown Mode";
 }
@@ -919,8 +886,6 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 	int nLineTarget;
 	int nFrame = 0;
 	DWORD dwLastSecondTicks;
-	long CompareResult;
-	long CombFactor;
 	long FlipTicks;
 	short* ppEvenLines[5][CLEARLINES];
 	short* ppOddLines[5][CLEARLINES];
@@ -1016,27 +981,37 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				}
 			}
 
-			if(bAutoDetectMode == TRUE && !bMissedFrame)
+			if(!bMissedFrame)
 			{
-				if (bIsPAL)
+
+				if((bAutoDetectMode == TRUE && bIsPAL) || DeintMethods[gPulldownMode].bRequiresCombFactor)
 				{
-					CombFactor = GetCombFactor(info.EvenLines[0], info.OddLines[0]);
-					UpdatePALPulldownMode(CombFactor, TRUE);
-					LOG(" Frame %d O CF = %d", CurrentFrame, CombFactor);
+					info.CombFactor = GetCombFactor(info.EvenLines[0], info.OddLines[0]);
+					LOG(" Frame %d %c CF = %d", CurrentFrame, info.IsOdd ? 'O' : 'E', info.CombFactor);
 				}
-				else
+
+				if((bAutoDetectMode == TRUE && !bIsPAL) || DeintMethods[gPulldownMode].bRequiresFieldDiff)
 				{
 					RECT source;
 
 					GetSourceRect(&source);
 
 					if (info.IsOdd)
-						CompareResult = CompareFields(info.OddLines[1], info.OddLines[0], &source);
+						info.CompareResult = CompareFields(info.OddLines[1], info.OddLines[0], &source);
 					else
-						CompareResult = CompareFields(info.EvenLines[1], info.EvenLines[0], &source);
+						info.CompareResult = CompareFields(info.EvenLines[1], info.EvenLines[0], &source);
+					
+					LOG(" Frame %d %c CR = %d", CurrentFrame, info.IsOdd ? 'O' : 'E', info.CompareResult);
+				}
 
-					LOG(" Frame %d %c CR = %d", CurrentFrame, info.IsOdd ? 'O' : 'E', CompareResult);
-					UpdateNTSCPulldownMode(CompareResult, 
+				if(bAutoDetectMode == TRUE && bIsPAL)
+				{
+					UpdatePALPulldownMode(info.CombFactor, TRUE);
+				}
+
+				if(bAutoDetectMode == TRUE && !bIsPAL)
+				{
+					UpdateNTSCPulldownMode(info.CompareResult, 
 										   info.IsOdd,
 										   info.EvenLines[0],
 										   info.OddLines[0]);
@@ -1070,80 +1045,16 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 			}
 			// if we have dropped a field then do BOB 
 			// if we are doing a half height mode then just do that
-			// anyway
-			else if(bMissedFrame && !IS_HALF_HEIGHT(gPulldownMode))
+			// anyway as it will be just as fast
+			else if(bMissedFrame && !DeintMethods[gPulldownMode].bIsHalfHeight)
+			{
 				bFlipNow = Bob(&info);
-			else if(gPulldownMode == SIMPLE_BOB)
-				bFlipNow = Bob(&info);
-			else if (gPulldownMode == VIDEO_MODE_2FRAME)
-				bFlipNow = DeinterlaceFieldTwoFrame(&info);
-			else if(gPulldownMode == VIDEO_MODE_WEAVE)
-				bFlipNow = DeinterlaceFieldWeave(&info);
-			else if (gPulldownMode == VIDEO_MODE_BOB)
-				bFlipNow = DeinterlaceFieldBob(&info);
-			else if(gPulldownMode == SIMPLE_WEAVE)
-				bFlipNow = Weave(&info);
-			else if(gPulldownMode == BLENDED_CLIP)
-				bFlipNow = BlendedClipping(&info);
-			else if(gPulldownMode == SCALER_BOB)
-			{
-				for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
-				{
-					// copy latest field's rows to overlay, resulting in a half-height image.
-					if (info.IsOdd)
-					{
-						memcpyMMX(pDest,
-									info.OddLines[0][nLineTarget],
-									CurrentX * 2);
-					}
-					else
-					{
-						memcpyMMX(pDest,
-									info.EvenLines[0][nLineTarget],
-									CurrentX * 2);
-					}
-					pDest += OverlayPitch;
-				}
-				bFlipNow = TRUE;
-			}
-			else if (gPulldownMode == ODD_ONLY)
-			{
-				if (info.IsOdd)
-				{
-					for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
-					{
-						// copy latest field's odd rows to overlay, resulting in a half-height image.
-						memcpyMMX(pDest,
-									info.OddLines[0][nLineTarget],
-									CurrentX * 2);
-						pDest += OverlayPitch;
-					}
-					bFlipNow = TRUE;
-				}
-			}
-			else if (gPulldownMode == EVEN_ONLY)
-			{
-				if (! info.IsOdd)
-				{
-					for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
-					{
-						// copy latest field's even rows to overlay, resulting in a half-height image.
-						memcpyMMX(pDest,
-									info.EvenLines[0][nLineTarget],
-									CurrentX * 2);
-						pDest += OverlayPitch;
-					}
-					bFlipNow = TRUE;
-				}
 			}
 			else
 			{
-				// Film mode.  If we have an entire new frame, display it.
-				bFlipNow = DoWeWantToFlip(info.IsOdd);
-				if (bFlipNow)
-					Weave(&info);
+				bFlipNow = DeintMethods[gPulldownMode].pfnAlgorithm(&info);
 			}
-
+			
 			AdjustAspectRatio(ppEvenLines[LastEvenFrame], ppOddLines[LastOddFrame]);
 
 			// somewhere above we will have locked the buffer, unlock before flip
@@ -1194,4 +1105,14 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 	BT848_SetDMA(FALSE);
 	ExitThread(0);
 	return 0;
+}
+
+BOOL FilmMode(DEINTERLACE_INFO *info)
+{
+	BOOL bFlipNow;
+	// Film mode.  If we have an entire new frame, display it.
+	bFlipNow = DoWeWantToFlip(info->IsOdd);
+	if (bFlipNow)
+		Weave(info);
+	return bFlipNow;
 }

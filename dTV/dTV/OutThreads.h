@@ -38,6 +38,7 @@
 #include "defines.h"
 #include "structs.h"
 #include "globals.h"
+#include "deinterlace.h"
 
 void Start_Capture();
 void Stop_Capture();

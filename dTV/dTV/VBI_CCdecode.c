@@ -19,6 +19,9 @@
 //
 //  This is the CLOSED CAPTION DECODER.
 //
+//  This software is based on code by timecop@japan.co.jp
+//  http://www.ne.jp/asahi/linux/timecop/
+//
 /////////////////////////////////////////////////////////////////////////////
 // Change Log
 //

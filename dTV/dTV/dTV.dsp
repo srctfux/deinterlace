@@ -139,6 +139,10 @@ SOURCE=.\DI_BobAndWeave.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\DI_HalfHeight.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\DI_TwoFrame.c
 # End Source File
 # Begin Source File

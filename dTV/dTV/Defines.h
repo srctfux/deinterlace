@@ -37,46 +37,6 @@
 #ifndef __DEFINES_H___
 #define __DEFINES_H___
 
-// Deinterlace modes.  Since these modes are referred to by number in the
-// INI file, it's desirable to keep the numbers consistent between releases.
-// Otherwise users will end up in the wrong modes when they upgrade.  If
-// you renumber or add/remove modes, be sure to update inifile.htm, which
-// documents the mode IDs!
-typedef enum
-{
-	VIDEO_MODE_BOB = 0,
-	VIDEO_MODE_WEAVE = 1,
-	VIDEO_MODE_2FRAME = 2,
-	SIMPLE_WEAVE = 3,
-	SIMPLE_BOB = 4,
-	SCALER_BOB = 5,
-	FILM_22_PULLDOWN_ODD = 6,
-	FILM_22_PULLDOWN_EVEN = 7,
-	FILM_32_PULLDOWN_0 = 8,
-	FILM_32_PULLDOWN_1 = 9,
-	FILM_32_PULLDOWN_2 = 10,
-	FILM_32_PULLDOWN_3 = 11,
-	FILM_32_PULLDOWN_4 = 12,
-	EVEN_ONLY = 13,
-	ODD_ONLY = 14,
-	BLENDED_CLIP = 15,
-	PULLDOWNMODES_LAST_ONE = 16
-} ePULLDOWNMODES;
-
-#define IS_PULLDOWN_MODE(x) ((x) == FILM_22_PULLDOWN_ODD || \
-							 (x) == FILM_22_PULLDOWN_EVEN || \
-							 (x) == FILM_32_PULLDOWN_0 || \
-							 (x) == FILM_32_PULLDOWN_1 || \
-							 (x) == FILM_32_PULLDOWN_2 || \
-							 (x) == FILM_32_PULLDOWN_3 || \
-							 (x) == FILM_32_PULLDOWN_4)
-
-#define IS_VIDEO_MODE(x) !IS_PULLDOWN_MODE(x)
-
-#define IS_HALF_HEIGHT(x) ((x) == EVEN_ONLY || \
-						   (x) == ODD_ONLY || \
-							(x) == SCALER_BOB)
-
 #define MAXVTDIALOG 8
 #define MAXPROGS 4096
 #define VBI_DATA_SIZE 2048*39
