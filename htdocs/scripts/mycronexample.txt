@@ -10,20 +10,24 @@
 #
 #Second, it runs the runlogs.sh script, which updates the Webalizer site statistics html pages and creates
 #add'l ones as specified in the webalizer.conf file in the /htdocs/webalizer directory.  This cron file
-#specifies that the script runs on the 55th minute of the 23rd hour of each day.
+#specifies that the script runs on the 55th minute of the 23rd hour of each day (2:55 AM Eastern).
+#
+#Third, it runs the zipmodule.sh script, which does a nightly source zip and places the file on anonymous
+#FTP.  This is run on the 21st hour of server time (midnight Eastern).
 #
 #This file specifies that all output from running scripts is sent to a logs e-mail address, in case the
 #script doesn't run correctly and you need to troubleshoot.  Currently, this feature is broken in
 #Sourceforge, but should be reimplemented soon as they build out their new system.
 #
-#Modify this file so that it points to the proper script locations.
+#Modify this file so that it points to the proper script locations in your user directory.
 #
 #After reading these instructions, delete them from the file before entering the file into the crontab.
 #Enter the file into the crontab by typing 'crontab mycronexample.txt <Enter>'
 #
-#NB:  make sure that the last line of the file has a newline after it.  For some reason, crontab doesn't
-#like a clean end-of-file
+#NB:  make sure that the last line of the file has a newline after it.  Crontab doesn't like a clean
+#end-of-file
 
 MAILTO=daniellogs@hotmail.com
 0 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 * * * /home/users/dschmelzer/webup.sh
 55 23 * * * /home/users/dschmelzer/runlogs.sh
+0 21 * * * /home/users/dschmelzer/zipmodule.sh
