@@ -1057,7 +1057,7 @@ BEGIN
             MENUITEM "V&ideo Deinterlace (Weave)",  IDM_VIDEO_WEAVE
             MENUITEM "Video Dei&nterlace (2-Frame)", IDM_VIDEO_2FRAME
             MENUITEM "Simple &Weave",               IDM_WEAVE
-            MENUITEM "Interpolated &Bob",           IDM_BOB
+            MENUITEM "Simple &Bob",                 IDM_BOB
             MENUITEM "Blended &Clip ...",           IDM_BLENDED_CLIP
             MENUITEM "B&TV Plugin",                 IDM_BTV
             MENUITEM "3:2 Pulldown, Skip Field &1", IDM_32PULL1

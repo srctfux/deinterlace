@@ -761,7 +761,7 @@ BOOL DoWeWantToFlip(BOOL bFlipNow, BOOL bIsOddField)
 	case VIDEO_MODE_BOB:         RetVal = TRUE;  break;
 	case VIDEO_MODE_2FRAME:      RetVal = TRUE;  break;
 	case SIMPLE_WEAVE:           RetVal = TRUE;  break;
-	case INTERPOLATE_BOB:        RetVal = TRUE;  break;
+	case SIMPLE_BOB:        RetVal = TRUE;  break;
 	case BLENDED_CLIP:			 RetVal = BlcWantsToFlip;  break;
 	case BTV_PLUGIN:             RetVal = bFlipNow;  break;
 	case FILM_22_PULLDOWN_ODD:   RetVal = bIsOddField;  break;
@@ -843,8 +843,8 @@ char *DeinterlaceModeName(int mode)
 		return "Video Deinterlace (2-Frame)";
 	case SIMPLE_WEAVE:
 		return "Simple Weave";
-	case INTERPOLATE_BOB:
-		return "Interpolated BOB";
+	case SIMPLE_BOB:
+		return "Simple Bob";
 	case BLENDED_CLIP:
 		return "Blended Clip";
 	case BTV_PLUGIN:
@@ -1037,7 +1037,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 					// do nothing
 				}
 				// if we have dropped a field then do BOB 
-				else if(LastEvenFrame != CurrentFrame || gPulldownMode == INTERPOLATE_BOB)
+				else if(LastEvenFrame != CurrentFrame || gPulldownMode == SIMPLE_BOB)
 				{
 					for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
 					{
@@ -1176,7 +1176,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				}
 
 				// if we have dropped a field then do BOB
-				else if(LastOddFrame != ((CurrentFrame + 4) % 5) || gPulldownMode == INTERPOLATE_BOB)
+				else if(LastOddFrame != ((CurrentFrame + 4) % 5) || gPulldownMode == SIMPLE_BOB)
 				{
 					for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
 					{
