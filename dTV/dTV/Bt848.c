@@ -451,6 +451,19 @@ void BT848_Restart_RISC_Code()
 	BT848_WriteByte(BT848_CAP_CTL, CapCtl);
 }
 
+int BT848_CCIRsource()
+{
+    switch (VideoSource)
+    {
+	case SOURCE_CCIR656_1:
+	case SOURCE_CCIR656_2:
+	case SOURCE_CCIR656_3:
+	case SOURCE_CCIR656_4:
+        return TRUE;
+    }
+    return FALSE;
+}
+
 void BT848_ResetHardware()
 {
 	BT848_SetDMA(FALSE);
@@ -464,7 +477,8 @@ void BT848_ResetHardware()
 	BT848_WriteWord(BT848_GPIO_DMA_CTL, 0xfc);
 	BT848_WriteByte(BT848_IFORM, BT848_IFORM_MUX1 | BT848_IFORM_XTAUTO | BT848_IFORM_PAL_BDGHI);
 
-	BT848_Registers_OnChange();
+	BT848_SetVideoSource(VideoSource);
+	BT848_SetGeoSize();
 	
 	BT848_WriteByte(BT848_TDEC, 0x00);
 
@@ -476,19 +490,18 @@ void BT848_ResetHardware()
 	}
 // MAE 2 Nov 2000 - End of change for Macrovision fix
 
-
 	BT848_WriteDword(BT848_INT_STAT, (DWORD) 0x0fffffff);
 	BT848_WriteDword(BT848_INT_MASK, 0);
 
 	BT848_SetPLL(0);
 
+    if (BT848_CCIRsource()) BT848_Enable656();
+	BT848_Registers_OnChange();
 	BT848_Brightness_OnChange(InitialBrightness);
 	BT848_Contrast_OnChange(InitialContrast);
 	BT848_Hue_OnChange(InitialHue);
 	BT848_SaturationU_OnChange(InitialSaturationU);
 	BT848_SaturationV_OnChange(InitialSaturationV);
-	BT848_SetVideoSource(VideoSource);
-	BT848_SetGeoSize();
 }
 
 PHYS RiscLogToPhys(DWORD * pLog)
@@ -558,6 +571,9 @@ BOOL BT848_SetGeoSize()
 	int hdelay, vdelay;
 	int hactive, vactive;
 	BYTE crop, vtc, ColourFormat;
+
+    // Not currently supported for CCIR656 source yet
+    if (BT848_CCIRsource()) return TRUE;
 
 	CurrentY = TVFormats[TVFormat].wCropHeight;
 	CurrentVBILines = TVFormats[TVFormat].VBILines;
@@ -1418,11 +1434,6 @@ BOOL VideoSource_OnChange(long NewValue)
     case SOURCE_CCIR656_2:
     case SOURCE_CCIR656_3:
     case SOURCE_CCIR656_4:
-		BT848_ResetHardware();
-		BT848_Enable656();
-		WorkoutOverlaySize();
-        AudioSource = AUDIOMUX_EXTERNAL;
-		break;
 	case SOURCE_COMPOSITE:
 	case SOURCE_SVIDEO:
 	case SOURCE_OTHER1:
