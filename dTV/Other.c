@@ -65,6 +65,7 @@ long OverlayPitch = 0;
 BOOL Can_ColorKey=FALSE;
 DWORD DestSizeAlign;
 DWORD SrcSizeAlign;
+COLORREF OverlayColor = RGB(255, 0, 255);
 
 void ExitDD(void)
 {
@@ -151,8 +152,8 @@ BOOL OverlayUpdate(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL ColorK
 	}
 
 	dwFlags |= DDOVER_KEYDESTOVERRIDE;
-	DDOverlayFX.dckDestColorkey.dwColorSpaceHighValue = RGB(255, 0, 255);
-	DDOverlayFX.dckDestColorkey.dwColorSpaceLowValue = RGB(255, 0, 255);
+	DDOverlayFX.dckDestColorkey.dwColorSpaceHighValue = OverlayColor;
+	DDOverlayFX.dckDestColorkey.dwColorSpaceLowValue = OverlayColor;
 
 	ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, pSrcRect, lpDDSurface, pDestRect, dwFlags, &DDOverlayFX);
 	if (ddrval != DD_OK)

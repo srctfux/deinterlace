@@ -47,6 +47,6 @@ void Clean_Overlays();
 
 extern DWORD DestSizeAlign;
 extern DWORD SrcSizeAlign;
-
+extern COLORREF OverlayColor;
 
 #endif

@@ -1321,7 +1321,8 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		{
 			PAINTSTRUCT sPaint;
 			BeginPaint(hWnd, &sPaint);
-			FillRect(sPaint.hdc, &sPaint.rcPaint, CreateSolidBrush(RGB(255, 0, 255)));
+			OverlayColor = GetNearestColor(sPaint.hdc, OverlayColor);
+			FillRect(sPaint.hdc, &sPaint.rcPaint, CreateSolidBrush(OverlayColor));
 			EndPaint(hWnd, &sPaint);
 		}
 		break;
