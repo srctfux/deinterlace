@@ -31,7 +31,6 @@ typedef struct _BlendStruct
 	double	coef1;
 	int		pixel2;
 	double	coef2;
-	int		pixel3;	// Temporary
 } BlendStruct;
 
 int PictureWidth = -1;
@@ -49,7 +48,7 @@ int MaskParam4 = 0;
 
 void UpdLinearFilterTables(int Width)
 {
-	int i, j, k;
+	int i, j;
 	int Start, End;
 	double pos;
 	double pixel_before, pixel_after;
@@ -64,8 +63,6 @@ void UpdLinearFilterTables(int Width)
 			{
 				LinearFilterTab[i][j].pixel1 = -1;
 				LinearFilterTab[i][j].pixel2 = -1;
-				// Temporary
-				LinearFilterTab[i][j].pixel3 = -1;
 			}
 			else
 			{
@@ -76,20 +73,17 @@ void UpdLinearFilterTables(int Width)
 				pixel_before = floor(pos);
 				pixel_after = ceil(pos);
 				LinearFilterTab[i][j].pixel1 = (int)pixel_before;
-				LinearFilterTab[i][j].coef1 = pos - pixel_before;
 				LinearFilterTab[i][j].pixel2 = (int)pixel_after;
-				LinearFilterTab[i][j].coef2 = pixel_after - pos;
-
-				// Temporary
-				k = (int)ceil(pos - 0.5);
-				if ((j % 2) != (k % 2))
+				if (pixel_before < pixel_after)
 				{
-					if ((pos - pixel_before) <= (pixel_after - pos))
-						k++;
-					else
-						k--;
+					LinearFilterTab[i][j].coef1 = pixel_after - pos;
+					LinearFilterTab[i][j].coef2 = pos - pixel_before;
 				}
-				LinearFilterTab[i][j].pixel3 = k;
+				else
+				{
+					LinearFilterTab[i][j].coef1 = 0.5;
+					LinearFilterTab[i][j].coef2 = 0.5;
+				}
 			}
 		}
 	}
@@ -144,7 +138,7 @@ void UpdNbPixelsPerLineTable(int Height, int Width)
 
 void ApplyLinearFilter(BYTE* pLine, int NewWidth, MEMCPY_FUNC *pCopy)
 {
-	int i,j;
+	int i;
 
 	// Exit if no transform is to be applied to the line
 	if (NewWidth == PictureWidth)
@@ -152,8 +146,7 @@ void ApplyLinearFilter(BYTE* pLine, int NewWidth, MEMCPY_FUNC *pCopy)
 
 	for (i=0 ; i<PictureWidth ; i++)
 	{
-		j = LinearFilterTab[NewWidth][i].pixel3;
-		if (j == -1)
+		if (LinearFilterTab[NewWidth][i].pixel1 == -1)
 		{
 			// Color the pixel in black
 			if (!DoOnlyMasking)
@@ -174,8 +167,11 @@ void ApplyLinearFilter(BYTE* pLine, int NewWidth, MEMCPY_FUNC *pCopy)
 			if (!DoOnlyMasking)
 			{
 				// Build temporary new line
-				TmpBuf[i*2] = pLine[j*2];
-				TmpBuf[i*2+1] = pLine[j*2+1];
+				TmpBuf[i*2] = (int)ceil(pLine[LinearFilterTab[NewWidth][i].pixel1*2] * LinearFilterTab[NewWidth][i].coef1 + pLine[LinearFilterTab[NewWidth][i].pixel2*2] * LinearFilterTab[NewWidth][i].coef2 - 0.5);
+				if ((i % 2) == (LinearFilterTab[NewWidth][i].pixel1 % 2))
+					TmpBuf[i*2+1] = pLine[LinearFilterTab[NewWidth][i].pixel1*2+1];
+				else
+					TmpBuf[i*2+1] = pLine[LinearFilterTab[NewWidth][i].pixel2*2+1];
 			}
 		}
 	}
