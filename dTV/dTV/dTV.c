@@ -38,6 +38,8 @@
 //                                     Removed bTV plug-in
 //                                     Added Scaled BOB method
 //
+// 03 Jan 2001   Michael Eskin         Added MSP muting
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -161,6 +163,9 @@ int MainProcessor=0;
 int DecodeProcessor=0;
 
 BOOL bShowCursor = TRUE;
+
+BOOL gbHasMSP = FALSE; // MAE 8 Dec 2000 Added
+
 /****************************************************************************
 
     FUNCTION: WinMain(HANDLE, HANDLE, LPSTR, int)
@@ -722,6 +727,15 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				{
 					Mixer_Mute();
 				}
+				
+				// MAE 8 Dec 2000 Start of change
+				if (gbHasMSP)
+				{
+					// Mute the MSP decoder
+					Audio_Mute();
+				}
+				// MAE 8 Dec 2000 End of change
+
 				ShowText(hWnd,"MUTE");
 			}
 			else
@@ -736,6 +750,12 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				{
 					Mixer_UnMute();
 				}
+				// MAE 8 Dec 2000 Start of change
+				if (gbHasMSP)
+				{
+					Audio_SetVolume(InitialVolume);
+				}
+				// MAE 8 Dec 2000 End of change
 				ShowText(hWnd,"UNMUTE");
 			}
 			break;
@@ -1553,6 +1573,15 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 	case WM_DESTROY:
 		Stop_Capture();
 		Audio_SetSource(AUDIOMUX_MUTE);
+		
+		// MAE 8 Dec 2000 Start of change
+		if (gbHasMSP)
+		{
+			// Mute the MSP decoder
+			Audio_Mute();
+		}
+		// MAE 8 Dec 2000 End of change
+
 		CleanUpMemory();
 
 		if(bIsFullScreen == FALSE)
@@ -1680,20 +1709,31 @@ void MainWndOnInitBT(HWND hWnd)
 		}
 		SetDlgItemText(SplashWnd, IDC_TEXT4, Text);
 
+		// MAE 8 Dec 2000 Start of change
+		gbHasMSP = FALSE;
+
 		if (MSPStatus[0] == 0x00)
 		{
 			sprintf(MSPStatus, "No Device on I2C-Bus");
 			sprintf(Text, "No MSP-Device");
+
 			if (Audio_Init(0x80, 0x81) == TRUE)
 			{
 				sprintf(Text, "MSP-Device OK");
 				sprintf(MSPStatus, "MSP-Device I2C-Bus I/O 0x80/0x81");
+
+				gbHasMSP = TRUE;
+				
+				Audio_SetVolume(InitialVolume);
 			}
 		}
 		else
 		{
 			sprintf(Text, "MSP-Device OK");
+			gbHasMSP = TRUE;
 		}
+
+		// MAE 8 Dec 2000 End of change
 		SetDlgItemText(SplashWnd, IDC_TEXT5, Text);
 
 		if (Has_MSP == TRUE)

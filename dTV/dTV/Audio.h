@@ -55,6 +55,7 @@ BOOL Audio_SetSuperBass(BOOL bSuperBass);
 void Audio_SetToneControl(BOOL nMode);
 BOOL Audio_SetEqualizer(int nIndex, char nLevel);
 int Audio_GetStereoMode(BOOL bHardwareMode);
+BOOL Audio_Mute(void); // MAE 8 Dec 2000
 BOOL Audio_MSP_Reset();
 BOOL Audio_MSP_Version();
 void Audio_MSP_Set_MajorMinor_Mode(int MajorMode, int MinorMode);

@@ -60,42 +60,43 @@ static struct MSP_INIT_DATA_DEM
 	int mode_reg;
 	int dfp_src;
 	int dfp_matrix;
+	int autodetect; // MAE 8 Dec 2000
 } MSP_init_data[] =
 {
 	/* AM (for carrier detect / msp3400) */
 	{ { 75, 19, 36, 35, 39, 40 }, { 75, 19, 36, 35, 39, 40 },
 	  MSP_CARRIER(5.5), MSP_CARRIER(5.5),
-	  0x00d0, 0x0500,   0x0020, 0x3000},
+	  0x00d0, 0x0500,   0x0020, 0x3000, 1},
 
 	/* AM (for carrier detect / msp3410) */
 	{ { -1, -1, -8, 2, 59, 126 }, { -1, -1, -8, 2, 59, 126 },
 	  MSP_CARRIER(5.5), MSP_CARRIER(5.5),
-	  0x00d0, 0x0100,   0x0020, 0x3000},
+	  0x00d0, 0x0100,   0x0020, 0x3000, 0},
 
 	/* FM Radio */
 	{ { -8, -8, 4, 6, 78, 107 }, { -8, -8, 4, 6, 78, 107 },
 	  MSP_CARRIER(10.7), MSP_CARRIER(10.7),
-	  0x00d0, 0x0480, 0x0020, 0x3000 },
+	  0x00d0, 0x0480, 0x0020, 0x3000, 0 },
 
 	/* Terrestial FM-mono + FM-stereo */
 	{ {  3, 18, 27, 48, 66, 72 }, {  3, 18, 27, 48, 66, 72 },
 	  MSP_CARRIER(5.5), MSP_CARRIER(5.5),
-	  0x00d0, 0x0480,   0x0030, 0x3000},
+	  0x00d0, 0x0480,   0x0030, 0x3000, 0}, 
 
 	/* Sat FM-mono */
 	{ {  1,  9, 14, 24, 33, 37 }, {  3, 18, 27, 48, 66, 72 },
 	  MSP_CARRIER(6.5), MSP_CARRIER(6.5),
-	  0x00c6, 0x0480,   0x0000, 0x3000},
+	  0x00c6, 0x0480,   0x0000, 0x3000, 0},
 
 	/* NICAM B/G, D/K */
 	{ { -2, -8, -10, 10, 50, 86 }, {  3, 18, 27, 48, 66, 72 },
 	  MSP_CARRIER(5.5), MSP_CARRIER(5.5),
-	  0x00d0, 0x0040,   0x0120, 0x3000},
+	  0x00d0, 0x0040,   0x0120, 0x3000, 0},
 
 	/* NICAM I */
 	{ {  2, 4, -6, -4, 40, 94 }, {  3, 18, 27, 48, 66, 72 },
 	  MSP_CARRIER(6.0), MSP_CARRIER(6.0),
-	  0x00d0, 0x0040,   0x0120, 0x3000},
+	  0x00d0, 0x0040,   0x0120, 0x3000, 0},
 };
 
 
@@ -121,14 +122,23 @@ int carrier_detect[8] = {
 };
 
 int MSPMode;
-int MSPStereo;
+int MSPStereo = VIDEO_SOUND_STEREO; // MAE 8 Dec 2000 Added default
 int MSPNewStereo;
 int MSPAutoDetectValue;
 BOOL MSPNicam;
-int MSPMajorMode;
-int MSPMinorMode;
-BOOL AutoStereoSelect=TRUE;
+int MSPMajorMode = 0; // MAE 8 Dec 2000 Added default
+int MSPMinorMode = 0; // MAE 8 Dec 2000 Added default
+BOOL AutoStereoSelect=FALSE; // MAE 8 Dec 2000 Changed default
 
+// MAE Added 8 Dec 200 
+BOOL Audio_Mute(void)
+{
+	int nVolume;
+	nVolume = MulDiv(400, 0x7f0, 1400);
+	WriteDSP(0, nVolume << 4);
+	WriteDSP(6, nVolume << 4);
+	return TRUE;
+}
 
 BOOL Audio_SetSource(AUDIOMUXTYPE nChannel)
 {
@@ -154,8 +164,8 @@ BOOL Audio_SetSource(AUDIOMUXTYPE nChannel)
 	}
 
 	/* select direct input */
-	BT848_WriteWord(BT848_GPIO_REG_INP, 0x00);
-	BT848_AndOrDataDword(BT848_GPIO_DATA, MuxSelect, ~TVCards[CardType].GPIOMask);
+	BT848_WriteWord(BT848_GPIO_REG_INP, 0x00); // MAE 14 Dec 2000 disabled
+	BT848_AndOrDataDword(BT848_GPIO_DATA, MuxSelect, ~TVCards[CardType].GPIOMask); 
 	return TRUE;
 }
 
@@ -186,11 +196,18 @@ BOOL Audio_Init(BYTE DWrite, BYTE DRead)
 	Sleep(4);
 	Audio_MSP_Version();
 	Sleep(4);
-	Audio_MSP_SetMode(MSPMode);
-	Sleep(4);
-	Audio_MSP_Set_MajorMinor_Mode(MSPMajorMode, MSPMinorMode);
-	Sleep(4);
-	Audio_MSP_SetStereo(MSPMajorMode, MSPMinorMode, MSPStereo);
+
+	if (MSP_init_data[MSPMajorMode].autodetect)
+	{
+		WriteDem(0x20,0x0001); // Autodetect source
+	}
+	else
+	{
+		Audio_MSP_SetMode(MSPMode);
+		Sleep(4);
+		Audio_MSP_Set_MajorMinor_Mode(MSPMajorMode, MSPMinorMode);
+		Sleep(4);
+	}
 
 	MSPToneControl = TRUE;
 	Audio_SetVolume(InitialVolume);
@@ -204,6 +221,9 @@ BOOL Audio_Init(BYTE DWrite, BYTE DRead)
 	{
 		Audio_SetEqualizer(i, InitialEqualizer[i]);
 	}
+
+	Audio_MSP_SetStereo(MSPMajorMode, MSPMinorMode, MSPStereo);
+
 	return (TRUE);
 }
 
@@ -390,6 +410,7 @@ BOOL Audio_MSP_Reset()
 
 	I2CBus_Stop();
 	I2CBus_Unlock();
+
 	return ret;
 }
 
@@ -423,7 +444,7 @@ void Audio_MSP_SetMode(int type)
 
 	Audio_MSP_SetCarrier(MSP_init_data[type].cdo1, MSP_init_data[type].cdo2);
 
-	WriteDem(0x60, 0);			/* LOAD_REG_1/2 */
+	// MAE WriteDem(0x60, 0);			/* LOAD_REG_1/2 */
 	WriteDSP(0x08, MSP_init_data[type].dfp_src);
 	WriteDSP(0x09, MSP_init_data[type].dfp_src);
 	WriteDSP(0x0a, MSP_init_data[type].dfp_src);
@@ -445,16 +466,19 @@ void Audio_MSP_SetStereo(int MajorMode, int MinorMode, int mode)
 	switch (MSPMode)
 	{
 	case MSP_MODE_FM_TERRA:
-		Audio_MSP_SetCarrier(carrier_detect[MinorMode], carrier_detect_main[MajorMode]);
 		switch (MSPStereo)
 		{
 		case VIDEO_SOUND_STEREO:
-			WriteDSP(0x0e, 0x3001);
+			//WriteDSP(0x0e, 0x2402); // MAE 8 Dec 2000
+			WriteDSP(0x0e, 0x2403); // MAE 8 Dec 2000
+			//WriteDSP(0x08, 0x0320); // MAE 8 Dec 2000
+			//WriteDSP(0x00, 0x7300); // MAE 8 Dec 2000
+
 			break;
 		case VIDEO_SOUND_MONO:
 		case VIDEO_SOUND_LANG1:
 		case VIDEO_SOUND_LANG2:
-			WriteDSP(0x0e, 0x3000);
+			WriteDSP(0x0e, 0x3000); // MAE 8 Dec 2000
 			break;
 		}
 		break;
@@ -489,9 +513,9 @@ void Audio_MSP_SetStereo(int MajorMode, int MinorMode, int mode)
 	switch (MSPStereo)
 	{
 	case VIDEO_SOUND_STEREO:
-		WriteDSP(0x08, 0x0020 | nicam);
-		WriteDSP(0x09, 0x0020 | nicam);
-		WriteDSP(0x0a, 0x0020 | nicam);
+		WriteDSP(0x08, 0x0320 | nicam);
+		WriteDSP(0x09, 0x0320 | nicam);
+		WriteDSP(0x0a, 0x0320 | nicam);
 		WriteDSP(0x05, 0x4000);
 		break;
 	case VIDEO_SOUND_MONO:
@@ -499,11 +523,13 @@ void Audio_MSP_SetStereo(int MajorMode, int MinorMode, int mode)
 		WriteDSP(0x08, 0x0000 | nicam);
 		WriteDSP(0x09, 0x0000 | nicam);
 		WriteDSP(0x0a, 0x0000 | nicam);
+		WriteDSP(0x05, 0x0000);
 		break;
 	case VIDEO_SOUND_LANG2:
 		WriteDSP(0x08, 0x0010 | nicam);
 		WriteDSP(0x09, 0x0010 | nicam);
 		WriteDSP(0x0a, 0x0010 | nicam);
+		WriteDSP(0x05, 0x0000);
 		break;
 	}
 }
@@ -585,6 +611,7 @@ void Audio_MSP_Set_MajorMinor_Mode(int MajorMode, int MinorMode)
 	case 0:					// 4.5
 	default:
 //          Audio_MSP_SetMode(Audio_MSP_MODE_FM_TERRA);
+//			Audio_MSP_SetStereo(MajorMode, MinorMode, VIDEO_SOUND_STEREO); // MAETEST
 		Audio_MSP_SetCarrier(carrier_detect[MinorMode], carrier_detect_main[MajorMode]);
 		break;
 	}
@@ -678,10 +705,10 @@ void Audio_MSP_Print_Mode()
 			strcat(Text, "(Stereo)");
 			break;
 		case 3:
-			strcat(Text, "(Kanal 1)");
+			strcat(Text, "(Channel 1)");
 			break;
 		case 4:
-			strcat(Text, "(Kanal 2)");
+			strcat(Text, "(Channel 2)");
 			break;
 		}
 	}

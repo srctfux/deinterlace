@@ -26,6 +26,8 @@
 //
 // 15 Aug 2000   John Adcock             Added structures from bttv
 // 20 Nov 2000   Michael Eskin, Conexant Added support for Conexant and Rockwell Bt878XEVKs
+//  5 Dec 2000   Michael Eskin, Conexant Added support for Conexant Foghorn ATSC reference designs 
+//                                       and Philips 1236D tuner
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -555,6 +557,38 @@ const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 		TUNER_PHILIPS_NTSC
 	},
 	// MAE 20 Nov 2000 End of change
+	// MAE 5 Dec 2000 Start of change
+	{
+		"Conexant Foghorn NTSC/ATSC-A",
+		3, 1, 0, 2, 0xFFFFB7,
+		{ 2, 3, 1, 1, 0, 0, 0, 0},
+		{ 0x000048, 0x000048, 0x000048, 0x000048, 0x000048, 0x000048},
+		0,
+		1,0,0,0,0,0,0,0,
+		PLL_NONE,
+		TUNER_PHILIPS_1236D_NTSC_INPUT1
+	},
+	{
+		"Conexant Foghorn NTSC/ATSC-B",
+		3, 1, 0, 2, 0xFFFFB7,
+		{ 2, 3, 1, 1, 0, 0, 0, 0},
+		{ 0x000048, 0x000048, 0x000048, 0x000048, 0x000048, 0x000048},
+		0,
+		1,0,0,0,0,0,0,0,
+		PLL_NONE,
+		TUNER_PHILIPS_1236D_NTSC_INPUT1
+	},
+	{
+		"Conexant Foghorn NTSC/ATSC-C",
+		3, 1, 0, 2, 0xFFFFB7,
+		{ 2, 3, 1, 1, 0, 0, 0, 0},
+		{ 0x000048, 0x000048, 0x000048, 0x000048, 0x000048, 0x000048},
+		0,
+		1,0,0,0,0,0,0,0,
+		PLL_NONE,
+		TUNER_PHILIPS_1236D_NTSC_INPUT1
+	},
+	// MAE 5 Dec 2000 End of change
 
 };
 
@@ -583,6 +617,11 @@ const AUTODETECT878 AutoDectect878[] =
 	{ 0x182214F1, TVCARD_CONEXANTNTSCXEVK,  "Conexant Bt878A NTSC XEVK" },
 	{ 0x1322127A, TVCARD_ROCKWELLNTSCXEVK,  "Rockwell Bt878A NTSC XEVK" },
 	// MAE 20 Nov 2000 End of change
+	// MAE 5 Dec 2000 Start of change
+	{ 0x013214F1, TVCARD_CONEXANTFOGHORNREVA,  "Conexant Foghorn NTSC/ATSC-A" },
+	{ 0x023214F1, TVCARD_CONEXANTFOGHORNREVB,  "Conexant Foghorn NTSC/ATSC-B" },
+	{ 0x033214F1, TVCARD_CONEXANTFOGHORNREVC,  "Conexant Foghorn NTSC/ATSC-C" },
+	// MAE 5 Dec 2000 End of change
 
 	{ 0, -1, NULL }
 };
@@ -607,6 +646,11 @@ const TVTUNERSETUP Tuners[TUNER_LASTONE] =
 	/* untested - data sheet guess. Only IF differs. */
 	{ "Alps TSBC5", Alps, PAL, 2132, 5620, 0x01, 0x02, 0x08, 0x8e, 0xc2, 608, 0x00},
 	{ "Temic 4006FH5", TEMIC, PAL_I, 2720, 7200, 0xa0, 0x90, 0x30, 0x8e, 0xc2, 623, 0x00},
+	// MAE 5 Dec 2000 Start of change
+	{ "Philips 1236D ATSC/NTSC Input 1", Philips, NTSC, 2516, 7220, 0xA3, 0x93, 0x33, 0xCE, 0xc2, 732, 0x00},
+	{ "Philips 1236D ATSC/NTSC Input 2", Philips, NTSC, 2516, 7220, 0xA2, 0x92, 0x32, 0xCE, 0xc2, 732, 0x00},
+	// MAE 5 Dec 2000 End of change
+
 };
 
 TVCARDID CardType = TVCARD_UNKNOWN;
