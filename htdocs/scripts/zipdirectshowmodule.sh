@@ -3,7 +3,7 @@
 #Deinterlace Module Zip Script
 #Dan Schmelzer
 #dschmelzer@hotmail.com
-#2/18/2001
+#Updated 8/2/2001
 
 #Why this script is needed...
 #This script is needed to do the nightly Deinterlace module zip and to put
@@ -28,35 +28,36 @@
 #===Getting down to business===
 
 
-#Remove the old module zip from the FTP site
+#Remove the old module zip from the web site
 
-rm -f /home/groups/ftp/pub/deinterlace/directshowmodule.zip
+rm -f /home/groups/d/de/deinterlace/htdocs/downloads/directshowmodule.zip
 
 
-#Do the remaining work from the dTV subdirectory
+#Do the remaining work from the DScaler subdirectory
 
 cd /home/groups/d/de/deinterlace/
 
 
-#Check out the Deinterlace module to temporary space from the dTV CVS using pserver.
+#Check out the DIDMO module to temporary space from the DScaler CVS using pserver.
 #You will need to log in to pserver once; after that, you should be fine, unless the CVS
 #server crashes or something like that.  In a half year, I've had to log in a couple of times.
 #See the instructions above for the details on logging in.
 
-cvs -d:pserver:anonymous@cvs1:/cvsroot/deinterlace co Deinterlace>/dev/null
+cvs -d:pserver:anonymous@cvs1:/cvsroot/deinterlace co DIDMO>/dev/null
 
 
 
 #todos doesn't have a recursive function, so you have to work with each directory individually.
 
-cd /home/groups/d/de/deinterlace/Deinterlace
-todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini
+cd /home/groups/d/de/deinterlace/DIDMO
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
 cd /home/groups/d/de/deinterlace/
 
 
 #Zip up the module
 
-zip -r directshowmodule.zip Deinterlace
+zip -r directshowmodule.zip DIDMO
 
 
 #Give the zip file group permissions in case somebody else needs to delete it
@@ -66,19 +67,12 @@ chmod 777 directshowmodule.zip
 
 #Then move it to the site space
 
-mv directshowmodule.zip /home/groups/ftp/pub/deinterlace/
+mv directshowmodule.zip /home/groups/d/de/deinterlace/htdocs/downloads/
 
 
 #Clean up the temporary space
 
-rm -rf Deinterlace
+rm -rf DIDMO
 
 
 #Joy
-
-
-
-
-
-
-
