@@ -792,7 +792,7 @@ void Setting_OSDShow(SETTING* pSetting, HWND hWnd)
 		}
 		else
 		{
-			sprintf(szBuffer, "%s %f", pSetting->szDisplayName, (float)*(pSetting->pValue) / (float)pSetting->OSDDivider);
+			sprintf(szBuffer, "%s %.*f", pSetting->szDisplayName, (int)log10(pSetting->OSDDivider), (float)*(pSetting->pValue) / (float)pSetting->OSDDivider);
 		}
 		break;
 	default:
