@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>DTV -- TV &amp; Video Deinterlacer</title>
+<title>dTV -- TV &amp; Video Deinterlacer</title>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 <style type="text/css">
 <!--
