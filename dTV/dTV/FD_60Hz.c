@@ -95,7 +95,6 @@ long				NextPulldownRepeatCount = 0;    // for temporary increases of PullDownRe
 ///////////////////////////////////////////////////////////////////////////////
 void UpdateNTSCPulldownMode(DEINTERLACE_INFO *pInfo)
 {
-	int CombFactor = 0;
 	boolean SwitchToVideo = FALSE;
 	static long MISMATCH_COUNT = 0;
 	static long MOVIE_FIELD_CYCLE = 0;
@@ -122,7 +121,8 @@ void UpdateNTSCPulldownMode(DEINTERLACE_INFO *pInfo)
 	// the current field is very different from the field two fields ago.
 	// Threshold32Pulldown probably should be changed to be automatically
 	// compensating depending on the material.
-	//
+	
+	CompareFields(pInfo);
     if(pInfo->FieldDiff > Threshold32Pulldown)
 	{
 		MATCH_COUNT = 0;
@@ -149,7 +149,7 @@ void UpdateNTSCPulldownMode(DEINTERLACE_INFO *pInfo)
 			ThresholdPulldownMismatch > 0 &&		    // only do video-force check if there's a threshold.
 			pInfo->FieldDiff >= ThresholdPulldownMismatch &&	// only force video if this field is very different,
 			DoWeWantToFlipNTSC(pInfo) &&				// and we would weave it with the previous field,
-			(CombFactor = GetCombFactor(pInfo)) > ThresholdPulldownComb) // and it'd produce artifacts
+			GetCombFactor(pInfo) > ThresholdPulldownComb) // and it'd produce artifacts
 		{
 			SwitchToVideo = TRUE;
 			NextPulldownRepeatCount = 1;
@@ -161,7 +161,7 @@ void UpdateNTSCPulldownMode(DEINTERLACE_INFO *pInfo)
 			MOVIE_VERIFY_CYCLE = 0;
 			MOVIE_FIELD_CYCLE = 0;
 			UpdatePulldownStatus();
-			LOG(" Back to Video, comb factor %d", CombFactor);
+			LOG(" Back to Video, comb factor %d", pInfo->CombFactor);
 		}
 		else
 		{

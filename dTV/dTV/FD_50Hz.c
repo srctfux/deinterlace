@@ -69,6 +69,8 @@ void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 		dwLastFlipTicks = -1;
 		return;
 	}
+
+	GetCombFactor(pInfo);
 	if(!DeintMethods[gPulldownMode].bIsFilmMode)
 	{
 		if((pInfo->CombFactor - LastCombFactor) < PulldownThresholdLow && LastDiff > PulldownThresholdLow)

@@ -130,6 +130,10 @@ long GetCombFactor(DEINTERLACE_INFO *pInfo)
 	__int64 qwThreshold;
 	const __int64 Mask = 0x7f7f7f7f7f7f7f7f;
 
+	// If we've already computed the comb factor, just return it.
+	if (pInfo->CombFactor > -1)
+		return pInfo->CombFactor;
+
 	// If one of the fields is missing, treat them as very different.
 	if (pInfo->OddLines[0] == NULL || pInfo->EvenLines[0] == NULL)
 		return 0x7fffffff;
@@ -219,6 +223,9 @@ Next8Bytes:
 		CombFactor += (LineFactor & 0xFFFF);
 		CombFactor += (LineFactor >> 16);
 	}
+
+	pInfo->CombFactor = CombFactor;
+	LOG(" Frame %d %c CF = %d", pInfo->CurrentFrame, pInfo->IsOdd ? 'O' : 'E', pInfo->CombFactor);
 	return CombFactor;
 }
 
@@ -247,6 +254,10 @@ long CompareFields(DEINTERLACE_INFO *pInfo)
 	__int64 wBitShift    = BitShift;
 	short** pLines1;
 	short** pLines2;
+
+	// If we've already computed the field difference, just return it.
+	if (pInfo->FieldDiff > -1)
+		return pInfo->FieldDiff;
 
 	if(pInfo->IsOdd)
 	{
@@ -303,6 +314,8 @@ Next8Bytes:
 		}
 		DiffFactor += (long)sqrt(LineFactor);
 	}
+
+	pInfo->FieldDiff = DiffFactor;
+	LOG(" Frame %d %c FD = %d", pInfo->CurrentFrame, pInfo->IsOdd ? 'O' : 'E', pInfo->FieldDiff);
 	return DiffFactor;
 }
-

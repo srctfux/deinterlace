@@ -56,39 +56,39 @@ long SimilarityThreshold = 25;
 DEINTERLACE_METHOD DeintMethods[PULLDOWNMODES_LAST_ONE] =
 {
 	// VIDEO_MODE_BOB
-	{"Video Deinterlace (Bob)", "Bob", FALSE, FALSE, FALSE, FALSE, DeinterlaceFieldBob, 50, 60},
+	{"Video Deinterlace (Bob)", "Bob", FALSE, FALSE, DeinterlaceFieldBob, 50, 60},
 	// VIDEO_MODE_WEAVE
-	{"Video Deinterlace (Weave)", "Weave", FALSE, FALSE, FALSE, FALSE, DeinterlaceFieldWeave, 50, 60},
+	{"Video Deinterlace (Weave)", "Weave", FALSE, FALSE, DeinterlaceFieldWeave, 50, 60},
 	// VIDEO_MODE_2FRAME
-	{"Video Deinterlace (2-Frame)", "2-Frame", FALSE, FALSE, FALSE, FALSE, DeinterlaceFieldTwoFrame, 50, 60},
+	{"Video Deinterlace (2-Frame)", "2-Frame", FALSE, FALSE, DeinterlaceFieldTwoFrame, 50, 60},
 	// SIMPLE_WEAVE
-	{"Simple Weave", NULL, FALSE, FALSE, FALSE, FALSE, Weave, 50, 60},
+	{"Simple Weave", NULL, FALSE, FALSE, Weave, 50, 60},
 	// SIMPLE_BOB
-	{"Simple Bob", NULL, FALSE, FALSE, FALSE, FALSE, Bob, 50, 60},
+	{"Simple Bob", NULL, FALSE, FALSE, Bob, 50, 60},
 	// SCALER_BOB
-	{"Scaler Bob", NULL, FALSE, FALSE, TRUE, FALSE, HalfHeightBoth, 50, 60},
+	{"Scaler Bob", NULL, TRUE, FALSE, HalfHeightBoth, 50, 60},
 	// FILM_22_PULLDOWN_ODD
-	{"2:2 Pulldown Flip on Odd", "2:2 Odd", FALSE, FALSE, FALSE, TRUE, FilmModePAL, 25, 30},
+	{"2:2 Pulldown Flip on Odd", "2:2 Odd", FALSE, TRUE, FilmModePAL, 25, 30},
 	// FILM_22_PULLDOWN_EVEN
-	{"2:2 Pulldown Flip on Even", "2:2 Even", FALSE, FALSE, FALSE, TRUE, FilmModePAL, 25, 30},
+	{"2:2 Pulldown Flip on Even", "2:2 Even", FALSE, TRUE, FilmModePAL, 25, 30},
 	// FILM_32_PULLDOWN_0
-	{"3:2 Pulldown Skip 1st Full Frame", "3:2 1st", FALSE, FALSE, FALSE, TRUE, FilmModeNTSC, 1000, 24},
+	{"3:2 Pulldown Skip 1st Full Frame", "3:2 1st", FALSE, TRUE, FilmModeNTSC, 1000, 24},
 	// FILM_32_PULLDOWN_1
-	{"3:2 Pulldown Skip 2nd Full Frame", "3:2 2nd", FALSE, FALSE, FALSE, TRUE, FilmModeNTSC, 1000, 24},
+	{"3:2 Pulldown Skip 2nd Full Frame", "3:2 2nd", FALSE, TRUE, FilmModeNTSC, 1000, 24},
 	// FILM_32_PULLDOWN_2
-	{"3:2 Pulldown Skip 3rd Full Frame", "3:2 3rd", FALSE, FALSE, FALSE, TRUE, FilmModeNTSC, 1000, 24},
+	{"3:2 Pulldown Skip 3rd Full Frame", "3:2 3rd", FALSE, TRUE, FilmModeNTSC, 1000, 24},
 	// FILM_32_PULLDOWN_3
-	{"3:2 Pulldown Skip 4th Full Frame", "3:2 4th", FALSE, FALSE, FALSE, TRUE, FilmModeNTSC, 1000, 24},
+	{"3:2 Pulldown Skip 4th Full Frame", "3:2 4th", FALSE, TRUE, FilmModeNTSC, 1000, 24},
 	// FILM_32_PULLDOWN_4
-	{"3:2 Pulldown Skip 5th Full Frame", "3:2 5th", FALSE, FALSE, FALSE, TRUE, FilmModeNTSC, 1000, 24},
+	{"3:2 Pulldown Skip 5th Full Frame", "3:2 5th", FALSE, TRUE, FilmModeNTSC, 1000, 24},
 	// EVEN_ONLY
-	{"Even Scanlines Only", "Even", FALSE, FALSE, TRUE, FALSE, HalfHeightEvenOnly, 25, 30},
+	{"Even Scanlines Only", "Even", TRUE, FALSE, HalfHeightEvenOnly, 25, 30},
 	// ODD_ONLY
-	{"Odd Scanlines Only", "Odd", FALSE, FALSE, TRUE, FALSE, HalfHeightOddOnly, 25, 30},
+	{"Odd Scanlines Only", "Odd", TRUE, FALSE, HalfHeightOddOnly, 25, 30},
 	// BLENDED_CLIP
-	{"Blended Clip", NULL, FALSE, FALSE, FALSE, FALSE, BlendedClipping, 50, 60},
+	{"Blended Clip", NULL, FALSE, FALSE, BlendedClipping, 50, 60},
 	// ADAPTIVE
-	{"Adaptive", NULL, TRUE, FALSE, FALSE, FALSE, AdaptiveDeinterlace, 50, 60},
+	{"Adaptive", NULL, FALSE, FALSE, AdaptiveDeinterlace, 50, 60},
 };
 
 /////////////////////////////////////////////////////////////////////////////

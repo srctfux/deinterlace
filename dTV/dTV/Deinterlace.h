@@ -121,10 +121,6 @@ typedef struct
 	char* szName;
 	// What to display when used in adaptive mode (NULL to use szName)
 	char* szAdaptiveName;
-	// Do we need to calculate FieldDiff to use this Algorithm
-    BOOL bRequiresFieldDiff;
-    // Do we need to calculate CombFactor to use this Algorithm
-    BOOL bRequiresCombFactor;
 	// Do we need to shrink the overlay by half
 	BOOL bIsHalfHeight;
 	// Is this a film mode

@@ -418,6 +418,8 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 			info.FrameWidth = CurrentX;
 			info.FrameHeight = CurrentY;
 			info.FieldHeight = CurrentY / 2;
+			info.CombFactor = -1;
+			info.FieldDiff = -1;
 
 			bMissedFrame = FALSE;
 			bFlipNow = FALSE;
@@ -491,19 +493,6 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 
 			if(!bMissedFrame)
 			{
-				if((bAutoDetectMode == TRUE && bIsPAL) || DeintMethods[gPulldownMode].bRequiresCombFactor)
-				{
-					info.CombFactor = GetCombFactor(&info);
-					LOG(" Frame %d %c CF = %d", CurrentFrame, info.IsOdd ? 'O' : 'E', info.CombFactor);
-				}
-
-				if((bAutoDetectMode == TRUE && !bIsPAL) || DeintMethods[gPulldownMode].bRequiresFieldDiff)
-				{
-					info.FieldDiff = CompareFields(&info);
-					
-					LOG(" Frame %d %c CR = %d", CurrentFrame, info.IsOdd ? 'O' : 'E', info.FieldDiff);
-				}
-
 				if(bAutoDetectMode == TRUE && bIsPAL)
 				{
 					UpdatePALPulldownMode(&info);

@@ -31,6 +31,7 @@
 #include "OutThreads.h"
 #include "Status.h"
 #include "FD_60Hz.h"
+#include "FD_Common.h"
 
 long				StaticImageFieldCount = 100;
 long				LowMotionFieldCount = 4;
@@ -80,7 +81,6 @@ static void UpdateAdaptiveMode(ePULLDOWNMODES mode)
 ///////////////////////////////////////////////////////////////////////////////
 BOOL AdaptiveDeinterlace(DEINTERLACE_INFO *info)
 {
-	int CombFactor = 0;
 	static long MATCH_COUNT = 0;
 
 	// If this is our first time, update the current adaptive mode to whatever
@@ -101,6 +101,7 @@ BOOL AdaptiveDeinterlace(DEINTERLACE_INFO *info)
 	// the current field is very different from the field two fields ago.
 	// so reset the match count and switch back
 	// to either low or high motion
+	CompareFields(info);
     if(info->FieldDiff > Threshold32Pulldown)
 	{
 		MATCH_COUNT = 0;
