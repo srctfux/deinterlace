@@ -78,7 +78,7 @@ void VBI_DecodeLine(unsigned char *VBI_Buffer, int line, BOOL IsOdd)
 	vpsstep = 2 * (int) ((35.468950 / 5.0) * FPFAC + 0.5);
 
 	// set up threshold and offset data
-	VBI_AGC(VBI_Buffer, 120, 450, 1);
+	//VBI_AGC(VBI_Buffer, 120, 450, 1);
 
 	/* all kinds of data with videotext data format: videotext, intercast, ... */
 	if (DoTeletext)

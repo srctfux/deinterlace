@@ -164,7 +164,7 @@ int decode(unsigned char *vbiline)
 	DWORD Threshold = 0;
 	int ClockCur;
     
-    i=35;
+    i=0;
 
     while (i < 120)
 	{
@@ -781,7 +781,7 @@ int CC_DecodeLine(BYTE* vbiline, CCMODE CCMode, BOOL IsOdd)
 			CCdecode(decode(vbiline), FALSE, 0);
 			break;
 		case CCMODE_TEXT2:
-			CCdecode(decode(vbiline), TRUE, 1);
+			CCdecode(decode(vbiline), FALSE, 1);
 			break;
 		default:
 			break;
@@ -801,7 +801,7 @@ int CC_DecodeLine(BYTE* vbiline, CCMODE CCMode, BOOL IsOdd)
 			CCdecode(decode(vbiline), FALSE, 0);
 			break;
 		case CCMODE_TEXT4:
-			CCdecode(decode(vbiline), TRUE, 1);
+			CCdecode(decode(vbiline), FALSE, 1);
 			break;
 		default:
 			break;
@@ -852,7 +852,8 @@ void CC_PaintChars(HWND hWnd, CC_Char* Char, char* szLine, HDC hDC, RECT* PaintR
 								(Char->bFlash)? FW_BOLD:0, 
 								Char->bItalics, 
 								Char->bUnderline, 
-								0, 0, 0, 0, 0, 
+								0, 0, 0, 0, 
+								NONANTIALIASED_QUALITY, 
 								DEFAULT_PITCH | FF_DONTCARE, 
 								"Arial");
 		if (!hOSDfont) return;

@@ -462,7 +462,7 @@ int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 		ShowText(hWnd, "Aspect Ratio From Current Resolution");
 		break;
 	case IDM_TASPECT_133:
-		target_aspect = 1330;
+		target_aspect = 1333;
 		ShowText(hWnd, "1.33:1 Screen");
 		break;
 	case IDM_TASPECT_166:

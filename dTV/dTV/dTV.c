@@ -1197,48 +1197,21 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
 		case IDM_OSD_CC_TEXT:
 			{
-				RECT WinRect;
+				RECT winRect;
 				RECT DestRect;
-				HDC hDC;
-				HDC hMemDC;
-				HBITMAP hMemBM, hOldBM;
-				HBRUSH hBrush;
-    
-				GetClientRect(hWnd, &WinRect);
-				GetDestRect(&DestRect);
+				PAINTSTRUCT sPaint;
+				GetClientRect(hWnd, &winRect);
 				if(bDisplayStatusBar == TRUE)
 				{
-					WinRect.bottom -= StatusBar_Height();
+					winRect.bottom -= StatusBar_Height();
 				}
-				hDC = GetDC(hWnd);
-			    hMemDC = CreateCompatibleDC(hDC);
-			    hMemBM = CreateCompatibleBitmap(hDC,
-                                    WinRect.right - WinRect.left,
-                                    WinRect.bottom - WinRect.top);
-
-
-				hOldBM = SelectObject(hMemDC, hMemBM);
-
-				hBrush = CreateSolidBrush(Overlay_GetColor());
-				FillRect(hMemDC, &DestRect, hBrush);
-				DeleteObject(hBrush);
-
-			    CC_PaintScreen(hWnd, (CC_Screen*)lParam, hMemDC, &DestRect);
-
-				BitBlt(hDC, 
-					DestRect.left, 
-					DestRect.top, 
-					DestRect.right - DestRect.left, 
-					DestRect.bottom - DestRect.top,
-					hMemDC, 
-					DestRect.left, 
-					DestRect.top, 
-					SRCCOPY);
-				ReleaseDC(hWnd, hDC);
-
-				SelectObject(hMemDC, hOldBM);
-				DeleteObject(hMemBM);
-				DeleteDC(hMemDC);
+                InvalidateRect(hWnd, &winRect, FALSE);
+				BeginPaint(hWnd, &sPaint);
+			    PaintColorkey(hWnd, TRUE, sPaint.hdc, &winRect);
+				GetDestRect(&DestRect);
+			    CC_PaintScreen(hWnd, (CC_Screen*)lParam, sPaint.hdc, &DestRect);
+				EndPaint(hWnd, &sPaint);
+                ValidateRect(hWnd, &winRect);
 			}
 			break;
 
