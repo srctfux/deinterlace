@@ -50,6 +50,7 @@ void StatusBar_Destroy();
 void StatusBar_ShowText(eSTATUSBAR_BOX Field, LPCTSTR  szText);
 void StatusBar_ShowWindow(BOOL bShow);
 void StatusBar_Repaint();
+int StatusBar_Height();
 
 
 #endif

@@ -72,6 +72,7 @@
 #include "FLT_TNoise.h"
 #include "Splash.h"
 #include "VideoSettings.h"
+#include "VBI_CCdecode.h"
 #define DOLOGGING
 #include "DebugLog.h"
 
@@ -1177,7 +1178,19 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_OSD_CC_TEXT:
-            OSD_ShowTextOverride(hWnd, (LPSTR)lParam, 0);
+			{
+				RECT winRect;
+				HDC hDC;
+				GetClientRect(hWnd, &winRect);
+				if(bDisplayStatusBar == TRUE)
+				{
+					winRect.bottom -= StatusBar_Height();
+				}
+				hDC = GetDC(hWnd);
+			    PaintColorkey(hWnd, TRUE, hDC, &winRect);
+			    CC_PaintScreen(hWnd, (CC_Screen*)lParam, hDC, &winRect);
+				ReleaseDC(hWnd, hDC);
+			}
 			break;
 
         case IDM_OVERLAY_STOP:
@@ -1193,6 +1206,10 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				RECT winRect;
 				HDC hDC;
 				GetClientRect(hWnd, &winRect);
+				if(bDisplayStatusBar == TRUE)
+				{
+					winRect.bottom -= StatusBar_Height();
+				}
 				hDC = GetDC(hWnd);
 			    PaintColorkey(hWnd, TRUE, hDC, &winRect);
 			    OSD_Redraw(hWnd, hDC);

@@ -85,7 +85,9 @@ typedef struct
 	WORD VBILines;
 	double Fsc;
 	BOOL NeedsPLL;
-	double CC_Clock;
+	WORD CC_Clock;
+	WORD CC_Gap;
+	WORD CC_Line;
 } TTVFORMAT;
 
 

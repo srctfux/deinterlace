@@ -468,3 +468,10 @@ void StatusBar_Repaint()
 		InvalidateRect(hwndStatusBar, NULL, TRUE);
 	}
 }
+
+int StatusBar_Height()
+{
+	RECT rect;
+	GetClientRect(hwndStatusBar, &rect);
+	return (rect.bottom - rect.top);
+}

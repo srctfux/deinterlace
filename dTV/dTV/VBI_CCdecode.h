@@ -28,6 +28,46 @@
 #ifndef __CCDECODE_H___
 #define __CCDECODE_H___
 
+typedef enum
+{
+	CC_WHITE,
+	CC_GREEN,
+	CC_BLUE,
+	CC_CYAN,
+	CC_RED,
+	CC_YELLOW,
+	CC_MAGENTA,
+	CC_BLACK,
+} CC_Color;
+
+typedef struct
+{
+	BOOL bIsActive;
+	char Text;
+	CC_Color ForeColor;
+	CC_Color BackColor;
+	BOOL bUnderline;
+	BOOL bFlash;
+	BOOL bItalics;
+} CC_Char;
+
+typedef enum
+{
+	CCMODE_TEXT,
+	CCMODE_ROLL_UP,
+	CCMODE_POP_ON,
+	CCMODE_PAINT_ON,
+} CCMODE;
+
+#define CC_CHARS_PER_LINE 34
+
+typedef struct
+{
+	CC_Char ScreenData[15][CC_CHARS_PER_LINE];
+} CC_Screen;
+
 int CC_DecodeLine(BYTE* vbiline);
+void CC_PaintScreen(HWND hWnd, CC_Screen* Screen, HDC hDC, RECT* PaintRect);
+
 
 #endif
