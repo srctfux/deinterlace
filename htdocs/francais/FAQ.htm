@@ -3,7 +3,7 @@
 <!-- #BeginTemplate "/Templates/dtvnormal-multilang.dwt" --> 
 <head>
 <!-- #BeginEditable "doctitle" --> 
-<title>DScaler - Frequently Asked Questions</title>
+<title>DScaler - Foire Aux Questions</title>
 <!-- #EndEditable --> 
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 <style type="text/css">
@@ -45,316 +45,234 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
     <td colspan="3"><!-- #BeginEditable "Text" --> 
       <h1>Introduction</h1>
       <p> 
-      <h2>Qu'est ce que dTV ?</h2>
+      <h2>Qu'est ce que DScaler ?</h2>
       <p> dTV est une application qui capture une source analogique entrelacée, 
-        la désentrelace afin de générer un flux d'images progressives en vue d'une 
-        utilisation sur un moniteur informatique ou sur un projecteur.
+        la désentrelace afin de générer un flux d'images progressives, &agrave; 
+        la r&eacute;solution d&eacute;sir&eacute;e, en vue d'une utilisation sur 
+        un moniteur informatique ou sur un projecteur. 
       <p> Les sources analogiques entrelacées sont ce que génèrent des appareils 
-        comme les magnétoscopes, les laserdisc ou les consoles de jeux.
+        comme les magnétoscopes, les laserdisc ou les consoles de jeux. 
       <p> 
-      <p>
-      <h2>Qu'est ce que dTV a de si spécial ?</h2>
-      <p> Contrairement à la plupart des applications comparables, dTV implémente 
+      <p> 
+      <h2>Qu'est ce que DScaler a de si spécial ?</h2>
+      <p> Contrairement à la plupart des applications comparables, DScaler implémente 
         des algorithmes évolués afin de désentrelacer ces sources. L'utilisation 
         de ces algorithmes permet de s'assurer que chaque type de source sera 
         traitée de la meilleure manière possible.<br>
         La qualité d'image obtenue n'avait encore été jamais vu auparavant sur 
-        un micro-ordinateur.
-      <p> Parmi ces techniques ;
+        un micro-ordinateur. 
+      <p> Parmi ces techniques ; 
       <ul>
         <li>désentrelacement de sources vidéo (non film) 
         <li>détection du procédé de "telecinema" inverse 
         <li>la détection, pour les sources film, des séquencements 2:2 (pal) et 
-          3:2 (ntsc). En Anglais, le "3:2 pulldown"
+          3:2 (ntsc). En Anglais, le "3:2 pulldown" 
       </ul>
       <p> Une grande qualité d'image résulte de ces opérations complexes. Ceci 
         permet à certaines personnes équipées de projecteurs dits "compatibles 
         doubleur", de leur fournir une image progressive à partir d'une source 
-        entrelacée.
+        entrelacée. 
       <p> 
       <h2>Qui fait quoi ?</h2>
+      <p>Voyez le fichier <a href="Authors.htm">Auteurs</a> pour la liste des 
+        principaux d&eacute;veloppeurs ainsi que la liste des <a href="Thanks.htm">remerciements</a> 
+        pour quelques noms de personnes qui contribuent au succ&egrave;s de DScaler.</p>
+      <h2>Combien co&ucirc;te DScaler ?</h2>
+      <p>5000 FF (HT) :-) Non bien sur, DScaler est totalement gratuit, issue 
+        de l'<i>open source</i>, est r&eacute;gie par la licence GPL.</p>
       <p> 
-      <h3>Développeurs</h3>
-      <p> 
-      <h3><i>John Adcock</i></h3>
-      <p>John est l'initiateur du projet. Il a passé énormément de temps à développer 
-        pendant une période de 3 mois sans emploi sur les versions 1.0 jusqu'à 
-        1.06 beta 4. Il a fait tout le travail d'adaptation, et nettoyage, et 
-        de légalisation de Multidec. Il a developpé, dans un contexte "open source", 
-        la première application "soft" permettant de réaliser, en temps réel, 
-        le désentrelacement de sources avec séquencement 3:2, c'est à dire les 
-        films ntsc (le code est basé sur un article de Mark Rejhon décrivant un 
-        algorithme pour se faire). Il a également mis au point un module de désentrelacement 
-        de sources vidéo largement supérieur à ce que l'on peut trouver sur pc 
-        actuellement.</p>
-      <h3><br>
-        <i> Mark Rejhon</i></h3>
-      <p>Depuis la version 1.07, Mark est le "chef de projet". C'est également 
-        le modérateur d'un des plus importants forum dédié au "pc home cinéma" 
-        (<a href="http://www.avsforum.com">Audio Video Science forum</a>, "home 
-        theater computers"). Mark a mis au point l'algorithme de détection des 
-        séquences 3:2 qui constitue la base de l'algorithme implémenté par John 
-        Adcock dans dTV. Il participe également à plusieurs tâches annexes ; nettoyage 
-        dy code, documentation, test, et prise en compte (voir amélioration) des 
-        requêtes émises par les différents contributeurs du projet. Il a également 
-        apporté des changement à certaines parties spécifiques du code, notamment 
-        au niveau du désentrelaceur de sources vidéo.</p>
-      <h3><br>
-        <i> Steve Grimm</i></h3>
-      <p>Steve a contribué à plusieurs améliorations au désentrelaceur de sources 
-        vidéos, notamment au niveau du va et viens entre le mode vidéo et le mode 
-        film, mais également au niveau de la détection des séquencements 3:2 incorrects. 
-        Il a également travaillé sur une pre-version de l'algorithme de séquencement 
-        3:2.
-      <p> 
-      <h3><br>
-        <i> Michael Samblanet</i></h3>
-      <p>Michael continue à améliorer son module de gestion des ratios d'image.</p>
-      <p><br>
-      </p>
-      <h3><i>Tom Barry</i></h3>
-      <p>Tom a contribué à développer le mécanisme de triple buffer ainsi que 
-        d'autres mécanismes de synchronization présents dans la version 2.0.0. 
-        Il a également optimisé le mode vidéo grâce à des routines MMX. Il a également 
-        ajouté le menu "chipset settings". Ces dernières modifications sont présentes 
-        à partir de la version 1.9.</p>
-      <h3>Autres remerciements</h3>
-      <p> 
-      <p>Réferrer vous au fichier <a href="../Thanks_MultiDec.txt"> MultiDec_ReadMe.txt</a> 
-        pour une liste de remerciements relatifs au projet sur lequel dTV s'est 
-        construit.</p>
-      <ol>
-        <li>Un grand merci à Mark Rejhon pour son algorithme de séquencement 3:2, 
-          son aide pour les tests, la promotion de dTV, et avant tout, son esprit 
-          perfectioniste !</li>
-        <li>Merci a Michael Samblanet pour son module de gestion des ratios d'image</li>
-        <li>Merci à Daniel Schmelzer pour son travail continuel sur le site web. 
-          Merci pour le logo ;-)</li>
-        <li>Merci à Steve Grimm pour son travail sur l'ancienne méthode de séquencement 
-          3:2</li>
-        <li>Merci à tous sur la mailing list de dévelopement de dTV</li>
-        <li>Merci à Borg, créateur de bTV, pour avoir écrit le premier programme 
-          de désentrelacement correct, et qui aura inspiré la forme actuelle du 
-          projet "désentrelacement".</li>
-        <li>Merci à Yvon Quéré (NDT; c'est moi :-) et à Ali pour avoir découvert 
-          et mis en valeur bTV et particulièrement à Yvon pour la création, et 
-          la mise à jour continuelle de la FAQ.</li>
-        <li>Merci à tous chez AVSForum pour les encouragements et l'aide apportée. 
-          Clairement le forum "home theater computers" est le meilleur forum sur 
-          internet !</li>
-        <li>Merci à Steaphan Greene, Øyvind Aabling, Octavian Purdila, Vladimir 
-          Dergachev and Christian Lupien (les developpeurs du "GATOS") pour le 
-          code de capture d'écran.</li>
-      </ol>
       <p> 
       <h1>Points généraux</h1>
       <p> 
-      <p>
-      <h2>Devrais je utiliser dTV pour désentrelacer l'image fournie par mon lecteur 
-        de dvd de salon ?</h2>
+      <p> 
+      <h2>Devrais je utiliser DScaler pour désentrelacer l'image fournie par mon 
+        lecteur de dvd de salon ?</h2>
       <p> Bien que celà soit faisable et fonctionne plutôt correctement (voir 
-        la section "dTV/Windvd challenge" sur la <a href="../screenshots/index.htm">page 
+        la section "DScaler/Windvd challenge" sur la <a href="/screenshots/index.htm">page 
         des captures d'écrans</a>), les pc home cinéma ont montré les meilleurs 
         résultats grâce à la combinaison des applications de lecteur des dvd, 
         d'un lecteur de dvd-rom, et d'une carte graphique récente.<br>
         Cependant, cette possibilité a souvent été utilisée à des fins de tests 
         (test de la qualité de capture sur une source de grande qualité, test 
-        des techniques de séquencement sur des sources correctement encodées etc..).
+        des techniques de séquencement sur des sources correctement encodées etc..). 
       <p> 
       <h1>Questions de soft</h1>
       <p> 
-      <h2>Sur quel système d'exploitation puis je utiliser dTV ?</h2>
-      <p> Windows 95 ok<br>
-        Windows 98 ok<br>
-        Windows NT ok <i>nécessite qu'un module VxD fonctionne au niveau du "ring-0" 
-        (partie bas niveau du noyau NT)</i><br>
-        Windows Me ok <i>testé avec une carte Hauppage 401 sans problèmes</i><br>
-        Windows 2000 ok<br>
-        Linux non<br>
+      <h2>Sur quel système d'exploitation puis je utiliser DScaler ?</h2>
+      <p> Windows 95 ok, driver VxD fonctionnant au niveau du &quot;ring-0&quot;, 
+        Internet Explorer probablement requis<br>
+        Windows 98 ok, driver VxD fonctionnant au niveau du &quot;ring-0&quot;<br>
+        Windows NT ?? besoin &eacute;ventuel d'une update de DirectX 5<br>
+        Windows Me ok, driver VxD fonctionnant au niveau du &quot;ring-0&quot;<br>
+        Windows 2000 ok, driver &quot;sys&quot; fonctionnant au niveau du &quot;ring-0&quot;<br>
+        Linux non, mais si vous voulez travailler au portage, <a href="#HELP">contactez 
+        nous</a><br>
         OS/2 definitivement non ;-) 
       <p> 
-      <h2>Lors d'une capture, dTV génère des fichiers ppm, kezako ?</h2>
-      <p> Il s'agit du format "Portable PixMap". En fait, le code de ce format 
-        était le seul dont John Adcock disposait au moment d'ajouter cette fonctionnalité 
-        à dTV ;-)<br>
-        Il est pris en compte par plusieurs applications. Parmi elles ; 
-      <ul>
-        <li>ACDSee 3 <a href="http://www.acdsystems.com/english/products/acdsee/index.htm">http://www.acdsystems.com/english/products/acdsee/index.htm</a> 
-        <li>Irfanview <a href="http://www.irfanview.com/english.htm">http://www.irfanview.com/english.htm</a> 
-        <li>Paint Shop Pro <a href="http://www.jasc.com/product.asp?pf%5Fid=001">http://www.jasc.com/product.asp?pf%5Fid=001</a> 
-      </ul>
-      <p> 
-      <h2>Puis je contrôler à distance dTV ? <b>OUI</b></h2>
-      <p> Absolument. dTV a été développé principalement par des personnes cherchant 
-        à l'utiliser pour désentrelacer les sources analogiques pour les utiliser 
-        sur un projecteur. Il va de soi qu'ils préferent utiliser dTV depuis leur 
-        télécommande, sur leur canapé, qu'assis à leur bureau.<br>
-        Dans ce but, dTV est rempli de <a href="../keyboard.htm">raccourcis claviers</a> 
+      <h2>Puis je contrôler à distance DScaler ? <b>OUI</b></h2>
+      <p> Absolument. DScaler a été développé principalement par des personnes 
+        cherchant à l'utiliser pour désentrelacer les sources analogiques pour 
+        les utiliser sur un projecteur. Il va de soi qu'ils préferent utiliser 
+        DScaler depuis leur télécommande, sur leur canapé, qu'assis à leur bureau.<br>
+        Dans ce but, DScaler est rempli de <a href="keyboard.htm">raccourcis claviers</a> 
         pour la plupart des opérations courantes afin de faciliter sa manipulation.<br>
-        Nous suggérons l'usage de <a href="http://www.stack.nl/~stilgar/windoze/girder.html">Girder</a> 
-        de Ron Bessems comme solution de choix pour contrôler à distance son ordinateur.
-      <p> <i>Un fichier d'export relatif à dTV sera bientôt disponible</i>
+        Nous suggérons l'usage de <a href="http://www.girder.nl">Girder</a> de 
+        Ron Bessems comme solution de choix pour contrôler à distance son ordinateur. 
       <p> 
       <h1>Questions de matériel</h1>
       <p> 
       <h2>Puis je utiliser n'importe quelle carte vga ?</h2>
-      <p> Malgré ce commentaire de Mark Rejhon ;
-      <p> <i>"dTV requires an AGP card. It is impossible to do on a PCI video 
-        card. dTV uses massive amounts of *bidirectional* bus bandwidth: 250 megabits 
-        per second incoming bandwidth (from TV card) and about 500 megabits per 
-        second outgoing bandwidth (to videocard). This bus data firehose is not 
-        feasible on PCI bus, as PCI can reliably continuously transfer up to about 
-        600-700 megabits per second *in one direction only* out of a possible 
-        1056 megabits per second (132 megabytes per second) due to overhead. Try 
-        to go bidirectional, and framerate literally gets the death penalty!"</i>
+      <p> Malgré ce commentaire de Mark Rejhon ; 
+      <p> <i>"DScaler requires an AGP card. It is impossible to do on a PCI video 
+        card. DScaler uses massive amounts of *bidirectional* bus bandwidth: 250 
+        megabits per second incoming bandwidth (from TV card) and about 500 megabits 
+        per second outgoing bandwidth (to videocard). This bus data firehose is 
+        not feasible on PCI bus, as PCI can reliably continuously transfer up 
+        to about 600-700 megabits per second *in one direction only* out of a 
+        possible 1056 megabits per second (132 megabytes per second) due to overhead. 
+        Try to go bidirectional, and framerate literally gets the death penalty!"</i> 
       <p> Malgré tout, l'expérience depuis quelques mois semble montrer que même 
         l'usage de cartes pci semble convenir sans pour autant induire de ralentissements.<br>
         Dans certains cas cependant, le taux de rafraîchissement chute au fur 
-        et à mesure que l'on grimpe en résolution ;
+        et à mesure que l'on grimpe en résolution ; 
       <p> IanD nous a dit <i>"I have an 8MB 3dfusion PCI on a BX mobo Celeron 
         566 64MB RAM 66MHz FSB, with Dynalink Magic TView (Conexant 878) and can 
-        only execute dTV at 16 bit colour depth. When running a 1024x768 desktop, 
-        dTV v1.9 with a 720x576 @ 50Hz PAL composite input gives 0 DFS in manual 
-        Video De-interlace mode for dTV window sizes up to 848x629 (as determined 
-        from dtv.ini) but 7+ DFS for window sizes even 1 pixel above either of 
-        these dimensions"</i>
-      <p> Conclusion ; pas de prérequis spécifiques pour dTV. Il fonctionne certainement 
-        correctement avec n'importe quelle carte. Cependant, au jour d'aujourd'hui, 
-        les cartes à base de GeForce ou les Matrox G400 (dualhead) sont utilisées 
-        avec succès par de nombreux utilisateurs.
-      <p> 
-      <a name="BESTCARD"></a>
+        only execute DScaler at 16 bit colour depth. When running a 1024x768 desktop, 
+        DScaler v1.9 with a 720x576 @ 50Hz PAL composite input gives 0 DFS in 
+        manual Video De-interlace mode for DScaler window sizes up to 848x629 
+        (as determined from DScaler.ini) but 7+ DFS for window sizes even 1 pixel 
+        above either of these dimensions"</i> 
+      <p> Conclusion ; pas de prérequis spécifiques pour DScaler. Il fonctionne 
+        certainement correctement avec n'importe quelle carte. Cependant, au jour 
+        d'aujourd'hui, les cartes à base de GeForce ou les Matrox G4x0 (dualhead) 
+        sont utilisées avec succès par de nombreux utilisateurs. 
+      <p> <a name="BESTCARD"></a> 
       <h2>Quelle carte de capture puis je utiliser ?</h2>
       <p> Pratiquement n'importe quelle carte (ce qui signifie BEAUCOUP de cartes) 
         basée sur un des chipset dévelopés par Conexant (précédemment Brooktree) 
         bt848/878/879. Pourquoi ceux ci ? Ils sont, depuis plusieurs années, parmi 
         les chipset les plus simples à programmer (énormément d'applications ont 
         été développées pour ceux ci) et les moins chers. Ce qui signifie qu'un 
-        grand nombre de sociétés ont fabriqué des cartes sur ce modèle.
+        grand nombre de sociétés ont fabriqué des cartes sur ce modèle. 
+      <p>Le son depuis le tuner ne fonctionne pas syst&eacute;matiquement, et 
+        le support de l'ensemble des combinaisons de cartes et de tuner n'est 
+        pas une priorit&eacute;.
       <p> Malgré le fait que nous sommes assez incapables de vous dire quelles 
         cartes sont les meilleures, voici une petite sélection de cartes qui sont 
-        utilisées avec succès par un certain nombre d'utilisateurs ;
+        utilisées avec succès par un certain nombre d'utilisateurs ; 
       <p> 
       <ul>
-        <li>Zoltrix Genie TV <a href="http://www.zoltix.com/products/GenieTVspecs.htm">http://www.zoltix.com/products/GenieTVspecs.htm</a> 
+        <li>Zoltrix Genie TV <a href="http://www.zoltrix-int.com/products/video/8MMZXGENIE.htm">http://www.zoltrix-int.com/products/video/8MMZXGENIE.htm</a>
         <li>The WinTV series from Hauppage <a href="http://www.hauppage.com/html/products.htm">http://www.hauppage.com/html/products.htm</a> 
         <li>Guillemot maxi video 3 <a href="http://fr.guillemot.com/brand/gamme/video/mtvvidp3/mtvvidpci3.html">http://fr.guillemot.com/brand/gamme/video/mtvvidp3/mtvvidpci3.html</a> 
         <li>The Pinacle Studio PCTV <a href="http://www.pinnaclesys.com/ProductPage.asp?Product_ID=6">http://www.pinnaclesys.com/ProductPage.asp?Product_ID=6</a> 
       </ul>
-      Jetez un oeil a la page des <a href="../card-support/index.htm">cartes supportées</a>. 
+      Jetez un oeil a la page des <a href="/card-support/index.htm">cartes supportées</a>. 
       Elle ne sera évidemment jamais complète alors n'hésitez pas à nous contacter 
-      pour nous faire part de votre expérience avec telle ou telle carte.
+      pour nous faire part de votre expérience avec telle ou telle carte. 
       <p> <i>cette liste est initialement basée sur celle associée au driver linux 
-        bttv sur lequel ce programme était originellement basé.</i>
+        bttv sur lequel ce programme était originellement basé.</i> 
       <p> 
       <h2>Puis je utiliser l'entrée video de la carte "X" ?</h2>
-      <p> Probablement non. dTV supporte (voir section précédente) les chipsets 
+      <p> Probablement non. DScaler supporte (voir section précédente) les chipsets 
         Brooktree/Conexant. Le fait de supporter d'autres chipsets, bien que faisable, 
         requiert beaucoup de travail et de solides connaissances de ceux ci. Et 
         malheureusement, <b>aucune carte récente avec une entrée vidéo n'utilise 
         les chipsets Brooktree/Conexant</b>. Ce qui signifie que les cartes Matrox, 
-        Asus Deluxe etc.. ne sont pas supportées.
+        Asus Deluxe etc.. ne sont pas supportées. 
       <p> 
       <h2>Puis je utiliser plus d'une entrée video à la fois ?</h2>
       <p> Certaines personnes un peu "farfelues" (elle l'admettent elles-mêmes 
         :-) qui utilise la fonction "image dans l'image" de certains téléviseurs, 
-        ont posé la question suivante ; est ce que dTV est capable de gérer de 
-        multiples cartes ou de multiples entrées vidéo ?<br>
-        Une carte permettant, au minimum, 4 entrées vidéo est fabriquée par Leadtek. 
-        Il s'agit de la <a href="http://www.leadtek.com.tw/ewv605.htm">Winview 
-        605</a>.
+        ont posé la question suivante ; est ce que DScaler est capable de gérer 
+        de multiples cartes ou de multiples entrées vidéo ?<br>
+        Une carte permettant, au minimum, 4 entrées vidéo &eacute;tait fabriquée 
+        par Leadtek. Il s'agissait de la Winview 605. 
       <p> Elle est basée sur le bon chipset, il est donc possible qu'elle fonctionne 
-        avec dTV, mais rien n'a été tenté au jour d'aujourd'hui pour traiter plusieurs 
-        entrées vidéo simultanément.
-      <p> Jetez un oeil sur l'article suivant sur <a href="http://www.avsforum.com/ubb/Forum12/HTML/004431.html">AVS 
-        Forum</a>.
-      <p> 
-      <a name="TROUBLE"></a>
+        avec DScaler, mais rien n'a été tenté au jour d'aujourd'hui pour traiter 
+        plusieurs entrées vidéo simultanément. 
+      <p> Jetez un oeil sur l'article suivant sur <a href="http://www.avsforum.com/ubb/Archives/Archive-000004/HTML/20010323-12-004431.html">AVS 
+        Forum</a>. 
+      <p> <a name="TROUBLE"></a> 
       <h1>Problèmes ?</h1>
-      <p> 
-      <a name="PURPLESTRIPES"></a>
+      <p> <a name="PURPLESTRIPES"></a> 
       <h2>En quoi consiste ce problème des lignes roses/violettes ?</h2>
       <p> Lorsque l'on utilise certaines sources analogiques avec certaines cartes 
-        et dTV, il apparaît de nombreuses lignes horizontales roses sur l'image.
-      <p> <a href="../images/Mummy_MacrovisionOn.jpg">Cette image</a> contient un 
-        signal macrovision. La même séquence vidéo <a href="../images/Mummy_MacrovisionOff.jpg">sans 
-        la protection macrovision</a> ne contient aucune ligne.
+        et DScaler, il apparaît de nombreuses lignes horizontales roses sur l'image. 
+      <p> <a href="../images/Mummy_MacrovisionOn.jpg">Cette image</a> contient 
+        un signal macrovision. La même séquence vidéo <a href="../images/Mummy_MacrovisionOff.jpg">sans 
+        la protection macrovision</a> ne contient aucune ligne. 
       <p> Ce phénomène semble être, au moins, <b>plus visible en présence d'un 
         signal vidéo protégé par macrovision</b> mais le phénomène a été vu (bien 
-        que moins prononcé) sur des sources non protégées.
+        que moins prononcé) sur des sources non protégées. 
       <p> D'autres exemples de ce phénomène sont disponibles dans les articles 
         suivantes ;<br>
-        <a href="http://www.avsforum.com/ubb/Forum12/HTML/004317.html">avs:MacroVision 
+        <a href="http://www.avsforum.com/ubb/Archives/Archive-000004/HTML/20010323-12-004317.html">avs:MacroVision 
         side effect</a><br>
-        <a href="http://www.avsforum.com/ubb/Forum12/HTML/004436.html">avs:dTV 
-        Purple Stripes - is this capture card dependent?</a>
+        <a href="http://www.avsforum.com/ubb/Forum12/HTML/004436.html">avs:DScaler 
+        Purple Stripes - is this capture card dependent?</a> 
       <p> Un extrait de la <a href="http://www.dvddemystified.com/dvdfaq.html">Faq 
-        du dvd</a> ;
+        du dvd</a> ; 
       <p> <i>"Macrovision adds a rapidly modulated colorburst signal ("Colorstripe") 
         along with pulses in the vertical blanking signal ("AGC") to the composite 
         video and s-video outputs. This confuses the synchronization and automatic-recording-level 
         circuitry in 95% of consumer VCRs. Unfortunately, it can degrade the picture, 
         especially with old or nonstandard equipment. Macrovision may show up 
         as stripes of color, distortion, rolling, black & white picture, and dark/light 
-        cycling. Macrovision creates problems for many line doublers."</i>
+        cycling. Macrovision creates problems for many line doublers."</i> 
       <p> <b>ATTENTION</b> En pratique, ce problème n'a été observé uniquement 
         lors du branchement, à des fins de tests, d'un lecteur de dvd de salon 
         à l'ordinateur. Il n'est pas démontré que le problème se pose également 
         avec d'autres types de sources. Dans la plupart des cas, vous n'avez donc 
-        pas à vous en soucier
+        pas à vous en soucier 
       <p> 
-      <h2>Malgré une machine très puissante, dTV semble ne pas parvenir à tenir 
-        le rhytme</h2>
+      <h2>DScaler semble ne pas parvenir à tenir le rhytme (DFS &gt; 0)</h2>
       <p></p>
       Certaines personnes ont observés des trames perdues (NDT ; l'indicateur 
       DFS, Dropped Frames per Second en bas à droite de la barre de status) (ce 
       qui est généralement le signe d'une machine qui n'arrive pas à tenir la 
-      charge imposé par dTV) sur des systèmes pourtant très puissants. Une hypothèse 
-      suggère des problèmes de vitesse du bus agp sur certaines cartes mères.
+      charge imposé par DScaler) sur des systèmes pourtant très puissants. Une 
+      hypothèse suggère des problèmes de vitesse du bus agp sur certaines cartes 
+      mères. 
       <p> JackB nous dit à ce sujet <i>"We looked at his BIOS settings and the 
         only major difference is that his had a 4X AGP mode and my MB only has 
         a 2X AGP mode <snip>We put my video card, a GeForce2 MX, in his(slower 
         supposedly)system and it ran 0 DFS. So it's not the MX throughput that's 
         the problem. So, I'm down to it's my motherboard not being up to speed 
-        in either AGP acceleration or I have some settings set incorrectly"</i>
-      <p> 
-      <a name="OVERLAY"></a>
+        in either AGP acceleration or I have some settings set incorrectly"</i> 
+      <p> <a name="OVERLAY"></a> 
       <h2>J'ai une erreur "overlay update"</h2>
       <p> Parfois, on obtient ce genre de message d'erreur 
-      <p><code>Error calling overlay update. D:/source/deinterlace/dtv/other.c 
-        at line 161</code>
+      <p><code>Error calling overlay update. D:/source/deinterlace/DScaler/other.c 
+        at line 161</code> 
       <p> Nous n'avons malheureusement pas d'explication valable à ce problème 
         mais il apparaît généralement lorsqu'on modifie la taille de la fenêtre 
-        de dTV, ou lorsqu'on le fait passer du mode fenêtre au mode plein écran. 
-        Le nombre de couleurs, la fréquence de rafraîchissement ainsi que la taille 
-        du bureau Windows ont peut être une influence sur ce problème. <br>
-        Malgré tout, suite à de nombreux changements à plusieurs endroits, le 
-        problème semble ne plus se produire depuis la version 2.0.0
-      <p> Plus d'infos sur le sujet dans <a href="http://www.avsforum.com/ubb/Forum12/HTML/004895.html">cet 
-        article</a> d'AVS Forum.
-      <p> 
-      <a name="HELP"></a>
+        de DScaler, ou lorsqu'on le fait passer du mode fenêtre au mode plein 
+        écran. Le nombre de couleurs, la fréquence de rafraîchissement ainsi que 
+        la taille du bureau Windows ont peut être une influence sur ce problème. 
+        <br>
+      <p><a name="HELP"></a> 
       <h1>Comment puis je contribuer ?</h1>
       <p> 
       <h2>En testant</h2>
-      <p> De plus en plus de gens essaye dTV, pourquoi pas vous ?<br>
+      <p> De plus en plus de gens essaye DScaler, pourquoi pas vous ?<br>
         Nous aimerions connaître vos impressions et les commentaires que vous 
         avez sur son utilisation. Pourquoi quelque chose fonctionne de cette manière 
         ? Quelle nouvelle fonctionnalité aimeriez vous voir apparaître etc... 
-        Chaque information qui nous revient est utile.
-      <p> Jetez un oeil, avant de reporter un problème, à la liste actuelle des
-      <a href="http://sourceforge.net/mail/?group_id=7420">mailing 
-        list</a>. Rappelez dans votre correspondance 
-        quel matériel vous utilisez.
+        Chaque information qui nous revient est utile. 
+      <p> Jetez un oeil, avant de reporter un problème, à la liste actuelle des 
+        <a href="http://sourceforge.net/mail/?group_id=7420">mailing list</a>. 
+        Rappelez dans votre correspondance quel matériel vous utilisez. 
       <p> 
       <h2>En développant</h2>
       <p> Toute aide est bienvenue. Malgré la présence de partie complexes, il 
         y a un grand nombre de fonctionnalités qui peuvent être facilement implémentées 
-        sans avoir besoin de connaître tous les secrets du séquencement 3:2.
+        sans avoir besoin de connaître tous les secrets du séquencement 3:2. 
       <p> Si vous avez une idée, ou si vous voulez essayer d'implémenter quelque 
         chose qui se trouve déjà dans la <a href="../Todo.htm">liste des choses 
         à faire</a>,prenez contact avec les auteurs et rejoignez la <a href="http://sourceforge.net/mail/?group_id=7420">mailing 
-        list</a> de développement de dTV.
+        list</a> de développement de DScaler. Toutes les informations sur la <a href="developers.htm">page 
+        des d&eacute;veloppeurs</a>.
       <p> 
       <!-- #EndEditable --></td>
   </tr>
