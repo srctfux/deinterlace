@@ -34,8 +34,8 @@
 	{
 		// We'll be using a couple registers that have meaning in the C code, so
 		// save them.
-		mov dword ptr[OldSI], esi
-		mov dword ptr[OldSP], esp
+		mov OldSI, esi
+		mov OldSP, esp
 
 		// Figure out what to do with the scanline above the one we just copied.
 		// See above for a description of the algorithm.
@@ -179,8 +179,8 @@ MAINLOOP_LABEL:
 
 		emms
 
-		mov esi, dword ptr[OldSI]
-		mov esp, dword ptr[OldSP]
+		mov esi, OldSI
+		mov esp, OldSP
 	}
 
 #undef MAINLOOP_LABEL

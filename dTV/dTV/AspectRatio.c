@@ -68,11 +68,11 @@ extern void ShowText(HWND hWnd, LPCTSTR szText);
 // Use aspect * 1000 (1.66 = 1660, 2.35 = 2350, etc)
 // Use negative values for source_aspect to imply anamorphic sources
 // Note: target_aspect is the aspect ratio of the screen.
-int source_aspect = 0;
+int source_aspect = 1333;
 int target_aspect = 0;
 
 // Mode 0 = do nothing, 1 = Letterboxed, 2 = 16:9 anamorphic
-int aspect_mode = 0;
+int aspect_mode = 1;
 
 int custom_source_aspect = 0;
 int custom_target_aspect = 0;
@@ -1081,7 +1081,7 @@ SETTING AspectSettings[ASPECT_SETTING_LASTONE] =
 	},
 	{
 		"Source Aspect", NUMBER, 0, &source_aspect,
-		0, 0, 4000, 100, NULL,
+		1333, 0, 4000, 100, NULL,
 		"ASPECT", "SourceAspect", Aspect_OnChange,
 	},
 	{
@@ -1101,7 +1101,7 @@ SETTING AspectSettings[ASPECT_SETTING_LASTONE] =
 	},
 	{
 		"Aspect Mode", NUMBER, 0, &aspect_mode,
-		0, 0, 2, 1, NULL,
+		1, 0, 2, 1, NULL,
 		"ASPECT", "Mode", Aspect_OnChange,
 	},
 	{

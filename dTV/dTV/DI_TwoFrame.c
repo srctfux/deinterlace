@@ -84,8 +84,8 @@ BOOL DeinterlaceFieldTwoFrame(DEINTERLACE_INFO *info)
 	short* OVal0;
 	short* OVal1;
 	short* OVal2;
-	BYTE* OldSI;
-	BYTE* OldSP;
+	DWORD OldSI;
+	DWORD OldSP;
 	BYTE* Dest;
 	DWORD LineLength = info->LineLength;
 
@@ -110,10 +110,12 @@ BOOL DeinterlaceFieldTwoFrame(DEINTERLACE_INFO *info)
 	qwTemporalTolerance += (qwTemporalTolerance << 48) + (qwTemporalTolerance << 32) + (qwTemporalTolerance << 16);
 
 	// copy first even line no matter what, and the first odd line if we're
-	// processing an even field.
+	// processing an odd field.
 	memcpyMMX(info->Overlay, info->EvenLines[0][0], info->LineLength);
-	if (! info->IsOdd)
+	if (info->IsOdd)
+	{
 		memcpyMMX(info->Overlay + info->OverlayPitch, info->OddLines[0][0], info->LineLength);
+	}
 
 	for (Line = 0; Line < info->FieldHeight - 1; ++Line)
 	{
@@ -165,8 +167,8 @@ BOOL DeinterlaceFieldTwoFrame(DEINTERLACE_INFO *info)
 		}
 	}
 
-	// Copy last odd line if we're processing an odd field.
-	if (info->IsOdd)
+	// Copy last odd line if we're processing an even field.
+	if (!info->IsOdd)
 	{
 		memcpyMMX(info->Overlay + (info->FrameHeight - 1) * info->OverlayPitch,
 				  info->OddLines[info->FieldHeight - 1],

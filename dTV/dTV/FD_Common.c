@@ -73,7 +73,7 @@ long DiffThreshold = 224;
 long GetCombFactor(DEINTERLACE_INFO *pInfo)
 {
 	int Line;
-	long LineFactor;
+	DWORD LineFactor;
 	long CombFactor = 0;
 	short* YVal1;
 	short* YVal2;
@@ -174,7 +174,7 @@ Next8Bytes:
 			psrlq mm0,32
 			movd ecx, mm0
 			add ecx, eax
-			mov dword ptr[LineFactor], ecx
+			mov LineFactor, ecx
 			emms
 		}
 		CombFactor += (LineFactor & 0xFFFF);
@@ -202,7 +202,7 @@ Next8Bytes:
 long CompareFields(DEINTERLACE_INFO *pInfo)
 {
 	int Line;
-	long LineFactor;
+	DWORD LineFactor;
 	long DiffFactor = 0;
 	short* YVal1;
 	short* YVal2;
@@ -266,7 +266,7 @@ Next8Bytes:
 			psrlq mm0,32
 			movd ecx, mm0
 			add ecx, eax
-			mov dword ptr[LineFactor], ecx
+			mov LineFactor, ecx
 			emms
 		}
 		DiffFactor += (long)sqrt(LineFactor);

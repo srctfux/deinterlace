@@ -480,21 +480,24 @@ PHYS RiscLogToPhys(DWORD * pLog)
 	return (RiscBasePhysical + (pLog - RiscBaseLinear) * 4);
 }
 
+// JA 17012001 Updated to do exactly what it says in the bt848 docs
 void BT848_SetPLL(PLLFREQ PLL)
 {
-	int i;
+	int i = 6;
+
+	// reset the TGCKI bits
+	BT848_MaskDataByte(BT848_TGCTRL, BT848_TGCTRL_TGCKI_NOPLL, 0x18);
 
 	switch(PLL)
 	{
 	case PLL_NONE:
-		BT848_WriteByte(BT848_TGCTRL, BT848_TGCTRL_TGCKI_NOPLL);
 		BT848_WriteByte(BT848_PLL_XCI, 0x00);
 		return;
 		break;
 	case PLL_28:
 		BT848_WriteByte(BT848_PLL_F_LO, 0xf9);
 		BT848_WriteByte(BT848_PLL_F_HI, 0xdc);
-		BT848_WriteByte(BT848_PLL_XCI, 0x8E);
+		BT848_WriteByte(BT848_PLL_XCI, 0x8e);
 		break;
 	case PLL_35:
 		BT848_WriteByte(BT848_PLL_F_LO, 0x39);
@@ -503,19 +506,15 @@ void BT848_SetPLL(PLLFREQ PLL)
 		break;
 	}
 
-	for (i = 0; i < 100; i++)
+	// wait for the PLL to lock
+	while(i-- > 0 && BT848_ReadByte(BT848_DSTATUS) & BT848_DSTATUS_PLOCK)
 	{
-		if (BT848_ReadByte(BT848_DSTATUS) & BT848_DSTATUS_CSEL)
-		{
-			BT848_WriteByte(BT848_DSTATUS, 0x00);
-		}
-		else
-		{
-			BT848_WriteByte(BT848_TGCTRL, BT848_TGCTRL_TGCKI_PLL);
-			break;
-		}
-		Sleep(10);
+		BT848_WriteByte(BT848_DSTATUS, 0x00);
+		Sleep(100);
 	}
+
+	// Set the TGCKI bits to use PLL rather than xtal
+	BT848_MaskDataByte(BT848_TGCTRL, BT848_TGCTRL_TGCKI_PLL, 0x18);
 
 	BT848_WhiteCrush_OnChange(0);
 	BT848_WriteByte(BT848_VTOTAL_LO, 0x00);
@@ -695,11 +694,13 @@ BOOL BT848_Registers_OnChange(long IgnoreCompletely)
 {
 	BYTE bNewValue;
 
+	// use mask here as we don't want to disturb the s-video stuff
 	bNewValue =  BtEvenLumaDec?BT848_CONTROL_LDEC:0;
-	BT848_WriteByte(BT848_E_CONTROL, bNewValue);
+	BT848_MaskDataByte(BT848_E_CONTROL, bNewValue, BT848_CONTROL_LDEC);
 
+	// use mask here as we don't want to disturb the s-video stuff
 	bNewValue =  BtOddLumaDec?BT848_CONTROL_LDEC:0;
-	BT848_WriteByte(BT848_O_CONTROL, bNewValue);
+	BT848_MaskDataByte(BT848_O_CONTROL, bNewValue, BT848_CONTROL_LDEC);
 
 	bNewValue =  BtEvenChromaAGC?BT848_SCLOOP_CAGC:0;
 	bNewValue |= BtEvenLumaPeak?BT848_SCLOOP_LUMA_PEAK:0;

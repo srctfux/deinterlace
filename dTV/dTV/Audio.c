@@ -167,13 +167,13 @@ BOOL Audio_SetSource(AUDIOMUXTYPE nChannel)
 	BT848_AndOrDataDword(BT848_GPIO_OUT_EN, TVCards[CardType].GPIOMask, ~TVCards[CardType].GPIOMask);
 
 	i = 0;
-	while ((i < 20) && (!(BT848_ReadByte(BT848_DSTATUS) & BT848_DSTATUS_HLOC)))
+	while ((i < 20) && (!(BT848_ReadByte(BT848_DSTATUS) & BT848_DSTATUS_PRES)))
 	{
 		i++;
 		Sleep(50);
 	}
 	/* if audio mute or not in H-lock, turn audio off */
-	if ((nChannel != AUDIOMUX_RADIO) && !(BT848_ReadByte(BT848_DSTATUS) & BT848_DSTATUS_HLOC))
+	if ((nChannel != AUDIOMUX_RADIO) && !(BT848_ReadByte(BT848_DSTATUS) & BT848_DSTATUS_PRES))
 	{
 		MuxSelect = TVCards[CardType].AudioMuxSelect[AUDIOMUX_MUTE];
 	}

@@ -374,263 +374,274 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 
 	BOOL bIsPAL = TVSettings[TVTYPE].Is25fps;
 
-	RefreshRate = GetRefreshRate();
-
-	if (lpDDOverlay == NULL || lpDDOverlayBack == NULL)
+	// catch anything fatal in this loop so we don't crash the machine
+	__try
 	{
-		ExitThread(-1);
-	}
+		RefreshRate = GetRefreshRate();
 
-	// Sets processor Affinity and Thread priority according to menu selection
-	SetThreadProcessorAndPriority();
-
-	// Set up 5 sets of pointers to the start of odd and even lines
-	for (j = 0; j < 5; j++)
-	{
-		for (i = 0; i < CurrentY; i += 2)
+		if (lpDDOverlay == NULL || lpDDOverlayBack == NULL)
 		{
-			ppOddLines[j][i / 2] = (short *) pDisplay[j] + (i + 1) * 1024;
-			ppEvenLines[j][i / 2] = (short *) pDisplay[j] + i * 1024;
+			ExitThread(-1);
 		}
-	}
 
-	PrevPulldownMode = gPulldownMode;
+		// Sets processor Affinity and Thread priority according to menu selection
+		SetThreadProcessorAndPriority();
 
-	// reset the static variables in the detection code
-	if (bIsPAL)
-		UpdatePALPulldownMode(NULL);
-	else
-		UpdateNTSCPulldownMode(NULL);
-
-	memset(&info, 0, sizeof(info));
-
-	// display the current pulldown mode
-	UpdatePulldownStatus();
-	
-	// start the capture off
-	BT848_Restart_RISC_Code();
-
-	dwLastSecondTicks = GetTickCount();
-	while(!bStopThread)
-	{
-		info.IsOdd = WaitForNextField(info.IsOdd);
-		if(bIsPaused == FALSE)
+		// Set up 5 sets of pointers to the start of odd and even lines
+		for (j = 0; j < 5; j++)
 		{
-			info.CurrentFrame = CurrentFrame;
-			info.OverlayPitch = OverlayPitch;
-			info.LineLength = CurrentX * 2;
-			info.FrameWidth = CurrentX;
-			info.FrameHeight = CurrentY;
-			info.FieldHeight = CurrentY / 2;
-			info.CombFactor = -1;
-			info.FieldDiff = -1;
-
-			bMissedFrame = FALSE;
-			bFlipNow = FALSE;
-
-			if(info.IsOdd)
+			for (i = 0; i < CurrentY; i += 2)
 			{
-				memmove(&info.OddLines[1], &info.OddLines[0], sizeof(info.OddLines) - sizeof(info.OddLines[0]));
-				info.OddLines[0] = ppOddLines[CurrentFrame];
-				LastOddFrame = CurrentFrame;
+				ppOddLines[j][i / 2] = (short *) pDisplay[j] + (i + 1) * 1024;
+				ppEvenLines[j][i / 2] = (short *) pDisplay[j] + i * 1024;
+			}
+		}
 
-				// If we skipped the previous field, note the missing field in the deinterlace
-				// info structure and force this field to be bobbed.
-				if (LastEvenFrame != CurrentFrame)
+		PrevPulldownMode = gPulldownMode;
+
+		// reset the static variables in the detection code
+		if (bIsPAL)
+			UpdatePALPulldownMode(NULL);
+		else
+			UpdateNTSCPulldownMode(NULL);
+
+		memset(&info, 0, sizeof(info));
+
+		// display the current pulldown mode
+		UpdatePulldownStatus();
+		
+		// start the capture off
+		BT848_Restart_RISC_Code();
+
+		dwLastSecondTicks = GetTickCount();
+		while(!bStopThread)
+		{
+			info.IsOdd = WaitForNextField(info.IsOdd);
+			if(bIsPaused == FALSE)
+			{
+				info.CurrentFrame = CurrentFrame;
+				info.OverlayPitch = OverlayPitch;
+				info.LineLength = CurrentX * 2;
+				info.FrameWidth = CurrentX;
+				info.FrameHeight = CurrentY;
+				info.FieldHeight = CurrentY / 2;
+				info.CombFactor = -1;
+				info.FieldDiff = -1;
+
+				bMissedFrame = FALSE;
+				bFlipNow = FALSE;
+
+				if(info.IsOdd)
 				{
-					// in film mode in the 60Hz mode
-					// we might wait quite a long time after doing a flip
-					// on the 2 field part of the 3:2 pulldown
-					// we might then get a single frame behind
-					// we need to cope with this so we fill the info struct properly
-					// rather than dropping a frame
-					if(DoAccurateFlips && DeintMethods[gPulldownMode].bIsFilmMode && !bIsPAL &&
-						(LastEvenFrame + 1) % 5 == CurrentFrame)
+					memmove(&info.OddLines[1], &info.OddLines[0], sizeof(info.OddLines) - sizeof(info.OddLines[0]));
+					info.OddLines[0] = ppOddLines[CurrentFrame];
+					LastOddFrame = CurrentFrame;
+
+					// If we skipped the previous field, note the missing field in the deinterlace
+					// info structure and force this field to be bobbed.
+					if (LastEvenFrame != CurrentFrame)
 					{
-						memmove(&info.EvenLines[1], &info.EvenLines[0], sizeof(info.EvenLines) - sizeof(info.EvenLines[0]));
-						info.EvenLines[0] = ppEvenLines[CurrentFrame];
-						LastEvenFrame = CurrentFrame;
-					}
-					else
-					{
-						memmove(&info.EvenLines[1], &info.EvenLines[0], sizeof(info.EvenLines) - sizeof(info.EvenLines[0]));
-						info.EvenLines[0] = NULL;
-						bMissedFrame = TRUE;
-						nFrame++;
-					}
-				}
-			}
-			else
-			{
-				memmove(&info.EvenLines[1], &info.EvenLines[0], sizeof(info.EvenLines) - sizeof(info.EvenLines[0]));
-				info.EvenLines[0] = ppEvenLines[CurrentFrame];
-				LastEvenFrame = CurrentFrame;
-
-				// If we skipped the previous field, note the missing field in the deinterlace
-				// info structure and force this field to be bobbed.
-				if(LastOddFrame != ((CurrentFrame + 4) % 5))
-				{
-					// in film mode in the 60Hz mode
-					// we might wait quite a long time after doing a flip
-					// on the 2 field part of the 3:2 pulldown
-					// we might then get a single frame behind
-					// we need to cope with this so we fill the info struct properly
-					// rather than dropping a frame
-					if(DoAccurateFlips && DeintMethods[gPulldownMode].bIsFilmMode && !bIsPAL &&
-						(LastOddFrame + 2) % 5 == CurrentFrame)
-					{
-						memmove(&info.OddLines[1], &info.OddLines[0], sizeof(info.OddLines) - sizeof(info.OddLines[0]));
-						info.OddLines[0] = ppOddLines[((CurrentFrame + 4) % 5)];
-						LastOddFrame = CurrentFrame;
-					}
-					else
-					{
-						memmove(&info.OddLines[1], &info.OddLines[0], sizeof(info.OddLines) - sizeof(info.OddLines[0]));
-						info.OddLines[0] = NULL;
-						bMissedFrame = TRUE;
-						nFrame++;
-					}
-				}
-			}
-			// update the source area
-			GetSourceRect(&info.SourceRect);
-
-			if(!bMissedFrame)
-			{
-				if(bAutoDetectMode == TRUE && bIsPAL)
-				{
-					UpdatePALPulldownMode(&info);
-				}
-
-				if(bAutoDetectMode == TRUE && !bIsPAL)
-				{
-					UpdateNTSCPulldownMode(&info);
-				}
-			}
-
-			if (!RunningLate && Capture_VBI == TRUE)
-			{
-				BYTE * pVBI = (LPBYTE) pVBILines[CurrentFrame];
-				if (info.IsOdd)
-				{
-					pVBI += CurrentVBILines * 2048;
-				}
-				for (nLineTarget = 0; nLineTarget < CurrentVBILines ; nLineTarget++)
-				{
-					VBI_DecodeLine(pVBI + nLineTarget * 2048, nLineTarget);
-				}
-			}
-
-			if (!RunningLate)
-			{
-				pDest = LockOverlay();	// Ready to access screen, Lock back buffer berfore accessing
-										// can't do this until after Lock Call
-				info.Overlay = pDest;
-
-				NoiseFilter_Temporal(&info);
-			}
-
-			if (RunningLate)
-			{
-				;     // do nothing
-			}
-			// if we have dropped a field then do BOB 
-			// if we are doing a half height mode then just do that
-			// anyway as it will be just as fast
-			else if(bMissedFrame && !DeintMethods[gPulldownMode].bIsHalfHeight)
-			{
-				bFlipNow = Bob(&info);
-			}
-			// When we first detect film mode we will be on the right flip mode in PAL
-			// and at the end of a three series in NTSC this will be the starting point for
-			// our 2.5 field timings
-			else if(PrevPulldownMode != gPulldownMode && DeintMethods[gPulldownMode].bIsFilmMode)
-			{
-				bFlipNow = Weave(&info);
-			}
-			else
-			{
-				bFlipNow = DeintMethods[gPulldownMode].pfnAlgorithm(&info);
-			}
-			
-			AdjustAspectRatio(ppEvenLines[LastEvenFrame], ppOddLines[LastOddFrame]);
-
-			// somewhere above we will have locked the buffer, unlock before flip
-			if (!RunningLate)
-			{
-				ddrval = IDirectDrawSurface_Unlock(lpDDOverlayBack, NULL);
-
-				if (bFlipNow)
-				{
-					// Need to wait for a good time to flip
-					// only if we have been in the same mode for at least one flip
-					if(DoAccurateFlips && PrevPulldownMode == gPulldownMode && RefreshRate > 0)
-					{
-						DWORD FlipsToWait;
-						// work out the minimum number of flips to
-						// display each screen for
-						if(bIsPAL)
+						// in film mode in the 60Hz mode
+						// we might wait quite a long time after doing a flip
+						// on the 2 field part of the 3:2 pulldown
+						// we might then get a single frame behind
+						// we need to cope with this so we fill the info struct properly
+						// rather than dropping a frame
+						if(DoAccurateFlips && DeintMethods[gPulldownMode].bIsFilmMode && !bIsPAL &&
+							(LastEvenFrame + 1) % 5 == CurrentFrame)
 						{
-							FlipsToWait = RefreshRate / DeintMethods[gPulldownMode].FrameRate50Hz;
+							memmove(&info.EvenLines[1], &info.EvenLines[0], sizeof(info.EvenLines) - sizeof(info.EvenLines[0]));
+							info.EvenLines[0] = ppEvenLines[CurrentFrame];
+							LastEvenFrame = CurrentFrame;
 						}
 						else
 						{
-							FlipsToWait = RefreshRate / DeintMethods[gPulldownMode].FrameRate60Hz;
+							memmove(&info.EvenLines[1], &info.EvenLines[0], sizeof(info.EvenLines) - sizeof(info.EvenLines[0]));
+							info.EvenLines[0] = NULL;
+							bMissedFrame = TRUE;
+							nFrame++;
 						}
-						// wait for the flip
-						// (1000 / Refresh rate is time between each flip
-						// the - 3 is just some margin for error and should
-						// give us enough time to get to the flip call
-						while((GetTickCount() - FlipTicks) < (1000 / RefreshRate) * FlipsToWait - 3);
 					}
+				}
+				else
+				{
+					memmove(&info.EvenLines[1], &info.EvenLines[0], sizeof(info.EvenLines) - sizeof(info.EvenLines[0]));
+					info.EvenLines[0] = ppEvenLines[CurrentFrame];
+					LastEvenFrame = CurrentFrame;
 
-					// setup flip flag
-					// the odd and even flags may help the scaled bob
-					// on some cards
-					FlipFlag = (Wait_For_Flip)?DDFLIP_WAIT:DDFLIP_DONOTWAIT;
-					if(gPulldownMode == SCALER_BOB)
+					// If we skipped the previous field, note the missing field in the deinterlace
+					// info structure and force this field to be bobbed.
+					if(LastOddFrame != ((CurrentFrame + 4) % 5))
 					{
-						FlipFlag |= (info.IsOdd)?DDFLIP_ODD:DDFLIP_EVEN;
+						// in film mode in the 60Hz mode
+						// we might wait quite a long time after doing a flip
+						// on the 2 field part of the 3:2 pulldown
+						// we might then get a single frame behind
+						// we need to cope with this so we fill the info struct properly
+						// rather than dropping a frame
+						if(DoAccurateFlips && DeintMethods[gPulldownMode].bIsFilmMode && !bIsPAL &&
+							(LastOddFrame + 2) % 5 == CurrentFrame)
+						{
+							memmove(&info.OddLines[1], &info.OddLines[0], sizeof(info.OddLines) - sizeof(info.OddLines[0]));
+							info.OddLines[0] = ppOddLines[((CurrentFrame + 4) % 5)];
+							LastOddFrame = CurrentFrame;
+						}
+						else
+						{
+							memmove(&info.OddLines[1], &info.OddLines[0], sizeof(info.OddLines) - sizeof(info.OddLines[0]));
+							info.OddLines[0] = NULL;
+							bMissedFrame = TRUE;
+							nFrame++;
+						}
 					}
-					FlipResult = IDirectDrawSurface_Flip(lpDDOverlay, NULL, FlipFlag); 
+				}
+				// update the source area
+				GetSourceRect(&info.SourceRect);
 
-					// save the time of the last flip
-					FlipTicks = GetTickCount();
+				if(!bMissedFrame)
+				{
+					if(bAutoDetectMode == TRUE && bIsPAL)
+					{
+						UpdatePALPulldownMode(&info);
+					}
+
+					if(bAutoDetectMode == TRUE && !bIsPAL)
+					{
+						UpdateNTSCPulldownMode(&info);
+					}
+				}
+
+				if (!RunningLate && Capture_VBI == TRUE)
+				{
+					BYTE * pVBI = (LPBYTE) pVBILines[CurrentFrame];
+					if (info.IsOdd)
+					{
+						pVBI += CurrentVBILines * 2048;
+					}
+					for (nLineTarget = 0; nLineTarget < CurrentVBILines ; nLineTarget++)
+					{
+						VBI_DecodeLine(pVBI + nLineTarget * 2048, nLineTarget);
+					}
+				}
+
+				if (!RunningLate)
+				{
+					pDest = LockOverlay();	// Ready to access screen, Lock back buffer berfore accessing
+											// can't do this until after Lock Call
+					info.Overlay = pDest;
+
+					NoiseFilter_Temporal(&info);
+				}
+
+				if (RunningLate)
+				{
+					;     // do nothing
+				}
+				// if we have dropped a field then do BOB 
+				// if we are doing a half height mode then just do that
+				// anyway as it will be just as fast
+				else if(bMissedFrame && !DeintMethods[gPulldownMode].bIsHalfHeight)
+				{
+					bFlipNow = Bob(&info);
+				}
+				// When we first detect film mode we will be on the right flip mode in PAL
+				// and at the end of a three series in NTSC this will be the starting point for
+				// our 2.5 field timings
+				else if(PrevPulldownMode != gPulldownMode && DeintMethods[gPulldownMode].bIsFilmMode)
+				{
+					bFlipNow = Weave(&info);
+				}
+				else
+				{
+					bFlipNow = DeintMethods[gPulldownMode].pfnAlgorithm(&info);
+				}
+				
+				AdjustAspectRatio(ppEvenLines[LastEvenFrame], ppOddLines[LastOddFrame]);
+
+				// somewhere above we will have locked the buffer, unlock before flip
+				if (!RunningLate)
+				{
+					ddrval = IDirectDrawSurface_Unlock(lpDDOverlayBack, NULL);
+
+					if (bFlipNow)
+					{
+						// Need to wait for a good time to flip
+						// only if we have been in the same mode for at least one flip
+						if(DoAccurateFlips && PrevPulldownMode == gPulldownMode && RefreshRate > 0)
+						{
+							DWORD FlipsToWait;
+							// work out the minimum number of flips to
+							// display each screen for
+							if(bIsPAL)
+							{
+								FlipsToWait = RefreshRate / DeintMethods[gPulldownMode].FrameRate50Hz;
+							}
+							else
+							{
+								FlipsToWait = RefreshRate / DeintMethods[gPulldownMode].FrameRate60Hz;
+							}
+							// wait for the flip
+							// (1000 / Refresh rate is time between each flip
+							// the - 3 is just some margin for error and should
+							// give us enough time to get to the flip call
+							while((GetTickCount() - FlipTicks) < (1000 / RefreshRate) * FlipsToWait - 3);
+						}
+
+						// setup flip flag
+						// the odd and even flags may help the scaled bob
+						// on some cards
+						FlipFlag = (Wait_For_Flip)?DDFLIP_WAIT:DDFLIP_DONOTWAIT;
+						if(gPulldownMode == SCALER_BOB)
+						{
+							FlipFlag |= (info.IsOdd)?DDFLIP_ODD:DDFLIP_EVEN;
+						}
+						FlipResult = IDirectDrawSurface_Flip(lpDDOverlay, NULL, FlipFlag); 
+
+						// save the time of the last flip
+						FlipTicks = GetTickCount();
+					}
 				}
 			}
-		}
-		
-		// save the last pulldown mode so that we know if its changed
-		PrevPulldownMode = gPulldownMode;
+			
+			// save the last pulldown mode so that we know if its changed
+			PrevPulldownMode = gPulldownMode;
 
-		if (IsStatusBarVisible())
-		{
-			if (dwLastSecondTicks + 1000 < GetTickCount())
+			if (IsStatusBarVisible())
 			{
-				sprintf(Text, "%d DF/S", nFrame);
-				StatusBar_ShowText(STATUS_FPS, Text);
-				nFrame = 0;
-				dwLastSecondTicks = GetTickCount();
-			 }
+				if (dwLastSecondTicks + 1000 < GetTickCount())
+				{
+					sprintf(Text, "%d DF/S", nFrame);
+					StatusBar_ShowText(STATUS_FPS, Text);
+					nFrame = 0;
+					dwLastSecondTicks = GetTickCount();
+				 }
+			}
+		}
+
+		BT848_SetDMA(FALSE);
+
+		// if we are in autodect mode we don't want to remember the current film mode
+		// so return to the current fallback mode instead.
+		if(bAutoDetectMode && DeintMethods[gPulldownMode].bIsFilmMode)
+		{
+			if(TVSettings[TVTYPE].Is25fps)
+			{
+				gPulldownMode = Setting_GetValue(FD50_GetSetting(PALFILMFALLBACKMODE));
+			}
+			else
+			{
+				gPulldownMode = Setting_GetValue(FD60_GetSetting(NTSCFILMFALLBACKMODE));
+			}
 		}
 	}
-
-	BT848_SetDMA(FALSE);
-
-	// if we are in autodect mode we don't want to remember the current film mode
-	// so return to the current fallback mode instead.
-	if(bAutoDetectMode && DeintMethods[gPulldownMode].bIsFilmMode)
-	{
-		if(TVSettings[TVTYPE].Is25fps)
-		{
-			gPulldownMode = Setting_GetValue(FD50_GetSetting(PALFILMFALLBACKMODE));
-		}
-		else
-		{
-			gPulldownMode = Setting_GetValue(FD60_GetSetting(NTSCFILMFALLBACKMODE));
-		}
+	// if there is any exception thrown then exit the thread
+	__except (EXCEPTION_EXECUTE_HANDLER) 
+    { 
+		ExitThread(1);
+		return 0;
 	}
-
+	// end of __try loop
+    
 	ExitThread(0);
 	return 0;
 }

@@ -146,6 +146,7 @@ void BT848_SaveSettings(LPCSTR szFileName);
 #define BT848_DSTATUS_FIELD    (1<<5)
 #define BT848_DSTATUS_NUML     (1<<4)
 #define BT848_DSTATUS_CSEL     (1<<3)
+#define BT848_DSTATUS_PLOCK    (1<<2)
 #define BT848_DSTATUS_LOF      (1<<1)
 #define BT848_DSTATUS_COF      (1<<0)
 

@@ -273,4 +273,5 @@ void Deinterlace_SetMenu(HMENU hMenu)
 	CheckMenuItem(hMenu, IDM_EVEN_ONLY, (ModeToShow == EVEN_ONLY) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_BLENDED_CLIP, (ModeToShow == BLENDED_CLIP) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_ADAPTIVE, (ModeToShow == ADAPTIVE) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_VIDEO_GREEDY, (ModeToShow == GREEDY) ?MF_CHECKED:MF_UNCHECKED);
 }

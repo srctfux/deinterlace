@@ -122,10 +122,10 @@ int ThreadClassId = 1;
 
 BOOL bShowCursor = TRUE;
 
-int emsizex = 754;
-int emsizey = 521;
-int emstartx = 10;
-int emstarty = 10;
+long emsizex = 649;
+long emsizey = 547;
+long emstartx = 10;
+long emstarty = 10;
 
 int pgsizex = -1;
 int pgsizey = -1;
@@ -234,13 +234,21 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		ErrorBox("Accelerators not Loaded");
 	}
 
-	while (GetMessage(&msg, NULL, 0, 0))
+	// catch any serious errors during message handling
+	__try
 	{
-		if (!TranslateAccelerator(hWnd, hAccel, &msg))
+		while (GetMessage(&msg, NULL, 0, 0))
 		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			if (!TranslateAccelerator(hWnd, hAccel, &msg))
+			{
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
+			}
 		}
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER) 
+    {
+		ErrorBox("Crashed");
 	}
 
 	ExitDD();
@@ -1441,11 +1449,14 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 void SaveWindowPos(HWND hWnd)
 {
 	RECT rScreen;
-	GetWindowRect(hWnd, &rScreen);
-	emstarty = rScreen.top;
-	emsizey = rScreen.bottom - rScreen.top;
-	emstartx = rScreen.left;
-	emsizex = rScreen.right - rScreen.left;
+	if(hWnd != NULL)
+	{
+		GetWindowRect(hWnd, &rScreen);
+		emstarty = rScreen.top;
+		emsizey = rScreen.bottom - rScreen.top;
+		emstartx = rScreen.left;
+		emsizex = rScreen.right - rScreen.left;
+	}
 }
 
 //---------------------------------------------------------------------------
@@ -1709,7 +1720,6 @@ void MainWndOnCreate(HWND hWnd)
 
 	if(bIsFullScreen == TRUE)
 	{
-		SaveWindowPos(hWnd);
 		Cursor_SetVisibility(FALSE);
 	}
 	else
@@ -2007,21 +2017,22 @@ void SetThreadProcessorAndPriority()
 
 void Cursor_SetVisibility(BOOL bVisible)
 {
+	static int nCursorIndex = 1;
 	if(bVisible)
 	{
-		// the incrememts the cursors internal counter
-		// either this is -1 (cursor not present)
-		// or zero (cursor not visible)
-		// or (greater than zero cursor visible)
-		ShowCursor(TRUE);
+		while(nCursorIndex < 1)
+		{
+			ShowCursor(TRUE);
+			nCursorIndex++;
+		}
 	}
 	else
 	{
-		// Want to make cursor cont zero
-		// for cursor not visible
-		// if cursor not present (-1)
-		// then will just return
-		while(ShowCursor(FALSE) >= 0);
+		while(nCursorIndex > 0)
+		{
+			ShowCursor(FALSE);
+			nCursorIndex--;
+		}
 	}
 }
 
@@ -2033,27 +2044,26 @@ BOOL IsFullScreen_OnChange(long NewValue)
 {
 	bDoResize = FALSE;
 	bIsFullScreen = (BOOL)NewValue;
-	if(bIsFullScreen == FALSE)
+
+	// make sure that the window has been created
+	if(hWnd != NULL)
 	{
-		SetWindowPos(hWnd, 0, emstartx, emstarty, emsizex, emsizey, SWP_SHOWWINDOW);
-		if(bShowCursor)
+		if(bIsFullScreen == FALSE)
 		{
-			Cursor_SetVisibility(TRUE);
+			SetWindowPos(hWnd, 0, emstartx, emstarty, emsizex, emsizey, SWP_SHOWWINDOW);
+			Cursor_SetVisibility(bShowCursor);
+			if (bDisplayStatusBar == TRUE)
+			{
+				SetTimer(hWnd, TIMER_STATUS, TIMER_STATUS_MS, NULL);
+			}
 		}
-		if (bDisplayStatusBar == TRUE)
+		else
 		{
-			SetTimer(hWnd, TIMER_STATUS, TIMER_STATUS_MS, NULL);
-		}
-	}
-	else
-	{
-		SaveWindowPos(hWnd);
-		if(bShowCursor)
-		{
+			SaveWindowPos(hWnd);
 			Cursor_SetVisibility(FALSE);
 		}
+		WorkoutOverlaySize();
 	}
-	WorkoutOverlaySize();
 	bDoResize = TRUE;
 	return FALSE;
 }
@@ -2171,12 +2181,12 @@ SETTING dTVSettings[DTV_SETTING_LASTONE] =
 	},
 	{
 		"Window Width", NUMBER, 0, &emsizex,
-		754, 0, 2048, 0, NULL,
+		649, 0, 2048, 0, NULL,
 		"MainWindow", "StartWidth", NULL,
 	},
 	{
 		"Window Height", NUMBER, 0, &emsizey,
-		521, 0, 2048, 0, NULL,
+		547, 0, 2048, 0, NULL,
 		"MainWindow", "StartHeight", NULL,
 	},
 	{

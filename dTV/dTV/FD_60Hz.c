@@ -144,7 +144,7 @@ void UpdateNTSCPulldownMode(DEINTERLACE_INFO *pInfo)
 	static long MOVIE_FIELD_CYCLE = 0;
 	static long MOVIE_VERIFY_CYCLE = 0;
 	static long MATCH_COUNT = 0;
-	static ePULLDOWNMODES OldPulldownMode = VIDEO_MODE_BOB;
+	static ePULLDOWNMODES OldPulldownMode = PULLDOWNMODES_LAST_ONE;
 
 	// Call with pInfo == NULL is an initialization call.
 	// This resets static variables when we start the thread each time.
