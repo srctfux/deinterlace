@@ -395,15 +395,13 @@ double GetActualSourceFrameAspect()
 }
 
 //----------------------------------------------------------------------------
-// Calculate size and position coordinates for video overlay
-// Takes into account of aspect ratio control.
-void WorkoutOverlaySize()
+// Updates the window position/window state and enable/disable titlebar 
+// as necessary.  This function should be globally used for everytime 
+// you want to update the window everytime you have enabled/disabled the 
+// statusbar, menus, full screen state, etc.
+//
+void UpdateWindowState()
 {
-	RECT rOverlayDest;
-	RECT rOverlaySrc;
-
-	int DestWidth, DestHeight;
-
 	if(bIsFullScreen == TRUE)
 	{
 		SetWindowLong(hWnd, GWL_STYLE, WS_VISIBLE);
@@ -430,6 +428,20 @@ void WorkoutOverlaySize()
 					0,0,0,0,
 					SWP_NOSIZE | SWP_NOMOVE | SWP_SHOWWINDOW);
 	}
+}
+
+
+//----------------------------------------------------------------------------
+// Calculate size and position coordinates for video overlay
+// Takes into account of aspect ratio control.
+void WorkoutOverlaySize()
+{
+	RECT rOverlayDest;
+	RECT rOverlaySrc;
+
+	int DestWidth, DestHeight;
+
+	UpdateWindowState();
 
 	// Do overscan
 	rOverlaySrc.left = InitialOverscan;

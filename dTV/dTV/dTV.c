@@ -213,7 +213,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		return FALSE;
 	}
 	hMenu = LoadMenu(hInstance, "ANALOGMENU");
-	hWnd = CreateWindow("dTV", "dTV", WS_OVERLAPPEDWINDOW, emstartx, emstarty, emsizex, emsizey, NULL, NULL, hInstance, NULL);
+	hWnd = CreateWindow("dTV", "dTV", WS_VISIBLE, emstartx, emstarty, emsizex, emsizey, NULL, NULL, hInstance, NULL);
 
 	if (!hWnd)
 		return (FALSE);
@@ -253,7 +253,12 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	BirneGruen = LoadBitmap(hInst, "BGRUEN");
 	currFont = CreateFontIndirect(&lf);
 
-	ShowWindow(hWnd, nCmdShow);
+	// 2000-10-31 Added by Mark Rejhon
+	// Now show the window, directly to maximized or windowed right away.
+	// That way, if the end user has configured dTV to startup maximized,
+	// it won't flash a window right before maximizing.
+	UpdateWindowState();
+
 	PostMessage(hWnd, WM_SIZE, SIZENORMAL, MAKELONG(emsizex, emsizey));
 	if (!(hAccel = LoadAccelerators(hInstance, "ANALOGACCEL")))
 	{

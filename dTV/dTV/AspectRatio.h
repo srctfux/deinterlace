@@ -33,6 +33,7 @@
 
 int     ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID);
 void    SetMenuAspectRatio(HWND hWnd);
+void    UpdateWindowState();
 void    WorkoutOverlaySize();
 void    PaintOverlay(HWND hWnd);
 int		FindAspectRatio(short** EvenField, short** OddField);
