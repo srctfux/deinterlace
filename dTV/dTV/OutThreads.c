@@ -443,6 +443,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				info.CombFactor = -1;
 				info.FieldDiff = -1;
 				bFlipNow = FALSE;
+				GetDestRect(&info.DestRect);
 
 				if(info.IsOdd)
 				{

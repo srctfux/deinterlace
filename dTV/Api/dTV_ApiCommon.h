@@ -168,6 +168,8 @@ typedef struct
 	BOOL bDoAccurateFlips;
 	// How long should we sleep for if we get the chance
 	long SleepInterval;
+	// How big the source will end up
+	RECT DestRect;
 } DEINTERLACE_INFO;
 
 // Deinterlace functions return true if the overlay is ready to be displayed.
