@@ -433,7 +433,11 @@ void WriteSettingsToIni()
     
 	// These two lines flushes current INI file to disk (in case of abrupt poweroff shortly afterwards)
     WritePrivateProfileString(NULL, NULL, NULL, szIniFile);
-    _flushall();
+    
+    // Disk cache flushing:
+    // The below doesn't seem to be needed and only seem to 
+    // cause the video to freeze for a full second.
+    //_flushall(); 
 }
 
 void WritePrivateProfileInt(LPCTSTR lpAppName,  LPCTSTR lpKeyName,  int nValue, LPCTSTR lpFileName)
