@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendFilter.cpp,v 1.6 2002-03-11 19:25:47 tobbej Exp $
+// $Id: DSRendFilter.cpp,v 1.7 2002-04-16 15:38:27 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.6  2002/03/11 19:25:47  tobbej
+// fixed pause so it blocks properly
+//
 // Revision 1.5  2002/03/08 11:14:04  tobbej
 // changed property page a bit
 // removed some debug output
@@ -65,12 +68,13 @@ CDSRendFilter::CDSRendFilter() :
 	m_pEventSink(NULL),
 	m_tStart(0)
 {
-
+	IPin *tmp=NULL;
+	HRESULT hr=m_InputPin.QueryInterface(IID_IPin,(void**)&tmp);
 }
 
 CDSRendFilter::~CDSRendFilter()
 {
-
+	
 }
 
 HRESULT CDSRendFilter::FinalConstruct()
@@ -514,12 +518,57 @@ STDMETHODIMP CDSRendFilter::GetNextSample(IMediaSample **ppSample,DWORD dwTimeou
 	m_cFramesDrawn++;
 	*ppSample=m_pSample;
 	
+	REFERENCE_TIME rtStart;
+	REFERENCE_TIME rtStop;
+	if(SUCCEEDED(m_pSample->GetTime(&rtStart,&rtStop)))
+	{
+		m_rtNextFieldStart=rtStart+(rtStop-rtStart)/2;
+	}
+	else
+	{
+		m_rtNextFieldStart=-1;
+	}
+
+
 	//addref the returned sample and release our buffered sample,
 	//this is nessesary if the upstream filter only provides one singel IMediaSample
 	(*ppSample)->AddRef();
 	m_pSample=NULL;
 	m_sampleLock.Unlock();
 	return S_OK;
+}
+
+STDMETHODIMP CDSRendFilter::WaitForNextField(DWORD dwTimeout)
+{
+	ATLTRACE(_T("%s(%d) : CDSRendFilter::WaitForNextField\n"),__FILE__,__LINE__);
+	if(m_pRefClk==NULL)
+	{
+		ATLTRACE(_T("%s(%d) :  No Reference clock\n"),__FILE__,__LINE__);
+		return VFW_E_NO_CLOCK;
+	}
+	if(m_rtNextFieldStart==-1)
+	{
+		ATLTRACE(_T("%s(%d) :  No time to wait for\n"),__FILE__,__LINE__);
+		return E_FAIL;
+	}
+	
+	CEvent clockEvent;
+	DWORD clockCookie;
+	HRESULT hr=m_pRefClk->AdviseTime(m_tStart,m_rtNextFieldStart,(HEVENT)clockEvent.getHandle(),&clockCookie);
+	if(FAILED(hr))
+	{
+		ATLTRACE(_T("%s(%d) :  AdviseTime failed\n"),__FILE__,__LINE__);
+		return hr;
+	}
+
+	if(clockEvent.wait(dwTimeout))
+	{
+		return S_OK;
+	}
+	else
+	{
+		return VFW_E_TIMEOUT;
+	}
 }
 
 // IMediaSeeking
@@ -686,4 +735,3 @@ HRESULT CDSRendFilter::GetPreroll(LONGLONG *pllPreroll)
 
 	return pSeeking->GetPreroll(pllPreroll);
 }
-

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: CustomComObj.h,v 1.1.1.1 2002-02-03 10:52:53 tobbej Exp $
+// $Id: CustomComObj.h,v 1.2 2002-04-16 15:38:27 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1.1.1  2002/02/03 10:52:53  tobbej
+// First import of new direct show renderer filter
+//
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -44,23 +47,30 @@ public:
 	CCustomComObject(paramType pFilter)
 		:base(pFilter)
 	{
+		_Module.Lock();
 	}
 
 	~CCustomComObject()
 	{
 		FinalRelease();
+#ifdef _ATL_DEBUG_INTERFACES
+		_Module.DeleteNonAddRefThunk(_GetRawUnknown());
+#endif
+		_Module.Unlock();
 	}
 	
 	ULONG STDMETHODCALLTYPE AddRef()
 	{
-		//delegate addref to filter
-		return m_pFilter->AddRef();
+		ULONG ref=InternalAddRef();
+		//ATLTRACE(_T("AddRef count=%d\n"),ref);
+		return ref;
 	}
 
 	ULONG STDMETHODCALLTYPE Release()
 	{
-		//delegate release to filter
-		return m_pFilter->Release();
+		ULONG ref=InternalRelease();
+		//ATLTRACE(_T("Release count=%d\n"),ref);
+		return ref;
 	}
 	
 	STDMETHOD(QueryInterface)(REFIID iid, void ** ppvObject)

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendFilter.h,v 1.5 2002-03-11 19:25:58 tobbej Exp $
+// $Id: DSRendFilter.h,v 1.6 2002-04-16 15:38:27 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.5  2002/03/11 19:25:58  tobbej
+// fixed pause so it blocks properly
+//
 // Revision 1.4  2002/03/08 11:14:04  tobbej
 // changed property page a bit
 // removed some debug output
@@ -115,6 +118,7 @@ END_PROP_MAP()
 
 // IDSRendFilter
 	STDMETHOD(GetNextSample)(IMediaSample **ppSample,DWORD dwTimeout);
+	STDMETHOD(WaitForNextField)(DWORD dwTimeout);
 
 // IPersist
 	STDMETHOD(GetClassID(CLSID *pClassID));
@@ -163,6 +167,7 @@ END_PROP_MAP()
 	STDMETHOD(GetPreroll(LONGLONG *pllPreroll));
 
 public:
+	
 	/**
 	 *
 	 * @param pSample sample to render
@@ -190,6 +195,7 @@ public:
 	
 	///rendering lock
 	CComAutoCriticalSection m_renderLock;
+
 private:
 	/**
 	 * Helper function for IMediaSeeking interface.
@@ -233,6 +239,8 @@ private:
 
 	CComPtr<IMediaSample> m_pSample;
 	CComAutoCriticalSection m_sampleLock;
+	REFERENCE_TIME m_rtNextFieldStart;
+
 	///This event is used to signal that there is a new sample to be retrived.
 	CEvent m_nextSampleReady;
 };
