@@ -891,9 +891,9 @@ void ChangeDefaultsBasedOnHardware()
 		TVCard_ChangeDefault(OutThreads_GetSetting(WAITFORFLIP), TRUE);
 		TVCard_ChangeDefault(OutThreads_GetSetting(DOACCURATEFLIPS), FALSE);
 		TVCard_ChangeDefault(OutThreads_GetSetting(AUTODETECT), TRUE);
-		TVCard_ChangeDefault(OutThreads_GetSetting(PULLDOWNMODE), GREEDY);
-		TVCard_ChangeDefault(FD60_GetSetting(NTSCFILMFALLBACKMODE), GREEDY);
-		TVCard_ChangeDefault(FD50_GetSetting(PALFILMFALLBACKMODE), GREEDY);
+		//TVCard_ChangeDefault(OutThreads_GetSetting(PULLDOWNMODE), INDEX_VIDEO_GREEDY);
+		TVCard_ChangeDefault(FD60_GetSetting(NTSCFILMFALLBACKMODE), INDEX_VIDEO_GREEDY);
+		TVCard_ChangeDefault(FD50_GetSetting(PALFILMFALLBACKMODE), INDEX_VIDEO_GREEDY);
 		TVCard_ChangeDefault(BT848_GetSetting(CURRENTX), 720);
 	}
 	else if(ProcessorSpeed == 1 && TradeOff == 1)
@@ -903,9 +903,9 @@ void ChangeDefaultsBasedOnHardware()
 		TVCard_ChangeDefault(OutThreads_GetSetting(WAITFORFLIP), FALSE);
 		TVCard_ChangeDefault(OutThreads_GetSetting(DOACCURATEFLIPS), FALSE);
 		TVCard_ChangeDefault(OutThreads_GetSetting(AUTODETECT), TRUE);
-		TVCard_ChangeDefault(OutThreads_GetSetting(PULLDOWNMODE), GREEDY);
-		TVCard_ChangeDefault(FD60_GetSetting(NTSCFILMFALLBACKMODE), GREEDY);
-		TVCard_ChangeDefault(FD50_GetSetting(PALFILMFALLBACKMODE), GREEDY);
+		//TVCard_ChangeDefault(OutThreads_GetSetting(PULLDOWNMODE), INDEX_VIDEO_GREEDY);
+		TVCard_ChangeDefault(FD60_GetSetting(NTSCFILMFALLBACKMODE), INDEX_VIDEO_GREEDY);
+		TVCard_ChangeDefault(FD50_GetSetting(PALFILMFALLBACKMODE), INDEX_VIDEO_GREEDY);
 		TVCard_ChangeDefault(BT848_GetSetting(CURRENTX), 720);
 	}
 	else if(ProcessorSpeed == 2 && TradeOff == 0)
@@ -915,9 +915,9 @@ void ChangeDefaultsBasedOnHardware()
 		TVCard_ChangeDefault(OutThreads_GetSetting(WAITFORFLIP), TRUE);
 		TVCard_ChangeDefault(OutThreads_GetSetting(DOACCURATEFLIPS), FALSE);
 		TVCard_ChangeDefault(OutThreads_GetSetting(AUTODETECT), FALSE);
-		TVCard_ChangeDefault(OutThreads_GetSetting(PULLDOWNMODE), GREEDY);
-		TVCard_ChangeDefault(FD60_GetSetting(NTSCFILMFALLBACKMODE), GREEDY);
-		TVCard_ChangeDefault(FD50_GetSetting(PALFILMFALLBACKMODE), GREEDY);
+		//TVCard_ChangeDefault(OutThreads_GetSetting(PULLDOWNMODE), INDEX_VIDEO_GREEDY);
+		TVCard_ChangeDefault(FD60_GetSetting(NTSCFILMFALLBACKMODE), INDEX_VIDEO_GREEDY);
+		TVCard_ChangeDefault(FD50_GetSetting(PALFILMFALLBACKMODE), INDEX_VIDEO_GREEDY);
 		TVCard_ChangeDefault(BT848_GetSetting(CURRENTX), 640);
 	}
 	else if(ProcessorSpeed == 2 && TradeOff == 1)
@@ -927,9 +927,9 @@ void ChangeDefaultsBasedOnHardware()
 		TVCard_ChangeDefault(OutThreads_GetSetting(WAITFORFLIP), FALSE);
 		TVCard_ChangeDefault(OutThreads_GetSetting(DOACCURATEFLIPS), FALSE);
 		TVCard_ChangeDefault(OutThreads_GetSetting(AUTODETECT), FALSE);
-		TVCard_ChangeDefault(OutThreads_GetSetting(PULLDOWNMODE), GREEDY);
-		TVCard_ChangeDefault(FD60_GetSetting(NTSCFILMFALLBACKMODE), GREEDY);
-		TVCard_ChangeDefault(FD50_GetSetting(PALFILMFALLBACKMODE), GREEDY);
+		//TVCard_ChangeDefault(OutThreads_GetSetting(PULLDOWNMODE), INDEX_VIDEO_GREEDY);
+		TVCard_ChangeDefault(FD60_GetSetting(NTSCFILMFALLBACKMODE), INDEX_VIDEO_GREEDY);
+		TVCard_ChangeDefault(FD50_GetSetting(PALFILMFALLBACKMODE), INDEX_VIDEO_GREEDY);
 		TVCard_ChangeDefault(BT848_GetSetting(CURRENTX), 640);
 	}
 	else
@@ -939,9 +939,9 @@ void ChangeDefaultsBasedOnHardware()
 		TVCard_ChangeDefault(OutThreads_GetSetting(WAITFORFLIP), TRUE);
 		TVCard_ChangeDefault(OutThreads_GetSetting(DOACCURATEFLIPS), FALSE);
 		TVCard_ChangeDefault(OutThreads_GetSetting(AUTODETECT), TRUE);
-		TVCard_ChangeDefault(OutThreads_GetSetting(PULLDOWNMODE), ADAPTIVE);
-		TVCard_ChangeDefault(FD60_GetSetting(NTSCFILMFALLBACKMODE), ADAPTIVE);
-		TVCard_ChangeDefault(FD50_GetSetting(PALFILMFALLBACKMODE), GREEDY);
+		//TVCard_ChangeDefault(OutThreads_GetSetting(PULLDOWNMODE), INDEX_ADAPTIVE);
+		TVCard_ChangeDefault(FD60_GetSetting(NTSCFILMFALLBACKMODE), INDEX_ADAPTIVE);
+		TVCard_ChangeDefault(FD50_GetSetting(PALFILMFALLBACKMODE), INDEX_VIDEO_GREEDY2FRAME);
 		TVCard_ChangeDefault(BT848_GetSetting(CURRENTX), 720);
 	}
 }

@@ -38,9 +38,8 @@
 #include "FD_Common.h"
 #define DOLOGGING
 #include "DebugLog.h"
-#include "DI_Weave.h"
 
-ePULLDOWNMODES gPALFilmFallbackMode = VIDEO_MODE_2FRAME;
+long gPALFilmFallbackIndex = INDEX_VIDEO_2FRAME;
 // Default values which can be overwritten by the INI file
 long PulldownThresholdLow = 30;
 long PulldownThresholdHigh = 10;
@@ -71,7 +70,6 @@ void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 		RepeatCount = 0;
 		LastPolarity = -1;
 		LastDiff = 0;
-		UpdatePulldownStatus();
 		ResetModeSwitches();
 		StartFilmTicks = 0;
 		return;
@@ -81,7 +79,7 @@ void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 	PercentDecrease = ((double)pInfo->CombFactor * 100.0) / ((double)LastCombFactor + 100.0);
 	PercentIncrease = ((double)(pInfo->CombFactor - LastCombFactor) * 100.0) / ((double)LastCombFactor + 100.0);
 
-	if(!DeintMethods[gPulldownMode].bIsFilmMode)
+	if(!IsFilmMode())
 	{
 		if(PercentDecrease < PulldownThresholdLow && LastDiff > PulldownThresholdLow)
 		{
@@ -111,14 +109,12 @@ void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 				{
 					if(pInfo->IsOdd == TRUE)
 					{
-						gPulldownMode = FILM_22_PULLDOWN_ODD;
-						UpdatePulldownStatus();
+						SetFilmDeinterlaceMode(FILM_22_PULLDOWN_ODD);
 						LOG(" Gone to Odd");
 					}
 					if(pInfo->IsOdd == FALSE)
 					{
-						gPulldownMode = FILM_22_PULLDOWN_EVEN;
-						UpdatePulldownStatus();
+						SetFilmDeinterlaceMode(FILM_22_PULLDOWN_EVEN);
 						LOG(" Gone to Even");
 					}
 				}
@@ -156,12 +152,12 @@ void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 		
 		if(PercentIncrease > PulldownThresholdHigh && LastDiff > PulldownThresholdLow)
 		{
-			if(gPulldownMode == FILM_22_PULLDOWN_ODD && pInfo->IsOdd == TRUE)
+			if(GetFilmMode() == FILM_22_PULLDOWN_ODD && pInfo->IsOdd == TRUE)
 			{
 				RepeatCount--;
 				LOG(" Downed RepeatCount 2 %d", RepeatCount);
 			}
-			if(gPulldownMode == FILM_22_PULLDOWN_EVEN && pInfo->IsOdd == FALSE)
+			if(GetFilmMode() == FILM_22_PULLDOWN_EVEN && pInfo->IsOdd == FALSE)
 			{
 				RepeatCount--;
 				LOG(" Downed RepeatCount 2 %d", RepeatCount);
@@ -170,8 +166,7 @@ void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 		// FIXME: Should have a different parameter here
 		if(RepeatCount <= (PALPulldownRepeatCount - PALPulldownRepeatCount2))
 		{
-			gPulldownMode = gPALFilmFallbackMode;
-			UpdatePulldownStatus();
+			SetVideoDeinterlaceIndex(gPALFilmFallbackIndex);
 			LOG(" Back To Video Mode");
 			RepeatCount = PALPulldownRepeatCount - 1;
 			LastPolarity = !pInfo->IsOdd;
@@ -183,34 +178,30 @@ void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 	LastCombFactor = pInfo->CombFactor;
 }
 
-BOOL FilmModePAL(DEINTERLACE_INFO *pInfo)
+BOOL FilmModePALEven(DEINTERLACE_INFO *pInfo)
 {
-	BOOL bFlipNow;
-	// Film mode.  If we have an entire new frame, display it.
-	bFlipNow = DoWeWantToFlipPAL(pInfo);
-	if (bFlipNow)
+	if (!pInfo->IsOdd)
+	{
 		Weave(pInfo);
-	return bFlipNow;
+		return TRUE;
+	}
+	else
+	{
+		return FALSE;
+	}
 }
 
-
-///////////////////////////////////////////////////////////////////////////////
-// Flip decisioning for film modes.
-// Returns true if the current field has given us a complete frame.
-// If we're still waiting for another field, returns false.
-///////////////////////////////////////////////////////////////////////////////
-BOOL DoWeWantToFlipPAL(DEINTERLACE_INFO *pInfo)
+BOOL FilmModePALOdd(DEINTERLACE_INFO *pInfo)
 {
-	BOOL RetVal;
-	switch(gPulldownMode)
+	if (pInfo->IsOdd)
 	{
-	case FILM_22_PULLDOWN_ODD:   RetVal = pInfo->IsOdd;  break;
-	case FILM_22_PULLDOWN_EVEN:  RetVal = !pInfo->IsOdd;  break;
-	default:
-		RetVal = FALSE;
-		break;
+		Weave(pInfo);
+		return TRUE;
 	}
-	return RetVal;
+	else
+	{
+		return FALSE;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -231,9 +222,9 @@ SETTING FD50Settings[FD50_SETTING_LASTONE] =
 		"Pulldown", "PulldownThresholdHigh", NULL,
 	},
 	{
-		"PAL Film Fallback Mode", ITEMFROMLIST, 0, &gPALFilmFallbackMode,
-		VIDEO_MODE_2FRAME, 0, PULLDOWNMODES_LAST_ONE - 1, 1, 1,
-		DeintModeNames,
+		"PAL Film Fallback Mode", ITEMFROMLIST, 0, &gPALFilmFallbackIndex,
+		INDEX_VIDEO_2FRAME, 0, FILMPULLDOWNMODES_LAST_ONE - 1, 1, 1,
+		NULL,
 		"Pulldown", "PALFilmFallbackMode", NULL,
 	},
 	{

@@ -46,11 +46,10 @@
 #include "FD_Common.h"
 #define DOLOGGING
 #include "DebugLog.h"
-#include "DI_Weave.h"
 
 // Settings
 // Default values which can be overwritten by the INI file
-ePULLDOWNMODES gNTSCFilmFallbackMode = ADAPTIVE;
+long gNTSCFilmFallbackIndex = INDEX_ADAPTIVE;
 long Threshold32Pulldown = 15;
 long ThresholdPulldownMismatch = 100;
 long ThresholdPulldownComb = 150;
@@ -63,7 +62,7 @@ long PulldownSwitchInterval = 3000;
 // Module wide declarations
 long NextPulldownRepeatCount = 0;    // for temporary increases of PullDownRepeatCount
 DWORD ModeSwitchTimestamps[MAXMODESWITCHES];
-ePULLDOWNMODES ModeSwitchModes[MAXMODESWITCHES];
+DEINTERLACE_METHOD* ModeSwitchMethods[MAXMODESWITCHES];
 int NumSwitches;
 
 BOOL DidWeExpectFieldMatch(DEINTERLACE_INFO *pInfo);
@@ -76,7 +75,7 @@ BOOL DidWeExpectFieldMatch(DEINTERLACE_INFO *pInfo);
 void ResetModeSwitches()
 {
 	memset(&ModeSwitchTimestamps[0], 0, sizeof(ModeSwitchTimestamps));
-	memset(&ModeSwitchModes[0], 0, sizeof(ModeSwitchModes));
+	memset(&ModeSwitchMethods[0], 0, sizeof(ModeSwitchMethods));
 	NumSwitches = 0;
 }
 
@@ -92,16 +91,16 @@ void ResetModeSwitches()
 // sensitivity of this algorithm.  To trigger video mode there need to be
 // PulldownSwitchMax mode switches in PulldownSwitchInterval milliseconds.
 ///////////////////////////////////////////////////////////////////////////////
-BOOL TrackModeSwitches(ePULLDOWNMODES PulldownMode)
+BOOL TrackModeSwitches()
 {
-	if(DeintMethods[PulldownMode].bIsFilmMode &&
-		PulldownMode != ModeSwitchModes[0])
+	if(IsFilmMode() &&
+		GetCurrentDeintMethod() != ModeSwitchMethods[0])
 	{
 		// Scroll the list of timestamps.  Most recent is first in the list.
 		memmove(&ModeSwitchTimestamps[1], &ModeSwitchTimestamps[0], sizeof(ModeSwitchTimestamps) - sizeof(DWORD));
-		memmove(&ModeSwitchModes[1], &ModeSwitchModes[0], sizeof(ModeSwitchModes) - sizeof(ePULLDOWNMODES));
+		memmove(&ModeSwitchMethods[1], &ModeSwitchMethods[0], sizeof(ModeSwitchMethods) - sizeof(DEINTERLACE_METHOD*));
 		ModeSwitchTimestamps[0] = GetTickCount();
-		ModeSwitchModes[0] = PulldownMode;
+		ModeSwitchMethods[0] = GetCurrentDeintMethod();
 		if(NumSwitches < MAXMODESWITCHES)
 		{
 			NumSwitches++;
@@ -160,7 +159,7 @@ void UpdateNTSCPulldownMode(DEINTERLACE_INFO *pInfo)
 	static long MOVIE_FIELD_CYCLE = 0;
 	static long MOVIE_VERIFY_CYCLE = 0;
 	static long MATCH_COUNT = 0;
-	static ePULLDOWNMODES OldPulldownMode = PULLDOWNMODES_LAST_ONE;
+	static DEINTERLACE_METHOD* OldPulldownMethod = NULL;
 
 	// Call with pInfo == NULL is an initialization call.
 	// This resets static variables when we start the thread each time.
@@ -170,7 +169,6 @@ void UpdateNTSCPulldownMode(DEINTERLACE_INFO *pInfo)
         MOVIE_FIELD_CYCLE = 0;
 		MISMATCH_COUNT = 0;
 		MATCH_COUNT = 0;
-		UpdatePulldownStatus();
 		ResetModeSwitches();
 		return;
 	}
@@ -203,7 +201,7 @@ void UpdateNTSCPulldownMode(DEINTERLACE_INFO *pInfo)
 		// weave artifacts, optionally switch to video mode but make
 		// it very easy to get back into film mode in case this was
 		// just a glitchy scene change.
-		if (DeintMethods[gPulldownMode].bIsFilmMode &&
+		if (IsFilmMode() &&
 			bFallbackToVideo &&							// let the user turn this on and off.
 			ThresholdPulldownMismatch > 0 &&		    // only do video-force check if there's a threshold.
 			pInfo->FieldDiff >= ThresholdPulldownMismatch &&	// only force video if this field is very different,
@@ -216,10 +214,9 @@ void UpdateNTSCPulldownMode(DEINTERLACE_INFO *pInfo)
 
 		if (SwitchToVideo)
 		{
-			gPulldownMode = gNTSCFilmFallbackMode;
+			SetVideoDeinterlaceIndex(gNTSCFilmFallbackIndex);
 			MOVIE_VERIFY_CYCLE = 0;
 			MOVIE_FIELD_CYCLE = 0;
-			UpdatePulldownStatus();
 			LOG(" Back to Video, comb factor %d", pInfo->CombFactor);
 		}
 		else
@@ -260,30 +257,28 @@ void UpdateNTSCPulldownMode(DEINTERLACE_INFO *pInfo)
 				{
 					switch(pInfo->CurrentFrame)
 					{
-					case 0:  gPulldownMode = FILM_32_PULLDOWN_2;  break;
-					case 1:  gPulldownMode = FILM_32_PULLDOWN_3;  break;
-					case 2:  gPulldownMode = FILM_32_PULLDOWN_4;  break;
-					case 3:  gPulldownMode = FILM_32_PULLDOWN_0;  break;
-					case 4:  gPulldownMode = FILM_32_PULLDOWN_1;  break;
+					case 0:  SetFilmDeinterlaceMode(FILM_32_PULLDOWN_2);  break;
+					case 1:  SetFilmDeinterlaceMode(FILM_32_PULLDOWN_3);  break;
+					case 2:  SetFilmDeinterlaceMode(FILM_32_PULLDOWN_4);  break;
+					case 3:  SetFilmDeinterlaceMode(FILM_32_PULLDOWN_0);  break;
+					case 4:  SetFilmDeinterlaceMode(FILM_32_PULLDOWN_1);  break;
 					}
-					UpdatePulldownStatus();
-					LOG("Gone to film mode %d", gPulldownMode - FILM_32_PULLDOWN_0); 
+					LOG("Gone to film mode %d", (pInfo->CurrentFrame + 2) % 5); 
 				}
 				else
 				{
 					switch(pInfo->CurrentFrame)
 					{
-					case 0:  gPulldownMode = FILM_32_PULLDOWN_4;  break;
-					case 1:  gPulldownMode = FILM_32_PULLDOWN_0;  break;
-					case 2:  gPulldownMode = FILM_32_PULLDOWN_1;  break;
-					case 3:  gPulldownMode = FILM_32_PULLDOWN_2;  break;
-					case 4:  gPulldownMode = FILM_32_PULLDOWN_3;  break;
+					case 0:  SetFilmDeinterlaceMode(FILM_32_PULLDOWN_4);  break;
+					case 1:  SetFilmDeinterlaceMode(FILM_32_PULLDOWN_0);  break;
+					case 2:  SetFilmDeinterlaceMode(FILM_32_PULLDOWN_1);  break;
+					case 3:  SetFilmDeinterlaceMode(FILM_32_PULLDOWN_2);  break;
+					case 4:  SetFilmDeinterlaceMode(FILM_32_PULLDOWN_3);  break;
 					}
-					UpdatePulldownStatus();
-					LOG("Gone to film mode %d", gPulldownMode - FILM_32_PULLDOWN_0); 
+					LOG("Gone to film mode %d", (pInfo->CurrentFrame + 4) % 5); 
 				}
 
-				if (OldPulldownMode != gPulldownMode)
+				if (OldPulldownMethod != GetCurrentDeintMethod())
 				{
 					// A mode switch.  If we've done a lot of them recently,
 					// force video mode since it means we're having trouble
@@ -308,12 +303,11 @@ void UpdateNTSCPulldownMode(DEINTERLACE_INFO *pInfo)
 					// bail out of film mode if we subsequently decide that
 					// the film mode we just dropped out of was correct.
 					if (bFallbackToVideo &&
-						TrackModeSwitches(gPulldownMode))
+						TrackModeSwitches())
 					{
-						gPulldownMode = gNTSCFilmFallbackMode;
+						SetVideoDeinterlaceIndex(gNTSCFilmFallbackIndex);
 						MOVIE_VERIFY_CYCLE = 0;
 						MOVIE_FIELD_CYCLE = 0;
-						UpdatePulldownStatus();
 						LOG(" Too much film mode cycling, switching to video");
 						
 						// Require pulldown mode to be consistent for the
@@ -332,7 +326,7 @@ void UpdateNTSCPulldownMode(DEINTERLACE_INFO *pInfo)
 					}
 				}
 
-				OldPulldownMode = gPulldownMode;
+				OldPulldownMethod = GetCurrentDeintMethod();
 			}
 			else
 			{
@@ -377,11 +371,86 @@ void UpdateNTSCPulldownMode(DEINTERLACE_INFO *pInfo)
 }
 
 
-BOOL FilmModeNTSC(DEINTERLACE_INFO *pInfo)
+BOOL FilmModeNTSC1st(DEINTERLACE_INFO *pInfo)
 {
 	BOOL bFlipNow;
 	// Film mode.  If we have an entire new frame, display it.
-	bFlipNow = DoWeWantToFlipNTSC(pInfo);
+	switch(pInfo->CurrentFrame)
+	{
+	case 0:  bFlipNow = FALSE;         break;
+	case 1:  bFlipNow = !pInfo->IsOdd;  break;
+	case 2:  bFlipNow = !pInfo->IsOdd;  break;
+	case 3:  bFlipNow = pInfo->IsOdd;   break;
+	case 4:  bFlipNow = pInfo->IsOdd;   break;
+	}
+	if (bFlipNow)
+		Weave(pInfo);
+	return bFlipNow;
+}
+
+BOOL FilmModeNTSC2nd(DEINTERLACE_INFO *pInfo)
+{
+	BOOL bFlipNow;
+	// Film mode.  If we have an entire new frame, display it.
+	switch(pInfo->CurrentFrame)
+	{
+	case 0:  bFlipNow = pInfo->IsOdd;   break;
+	case 1:  bFlipNow = FALSE;         break;
+	case 2:  bFlipNow = !pInfo->IsOdd;  break;
+	case 3:  bFlipNow = !pInfo->IsOdd;  break;
+	case 4:  bFlipNow = pInfo->IsOdd;   break;
+	}
+	if (bFlipNow)
+		Weave(pInfo);
+	return bFlipNow;
+}
+
+BOOL FilmModeNTSC3rd(DEINTERLACE_INFO *pInfo)
+{
+	BOOL bFlipNow;
+	// Film mode.  If we have an entire new frame, display it.
+	switch(pInfo->CurrentFrame)
+	{
+	case 0:  bFlipNow = pInfo->IsOdd;   break;
+	case 1:  bFlipNow = pInfo->IsOdd;   break;
+	case 2:  bFlipNow = FALSE;         break;
+	case 3:  bFlipNow = !pInfo->IsOdd;  break;
+	case 4:  bFlipNow = !pInfo->IsOdd;  break;
+	}
+	if (bFlipNow)
+		Weave(pInfo);
+	return bFlipNow;
+}
+
+BOOL FilmModeNTSC4th(DEINTERLACE_INFO *pInfo)
+{
+	BOOL bFlipNow;
+	// Film mode.  If we have an entire new frame, display it.
+	switch(pInfo->CurrentFrame)
+	{
+	case 0:  bFlipNow = !pInfo->IsOdd;  break;
+	case 1:  bFlipNow = pInfo->IsOdd;   break;
+	case 2:  bFlipNow = pInfo->IsOdd;   break;
+	case 3:  bFlipNow = FALSE;         break;
+	case 4:  bFlipNow = !pInfo->IsOdd;  break;
+	}
+	if (bFlipNow)
+		Weave(pInfo);
+	return bFlipNow;
+}
+
+BOOL FilmModeNTSC5th(DEINTERLACE_INFO *pInfo)
+{
+	BOOL bFlipNow;
+	// Film mode.  If we have an entire new frame, display it.
+	switch(pInfo->CurrentFrame)
+	{
+	case 0:  bFlipNow = !pInfo->IsOdd;  break;
+	case 1:  bFlipNow = !pInfo->IsOdd;  break;
+	case 2:  bFlipNow = pInfo->IsOdd;   break;
+	case 3:  bFlipNow = pInfo->IsOdd;   break;
+	case 4:  bFlipNow = FALSE;         break;
+	}
 	if (bFlipNow)
 		Weave(pInfo);
 	return bFlipNow;
@@ -390,7 +459,7 @@ BOOL FilmModeNTSC(DEINTERLACE_INFO *pInfo)
 BOOL DidWeExpectFieldMatch(DEINTERLACE_INFO *pInfo)
 {
 	BOOL RetVal;
-	switch(gPulldownMode)
+	switch(GetFilmMode())
 	{
 	case FILM_32_PULLDOWN_0:
 		switch(pInfo->CurrentFrame)
@@ -400,76 +469,6 @@ BOOL DidWeExpectFieldMatch(DEINTERLACE_INFO *pInfo)
 		case 2:  RetVal = FALSE;          break;
 		case 3:  RetVal = pInfo->IsOdd;   break;
 		case 4:  RetVal = FALSE;          break;
-		}
-		break;
-	case FILM_32_PULLDOWN_1:
-		switch(pInfo->CurrentFrame)
-		{
-		case 0:  RetVal = FALSE;          break;
-		case 1:  RetVal = FALSE;          break;
-		case 2:  RetVal = !pInfo->IsOdd;  break;
-		case 3:  RetVal = FALSE;          break;
-		case 4:  RetVal = pInfo->IsOdd;   break;
-		}
-		break;
-	case FILM_32_PULLDOWN_2:
-		switch(pInfo->CurrentFrame)
-		{
-		case 0:  RetVal = pInfo->IsOdd;   break;
-		case 1:  RetVal = FALSE;          break;
-		case 2:  RetVal = FALSE;          break;
-		case 3:  RetVal = !pInfo->IsOdd;  break;
-		case 4:  RetVal = FALSE;          break;
-		}
-		break;
-	case FILM_32_PULLDOWN_3:
-		switch(pInfo->CurrentFrame)
-		{
-		case 0:  RetVal = FALSE;          break;
-		case 1:  RetVal = pInfo->IsOdd;   break;
-		case 2:  RetVal = FALSE;          break;
-		case 3:  RetVal = FALSE;          break;
-		case 4:  RetVal = !pInfo->IsOdd;  break;
-		}
-		break;
-	case FILM_32_PULLDOWN_4:
-		switch(pInfo->CurrentFrame)
-		{
-		case 0:  RetVal = !pInfo->IsOdd;  break;
-		case 1:  RetVal = FALSE;          break;
-		case 2:  RetVal = pInfo->IsOdd;   break;
-		case 3:  RetVal = FALSE;          break;
-		case 4:  RetVal = FALSE;          break;
-		}
-		break;
-	default:
-		RetVal = FALSE;
-		break;
-	}
-	return RetVal;
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Flip decisioning for film modes.
-// Returns true if the current field has given us a complete frame.
-// If we're still waiting for another field, returns false.
-///////////////////////////////////////////////////////////////////////////////
-BOOL DoWeWantToFlipNTSC(DEINTERLACE_INFO *pInfo)
-{
-	BOOL RetVal;
-	switch(gPulldownMode)
-	{
-	case FILM_22_PULLDOWN_ODD:   RetVal = pInfo->IsOdd;  break;
-	case FILM_22_PULLDOWN_EVEN:  RetVal = !pInfo->IsOdd;  break;
-	case FILM_32_PULLDOWN_0:
-		switch(pInfo->CurrentFrame)
-		{
-		case 0:  RetVal = FALSE;         break;
-		case 1:  RetVal = !pInfo->IsOdd;  break;
-		case 2:  RetVal = !pInfo->IsOdd;  break;
-		case 3:  RetVal = pInfo->IsOdd;   break;
-		case 4:  RetVal = pInfo->IsOdd;   break;
 		}
 		break;
 	case FILM_32_PULLDOWN_1:
@@ -486,19 +485,19 @@ BOOL DoWeWantToFlipNTSC(DEINTERLACE_INFO *pInfo)
 		switch(pInfo->CurrentFrame)
 		{
 		case 0:  RetVal = pInfo->IsOdd;   break;
-		case 1:  RetVal = pInfo->IsOdd;   break;
-		case 2:  RetVal = FALSE;         break;
+		case 1:  RetVal = FALSE;          break;
+		case 2:  RetVal = FALSE;          break;
 		case 3:  RetVal = !pInfo->IsOdd;  break;
-		case 4:  RetVal = !pInfo->IsOdd;  break;
+		case 4:  RetVal = FALSE;          break;
 		}
 		break;
 	case FILM_32_PULLDOWN_3:
 		switch(pInfo->CurrentFrame)
 		{
-		case 0:  RetVal = !pInfo->IsOdd;  break;
+		case 0:  RetVal = FALSE;          break;
 		case 1:  RetVal = pInfo->IsOdd;   break;
-		case 2:  RetVal = pInfo->IsOdd;   break;
-		case 3:  RetVal = FALSE;         break;
+		case 2:  RetVal = FALSE;          break;
+		case 3:  RetVal = FALSE;          break;
 		case 4:  RetVal = !pInfo->IsOdd;  break;
 		}
 		break;
@@ -506,10 +505,10 @@ BOOL DoWeWantToFlipNTSC(DEINTERLACE_INFO *pInfo)
 		switch(pInfo->CurrentFrame)
 		{
 		case 0:  RetVal = !pInfo->IsOdd;  break;
-		case 1:  RetVal = !pInfo->IsOdd;  break;
+		case 1:  RetVal = FALSE;          break;
 		case 2:  RetVal = pInfo->IsOdd;   break;
-		case 3:  RetVal = pInfo->IsOdd;   break;
-		case 4:  RetVal = FALSE;         break;
+		case 3:  RetVal = FALSE;          break;
+		case 4:  RetVal = FALSE;          break;
 		}
 		break;
 	default:
@@ -519,16 +518,15 @@ BOOL DoWeWantToFlipNTSC(DEINTERLACE_INFO *pInfo)
 	return RetVal;
 }
 
-
 ////////////////////////////////////////////////////////////////////////////
 // Start of Settings related code
 /////////////////////////////////////////////////////////////////////////////
 SETTING FD60Settings[FD60_SETTING_LASTONE] =
 {
 	{
-		"NTSC Film Fallback Mode", ITEMFROMLIST, 0, &gNTSCFilmFallbackMode,
-		ADAPTIVE, 0, PULLDOWNMODES_LAST_ONE - 1, 1, 1,
-		DeintModeNames,
+		"NTSC Film Fallback Mode", ITEMFROMLIST, 0, &gNTSCFilmFallbackIndex,
+		INDEX_ADAPTIVE, 0, FILMPULLDOWNMODES_LAST_ONE - 1, 1, 1,
+		NULL,
 		"Pulldown", "NTSCFilmFallbackMode", NULL,
 	},
 	{

@@ -44,7 +44,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /G6 /W3 /Gm /GX /Zi /Od /I "..\driver\include\\" /D "_DEBUG" /D "_WINDOWS" /D "WIN32" /D "_MBCS" /FR /YX /FD /c
-# ADD CPP /nologo /G6 /W3 /GX /ZI /Od /I "..\driver\include\\" /D "_DEBUG" /D "_WINDOWS" /D "WIN32" /D "_MBCS" /FR /YX"stdafx.h" /FD /c
+# ADD CPP /nologo /G6 /W3 /GX /ZI /Od /I "..\driver\include\\" /I "..\api" /D "_DEBUG" /D "_WINDOWS" /D "WIN32" /D "_MBCS" /FR /YX"stdafx.h" /FD /c
 # ADD BASE MTL /D "_DEBUG" /mktyplib203 /win32
 # SUBTRACT BASE MTL /nologo
 # ADD MTL /D "_DEBUG" /mktyplib203 /win32
@@ -78,7 +78,7 @@ LINK32=link.exe
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /G6 /MT /W3 /Gi /Ot /I "..\driver\include\\" /D "NDEBUG" /D "_WINDOWS" /D "WIN32" /D "_MBCS" /YX /FD /c
 # SUBTRACT BASE CPP /Fr
-# ADD CPP /nologo /G6 /MT /W3 /Gi /Zi /Ot /Gf /Gy /I "..\driver\include\\" /D "NDEBUG" /D "_WINDOWS" /D "WIN32" /D "_MBCS" /FAcs /Fr /YX"stdafx.h" /FD /c
+# ADD CPP /nologo /G6 /MT /W3 /Gi /Zi /Ot /Gf /Gy /I "..\driver\include\\" /I "..\api" /D "NDEBUG" /D "_WINDOWS" /D "WIN32" /D "_MBCS" /FAcs /Fr /YX"stdafx.h" /FD /c
 # ADD BASE MTL /D "NDEBUG" /mktyplib203 /win32
 # SUBTRACT BASE MTL /nologo
 # ADD MTL /D "NDEBUG" /mktyplib203 /win32
@@ -139,46 +139,6 @@ SOURCE=.\Deinterlace.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\DI_Adaptive.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\DI_BlendedClip.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\DI_Bob.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\DI_Greedy.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\DI_Greedy2Frame.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\DI_HalfHeight.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\DI_TwoFrame.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\DI_VideoBob.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\DI_VideoWeave.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\DI_Weave.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\Dialogs.c
 # End Source File
 # Begin Source File
@@ -208,14 +168,6 @@ SOURCE=.\FD_Common.c
 # Begin Source File
 
 SOURCE=.\Filter.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\FLT_Gamma.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\FLT_TNoise.c
 # End Source File
 # Begin Source File
 
@@ -311,51 +263,11 @@ SOURCE=.\Deinterlace.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\DI_Adaptive.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\DI_BlendedClip.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\DI_Bob.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\DI_Greedy.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\DI_Greedy2Frame.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\DI_TwoFrame.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\DI_VideoBob.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\DI_VideoWeave.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\DI_Weave.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\Dialogs.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\dTV.H
-# End Source File
-# Begin Source File
-
-SOURCE=.\dTV_Control.h
 # End Source File
 # Begin Source File
 
@@ -376,14 +288,6 @@ SOURCE=.\FD_Common.h
 # Begin Source File
 
 SOURCE=.\Filter.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\FLT_Gamma.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\FLT_TNoise.h
 # End Source File
 # Begin Source File
 
@@ -600,6 +504,11 @@ SOURCE=.\READ_ME_FIRST_NOW.txt
 # End Source File
 # End Target
 # End Project
+# Section dTV : {F08DF952-8592-11D1-B16A-00C0F0283628}
+# 	2:5:Class:CSlider
+# 	2:10:HeaderFile:slider.h
+# 	2:8:ImplFile:slider.cpp
+# End Section
 # Section dTV : {7BF80981-BF32-101A-8BBB-00AA00300CAB}
 # 	2:5:Class:CPicture
 # 	2:10:HeaderFile:picture.h
@@ -608,9 +517,4 @@ SOURCE=.\READ_ME_FIRST_NOW.txt
 # Section dTV : {F08DF954-8592-11D1-B16A-00C0F0283628}
 # 	2:21:DefaultSinkHeaderFile:slider.h
 # 	2:16:DefaultSinkClass:CSlider
-# End Section
-# Section dTV : {F08DF952-8592-11D1-B16A-00C0F0283628}
-# 	2:5:Class:CSlider
-# 	2:10:HeaderFile:slider.h
-# 	2:8:ImplFile:slider.cpp
 # End Section

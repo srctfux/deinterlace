@@ -275,6 +275,224 @@ Next8Bytes:
 	return DiffFactor;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Simple Weave.  Copies alternating scanlines from the most recent fields.
+BOOL Weave(DEINTERLACE_INFO *info)
+{
+	int i;
+	BYTE *lpOverlay = info->Overlay;
+
+	if (info->EvenLines[0] == NULL || info->OddLines[0] == NULL)
+		return FALSE;
+
+	for (i = 0; i < info->FieldHeight; i++)
+	{
+		info->pMemcpy(lpOverlay, info->EvenLines[0][i], info->LineLength);
+		lpOverlay += info->OverlayPitch;
+
+		info->pMemcpy(lpOverlay, info->OddLines[0][i], info->LineLength);
+		lpOverlay += info->OverlayPitch;
+	}
+	return TRUE;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Copies memory to two locations using MMX registers for speed.
+void memcpyBOBMMX(void *Dest1, void *Dest2, void *Src, size_t nBytes)
+{
+	__asm
+	{
+		mov		esi, dword ptr[Src]
+		mov		edi, dword ptr[Dest1]
+		mov     ebx, dword ptr[Dest2]
+		mov		ecx, nBytes
+		shr     ecx, 6                      // nBytes / 64
+align 8
+CopyLoop:
+		movq	mm0, qword ptr[esi]
+		movq	mm1, qword ptr[esi+8*1]
+		movq	mm2, qword ptr[esi+8*2]
+		movq	mm3, qword ptr[esi+8*3]
+		movq	mm4, qword ptr[esi+8*4]
+		movq	mm5, qword ptr[esi+8*5]
+		movq	mm6, qword ptr[esi+8*6]
+		movq	mm7, qword ptr[esi+8*7]
+		movq	qword ptr[edi], mm0
+		movq	qword ptr[edi+8*1], mm1
+		movq	qword ptr[edi+8*2], mm2
+		movq	qword ptr[edi+8*3], mm3
+		movq	qword ptr[edi+8*4], mm4
+		movq	qword ptr[edi+8*5], mm5
+		movq	qword ptr[edi+8*6], mm6
+		movq	qword ptr[edi+8*7], mm7
+		movq	qword ptr[ebx], mm0
+		movq	qword ptr[ebx+8*1], mm1
+		movq	qword ptr[ebx+8*2], mm2
+		movq	qword ptr[ebx+8*3], mm3
+		movq	qword ptr[ebx+8*4], mm4
+		movq	qword ptr[ebx+8*5], mm5
+		movq	qword ptr[ebx+8*6], mm6
+		movq	qword ptr[ebx+8*7], mm7
+		add		esi, 64
+		add		edi, 64
+		add		ebx, 64
+		dec ecx
+		jne near CopyLoop
+
+		mov		ecx, nBytes
+		and     ecx, 63
+		cmp     ecx, 0
+		je EndCopyLoop
+align 8
+CopyLoop2:
+		mov dl, byte ptr[esi] 
+		mov byte ptr[edi], dl
+		mov byte ptr[ebx], dl
+		inc esi
+		inc edi
+		inc ebx
+		dec ecx
+		jne near CopyLoop2
+EndCopyLoop:
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Copies memory to two locations using MMX registers for speed.
+void memcpyBOBSSE(void *Dest1, void *Dest2, void *Src, size_t nBytes)
+{
+	__asm
+	{
+		mov		esi, dword ptr[Src]
+		mov		edi, dword ptr[Dest1]
+		mov     ebx, dword ptr[Dest2]
+		mov		ecx, nBytes
+		shr     ecx, 7                      // nBytes / 128
+align 8
+CopyLoop:
+		movaps	xmm0, xmmword ptr[esi]
+		movaps	xmm1, xmmword ptr[esi+16*1]
+		movaps	xmm2, xmmword ptr[esi+16*2]
+		movaps	xmm3, xmmword ptr[esi+16*3]
+		movaps	xmm4, xmmword ptr[esi+16*4]
+		movaps	xmm5, xmmword ptr[esi+16*5]
+		movaps	xmm6, xmmword ptr[esi+16*6]
+		movaps	xmm7, xmmword ptr[esi+16*7]
+		movntps	xmmword ptr[edi], xmm0
+		movntps	xmmword ptr[edi+16*1], xmm1
+		movntps	xmmword ptr[edi+16*2], xmm2
+		movntps	xmmword ptr[edi+16*3], xmm3
+		movntps	xmmword ptr[edi+16*4], xmm4
+		movntps	xmmword ptr[edi+16*5], xmm5
+		movntps	xmmword ptr[edi+16*6], xmm6
+		movntps	xmmword ptr[edi+16*7], xmm7
+		movntps	xmmword ptr[ebx], xmm0
+		movntps	xmmword ptr[ebx+16*1], xmm1
+		movntps	xmmword ptr[ebx+16*2], xmm2
+		movntps	xmmword ptr[ebx+16*3], xmm3
+		movntps	xmmword ptr[ebx+16*4], xmm4
+		movntps	xmmword ptr[ebx+16*5], xmm5
+		movntps	xmmword ptr[ebx+16*6], xmm6
+		movntps	xmmword ptr[ebx+16*7], xmm7
+		add		esi, 128
+		add		edi, 128
+		add		ebx, 128
+		dec ecx
+		jne near CopyLoop
+
+		mov		ecx, nBytes
+		and     ecx, 127
+		cmp     ecx, 0
+		je EndCopyLoop
+align 8
+CopyLoop2:
+		mov dl, byte ptr[esi] 
+		mov byte ptr[edi], dl
+		mov byte ptr[ebx], dl
+		inc esi
+		inc edi
+		inc ebx
+		dec ecx
+		jne near CopyLoop2
+EndCopyLoop:
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Simple Bob.  Copies the most recent field to the overlay, with each scanline
+// copied twice.
+/////////////////////////////////////////////////////////////////////////////
+BOOL Bob(DEINTERLACE_INFO *info)
+{
+	int i;
+	BYTE *lpOverlay = info->Overlay;
+	short **lines;
+ 
+	// If field is odd we will offset it down 1 line to avoid jitter  TRB 1/21/01
+	if (info->IsOdd)
+	{
+		lines = info->OddLines[0];
+		// No recent data?  We can't do anything.
+		if (lines == NULL)
+			return FALSE;
+
+		if (info->CpuFeatureFlags & FEATURE_SSE)
+		{
+			memcpySSE(lpOverlay, lines[0], info->LineLength);	// extra copy of first line
+			lpOverlay += info->OverlayPitch;					// and offset out output ptr
+			for (i = 0; i < info->FieldHeight - 1; i++)
+			{
+				memcpyBOBSSE(lpOverlay, lpOverlay + info->OverlayPitch,
+					lines[i], info->LineLength);
+				lpOverlay += 2 * info->OverlayPitch;
+			}
+			memcpySSE(lpOverlay, lines[i], info->LineLength);	// only 1 copy of last line
+		}
+		else
+		{
+			memcpyMMX(lpOverlay, lines[0], info->LineLength);	// extra copy of first line
+			lpOverlay += info->OverlayPitch;					// and offset out output ptr
+			for (i = 0; i < info->FieldHeight - 1; i++)
+			{
+				memcpyBOBMMX(lpOverlay, lpOverlay + info->OverlayPitch,
+					lines[i], info->LineLength);
+				lpOverlay += 2 * info->OverlayPitch;
+			}
+			memcpyMMX(lpOverlay, lines[i], info->LineLength);	// only 1 copy of last line
+		}
+	}	
+	else
+	{
+		lines = info->EvenLines[0];
+		if (lines == NULL)
+				return FALSE;
+		if (info->CpuFeatureFlags & FEATURE_SSE)
+		{
+			for (i = 0; i < info->FieldHeight; i++)
+			{
+				memcpyBOBMMX(lpOverlay, lpOverlay + info->OverlayPitch,
+					lines[i], info->LineLength);
+				lpOverlay += 2 * info->OverlayPitch;
+			}
+		}
+		else
+		{
+			for (i = 0; i < info->FieldHeight; i++)
+			{
+				memcpyBOBSSE(lpOverlay, lpOverlay + info->OverlayPitch,
+					lines[i], info->LineLength);
+				lpOverlay += 2 * info->OverlayPitch;
+			}
+		}
+	}
+	// need to clear up MMX registers
+	_asm
+	{
+		emms
+	}
+	return TRUE;
+}
+
 ////////////////////////////////////////////////////////////////////////////
 // Start of Settings related code
 /////////////////////////////////////////////////////////////////////////////

@@ -25,40 +25,24 @@
 
 #include "stdafx.h"
 #include "Filter.h"
+#include "settings.h"
 
-DEINTERLACE_FUNC NoiseFilter_Temporal;
-DEINTERLACE_FUNC Filter_Gamma;
+long NumFilters = 0;
+BOOL TNoiseFilterOn;
+BOOL GammaFilterOn;
 
-FILTER_METHOD Filters[FILTERS_LAST_ONE] = 
-{
-	{
-		"Gamma Filter",
-		FALSE,
-		TRUE,
-		Filter_Gamma,
-		IDM_GAMMA_FILTER,
-		TRUE,
-	},
-	{
-		"Temporal Noise Filter",
-		FALSE,
-		TRUE,
-		NoiseFilter_Temporal,
-		IDM_NOISE_FILTER,
-		FALSE,
-	},
-};
+FILTER_METHOD* Filters[100] = {NULL,};
 
 void Filter_DoInput(DEINTERLACE_INFO *pInfo, BOOL HurryUp)
 {
 	int i;
-	for(i = 0; i < FILTERS_LAST_ONE; i++)
+	for(i = 0; i < NumFilters; i++)
 	{
-		if(Filters[i].bActive && Filters[i].bOnInput)
+		if(Filters[i]->bActive && Filters[i]->bOnInput)
 		{
-			if(!HurryUp || Filters[i].bAlwaysRun)
+			if(!HurryUp || Filters[i]->bAlwaysRun)
 			{
-				Filters[i].pfnAlgorithm(pInfo);
+				Filters[i]->pfnAlgorithm(pInfo);
 			}
 		}
 	}
@@ -67,16 +51,38 @@ void Filter_DoInput(DEINTERLACE_INFO *pInfo, BOOL HurryUp)
 void Filter_DoOutput(DEINTERLACE_INFO *pInfo, BOOL HurryUp)
 {
 	int i;
-	for(i = 0; i < FILTERS_LAST_ONE; i++)
+	for(i = 0; i < NumFilters; i++)
 	{
-		if(Filters[i].bActive && !Filters[i].bOnInput)
+		if(Filters[i]->bActive && !Filters[i]->bOnInput)
 		{
-			if(!HurryUp || Filters[i].bAlwaysRun)
+			if(!HurryUp || Filters[i]->bAlwaysRun)
 			{
-				Filters[i].pfnAlgorithm(pInfo);
+				Filters[i]->pfnAlgorithm(pInfo);
 			}
 		}
 	}
+}
+
+BOOL LoadFilterPlugins()
+{
+	return FALSE;
+}
+
+void UnloadFilterPlugins()
+{
+}
+
+
+BOOL TNoiseFilter_OnChange(long NewValue)
+{
+	// TODO
+	return FALSE;
+}
+
+BOOL GammaFilter_OnChange(long NewValue)
+{
+	// TODO
+	return FALSE;
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -85,20 +91,20 @@ void Filter_DoOutput(DEINTERLACE_INFO *pInfo, BOOL HurryUp)
 SETTING FilterSettings[FILTER_SETTING_LASTONE] =
 {
 	{
-		"Noise Filter", ONOFF, 0, &Filters[TEMPORAL_NOISE].bActive,
+		"Noise Filter", ONOFF, 0, &TNoiseFilterOn,
 		FALSE, 0, 1, 1, 1,
 		NULL,
-		"NoiseFilter", "UseTemporalNoiseFilter", NULL,
+		"NoiseFilter", "UseTemporalNoiseFilter", TNoiseFilter_OnChange,
 	},
 	{
-		"Gamma Filter", ONOFF, 0, &Filters[GAMMA].bActive,
+		"Gamma Filter", ONOFF, 0, &GammaFilterOn,
 		FALSE, 0, 1, 1, 1,
 		NULL,
-		"GammaFilter", "UseGammaFilter", NULL,
+		"GammaFilter", "UseGammaFilter", GammaFilter_OnChange,
 	},
 };
 
-SETTING* Filter_GetSetting(FILTER_SETTING Setting)
+SETTING* Filter_GetSetting(long nIndex, FILTER_SETTING Setting)
 {
 	if(Setting > -1 && Setting < FILTER_SETTING_LASTONE)
 	{
@@ -108,6 +114,11 @@ SETTING* Filter_GetSetting(FILTER_SETTING Setting)
 	{
 		return NULL;
 	}
+}
+
+LONG Filter_HandleSettingsMsg(HWND hWnd, UINT message, UINT wParam, LONG lParam, BOOL* bDone)
+{
+	return 0;
 }
 
 void Filter_ReadSettingsFromIni()
@@ -132,9 +143,9 @@ void Filter_WriteSettingsToIni()
 void Filter_SetMenu(HMENU hMenu)
 {
 	int i;
-	for(i = 0; i < FILTERS_LAST_ONE; i++)
+	for(i = 0; i < NumFilters; i++)
 	{
-		CheckMenuItem(hMenu, Filters[i].MenuId, Filters[i].bActive ? MF_CHECKED : MF_UNCHECKED);
+		CheckMenuItem(hMenu, Filters[i]->MenuId, Filters[i]->bActive ? MF_CHECKED : MF_UNCHECKED);
 	}
 }
 

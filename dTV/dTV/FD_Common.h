@@ -46,4 +46,8 @@ BOOL DoWeWantToFlip(BOOL bIsOddField);
 long GetCombFactor(DEINTERLACE_INFO *pInfo);
 long CompareFields(DEINTERLACE_INFO *pInfo);
 
+BOOL Weave(DEINTERLACE_INFO *info);
+BOOL Bob(DEINTERLACE_INFO *info);
+
+
 #endif

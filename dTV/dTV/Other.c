@@ -830,7 +830,7 @@ void SaveStill()
 			return;
 		}
 
-		sprintf(description, "dTV image, deinterlace mode %s", DeinterlaceModeName(-1));
+		sprintf(description, "dTV image, deinterlace mode %s", GetDeinterlaceModeName());
 		// How do we figure out our version number?!?!
 		FillTiffHeader(&head, description, "http://deinterlace.sourceforge.net/", "dTV version 2.x");
 		fwrite(&head, sizeof(head), 1, file);

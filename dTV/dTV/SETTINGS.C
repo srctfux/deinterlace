@@ -56,18 +56,9 @@
 #include "deinterlace.h"
 #include "AspectRatio.h"
 #include "DebugLog.h"
-#include "FLT_TNoise.h"
-#include "FLT_Gamma.h"
 #include "MixerDev.h"
 #include "dTV.h"
 #include "ProgramList.h"
-#include "DI_Adaptive.h"
-#include "DI_BlendedClip.h"
-#include "DI_VideoBob.h"
-#include "DI_VideoWeave.h"
-#include "DI_TwoFrame.h"
-#include "DI_Greedy.h"
-#include "DI_Greedy2Frame.h"
 #include "other.h"
 #include "FD_50Hz.h"
 #include "FD_60Hz.h"
@@ -124,15 +115,7 @@ void LoadSettingsFromIni()
 	FD50_ReadSettingsFromIni();
 	FD60_ReadSettingsFromIni();
 	FD_Common_ReadSettingsFromIni();
-	DI_Adaptive_ReadSettingsFromIni();
-	DI_VideoBob_ReadSettingsFromIni();
-	DI_VideoWeave_ReadSettingsFromIni();
-	DI_BlendedClip_ReadSettingsFromIni();
-	DI_TwoFrame_ReadSettingsFromIni();
-	DI_Greedy2Frame_ReadSettingsFromIni();
 	Deinterlace_ReadSettingsFromIni();
-	FLT_TNoise_ReadSettingsFromIni();
-	FLT_Gamma_ReadSettingsFromIni();
 	OSD_ReadSettingsFromIni();
 	Filter_ReadSettingsFromIni();
 	VBI_ReadSettingsFromIni();
@@ -212,76 +195,52 @@ void LoadSettingsFromIni()
 
 LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 {
+	LONG RetVal = 0;
+	BOOL bDone = TRUE;
+
 	switch(message)
 	{
 		case WM_ASPECT_GETVALUE:
-			return Setting_GetValue(Aspect_GetSetting((ASPECT_SETTING)wParam));
+			RetVal =  Setting_GetValue(Aspect_GetSetting((ASPECT_SETTING)wParam));
 			break;
 		case WM_BT848_GETVALUE:		
-			return Setting_GetValue(BT848_GetSetting((BT848_SETTING)wParam));
+			RetVal =  Setting_GetValue(BT848_GetSetting((BT848_SETTING)wParam));
 			break;
 		case WM_DTV_GETVALUE:		
-			return Setting_GetValue(dTV_GetSetting((DTV_SETTING)wParam));
+			RetVal =  Setting_GetValue(dTV_GetSetting((DTV_SETTING)wParam));
 			break;
 		case WM_OUTHREADS_GETVALUE:
-			return Setting_GetValue(OutThreads_GetSetting((OUTTHREADS_SETTING)wParam));
+			RetVal =  Setting_GetValue(OutThreads_GetSetting((OUTTHREADS_SETTING)wParam));
 			break;
 		case WM_OTHER_GETVALUE:		
-			return Setting_GetValue(Other_GetSetting((OTHER_SETTING)wParam));
+			RetVal =  Setting_GetValue(Other_GetSetting((OTHER_SETTING)wParam));
 			break;
 		case WM_FD50_GETVALUE:		
-			return Setting_GetValue(FD50_GetSetting((FD50_SETTING)wParam));
+			RetVal =  Setting_GetValue(FD50_GetSetting((FD50_SETTING)wParam));
 			break;
 		case WM_FD60_GETVALUE:		
-			return Setting_GetValue(FD60_GetSetting((FD60_SETTING)wParam));
+			RetVal =  Setting_GetValue(FD60_GetSetting((FD60_SETTING)wParam));
 			break;
 		case WM_FD_COMMON_GETVALUE:
-			return Setting_GetValue(FD_Common_GetSetting((FD_COMMON_SETTING)wParam));
-			break;
-		case WM_DI_ADAPTIVE_GETVALUE:	
-			return Setting_GetValue(DI_Adaptive_GetSetting((DI_ADAPTIVE_SETTING)wParam));
-			break;
-		case WM_DI_VIDEOBOB_GETVALUE:	
-			return Setting_GetValue(DI_VideoBob_GetSetting((DI_VIDEOBOB_SETTING)wParam));
-			break;
-		case WM_DI_BLENDEDCLIP_GETVALUE:
-			return Setting_GetValue(DI_BlendedClip_GetSetting((DI_BLENDEDCLIP_SETTING)wParam));
-			break;
-		case WM_DI_GREEDY_GETVALUE:
-			return Setting_GetValue(DI_Greedy_GetSetting((DI_GREEDY_SETTING)wParam));
-			break;
-		case WM_DI_TWOFRAME_GETVALUE:	
-			return Setting_GetValue(DI_TwoFrame_GetSetting((DI_TWOFRAME_SETTING)wParam));
+			RetVal =  Setting_GetValue(FD_Common_GetSetting((FD_COMMON_SETTING)wParam));
 			break;
 		case WM_DEINTERLACE_GETVALUE:	
-			return Setting_GetValue(Deinterlace_GetSetting((DEINTERLACE_SETTING)wParam));
-			break;
-		case WM_FLT_TNOISE_GETVALUE:		
-			return Setting_GetValue(FLT_TNoise_GetSetting((FLT_TNOISE_SETTING)wParam));
+			RetVal = Setting_GetValue(Deinterlace_GetSetting(-1, (DEINTERLACE_SETTING)wParam));
 			break;
 		case WM_TVCARD_GETVALUE:		
-			return Setting_GetValue(TVCard_GetSetting((TVCARD_SETTING)wParam));
+			RetVal = Setting_GetValue(TVCard_GetSetting((TVCARD_SETTING)wParam));
 			break;
 		case WM_VIDEOSETTINGS_GETVALUE:		
-			return Setting_GetValue(VideoSettings_GetSetting((VIDEOSETTINGS_SETTING)wParam));
+			RetVal = Setting_GetValue(VideoSettings_GetSetting((VIDEOSETTINGS_SETTING)wParam));
 			break;
 		case WM_OSD_GETVALUE:		
-			return Setting_GetValue(OSD_GetSetting((OSD_SETTING)wParam));
+			RetVal = Setting_GetValue(OSD_GetSetting((OSD_SETTING)wParam));
 			break;
 		case WM_FILTER_GETVALUE:		
-			return Setting_GetValue(Filter_GetSetting((FILTER_SETTING)wParam));
-			break;
-		case WM_FLT_GAMMA_GETVALUE:		
-			return Setting_GetValue(FLT_Gamma_GetSetting((FLT_GAMMA_SETTING)wParam));
+			RetVal = Setting_GetValue(Filter_GetSetting(-1, (FILTER_SETTING)wParam));
 			break;
 		case WM_VBI_GETVALUE:		
-			return Setting_GetValue(VBI_GetSetting((VBI_SETTING)wParam));
-			break;
-		case WM_DI_GREEDY2FRAME_GETVALUE:		
-			return Setting_GetValue(DI_Greedy2Frame_GetSetting((DI_GREEDY2FRAME_SETTING)wParam));
-			break;
-		case WM_DI_VIDEOWEAVE_GETVALUE:	
-			return Setting_GetValue(DI_VideoWeave_GetSetting((DI_VIDEOWEAVE_SETTING)wParam));
+			RetVal = Setting_GetValue(VBI_GetSetting((VBI_SETTING)wParam));
 			break;
 
 		case WM_ASPECT_SETVALUE:
@@ -308,26 +267,8 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 		case WM_FD_COMMON_SETVALUE:
 			Setting_SetValue(FD_Common_GetSetting((FD_COMMON_SETTING)wParam), lParam);
 			break;
-		case WM_DI_ADAPTIVE_SETVALUE:	
-			Setting_SetValue(DI_Adaptive_GetSetting((DI_ADAPTIVE_SETTING)wParam), lParam);
-			break;
-		case WM_DI_VIDEOBOB_SETVALUE:	
-			Setting_SetValue(DI_VideoBob_GetSetting((DI_VIDEOBOB_SETTING)wParam), lParam);
-			break;
-		case WM_DI_BLENDEDCLIP_SETVALUE:
-			Setting_SetValue(DI_BlendedClip_GetSetting((DI_BLENDEDCLIP_SETTING)wParam), lParam);
-			break;
-		case WM_DI_GREEDY_SETVALUE:
-			Setting_SetValue(DI_Greedy_GetSetting((DI_GREEDY_SETTING)wParam), lParam);
-			break;
-		case WM_DI_TWOFRAME_SETVALUE:	
-			Setting_SetValue(DI_TwoFrame_GetSetting((DI_TWOFRAME_SETTING)wParam), lParam);
-			break;
 		case WM_DEINTERLACE_SETVALUE:	
-			Setting_SetValue(Deinterlace_GetSetting((DEINTERLACE_SETTING)wParam), lParam);
-			break;
-		case WM_FLT_TNOISE_SETVALUE:		
-			Setting_SetValue(FLT_TNoise_GetSetting((FLT_TNOISE_SETTING)wParam), lParam);
+			Setting_SetValue(Deinterlace_GetSetting(-1, (DEINTERLACE_SETTING)wParam), lParam);
 			break;
 		case WM_TVCARD_SETVALUE:		
 			Setting_SetValue(TVCard_GetSetting((TVCARD_SETTING)wParam), lParam);
@@ -339,19 +280,10 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 			Setting_SetValue(OSD_GetSetting((OSD_SETTING)wParam), lParam);
 			break;
 		case WM_FILTER_SETVALUE:		
-			Setting_SetValue(Filter_GetSetting((FILTER_SETTING)wParam), lParam);
-			break;
-		case WM_FLT_GAMMA_SETVALUE:		
-			Setting_SetValue(FLT_Gamma_GetSetting((FLT_GAMMA_SETTING)wParam), lParam);
+			Setting_SetValue(Filter_GetSetting(-1, (FILTER_SETTING)wParam), lParam);
 			break;
 		case WM_VBI_SETVALUE:		
 			Setting_SetValue(VBI_GetSetting((VBI_SETTING)wParam), lParam);
-			break;
-		case WM_DI_GREEDY2FRAME_SETVALUE:		
-			Setting_SetValue(DI_Greedy2Frame_GetSetting((DI_GREEDY2FRAME_SETTING)wParam), lParam);
-			break;
-		case WM_DI_VIDEOWEAVE_SETVALUE:	
-			Setting_SetValue(DI_VideoWeave_GetSetting((DI_VIDEOWEAVE_SETTING)wParam), lParam);
 			break;
 
 		case WM_ASPECT_CHANGEVALUE:
@@ -378,26 +310,8 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 		case WM_FD_COMMON_CHANGEVALUE:
 			Setting_ChangeValue(FD_Common_GetSetting((FD_COMMON_SETTING)wParam), lParam);
 			break;
-		case WM_DI_ADAPTIVE_CHANGEVALUE:	
-			Setting_ChangeValue(DI_Adaptive_GetSetting((DI_ADAPTIVE_SETTING)wParam), lParam);
-			break;
-		case WM_DI_VIDEOBOB_CHANGEVALUE:	
-			Setting_ChangeValue(DI_VideoBob_GetSetting((DI_VIDEOBOB_SETTING)wParam), lParam);
-			break;
-		case WM_DI_BLENDEDCLIP_CHANGEVALUE:
-			Setting_ChangeValue(DI_BlendedClip_GetSetting((DI_BLENDEDCLIP_SETTING)wParam), lParam);
-			break;
-		case WM_DI_GREEDY_CHANGEVALUE:
-			Setting_ChangeValue(DI_Greedy_GetSetting((DI_GREEDY_SETTING)wParam), lParam);
-			break;
-		case WM_DI_TWOFRAME_CHANGEVALUE:	
-			Setting_ChangeValue(DI_TwoFrame_GetSetting((DI_TWOFRAME_SETTING)wParam), lParam);
-			break;
 		case WM_DEINTERLACE_CHANGEVALUE:	
-			Setting_ChangeValue(Deinterlace_GetSetting((DEINTERLACE_SETTING)wParam), lParam);
-			break;
-		case WM_FLT_TNOISE_CHANGEVALUE:		
-			Setting_ChangeValue(FLT_TNoise_GetSetting((FLT_TNOISE_SETTING)wParam), lParam);
+			Setting_ChangeValue(Deinterlace_GetSetting(-1, (DEINTERLACE_SETTING)wParam), lParam);
 			break;
 		case WM_TVCARD_CHANGEVALUE:		
 			Setting_ChangeValue(TVCard_GetSetting((TVCARD_SETTING)wParam), lParam);
@@ -409,37 +323,44 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 			Setting_ChangeValue(OSD_GetSetting((OSD_SETTING)wParam), lParam);
 			break;
 		case WM_FILTER_CHANGEVALUE:		
-			Setting_ChangeValue(Filter_GetSetting((FILTER_SETTING)wParam), lParam);
-			break;
-		case WM_FLT_GAMMA_CHANGEVALUE:		
-			Setting_ChangeValue(FLT_Gamma_GetSetting((FLT_GAMMA_SETTING)wParam), lParam);
+			Setting_ChangeValue(Filter_GetSetting(-1, (FILTER_SETTING)wParam), lParam);
 			break;
 		case WM_VBI_CHANGEVALUE:		
 			Setting_ChangeValue(VBI_GetSetting((VBI_SETTING)wParam), lParam);
 			break;
-		case WM_DI_GREEDY2FRAME_CHANGEVALUE:		
-			Setting_ChangeValue(DI_Greedy2Frame_GetSetting((DI_GREEDY2FRAME_SETTING)wParam), lParam);
-			break;
-		case WM_DI_VIDEOWEAVE_CHANGEVALUE:	
-			Setting_ChangeValue(DI_VideoWeave_GetSetting((DI_VIDEOWEAVE_SETTING)wParam), lParam);
-			break;
 		
 		default:
+			bDone = FALSE;
 			break;
 	}
 
-    // Updates the menu checkbox settings
-	SetMenuAnalog();
+	if(!bDone)
+	{
+		RetVal = Deinterlace_HandleSettingsMsg(hWnd, message, wParam, lParam, &bDone);
+	}
+	if(!bDone)
+	{
+		RetVal = Filter_HandleSettingsMsg(hWnd, message, wParam, lParam, &bDone);
+	}
+	
+	if(bDone)
+	{
+		// Updates the menu checkbox settings
+		SetMenuAnalog();
 
-    // Set the configuration file autosave timer.
-    // We use an autosave timer so that when the user has finished
-    // making adjustments and at least a small delay has occured,
-    // that the DTV.INI file is properly up to date, even if 
-    // the system crashes or system is turned off abruptly.
-    KillTimer(hWnd, TIMER_AUTOSAVE);
-    SetTimer(hWnd, TIMER_AUTOSAVE, TIMER_AUTOSAVE_MS, NULL);
-
-	return DefWindowProc(hWnd, message, wParam, lParam);
+		// Set the configuration file autosave timer.
+		// We use an autosave timer so that when the user has finished
+		// making adjustments and at least a small delay has occured,
+		// that the DTV.INI file is properly up to date, even if 
+		// the system crashes or system is turned off abruptly.
+		KillTimer(hWnd, TIMER_AUTOSAVE);
+		SetTimer(hWnd, TIMER_AUTOSAVE, TIMER_AUTOSAVE_MS, NULL);
+		return RetVal;
+	}
+	else
+	{
+		return DefWindowProc(hWnd, message, wParam, lParam);
+	}
 }
 
 
@@ -456,15 +377,7 @@ void WriteSettingsToIni()
 	FD50_WriteSettingsToIni();
 	FD60_WriteSettingsToIni();
 	FD_Common_WriteSettingsToIni();
-	DI_Adaptive_WriteSettingsToIni();
-	DI_VideoBob_WriteSettingsToIni();
-	DI_VideoWeave_WriteSettingsToIni();
-	DI_BlendedClip_WriteSettingsToIni();
-	DI_TwoFrame_WriteSettingsToIni();
-	DI_Greedy2Frame_WriteSettingsToIni();
 	Deinterlace_WriteSettingsToIni();
-	FLT_TNoise_WriteSettingsToIni();
-	FLT_Gamma_WriteSettingsToIni();
 	TVCard_WriteSettingsToIni();
 	VideoSettings_WriteSettingsToIni();
 	OSD_WriteSettingsToIni();

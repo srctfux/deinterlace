@@ -82,8 +82,6 @@
 #include "FD_60Hz.h"
 #include "FD_50Hz.h"
 #include "FD_Common.h"
-#include "DI_Weave.h"
-#include "DI_Bob.h"
 
 // Thread related variables
 BOOL                bStopThread = FALSE;
@@ -91,7 +89,6 @@ BOOL                bIsPaused = FALSE;
 HANDLE              OutThread;
 
 // Dynamically updated variables
-ePULLDOWNMODES      gPulldownMode = VIDEO_MODE_2FRAME;
 int                 CurrentFrame=0;
 BOOL                bAutoDetectMode = TRUE;
 
@@ -117,8 +114,8 @@ long nSecTicks = 0;
 long nInitialTicks = -1;
 long nLastTicks = 0;
 long nTotalDeintModeChanges = 0;
-long nDeintModeChanges[PULLDOWNMODES_LAST_ONE] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
-long nDeintModeTicks[PULLDOWNMODES_LAST_ONE] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+//long nDeintModeChanges[PULLDOWNMODES_LAST_ONE] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+//long nDeintModeTicks[PULLDOWNMODES_LAST_ONE] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
 
 // cope with older DX header files
 #if !defined(DDFLIP_DONOTWAIT)
@@ -223,8 +220,8 @@ void Start_Capture()
 	BT848_MaskDataByte(BT848_CAP_CTL, (BYTE) nFlags, (BYTE) 0x0f);
 	BT848_SetDMA(TRUE);
 
-	// ame sure half heigt modes are set correctly
-	SetDeinterlaceMode(gPulldownMode);
+	// ame sure half height modes are set correctly
+	PrepareDeinterlaceMode();
 
 	Start_Thread();
 }
@@ -304,61 +301,6 @@ BOOL WaitForNextField(BOOL LastField, BOOL* RunningLate)
 	return bIsOddField;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// SetDeinterlaceMode
-//
-// Sets the deinterlace mode as a result of a menu selection.  This turns off
-// autodetection, updates the mode indicator, etc.
-///////////////////////////////////////////////////////////////////////////////
-void SetDeinterlaceMode(int mode)
-{
-	gPulldownMode = mode;
-	UpdatePulldownStatus();
-	SetHalfHeight(DeintMethods[mode].bIsHalfHeight);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Translates a deinterlace mode name to human-readable form.
-// Parameter: mode to translate, or -1 to return name of current mode.
-char *DeinterlaceModeName(int mode)
-{
-	if (mode < 0)
-		mode = gPulldownMode;
-
-	if(mode < PULLDOWNMODES_LAST_ONE)
-		return DeintMethods[mode].szName;
-
-	return "Unknown Pulldown Mode";
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Updates the pulldown mode status indicator in the window footer if the mode
-// is different than the one currently listed there.
-void UpdatePulldownStatus()
-{
-	static ePULLDOWNMODES lastPulldownMode = PULLDOWNMODES_LAST_ONE;
-
-	if (gPulldownMode != lastPulldownMode)
-	{
-		DWORD CurrentTickCount = GetTickCount();
-
-		if (nInitialTicks == -1)
-		{
-			nInitialTicks = CurrentTickCount;
-			nLastTicks = CurrentTickCount;
-		}
-		if (lastPulldownMode != PULLDOWNMODES_LAST_ONE)
-		{
-			nDeintModeTicks[lastPulldownMode] += CurrentTickCount - nLastTicks;
-		}
-		nLastTicks = CurrentTickCount;
-		StatusBar_ShowText(STATUS_PAL, DeinterlaceModeName(gPulldownMode));
-		lastPulldownMode = gPulldownMode;
-		nTotalDeintModeChanges++;
-		nDeintModeChanges[gPulldownMode]++;
-	}
-}
-
 //
 // Add a function to Lock the overlay surface and update some info from it.
 // We always lock and write to the back buffer.
@@ -412,7 +354,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 	HRESULT ddrval;
 	DEINTERLACE_INFO info;
 	DWORD FlipFlag;
-	ePULLDOWNMODES PrevPulldownMode = PULLDOWNMODES_LAST_ONE;
+	DEINTERLACE_METHOD* PrevDeintMethod = NULL;
 	BOOL FlipAdjust;
 	LARGE_INTEGER TimerFrequency;
 	BOOL bIsPAL = BT848_GetTVFormat()->Is25fps;
@@ -462,7 +404,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 			}
 		}
 
-		PrevPulldownMode = gPulldownMode;
+		PrevDeintMethod = GetCurrentDeintMethod();
 
 		// reset the static variables in the detection code
 		if (bIsPAL)
@@ -472,9 +414,6 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 
 		memset(&info, 0, sizeof(info));
 
-		// display the current pulldown mode
-		UpdatePulldownStatus();
-		
 		// start the capture off
 		BT848_Restart_RISC_Code();
 
@@ -716,20 +655,20 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 					// if we have dropped a field then do BOB 
 					// if we are doing a half height mode then just do that
 					// anyway as it will be just as fast
-					else if(bMissedFrame && !DeintMethods[gPulldownMode].bIsHalfHeight)
+					else if(bMissedFrame && !GetCurrentDeintMethod()->bIsHalfHeight)
 					{
 						bFlipNow = Bob(&info);
 					}
 					// When we first detect film mode we will be on the right flip mode in PAL
 					// and at the end of a three series in NTSC this will be the starting point for
 					// our 2.5 field timings
-					else if(PrevPulldownMode != gPulldownMode && DeintMethods[gPulldownMode].bIsFilmMode)
+					else if(PrevDeintMethod != GetCurrentDeintMethod() && IsFilmMode())
 					{
 						bFlipNow = Weave(&info);
 					}
 					else
 					{
-						bFlipNow = DeintMethods[gPulldownMode].pfnAlgorithm(&info);
+						bFlipNow = GetCurrentDeintMethod()->pfnAlgorithm(&info);
 					}
 					
 					AdjustAspectRatio(ppEvenLines[LastEvenFrame], ppOddLines[LastOddFrame]);
@@ -762,24 +701,24 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 						// the odd and even flags may help the scaled bob
 						// on some cards
 						FlipFlag = (Wait_For_Flip)?DDFLIP_WAIT:DDFLIP_DONOTWAIT;
-						if(gPulldownMode == SCALER_BOB)
+						if(GetCurrentDeintMethod()->nMethodIndex == INDEX_SCALER_BOB)
 						{
 							FlipFlag |= (info.IsOdd)?DDFLIP_ODD:DDFLIP_EVEN;
 						}
 
 						// Need to wait for a good time to flip
 						// only if we have been in the same mode for at least one flip
-						if(DoAccurateFlips && PrevPulldownMode == gPulldownMode)
+						if(DoAccurateFlips && PrevDeintMethod == GetCurrentDeintMethod())
 						{
 							LONGLONG TicksToWait;
 							// work out the required ticks between flips
 							if(bIsPAL)
 							{
-								TicksToWait = (LONGLONG)(RunningAverageCounterTicks * 25.0 / (double)DeintMethods[gPulldownMode].FrameRate50Hz);
+								TicksToWait = (LONGLONG)(RunningAverageCounterTicks * 25.0 / (double)GetCurrentDeintMethod()->FrameRate50Hz);
 							}
 							else
 							{
-								TicksToWait = (LONGLONG)(RunningAverageCounterTicks * 30.0 / (double)DeintMethods[gPulldownMode].FrameRate60Hz);
+								TicksToWait = (LONGLONG)(RunningAverageCounterTicks * 30.0 / (double)GetCurrentDeintMethod()->FrameRate60Hz);
 							}
 							// if we are geting behind then we need to speed up
 							// slightly however don't ever go more than 3% off spec
@@ -815,21 +754,12 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 							FlipAdjust = FALSE;
 							LastFlipTime.QuadPart = CurrentFlipTime.QuadPart;
 						}
-
-						if(PrevPulldownMode != gPulldownMode)
-						{
-							if(DeintMethods[gPulldownMode].bIsHalfHeight || 
-								DeintMethods[PrevPulldownMode].bIsHalfHeight)
-							{
-								SetDeinterlaceMode(gPulldownMode);
-							}
-						}
 					}
 				}
 			}
 			
 			// save the last pulldown mode so that we know if its changed
-			PrevPulldownMode = gPulldownMode;
+			PrevDeintMethod = GetCurrentDeintMethod();
 
 			CurrentTickCount = GetTickCount();
 			if (dwLastSecondTicks + 1000 < CurrentTickCount)
@@ -839,10 +769,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				nFrame = 0;
 				nSecTicks += CurrentTickCount - dwLastSecondTicks;
 				dwLastSecondTicks = CurrentTickCount;
-				if (gPulldownMode != PULLDOWNMODES_LAST_ONE)
-				{
-					nDeintModeTicks[gPulldownMode] += CurrentTickCount - nLastTicks;
-				}
+				GetCurrentDeintMethod()->ModeTicks += CurrentTickCount - nLastTicks;
 				nLastTicks = CurrentTickCount;
 				if (IsStatusBarVisible())
 				{
@@ -853,20 +780,6 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 		}
 
 		BT848_SetDMA(FALSE);
-
-		// if we are in autodect mode we don't want to remember the current film mode
-		// so return to the current fallback mode instead.
-		if(bAutoDetectMode && DeintMethods[gPulldownMode].bIsFilmMode)
-		{
-			if(bIsPAL)
-			{
-				gPulldownMode = Setting_GetValue(FD50_GetSetting(PALFILMFALLBACKMODE));
-			}
-			else
-			{
-				gPulldownMode = Setting_GetValue(FD60_GetSetting(NTSCFILMFALLBACKMODE));
-			}
-		}
 	}
 	// if there is any exception thrown then exit the thread
 	__except (EXCEPTION_EXECUTE_HANDLER) 
@@ -916,11 +829,12 @@ SETTING OutThreadsSettings[OUTTHREADS_SETTING_LASTONE] =
 		NULL,
 		"Pulldown", "bAutoDetectMode", NULL,
 	},
+	// don't use gPulldownMethiod anymore
 	{
-		"Pulldown Mode", ITEMFROMLIST, 0, &gPulldownMode,
-		VIDEO_MODE_2FRAME, 0, PULLDOWNMODES_LAST_ONE - 1, 1, 1,
-		DeintModeNames,
-		"Deinterlace", "DeinterlaceMode", NULL,
+		NULL, ITEMFROMLIST, 0, NULL,
+		0, 0, 0, 1, 1,
+		NULL,
+		NULL, NULL, NULL,
 	},
 	{
 		"Refresh Rate", SLIDER, 0, &RefreshRate,

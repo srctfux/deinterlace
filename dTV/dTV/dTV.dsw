@@ -26,36 +26,6 @@ Package=<5>
 
 Package=<4>
 {{{
-    Begin Project Dependency
-    Project_Dep_Name dTVdrvNT
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name dTVdrv95
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "dTVdrv95"=..\DRIVER\VXD\dTVdrv95.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "dTVdrvNT"=..\Driver\SYS\dTVdrvNT.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
 }}}
 
 ###############################################################################
@@ -68,7 +38,6 @@ Package=<5>
 
 Package=<3>
 {{{
-    {F08DF954-8592-11D1-B16A-00C0F0283628}
 }}}
 
 ###############################################################################

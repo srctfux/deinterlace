@@ -107,7 +107,7 @@ static struct {
 	int		refresh_delay;	// Refresh period in ms (0 means no refresh)
 	BOOL	active;			// Screen to take into account or not
 } ActiveScreens[] = {
-	{	OSD_SCREEN_1,	OSD_TIMER_REFRESH_DELAY,	TRUE	},
+ 	{	OSD_SCREEN_1,	OSD_TIMER_REFRESH_DELAY,	TRUE	},
 	{	OSD_SCREEN_3,	1000,						TRUE	},
 	{	OSD_SCREEN_2,	OSD_TIMER_REFRESH_DELAY,	TRUE	},
 	{	OSD_SCREEN_4,	0,							FALSE	},
@@ -474,6 +474,7 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 	int				i;
 	long			Color;
 	double			pos;
+	DEINTERLACE_METHOD* DeintMethod;
 
 	// Case : no OSD screen
 	if (IdxCurrentScreen == -1)
@@ -628,11 +629,11 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 			strcpy(szInfo, "Auto Pulldown Detect OFF");
 		}
 		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine--, dfMargin, dfSize));
-		OSD_AddText(DeinterlaceModeName(-1), dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine--, dfMargin, dfSize));
+		OSD_AddText(GetDeinterlaceModeName(), dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine--, dfMargin, dfSize));
 
 		// Filters
 		nLine = -1;
-		if (Setting_GetValue(Filter_GetSetting(USETEMPORALNOISEFILTER)))
+		if (Setting_GetValue(Filter_GetSetting(-1, USETEMPORALNOISEFILTER)))
 		{
 			strcpy(szInfo, "Noise Filter ON");
 		}
@@ -641,7 +642,7 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 			strcpy(szInfo, "Noise Filter OFF");
 		}
 		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine--, dfMargin, dfSize));
-		if (Setting_GetValue(Filter_GetSetting(USEGAMMAFILTER)))
+		if (Setting_GetValue(Filter_GetSetting(-1, USEGAMMAFILTER)))
 		{
 			strcpy(szInfo, "Gamma Filter ON");
 		}
@@ -763,14 +764,15 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 		nLine++;
 		OSD_AddText("changes - % of time - mode", dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-		for (i = 0 ; i < PULLDOWNMODES_LAST_ONE ; i++)
+		for (i = 0 ; i < FILMPULLDOWNMODES_LAST_ONE ; i++)
 		{
-			if (nDeintModeChanges[i] > 0)
+			DeintMethod = GetFilmDeintMethod(i);
+			if (DeintMethod->ModeChanges > 0)
 			{
 				pos = OSD_GetLineYpos (nLine, dfMargin, dfSize);
 				if (pos > 0)
 				{
-					if (i == gPulldownMode)
+					if (DeintMethod == GetCurrentDeintMethod())
 					{
 						Color = OSD_COLOR_CURRENT;
 					}
@@ -778,11 +780,36 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 					{
 						Color = 0;
 					}
-					sprintf (szInfo, "%04d - %05.1f %% - %s", nDeintModeChanges[i], nDeintModeTicks[i] * 100 / (double)(nLastTicks - nInitialTicks), DeintModeNames[i]);
+					sprintf (szInfo, "%04d - %05.1f %% - %s", DeintMethod->ModeChanges, DeintMethod->ModeTicks * 100 / (double)(nLastTicks - nInitialTicks), DeintMethod->szName);
 					OSD_AddText(szInfo, dfSize, Color, OSD_XPOS_LEFT, dfMargin, pos);
 					nLine++;
 				}
 			}
+		}
+		i = 0;
+		DeintMethod = GetVideoDeintMethod(i);
+		while(DeintMethod != NULL)
+		{
+			if (DeintMethod->ModeChanges > 0)
+			{
+				pos = OSD_GetLineYpos (nLine, dfMargin, dfSize);
+				if (pos > 0)
+				{
+					if (DeintMethod == GetCurrentDeintMethod())
+					{
+						Color = OSD_COLOR_CURRENT;
+					}
+					else
+					{
+						Color = 0;
+					}
+					sprintf (szInfo, "%04d - %05.1f %% - %s", DeintMethod->ModeChanges, DeintMethod->ModeTicks * 100 / (double)(nLastTicks - nInitialTicks), DeintMethod->szName);
+					OSD_AddText(szInfo, dfSize, Color, OSD_XPOS_LEFT, dfMargin, pos);
+					nLine++;
+				}
+			}
+			i++;
+			DeintMethod = GetVideoDeintMethod(i);
 		}
 		break;
 

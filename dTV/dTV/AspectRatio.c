@@ -78,6 +78,7 @@
 extern HMENU hMenu;
 extern BOOL  bIsFullScreen;
 extern void ShowText(HWND hWnd, LPCTSTR szText);
+int HalfHeight = FALSE;
 
 AspectSettingsStruct aspectSettings = {1333,0,1,0,0,30,0,FALSE,60,300,15,20,
 									2000,VERT_POS_CENTRE,HORZ_POS_CENTRE,
@@ -110,8 +111,7 @@ double GetActualSourceFrameAspect()
 //----------------------------------------------------------------------------
 // Enter or leave half-height mode.
 // True if we're in half-height mode (even or odd scanlines only).
-static int HalfHeight;
-void SetHalfHeight(int IsHalfHeight)
+void SetHalfHeight(BOOL IsHalfHeight)
 {
 	if (IsHalfHeight != HalfHeight)
 	{

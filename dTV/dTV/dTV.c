@@ -74,7 +74,6 @@
 #include "tuner.h"
 #include "status.h"
 #include "vbi.h"
-#include "DI_BlendedClip.H"
 #include "FD_60Hz.H"
 #include "FD_50Hz.H"
 #include "Filter.h"
@@ -82,6 +81,7 @@
 #include "VideoSettings.h"
 #include "VBI_CCdecode.h"
 #include "VBI_VideoText.h"
+#include "deinterlace.h"
 #define DOLOGGING
 #include "DebugLog.h"
 
@@ -414,11 +414,11 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			// either case
 			if(BT848_GetTVFormat()->Is25fps)
 			{
-				SetDeinterlaceMode(Setting_GetValue(FD50_GetSetting(PALFILMFALLBACKMODE)));
+				SetVideoDeinterlaceMode(Setting_GetValue(FD50_GetSetting(PALFILMFALLBACKMODE)));
 			}
 			else
 			{
-				SetDeinterlaceMode(Setting_GetValue(FD60_GetSetting(NTSCFILMFALLBACKMODE)));
+				SetVideoDeinterlaceMode(Setting_GetValue(FD60_GetSetting(NTSCFILMFALLBACKMODE)));
 			}
 			break;
 
@@ -435,16 +435,16 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			}
 			break;
 
+		case IDM_22PULLODD:
+		case IDM_22PULLEVEN:
 		case IDM_32PULL1:
 		case IDM_32PULL2:
 		case IDM_32PULL3:
 		case IDM_32PULL4:
 		case IDM_32PULL5:
-		case IDM_22PULLODD:
-		case IDM_22PULLEVEN:
 			Setting_SetValue(OutThreads_GetSetting(AUTODETECT), FALSE);
-			SetDeinterlaceMode(LOWORD(wParam) - IDM_VIDEO_BOB);
-			ShowText(hWnd, DeinterlaceModeName(-1));
+			SetFilmDeinterlaceMode(LOWORD(wParam) - IDM_22PULLODD);
+			ShowText(hWnd, GetDeinterlaceModeName());
 			break;
 
 		case IDM_WEAVE:
@@ -469,46 +469,41 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				{
 					Setting_SetValue(FD60_GetSetting(NTSCFILMFALLBACKMODE), LOWORD(wParam) - IDM_VIDEO_BOB);
 				}
-				if(!DeintMethods[gPulldownMode].bIsFilmMode)
+				if(!IsFilmMode())
 				{
-					SetDeinterlaceMode(LOWORD(wParam) - IDM_VIDEO_BOB);
+					SetVideoDeinterlaceIndex(LOWORD(wParam) - IDM_VIDEO_BOB);
 				}
 			}
 			else
 			{
-				
-				SetDeinterlaceMode(LOWORD(wParam) - IDM_VIDEO_BOB);
+				SetVideoDeinterlaceIndex(LOWORD(wParam) - IDM_VIDEO_BOB);
 			}
-			ShowText(hWnd, DeinterlaceModeName(-1));
-			if(LOWORD(wParam) == IDM_BLENDED_CLIP)
-			{
-				BlendedClip_ShowDlg(hInst, hWnd);
-			}
+			ShowText(hWnd, GetDeinterlaceModeName());
 			break;
 
 		case IDM_NOISE_FILTER:
-			if (Setting_GetValue(Filter_GetSetting(USETEMPORALNOISEFILTER)))
+			if (Setting_GetValue(Filter_GetSetting(-1, USETEMPORALNOISEFILTER)))
 			{
 				ShowText(hWnd, "Noise Filter OFF");
-				Setting_SetValue(Filter_GetSetting(USETEMPORALNOISEFILTER), FALSE);
+				Setting_SetValue(Filter_GetSetting(-1, USETEMPORALNOISEFILTER), FALSE);
 			}
 			else
 			{
 				ShowText(hWnd, "Noise Filter ON");
-				Setting_SetValue(Filter_GetSetting(USETEMPORALNOISEFILTER), TRUE);
+				Setting_SetValue(Filter_GetSetting(-1, USETEMPORALNOISEFILTER), TRUE);
 			}
 			break;
 
 		case IDM_GAMMA_FILTER:
-			if (Setting_GetValue(Filter_GetSetting(USEGAMMAFILTER)))
+			if (Setting_GetValue(Filter_GetSetting(-1, USEGAMMAFILTER)))
 			{
 				ShowText(hWnd, "Gamma Filter OFF");
-				Setting_SetValue(Filter_GetSetting(USEGAMMAFILTER), FALSE);
+				Setting_SetValue(Filter_GetSetting(-1, USEGAMMAFILTER), FALSE);
 			}
 			else
 			{
 				ShowText(hWnd, "Gamma Filter ON");
-				Setting_SetValue(Filter_GetSetting(USEGAMMAFILTER), TRUE);
+				Setting_SetValue(Filter_GetSetting(-1, USEGAMMAFILTER), TRUE);
 			}
 			break;
 
@@ -1084,29 +1079,16 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_SPACEBAR:
 			if(!Setting_GetValue(OutThreads_GetSetting(AUTODETECT)))
 			{
-				int NewPulldownMode = gPulldownMode + 1;
-
-				if(NewPulldownMode == PULLDOWNMODES_LAST_ONE)
-				{
-					NewPulldownMode = VIDEO_MODE_BOB;
-				}
-				SetDeinterlaceMode(NewPulldownMode);
-				ShowText(hWnd, DeinterlaceModeName(-1));
+				IncrementDeinterlaceMode();
+				ShowText(hWnd, GetDeinterlaceModeName());
 			}
 			break;
 
 		case IDM_SHIFT_SPACEBAR:
 			if (!Setting_GetValue(OutThreads_GetSetting(AUTODETECT)))
 			{
-				int NewPulldownMode = gPulldownMode;
-
-				if (gPulldownMode == VIDEO_MODE_BOB)
-					NewPulldownMode = PULLDOWNMODES_LAST_ONE;
-
-				NewPulldownMode--;
-
-				SetDeinterlaceMode(NewPulldownMode);
-				ShowText(hWnd, DeinterlaceModeName(-1));
+				DecrementDeinterlaceMode();
+				ShowText(hWnd, GetDeinterlaceModeName());
 			}
 			break;
 
@@ -1547,30 +1529,45 @@ void MainWndOnInitBT(HWND hWnd)
 	int i;
 	BOOL bInitOK = FALSE;
 
-	AddSplashTextLine("Hardware Init");
-
-	if (BT848_FindTVCard(hWnd) == TRUE)
-	{
-		AddSplashTextLine(BT848_ChipType());
-		if(InitDD(hWnd) == TRUE)
-		{
-			if(Overlay_Create() == TRUE)
-			{
-				if (BT848_MemoryInit() == TRUE)
-				{
-					bInitOK = TRUE;
-				}
-			}
-		}
-	}
-	else
+	// TODO: put bvack to hardware tests first
+	AddSplashTextLine("Software Init");
+	if(!LoadDeinterlacePlugins())
 	{
 		AddSplashTextLine("");
 		AddSplashTextLine("No");
-		AddSplashTextLine("Suitable");
-		AddSplashTextLine("Hardware");
+		AddSplashTextLine("Plug-ins");
+		AddSplashTextLine("Found");
+		bInitOK = FALSE;
 	}
+	else
+	{
+		LoadFilterPlugins();
 
+		AddSplashTextLine("Hardware Init");
+
+		if (BT848_FindTVCard(hWnd) == TRUE)
+		{
+			AddSplashTextLine(BT848_ChipType());
+			if(InitDD(hWnd) == TRUE)
+			{
+				if(Overlay_Create() == TRUE)
+				{
+					if (BT848_MemoryInit() == TRUE)
+					{
+						bInitOK = TRUE;
+					}
+				}
+			}
+		}
+		else
+		{
+			AddSplashTextLine("");
+			AddSplashTextLine("No");
+			AddSplashTextLine("Suitable");
+			AddSplashTextLine("Hardware");
+		}
+	}
+	
 	if (bInitOK)
 	{
 		if(Setting_GetValue(TVCard_GetSetting(CURRENTCARDTYPE)) == TVCARD_UNKNOWN)
@@ -1860,7 +1857,7 @@ void MainWndOnDestroy()
 		ExitDD();
 	}
 	__except(EXCEPTION_EXECUTE_HANDLER) {LOG("Error ExitDD");}
-	
+
 	__try
 	{
 		// save settings
@@ -1868,6 +1865,15 @@ void MainWndOnDestroy()
 		WriteSettingsToIni();
 	}
 	__except(EXCEPTION_EXECUTE_HANDLER) {LOG("Error WriteSettingsToIni");}
+
+	__try
+	{
+		// unload plug-ins
+		UnloadDeinterlacePlugins();
+		UnloadFilterPlugins();
+	}
+	__except(EXCEPTION_EXECUTE_HANDLER) {LOG("Error Unlaod plug-ins");}
+
 }
 
 //---------------------------------------------------------------------------

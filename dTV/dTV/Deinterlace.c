@@ -47,65 +47,362 @@
 #include "OutThreads.h"
 #include "FD_50Hz.h"
 #include "FD_60Hz.h"
+#include "AspectRatio.h"
+#include "Status.h"
 
-DEINTERLACE_FUNC Bob;
-DEINTERLACE_FUNC Weave;
-DEINTERLACE_FUNC DeinterlaceFieldWeave;
-DEINTERLACE_FUNC DeinterlaceFieldBob;
-DEINTERLACE_FUNC DeinterlaceFieldTwoFrame;
-DEINTERLACE_FUNC BlendedClipping;
-DEINTERLACE_FUNC HalfHeightBoth;
-DEINTERLACE_FUNC HalfHeightEvenOnly;
-DEINTERLACE_FUNC HalfHeightOddOnly;
-DEINTERLACE_FUNC FilmModePAL;
-DEINTERLACE_FUNC FilmModeNTSC;
-DEINTERLACE_FUNC AdaptiveDeinterlace;
-DEINTERLACE_FUNC GreedyClipping;
-DEINTERLACE_FUNC DeinterlaceFieldGreedy2Frame;
-
-DEINTERLACE_METHOD DeintMethods[PULLDOWNMODES_LAST_ONE] =
+DEINTERLACE_METHOD FilmDeintMethods[FILMPULLDOWNMODES_LAST_ONE] =
 {
-	// VIDEO_MODE_BOB
-	{"Video Deinterlace (Bob)", "Bob", FALSE, FALSE, DeinterlaceFieldBob, 50, 60},
-	// VIDEO_MODE_WEAVE
-	{"Video Deinterlace (Weave)", "Weave", FALSE, FALSE, DeinterlaceFieldWeave, 50, 60},
-	// VIDEO_MODE_2FRAME
-	{"Video Deinterlace (2-Frame)", "2-Frame", FALSE, FALSE, DeinterlaceFieldTwoFrame, 50, 60},
-	// SIMPLE_WEAVE
-	{"Simple Weave", NULL, FALSE, FALSE, Weave, 50, 60},
-	// SIMPLE_BOB
-	{"Simple Bob", NULL, FALSE, FALSE, Bob, 50, 60},
-	// SCALER_BOB
-	{"Scaler Bob", NULL, TRUE, FALSE, HalfHeightBoth, 50, 60},
 	// FILM_22_PULLDOWN_ODD
-	{"2:2 Pulldown Flip on Odd", "2:2 Odd", FALSE, TRUE, FilmModePAL, 25, 30},
+	{"2:2 Pulldown Flip on Odd", "2:2 Odd", FALSE, TRUE, FilmModePALOdd, 25, 30, 0, NULL, 0, NULL, NULL, 2, 0, 0, -1,},
 	// FILM_22_PULLDOWN_EVEN
-	{"2:2 Pulldown Flip on Even", "2:2 Even", FALSE, TRUE, FilmModePAL, 25, 30},
+	{"2:2 Pulldown Flip on Even", "2:2 Even", FALSE, TRUE, FilmModePALEven, 25, 30, 0, NULL, 0, NULL, NULL, 2, 0, 0, -1,},
 	// FILM_32_PULLDOWN_0
-	{"3:2 Pulldown Skip 1st Full Frame", "3:2 1st", FALSE, TRUE, FilmModeNTSC, 1000, 24},
+	{"3:2 Pulldown Skip 1st Full Frame", "3:2 1st", FALSE, TRUE, FilmModeNTSC1st, 1000, 24, 0, NULL, 0, NULL, NULL, 2, 0, 0, -1,},
 	// FILM_32_PULLDOWN_1
-	{"3:2 Pulldown Skip 2nd Full Frame", "3:2 2nd", FALSE, TRUE, FilmModeNTSC, 1000, 24},
+	{"3:2 Pulldown Skip 2nd Full Frame", "3:2 2nd", FALSE, TRUE, FilmModeNTSC2nd, 1000, 24, 0, NULL, 0, NULL, NULL, 2, 0, 0, -1,},
 	// FILM_32_PULLDOWN_2
-	{"3:2 Pulldown Skip 3rd Full Frame", "3:2 3rd", FALSE, TRUE, FilmModeNTSC, 1000, 24},
+	{"3:2 Pulldown Skip 3rd Full Frame", "3:2 3rd", FALSE, TRUE, FilmModeNTSC3rd, 1000, 24, 0, NULL, 0, NULL, NULL, 2, 0, 0, -1,},
 	// FILM_32_PULLDOWN_3
-	{"3:2 Pulldown Skip 4th Full Frame", "3:2 4th", FALSE, TRUE, FilmModeNTSC, 1000, 24},
+	{"3:2 Pulldown Skip 4th Full Frame", "3:2 4th", FALSE, TRUE, FilmModeNTSC4th, 1000, 24, 0, NULL, 0, NULL, NULL, 2, 0, 0, -1,},
 	// FILM_32_PULLDOWN_4
-	{"3:2 Pulldown Skip 5th Full Frame", "3:2 5th", FALSE, TRUE, FilmModeNTSC, 1000, 24},
-	// EVEN_ONLY
-	{"Even Scanlines Only", "Even", TRUE, FALSE, HalfHeightEvenOnly, 25, 30},
-	// ODD_ONLY
-	{"Odd Scanlines Only", "Odd", TRUE, FALSE, HalfHeightOddOnly, 25, 30},
-	// BLENDED_CLIP
-	{"Blended Clip", NULL, FALSE, FALSE, BlendedClipping, 50, 60},
-	// ADAPTIVE
-	{"Adaptive", NULL, FALSE, FALSE, AdaptiveDeinterlace, 50, 60},
-	// GREEDY
-	{"Video (Greedy)", NULL, FALSE, FALSE, GreedyClipping, 50, 60},
-	// Greedy 2 frame
-	{"Greedy 2 Frame", NULL, FALSE, FALSE, DeinterlaceFieldGreedy2Frame, 50, 60},
+	{"3:2 Pulldown Skip 5th Full Frame", "3:2 5th", FALSE, TRUE, FilmModeNTSC5th, 1000, 24, 0, NULL, 0, NULL, NULL, 2, 0, 0, -1,},
 };
 
-char* DeintModeNames[PULLDOWNMODES_LAST_ONE];
+long NumVideoModes = 0;
+DEINTERLACE_METHOD* VideoDeintMethods[100] = {NULL,};
+BOOL bIsFilmMode = FALSE;
+
+long gVideoPulldownMode = 0;
+long gFilmPulldownMode = 0;
+
+DEINTERLACE_METHOD* GetCurrentDeintMethod()
+{
+	if(bIsFilmMode)
+	{
+		return FilmDeintMethods + gFilmPulldownMode;
+	}
+	else
+	{
+		return VideoDeintMethods[gVideoPulldownMode];
+	}
+}
+
+DEINTERLACE_METHOD* GetVideoDeintMethod(int Mode)
+{
+	if(Mode < NumVideoModes)
+	{
+		return VideoDeintMethods[gVideoPulldownMode];
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+DEINTERLACE_METHOD* GetFilmDeintMethod(eFILMPULLDOWNMODES Mode)
+{
+	if(Mode < FILMPULLDOWNMODES_LAST_ONE)
+	{
+		return FilmDeintMethods + gFilmPulldownMode;
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+
+BOOL IsFilmMode()
+{
+	return bIsFilmMode;
+}
+
+BOOL InHalfHeightMode()
+{
+	if(bIsFilmMode)
+	{
+		return FALSE;
+	}
+	else
+	{
+		return VideoDeintMethods[gVideoPulldownMode]->bIsHalfHeight;
+	}
+}
+
+eFILMPULLDOWNMODES GetFilmMode()
+{
+	if(bIsFilmMode)
+	{
+		return gFilmPulldownMode;
+	}
+	else
+	{
+		return FILMPULLDOWNMODES_LAST_ONE;
+	}
+}
+
+void SetFilmDeinterlaceMode(int mode)
+{
+	if (gFilmPulldownMode != mode || bIsFilmMode == FALSE)
+	{
+		DWORD CurrentTickCount = GetTickCount();
+
+		if (nInitialTicks == -1)
+		{
+			nInitialTicks = CurrentTickCount;
+			nLastTicks = CurrentTickCount;
+		}
+		else
+		{
+			if(bIsFilmMode == TRUE)
+			{
+				FilmDeintMethods[gFilmPulldownMode].ModeTicks += CurrentTickCount - nLastTicks;
+			}
+			else
+			{
+				VideoDeintMethods[gVideoPulldownMode]->ModeTicks += CurrentTickCount - nLastTicks;
+			}
+		}
+		gFilmPulldownMode = mode;
+		bIsFilmMode = TRUE;
+		nLastTicks = CurrentTickCount;
+		StatusBar_ShowText(STATUS_PAL, GetDeinterlaceModeName());
+		nTotalDeintModeChanges++;
+		FilmDeintMethods[gFilmPulldownMode].ModeChanges++;
+		SetHalfHeight(FilmDeintMethods[gFilmPulldownMode].bIsHalfHeight);
+	}
+}
+
+void SetVideoDeinterlaceMode(int mode)
+{
+	if (gVideoPulldownMode != mode || bIsFilmMode == TRUE)
+	{
+		DWORD CurrentTickCount = GetTickCount();
+
+		if (nInitialTicks == -1)
+		{
+			nInitialTicks = CurrentTickCount;
+			nLastTicks = CurrentTickCount;
+		}
+		else
+		{
+			if(bIsFilmMode == TRUE)
+			{
+				FilmDeintMethods[gFilmPulldownMode].ModeTicks += CurrentTickCount - nLastTicks;
+			}
+			else
+			{
+				VideoDeintMethods[gVideoPulldownMode]->ModeTicks += CurrentTickCount - nLastTicks;
+			}
+		}
+		gVideoPulldownMode = mode;
+		bIsFilmMode = FALSE;
+		nLastTicks = CurrentTickCount;
+		StatusBar_ShowText(STATUS_PAL, GetDeinterlaceModeName());
+		nTotalDeintModeChanges++;
+		VideoDeintMethods[gVideoPulldownMode]->ModeChanges++;
+		SetHalfHeight(VideoDeintMethods[gVideoPulldownMode]->bIsHalfHeight);
+	}
+}
+
+void SetVideoDeinterlaceIndex(int index)
+{
+	int i;
+	for(i = 0; i < NumVideoModes; i++)
+	{
+		if(VideoDeintMethods[i]->nMethodIndex == index)
+		{
+			SetVideoDeinterlaceMode(i);
+			return;
+		}
+	}
+}
+
+char* GetDeinterlaceModeName()
+{
+	if(bIsFilmMode)
+	{
+		return FilmDeintMethods[gFilmPulldownMode].szName;
+	}
+	else
+	{
+		return VideoDeintMethods[gVideoPulldownMode]->szName;
+	}
+}
+
+void PrepareDeinterlaceMode()
+{
+	bIsFilmMode = FALSE;
+	if(BT848_GetTVFormat()->Is25fps)
+	{
+		SetVideoDeinterlaceIndex(Setting_GetValue(FD50_GetSetting(PALFILMFALLBACKMODE)));
+	}
+	else
+	{
+		SetVideoDeinterlaceIndex(Setting_GetValue(FD60_GetSetting(NTSCFILMFALLBACKMODE)));
+	}
+	// If that didn't work then go into whatever they loaded up first
+	if(gVideoPulldownMode == -1)
+	{
+		SetVideoDeinterlaceMode(0);
+	}
+}
+
+void IncrementDeinterlaceMode()
+{
+	long Mode;
+	if(bIsFilmMode)
+	{
+		Mode = gFilmPulldownMode;
+		Mode++;
+		if(Mode == FILMPULLDOWNMODES_LAST_ONE)
+		{
+			SetVideoDeinterlaceMode(0);
+		}
+		else
+		{
+			SetFilmDeinterlaceMode(Mode);
+		}
+	}
+	else
+	{
+		Mode = gVideoPulldownMode;
+		Mode++;
+		if(Mode == NumVideoModes)
+		{
+			SetFilmDeinterlaceMode(FILM_22_PULLDOWN_ODD);
+		}
+		else
+		{
+			SetVideoDeinterlaceMode(Mode);
+		}
+	}
+}
+
+void DecrementDeinterlaceMode()
+{
+	long Mode;
+	if(bIsFilmMode)
+	{
+		Mode = gFilmPulldownMode;
+		Mode--;
+		if(Mode < 0)
+		{
+			SetVideoDeinterlaceMode(NumVideoModes - 1);
+		}
+		else
+		{
+			SetFilmDeinterlaceMode(Mode);
+		}
+	}
+	else
+	{
+		Mode = gVideoPulldownMode;
+		Mode--;
+		if(Mode < 0)
+		{
+			SetFilmDeinterlaceMode(FILM_32_PULLDOWN_4);
+		}
+		else
+		{
+			SetVideoDeinterlaceMode(Mode);
+		}
+	}
+}
+
+void LoadPlugin(LPCSTR szFileName)
+{
+	GETDEINTERLACEPLUGININFO* pfnGetDeinterlacePluginInfo;
+	DEINTERLACE_METHOD* pMethod;
+	HMODULE hPlugInMod;
+
+	hPlugInMod = LoadLibrary(szFileName);
+	if(hPlugInMod == NULL)
+	{
+		return;
+	}
+	
+	pfnGetDeinterlacePluginInfo = (GETDEINTERLACEPLUGININFO*)GetProcAddress(hPlugInMod, "GetDeinterlacePluginInfo");
+	if(pfnGetDeinterlacePluginInfo == NULL)
+	{
+		return;
+	}
+
+	pMethod = pfnGetDeinterlacePluginInfo(CpuFeatureFlags);
+	if(pMethod != NULL)
+	{
+		VideoDeintMethods[NumVideoModes] = pMethod;
+		pMethod->hModule = hPlugInMod;
+		NumVideoModes++;
+	}
+}
+
+void UnloadDeinterlacePlugins()
+{
+	int i;
+	for(i = 0; i < NumVideoModes; i++)
+	{
+		VideoDeintMethods[i]->pfnPluginExit();
+		FreeLibrary(VideoDeintMethods[i]->hModule);
+		VideoDeintMethods[i] = NULL;
+	}
+	NumVideoModes = 0;
+}
+
+int MethodCompare( const void *arg1, const void *arg2 )
+{
+	DEINTERLACE_METHOD* pMethod1 = *(DEINTERLACE_METHOD**)arg1;
+	DEINTERLACE_METHOD* pMethod2 = *(DEINTERLACE_METHOD**)arg2;
+
+	if(pMethod1->nMethodIndex < pMethod2->nMethodIndex)
+	{
+		return -1;
+	}
+	else if(pMethod1->nMethodIndex > pMethod2->nMethodIndex)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+void AddUIForDeintPlugin(DEINTERLACE_METHOD* DeintMethod)
+{
+	// TODO Get UI Sorted
+}
+
+BOOL LoadDeinterlacePlugins()
+{
+	WIN32_FIND_DATA FindFileData;
+	HANDLE hFindFile;
+	int i;
+	hFindFile = FindFirstFile("DI_*.dll", &FindFileData);
+
+	if (hFindFile != INVALID_HANDLE_VALUE)
+	{
+		BOOL RetVal = TRUE;
+    	while(RetVal != 0)
+		{
+			LoadPlugin(FindFileData.cFileName);
+			RetVal = FindNextFile(hFindFile, &FindFileData);
+		}
+	}
+
+	// put the plug-ins into index order
+	// this should prevent confusion in the UI
+	if(NumVideoModes > 1)
+	{
+		qsort((void*) VideoDeintMethods, NumVideoModes, sizeof(DEINTERLACE_METHOD*), MethodCompare);
+	}
+	for(i = 0; i < NumVideoModes; i++)
+	{
+		AddUIForDeintPlugin(VideoDeintMethods[i]);
+	}
+	return (NumVideoModes > 0);
+}
+
 
 /////////////////////////////////////////////////////////////////////////////
 // memcpyMMX
@@ -221,27 +518,55 @@ EndCopyLoopSSE:
 // there are no settings at the moment but here is a good place to set
 // up the DeintModeNames array used where modes are to be selected
 /////////////////////////////////////////////////////////////////////////////
-SETTING* Deinterlace_GetSetting(DEINTERLACE_SETTING Setting)
+SETTING* Deinterlace_GetSetting(long nIndex, long Setting)
 {
-	return NULL;
+	if(nIndex < 0 || nIndex >= NumVideoModes)
+	{
+		return NULL;
+	}
+	if(Setting > -1 && Setting < VideoDeintMethods[nIndex]->nSettings)
+	{
+		return &(VideoDeintMethods[nIndex]->pSettings[Setting]);
+	}
+	else
+	{
+		return NULL;
+	}
 }
+
+LONG Deinterlace_HandleSettingsMsg(HWND hWnd, UINT message, UINT wParam, LONG lParam, BOOL* bDone)
+{
+	return 0;
+}
+
 
 void Deinterlace_ReadSettingsFromIni()
 {
-	int i;
-	for(i = 0; i < PULLDOWNMODES_LAST_ONE; i++)
+	int i,j;
+	for(i = 0; i < NumVideoModes; i++)
 	{
-		DeintModeNames[i] = DeintMethods[i].szName;
+		for(j = 0; j < VideoDeintMethods[i]->nSettings; j++)
+		{
+			Setting_ReadFromIni(&(VideoDeintMethods[i]->pSettings[j]));
+		}
 	}
 }
 
 void Deinterlace_WriteSettingsToIni()
 {
+	int i,j;
+	for(i = 0; i < NumVideoModes; i++)
+	{
+		for(j = 0; j < VideoDeintMethods[i]->nSettings; j++)
+		{
+			Setting_WriteToIni(&(VideoDeintMethods[i]->pSettings[j]));
+		}
+	}
 }
 
 void Deinterlace_SetMenu(HMENU hMenu)
 {
-	ePULLDOWNMODES ModeToShow;
+	eFILMPULLDOWNMODES ModeToShow;
 
 	if(Setting_GetValue(OutThreads_GetSetting(AUTODETECT)))
 	{
@@ -256,15 +581,9 @@ void Deinterlace_SetMenu(HMENU hMenu)
 	}
 	else
 	{
-		ModeToShow = gPulldownMode;
+		ModeToShow = gFilmPulldownMode;
 	}
 
-	CheckMenuItem(hMenu, IDM_VIDEO_BOB, (ModeToShow == VIDEO_MODE_BOB) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_VIDEO_WEAVE, (ModeToShow == VIDEO_MODE_WEAVE) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_VIDEO_2FRAME, (ModeToShow == VIDEO_MODE_2FRAME) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_WEAVE, (ModeToShow == SIMPLE_WEAVE) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_BOB, (ModeToShow == SIMPLE_BOB) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(hMenu, IDM_SCALER_BOB, (ModeToShow == SCALER_BOB) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_22PULLODD, (ModeToShow == FILM_22_PULLDOWN_ODD) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_22PULLEVEN, (ModeToShow == FILM_22_PULLDOWN_EVEN) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_32PULL1, (ModeToShow == FILM_32_PULLDOWN_0) ?MF_CHECKED:MF_UNCHECKED);
@@ -272,10 +591,19 @@ void Deinterlace_SetMenu(HMENU hMenu)
 	CheckMenuItem(hMenu, IDM_32PULL3, (ModeToShow == FILM_32_PULLDOWN_2) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_32PULL4, (ModeToShow == FILM_32_PULLDOWN_3) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_32PULL5, (ModeToShow == FILM_32_PULLDOWN_4) ?MF_CHECKED:MF_UNCHECKED);
+
+	/*
+	CheckMenuItem(hMenu, IDM_VIDEO_BOB, (ModeToShow == VIDEO_MODE_BOB) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_VIDEO_WEAVE, (ModeToShow == VIDEO_MODE_WEAVE) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_VIDEO_2FRAME, (ModeToShow == VIDEO_MODE_2FRAME) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_WEAVE, (ModeToShow == SIMPLE_WEAVE) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_BOB, (ModeToShow == SIMPLE_BOB) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_SCALER_BOB, (ModeToShow == SCALER_BOB) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_ODD_ONLY, (ModeToShow == ODD_ONLY) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_EVEN_ONLY, (ModeToShow == EVEN_ONLY) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_BLENDED_CLIP, (ModeToShow == BLENDED_CLIP) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_ADAPTIVE, (ModeToShow == ADAPTIVE) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_VIDEO_GREEDY, (ModeToShow == GREEDY) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_VIDEO_GREEDY2FRAME, (ModeToShow == GREEDY2FRAME) ?MF_CHECKED:MF_UNCHECKED);
+	*/
 }

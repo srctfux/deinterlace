@@ -73,7 +73,7 @@ void    WorkoutOverlaySize();
 void    PaintColorkey(HWND hWnd, BOOL bEnable, HDC hDC, RECT* PaintRect);
 int		FindAspectRatio(short** EvenField, short** OddField);
 void	AdjustAspectRatio(short** EvenField, short** OddField);
-void	SetHalfHeight(int IsHalfHeight);
+void	SetHalfHeight(BOOL IsHalfHeight);
 void	GetSourceRect(RECT *rect);
 void    GetDestRect(RECT *rect);
 void	SwitchToRatio(int nMode, int nRatio);

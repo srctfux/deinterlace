@@ -63,13 +63,8 @@ void SetupCaptureFlags();
 
 DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter);
 
-void UpdatePulldownStatus();
 BOOL WaitForNextField(BOOL LastField, BOOL* RunningLate);
-void SetDeinterlaceMode(int mode);
-char *DeinterlaceModeName(int mode);
 BYTE * LockOverlay();		// Lock overlay, returns ptr to buffer
-
-extern ePULLDOWNMODES gPulldownMode;
 
 // Statistics
 extern long	nTotalDropFrames;
@@ -78,7 +73,5 @@ extern long nSecTicks;
 extern long nInitialTicks;
 extern long nLastTicks;
 extern long nTotalDeintModeChanges;
-extern long nDeintModeChanges[PULLDOWNMODES_LAST_ONE];
-extern long nDeintModeTicks[PULLDOWNMODES_LAST_ONE];
 
 #endif

@@ -35,13 +35,14 @@
 #define __DEINTERLACE_H___
 
 #include "settings.h"
+#include "dTV_Deinterlace.h"
 
 // Get Hold of the Deinterlace.c file settings
-SETTING* Deinterlace_GetSetting(DEINTERLACE_SETTING Setting);
+SETTING* Deinterlace_GetSetting(long nIndex, long Setting);
+LONG Deinterlace_HandleSettingsMsg(HWND hWnd, UINT message, UINT wParam, LONG lParam, BOOL* bDone);
 void Deinterlace_ReadSettingsFromIni();
 void Deinterlace_WriteSettingsToIni();
 void Deinterlace_SetMenu(HMENU hMenu);
-
 
 
 // Deinterlace modes.  Since these modes are referred to by number in the
@@ -51,101 +52,17 @@ void Deinterlace_SetMenu(HMENU hMenu);
 // documents the mode IDs!
 typedef enum
 {
-	VIDEO_MODE_BOB = 0,
-	VIDEO_MODE_WEAVE = 1,
-	VIDEO_MODE_2FRAME = 2,
-	SIMPLE_WEAVE = 3,
-	SIMPLE_BOB = 4,
-	SCALER_BOB = 5,
-	FILM_22_PULLDOWN_ODD = 6,
-	FILM_22_PULLDOWN_EVEN = 7,
-	FILM_32_PULLDOWN_0 = 8,
-	FILM_32_PULLDOWN_1 = 9,
-	FILM_32_PULLDOWN_2 = 10,
-	FILM_32_PULLDOWN_3 = 11,
-	FILM_32_PULLDOWN_4 = 12,
-	EVEN_ONLY = 13,
-	ODD_ONLY = 14,
-	BLENDED_CLIP = 15,
-	ADAPTIVE = 16,
-	GREEDY = 17,
-	GREEDY2FRAME = 18,
-	PULLDOWNMODES_LAST_ONE = 19
-} ePULLDOWNMODES;
+	FILM_22_PULLDOWN_ODD = 0,
+	FILM_22_PULLDOWN_EVEN = 1,
+	FILM_32_PULLDOWN_0 = 2,
+	FILM_32_PULLDOWN_1 = 3,
+	FILM_32_PULLDOWN_2 = 4,
+	FILM_32_PULLDOWN_3 = 5,
+	FILM_32_PULLDOWN_4 = 6,
+	FILMPULLDOWNMODES_LAST_ONE = 7
+} eFILMPULLDOWNMODES;
 
 #define MAX_FIELD_HISTORY 5
-
-/////////////////////////////////////////////////////////////////////////////
-// Describes the inputs to a deinterlacing algorithm.  Some of these values
-// are also available in global variables, but they're duplicated here in
-// anticipation of eventually supporting deinterlacing plugins.
-typedef struct {
-	// Data from the most recent several odd and even fields, from newest
-	// to oldest, i.e., OddLines[0] is always the most recent odd field.
-	// Pointers are NULL if the field in question isn't valid, e.g. because
-	// the program just started or a field was skipped.
-	short **OddLines[MAX_FIELD_HISTORY];
-	short **EvenLines[MAX_FIELD_HISTORY];
-
-	// Current overlay buffer pointer.
-	BYTE *Overlay;
-
-	// The part of the overlay that we actually show
-	RECT SourceRect;
-
-	// True if the most recent field is an odd one; false if it was even.
-	BOOL IsOdd;
-
-	// which frame are we on
-	int CurrentFrame;
-
-	// Overlay pitch (number of bytes between scanlines).
-	DWORD OverlayPitch;
-
-	// Number of bytes of actual data in each scanline.  May be less than
-	// OverlayPitch since the overlay's scanlines might have alignment
-	// requirements.  Generally equal to FrameWidth * 2.
-	DWORD LineLength;
-
-	// Number of pixels in each scanline.
-	int FrameWidth;
-
-	// Number of scanlines per frame.
-	int FrameHeight;
-
-	// Number of scanlines per field.  FrameHeight / 2, mostly for
-	// cleanliness so we don't have to keep dividing FrameHeight by 2.
-	int FieldHeight;
-
-	// Results from the NTSC Field compare
-	long FieldDiff;
-	// Results of the PAL mode deinterlace detect
-	long CombFactor;
-
-} DEINTERLACE_INFO;
-
-// Deinterlace functions return true if the overlay is ready to be displayed.
-typedef BOOL (DEINTERLACE_FUNC)(DEINTERLACE_INFO *info);
-
-typedef struct
-{
-	// What to display when selected
-	char* szName;
-	// What to display when used in adaptive mode (NULL to use szName)
-	char* szAdaptiveName;
-	// Do we need to shrink the overlay by half
-	BOOL bIsHalfHeight;
-	// Is this a film mode
-	BOOL bIsFilmMode;
-    // Pointer to Algorithm function (cannot be NULL)
-    DEINTERLACE_FUNC* pfnAlgorithm;
-	// flip frequency in 50Hz mode
-	unsigned long FrameRate50Hz;
-	// flip frequency in 60Hz mode
-	unsigned long FrameRate60Hz;
-} DEINTERLACE_METHOD;
-
-extern DEINTERLACE_METHOD DeintMethods[PULLDOWNMODES_LAST_ONE];
 
 void memcpyMMX(void *Dest, void *Src, size_t nBytes);
 
@@ -153,6 +70,22 @@ void memcpyMMX(void *Dest, void *Src, size_t nBytes);
 void memcpySSE(void *Dest, void *Src, size_t nBytes);
 #endif
 
-extern char* DeintModeNames[PULLDOWNMODES_LAST_ONE];
+BOOL LoadDeinterlacePlugins();
+void UnloadDeinterlacePlugins();
+
+DEINTERLACE_METHOD* GetCurrentDeintMethod();
+DEINTERLACE_METHOD* GetVideoDeintMethod(int Mode);
+DEINTERLACE_METHOD* GetFilmDeintMethod(eFILMPULLDOWNMODES Mode);
+BOOL IsFilmMode();
+eFILMPULLDOWNMODES GetFilmMode();
+BOOL InHalfHeightMode();
+void SetFilmDeinterlaceMode(int mode);
+void SetVideoDeinterlaceMode(int mode);
+void SetVideoDeinterlaceIndex(int index);
+char* GetDeinterlaceModeName();
+void IncrementDeinterlaceMode();
+void DecrementDeinterlaceMode();
+void PrepareDeinterlaceMode();
+
 
 #endif

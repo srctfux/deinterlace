@@ -40,53 +40,7 @@
 #define __SETTINGS_H___
 
 #include "dTV_Control.h"
-
-// This is the Header for the new UI code
-// This is currently in developement and is not to be used
-// It has only been checked in so that I can work on the
-// crashing problems
-
-typedef enum
-{
-	NOT_PRESENT = 0,
-	ONOFF,
-	YESNO,
-	ITEMFROMLIST,
-	SLIDER,
-	NUMBER,
-	SUBMENU,
-
-} SETTING_TYPE;
-
-// Function called when setting value changes
-// return value indicates whether.rest of screen needs to be
-// refreshed
-typedef BOOL (SETTING_ONCHANGE)(long NewValue);
-
-typedef struct
-{
-	char* szDisplayName;
-	SETTING_TYPE Type;
-	long OriginalValue;
-	long* pValue;
-	long Default;
-	long MinValue;
-	long MaxValue;
-	long StepValue;
-	long OSDDivider;
-	char** pszList;
-	char* szIniSection;
-	char* szIniEntry;
-	SETTING_ONCHANGE* pfnOnChange;
-} SETTING;
-
-#define SETTINGS_PER_MENU 8
-
-typedef struct
-{
-   char* szDisplayName;
-   SETTING* Elements[SETTINGS_PER_MENU];
-} UI_SUBMENU;
+#include "dTV_ApiCommon.h"
 
 void DisplayUISubMenuAsDialog(UI_SUBMENU* pSubMenu);
 
