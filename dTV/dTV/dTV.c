@@ -1426,7 +1426,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
             break;
         //-------------------------------
         case TIMER_AUTOSAVE:
-			WriteSettingsToIni();
+			WriteSettingsToIni(NULL);
             break;
         //-------------------------------
         case OSD_TIMER_ID:
