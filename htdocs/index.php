@@ -25,7 +25,7 @@ p {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt; font-style: nor
   <tr> 
     <td width="33%" valign="top" height="30%"> 
       <p>&nbsp;<a href="about.htm" class="bland">About</a><br>
-        &nbsp;<a href="Reviews.htm" class="bland">Reviews</a><br>
+        &nbsp;<a href="reviews/index.html" class="bland">What they say about it</a><br>
         &nbsp;<a href="screenshots/index.htm" class="bland">Screenshots</a><br>
         &nbsp;<a href="downloads.htm" class="bland">News & Download</a><br>
         &nbsp;<a href="Authors.htm" class="bland">Authors</a><br>
