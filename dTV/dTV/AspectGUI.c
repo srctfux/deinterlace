@@ -376,7 +376,6 @@ BOOL ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 		{
 			aspectSettings.xZoomCenter -= 0.05;
 			if (aspectSettings.xZoomCenter < 0.0) aspectSettings.xZoomCenter = 0.0;
-			ShowText(hWnd,"Pan Left");
 		}
 		break;
 
@@ -385,7 +384,6 @@ BOOL ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 		{
 			aspectSettings.xZoomCenter += 0.05;
 			if (aspectSettings.xZoomCenter > 1.0) aspectSettings.xZoomCenter = 1.0;
-			ShowText(hWnd,"Pan Right");
 		}
 		break;
 
@@ -394,7 +392,6 @@ BOOL ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 		{
 			aspectSettings.yZoomCenter += 0.05;
 			if (aspectSettings.yZoomCenter > 1.0) aspectSettings.yZoomCenter = 1.0;
-			ShowText(hWnd,"Pan Down");
 		}
 		break;
 
@@ -403,7 +400,6 @@ BOOL ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 		{
 			aspectSettings.yZoomCenter -= 0.05;
 			if (aspectSettings.yZoomCenter < 0.0) aspectSettings.yZoomCenter = 0.0;
-			ShowText(hWnd,"Pan Up");
 		}
 		break;
 

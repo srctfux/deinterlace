@@ -834,13 +834,13 @@ BEGIN
         END
         POPUP "&Zoom"
         BEGIN
-            MENUITEM "X1",                          IDM_ZOOM_10
-            MENUITEM "X1.5",                        IDM_ZOOM_15
-            MENUITEM "X2",                          IDM_ZOOM_20
-            MENUITEM "X2.5",                        IDM_ZOOM_25
-            MENUITEM "X3",                          IDM_ZOOM_30
-            MENUITEM "X3.5",                        IDM_ZOOM_35
-            MENUITEM "X4",                          IDM_ZOOM_40
+            MENUITEM "1x",                          IDM_ZOOM_10
+            MENUITEM "1.5x",                        IDM_ZOOM_15
+            MENUITEM "2x",                          IDM_ZOOM_20
+            MENUITEM "2.5x",                        IDM_ZOOM_25
+            MENUITEM "3x",                          IDM_ZOOM_30
+            MENUITEM "3.5x",                        IDM_ZOOM_35
+            MENUITEM "4x",                          IDM_ZOOM_40
         END
     END
     POPUP "&Settings"
