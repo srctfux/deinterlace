@@ -327,41 +327,54 @@ void DecrementDeinterlaceMode()
 
 BOOL ProcessDeinterlaceSelection(HWND hWnd, WORD wMenuID)
 {
-	int i;
-	if(wMenuID >= IDM_FIRST_DEINTMETHOD && wMenuID <= IDM_LAST_DEINTMETHOD)
-	{
-		SetVideoDeinterlaceIndex(wMenuID - IDM_FIRST_DEINTMETHOD);
-		OSD_ShowText(hWnd, GetDeinterlaceModeName(), 0);
-		return TRUE;
-	}
-	else
-	{
-	   for(i = 0; i < NumVideoModes; i++)
-	   {
-		   if(wMenuID == VideoDeintMethods[i]->MenuId)
-		   {
-			   if(!bIsFilmMode)
-			   {
-				   SetVideoDeinterlaceMode(i);
-				   OSD_ShowText(hWnd, GetDeinterlaceModeName(), 0);
-			   }
-			   else
-			   {
-				   gVideoPulldownMode = i;
-			   }
-			   if(BT848_GetTVFormat()->Is25fps)
-			   {
-				   Setting_SetValue(FD50_GetSetting(PALFILMFALLBACKMODE), VideoDeintMethods[i]->nMethodIndex);
-			   }
-			   else
-			   {
-				   Setting_SetValue(FD60_GetSetting(NTSCFILMFALLBACKMODE), VideoDeintMethods[i]->nMethodIndex);
-			   }
-			   return TRUE;
-		   }
-	   }
-	   return FALSE;
-   }
+    int     nDeinterlaceIndex = 0;
+    int     bFound = FALSE;
+    int     i;
+
+    if(wMenuID >= IDM_FIRST_DEINTMETHOD && wMenuID <= IDM_LAST_DEINTMETHOD)
+    {
+        // Usually done through other means than dTV menus
+        bFound = TRUE;
+        nDeinterlaceIndex = wMenuID - IDM_FIRST_DEINTMETHOD;
+	    SetVideoDeinterlaceIndex(wMenuID - IDM_FIRST_DEINTMETHOD);
+	    OSD_ShowText(hWnd, GetDeinterlaceModeName(), 0);
+    }
+    else
+    {
+        // Usually done through the dTV menus
+        for(i = 0; i < NumVideoModes; i++)
+        {
+            if(wMenuID == VideoDeintMethods[i]->MenuId)
+            {
+                bFound = TRUE;
+                nDeinterlaceIndex = VideoDeintMethods[i]->nMethodIndex;
+                if(!bIsFilmMode)
+                {
+                    SetVideoDeinterlaceMode(i);
+                    OSD_ShowText(hWnd, GetDeinterlaceModeName(), 0);
+                }
+                else
+                {
+                    gVideoPulldownMode = i;
+                }
+                break;
+            }
+        }
+    }
+
+    // Now save the current deinterlace setting
+    if (bFound)
+    {
+        if(BT848_GetTVFormat()->Is25fps)
+        {
+            Setting_SetValue(FD50_GetSetting(PALFILMFALLBACKMODE), nDeinterlaceIndex);
+        }
+        else
+        {
+            Setting_SetValue(FD60_GetSetting(NTSCFILMFALLBACKMODE), nDeinterlaceIndex);
+        }
+    }
+    return bFound;
 }
 
 void LoadDeintPlugin(LPCSTR szFileName)
