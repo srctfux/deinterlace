@@ -1162,7 +1162,6 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 			{
 				ddrval = IDirectDrawSurface_Unlock(lpDDOverlayBack, lpCurOverlay);
 
-				LOG("bFlipNow = %d", bFlipNow);
 				if (bFlipNow)
 				{
 					if (Wait_For_Flip)			// user parm
