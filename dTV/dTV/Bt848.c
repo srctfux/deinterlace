@@ -586,8 +586,8 @@ BOOL BT848_SetGeoSize()
 	BT848_Registers_OnChange(0);
 
 	hactive = CurrentX;
-//	vtc = (hactive < 193) ?	2 : ((hactive < 385) ? 1 : 0);		// TRB 12/15/00  allow vertical filter from ini
-	vtc = BtVertFilter;		
+
+	vtc = BtVertFilter?BT848_VTC_VFILT_2TAPZ:0;		
 	if(CurrentX <= TVFormats[TVFormat].wHActivex1)
 	{
 		hscale = ((TVFormats[TVFormat].wHActivex1 - CurrentX) * 4096UL) / CurrentX;
