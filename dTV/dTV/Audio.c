@@ -44,7 +44,7 @@ char MSPStatus[30] = "";
 char MSPVersion[16] = "";
 BOOL MSPToneControl = FALSE;
 
-int InitialVolume = 1000;
+int InitialVolume = 800;
 char InitialBalance = 0x00;
 char InitialLoudness = 0x00;
 char InitialBass = 0x00;
@@ -166,20 +166,31 @@ BOOL Audio_SetSource(AUDIOMUXTYPE nChannel)
 
 	BT848_AndOrDataDword(BT848_GPIO_OUT_EN, TVCards[CardType].GPIOMask, ~TVCards[CardType].GPIOMask);
 
-	i = 0;
-	while ((i < 20) && (!(BT848_ReadByte(BT848_DSTATUS) & BT848_DSTATUS_PRES)))
+	switch(nChannel)
 	{
-		i++;
-		Sleep(50);
-	}
-	/* if audio mute or not in H-lock, turn audio off */
-	if ((nChannel != AUDIOMUX_RADIO) && !(BT848_ReadByte(BT848_DSTATUS) & BT848_DSTATUS_PRES))
-	{
-		MuxSelect = TVCards[CardType].AudioMuxSelect[AUDIOMUX_MUTE];
-	}
-	else
-	{
+	case AUDIOMUX_MSP_RADIO:
+	case AUDIOMUX_MUTE:
+		// just get on with it
 		MuxSelect = TVCards[CardType].AudioMuxSelect[nChannel];
+		break;
+	default:
+		// see if there is a video signal present
+		i = 0;
+		while ((i < 20) && (!(BT848_ReadByte(BT848_DSTATUS) & BT848_DSTATUS_PRES)))
+		{
+			i++;
+			Sleep(50);
+		}
+		/* if video not in H-lock, turn audio off */
+		if (i == 20)
+		{
+			MuxSelect = TVCards[CardType].AudioMuxSelect[AUDIOMUX_MUTE];
+		}
+		else
+		{
+			MuxSelect = TVCards[CardType].AudioMuxSelect[nChannel];
+		}
+		break;
 	}
 
 	/* select direct input */

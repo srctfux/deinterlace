@@ -86,9 +86,6 @@ int CurrentProgramm = 0;
 
 HWND VThWnd;
 
-
-SYSTEM_INFO SysInfo;
-
 unsigned long freq;
 char Typ;
 unsigned int srate;
@@ -397,7 +394,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			return (TRUE);
 
 		case IDM_CHANNELPLUS:
-			if (VideoSource == 0)
+			if (VideoSource == SOURCE_TUNER)
 			{
 				// MAE 8 Nov 2000 Added wrap around
 				if (Programm[CurrentProgramm + 1].freq != 0)
@@ -413,7 +410,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_CHANNELMINUS:
-			if (VideoSource == 0)
+			if (VideoSource == SOURCE_TUNER)
 			{
 				// MAE 8 Nov 2000 Added wrap around
 				if (CurrentProgramm != 0)
@@ -878,19 +875,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
 		case IDM_SOURCE_TUNER:
 			SwitchToSource(SOURCE_TUNER);
-			VideoSource = 0;
-			AudioSource = AUDIOMUX_TUNER;
-			Stop_Capture();
-			BT848_SetVideoSource(VideoSource);
-			if(!System_In_Mute)
-			{
-				Audio_SetSource(AudioSource);
-			}
-			Start_Capture();
-
-			sprintf(Text, "Channel %s", Programm[CurrentProgramm].Name);
-			StatusBar_ShowText(STATUS_TEXT, Text);
-			OSD_ShowText(hWnd,Programm[CurrentProgramm].Name, 0);
 			break;
 
 		case IDM_SOURCE_COMPOSITE:
@@ -1030,7 +1014,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_CHANNEL_LIST:
-			if (VideoSource == 0)
+			if (VideoSource == SOURCE_TUNER)
 			{
 				DialogBox(hInst, "CHANNELLIST", hWnd, (DLGPROC) ProgramListProc);
 				OSD_ShowText(hWnd,Programm[CurrentProgramm].Name, 0);
@@ -1420,7 +1404,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		Audio_SetSource(AUDIOMUX_MUTE);
 		
 		// MAE 8 Dec 2000 Start of change
-		// JA 8 Jan 20001 Changed to use function
+		// JA 8 Jan 2001 Changed to use function
 		if (Audio_MSP_IsPresent())
 		{
 			// Mute the MSP decoder
@@ -1600,7 +1584,6 @@ void MainWndOnInitBT(HWND hWnd)
         }
 		WorkoutOverlaySize();
 		Start_Capture();
-		Sleep(100);
 
 		SetMenuAnalog();
 
@@ -1622,6 +1605,7 @@ void MainWndOnCreate(HWND hWnd)
 	char Text[128];
 	int i;
 	int ProcessorMask;
+	SYSTEM_INFO SysInfo;
 
 	GetSystemInfo(&SysInfo);
 	AddSplashTextLine("Table Build");
@@ -1634,7 +1618,6 @@ void MainWndOnCreate(HWND hWnd)
 
 	if (USE_MIXER == TRUE)
 	{
-		Sleep(100);
 		AddSplashTextLine("Sound-System");
 
 		Enumerate_Sound_SubSystem();
@@ -1681,7 +1664,6 @@ void MainWndOnCreate(HWND hWnd)
 	}
 	AddSplashTextLine("System Analysis");
 
-	Sleep(100);
 	sprintf(Text, "Processor %d ", SysInfo.dwProcessorType);
 	AddSplashTextLine(Text);
 	sprintf(Text, "Number %d ", SysInfo.dwNumberOfProcessors);
@@ -1713,7 +1695,6 @@ void MainWndOnCreate(HWND hWnd)
 		AddSplashTextLine(Text);
 		sprintf(Text, "DECODE-CPU %d ", DecodeProcessor);
 		AddSplashTextLine(Text);
-		Sleep(100);
 	}
 
 	ProcessorMask = 1 << (MainProcessor);
@@ -1896,10 +1877,10 @@ void ChangeChannel(int NewChannel)
 				Audio_SetSource(AUDIOMUX_MUTE);
 				CurrentProgramm = NewChannel;
 				Tuner_SetFrequency(TunerType, MulDiv(Programm[CurrentProgramm].freq * 1000, 16, 1000000));
-
-				VT_ChannelChange();
 				Sleep(20);
 				Audio_SetSource(AudioSource);
+
+				VT_ChannelChange();
 			}
 		}
 	}
@@ -2106,8 +2087,8 @@ BOOL ShowMenu_OnChange(long NewValue)
 
 void SwitchToSource(int nInput)
 {
-	VideoSource = nInput;
 	Stop_Capture();
+	VideoSource = nInput;
 	OSD_ShowText(hWnd, GetSourceName(VideoSource), 0);
 	StatusBar_ShowText(STATUS_KEY, GetSourceName(VideoSource));
 
@@ -2117,7 +2098,14 @@ void SwitchToSource(int nInput)
 		BT848_ResetHardware();
 		BT848_SetGeoSize();
 		WorkoutOverlaySize();
-		AudioSource = AUDIOMUX_TUNER;
+		if(Audio_MSP_IsPresent())
+		{
+			AudioSource = AUDIOMUX_MSP_RADIO;
+		}
+		else
+		{
+			AudioSource = AUDIOMUX_TUNER;
+		}
 		BT848_SetVideoSource(VideoSource);
 		ChangeChannel(CurrentProgramm);
 		break;
