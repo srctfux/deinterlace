@@ -1056,8 +1056,23 @@ BOOL Aspect_Overscan_OnChange(long Overscan)
 	return FALSE;
 }
 
-BOOL Aspect_OnChange(long IgnoreCompletely)
+BOOL AspectMode_OnChange(long NewValue)
 {
+	aspect_mode = NewValue;
+	WorkoutOverlaySize();
+	return FALSE;
+}
+
+BOOL TargetAspect_OnChange(long NewValue)
+{
+	target_aspect = NewValue;
+	WorkoutOverlaySize();
+	return FALSE;
+}
+
+BOOL SourceAspect_OnChange(long NewValue)
+{
+	source_aspect = NewValue;
 	WorkoutOverlaySize();
 	return FALSE;
 }
@@ -1070,33 +1085,33 @@ SETTING AspectSettings[ASPECT_SETTING_LASTONE] =
 {
 	{
 		"Overscan", SLIDER, 0, &InitialOverscan,
-		DEFAULT_OVERSCAN, 0, 150, 10, NULL,
+		DEFAULT_OVERSCAN_NTSC, 0, 150, 10, NULL,
 		"Hardware", "InitialOverscan", Aspect_Overscan_OnChange,
 	},
 	{
 		"Source Aspect", NUMBER, 0, &source_aspect,
 		1333, 0, 4000, 100, NULL,
-		"ASPECT", "SourceAspect", Aspect_OnChange,
+		"ASPECT", "SourceAspect", SourceAspect_OnChange,
 	},
 	{
 		"Custom Source Aspect", SLIDER, 0, &custom_source_aspect,
 		0, 0, 4000, 100, NULL,
-		"ASPECT", "CustomSourceAspect", Aspect_OnChange,
+		"ASPECT", "CustomSourceAspect", NULL,
 	},
 	{
 		"Target Aspect", NUMBER, 0, &target_aspect,
 		0, 0, 4000, 100, NULL,
-		"ASPECT", "TargetAspect", Aspect_OnChange,
+		"ASPECT", "TargetAspect", TargetAspect_OnChange,
 	},
 	{
 		"Custom Target Aspect", SLIDER, 0, &custom_target_aspect,
 		0, 0, 4000, 100, NULL,
-		"ASPECT", "CustomTargetAspect", Aspect_OnChange,
+		"ASPECT", "CustomTargetAspect", NULL,
 	},
 	{
 		"Aspect Mode", NUMBER, 0, &aspect_mode,
 		1, 0, 2, 1, NULL,
-		"ASPECT", "Mode", Aspect_OnChange,
+		"ASPECT", "Mode", AspectMode_OnChange,
 	},
 	{
 		"Luminance Threshold", SLIDER, 0, &LuminanceThreshold,

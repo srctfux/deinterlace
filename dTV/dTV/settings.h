@@ -104,6 +104,7 @@ void Setting_OSDShow(SETTING* pSetting, HWND hWnd);
 void Setting_Up(SETTING* pSetting);
 void Setting_Down(SETTING* pSetting);
 void Setting_ChangeValue(SETTING* pSetting, eCHANGEVALUE NewValue);
+void Setting_SetSection(SETTING* pSetting, LPSTR NewValue);
 
 LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lParam);
 

@@ -44,8 +44,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /G6 /W3 /Gm /GX /Zi /Od /I "..\driver\include\\" /D "_DEBUG" /D "_WINDOWS" /D "WIN32" /D "_MBCS" /FR /YX /FD /c
-# ADD CPP /nologo /G6 /W3 /GX /Z7 /Od /I "..\driver\include\\" /D "_DEBUG" /D "_WINDOWS" /D "WIN32" /D "_MBCS" /FR /YX"stdafx.h" /FD /c
-# SUBTRACT CPP /Gf /Gy
+# ADD CPP /nologo /G6 /W3 /GX /ZI /Od /I "..\driver\include\\" /D "_DEBUG" /D "_WINDOWS" /D "WIN32" /D "_MBCS" /FR /YX"stdafx.h" /FD /c
 # ADD BASE MTL /D "_DEBUG" /mktyplib203 /win32
 # SUBTRACT BASE MTL /nologo
 # ADD MTL /D "_DEBUG" /mktyplib203 /win32
@@ -242,6 +241,10 @@ SOURCE=.\VBI_CCdecode.c
 
 SOURCE=.\VBI_VideoText.C
 # End Source File
+# Begin Source File
+
+SOURCE=.\VideoSettings.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -389,6 +392,10 @@ SOURCE=.\VBI_CCdecode.h
 # Begin Source File
 
 SOURCE=.\VBI_VideoText.H
+# End Source File
+# Begin Source File
+
+SOURCE=.\VideoSettings.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"

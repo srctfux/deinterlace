@@ -755,6 +755,10 @@
 #define IDC_PNAME12                     1871
 #define IDC_CPU_TYPE                    1872
 #define IDC_LINK                        1873
+#define IDC_BYFORMAT                    1875
+#define IDC_BYINPUT                     1876
+#define IDC_ALLFORMATS                  1877
+#define IDC_ALLINPUTS                   1878
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -763,7 +767,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        158
 #define _APS_NEXT_COMMAND_VALUE         791
-#define _APS_NEXT_CONTROL_VALUE         1875
+#define _APS_NEXT_CONTROL_VALUE         1879
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

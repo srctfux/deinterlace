@@ -71,6 +71,7 @@
 #include "FD_50Hz.H"
 #include "FLT_TNoise.h"
 #include "Splash.h"
+#include "VideoSettings.h"
 #define DOLOGGING
 #include "DebugLog.h"
 

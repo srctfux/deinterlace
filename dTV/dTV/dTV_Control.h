@@ -431,4 +431,18 @@ typedef enum
 #define WM_TVCARD_SETVALUE		(WM_USER + 116)
 #define WM_TVCARD_CHANGEVALUE	(WM_USER + 216)
 
+/////////////////////////////////////////////////////////////////////////////
+// Control settings contained in VideoSettings.c
+/////////////////////////////////////////////////////////////////////////////
+
+typedef enum
+{
+	SAVEPERINPUT = 0,
+	SAVEPERFORMAT,
+	VIDEOSETTINGS_SETTING_LASTONE,
+} VIDEOSETTINGS_SETTING;
+#define WM_VIDEOSETTINGS_GETVALUE		(WM_USER + 17)
+#define WM_VIDEOSETTINGS_SETVALUE		(WM_USER + 117)
+#define WM_VIDEOSETTINGS_CHANGEVALUE	(WM_USER + 217)
+
 #endif

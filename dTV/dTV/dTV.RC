@@ -163,6 +163,13 @@ BEGIN
     DEFPUSHBUTTON   "&OK",IDOK,6,161,45,15
     PUSHBUTTON      "Cancel",IDCANCEL,57,161,45,15,WS_GROUP
     PUSHBUTTON      "&Default",IDDEFAULT,113,161,45,15
+    CONTROL         "Save Settings by &Format",IDC_BYFORMAT,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,166,153,94,10
+    CONTROL         "Save Settings by &Input",IDC_BYINPUT,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,166,167,88,9
+    PUSHBUTTON      "Save Current to All Formats",IDC_ALLFORMATS,260,153,90,
+                    10
+    PUSHBUTTON      "Save Current to All Inputs",IDC_ALLINPUTS,259,166,91,10
 END
 
 AUDIOEINSTELLUNGEN DIALOG DISCARDABLE  0, 0, 257, 236

@@ -44,6 +44,7 @@
 #include "MixerDev.h"
 #include "ProgramList.h"
 #include "Other.h"
+#include "VideoSettings.h"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -68,8 +69,9 @@ BOOL BT848_SaturationU_OnChange(long Data);
 BOOL BT848_SaturationV_OnChange(long Data);
 BOOL BT848_BDelay_OnChange(long Data);
 BOOL BT848_Overscan_OnChange(long Data);
-BOOL BT848_Registers_OnChange(long IgnoreCompletely);
-BOOL BT848_WhiteCrush_OnChange(long IgnoreCompletely);
+BOOL BT848_Registers_OnChange();
+BOOL BT848_WhiteCrushUp_OnChange(long NewValue);
+BOOL BT848_WhiteCrushDown_OnChange(long NewValue);
 BOOL CurrentX_OnChange(long NewValue);
 BOOL VideoSource_OnChange(long NewValue);
 
@@ -437,7 +439,7 @@ void BT848_ResetHardware()
 	BT848_WriteWord(BT848_GPIO_DMA_CTL, 0xfc);
 	BT848_WriteByte(BT848_IFORM, BT848_IFORM_MUX1 | BT848_IFORM_XTAUTO | BT848_IFORM_PAL_BDGHI);
 
-	BT848_Registers_OnChange(0);
+	BT848_Registers_OnChange();
 	
 	BT848_WriteByte(BT848_TDEC, 0x00);
 
@@ -505,7 +507,8 @@ void BT848_SetPLL(PLLFREQ PLL)
 	// Set the TGCKI bits to use PLL rather than xtal
 	BT848_MaskDataByte(BT848_TGCTRL, BT848_TGCTRL_TGCKI_PLL, 0x18);
 
-	BT848_WhiteCrush_OnChange(0);
+	BT848_WhiteCrushUp_OnChange(BtWhiteCrushUp);
+	BT848_WhiteCrushDown_OnChange(BtWhiteCrushDown);
 	BT848_WriteByte(BT848_VTOTAL_LO, 0x00);
 	BT848_WriteByte(BT848_VTOTAL_HI, 0x00);
 	BT848_WriteByte(BT848_DVSIF, 0x00);
@@ -563,7 +566,7 @@ BOOL BT848_SetGeoSize()
 		BT848_BDelay_OnChange(InitialBDelay);
 	}
 // MAE 2 Nov 2000 - End of change for Macrovision fix
-	BT848_Registers_OnChange(0);
+	BT848_Registers_OnChange();
 
 	hactive = CurrentX & ~2;
 
@@ -605,9 +608,16 @@ BOOL BT848_Brightness_OnChange(long Brightness)
 	return FALSE;
 }
 
-BOOL BT848_WhiteCrush_OnChange(long IgnoreCompletely)
+BOOL BT848_WhiteCrushUp_OnChange(long NewValue)
 {
+	BtWhiteCrushUp = NewValue;
 	BT848_WriteByte(BT848_WC_UP, (BYTE)BtWhiteCrushUp);			// TRB 12/00 allow parm
+	return FALSE;
+}
+
+BOOL BT848_WhiteCrushDown_OnChange(long NewValue)
+{
+	BtWhiteCrushDown = NewValue;
 	BT848_WriteByte(BT848_WC_DOWN, (BYTE)BtWhiteCrushDown);		// TRB 12/00 allow parm
 	return FALSE;
 }
@@ -694,7 +704,7 @@ BOOL BT848_BDelay_OnChange(long BDelay)
 	return FALSE;
 }
 
-BOOL BT848_Registers_OnChange(long IgnoreCompletely)
+BOOL BT848_Registers_OnChange()
 {
 	BYTE bNewValue;
 
@@ -1256,77 +1266,77 @@ BOOL APIENTRY AdvVideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lPa
 
 		case IDC_AGC:						// Changed AGC
 			BtAgcDisable = (BST_CHECKED != IsDlgButtonChecked(hDlg, IDC_AGC));
-			BT848_Registers_OnChange(0);
+			BT848_Registers_OnChange();
 			break;  
 
 		case IDC_CRUSH:						// Changed Adaptive AGC
 			BtCrush = (BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_CRUSH));
-			BT848_Registers_OnChange(0);
+			BT848_Registers_OnChange();
 			break;  
 
 		case IDC_E_CAGC:					// Changed Even CAGC
 			BtEvenChromaAGC = (BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_E_CAGC));
-			BT848_Registers_OnChange(0);
+			BT848_Registers_OnChange();
 			break;
 
 		case IDC_O_CAGC:					// Changed Odd CAGC
 			BtOddChromaAGC = (BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_O_CAGC));
-			BT848_Registers_OnChange(0);
+			BT848_Registers_OnChange();
 			break;
 
 		case IDC_E_LUMA_PEAK:				// Changed Even Peak
 			BtEvenLumaPeak = (BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_E_LUMA_PEAK));
-			BT848_Registers_OnChange(0);
+			BT848_Registers_OnChange();
 			break;
 
 		case IDC_O_LUMA_PEAK:				// Changed Odd Peak
 			BtOddLumaPeak = (BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_O_LUMA_PEAK));
-			BT848_Registers_OnChange(0);
+			BT848_Registers_OnChange();
 			break;
 
 		case IDC_LUMA_RANGE:				// Luma Output Range
 			BtFullLumaRange = (BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_LUMA_RANGE));
-			BT848_Registers_OnChange(0);
+			BT848_Registers_OnChange();
 			break;
 
 		case IDC_E_LUMA_DEC:				// Changed Even L.decimation
 			BtEvenLumaDec = (BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_E_LUMA_DEC));
-			BT848_Registers_OnChange(0);
+			BT848_Registers_OnChange();
 			break;
 
 		case IDC_O_LUMA_DEC:				// Changed Odd L.decimation
 			BtOddLumaDec = (BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_O_LUMA_DEC));
-			BT848_Registers_OnChange(0);
+			BT848_Registers_OnChange();
 			break;
 
 		case IDC_E_COMB:					// Changed Even COMB
 			BtEvenComb = (BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_E_COMB));
-			BT848_Registers_OnChange(0);
+			BT848_Registers_OnChange();
 			break;
 
 		case IDC_O_COMB:					// Changed Odd COMB
 			BtOddComb = (BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_O_COMB));
-			BT848_Registers_OnChange(0);
+			BT848_Registers_OnChange();
 			break;
 
 		case IDC_COLOR_BARS:				// Color Bars
 			BtColorBars = (BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_COLOR_BARS));
-			BT848_Registers_OnChange(0);
+			BT848_Registers_OnChange();
 			break;
 
 		case IDC_GAMMA_CORR:				// Gamma correction removal
 			BtGammaCorrection = (BST_CHECKED != IsDlgButtonChecked(hDlg, IDC_GAMMA_CORR));
-			BT848_Registers_OnChange(0);
+			BT848_Registers_OnChange();
 			break;
 
 		case IDC_VERT_FILTER:				// Use vertical z-filter
 			BtVertFilter = (BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_VERT_FILTER));
-			BT848_Registers_OnChange(0);
+			BT848_Registers_OnChange();
 			break;
 
 		case IDC_HOR_FILTER:				// Use Hor peaking filter
 			BtHorFilter = (BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_HOR_FILTER));
-			BT848_Registers_OnChange(0);
+			BT848_Registers_OnChange();
 			break;
 
 		}
@@ -1338,8 +1348,9 @@ BOOL APIENTRY AdvVideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lPa
 BOOL VideoSource_OnChange(long NewValue)
 {
 	Stop_Capture();
+	VideoSettings_Save();
 	VideoSource = NewValue;
-
+	VideoSettings_Load();
 	switch(NewValue)
 	{
 	case SOURCE_TUNER:
@@ -1364,19 +1375,6 @@ BOOL VideoSource_OnChange(long NewValue)
 		WorkoutOverlaySize();
         AudioSource = AUDIOMUX_EXTERNAL;
 		break;
-/*
-        // FIXME: We really need separate picture settings for each input.
-		// Reset defaults for brightness, contrast, color U and V
-		InitialBrightness = 0;
-		InitialContrast = 0x80;
-		InitialSaturationU = 0x80;
-		InitialSaturationV = 0x80;
-		BT848_SetBrightness(InitialBrightness);
-		BT848_SetContrast(InitialContrast);
-		BT848_SetSaturationU(InitialSaturationU);
-		BT848_SetSaturationV(InitialSaturationV);
-*/
-
 	case SOURCE_COMPOSITE:
 	case SOURCE_SVIDEO:
 	case SOURCE_OTHER1:
@@ -1402,9 +1400,11 @@ BOOL VideoSource_OnChange(long NewValue)
 BOOL TVFormat_OnChange(long NewValue)
 {
 	Stop_Capture();
+	VideoSettings_Save();
 	TVFormat = NewValue;
 	BT848_SetGeoSize();
 	WorkoutOverlaySize();
+	VideoSettings_Load();
 	Start_Capture();
 	return FALSE;
 }
@@ -1433,6 +1433,125 @@ BOOL HDelay_OnChange(long NewValue)
 	Stop_Capture();
 	BT848_SetGeoSize();
 	Start_Capture();
+	return FALSE;
+}
+
+BOOL BtAgcDisable_OnChange(long NewValue)
+{
+	BtAgcDisable = NewValue;
+	BT848_Registers_OnChange();
+	return FALSE;
+}
+
+BOOL BtCrush_OnChange(long NewValue)
+{
+	BtCrush = NewValue;
+	BT848_Registers_OnChange();
+	return FALSE;
+}
+
+BOOL BtEvenChromaAGC_OnChange(long NewValue)
+{
+	BtEvenChromaAGC = NewValue;
+	BT848_Registers_OnChange();
+	return FALSE;
+}
+
+BOOL BtOddChromaAGC_OnChange(long NewValue)
+{
+	BtOddChromaAGC = NewValue;
+	BT848_Registers_OnChange();
+	return FALSE;
+}
+
+BOOL BtEvenLumaPeak_OnChange(long NewValue)
+{
+	BtEvenLumaPeak = NewValue;
+	BT848_Registers_OnChange();
+	return FALSE;
+}
+
+BOOL BtOddLumaPeak_OnChange(long NewValue)
+{
+	BtOddLumaPeak = NewValue;
+	BT848_Registers_OnChange();
+	return FALSE;
+}
+
+BOOL BtFullLumaRange_OnChange(long NewValue)
+{
+	BtFullLumaRange = NewValue;
+	BT848_Registers_OnChange();
+	return FALSE;
+}
+
+BOOL BtEvenLumaDec_OnChange(long NewValue)
+{
+	BtEvenLumaDec = NewValue;
+	BT848_Registers_OnChange();
+	return FALSE;
+}
+
+BOOL BtOddLumaDec_OnChange(long NewValue)
+{
+	BtOddLumaDec = NewValue;
+	BT848_Registers_OnChange();
+	return FALSE;
+}
+
+BOOL BtEvenComb_OnChange(long NewValue)
+{
+	BtEvenComb = NewValue;
+	BT848_Registers_OnChange();
+	return FALSE;
+}
+
+BOOL BtOddComb_OnChange(long NewValue)
+{
+	BtOddComb = NewValue;
+	BT848_Registers_OnChange();
+	return FALSE;
+}
+
+BOOL BtColorBars_OnChange(long NewValue)
+{
+	BtColorBars = NewValue;
+	BT848_Registers_OnChange();
+	return FALSE;
+}
+
+BOOL BtGammaCorrection_OnChange(long NewValue)
+{
+	BtGammaCorrection = NewValue;
+	BT848_Registers_OnChange();
+	return FALSE;
+}
+
+BOOL BtCoring_OnChange(long NewValue)
+{
+	BtCoring = NewValue;
+	BT848_Registers_OnChange();
+	return FALSE;
+}
+
+BOOL BtHorFilter_OnChange(long NewValue)
+{
+	BtHorFilter = NewValue;
+	BT848_Registers_OnChange();
+	return FALSE;
+}
+
+BOOL BtVertFilter_OnChange(long NewValue)
+{
+	BtVertFilter = NewValue;
+	BT848_Registers_OnChange();
+	return FALSE;
+}
+
+BOOL BtColorKill_OnChange(long NewValue)
+{
+	BtColorKill = NewValue;
+	BT848_Registers_OnChange();
 	return FALSE;
 }
 
@@ -1480,100 +1599,100 @@ SETTING BT848Settings[BT848_SETTING_LASTONE] =
 	{
 		"BtAgcDisable", YESNO, 0, &BtAgcDisable,
 		FALSE, 0, 1, 0, NULL,
-		"Hardware", "BtAgcDisable", BT848_Registers_OnChange,
+		"Hardware", "BtAgcDisable", BtAgcDisable_OnChange,
 	},
 	{
 		"BtCrush", YESNO, 0, &BtCrush,
 		TRUE, 0, 1, 0, NULL,
-		"Hardware", "BtCrush", BT848_Registers_OnChange,
+		"Hardware", "BtCrush", BtCrush_OnChange,
 	},
 	{
 		"BtEvenChromaAGC", YESNO, 0, &BtEvenChromaAGC,
 		TRUE, 0, 1, 0, NULL,
-		"Hardware", "BtEvenChromaAGC", BT848_Registers_OnChange,
+		"Hardware", "BtEvenChromaAGC", BtEvenChromaAGC_OnChange,
 	},
 	{
 		"BtOddChromaAGC", YESNO, 0, &BtOddChromaAGC,
 		TRUE, 0, 1, 0, NULL,
-		"Hardware", "BtOddChromaAGC", BT848_Registers_OnChange,
+		"Hardware", "BtOddChromaAGC", BtOddChromaAGC_OnChange,
 	},
 	{
 		"BtEvenLumaPeak", YESNO, 0, &BtEvenLumaPeak,
 		FALSE, 0, 1, 0, NULL,
-		"Hardware", "BtEvenLumaPeak", BT848_Registers_OnChange,
+		"Hardware", "BtEvenLumaPeak", BtEvenLumaPeak_OnChange,
 	},
 	{
 		"BtOddLumaPeak", YESNO, 0, &BtOddLumaPeak,
 		FALSE, 0, 1, 0, NULL,
-		"Hardware", "BtOddLumaPeak", BT848_Registers_OnChange,
+		"Hardware", "BtOddLumaPeak", BtOddLumaPeak_OnChange,
 	},
 	{
 		"BtFullLumaRange", YESNO, 0, &BtFullLumaRange,
 		TRUE, 0, 1, 0, NULL,
-		"Hardware", "BtFullLumaRange", BT848_Registers_OnChange,
+		"Hardware", "BtFullLumaRange", BtFullLumaRange_OnChange,
 	},
 	{
 		"BtEvenLumaDec", YESNO, 0, &BtEvenLumaDec,
 		FALSE, 0, 1, 0, NULL,
-		"Hardware", "BtEvenLumaDec", BT848_Registers_OnChange,
+		"Hardware", "BtEvenLumaDec", BtEvenLumaDec_OnChange,
 	},
 	{
 		"BtOddLumaDec", YESNO, 0, &BtOddLumaDec,
 		FALSE, 0, 1, 0, NULL,
-		"Hardware", "BtOddLumaDec", BT848_Registers_OnChange,
+		"Hardware", "BtOddLumaDec", BtOddLumaDec_OnChange,
 	},
 	{
 		"BtEvenComb", YESNO, 0, &BtEvenComb,
 		TRUE, 0, 1, 0, NULL,
-		"Hardware", "BtEvenComb", BT848_Registers_OnChange,
+		"Hardware", "BtEvenComb", BtEvenComb_OnChange,
 	},
 	{
 		"BtOddComb", YESNO, 0, &BtOddComb,
 		TRUE, 0, 1, 0, NULL,
-		"Hardware", "BtOddComb", BT848_Registers_OnChange,
+		"Hardware", "BtOddComb", BtOddComb_OnChange,
 	},
 	{
 		"BtColorBars", YESNO, 0, &BtColorBars,
 		FALSE, 0, 1, 0, NULL,
-		"Hardware", "BtColorBars", BT848_Registers_OnChange,
+		"Hardware", "BtColorBars", BtColorBars_OnChange,
 	},
 	{
 		"BtGammaCorrection", YESNO, 0, &BtGammaCorrection,
 		FALSE, 0, 1, 0, NULL,
-		"Hardware", "BtGammaCorrection", BT848_Registers_OnChange,
+		"Hardware", "BtGammaCorrection", BtGammaCorrection_OnChange,
 	},
 	{
 		"BtCoring", YESNO, 0, &BtCoring,
 		FALSE, 0, 1, 0, NULL,
-		"Hardware", "BtCoring", BT848_Registers_OnChange,
+		"Hardware", "BtCoring", BtCoring_OnChange,
 	},
 	{
 		"BtHorFilter", YESNO, 0, &BtHorFilter,
 		FALSE, 0, 1, 0, NULL,
-		"Hardware", "BtHorFilter", BT848_Registers_OnChange,
+		"Hardware", "BtHorFilter", BtHorFilter_OnChange,
 	},
 	{
 		"BtVertFilter", YESNO, 0, &BtVertFilter,
 		FALSE, 0, 1, 0, NULL,
-		"Hardware", "BtVertFilter", BT848_Registers_OnChange,
+		"Hardware", "BtVertFilter", BtVertFilter_OnChange,
 	},
 	{
 		"BtColorKill", YESNO, 0, &BtColorKill,
 		TRUE, 0, 1, 0, NULL,
-		"Hardware", "BtColorKill", BT848_Registers_OnChange,
+		"Hardware", "BtColorKill", BtColorKill_OnChange,
 	},
 	{
 		"BtWhiteCrushUp", SLIDER, 0, &BtWhiteCrushUp,
 		0xcf, 0, 255, 10, NULL,
-		"Hardware", "BtWhiteCrushUp", BT848_WhiteCrush_OnChange,
+		"Hardware", "BtWhiteCrushUp", BT848_WhiteCrushUp_OnChange,
 	},
 	{
 		"BtWhiteCrushDown", SLIDER, 0, &BtWhiteCrushDown,
 		0x7f, 0, 255, 10, NULL,
-		"Hardware", "BtWhiteCrushDown", BT848_WhiteCrush_OnChange,
+		"Hardware", "BtWhiteCrushDown", BT848_WhiteCrushDown_OnChange,
 	},
 	{
-		"Pixels per Line", SLIDER, 0, &CurrentX,
+		"Sharpness", SLIDER, 0, &CurrentX,
 		720, 0, DTV_MAX_WIDTH, 0, NULL,
 		"MainWindow", "CurrentX", CurrentX_OnChange,
 	},
@@ -1593,7 +1712,7 @@ SETTING BT848Settings[BT848_SETTING_LASTONE] =
 		"Hardware", "TVType", TVFormat_OnChange,
 	},
 	{
-		"HDelay", SLIDER, 0, &HDelay,
+		"Horizontal Pos", SLIDER, 0, &HDelay,
 		0, 0, 255, 0, NULL,
 		"Hardware", "HDelay", HDelay_OnChange,
 	},

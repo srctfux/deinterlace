@@ -41,7 +41,6 @@
 BOOL APIENTRY VideoTextProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 BOOL APIENTRY VideoTextUnterTitelProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 BOOL APIENTRY SplashProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
-BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 BOOL APIENTRY VTInfoProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 BOOL APIENTRY VPSInfoProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 BOOL APIENTRY AudioSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);

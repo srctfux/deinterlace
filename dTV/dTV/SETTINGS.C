@@ -73,6 +73,7 @@
 #include "Splash.h"
 #include "OSD.h"
 #include "TVCards.h"
+#include "VideoSettings.h"
 
 char szIniFile[MAX_PATH] = "dTV.ini";
 
@@ -114,6 +115,7 @@ void LoadSettingsFromIni()
 	DI_TwoFrame_ReadSettingsFromIni();
 	Deinterlace_ReadSettingsFromIni();
 	FLT_TNoise_ReadSettingsFromIni();
+	VideoSettings_ReadSettingsFromIni();
 
 	VBI_Flags = 0;
 	if(GetPrivateProfileInt("VBI", "VT", 0, szIniFile) != 0)
@@ -259,6 +261,9 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 		case WM_TVCARD_GETVALUE:		
 			return Setting_GetValue(TVCard_GetSetting((TVCARD_SETTING)wParam));
 			break;
+		case WM_VIDEOSETTINGS_GETVALUE:		
+			return Setting_GetValue(VideoSettings_GetSetting((VIDEOSETTINGS_SETTING)wParam));
+			break;
 
 		case WM_ASPECT_SETVALUE:
 			Setting_SetValue(Aspect_GetSetting((ASPECT_SETTING)wParam), lParam);
@@ -307,6 +312,9 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 			break;
 		case WM_TVCARD_SETVALUE:		
 			Setting_SetValue(TVCard_GetSetting((TVCARD_SETTING)wParam), lParam);
+			break;
+		case WM_VIDEOSETTINGS_SETVALUE:		
+			Setting_SetValue(VideoSettings_GetSetting((VIDEOSETTINGS_SETTING)wParam), lParam);
 			break;
 
 		case WM_ASPECT_CHANGEVALUE:
@@ -357,6 +365,9 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 		case WM_TVCARD_CHANGEVALUE:		
 			Setting_ChangeValue(TVCard_GetSetting((TVCARD_SETTING)wParam), lParam);
 			break;
+		case WM_VIDEOSETTINGS_CHANGEVALUE:		
+			Setting_ChangeValue(VideoSettings_GetSetting((VIDEOSETTINGS_SETTING)wParam), lParam);
+			break;
 		
 		default:
 			break;
@@ -397,6 +408,7 @@ void WriteSettingsToIni()
 	Deinterlace_WriteSettingsToIni();
 	FLT_TNoise_WriteSettingsToIni();
 	TVCard_WriteSettingsToIni();
+	VideoSettings_WriteSettingsToIni();
 
 	WritePrivateProfileInt("VBI", "VT", VBI_Flags & VBI_VT, szIniFile);
 	WritePrivateProfileInt("VBI", "VPS", VBI_Flags & VBI_VPS, szIniFile);
@@ -545,13 +557,11 @@ BOOL Setting_SetValue(SETTING* pSetting, long Value)
 	
 	if(pSetting->pfnOnChange != NULL)
 	{
-		BOOL RetVal;
-		*pSetting->pValue = NewValue;
-		RetVal = pSetting->pfnOnChange(NewValue);
-		return RetVal; 
+		return pSetting->pfnOnChange(NewValue); 
 	}
 	else
 	{
+		*pSetting->pValue = NewValue;
 		return FALSE;
 	}
 }
@@ -711,14 +721,14 @@ void Setting_OSDShow(SETTING* pSetting, HWND hWnd)
 	switch(pSetting->Type)
 	{
 	case ITEMFROMLIST:
-		sprintf(szBuffer, "%s : %s", pSetting->szDisplayName, pSetting->pszList[*(pSetting->pValue)]);
+		sprintf(szBuffer, "%s %s", pSetting->szDisplayName, pSetting->pszList[*(pSetting->pValue)]);
 		break;
 	case YESNO:
-		sprintf(szBuffer, "%s : %s", pSetting->szDisplayName, *(pSetting->pValue)?"YES":"NO");
+		sprintf(szBuffer, "%s %s", pSetting->szDisplayName, *(pSetting->pValue)?"YES":"NO");
 		break;
 	case SLIDER:
 	case NUMBER:
-		sprintf(szBuffer, "%s : %d", pSetting->szDisplayName, *(pSetting->pValue));
+		sprintf(szBuffer, "%s %d", pSetting->szDisplayName, *(pSetting->pValue));
 		break;
 	default:
 		break;
@@ -787,6 +797,14 @@ int GetCurrentAdjustmentStepCount()
     dwTaps++;
     dwLastTick = dwTick;
     return nStepCount;
+}
+
+void Setting_SetSection(SETTING* pSetting, LPSTR NewValue)
+{
+	if(pSetting != NULL)
+	{
+		pSetting->szIniSection = NewValue;
+	}
 }
 
 void Setting_Up(SETTING* pSetting)
