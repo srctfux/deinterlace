@@ -1,3 +1,18 @@
+4/6 Yvonus
+. Remaining dTV changed into DSCaler (with the 2 first letters in capital)
+. Broken link on Screenshots
+. Broken link on Girder site
+. Updated "Can I use any vga card.." ; YUY2 -> YUV2
+. Broken link on Zoltrix Genie TV
+. Broken link on supported pages
+. Update "Can I use more than one ..". The Leadtek card now shown as outdated product. Link to AVS
+topic updated (now in archives)
+. Broken link on one AVS thread "Macrovision side effect"
+. In "Overlay update". Removal of the info that the bug has disappeared, it's still there :-(
+Removed also the avs topic because it's too outdated
+
+
+
 22/5
 . (JA) Updated Introduction
 . (JA) Updated OS
@@ -8,15 +23,30 @@
 . (JA) Updated How can I help
 . (JA) Other adjustments
 
+8/2 Yvonus
+. Adding description of deinterlace modes "Video deinterlace (2 frames)","Simple bob", "Scaler bob", "Adaptative deinterlace" and "* fields only"
+. Update of "Simple weave","Video deinterlace (weave)" and "Video deinterlace (bob)"
+. Removing "interpolated bob"
+. Updated the "operating system" part with "ring-0" notes on each OS
+
+4/2 Yvonus
+. Removed the verbose "who made what" section that was difficult to keep up to date
+with the web site. Now replaced with links to authors and thanks files on the site
+. Remove the "deprecated" note on the ppm format issue and replace by a simpler "in old version, dTV ..."
+. Added in "software" the "my picture jumps+dropped frames"
+. Replaced the older "despite a very powerful system.." with the new "I get some dropped frames"
+. Updated the "overlay" thing with the Mpact specific note
+. Updated the "testing" part with a link to avs. remove the link to the unused bugs list on Sourceforge
+
 25/1
 . (JA) Corrected Video deinterlacing modes comments
 . (JA) Corrected OS section
 
-24/1
+24/1 Yvonus
 . Description of "Blended clip updated"
 . Added description of "Greedy deinterlace"
 
-21/1
+21/1 Yvonus
 . Added Michael Eskin in the developer's list
 . The "what are ppm files" section has been updated and shown as
 "deprecated" as we're not outputting TIFF files
