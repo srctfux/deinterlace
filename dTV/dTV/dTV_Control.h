@@ -111,12 +111,16 @@
 #define IDM_TYPEFORMAT_PAL60            1126
 
 // Messages for the Input Select Menu
-#define IDM_COMPOSITE                   1090
-#define IDM_SVIDEO                      1091
-#define IDM_CCIR656_1                   1095
-#define IDM_CCIR656_2                   1096
-#define IDM_CCIR656_3                   1097
-#define IDM_CCIR656_4                   1098
+#define IDM_SOURCE_TUNER                1089
+#define IDM_SOURCE_COMPOSITE            1090
+#define IDM_SOURCE_SVIDEO               1091
+#define IDM_SOURCE_OTHER1               1092
+#define IDM_SOURCE_OTHER2               1093
+#define IDM_SOURCE_COMPVIASVIDEO        1094
+#define IDM_SOURCE_CCIR656_1            1095
+#define IDM_SOURCE_CCIR656_2            1096
+#define IDM_SOURCE_CCIR656_3            1097
+#define IDM_SOURCE_CCIR656_4            1098
 
 // Messages for the Screen Aspect Ratio Menu
 #define IDM_TASPECT_0                   740
@@ -126,6 +130,20 @@
 #define IDM_TASPECT_185                 744
 #define IDM_TASPECT_200                 745
 #define IDM_TASPECT_235                 746
+
+// Messages for the Video Deinterlace Algorithm
+#define IDM_VIDEO_BOB                   530
+#define IDM_VIDEO_WEAVE                 531
+#define IDM_VIDEO_2FRAME                532
+#define IDM_WEAVE                       533
+#define IDM_BOB                         534
+#define IDM_SCALER_BOB                  535
+#define IDM_EVEN_ONLY                   543
+#define IDM_ODD_ONLY                    544
+#define IDM_BLENDED_CLIP                545
+#define IDM_ADAPTIVE                    546
+#define IDM_VIDEO_GREEDY                547
+#define IDM_VIDEO_GREEDY2FRAME          548
 
 /////////////////////////////////////////////////////////////////////////////
 // For setting of certain values
@@ -157,6 +175,15 @@ typedef enum
 } VIDEOFORMAT;
 
 #endif
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Allow callers to convert a WM code to do other operations
+/////////////////////////////////////////////////////////////////////////////
+
+#define WM_CONVERT_TO_GETVALUE(x)     (((x - WM_USER) % 100) + WM_USER)
+#define WM_CONVERT_TO_SETVALUE(x)    ((((x - WM_USER) % 100) + 100) + WM_USER)
+#define WM_CONVERT_TO_CHANGEVALUE(x) ((((x - WM_USER) % 100) + 200) + WM_USER)
 
 
 /////////////////////////////////////////////////////////////////////////////
