@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: FieldBufferHandler.cpp,v 1.4 2002-07-15 18:19:43 tobbej Exp $
+// $Id: FieldBufferHandler.cpp,v 1.5 2002-07-29 17:51:40 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,10 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.4  2002/07/15 18:19:43  tobbej
+// support for rgb24 input
+// new settings
+//
 // Revision 1.3  2002/07/06 19:18:22  tobbej
 // fixed sample scheduling, file playback shoud work now
 //
@@ -56,7 +60,8 @@ m_bOneFieldPerSample(false),
 m_bFlushing(false),
 m_pfnMemcpy(NULL),
 m_bNeedConv(false),
-m_bSwapFields(false)
+m_bSwapFields(false),
+m_bVertMirror(false)
 {
 	//clear mediatype
 	memset(&m_Mt,0,sizeof(AM_MEDIA_TYPE));
@@ -232,6 +237,7 @@ HRESULT CFieldBufferHandler::InsertSample(CComPtr<IMediaSample> pSample)
 	BITMAPINFOHEADER bmiHeader;
 	hr=GetBitmapInfoHeader(bmiHeader);
 	ATLASSERT(SUCCEEDED(hr));
+	ATLASSERT(bmiHeader.biHeight>0);
 	ATLASSERT(sampleSize>=bmiHeader.biSizeImage);
 
 	if(!m_bOneFieldPerSample)
@@ -256,14 +262,14 @@ HRESULT CFieldBufferHandler::InsertSample(CComPtr<IMediaSample> pSample)
 		//split the field
 		if(m_bNeedConv)
 		{
-			m_ColorConv.Convert(field1.GetBufferSetSize(FieldSize),pSampleBuffer,CColorConverter::COVERSION_FORMAT::CNV_EVEN);
+			m_ColorConv.Convert(field1.GetBufferSetSize(FieldSize),pSampleBuffer,CColorConverter::COVERSION_FORMAT::CNV_EVEN,m_bVertMirror);
 		}
 		else
 		{
 			field1.GetBufferSetSize(FieldSize);
 			for(int i=0;i<bmiHeader.biHeight/2;i++)
 			{
-				m_pfnMemcpy(field1.pBuffer+i*LineSize,pSampleBuffer+(2*i)*LineSize,LineSize);
+				m_pfnMemcpy(field1.pBuffer+i*LineSize,pSampleBuffer+ (m_bVertMirror ? (bmiHeader.biHeight-1-(2*i))*LineSize : (2*i)*LineSize),LineSize);
 			}
 		}
 		ATLASSERT(field1.bInUse==false);
@@ -318,14 +324,14 @@ HRESULT CFieldBufferHandler::InsertSample(CComPtr<IMediaSample> pSample)
 		//split the field
 		if(m_bNeedConv)
 		{
-			m_ColorConv.Convert(field2.GetBufferSetSize(FieldSize),pSampleBuffer,CColorConverter::COVERSION_FORMAT::CNV_ODD);
+			m_ColorConv.Convert(field2.GetBufferSetSize(FieldSize),pSampleBuffer,CColorConverter::COVERSION_FORMAT::CNV_ODD,m_bVertMirror);
 		}
 		else
 		{
 			field2.GetBufferSetSize(FieldSize);
 			for(int i=0;i<bmiHeader.biHeight/2;i++)
 			{
-				m_pfnMemcpy(field2.pBuffer+i*LineSize,pSampleBuffer+(2*i+1)*LineSize,LineSize);
+				m_pfnMemcpy(field2.pBuffer+i*LineSize,pSampleBuffer+ (m_bVertMirror ? (bmiHeader.biHeight-1-(2*i+1))*LineSize : (2*i+1)*LineSize),LineSize);
 			}
 		}
 		ATLASSERT(field2.bInUse==false);
@@ -362,12 +368,20 @@ HRESULT CFieldBufferHandler::InsertSample(CComPtr<IMediaSample> pSample)
 		}
 
 		//check if this sample needs to be copied
-		if(m_bNeedConv || cMediaSamples>=m_MaxMediaSamples)
+		if(m_bNeedConv || m_bVertMirror || cMediaSamples>=m_MaxMediaSamples)
 		{
 			//copy IMediaSample to a new buffer
 			if(m_bNeedConv)
 			{
-				m_ColorConv.Convert(field.GetBufferSetSize(sampleSize),pSampleBuffer,CColorConverter::COVERSION_FORMAT::CNV_ALL);
+				m_ColorConv.Convert(field.GetBufferSetSize(sampleSize),pSampleBuffer,CColorConverter::COVERSION_FORMAT::CNV_ALL,m_bVertMirror);
+			}
+			else if(m_bVertMirror)
+			{
+				field.GetBufferSetSize(sampleSize);
+				for(long i=0;i<bmiHeader.biHeight;i++)
+				{
+					m_pfnMemcpy(field.pBuffer+i*bmiHeader.biWidth*2,pSampleBuffer+((bmiHeader.biHeight-i)*bmiHeader.biWidth*2),bmiHeader.biWidth*2);
+				}
 			}
 			else
 			{
@@ -394,10 +408,10 @@ HRESULT CFieldBufferHandler::InsertSample(CComPtr<IMediaSample> pSample)
 				switch(prop.dwTypeSpecificFlags&AM_VIDEO_FLAG_FIELD_MASK)
 				{
 				case AM_VIDEO_FLAG_FIELD1:
-					field.flags=m_bSwapFields ? BUFFER_FLAGS_FIELD_ODD : BUFFER_FLAGS_FIELD_EVEN;
+					field.flags=(m_bVertMirror ? !m_bSwapFields: m_bSwapFields) ? BUFFER_FLAGS_FIELD_ODD : BUFFER_FLAGS_FIELD_EVEN;
 					break;
 				case AM_VIDEO_FLAG_FIELD2:
-					field.flags=m_bSwapFields ? BUFFER_FLAGS_FIELD_EVEN : BUFFER_FLAGS_FIELD_ODD;
+					field.flags=(m_bVertMirror ? !m_bSwapFields: m_bSwapFields) ? BUFFER_FLAGS_FIELD_EVEN : BUFFER_FLAGS_FIELD_ODD;
 					break;
 				}
 			}
@@ -684,6 +698,16 @@ void CFieldBufferHandler::SetSwapFields(bool bSwap)
 bool CFieldBufferHandler::GetSwapFields()
 {
 	return m_bSwapFields;
+}
+
+void CFieldBufferHandler::SetVertMirror(bool bVertMirror)
+{
+	m_bVertMirror=bVertMirror;
+}
+
+bool CFieldBufferHandler::GetVertMirror()
+{
+	return m_bVertMirror;
 }
 
 HRESULT CFieldBufferHandler::GetStatus(DSRendStatus &status)

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendInPin.cpp,v 1.10 2002-07-15 18:21:37 tobbej Exp $
+// $Id: DSRendInPin.cpp,v 1.11 2002-07-29 17:51:40 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,10 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.10  2002/07/15 18:21:37  tobbej
+// support for rgb24 input
+// new settings
+//
 // Revision 1.9  2002/07/06 19:18:22  tobbej
 // fixed sample scheduling, file playback shoud work now
 //
@@ -122,7 +126,7 @@ STDMETHODIMP CDSRendInPin::get_SwapFields(BOOL * pVal)
 STDMETHODIMP CDSRendInPin::put_SwapFields(BOOL pVal)
 {
 	ATLTRACE(_T("%s(%d) : CDSRendInPin::put_SwapFields\n"),__FILE__,__LINE__);
-	m_pFilter->m_FieldBuffer.SetSwapFields(pVal==TRUE);
+	m_pFilter->m_FieldBuffer.SetSwapFields(pVal!=FALSE);
 	return S_OK;
 }
 
@@ -156,6 +160,22 @@ STDMETHODIMP CDSRendInPin::put_FieldFormat(DSREND_FIELD_FORMAT pVal)
 {
 	ATLTRACE(_T("%s(%d) : CDSRendInPin::put_FieldFormat\n"),__FILE__,__LINE__);
 	m_FieldFormat=pVal;
+	return S_OK;
+}
+
+STDMETHODIMP CDSRendInPin::get_VertMirror(BOOL *pVal)
+{
+	ATLTRACE(_T("%s(%d) : CDSRendInPin::get_VertMirror\n"),__FILE__,__LINE__);
+	if(pVal == NULL)
+		return E_POINTER;
+	*pVal=m_pFilter->m_FieldBuffer.GetVertMirror();
+	return S_OK;
+}
+
+STDMETHODIMP CDSRendInPin::put_VertMirror(BOOL newVal)
+{
+	ATLTRACE(_T("%s(%d) : CDSRendInPin::put_VertMirror\n"),__FILE__,__LINE__);
+	m_pFilter->m_FieldBuffer.SetVertMirror(newVal!=FALSE);
 	return S_OK;
 }
 
@@ -663,7 +683,11 @@ HRESULT CDSRendInPin::CheckMediaType(const AM_MEDIA_TYPE *pmt)
 			{
 				return E_FAIL;
 			}
-		}
+		}/*
+		if(pmt->subtype!=MEDIASUBTYPE_RGB24)
+		{
+			return E_FAIL;
+		}*/
 
 		bool bFieldInput;
 		BITMAPINFOHEADER *pBmi=NULL;
@@ -720,3 +744,4 @@ HRESULT CDSRendInPin::CheckMediaType(const AM_MEDIA_TYPE *pmt)
 	}
 	return E_FAIL;
 }
+

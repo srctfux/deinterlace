@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: SettingsPage.h,v 1.1 2002-07-15 18:20:00 tobbej Exp $
+// $Id: SettingsPage.h,v 1.2 2002-07-29 17:51:40 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1  2002/07/15 18:20:00  tobbej
+// new settings
+//
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -48,7 +51,6 @@ class ATL_NO_VTABLE CSettingsPage :
 {
 public:
 	CSettingsPage()
-		:m_bForceYUY2(FALSE)
 	{
 		m_dwTitleID = IDS_TITLESettingsPage;
 		m_dwHelpFileID = IDS_HELPFILESettingsPage;
@@ -71,6 +73,7 @@ BEGIN_MSG_MAP(CSettingsPage)
 	COMMAND_HANDLER(IDC_SETTINGSPAGE_FIELDFORMAT, CBN_SELENDOK, OnSelEndOkFieldFormat)
 	COMMAND_HANDLER(IDC_SETTINGSPAGE_FORCEYUY2, BN_CLICKED, OnClickedForceYUY2)
 	COMMAND_HANDLER(IDC_SETTINGSPAGE_SWAPFIELDS,BN_CLICKED,OnClickedSwapFields)
+	COMMAND_HANDLER(IDC_SETTINGSPAGE_VERTMIRROR,BN_CLICKED,OnClickedVertMirror)
 END_MSG_MAP()
 // Handler prototypes:
 //  LRESULT MessageHandler(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
@@ -85,10 +88,12 @@ private:
 	LRESULT OnSelEndOkFieldFormat(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
 	LRESULT OnClickedForceYUY2(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
 	LRESULT OnClickedSwapFields(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
+	LRESULT OnClickedVertMirror(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
 
 	CComPtr<IDSRendSettings> m_pSettings;
 	BOOL m_bForceYUY2;
 	BOOL m_bSwapFields;
+	BOOL m_bVertMirror;
 	DSREND_FIELD_FORMAT m_FieldFmt;
 };
 

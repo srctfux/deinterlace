@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: ColorConverter.cpp,v 1.1 2002-07-15 18:18:12 tobbej Exp $
+// $Id: ColorConverter.cpp,v 1.2 2002-07-29 17:51:40 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1  2002/07/15 18:18:12  tobbej
+// support for rgb24 input
+//
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -79,14 +82,16 @@ bool CColorConverter::SetFormat(const AM_MEDIA_TYPE *mt)
 		{
 			VIDEOINFOHEADER *vh=(VIDEOINFOHEADER *)mt->pbFormat;
 			m_width=vh->bmiHeader.biWidth;
-			m_height=vh->bmiHeader.biHeight;
+			
+			m_height=abs(vh->bmiHeader.biHeight);
 			m_bitcount=vh->bmiHeader.biBitCount;
 		}
 		else if(mt->formattype==FORMAT_VideoInfo2 && mt->cbFormat>0)
 		{
 			VIDEOINFOHEADER2 *vh2=(VIDEOINFOHEADER2 *)mt->pbFormat;
 			m_width=vh2->bmiHeader.biWidth;
-			m_height=vh2->bmiHeader.biHeight;
+			
+			m_height=abs(vh2->bmiHeader.biHeight);
 			m_bitcount=vh2->bmiHeader.biBitCount;
 		}
 		else
@@ -104,14 +109,15 @@ bool CColorConverter::SetFormat(const AM_MEDIA_TYPE *mt)
 			{
 				m_pfnConv=C_RGBtoYUV;
 			}
-			m_bNeedVertMirror= m_height<0 ? false : true;
+			//m_bNeedVertMirror= m_height<0 ? false : true;
+			m_bNeedVertMirror=true;
 			return true;
 		}
 	}
 	return false;
 }
 
-bool CColorConverter::Convert(BYTE *dst,BYTE *src,COVERSION_FORMAT cnv)
+bool CColorConverter::Convert(BYTE *dst,BYTE *src,COVERSION_FORMAT cnv,bool bVertMirror)
 {
 	if(m_pfnConv==NULL)
 	{
@@ -120,7 +126,7 @@ bool CColorConverter::Convert(BYTE *dst,BYTE *src,COVERSION_FORMAT cnv)
 	
 	long SrcLineSize=m_width*m_bitcount/8;
 	long DstLineSize=m_width*2;
-	long StartLine=m_bNeedVertMirror ? m_height-1 : 0;
+	bool bVMirror=bVertMirror ? !m_bNeedVertMirror : m_bNeedVertMirror;
 
 	switch(cnv)
 	{
@@ -128,7 +134,8 @@ bool CColorConverter::Convert(BYTE *dst,BYTE *src,COVERSION_FORMAT cnv)
 		{
 			for(long i=0;i<m_height;i++)
 			{
-				long offset=(StartLine-i)*SrcLineSize;
+				long offset=bVMirror ? (m_height-1-i)*SrcLineSize : i*SrcLineSize;
+				ATLASSERT(offset>=0);
 				m_pfnConv((short*)(dst+i*DstLineSize),src+offset,m_width);
 			}
 			break;
@@ -136,8 +143,10 @@ bool CColorConverter::Convert(BYTE *dst,BYTE *src,COVERSION_FORMAT cnv)
 	case CNV_EVEN:
 		{
 			for(long i=0;i<m_height/2;i++)
-			{	
-				long offset=(StartLine-(2*i))*SrcLineSize;
+			{
+				//if doing vert mirror, use the odd line instead
+				long offset=bVMirror ? (m_height-1-(2*i+1))*SrcLineSize : (2*i)*SrcLineSize;
+				ATLASSERT(offset>=0);
 				m_pfnConv((short*)(dst+i*DstLineSize),src+offset,m_width);
 			}
 			break;
@@ -146,7 +155,8 @@ bool CColorConverter::Convert(BYTE *dst,BYTE *src,COVERSION_FORMAT cnv)
 		{
 			for(long i=0;i<m_height/2;i++)
 			{
-				long offset=(StartLine-(2*i+1))*SrcLineSize;
+				long offset=bVMirror ? (m_height-1-(2*i))*SrcLineSize : (2*i+1)*SrcLineSize;
+				ATLASSERT(offset>=0);
 				m_pfnConv((short*)(dst+i*DstLineSize),src+offset,m_width);
 			}
 			break;

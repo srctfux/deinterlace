@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: SettingsPage.cpp,v 1.1 2002-07-15 18:20:00 tobbej Exp $
+// $Id: SettingsPage.cpp,v 1.2 2002-07-29 17:51:40 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1  2002/07/15 18:20:00  tobbej
+// new settings
+//
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -58,6 +61,11 @@ STDMETHODIMP CSettingsPage::Activate(HWND hWndParent,LPCRECT pRect,BOOL bModal)
 			return hr;
 		}
 		hr=m_pSettings->get_SwapFields(&m_bSwapFields);
+		if(FAILED(hr))
+		{
+			return hr;
+		}
+		hr=m_pSettings->get_VertMirror(&m_bVertMirror);
 		if(FAILED(hr))
 		{
 			return hr;
@@ -97,6 +105,11 @@ STDMETHODIMP CSettingsPage::Activate(HWND hWndParent,LPCRECT pRect,BOOL bModal)
 		if(hCheck!=NULL)
 		{
 			SendMessage(hCheck,BM_SETCHECK,m_bSwapFields==TRUE ? BST_CHECKED : BST_UNCHECKED,0);
+		}
+		hCheck=GetDlgItem(IDC_SETTINGSPAGE_VERTMIRROR);
+		if(hCheck!=NULL)
+		{
+			SendMessage(hCheck,BM_SETCHECK,m_bVertMirror==TRUE ? BST_CHECKED : BST_UNCHECKED,0);
 		}
 		
 
@@ -146,6 +159,11 @@ STDMETHODIMP CSettingsPage::Apply()
 			return hr;
 		}
 		hr=m_pSettings->put_SwapFields(m_bSwapFields);
+		if(FAILED(hr))
+		{
+			return hr;
+		}
+		hr=m_pSettings->put_VertMirror(m_bVertMirror);
 		if(FAILED(hr))
 		{
 			return hr;
@@ -231,6 +249,19 @@ LRESULT CSettingsPage::OnClickedSwapFields(WORD wNotifyCode, WORD wID, HWND hWnd
 	{
 		LRESULT check=SendMessage(hCheck,BM_GETCHECK,0,0);
 		m_bSwapFields= check==BST_CHECKED ? TRUE : FALSE;
+		SetDirty(TRUE);
+	}
+	return 0;
+}
+
+LRESULT CSettingsPage::OnClickedVertMirror(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled)
+{
+	ATLTRACE(_T("%s(%d) : CSettingsPage::OnClickedVertMirror\n"),__FILE__,__LINE__);
+	HWND hCheck=GetDlgItem(IDC_SETTINGSPAGE_VERTMIRROR);
+	if(hCheck!=NULL)
+	{
+		LRESULT check=SendMessage(hCheck,BM_GETCHECK,0,0);
+		m_bVertMirror= check==BST_CHECKED ? TRUE : FALSE;
 		SetDirty(TRUE);
 	}
 	return 0;

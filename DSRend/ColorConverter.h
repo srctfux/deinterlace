@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: ColorConverter.h,v 1.1 2002-07-15 18:18:13 tobbej Exp $
+// $Id: ColorConverter.h,v 1.2 2002-07-29 17:51:40 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1  2002/07/15 18:18:13  tobbej
+// support for rgb24 input
+//
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -39,33 +42,46 @@
 #endif // _MSC_VER > 1000
 
 /**
- *
+ * Takes care of convertin a mediasample to YUY2.
  */
 class CColorConverter
 {
 public:
+	///enum describing how to convert a sample
 	typedef enum COVERSION_FORMAT
 	{
 		///covert all of the sample	(field input)
 		CNV_ALL,
-		///covert even lines only
+		///convert and copy even lines only
 		CNV_EVEN,
-		///convert odd lines only
+		///convert and copy odd lines only
 		CNV_ODD
 	};
 
 	CColorConverter();
 	virtual ~CColorConverter();
 	
+	///@return true if conversion from specified mediatype can be preformed.
 	bool CanCovert(const AM_MEDIA_TYPE *mt);
 	bool SetFormat(const AM_MEDIA_TYPE *mt);
-	bool Convert(BYTE *dst,BYTE *src,COVERSION_FORMAT cnv);
+	
+	/**
+	 * 
+	 * @param dst
+	 * @param src
+	 * @param cnv
+	 * @param bVertMirror true if sample shoud be fliped when converting
+	 */
+	bool Convert(BYTE *dst,BYTE *src,COVERSION_FORMAT cnv,bool bVertMirror);
 
 private:
+	///function pinter to color conversion function
 	BYTE *(*m_pfnConv)(short *dest,BYTE *src,DWORD w);
 	long m_width;
 	long m_height;
 	WORD m_bitcount;
+	
+	///true if current format is normaly upside down.
 	bool m_bNeedVertMirror;
 };
 

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: FieldBufferHandler.h,v 1.3 2002-07-15 18:19:43 tobbej Exp $
+// $Id: FieldBufferHandler.h,v 1.4 2002-07-29 17:51:40 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,10 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.3  2002/07/15 18:19:43  tobbej
+// support for rgb24 input
+// new settings
+//
 // Revision 1.2  2002/07/06 19:18:22  tobbej
 // fixed sample scheduling, file playback shoud work now
 //
@@ -124,6 +128,8 @@ public:
 	void SetSwapFields(bool bSwap);
 	bool GetSwapFields();
 	HRESULT GetStatus(DSRendStatus &status);
+	void SetVertMirror(bool bVertMirror);
+	bool GetVertMirror();
 
 private:
 	HRESULT IsField(AM_MEDIA_TYPE *pMt);
@@ -186,6 +192,7 @@ private:
 	bool m_bNeedConv;
 	CColorConverter m_ColorConv;
 	bool m_bSwapFields;
+	bool m_bVertMirror;
 };
 
 #endif // !defined(AFX_FIELDBUFFERHANDLER_H__7D741E3E_2A1D_43FA_9BC4_4582BF590BC0__INCLUDED_)

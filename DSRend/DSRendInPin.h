@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendInPin.h,v 1.7 2002-07-15 18:21:37 tobbej Exp $
+// $Id: DSRendInPin.h,v 1.8 2002-07-29 17:51:40 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,10 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.7  2002/07/15 18:21:37  tobbej
+// support for rgb24 input
+// new settings
+//
 // Revision 1.6  2002/07/06 16:40:52  tobbej
 // new field buffering
 // support for field input
@@ -113,6 +117,8 @@ END_PROP_MAP()
 	STDMETHOD(put_ForceYUY2)(BOOL pVal);
 	STDMETHOD(get_FieldFormat)(DSREND_FIELD_FORMAT *pVal);
 	STDMETHOD(put_FieldFormat)(DSREND_FIELD_FORMAT pVal);
+	STDMETHOD(get_VertMirror)(/*[out, retval]*/ BOOL *pVal);
+	STDMETHOD(put_VertMirror)(/*[in]*/ BOOL newVal);
 	
 // IPin
 	STDMETHOD(Connect(IPin *pReceivePin,const AM_MEDIA_TYPE *pmt));
