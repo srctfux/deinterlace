@@ -577,24 +577,23 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 
 		// Source ratio
-		sprintf(szInfo, "Source %.3f", (double)Setting_GetValue(Aspect_GetSetting(SOURCE_ASPECT)) / 1000.0);
-
-		if (strlen(szInfo) > 0)
+		sprintf(szInfo, "Source %.2f:1", (double)Setting_GetValue(Aspect_GetSetting(SOURCE_ASPECT)) / 1000.0);
+		if ( (Setting_GetValue(Aspect_GetSetting(ASPECT_MODE)) == 1)
+		  && (Setting_GetValue(Aspect_GetSetting(SOURCE_ASPECT)) != 1333) )
 		{
-			if ( (Setting_GetValue(Aspect_GetSetting(ASPECT_MODE)) == 1)
-			  && (Setting_GetValue(Aspect_GetSetting(SOURCE_ASPECT)) != 1333) )
-			{
-				strcat(szInfo, " Letterboxed");
-			}
-			else if (Setting_GetValue(Aspect_GetSetting(ASPECT_MODE)) == 2)
-			{
-				strcat(szInfo, " Anamorphic");
-			}
-			OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+			strcat(szInfo, " Letterbox");
 		}
+		else if (Setting_GetValue(Aspect_GetSetting(ASPECT_MODE)) == 2)
+		{
+			strcat(szInfo, " Anamorphic");
+		}
+		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 
 		// Display ratio
-		sprintf(szInfo, "Display %.3f", (double)Setting_GetValue(Aspect_GetSetting(TARGET_ASPECT)) / 1000.0);
+		if (Setting_GetValue(Aspect_GetSetting(TARGET_ASPECT)) == 0)
+			strcpy(szInfo, "Display ratio from current resolution");
+		else
+			sprintf(szInfo, "Display %.2f:1", (double)Setting_GetValue(Aspect_GetSetting(TARGET_ASPECT)) / 1000.0);
 		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 
 		// Video settings

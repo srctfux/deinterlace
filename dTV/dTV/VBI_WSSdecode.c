@@ -34,10 +34,12 @@
 #include "vbi.h"
 #include "bt848.h"
 #include "AspectRatio.h"
+#include "dTV.h"
+#include "OSD.h"
 #define DOLOGGING
 #include "DebugLog.h"
 
-#define	WSS_MAX_SUCCESSIVE_ERR		10
+#define	WSS_MAX_SUCCESSIVE_ERR		6
 
 // Structure of WSS signal for 625-line systems
 #define	WSS625_RUNIN_CODE_LENGTH	29
@@ -88,7 +90,10 @@ int		WSSMinPos = WSS625_START_POS_MAX;
 int		WSSMaxPos = WSS625_START_POS_MIN;
 int		WSSTotalPos = 0;
 int		WSSNbErrPos = 0;
-static int	WSSNbSuccessiveErr = 0;	// Number of successive decoding errors
+static int	WSSNbSuccessiveErr = WSS_MAX_SUCCESSIVE_ERR;	// Number of successive decoding errors
+
+static int	WSSAspectRatioWhenErr = -1;
+static int	WSSAspectModeWhenErr = -1;
 
 // Offsets of each clock pixels (7.09379) in VBI buffer line
 static int offsets[] = {   0,   7,  14,  21,  28,  35,  43,  50,  57,  64,
@@ -144,7 +149,10 @@ void WSS_init ()
 	WSSMaxPos = WSS625_START_POS_MIN;
 	WSSTotalPos = 0;
 	WSSNbErrPos = 0;
-	WSSNbSuccessiveErr = 0;
+	WSSNbSuccessiveErr = WSS_MAX_SUCCESSIVE_ERR;
+
+	WSSAspectRatioWhenErr = -1;
+	WSSAspectModeWhenErr = -1;
 
 	// Clear WSS decoded data
 	WSS_clear_data ();
@@ -356,9 +364,11 @@ int WSS_DecodeLine(BYTE* vbiline)
 {
 	int		PrevAspectMode = WSSAspectMode;
 	int		PrevAspectRatio = WSSAspectRatio;
+	BOOL	PrevDecodeOk = WSSDecodeOk;
 	int		NewAspectMode;
 	int		NewAspectRatio;
 	BOOL	bSwitch = FALSE;
+	char	szInfo[32];
 
 	switch (BT848_GetTVFormat()->wCropHeight)
 	{
@@ -383,15 +393,22 @@ int WSS_DecodeLine(BYTE* vbiline)
 		WSSNbSuccessiveErr++;
 		// Clear WSS decoded data
 		// after two many successive decoding errors
-		if (WSSNbSuccessiveErr > WSS_MAX_SUCCESSIVE_ERR)
+		if (WSSNbSuccessiveErr == WSS_MAX_SUCCESSIVE_ERR)
 		{
 			WSS_clear_data();
-			WSSNbSuccessiveErr = 0;
+			bSwitch = TRUE;
+			NewAspectMode = WSSAspectModeWhenErr;
+			NewAspectRatio = WSSAspectRatioWhenErr;
 		}
-		return -1;
 	}
 	else
 	{
+		if (! PrevDecodeOk && (WSSNbSuccessiveErr >= WSS_MAX_SUCCESSIVE_ERR))
+		{
+			WSSAspectModeWhenErr = aspectSettings.aspect_mode;
+			WSSAspectRatioWhenErr = aspectSettings.source_aspect;
+		}
+
 		WSSNbDecodeOk++;
 		WSSNbSuccessiveErr = 0;
 
@@ -423,13 +440,31 @@ int WSS_DecodeLine(BYTE* vbiline)
 					NewAspectRatio = aspectSettings.source_aspect;
 				}
 			}
-			if (bSwitch
-			 && ( (NewAspectMode != aspectSettings.aspect_mode)
-			   || (NewAspectRatio != aspectSettings.source_aspect) ) )
-			{
-				SwitchToRatio (NewAspectMode, NewAspectRatio);
-			}
 		}
-		return 0;
 	}
+
+	if (bSwitch
+	 && (NewAspectMode != -1)
+	 && (NewAspectRatio != -1)
+	 && ( (NewAspectMode != aspectSettings.aspect_mode)
+	   || (NewAspectRatio != aspectSettings.source_aspect) ) )
+	{
+		SwitchToRatio (NewAspectMode, NewAspectRatio);
+
+		// OSD message
+		sprintf(szInfo, "%.2f:1", (double)Setting_GetValue(Aspect_GetSetting(SOURCE_ASPECT)) / 1000.0);
+		if ( (Setting_GetValue(Aspect_GetSetting(ASPECT_MODE)) == 1)
+		  && (Setting_GetValue(Aspect_GetSetting(SOURCE_ASPECT)) != 1333) )
+		{
+			strcat(szInfo, " Letterbox");
+		}
+		else if (Setting_GetValue(Aspect_GetSetting(ASPECT_MODE)) == 2)
+		{
+			strcat(szInfo, " Anamorphic");
+		}
+		strcat(szInfo, " Signal");
+		OSD_ShowText(hWnd, szInfo, 0);
+	}
+
+	return (WSSDecodeOk ? 0 : -1);
 }
