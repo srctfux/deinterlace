@@ -76,6 +76,8 @@
 /////////////////////////////////////////////////////////////////////////////
 #ifdef DTV_EXTERNAL
 
+#define IDM_SAVE_SETTINGS_NOW           100
+
 #define IDM_VT_RESET                    261
 #define IDM_RESET                       280
 #define IDM_TAKESTILL                   485

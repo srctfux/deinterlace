@@ -16,6 +16,7 @@
 #define ID_UPDATEALL                    6
 #define ID_UPDATEONE                    7
 #define IDGETSDT                        7
+#define IDM_SAVE_SETTINGS_NOW           100
 #define IDM_STATUSBAR                   133
 #define IDM_VBI                         231
 #define IDM_CAPTURE_PAUSE               232
