@@ -93,6 +93,7 @@
 #define IDM_HIDE_OSD                    592
 #define IDM_SHOW_OSD                    593
 #define IDM_SET_OSD_TEXT                594
+#define IDM_OSD_CC_TEXT					595
 #define IDM_FAST_REPAINT                599
 #define IDM_BRIGHTNESS_PLUS             600
 #define IDM_BRIGHTNESS_MINUS            601

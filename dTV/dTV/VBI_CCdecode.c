@@ -36,6 +36,7 @@
 #include "VBI_CCdecode.h"
 #define DOLOGGING
 #include "DebugLog.h"
+#include "dTV.h"
 
 
 /* #define XWIN 1   /* visual debugging */
@@ -132,14 +133,14 @@ int decode(unsigned char *vbiline)
 
     i=30;
 
-    while (i < 600 && clk < 7)
+    while (i < 700 && clk < 7)
 	{
 		/* find and lock all 7 clocks */
-		sample = vbiline[i];
+		sample = (vbiline[i] + vbiline[i + 1] + vbiline[i + 2] + vbiline[i - 1] + vbiline[i - 2]) / 5;
 		if (max[clk] < 0) 
 		{ 
 			/* find maximum value before drop */
-			if (sample > 70 && sample > val[clk])
+			if (sample > 85 && sample > val[clk])
 			{
 				/* mark new maximum found */
 				val[clk] = sample;
@@ -155,7 +156,7 @@ int decode(unsigned char *vbiline)
 		else
 		{ 
 			/* find minimum value after drop */
-		    if (/*sample < 85 && */sample < val[clk])
+		    if (sample < 85 && sample < val[clk])
 			{
 				/* mark new minimum found */
 				val[clk] = sample; 
@@ -176,6 +177,7 @@ int decode(unsigned char *vbiline)
     if (clk != 7) /* || vbiline[max[3]] - vbiline[min[5]] < 45) */
 	{
 		/* failure to locate clock lead-in */
+		//LOGD("Failed to Detect 7 clocks %d\n", clk);
 		return -1;
 	}
 
@@ -216,6 +218,8 @@ int decode(unsigned char *vbiline)
 		}
 	}
     return packedbits & parityok(packedbits);
+	//LOGD("%c%c\n", packedbits & 0x7F, (packedbits>>8) & 0x7F);
+	//return packedbits;
 } /* decode */
 
 int XDSdecode(int data)
@@ -400,6 +404,7 @@ int CCdecode(int data)
 		if (b2&0x60) ccbuf[ccmode][len++]=b2;
 		if (b1 == ']' || b2 == ']')
 			webtv_check(ccbuf[ccmode],len);
+		//LOGD("%c%c", b1, b2);
 	}
 	else if ((b1&0x10) && (b2>0x1F) && (data != lastcode)) //codes are always transmitted twice (apparently not, ignore the second occurance)
 	{
@@ -410,7 +415,10 @@ int CCdecode(int data)
 		{
 			row=rowdata[((b1<<1)&14)|((b2>>5)&1)];
 			if (len!=0)
+			{
 				ccbuf[ccmode][len++]='\n';
+				LOGD("\n");
+			}
 
 			if (b2&0x10) //row contains indent flag
 				for (x=0;x<(b2&0x0F)<<1;x++)
@@ -506,6 +514,9 @@ int RAW(int data)
 
 int sentance(int data)
 {
+	static char szCCText[2][31];
+	static int Pos = 0;
+	static int Buff = 0;
 	int b1, b2;
 	if (data == -1)
 		return -1;
@@ -516,12 +527,15 @@ int sentance(int data)
 	{
 		if (sen==1)
 		{
-			LOGD(" ");
+			szCCText[Buff][Pos++] = ' ';
 			sen=0;
 		}
 		if (inval>10 && sen)
 		{
-			LOGD("\n");
+			szCCText[Buff][Pos++] = '\0';
+			PostMessage(hWnd, WM_COMMAND, IDM_OSD_CC_TEXT, (LPARAM)szCCText[Buff]);
+			Buff = !Buff;
+			Pos = 0;
 			sen=0;
 		}
 		return 0;
@@ -533,15 +547,28 @@ int sentance(int data)
 		inval=0;
 		if (sen==2 && b1!='.' && b2!='.' && b1!='!' && b2!='!' && b1!='?' && b2!='?' && b1!=')' && b2!=')')
 		{
-			LOGD("\n");
+			szCCText[Buff][Pos++] = '\0';
+			PostMessage(hWnd, WM_COMMAND, IDM_OSD_CC_TEXT, (LPARAM)szCCText[Buff]);
+			Buff = !Buff;
+			Pos = 0;
 			sen=1;
 		}
 		else if (b1=='.' || b2=='.' || b1=='!' || b2=='!' || b1=='?' || b2=='?' || b1==')' || b2==')')
 			sen=2;
 		else
 			sen=1;
-		LOGD("%c%c",tolower(b1),tolower(b2));
-
+		if(Pos < 30)
+		{
+			szCCText[Buff][Pos++] = tolower(b1);
+			szCCText[Buff][Pos++] = tolower(b2);
+		}
+		else
+		{
+			szCCText[Buff][Pos++] = '\0';
+			PostMessage(hWnd, WM_COMMAND, IDM_OSD_CC_TEXT, (LPARAM)szCCText[Buff]);
+			Buff = !Buff;
+			Pos = 0;
+		}
 	}
 	return 0;
 }

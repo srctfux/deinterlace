@@ -187,7 +187,7 @@ void OSD_Redraw(HWND hWnd, HDC hDC)
 			{
 			case OSDB_TRANSPARENT:
 				SetBkMode(hDC, TRANSPARENT);
-				SetBkColor(hDC, Overlay_GetColor());
+				SetBkColor(hDC, OutlineColor);
 				break;
 			
 			case OSDB_BLOCK:

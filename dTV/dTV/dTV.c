@@ -1176,6 +1176,10 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
             }
 			break;
 
+		case IDM_OSD_CC_TEXT:
+            OSD_ShowTextOverride(hWnd, (LPSTR)lParam, 0);
+			break;
+
         case IDM_OVERLAY_STOP:
 		    Overlay_Stop(hWnd);
 			break;
