@@ -29,7 +29,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
     <td height="1" width="501"><img src="/images/spacer.gif" width="1" height="1"></td>
   </tr>
   <tr> 
-    <td width="160" rowspan="2"><img src="/images/dtvlogotvthumb.jpg" width="160" height="140" alt="dTV Logo"></td>
+    <td width="160" rowspan="2"><img src="images/dtvlogotvthumb.jpg" alt="dTV Logo" width="160" height="140"></td>
     <td colspan="2" align="right" valign="top"> <font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><font size="1"><!-- #BeginEditable "Language%20Selector" --><font size="1"><a href="francais/FAQ.htm"><img src="images/selector-french.gif" width="50" height="18" border="0"></a><img src="images/selector-divider.gif" width="10" height="17"><a href="FAQ.htm"><img src="images/selector-english.gif" width="45" height="18" border="0"></a></font><!-- #EndEditable --></font></b></font></td>
   </tr>
   <tr> 
@@ -51,7 +51,6 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         monitor or projector. 
       <p> Analog, interlaced video is what output devices like vcr, laserdisc, 
         game consoles ... 
-      <p> 
       <h2><br>
         What is so special about dTV ?</h2>
       <p> Unlike most existing software that tries to do the same, dTV implements 
@@ -68,80 +67,13 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <p> The image quality resulting from those complex operations is high and 
         allows some people equipped with data capable projectors to feed them 
         with a progressive scan source that was interlaced right before. 
-      <p> 
       <h2><br>
         Who made what ?</h2>
-      <p> 
-      <h3>Developers</h3>
-      <p> 
-      <h3><i>John Adcock</i></h3>
-      <p>John is the founder of the project. He did huge amounts of full time 
-        development over a three-month period during a lucky work break on versions 
-        1.0 through 1.06 Beta 4. He did most of the work cleaning, translating 
-        and legalizing Multidec. He put into code, the world's first open-source 
-        real-time 3:2 pulldown software deinterlacer (based on Mark Rejhon's algorithm 
-        article). He also designed an open-source video-material deinterlacer 
-        that is superior to those in virtually any other any PC-based video software 
-        product.</p>
-      <h3><br>
-        <i> Mark Rejhon</i></h3>
-      <p>As of version 1.07, Mark is the project admin. He is also the moderator 
-        of the Internet's largest Home Theater Computers forum at <a href="www.avsforum.com">AVSFORUM</a>. 
-        Mark authored the 3:2 pulldown algorithm that forms the basis of the algorithm 
-        implemented into dTV by JohnAd. He also does other programming tasks like 
-        code cleanup, merging, documenting, testing, enhancing of contributors' 
-        changes that are submitted to the project. He also enhances dTV with his 
-        own changes to certain parts of the code, including improvements to the 
-        deinterlacer modes.</p>
-      <h3><br>
-        <i> Steve Grimm</i></h3>
-      <p>Steve is contributing enhancements to the deinterlacing modes including 
-        better automatic switching between video mode and 3:2 pulldown mode, and 
-        handling of material that has bad 3:2 pulldown. He also worked on an early 
-        version of a 3:2 pulldown deinterlacing algorithm.</p>
-      <h3><br>
-        <i> Michael Samblanet</i></h3>
-      <p>Michael is continuing to upgrade his aspect ratio control code.</p>
-      <p><br>
-      </p>
-      <h3><i>Tom Barry</i></h3>
-      <p> Tom contributed the triple buffering code and synchronization fixes 
-        for version 2.0.0. Also, he has authored several MMX assembly optimizations 
-        to the video deinterlace mode and added the advanced Brooktree/Conexant 
-        chipset settings menu, both of which were included in version 1.9. 
-      <p> <br>
-      <h3>Thanks to those various helping hands</h3>
-      <p> 
-      <p>See <a href="MultiDec_ReadMe.txt"> MultiDec_ReadMe.txt</a> for a list 
-        of thanks for the project dTV was based upon.</p>
-      <ol>
-        <li>A big debt a gratitude is due to Mark Rejhon for his 3:2 algorithm 
-          and his help testing, promoting dTV but particularly for his vision 
-          and his refusal to accept second best.</li>
-        <li>Thanks to Paul Samblanet, who contributed the aspect ratio control 
-          code. </li>
-        <li>Thanks to Daniel Schmelzer for his hard work creating and updating 
-          the website. Love the logo!&nbsp;</li>
-        <li>Thanks to Steve Grimm for his work on the old method of 3:2 pulldown.</li>
-        <li>Thanks to everybody on the deinterlace project mailing list</li>
-        <li>Thanks to Borg, creator of bTV, for writing the first ever computer 
-          deinterlacing program the inspiration for this project</li>
-        <li>Thanks to Yvon Quere and Ali for finding bTV and Yvon for creating 
-          and updating the FAQ.&nbsp;</li>
-        <li>Thanks to all at the AVS Forums for your encouragement and help. The 
-          HTPC forum is easily the best group on the internet.</li>
-        <li>Thanks to the authors of VirtualDub for the the PAL detection algorithm.</li>
-        <li>Thanks to Gunnar Thalin for his Area based deinterlacing plug-in which 
-          was the basis for the current deinterlacing method.</li>
-        <li>Thanks to Steaphan Greene, Øyvind Aabling, Octavian Purdila, Vladimir 
-          Dergachev and Christian Lupien&#151;the GATOS developers&#151;for the 
-          screen capture code. </li>
-      </ol>
-      <p> 
+      <p>See <a href="Authors.htm">dTV -- Authors</a> for the main contributors
+      and <a href="Thanks.htm">dTV -- Thanks</a> for a list of people who have
+      helped make dTV a success. 
       <h1><br>
         General issues</h1>
-      <p> 
-      <p> 
       <h2>Should I use dTV to deinterlace the output from my set-top player ?</h2>
       <p> While it's feasible and works quite fine (see the "dTV WinDVD challenge" 
         in the <a href="screenshots/index.htm">screenshots</a> section), home theater 
@@ -150,10 +82,8 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         However, it's been used quite often for test purposes (testing of grab 
         quality on a high quality source, testing pulldown techniques on well 
         encoded sources etc..). 
-      <p> 
       <h1><br>
         Software issues</h1>
-      <p> 
       <h2>Which operating system can I use dTV on ?</h2>
       <p> Windows 95 ok<br>
         Windows 98 OK<br>
@@ -163,8 +93,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         Windows 2000 ok<br>
         Linux no<br>
         OS/2 definitely no ;-) 
-      <p> 
-      <h2><br>
+      <h2>
         When taking a snapshot, dTV outputs ppm files, what are those ?</h2>
       <p> It's called Portable PixMap. Actually, this is the only graphic file 
         code that John Adcock had when writing dTV ;-)<br>
@@ -174,8 +103,8 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         <li>Irfanview <a href="http://www.irfanview.com/english.htm">http://www.irfanview.com/english.htm</a> 
         <li>Paint Shop Pro <a href="http://www.jasc.com/product.asp?pf%5Fid=001">http://www.jasc.com/product.asp?pf%5Fid=001</a> 
       </ul>
-      <p> 
-      <h2><br>
+      <h2>&nbsp;</h2>
+      <h2>
         Can I <i>remote control</i> dTV ? <b>YES</b></h2>
       <p> Yes you can. dTV is being developed mainly by people using it as an 
         analog source scaler for their projector and they prefer for sure using 
@@ -185,11 +114,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         More, we suggest the use of <a href="http://www.stack.nl/~stilgar/windoze/girder.html">Girder</a> 
         from Ron Bessems as the application of choice for remote controlling your 
         computer. 
-      <p> <i>A dTV export group for Girder will soon be available from Teemu Hummer's 
-        <a href="http://www.kolumbus.fi/hummer/girder/">Girder Group Exports Site</a></i> 
-      <p><br>
       <h1>Hardware issues</h1>
-      <p> 
       <h2>Can I use any vga card as a display device ?</h2>
       <p> Despite this statement from Mark Rejhon ; 
       <p> "dTV requires an AGP card. It is impossible to do on a PCI video card. 
@@ -225,7 +150,6 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <p> While we can't claim "this card is the one you need", let's give you 
         a couple ones that, at least, have been successfully used by some users 
         ; 
-      <p> 
       <ul>
         <li>Zoltrix Genie TV <a href="http://www.zoltix.com/products/GenieTVspecs.htm">http://www.zoltix.com/products/GenieTVspecs.htm</a> 
         <li>The WinTV series from Hauppage <a href="http://www.hauppage.com/html/products.htm">http://www.hauppage.com/html/products.htm</a> 
@@ -237,7 +161,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         with dTV and your card. </p>
       <p> <i>This list is originally based on the linux bttv driver on which the 
         program was originally based.</i> 
-      <p><br>
+      <p>&nbsp;
       <h2>Can I use my existing <whatever> video card's video input ?</h2>
       <p> Probably not. dTV is supporting (see previous question) the Brooktree/Conexant 
         chipset. Supporting others chipsets, while feasible, means some hard work 
@@ -247,7 +171,6 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <p> If you have some programming knowledge regarding the grab chipsets used 
         in those card, you might want to help us. See the "<a href="#HELP">How 
         can I help</a>" section. 
-      <p> 
       <h2><br>
         Can I use more than one video input ?</h2>
       <p> Some "nut" people (he's admitting it himself ;-) who are playing with 
@@ -292,10 +215,8 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         a dvd player to the computer. Problems on other type of sources have yet 
         to be shown. 
       <p>So in common cases, you don't have to worry about this. 
-      <p> 
       <h2><br>
         Despite a very powerful system, I've still got some dropped frames ?</h2>
-      <p></p>
       <p>Some people experienced some dropped frames (signs of a machine that 
         has problems keeping up with the workload of dTV) even on powerful systems. 
         An hypothesis is that a motherboard agp speed issue might be the cause 
@@ -309,8 +230,9 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <p> <a name="OVERLAY"></a> 
       <h2><br>
         I get "overlay update" errors</h2>
-      <p> Sometimes you get this error message <code>Error calling overlay update. 
-        D:/source/deinterlace/dtv/other.c at line 161</code><br>
+      <p>This will occur if you have an MPACT2 based card running in 24bit
+      mode.&nbsp; To use dTV with this card you must use a 16bit desktop mode.<p> Sometimes you get this error message <code>Error calling overlay update. 
+        D:/source/deinterlace/dtv/other.c at line ???</code><br>
         We don't have any full explanation of the problem but it happens when 
         resizing dTV or making it go from fullscreen to window mode. Also the 
         color depth, frequency and size of the desktop might be related.<br>
@@ -318,18 +240,17 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <p> Some more info on this issue in <a href="http://www.avsforum.com/ubb/Forum12/HTML/004895.html">this 
         avs topic</a> 
       <p> <a name="HELP"></a> 
-      <h1><br>
+      <h1>
         How can I help ?</h1>
-      <p> 
       <h2>Testing</h2>
-      <p> More and more people are giving dTV a try. Why wouldn't you ? <br>
+      <p> More and more people are giving dTV a try. Why don't you ? <br>
         We'd like to know about your experience with it. What does (not) work 
-        ? What can be improved, what feature you'd like. Every feedback is useful. 
-      <p> Please have a look, when reporting a problem, to the <a href="http://sourceforge.net/mail/?group_id=7420">mailing 
-        list</a>. Report also the hardware you're using, especially video card 
-        and grab card. 
-      <p> 
-      <h2><br>
+        ? What can be improved, what feature you'd like to see. All feedback is useful.<p> Please
+      report bugs on the <a href="http://www.avsforum.com/ubbcgi/Ultimate.cgi">AV Science 
+        Forum</a> after checking (using the search feature) that the problem has
+      not already been reported. Each bug report should include the hardware you're using, especially video card,
+      grab card and processor type and speed. 
+      <h2>
         Coding</h2>
       <p> Any help is welcome. Despite including very complex code, there's a 
         lot of features in it that are simple or that could be easily implemented 

@@ -74,84 +74,49 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         I only recently found this site and have had a quick look and found that 
         most of the information you need should be buried in this lot.&nbsp;</p>
       <h2><br>
-        File by File</h2>
+      Important Files</h2>
       <p>Audio.c - Deals with the sound.&nbsp; The function Audio_SetSource selects 
         the sound channel output by the card.&nbsp; For cards with an MSP chip 
         there are several other functions to deals with the features of those 
         chips. None of this code has been tested by me.</p>
       <p>bt848.c - Deals with low level and chip specific details, don't even 
         bother looking in here if you haven't got the datasheet.</p>
-      <p>bTVPlugin.c - Adds abilty to call bTV plugins.</p>
-      <p>ccdecode.c - Very early Closed Caption decoder, read the description 
+      <p>VBI_CCdecode.c - Very early Closed Caption decoder, read the description 
         of CC in the Video Demystified first and then see if you can work out 
         what the code is trying to do.&nbsp; The code is untested and there have 
         been no reported successes with it.</p>
-      <p>DebugLog.c - Adds the ability to output formatted strings to the dTVLog.txt 
-        file to assist in debugging.&nbsp; To use Logging you must place a #define 
-        DOLOGGING at the top of the file you wish to include logging and then 
-        use the LOG function which works like printf.</p>
-      <p>Deinterlace.c - Contains the assembler code used for deinterlacing and 
-        for auto pulldown detection.&nbsp; The assembler makes heavy use of MMX 
-        instructions.&nbsp; If&nbsp;you know basic x86 assembler and want to find 
-        out about the new instruction see the <a href="http://developer.intel.com/design/pro/MANUALS/refer.htm">Intel 
-        Developer Manuals</a> Volume 2 has a description of all the instructions.</p>
-      <p>Dialogs.c - Contains the code for most of the simple dialogs used by 
-        the menus.</p>
+      <p>Deinterlace.c - Contains an array containing information about all the
+      deinterlacing routines used by dTV.</p>
+      <p>DI_XXXX.c - Contains the code for the XXXX deinterlacing method</p>
       <p><b>dTV.c</b> - Contains the Main windows event handler and WinMain.&nbsp; 
         This file is the best place to start to get a feel for how the software 
         functions at a high level.</p>
-      <p>ErrorBox.c - Simple error handling message box.</p>
-      <p>Globals.c - Globals not allocated to a particular source file are initialized 
-        here.</p>
-      <p>i2c.c - This code implements the I2C protocol which is used to talk to 
-        other components on the card like to tuner or sound chips. Should be no 
-        reason to change anything in here.</p>
-      <p>MixerDev.c - Lots of code to control the sound cards mixer through windows 
-        API code.&nbsp; I haven't touched this code and have no idea how it works.</p>
-      <p>Other.c - Was used by me as a bucket to place code, now contains just 
-        the overlay handling code.</p>
+      <p>FD_50Hz.c - Contains the PAL/SECAM film detection code.</p>
+      <p>FD_60Hz.c - Contains the NTSC film detection code.</p>
+      <p>Other.c - Contains just 
+        the overlay handling code and DirectDraw initialization.</p>
       <p><b>OutThread.c</b> - This is where the main logic of the display code 
-        is.&nbsp; Al the auto detection and flipping is handled in here.&nbsp; 
+        is.&nbsp; All the auto detection and flipping is handled in here.&nbsp; 
         This would be the file I expect to change the most and would be a good 
-        second file to take a look at.&nbsp; The main functions are YUVOutThreadPAL 
-        and YUVOutThreadNTSC</p>
+        second file to take a look at.&nbsp; The main functions is YUVOutThread.</p>
       <p>ProgramList.c - Handles the Program List dialog box.&nbsp; This could 
         definitely do with improvement.</p>
-      <p>Settings.c - Loads and saves settings to the dTV ini file.&nbsp; Contains 
-        defaults for some settings.</p>
-      <p>Status.c - Code for the status bar.&nbsp; should be OK</p>
-      <p>Tuner.c - Handles the tuner and also the country settings.&nbsp; This 
-        area could be massively improved.&nbsp; There is a file channels.ini which 
-        should be used instead of the channels.lst file.</p>
+      <p>Tuner.c - Handles the tuner and also the country settings.</p>
       <p>TVCards.c - Contains the details of all the cards that should be supported 
         by dTV.&nbsp; The data is taken from the bttv driver so check that they 
         haven't changed their values.&nbsp; The structures are similar but not 
         exactly the same so check that the values are being transposed properly.</p>
       <p>vbi.c - High level VBI decoding. VBI_DecodeLine is the high level function.</p>
-      <p>vt.c - VideoText decoder</p>
-      <h2><br>
+      <p>VBI_VideoText.c - VideoText decoder</p>
+      <h2>
         Comments</h2>
-      <p>Code that is commented with new style comments (//) has been done by 
-        me.&nbsp; The old style comments (/* */) were from the original code.</p>
-      <p>My long term aim is to move the code over to C++, my moves towards this 
-        are by the naming convention where the public functions of a c file are 
-        that file name followed by an&nbsp; underscore e.g. BT848_ResetHardware() 
-        will eventually become m_BT848-&gt;ResetHardware().&nbsp; This should 
-        reduce the huge number of global variables use throughout the program 
-        without impacting performance too much.</p>
       <p>Sound chip support needs a lot of further investigation.&nbsp; The code 
         in bttv is probably a good place to start.&nbsp; Note that bttv supports 
         many different sound chips, These could be added in a similar way to the 
         MSP chip but you're on your own.</p>
       <p>Tuner support also need a lot of work.&nbsp; There is no support currently 
         for fine tuning or manual channel setup.</p>
-      <p>The variable TVSettings (initialized in Global.c) contains the screen 
-        sizes and timing for the different video formats.&nbsp; The setting in 
-        1.6 were calibrated to my DX2 cards NTSC output.&nbsp; The PAL settings 
-        have not been optimized for DVD/LD and are at a higher resolution.&nbsp; 
-        If you want to add a new format put it here.&nbsp; Or if the other settings 
-        do not work try changes here.</p>
-      <p>Last Changed - John Adcock 4th September 2000</p>
+      <p>Last Changed - John Adcock 16th January 2001</p>
       <!-- #EndEditable --></td>
   </tr>
   <tr> 
