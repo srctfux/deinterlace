@@ -306,7 +306,7 @@ EndCopyLoop:
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// DeinterlaceOdd
+// DeinterlaceField
 //
 // The algorithm for this was taken from the 
 // Deinterlace - area based Vitual Dub Plug-in by
@@ -320,7 +320,7 @@ EndCopyLoop:
 // to write 32 byte sequential chunks.  This function now assumes the lines we write
 // are a multiple of 32 bytes.  It used to assume only 8.  -  Tom Barry 10/11/00
 ///////////////////////////////////////////////////////////////////////////////
-void DeinterlaceOdd(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay)
+void DeinterlaceField(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay, BOOL bIsOdd)
 {
 	int Line;
 	short* YVal1;
@@ -341,15 +341,37 @@ void DeinterlaceOdd(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay)
 	qwThreshold += (qwThreshold << 48) + (qwThreshold << 32) + (qwThreshold << 16);
 
 
-	// copy first even and odd line anyway
+	// copy first even line no matter what, and the first odd line if we're
+	// processing an odd field.
 	memcpyMMX(lpCurOverlay, pEvenLines[0], CurrentX * 2);
-	memcpyMMX(lpCurOverlay + OverlayPitch, pOddLines[0], CurrentX * 2);
+	if (bIsOdd)
+		memcpyMMX(lpCurOverlay + OverlayPitch, pOddLines[0], CurrentX * 2);
+
 	for (Line = 0; Line < (CurrentY / 2 - 1); ++Line)
 	{
-		YVal1 = pOddLines[Line];
-		YVal2 = pEvenLines[Line + 1];
-		YVal3 = pOddLines[Line + 1];
-		Dest = lpCurOverlay + (Line * 2 + 2) * OverlayPitch;
+		if (bIsOdd)
+		{
+			YVal1 = pOddLines[Line];
+			YVal2 = pEvenLines[Line + 1];
+			YVal3 = pOddLines[Line + 1];
+			Dest = lpCurOverlay + (Line * 2 + 2) * OverlayPitch;
+		}
+		else
+		{
+			YVal1 = pEvenLines[Line];
+			YVal2 = pOddLines[Line + 1];
+			YVal3 = pEvenLines[Line + 1];
+			Dest = lpCurOverlay + (Line * 2 + 1) * OverlayPitch;
+		}
+
+		// For ease of reading, the comments below assume that we're operating on an odd
+		// field (i.e., that bIsOdd is true).  The exact same processing is done when we
+		// operate on an even field, but the roles of the odd and even fields are reversed.
+		// It's just too cumbersome to explain the algorithm in terms of "the next odd
+		// line if we're doing an odd field, or the next even line if we're doing an
+		// even field" etc.  So wherever you see "odd" or "even" below, keep in mind that
+		// half the time this function is called, those words' meanings will invert.
+
 		_asm
 		{
 			mov ecx, CurrentX
@@ -611,306 +633,12 @@ DoNext32Bytes:
 			emms
 		}
 	}
+
+	// Copy last odd line if we're processing an even field.
+	if (! bIsOdd)
+		memcpyMMX(lpCurOverlay + (CurrentY - 1) * OverlayPitch, pOddLines[CurrentY / 2 - 1], CurrentX * 2);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// DeinterlaceEven
-//
-// The algorithm for this was taken from the VirtualDub Deinterlace class
-//
-// Unrolled loop to write 32 bytes at a time, see above - Tom Barry 10/11/00
-///////////////////////////////////////////////////////////////////////////////
-void DeinterlaceEven(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay)
-{
-	int Line;
-	short* YVal1;
-	short* YVal2;
-	short* YVal3;
-	BYTE* Dest;
-	
-	const __int64 YMask    = 0x00ff00ff00ff00ff;
-	const __int64 UVMask    = 0xff00ff00ff00ff00;
-	__int64 qwEdgeDetect;
-	__int64 qwThreshold;
-	const __int64 Mask = 0x7f7f7f7f7f7f7f7f;
-
-	qwEdgeDetect = EdgeDetect;
-	qwEdgeDetect += (qwEdgeDetect << 48) + (qwEdgeDetect << 32) + (qwEdgeDetect << 16);
-	qwThreshold = JaggieThreshold;
-	qwThreshold += (qwThreshold << 48) + (qwThreshold << 32) + (qwThreshold << 16);
-
-
-	// copy first even line
-	memcpyMMX(lpCurOverlay, pEvenLines[0], CurrentX * 2);
-	for (Line = 0; Line < (CurrentY / 2 - 1); ++Line)
-	{
-		YVal1 = pEvenLines[Line];
-		YVal2 = pOddLines[Line];
-		YVal3 = pEvenLines[Line + 1];
-		Dest = lpCurOverlay + (Line * 2 + 1) * OverlayPitch;
-		_asm
-		{
-			mov ecx, CurrentX
-			mov eax, dword ptr [YVal1]
-			mov ebx, dword ptr [YVal2]
-			mov edx, dword ptr [YVal3]
-			mov edi, dword ptr [Dest]
-			shr ecx, 4       // there are ActiveX * 2 / 8 qwords, done 4 at a time
-
-align 8
-DoNext32Bytes:			
-// Loop pass 1 of unrolled loop
-			add edi, OverlayPitch
-
-			movq mm0, qword ptr[eax] 
-			movq mm1, qword ptr[ebx] 
-
-			// copy the even line to destination, 32 bytes at a time
-			movq mm2, qword ptr[edx]
-			movq mm3, qword ptr[edx+8]
-			movq mm4, qword ptr[edx+16]
-			movq mm5, qword ptr[edx+24]
-
-			movq qword ptr[edi], mm2
-			movq qword ptr[edi+8], mm3
-			movq qword ptr[edi+16], mm4
-			movq qword ptr[edi+24], mm5
-
-			// get intensities in mm3 - 4
-			movq mm3, mm1
-			movq mm4, mm2
-			movq mm5, mm3
-
-			sub edi, OverlayPitch
-
-			pand mm3, YMask
-			pand mm4, YMask
-			pand mm5, YMask
-
-			// get average in mm0
-			psrlw mm0, 01
-			psrlw mm2, 01
-			pand  mm0, Mask
-			pand  mm2, Mask
-			paddw mm0, mm2
-
-			// work out (O1 - E) * (O2 - E) - EdgeDetect * (O1 - O2) ^ 2 >> 12
-			// result will be in mm6
-
-			psrlw mm3, 01
-			psrlw mm4, 01
-			psrlw mm5, 01
-
-			movq mm6, mm3
-			psubw mm6, mm4		//mm6 = O1 - E
-
-			movq mm7, mm5
-			psubw mm7, mm4		//mm7 = O2 - E
-
-			pmullw mm6, mm7		// mm0 = (O1 - E) * (O2 - E)
-
-			movq mm7, mm3
-			psubw mm7, mm5		// mm7 = (O1 - O2)
-			pmullw mm7, mm7		// mm7 = (O1 - O2) ^ 2
-			psrlw mm7, 12		// mm7 = (O1 - O2) ^ 2 >> 12
-			pmullw mm7, qwEdgeDetect		// mm1  = EdgeDetect * (O1 - O2) ^ 2 >> 12
-
-			psubw mm6, mm7      // mm6 is what we want
-
-			pcmpgtw mm6, qwThreshold
-
-			movq mm7, mm6
-
-			pand mm0, mm6
-
-			pandn mm7, mm1
-
-			por mm7, mm0
-
-			movq qword ptr[edi], mm7
-
-// Loop pass 2 of unrolled loop
-			movq mm0, qword ptr[eax+8] 
-			movq mm1, qword ptr[ebx+8] 
-			movq mm2, qword ptr[edx+8]
-
-			// get intensities in mm3 - 4
-			movq mm3, mm1
-			movq mm4, mm2
-			movq mm5, mm3
-
-			pand mm3, YMask
-			pand mm4, YMask
-			pand mm5, YMask
-
-			// get average in mm0
-			psrlw mm0, 01
-			psrlw mm2, 01
-			pand  mm0, Mask
-			pand  mm2, Mask
-			paddw mm0, mm2
-
-			// work out (O1 - E) * (O2 - E) - EdgeDetect * (O1 - O2) ^ 2 >> 12
-			// result will be in mm6
-
-			psrlw mm3, 01
-			psrlw mm4, 01
-			psrlw mm5, 01
-
-			movq mm6, mm3
-			psubw mm6, mm4		//mm6 = O1 - E
-
-			movq mm7, mm5
-			psubw mm7, mm4		//mm7 = O2 - E
-
-			pmullw mm6, mm7		// mm0 = (O1 - E) * (O2 - E)
-
-			movq mm7, mm3
-			psubw mm7, mm5		// mm7 = (O1 - O2)
-			pmullw mm7, mm7		// mm7 = (O1 - O2) ^ 2
-			psrlw mm7, 12		// mm7 = (O1 - O2) ^ 2 >> 12
-			pmullw mm7, qwEdgeDetect		// mm1  = EdgeDetect * (O1 - O2) ^ 2 >> 12
-
-			psubw mm6, mm7      // mm6 is what we want
-
-			pcmpgtw mm6, qwThreshold
-
-			movq mm7, mm6
-
-			pand mm0, mm6
-
-			pandn mm7, mm1
-
-			por mm7, mm0
-
-			movq qword ptr[edi+8], mm7
-	
-// Loop pass 3 of unrolled loop
-
-			movq mm0, qword ptr[eax+16] 
-			movq mm1, qword ptr[ebx+16] 
-			movq mm2, qword ptr[edx+16]
-
-			// get intensities in mm3 - 4
-			movq mm3, mm1
-			movq mm4, mm2
-			movq mm5, mm3
-
-			pand mm3, YMask
-			pand mm4, YMask
-			pand mm5, YMask
-
-			// get average in mm0
-			psrlw mm0, 01
-			psrlw mm2, 01
-			pand  mm0, Mask
-			pand  mm2, Mask
-			paddw mm0, mm2
-
-			// work out (O1 - E) * (O2 - E) - EdgeDetect * (O1 - O2) ^ 2 >> 12
-			// result will be in mm6
-
-			psrlw mm3, 01
-			psrlw mm4, 01
-			psrlw mm5, 01
-
-			movq mm6, mm3
-			psubw mm6, mm4		//mm6 = O1 - E
-
-			movq mm7, mm5
-			psubw mm7, mm4		//mm7 = O2 - E
-
-			pmullw mm6, mm7		// mm0 = (O1 - E) * (O2 - E)
-
-			movq mm7, mm3
-			psubw mm7, mm5		// mm7 = (O1 - O2)
-			pmullw mm7, mm7		// mm7 = (O1 - O2) ^ 2
-			psrlw mm7, 12		// mm7 = (O1 - O2) ^ 2 >> 12
-			pmullw mm7, qwEdgeDetect		// mm1  = EdgeDetect * (O1 - O2) ^ 2 >> 12
-
-			psubw mm6, mm7      // mm6 is what we want
-
-			pcmpgtw mm6, qwThreshold
-
-			movq mm7, mm6
-
-			pand mm0, mm6
-
-			pandn mm7, mm1
-
-			por mm7, mm0
-
-			movq qword ptr[edi+16], mm7
-	
-// Loop pass 4 of unrolled loop
-
-			movq mm0, qword ptr[eax+24] 
-			movq mm1, qword ptr[ebx+24] 
-			movq mm2, qword ptr[edx+24]
-
-			// get intensities in mm3 - 4
-			movq mm3, mm1
-			movq mm4, mm2
-			movq mm5, mm3
-
-			pand mm3, YMask
-			pand mm4, YMask
-			pand mm5, YMask
-
-			// get average in mm0
-			psrlw mm0, 01
-			psrlw mm2, 01
-			pand  mm0, Mask
-			pand  mm2, Mask
-			paddw mm0, mm2
-
-			// work out (O1 - E) * (O2 - E) - EdgeDetect * (O1 - O2) ^ 2 >> 12
-			// result will be in mm6
-
-			psrlw mm3, 01
-			psrlw mm4, 01
-			psrlw mm5, 01
-
-			movq mm6, mm3
-			psubw mm6, mm4		//mm6 = O1 - E
-
-			movq mm7, mm5
-			psubw mm7, mm4		//mm7 = O2 - E
-
-			pmullw mm6, mm7		// mm0 = (O1 - E) * (O2 - E)
-
-			movq mm7, mm3
-			psubw mm7, mm5		// mm7 = (O1 - O2)
-			pmullw mm7, mm7		// mm7 = (O1 - O2) ^ 2
-			psrlw mm7, 12		// mm7 = (O1 - O2) ^ 2 >> 12
-			pmullw mm7, qwEdgeDetect		// mm1  = EdgeDetect * (O1 - O2) ^ 2 >> 12
-
-			psubw mm6, mm7      // mm6 is what we want
-
-			pcmpgtw mm6, qwThreshold
-
-			movq mm7, mm6
-
-			pand mm0, mm6
-
-			pandn mm7, mm1
-
-			por mm7, mm0
-
-			movq qword ptr[edi+24], mm7
-	
-
-			add eax, 32
-			add ebx, 32
-			add edx, 32
-			add edi, 32
-			dec ecx
-			jne near DoNext32Bytes
-			emms
-		}
-	}
-	memcpyMMX(lpCurOverlay + (CurrentY - 1) * OverlayPitch, pOddLines[CurrentY / 2 - 1], CurrentX * 2);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // GetCombFactor

@@ -881,7 +881,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				}
 				else if(gPulldownMode == VIDEO_MODE)
 				{
-					DeinterlaceOdd(ppOddLines[CurrentFrame], ppEvenLines[LastEvenFrame], lpCurOverlay);
+					DeinterlaceField(ppOddLines[CurrentFrame], ppEvenLines[LastEvenFrame], lpCurOverlay, TRUE);
 				}
 				else if(gPulldownMode == SIMPLE_WEAVE)
 				{
@@ -975,7 +975,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				}
 				else if(gPulldownMode == VIDEO_MODE)
 				{
-					DeinterlaceEven(ppOddLines[LastOddFrame], ppEvenLines[CurrentFrame], lpCurOverlay);
+					DeinterlaceField(ppOddLines[LastOddFrame], ppEvenLines[CurrentFrame], lpCurOverlay, FALSE);
 				}
 				else if(gPulldownMode == SIMPLE_WEAVE)
 				{
