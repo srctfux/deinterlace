@@ -41,6 +41,7 @@
 #include "other.h"
 #include "AspectRatio.h"
 #include "resource.h"
+#include "DebugLog.h"
 
 // From dtv.c .... We really need to reduce reliance on globals by going C++!
 // Perhaps in the meantime, it could be passed as a parameter to WorkoutOverlay()
@@ -52,11 +53,20 @@ extern HMENU hMenu;
 // Note: target_aspect is the aspect ratio of the screen.
 int source_aspect = 0;
 int target_aspect = 0;
-int aspect_mode = 0;
 
 // Mode 0 = do nothing, 1 = Letterboxed, 2 = 16:9 anamorphic
+int aspect_mode = 0;
+
 int custom_source_aspect = 0;
 int custom_target_aspect = 0;
+
+// Luminance cutoff for a black pixel for letterbox detection.  0-255.
+long LuminanceThreshold = 15;
+
+// Ignore this many non-black pixels when detecting letterbox.  0 means
+// use a reasonable default.
+long IgnoreNonBlackPixels = 0;
+
 
 RECT destinationRectangle = {0,0,0,0};
 
@@ -167,6 +177,7 @@ int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 	case IDM_SASPECT_185A:
 	case IDM_SASPECT_200A:
 	case IDM_SASPECT_235A:
+	case IDM_SASPECT_COMPUTE:
 	case IDM_SASPECT_CUSTOM:
 	case IDM_TASPECT_0:
 	case IDM_TASPECT_133:
@@ -197,6 +208,7 @@ int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 			case IDM_SASPECT_200A:    aspect_mode = 2;  source_aspect = 2000;  break;
 			case IDM_SASPECT_235A:    aspect_mode = 2;  source_aspect = 2350;  break;
 			case IDM_SASPECT_CUSTOM:  aspect_mode = 2;  source_aspect = custom_source_aspect;  break;
+			case IDM_SASPECT_COMPUTE: FindAspectRatio();  break;
 
 			// Output Display Aspect Ratios
 			case IDM_TASPECT_0:       target_aspect = 0;     break;
@@ -284,6 +296,24 @@ void PaintOverlay(HWND hWnd)
 	DeleteObject(overlay);
 	// END MRS
 	EndPaint(hWnd, &sPaint);
+}
+
+//----------------------------------------------------------------------------
+// Calculate the actual aspect ratio of the source frame, independent of
+// grab or display resolutions.
+double GetActualSourceFrameAspect()
+{
+	switch (aspect_mode) {
+	case 1:
+		// Letterboxed or full-frame
+		return 4.0/3.0;
+	case 2:
+		// Anamorphic
+		return 16.0/9.0;
+	default:
+		// User-specified
+		return source_aspect/1000.0;
+	}
 }
 
 //----------------------------------------------------------------------------
@@ -386,23 +416,7 @@ void WorkoutOverlaySize()
 		double TargetSrcAspect; 
 		double TargetDestAspect;
 
-				// --- From Mark Rejhon, Sept 11, 2000
-		// Rewritten one line of code into easier-to-read switch statement
-		// Michael, never use nested x?y:z syntax in one line, use switch instead :)
-		// It's hard to read.  We want to keep code readable to harried coders and
-		// new coders alike.  Delete this comment block after reading this comment.
-		// --- End Mark Rejhon comment
-		switch (aspect_mode) {
-		case 1:
-			ActualSourceFrameAspect = (4.0/3.0);
-			break;
-		case 2:
-			ActualSourceFrameAspect = (16.0/9.0);
-			break;
-		default:
-			ActualSourceFrameAspect = source_aspect/1000.0;
-			break;
-		}
+		ActualSourceFrameAspect = GetActualSourceFrameAspect();
 		TargetSrcAspect = MaterialAspect * SourceFrameAspect / ActualSourceFrameAspect;
 		TargetDestAspect = MaterialAspect * ComputerAspect / ScreenAspect;	
 
@@ -521,4 +535,113 @@ void WorkoutOverlaySize()
 	InvalidateRect(hWnd,NULL,FALSE);
 
 	return;
+}
+
+
+//----------------------------------------------------------------------------
+// Scan the top of a letterboxed image to find out where the picture starts.
+//
+// The basic idea is that we find a bounding rectangle for the image (which
+// is assumed to be centered in the overlay buffer, an assumption the aspect
+// ratio code makes in general) by searching from the top down to find the first
+// scanline that isn't all black.  "All black" means that there aren't many
+// pixels with luminance above a certain threshold.
+//
+// To support letterboxed movies shown on TV channels that put little channel
+// logos in the corner, we allow the user to configure a maximum number of
+// non-black pixels which will be ignored for purposes of the computation.
+// By default this is 20% of the horizontal capture resolution, which will
+// produce good results if the aspect ratio analysis is done on a bright scene.
+//
+// This function can almost certainly be made more efficient using MMX
+// instructions, but since (for the moment, at least) it's only executed
+// once at a time on user request, it's probably not worth it.
+int FindTopOfImage(BYTE *Overlay)
+{
+	int y, x;
+	int maxX = CurrentX - InitialOverscan * 2;
+	int maxY = CurrentY / 2 - InitialOverscan;
+	BYTE *pixel;
+	int ignoreCount = IgnoreNonBlackPixels;
+
+	if (ignoreCount == 0)
+	{
+		// The user didn't specify an ignore count.  Default to 20%
+		// of the horizontal size of the image.
+		ignoreCount = CurrentX / 5;
+	}
+
+	for (y = InitialOverscan; y < maxY; y++)
+	{
+		int pixelCount = -ignoreCount;
+		pixel = &Overlay[OverlayPitch * y];
+		for (x = InitialOverscan; x < maxX; x++)
+		{
+			if (*pixel > LuminanceThreshold)
+				pixelCount++;
+			pixel += 2;	// Skip past the chroma information
+		}
+
+		if (pixelCount > 0)
+			break;
+	}
+
+	return y;
+}
+
+
+//----------------------------------------------------------------------------
+// Adjust the source aspect ratio to fit whatever is currently onscreen.
+void FindAspectRatio(void)
+{
+	int top;
+	int imageHeight = CurrentY - InitialOverscan * 2;
+	DDSURFACEDESC ddsd;
+
+	/* Should have to lock the surface!  But it looks like it's kept locked all the time.
+
+    HRESULT ddrval;
+	memset(&ddsd, 0, sizeof(ddsd));
+	ddsd.dwSize = sizeof(ddsd);
+	ddrval = IDirectDrawSurface_Lock(lpDDOverlay, NULL, &ddsd, DDLOCK_WAIT, NULL);
+	if (FAILED(ddrval))
+	{
+		ErrorBox("Can't Lock Surface");
+		ddrval = DDERR_WASSTILLDRAWING;
+		return;
+	}
+	*/ ddsd.lpSurface = lpOverlay;	// Remove this when surface locking is fixed.
+
+	// If the aspect mode is set to "use source", revert to assuming that the
+	// source frame is 4:3.  We have to assume *some* source-frame aspect ratio
+	// here or there aren't enough inputs to derive the material aspect ratio.
+	if (aspect_mode == 0)
+		aspect_mode = 1;
+
+	// Find the top of the image relative to the overscan area.  Overscan has to
+	// be discarded from the computations since it can't really be regarded as
+	// part of the picture.
+	top = FindTopOfImage(ddsd.lpSurface) - InitialOverscan;
+
+	// Now the material aspect ratio is simply
+	//
+	//	effective width / (total image height - number of black lines at top and bottom)
+	//
+	// We compute effective width from height using the source-frame aspect ratio, since
+	// this will change depending on whether or not the image is anamorphic.  And we
+	// assume that the total number of black lines above and below the image is simply
+	// twice the number on top, which will be true for centered images.
+	source_aspect = (int)((imageHeight * 1000) * GetActualSourceFrameAspect() / (imageHeight - top * 2));
+	LOG("Top of picture: %d   Aspect: %d", top, source_aspect);
+
+	/* Uncomment whenever we stop keeping the surfaces locked.
+	ddrval = IDirectDrawSurface_Unlock(lpDDOverlay, ddsd.lpSurface);
+	if (FAILED(ddrval))
+	{
+		ErrorBox("Can't Unlock Surface");
+		return;
+	}
+	*/
+
+	WorkoutOverlaySize();
 }

@@ -615,7 +615,7 @@ END
 ABOUT DIALOGEX 22, 17, 374, 274
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
 CAPTION "About dTV"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,305,9,58,19,WS_GROUP,WS_EX_CLIENTEDGE
     CTEXT           "dTV Version 1.8",IDC_TEXT1,0,3,293,9
@@ -925,6 +925,7 @@ BEGIN
             MENUITEM "1.85   Anamorphic\tCtrl+Shift+4", IDM_SASPECT_185A
             MENUITEM "2.00   Anamorphic\tCtrl+Shift+5", IDM_SASPECT_200A
             MENUITEM "2.35   Anamorphic\tCtrl+Shift+6", IDM_SASPECT_235A
+            MENUITEM "Current Image\t9",            IDM_SASPECT_COMPUTE
             MENUITEM "Custom  (from .INI file)\tCtrl+9", IDM_SASPECT_CUSTOM
         END
         POPUP "Aspect Ratio of Display Screen"
@@ -1288,6 +1289,7 @@ BEGIN
     "6",            IDM_TASPECT_235,        VIRTKEY, ALT, NOINVERT
     "6",            IDM_SASPECT_235A,       VIRTKEY, SHIFT, CONTROL, 
                                                     NOINVERT
+    "9",            IDM_SASPECT_COMPUTE,    VIRTKEY, NOINVERT
     "9",            IDM_SASPECT_CUSTOM,     VIRTKEY, CONTROL, NOINVERT
     "9",            IDM_TASPECT_CUSTOM,     VIRTKEY, ALT, NOINVERT
     "B",            IDM_BRIGHTNESSMINUS,    VIRTKEY, NOINVERT

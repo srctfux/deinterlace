@@ -124,6 +124,7 @@
 #define IDM_32PULL4                     539
 #define IDM_32PULL5                     540
 #define IDM_FALLBACK                    541
+#define IDM_SASPECT_COMPUTE             542
 #define IDM_END                         1032
 #define IDM_TUNER                       1089
 #define IDM_EXTERN1                     1090
@@ -656,7 +657,7 @@
 #define _APS_NO_MFC                     1
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        153
-#define _APS_NEXT_COMMAND_VALUE         542
+#define _APS_NEXT_COMMAND_VALUE         543
 #define _APS_NEXT_CONTROL_VALUE         1774
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

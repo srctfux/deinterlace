@@ -32,6 +32,7 @@
 #include "bTVPlugin.h"
 #include "OutThreads.h"
 #include "deinterlace.h"
+#include "AspectRatio.h"
 #include "DebugLog.h"
 
 // MRS 9-2-00
@@ -270,6 +271,8 @@ void LoadSettingsFromIni(LPSTR Name)
 	custom_target_aspect = GetPrivateProfileInt("ASPECT", "CustomScreenAspect", 0, szIniFile);
 	aspect_mode = GetPrivateProfileInt("ASPECT", "Mode", 0, szIniFile);
 	// END MRS 9/2/00
+	LuminanceThreshold = GetPrivateProfileInt("ASPECT", "LuminanceThreshold", LuminanceThreshold, szIniFile);
+	IgnoreNonBlackPixels = GetPrivateProfileInt("ASPECT", "IgnoreNonBlackPixels", IgnoreNonBlackPixels, szIniFile);
 }
 
 void WriteSettingsToIni()
@@ -468,6 +471,8 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("ASPECT", "ScreenAspect", target_aspect, szIniFile);
 	WritePrivateProfileInt("ASPECT", "Mode", aspect_mode, szIniFile);
 	// END MRS 9/2/00
+	WritePrivateProfileInt("ASPECT", "LuminanceThreshold", LuminanceThreshold, szIniFile);
+	WritePrivateProfileInt("ASPECT", "IgnoreNonBlackPixels", IgnoreNonBlackPixels, szIniFile);
 }
 
 void WritePrivateProfileInt(LPCTSTR lpAppName,  LPCTSTR lpKeyName,  int nValue, LPCTSTR lpFileName)
