@@ -448,14 +448,14 @@ int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 	case IDM_WINPOS_VERT_CENTRE:
 	case IDM_WINPOS_VERT_TOP:
 	case IDM_WINPOS_VERT_BOTTOM:
-		VerticalPos = wMenuID - IDM_WINPOS_VERT_CENTRE; 
+		VerticalPos = wMenuID - IDM_WINPOS_VERT_BOTTOM; 
 		WorkoutOverlaySize();
 		break;
 
 	case IDM_WINPOS_HORZ_CENTRE:
 	case IDM_WINPOS_HORZ_LEFT:
 	case IDM_WINPOS_HORZ_RIGHT:
-		HorizontalPos = wMenuID - IDM_WINPOS_HORZ_CENTRE; 
+		HorizontalPos = wMenuID - IDM_WINPOS_HORZ_RIGHT; 
 		WorkoutOverlaySize();
 		break;
 	default:
