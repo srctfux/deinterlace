@@ -1,0 +1,20 @@
+24/1
+. Description of "Blended clip updated"
+. Added description of "Greedy deinterlace"
+
+21/1
+. Added Michael Eskin in the developer's list
+. The "what are ppm files" section has been updated and shown as
+"deprecated" as we're not outputting TIFF files
+. Removed the "dTV export group" in the "Can I remote control dTV" as I now
+think that export groups are quite difficult to maintain. A lot less easier
+then Pronto's CCF files :-)
+. Updated the G400 to G4x0 in "Can I use any vga card..."
+. Update the "overlay update" ; removed the "has disappeared since version
+xxx" as we're still getting such errors
+. Added the whole section "What are all those deinterlace algorithms ?"
+submitted by Muljadi Budiman and slighly updated by myself (changed the 2:2
+pulldown part). Developers please check out the part you're related to.
+. Added a part to "Can I use more than one video input" suggesting usage of
+an a/v receiver to switch between multiple video inputs
+. Added "how much dvd costs ?"

@@ -29,8 +29,8 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
     <td height="1" width="501"><img src="/images/spacer.gif" width="1" height="1"></td>
   </tr>
   <tr> 
-    <td width="160" rowspan="2"><img src="images/dtvlogotvthumb.jpg" alt="dTV Logo" width="160" height="140"></td>
-    <td colspan="2" align="right" valign="top"> <font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><font size="1"><!-- #BeginEditable "Language%20Selector" --><font size="1"><a href="francais/FAQ.htm"><img src="images/selector-french.gif" width="50" height="18" border="0"></a><img src="images/selector-divider.gif" width="10" height="17"><a href="FAQ.htm"><img src="images/selector-english.gif" width="45" height="18" border="0"></a></font><!-- #EndEditable --></font></b></font></td>
+    <td width="160" rowspan="2"><img src="images/dtvlogotvthumb.jpg" width="160" height="140" alt="dTV Logo"></td>
+    <td colspan="2" align="right" valign="top"> <font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><font size="1"><!-- #BeginEditable "Language%20Selector" --><font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><font size="1"><font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><font size="1"><font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><font size="1"><font face="Verdana, Arial, Helvetica, sans-serif" size="5"><a href="/francais/FAQ.htm"><img src="/images/selector-french.gif" width="50" height="18" border="0"></a></font></font></b></font></font></b><img src="/images/selector-divider.gif" width="10" height="17"><b><font size="1"><font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><font size="1"><font face="Verdana, Arial, Helvetica, sans-serif" size="5"><a href="/FAQ.htm"><img src="/images/selector-english.gif" width="45" height="18" border="0"></a></font></font></b></font></font></b></font></font></b></font><!-- #EndEditable --></font></b></font></td>
   </tr>
   <tr> 
     <td colspan="2" align="right" valign="bottom"><font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><!-- #BeginEditable "Page%20Title" -->FAQ&nbsp;<!-- #EndEditable -->&nbsp;</b></font></td>
@@ -42,23 +42,24 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
     <td colspan="3">&nbsp;</td>
   </tr>
   <tr> 
-    <td colspan="3"><!-- #BeginEditable "Text" --> 
+    <td colspan="3"><!-- #BeginEditable "Text" --><p>Last update; January, 24, 2001
+      <p> 
       <h1>Introduction</h1>
       <p> 
       <h2>What is dTV ?</h2>
       <p> dTV is a piece of software that grabs analog, interlaced video, and 
-        deinterlace it to make it a progressive scan feed for use on your computer 
-        monitor or projector. 
+        deinterlaces it to make it a progressive scan feed for use on your computer 
+        monitor or projector.
       <p> Analog, interlaced video is what output devices like vcr, laserdisc, 
         game consoles ... 
-      <h2><br>
-        What is so special about dTV ?</h2>
+      <p>
+      <h2>What is so special about dTV ?</h2>
       <p> Unlike most existing software that tries to do the same, dTV implements 
         very sophisticated algorithms to deinterlace such sources. Using such 
         algorithms makes sure that each kind of video source is handled a different 
-        way. It provides the user with a level of image quality unknown to PC 
+        way. It provides the user with a level of image quality unknown to pc 
         owners up to now. 
-      <p> Some of those techniques are ; 
+      <p> Some of those techniques are ;
       <ul>
         <li>video source deinterlacing</li>
         <li>inverse telecine detection</li>
@@ -66,35 +67,178 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       </ul>
       <p> The image quality resulting from those complex operations is high and 
         allows some people equipped with data capable projectors to feed them 
-        with a progressive scan source that was interlaced right before. 
-      <h2><br>
-        Who made what ?</h2>
-      <p>See <a href="Authors.htm">dTV -- Authors</a> for the main contributors
-      and <a href="Thanks.htm">dTV -- Thanks</a> for a list of people who have
-      helped make dTV a success. 
-      <h1><br>
-        General issues</h1>
-      <h2>Should I use dTV to deinterlace the output from my set-top player ?</h2>
-      <p> While it's feasible and works quite fine (see the "dTV WinDVD challenge" 
-        in the <a href="screenshots/index.htm">screenshots</a> section), home theater 
-        PC's have shown the best results while using dvd decoding software along 
-        with a dvd-rom and a modern graphic card.<br>
-        However, it's been used quite often for test purposes (testing of grab 
-        quality on a high quality source, testing pulldown techniques on well 
-        encoded sources etc..). 
-      <h1><br>
-        Software issues</h1>
+        with a progressive scan source that was interlaced right before.
+      <p> 
+      <h2>Who made what ?</h2>
+      <p> 
+      <h3>Developers</h3>
+      <p> 
+      <h3><i>John Adcock</i></h3>
+      <p>John is the founder of the project. He did huge amounts of full time 
+        development over a three-month period during a lucky work break on versions 
+        1.0 through 1.06 Beta 4. He did most of the work cleaning, translating 
+        and legalizing Multidec. He put into code, the world's first open-source 
+        real-time 3:2 pulldown software deinterlacer (based on Mark Rejhon's algorithm 
+        article). He also designed an open-source video-material deinterlacer 
+        that is superior to those in virtually any other any PC-based video software 
+        product.</p>
+      <h3><br>
+        <i> Mark Rejhon</i></h3>
+      <p>As of version 1.07, Mark is the project admin. He is also the moderator 
+        of the Internet's largest Home Theater Computers forum at <a href="www.avsforum.com">AVSFORUM</a>. 
+        Mark authored the 3:2 pulldown algorithm that forms the basis of the algorithm 
+        implemented into dTV by JohnAd. He also does other programming tasks like 
+        code cleanup, merging, documenting, testing, enhancing of contributors' 
+        changes that are submitted to the project. He also enhances dTV with his 
+        own changes to certain parts of the code, including improvements to the 
+        deinterlacer modes.</p>
+      <h3><br>
+        <i> Steve Grimm</i></h3>
+      <p>Steve is contributing enhancements to the deinterlacing modes including 
+        better automatic switching between video mode and 3:2 pulldown mode, and 
+        handling of material that has bad 3:2 pulldown. He also worked on an early 
+        version of a 3:2 pulldown deinterlacing algorithm.</p>
+      <h3><br>
+        <i> Michael Samblanet</i></h3>
+      <p>Michael is continuing to upgrade his aspect ratio control code.</p>
+      <p><br>
+      </p>
+      <h3><i>Tom Barry</i></h3>
+      <p> Tom contributed the triple buffering code and synchronization fixes 
+        for version 2.0.0. Also, he has authored several MMX assembly optimizations 
+        to the video deinterlace mode and added the advanced Brooktree/Conexant 
+        chipset settings menu, both of which were included in version 1.9. <br>
+      <p><br>
+      </p>
+      <h3><i>Michael Eskin</i></h3>
+      <p> Michael works for Conexant and brings his technical expertise of the 
+        capture chipset to the dTV project. He's also contributing to various 
+        parts of the code among which, the OSD code. <br>
+      <a name="THANKS"></a>
+      <h3>Thanks to those various helping hands</h3>
+      <p> 
+      <p>See <a href="/MultiDec_ReadMe.txt"> MultiDec_ReadMe.txt</a> for a list 
+        of thanks for the project dTV was based upon.</p>
+      <ol>
+        <li>A big debt a gratitude is due to Mark Rejhon for his 3:2 alogirthm 
+          and his help testing, promoting dTV but particularly for his vision 
+          and his refusal to accept second best.</li>
+        <li>Thanks to Paul Samblanet, who contributed the aspect ratio control 
+          code. </li>
+        <li>Thanks to Daniel Schmelzer for his hard work creating and updating 
+          the website. Love the logo!&nbsp;</li>
+        <li>Thanks to Steve Grimm for his work on the old method of 3:2 pulldown.</li>
+        <li>Thanks to everybody on the deinterlace project mailing list</li>
+        <li>Thanks to Borg, creator of bTV, for writing the first ever computer 
+          deinterlacing program the inspiration for this project</li>
+        <li>Thanks to Yvon Quere and Ali for finding bTV and Yvon for creating 
+          and updating the FAQ.&nbsp;</li>
+        <li>Thanks to all at the AVSForums for your encouragement and help. The 
+          HTPC forum is easily the best group on the internet.</li>
+        <li>Thanks to the authors of VirtualDub for the the PAL detection algorithm.</li>
+        <li>Thanks to Gunnar Thalin for his Area based deinterlacing plug-in which 
+          was the basis for the current deinterlacing method.</li>
+        <li>Thanks to Steaphan Greene, Øyvind Aabling, Octavian Purdila, Vladimir 
+          Dergachev and Christian Lupien&#151;the GATOS developers&#151;for the 
+          screen capture code. </li>
+      </ol>
+      <p> 
+      <h2>How much does dTV cost ?</h2>
+      <p> $1000 (plus taxes) :-) Of course not, dTV is fully free of charge, freeware, 
+        coded under GPL. 
+      <p> 
+      <h1>General issues</h1>
+      <p> 
+      <p>
+      <h2>Should I use dTV to deinterlace the output from my set-top dvd player 
+        ?</h2>
+      <p> While it's feasable and works quite fine (see the "dTV Windvd challenge" 
+        in the <a href="/screenshots.htm">screenshots</a> section), home theater 
+        pc's have shown the best results while using dvd decoding software along 
+        with a dvd-rom and a modern graphic card. However, it's been used quite 
+        often for test purposes (testing of grab quality on a high quality source, 
+        testing pulldown techniques on well encoded sources etc..). 
+      <p> 
+      <h1>Software issues</h1>
+      <p> 
       <h2>Which operating system can I use dTV on ?</h2>
       <p> Windows 95 ok<br>
-        Windows 98 OK<br>
-        Windows NT ok<i> requires that a VxD runs in ring-0 (nt ultra low level 
-        part of the os</i><br>
+        Windows 98 ok<br>
+        Windows NT ok <i>requires that a VxD runs in ring-0 (nt ultra low level 
+        part of the os)</i><br>
         Windows Me ok <i>tested with an Hauppage 401 without problem</i><br>
         Windows 2000 ok<br>
         Linux no<br>
         OS/2 definitely no ;-) 
-      <h2>
-        When taking a snapshot, old versions of dTV output ppm files, what are those ?</h2>
+      <p> 
+      <h2>What are all those deinterlace algorithms ?</h2>
+      <p><br>
+      <h3>Video Deinterlace (Bob)</h3>
+      <p> This method is just a simple bob method used when dTV determines that 
+        the changes between the odd and even fields are extreme. This method will 
+        result in jitter (on static parts of the image) and jagged edges on diagonal 
+        lines. 
+      <h3>Simple Weave</h3>
+      <p> This method will weave the even and odd field if dTV determines that 
+        the changes between them are not severe. Setting dTV to always use this 
+        method will result in video playback that is almost identical to viewing 
+        on interlaced displays. 
+      <h3>Video Deinterlace (Weave)</h3>
+      <p> Similar to the above Simple Weave, with an enhancement. The method is 
+        enhanced by modifying the pixels that dTV determines is different enough 
+        than the pixel above and below it. 
+      <h3>Interpolated Bob</h3>
+      <p> As far as I can read the code, I don't see this method being used at 
+        all. If any developers can rectify this, please do. 
+      <h3>Blended Clip</h3>
+      <p> The BLENDED CLIP DeInterlace method is designed mostly for experimentation 
+        by those interested in what works for video deinterlacing. When it is 
+        selected it will pop up a control panel with many controls to adjust various 
+        parameters. These all correspond to Blc... parameters in the [Deinterlace] 
+        section of the dTV.ini file and are documented there. It is probably not 
+        the single best method for anything but it can be used to create custom 
+        deinterlace methods for special purposes. These can be saved in a separate 
+        ini file and invoked by a command line parameter when starting dTV.exe. 
+        Somewhat CPU intensive
+      <p> 
+      <h3>Greedy deinterlace method</h3>
+      <p> The GREEDY DeInterlace method is designed to give good results on low 
+        motion video source, using less CPU than some others. Good on slower machines 
+        but it will give awful results on high motion video material like sports. 
+        Quite by accident, it can also do a decent job on poorly mastered 3:2 
+        or 2:2 pull down film source material like some anime movies, regardless 
+        of low or high motion. Try it if you have a movie source that is not giving 
+        good results with normal Auto Pull Down processing.
+      <p> 
+      <h3>BTV Plugin</h3>
+      <p> <i>Deprecated. Included initially to allow usage of video plugins that 
+        could have been made for BorgTV (see <a href="#THANKS">thanks</a>)</i>
+      <p> Uses borgTV's plugin for deinterlacing purposes. Most people deem dTV's 
+        deinterlacing solution is better than borgTV's. YMMV. 
+      <h3>3:2 Pulldown, Skip Field X</h3>
+      <p> Mostly on NTSC format, on a 24-fps film material, the material is encoded 
+        as 48 fields (24 odd and 24 even). Each frame will be alternatingly played 
+        3 and 2 times respectively. With regard to fields, the order played will 
+        be come: Odd, Even, Odd (of frame 1) and Even, Odd (of Frame 2), and so 
+        on. In order to create a pure progressive image (which is 1 frame of the 
+        24-fps material), dTV will only need to take the odd and even field, weaves 
+        them together, skip the next odd frame and wait until the next odd and 
+        even field arrives, weaves them together and put it out again. In the 
+        field sequence, out of every 5 field, 1 field can be skipped. That field 
+        that is skipped will be the number displayed on the pulldown Skip Field. 
+        If all the sequences are coming in as perfect as described, and dTV detects 
+        it perfectly, the 3:2 pulldown method selected will always be set the 
+        same. If the PC is rather slow (dropping fields), or the sequence is altered 
+        (abruptly changing scenes), or dTV's tolerance in comparison is exceeded, 
+        it will retry to lock again to the 3:2 pulldown, and might end up with 
+        a different field to skip. 
+      <h3>2:2 Pulldown</h3>
+      <p> PAL movies are made of sequences of 2:2 frames. Once such a sequence 
+        is detected, the Odd and Even fields are taken, weaved to form 1 frame 
+        of the 24-fps material, and displayed. 
+      <h2>When taking a snapshot, dTV outputs ppm files, what are those ?</h2>
+      <i>Deprecated ; Since version 2, dTV outputs more widely used TIFF files 
+      that are supported by many applications out there</i> 
       <p> It's called Portable PixMap. Actually, this is the only graphic file 
         code that John Adcock had when writing dTV ;-)<br>
         It's perfectly handled by several applications including 
@@ -103,42 +247,31 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         <li>Irfanview <a href="http://www.irfanview.com/english.htm">http://www.irfanview.com/english.htm</a> 
         <li>Paint Shop Pro <a href="http://www.jasc.com/product.asp?pf%5Fid=001">http://www.jasc.com/product.asp?pf%5Fid=001</a> 
       </ul>
-      <h2>
-        My picture jumps up and down?<br>
-        I get dropped frames?</h2>
-      <p>
-        Both problems seems to be caused by not having a powerful enough machine
-        to run everything all at the same time.&nbsp; The things that use up a
-        lot of CPU time are 2-Frame and Blended Clip deinterlacing and automatic
-        pulldown detection.&nbsp; Try moving to another pulldown method or
-        switching off autodetection.&nbsp; The other alternative is to buy a
-        faster PC ;-))</p>
-      <p>
-        There is now a setting in Select Hardware which allows you to tell dTV
-        how fast your PC is.&nbsp; Try selecting alower speed if you get either
-        of these problems.</p>
-      <h2>
-        Can I <i>remote control</i> dTV ? <b>YES</b></h2>
-      <p> Yes you can. dTV is being developed mainly by people using it as an 
+      <p> 
+      <h2>Can I <i>remote control</i> dTV ? <b>YES</b></h2>
+      <p> Yes you can. dTV is being developped mainly by people using it as an 
         analog source scaler for their projector and they prefer for sure using 
-        dTV from their remote on the sofa rather than from their desk ;-) 
-      <p> dTV is thus filled with <a href="keyboard.htm">keyboard shortcuts</a> 
+        dTV from their remote on the sofa rather than from their desk ;-)
+      <p> dTV is thus filled with <a href="/keyboard.htm">keyboard shortcuts</a> 
         for all main options so that you can do everything quickly.<br>
         More, we suggest the use of <a href="http://www.stack.nl/~stilgar/windoze/girder.html">Girder</a> 
-        from Ron Bessems as the application of choice for remote controlling your 
-        computer. 
+        from Ron Bessems as the application of choice for remote controling your 
+        computer.
+      <p> 
+      <p> 
       <h1>Hardware issues</h1>
+      <p> 
       <h2>Can I use any vga card as a display device ?</h2>
-      <p> Despite this statement from Mark Rejhon ; 
+      <p> Despite this statement from Mark Rejhon ;
       <p> "dTV requires an AGP card. It is impossible to do on a PCI video card. 
-        dTV uses massive amounts of *bi-directional* bus bandwidth: 250 megabits 
+        dTV uses massive amounts of *bidirectional* bus bandwidth: 250 megabits 
         per second incoming bandwidth (from TV card) and about 500 megabits per 
-        second outgoing bandwidth (to video card). This bus data firehose is not 
+        second outgoing bandwidth (to videocard). This bus data firehose is not 
         feasible on PCI bus, as PCI can reliably continuously transfer up to about 
         600-700 megabits per second *in one direction only* out of a possible 
         1056 megabits per second (132 megabytes per second) due to overhead. Try 
-        to go bi-directional, and framerate literally gets the death penalty!" 
-      <p> However, experience in the last months showed the some users were able 
+        to go bidirectional, and framerate literally gets the death penalty!"
+      <p> However, experience in the last monthes showed the some users were able 
         to use their PCI card with success and without dropped frames. In some 
         cases however, frame rate is going down when higher and higher resolutions 
         are tried ; 
@@ -148,142 +281,136 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         v1.9 with a 720x576 @ 50Hz PAL composite input gives 0 DFS in manual Video 
         De-interlace mode for dTV window sizes up to 848x629 (as determined from 
         dtv.ini) but 7+ DFS for window sizes even 1 pixel above either of these 
-        dimensions</i> 
+        dimensions</i>
       <p> Bottom line ; no specific requirement for dTV. Probably works not so 
         bad on any vga card. However, as of today, GeForce based cards or (dualhead) 
-        Matrox G400 are successfully used by a lot of users. 
-      <p> <a name="BESTCARD"></a> 
-      <h2><br>
-        Which capture card can I use ?</h2>
+        Matrox G4x0 are successfully used by a lot of users.
+      <p> 
+      <a name="BESTCARD"></a>
+      <h2>Which capture card can I use ?</h2>
       <p> Almost any card (and that means A LOT) based of former Brooktree (now 
         Conexant) chips including bt848/878/879. Why those ? They are, for several 
         years now, the chipsets that are easy to program (there has been A LOT 
         of software based on those) and very cheap. Side effect ; a great number 
-        of manufacturers have (and are still) produced cards based on those chipsets. 
+        of manufacturers have (and are still) produced cards based on those chipsets.
       <p> While we can't claim "this card is the one you need", let's give you 
-        a couple ones that, at least, have been successfully used by some users 
-        ; 
+        a couple ones that, at least, have been sucessfully used by some users 
+        ;
+      <p> 
       <ul>
         <li>Zoltrix Genie TV <a href="http://www.zoltix.com/products/GenieTVspecs.htm">http://www.zoltix.com/products/GenieTVspecs.htm</a> 
         <li>The WinTV series from Hauppage <a href="http://www.hauppage.com/html/products.htm">http://www.hauppage.com/html/products.htm</a> 
         <li>Guillemot maxi video 3 <a href="http://fr.guillemot.com/brand/gamme/video/mtvvidp3/mtvvidpci3.html">http://fr.guillemot.com/brand/gamme/video/mtvvidp3/mtvvidpci3.html</a> 
-        <li>The Pinnacle Studio PCTV <a href="http://www.pinnaclesys.com/ProductPage.asp?Product_ID=6">http://www.pinnaclesys.com/ProductPage.asp?Product_ID=6</a> 
+        <li>The Pinacle Studio PCTV <a href="http://www.pinnaclesys.com/ProductPage.asp?Product_ID=6">http://www.pinnaclesys.com/ProductPage.asp?Product_ID=6</a> 
       </ul>
-      <p>Take a look at the <a href="card-support/index.htm">card list</a>. This will 
-        never be complete so feel free to drop us an email reporting your experience 
-        with dTV and your card. </p>
+      <p>Take a look at the <a href="/card_support.htm">card list</a>. This will 
+      never be complete so feel free to drop us an email reporting your experience 
+      with dTV and your card.</p>
       <p> <i>This list is originally based on the linux bttv driver on which the 
-        program was originally based.</i> 
-      <p>&nbsp;
-      <h2>Can I use my existing <whatever> video card's video input ?</h2>
+        program was originally based.</i>
+      <p> 
+      <h2>Can I use my existing <whatever> card's video input ?</h2>
       <p> Probably not. dTV is supporting (see previous question) the Brooktree/Conexant 
-        chipset. Supporting others chipsets, while feasible, means some hard work 
-        and some solid knowledge of those chipsets. And <b>unfortunately, no recent 
-        vga card with video-in feature includes Brooktree/Conexant chipset</b>. 
+        chipset. Supporting others chipsets, while feasable, means some hard work 
+        and some solid knowledges of those chipsets. And <b>unfortunately, no 
+        recent vga card with video-in feature includes Brooktree/Conexant chipset</b>. 
         Gx00, Asus Deluxe etc... are thus not supported at the moment. 
       <p> If you have some programming knowledge regarding the grab chipsets used 
         in those card, you might want to help us. See the "<a href="#HELP">How 
-        can I help</a>" section. 
-      <h2><br>
-        Can I use more than one video input ?</h2>
+        can I help</a>" section.
+      <p> 
+      <h2>Can I use more than one video input ?</h2>
       <p> Some "nut" people (he's admitting it himself ;-) who are playing with 
         Picture In Picture a lot have asked if dTV could drive multiple cards 
         or multiple inputs. A card allowing at worst 4 video inputs is manufactured 
         by Leadtek. It's the <a href="http://www.leadtek.com.tw/ewv605.htm">Winview 
         605</a>. 
       <p> It is Brooktree based so it might work with dTV but clearly nothing 
-        is done right now to drive multiple video inputs at the same time. 
+        is done right now to drive multiple video inputs at the same time.
       <p> See the <a href="http://www.avsforum.com/ubb/Forum12/HTML/004431.html">associated 
-        topic</a> on AVS forum. 
-      <p> <a name="TROUBLE"></a> 
+        topic</a> on AVS forum.
+      <p> However, you can easily use your a/v receiver to switch between multiple 
+        video inputs. Connect the monitor out of your equipement to your grab 
+        card and all your video devices to video in connectors.
+      <p> 
+      <a name="TROUBLE"></a>
       <h1>Troubleshooting</h1>
-      <p> <a name="PURPLESTRIPES"></a> 
+      <p> 
+      <a name="PURPLESTRIPES"></a>
       <h2>What is this "purple stripes" issue ?</h2>
-      <p> <i><b>UPDATE: </b>Michael Eskin of Conexant Systems Inc. has fixed
-      this issue with an adjustable INI file setting, as of dTV version 2.0.1</i>
       <p> When feeding some analog sources to the combination grab card/dTV, some 
-        numerous horizontal colored lines appear on the image. 
+        numerous horizontal colores lines appear on the image.
       <p> See <a href="/images/Mummy_MacrovisionOn.jpg">this picture</a> where 
         macrovision has been added to the video signal. The same video signal 
         <a href="/images/Mummy_MacrovisionOff.jpg">without the macrovision protection</a> 
-        is perfectly stripes-free. 
-      <p> This phenomenon seems to be, at least, <b>more visible when a macrovision 
+        is perfectly stripes-free.
+      <p> This phenomenom seems to be, at least, <b>more visible when a macrovision 
         protected video signal is fed</b> to some grab cards but this has been 
-        reported also (despite less visible) on unprotected material. 
+        reported also (despite less visible) on unprotected material.
       <p> Other examples of this phenomenon can be seen here ;<br>
         <a href="http://www.avsforum.com/ubb/Forum12/HTML/004317.html">avs:MacroVision 
         side effect</a><br>
         <a href="http://www.avsforum.com/ubb/Forum12/HTML/004436.html">avs:dTV 
-        Purple Stripes - is this capture card dependent?</a> 
-      <p> Some info from the <a href="http://www.dvddemystified.com/dvdfaq.html">Dvd 
-        Faq</a> ; 
+        Purple Stripes - is this capture card dependent?</a>
+      <p> Some infos from the <a href="http://www.dvddemystified.com/dvdfaq.html">Dvd 
+        Faq</a> ;
       <p> <i>"Macrovision adds a rapidly modulated colorburst signal ("Colorstripe") 
         along with pulses in the vertical blanking signal ("AGC") to the composite 
         video and s-video outputs. This confuses the synchronization and automatic-recording-level 
         circuitry in 95% of consumer VCRs. Unfortunately, it can degrade the picture, 
         especially with old or nonstandard equipment. Macrovision may show up 
         as stripes of color, distortion, rolling, black & white picture, and dark/light 
-        cycling. Macrovision creates problems for many line doublers."</i> 
+        cycling. Macrovision creates problems for many line doublers."</i>
       <p> <b>WARNING</b> This has been reported only when feeding, for test purposes, 
         a dvd player to the computer. Problems on other type of sources have yet 
-        to be shown. 
-      <p>So in common cases, you don't have to worry about this. 
-      <h2>I have slower system and&nbsp; I get some dropped frames ?</h2>
-      <p>Some people experienced some dropped frames or extreme jerkiness on
-      slower machines, say less than 500 mhz. Some performance tuning parameters
-      for this are available in the [Threads] section of the <a href="IniFile.HTM">.ini documentation</a>.
-      Depending upon your graphics card you may also try running with a lower
-      screen resolution or color depth. Also try to limit what else is running
-      at the time, including System Tray applications that may cause frequent
-      interupts. </p>
-      <h2>
-        Despite a very powerful system, I've still got some dropped frames ?</h2>
-      <p>Some people experienced some dropped frames (signs of a machine that 
-        has problems keeping up with the workload of dTV) even on powerful systems. 
-        An hypothesis is that a motherboard agp speed issue might be the cause 
-        of such behavior.&nbsp; </p>
+        to be shown.
+      <p>So in common cases, you don't have to worry about this.
+      <p> 
+      <h2>Despite a very powerful system, I've still got some dropped frames ?</h2>
+      <p></p>
+      <p>Some people experienced some dropped frames (signs of a machine that has 
+      problems keeping up with the workload of dTV) even on powerful systems. 
+      An hypothesis is that some motherboard agp speed issue might be the cause 
+      of such behavior.</p>
       <p> JackB reported <i>We looked at his BIOS settings and the only major 
         difference is that his had a 4X AGP mode and my MB only has a 2X AGP mode 
-        <snip>We put my video card, a GeForce2 MX, in his (slower supposedly) 
-        system and it ran 0 DFS. So it's not the MX throughput that's the problem. 
-        So, I'm down to it's my motherboard not being up to speed in either AGP 
-        acceleration or I have some settings set incorrectly</i> 
-      <p> <a name="OVERLAY"></a> 
-      <h2><br>
-        I get "overlay update" errors</h2>
-      <p>This will occur if you have an MPACT2 based card running in 24bit
-      mode.&nbsp; To use dTV with this card you must use a 16bit desktop mode.<p> Sometimes you get this error message <code>Error calling overlay update. 
-        D:/source/deinterlace/dtv/other.c at line ???</code><br>
+        <snip>We put my video card, a GeForce2 MX, in his(slower supposedly)system 
+        and it ran 0 DFS. So it's not the MX throughput that's the problem. So, 
+        I'm down to it's my motherboard not being up to speed in either AGP acceleration 
+        or I have some settings set incorrectly</i>
+      <p> 
+      <a name="OVERLAY"></a>
+      <h2>I get "overlay update" errors</h2>
+      <p> Sometimes you get this error message <br>
+        <code>Error calling overlay update. D:/source/deinterlace/dtv/other.c 
+        at line 161</code><br>
         We don't have any full explanation of the problem but it happens when 
         resizing dTV or making it go from fullscreen to window mode. Also the 
-        color depth, frequency and size of the desktop might be related.<br>
-        The problem seems to have disappeared with dTV starting from version 2.0.0 
-      <p> Some more info on this issue in <a href="http://www.avsforum.com/ubb/Forum12/HTML/004895.html">this 
-        avs topic</a> 
-      <p> <a name="HELP"></a> 
-      <h1>
-        How can I help ?</h1>
+        color depth, frequency and size of the desktop might be related. The problem 
+        seems to have disappeared with dTV starting from version 2.0.0 
+      <p> Some more infos on this issue in <a href="http://www.avsforum.com/ubb/Forum12/HTML/004895.html">this 
+        avs topic</a>
+      <p> 
+      <a name="HELP"></a>
+      <h1>How can I help ?</h1>
+      <p> 
       <h2>Testing</h2>
-      <p> More and more people are giving dTV a try. Why don't you ? <br>
-        We'd like to know about your experience with it. What does (not) work 
-        ? What can be improved, what feature you'd like to see. All feedback is useful.<p> Please
-      report bugs on the <a href="http://www.avsforum.com/ubbcgi/Ultimate.cgi">AV Science 
-        Forum</a> after checking (using the search feature) that the problem has
-      not already been reported. Each bug report should include the hardware you're using, especially video card,
-      grab card and processor type and speed. 
-      <h2>
-        Coding</h2>
+      <p> More and more people are giving dTV a try. Why wouldn't you ? We'd like 
+        to know about your experience with it. What does (not) work ? What can 
+        be improved, what feature you'd like. Every feedback is useful. 
+      <p> Please have a look, when reporting a problem, to the <a href="/Bugs.htm">bug 
+        list</a>. Report also the hardware you're using, especially video card 
+        and grab card. 
+      <p> 
+      <h2>Coding</h2>
       <p> Any help is welcome. Despite including very complex code, there's a 
         lot of features in it that are simple or that could be easily implemented 
         without knowing anything about 3:2 pulldown detection.
-      <p> dTV could especially use some more programmers interested in adding
-      advanced sound or closed captioning features.&nbsp;&nbsp; 
       <p> If you've got an idea, or feel like to trying to implement something 
-        that is already in the <a href="Todo.htm">Todo list</a>, contact the 
+        that is already in the <a href="/Todo.htm">Todo list</a>, contact the 
         authors and join the <a href="http://sourceforge.net/mail/?group_id=7420">mailing 
-        list</a>. All relevant info to get you started is on the <a href="developers.htm">developers 
+        list</a>. All relevant infos to get you started are on the <a href="/developers.htm">developers 
         page</a>. 
-      <p> 
       <!-- #EndEditable --></td>
   </tr>
   <tr> 
@@ -299,18 +426,18 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
   </tr>
   <tr> 
     <td colspan="3"> 
-      <div align="center"><a class="bottommenu" href="index.php">home</a> | <a href="about.htm" class="bottommenu">about</a>
-        | <a href="Reviews.htm" class="bottommenu">reviews</a> |&nbsp;<a href="screenshots/index.htm" class="bottommenu">screenshots</a>
-        | <a href="downloads.htm" class="bottommenu">download</a> | <a href="Authors.htm" class="bottommenu">authors</a>
+      <div align="center"><a href="index.php" class="bottommenu">home</a> | <a href="about.htm" class="bottommenu">about</a> 
+        | <a href="Reviews.htm" class="bottommenu">reviews</a> |&nbsp;<a href="screenshots/index.htm" class="bottommenu">screenshots</a> 
+        | <a href="downloads.htm" class="bottommenu">download</a> | <a href="Authors.htm" class="bottommenu">authors</a> 
         | <a href="Thanks.htm" class="bottommenu">thanks</a> <br>
-        <a href="setup/index.htm" class="bottommenu">setup</a> | <a href="keyboard.htm" class="bottommenu">keyboard
-        shortcuts </a>| <a href="http://sourceforge.net/mail/?group_id=7420" class="bottommenu">mailing
-        list</a> | <a href="FAQ.htm" class="bottommenu">faq</a> | <a href="developers.htm" class="bottommenu">developers</a>
+        <a href="setup/index.htm" class="bottommenu">setup</a> | <a href="keyboard.htm" class="bottommenu">keyboard 
+        shortcuts </a> | <a href="http://sourceforge.net/mail/?group_id=7420" class="bottommenu">mailing 
+        list</a> | <a href="FAQ.htm" class="bottommenu">faq</a> | <a href="developers.htm" class="bottommenu">developers</a> 
         | <a href="Links.htm" class="bottommenu">links</a></div>
     </td>
   </tr>
 </table>
-<p><a href="http://sourceforge.net"><img src="http://sourceforge.net/sflogo.php?group_id=7420&type=1" width="88" height="31" border="0"
+<p><a href="http://sourceforge.net"><img src="http://sourceforge.net/sflogo.php?group_id=7420&type=1" border="0"
 alt="SourceForge.net" align="right"></a></p>
 <p>&nbsp; </p>
 </body>
