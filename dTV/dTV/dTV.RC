@@ -802,6 +802,8 @@ BEGIN
         END
         MENUITEM "Bounce Window Position (Experimental)\tCtrl+B", 
                                                 IDM_WINPOS_BOUNCE
+        MENUITEM "Defer Setting Overlay (Experimental)", 
+                                                IDM_ASPECT_DEFER_OVERLAY
     END
     POPUP "&Settings"
     BEGIN

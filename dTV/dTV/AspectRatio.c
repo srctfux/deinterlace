@@ -50,6 +50,10 @@
 //									   Added prototype image bouncing code
 //									     (currently has issues with purple flashing)
 //
+// 22 Feb 2001   Michael Samblanet     Added defered setting of overlay region to
+//                                     avoid purple flashing
+//                                     Made bounce timer a ini setting and changed to 1sec default
+//
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -150,6 +154,9 @@ HORZ_POS HorizontalPos = HORZ_POS_CENTRE;
 
 RECT destinationRectangle = {0,0,0,0};
 RECT sourceRectangle = {0,0,0,0};
+RECT destinationRectangleWindow = {0,0,0,0}; // MRS 2-22-01 
+BOOL deferedSetOverlay = FALSE; // MRS 2-22-01 - Wait until middle of WM_PAINT to set overlay (between drawing of black bars and drawing of overlay color)
+BOOL overlayNeedsSetting = FALSE; // MRS 2-22-01
 
 int InitialOverscan    = 4;
 
@@ -168,6 +175,8 @@ BOOL bounceEnabled = FALSE;
 time_t bounceStartTime = 0;
 // Number of minutes for a complete cycle of bounce to occur (default is half hour)
 time_t bouncePeriod = 60*30;
+long timerBounceMS = 1000; // # of miliseconds between aspect updates
+
 BOOL Bounce_OnChange(long NewValue); // Forward declaration to reuse this code...
 
 //----------------------------------------------------------------------------
@@ -317,7 +326,7 @@ void AspectRatio_SetMenu(HMENU hMenu)
 
 	CheckMenuItem(hMenu, IDM_SASPECT_CLIP, (aspectImageClipped)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_WINPOS_BOUNCE, (bounceEnabled)?MF_CHECKED:MF_UNCHECKED);
-	
+	CheckMenuItem(hMenu, IDM_ASPECT_DEFER_OVERLAY, (deferedSetOverlay)?MF_CHECKED:MF_UNCHECKED);
 }
 
 //----------------------------------------------------------------------------
@@ -399,6 +408,11 @@ int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 		Bounce_OnChange(!bounceEnabled);
 		ShowText(hWnd, bounceEnabled ? "Image Bouncing ON" : "Image Bouncing OFF");
 		break;
+
+	case IDM_ASPECT_DEFER_OVERLAY:
+		deferedSetOverlay = !deferedSetOverlay;
+		break;
+
 
 	//-----------------------------------------------------------------
 	// Autodetect aspect ratio toggles
@@ -550,11 +564,14 @@ int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 //----------------------------------------------------------------------------
 // Repaints the overlay colorkey, optionally with black borders around it
 // during aspect ratio control
+extern LPDIRECTDRAW lpDD; // Temporary expierement MRS 2-22-01
 void PaintColorkey(HWND hWnd, BOOL bEnable, HDC hDC, RECT* PaintRect)
 {
 	// MRS 9-9-00
 	HBRUSH black = CreateSolidBrush(RGB(0,0,0));
 	HBRUSH overlay;
+	RECT r;
+	RECT r2, winRect;
 
 	if (bEnable && OverlayActive())
 	{
@@ -565,50 +582,67 @@ void PaintColorkey(HWND hWnd, BOOL bEnable, HDC hDC, RECT* PaintRect)
 		overlay = CreateSolidBrush(RGB(0,0,0));
 	}
 
-	if (destinationRectangle.right > destinationRectangle.left) {
-		RECT r;
-		// Draw black in the 4 borders
-		RECT r2, winRect;
-		GetClientRect(hWnd,&winRect);
-
-		// Top
-		r2.left = 0;
-		r2.top = 0;
-		r2.right = winRect.right;
-		r2.bottom = destinationRectangle.top;
-		IntersectRect(&r, &r2, PaintRect);
-		FillRect(hDC, &r, black);
-
-		// Bottom
-		r2.left = 0;
-		r2.top = destinationRectangle.bottom;
-		r2.right = winRect.right;
-		r2.bottom = winRect.bottom;
-		IntersectRect(&r, &r2, PaintRect);
-		FillRect(hDC, &r, black);
-
-		// Left
-		r2.left = 0;
-		r2.top = 0;
-		r2.right = destinationRectangle.left;
-		r2.bottom = winRect.bottom;
-		IntersectRect(&r, &r2, PaintRect);
-		FillRect(hDC, &r, black);
-
-		// Right
-		r2.left = destinationRectangle.right;
-		r2.top = 0;
-		r2.right = winRect.right;
-		r2.bottom = winRect.bottom;
-		IntersectRect(&r, &r2, PaintRect);
-		FillRect(hDC, &r, black);
-
-		// Draw overlay color in the middle.
-		IntersectRect(&r, &destinationRectangle, PaintRect);
-		FillRect(hDC, &r, overlay);
-	} else {
-		FillRect(hDC, PaintRect, overlay);
+	// MRS 2-22-01 - Reworked to fixup the rectangle rather than not draw piecemeal to help out defered overlay setting
+	if (destinationRectangle.right < destinationRectangle.left) {
+		int t = destinationRectangle.right;
+		destinationRectangle.right = destinationRectangle.left;
+		destinationRectangle.left = t;
 	}
+	if (destinationRectangle.bottom < destinationRectangle.top) {
+		int t = destinationRectangle.top;
+		destinationRectangle.top = destinationRectangle.bottom;
+		destinationRectangle.bottom = t;
+	}
+	
+	// Draw black in the 4 borders
+	GetClientRect(hWnd,&winRect);
+
+	// Top
+	r2.left = 0;
+	r2.top = 0;
+	r2.right = winRect.right;
+	r2.bottom = destinationRectangle.top;
+	IntersectRect(&r, &r2, PaintRect);
+	FillRect(hDC, &r, black);
+
+	// Bottom
+	r2.left = 0;
+	r2.top = destinationRectangle.bottom;
+	r2.right = winRect.right;
+	r2.bottom = winRect.bottom;
+	IntersectRect(&r, &r2, PaintRect);
+	FillRect(hDC, &r, black);
+
+	// Left
+	r2.left = 0;
+	r2.top = 0;
+	r2.right = destinationRectangle.left;
+	r2.bottom = winRect.bottom;
+	IntersectRect(&r, &r2, PaintRect);
+	FillRect(hDC, &r, black);
+
+	// Right
+	r2.left = destinationRectangle.right;
+	r2.top = 0;
+	r2.right = winRect.right;
+	r2.bottom = winRect.bottom;
+	IntersectRect(&r, &r2, PaintRect);
+	FillRect(hDC, &r, black);
+
+	if (overlayNeedsSetting) { // MRS 2-22-01
+		// Intended to prevent purple flashing by setting overlay
+		// after drawing black but before drawing purple.
+		Overlay_Update(&sourceRectangle, &destinationRectangleWindow, DDOVER_SHOW, TRUE);
+		overlayNeedsSetting = FALSE;
+		// Wait till current frame is done before drawing purple...
+		// Overlay changes do not seem to take place (at least on a GeForce)
+		// until the VBI...so need to wait to avoid purple flashing
+		if (lpDD != NULL) IDirectDraw_WaitForVerticalBlank(lpDD, DDWAITVB_BLOCKBEGIN, NULL);
+	}
+
+	// Draw overlay color in the middle.
+	IntersectRect(&r, &destinationRectangle, PaintRect);
+	FillRect(hDC, &r, overlay);
 
 	DeleteObject(black);
 	DeleteObject(overlay);
@@ -640,6 +674,7 @@ void WorkoutOverlaySize()
 {
 	RECT rOverlayDest;
 	RECT rOverlaySrc;
+	RECT previousDest = destinationRectangle; // MRS 2-22-01
 
 	int DestWidth, DestHeight;
 
@@ -738,40 +773,40 @@ void WorkoutOverlaySize()
 		// Crop the destination rectangle
 		if (TargetDestAspect > .1)
 		{
-			#define BOUNCE_POS (abs(MulDiv((time(NULL)-bounceStartTime)%bouncePeriod,200,bouncePeriod)+50)*100)
+			#define BOUNCE_POS (abs(MulDiv((time(NULL)-bounceStartTime)%bouncePeriod,200,bouncePeriod)+50)*10000l)
 			if (bounceEnabled && bounceStartTime == 0) time(&bounceStartTime);
 
 
 			if (WindowAspect > TargetDestAspect)
 			{
 				// Source is wider - crop Left and Right
-				int pos;
+				long pos;
 				int NewWidth;
 				if (bounceEnabled) pos = BOUNCE_POS;
 				else switch (HorizontalPos) {
 					case HORZ_POS_LEFT: pos = 0; break;
-					case HORZ_POS_RIGHT: pos = 10000; break;
-					default: pos = 5000; break;
+					case HORZ_POS_RIGHT: pos = 1000000; break;
+					default: pos = 500000; break;
 				}
-				if (pos > 10000) pos = 20000 - pos;
+				if (pos > 1000000) pos = 2000000 - pos;
 				NewWidth = (int) floor((TargetDestAspect*RHEIGHT(rOverlayDest))+.5);
-				rOverlayDest.left += MulDiv(RWIDTH(rOverlayDest)-NewWidth,pos,10000);
+				rOverlayDest.left += MulDiv(RWIDTH(rOverlayDest)-NewWidth,pos,1000000l);
 				rOverlayDest.right = rOverlayDest.left + NewWidth;
 			}
 			else
 			{
 				// Source is taller - crop top and bottom
-				int pos;
+				long pos;
 				int NewWidth;
 				if (bounceEnabled) pos = BOUNCE_POS;
 				else switch (VerticalPos) {
 					case VERT_POS_TOP: pos = 0; break;
-					case VERT_POS_BOTTOM: pos = 10000; break;
-					default: pos = 5000; break;
+					case VERT_POS_BOTTOM: pos = 1000000; break;
+					default: pos = 500000; break;
 				}
-				if (pos > 10000) pos = 20000 - pos;
+				if (pos > 1000000) pos = 2000000 - pos;
 				NewWidth = (int) floor((RWIDTH(rOverlayDest)/TargetDestAspect)+.5);
-				rOverlayDest.top += MulDiv((RHEIGHT(rOverlayDest) - NewWidth),pos,10000);
+				rOverlayDest.top += MulDiv((RHEIGHT(rOverlayDest) - NewWidth),pos,1000000l);
 				rOverlayDest.bottom = rOverlayDest.top + NewWidth;
 			}
 		}
@@ -892,16 +927,25 @@ void WorkoutOverlaySize()
 	if (rOverlaySrc.left  >= rOverlaySrc.right)   rOverlaySrc.right   = rOverlaySrc.left  + 1;
 	if (rOverlaySrc.top   >= rOverlaySrc.bottom)  rOverlaySrc.bottom  = rOverlaySrc.top   + 1;
 
-	Overlay_Update(&rOverlaySrc, &rOverlayDest, DDOVER_SHOW, TRUE);
+	if (!deferedSetOverlay) // MRS 2-22-01 - Defered overlay set
+		Overlay_Update(&rOverlaySrc, &rOverlayDest, DDOVER_SHOW, TRUE);
+	else overlayNeedsSetting = TRUE;
 
 	// MRS 9-9-00
 	// Save the Overlay Destination and force a repaint 
 	// Moved to after Overlay_Update in hopes of removing purple flashing.
 	destinationRectangle = rOverlayDest;
+	destinationRectangleWindow = rOverlayDest; // MRS 2-22-01
 	sourceRectangle = rOverlaySrc;
 	ScreenToClient(hWnd,((PPOINT)&destinationRectangle));
 	ScreenToClient(hWnd,((PPOINT)&destinationRectangle)+1);
-	InvalidateRect(hWnd,NULL,FALSE);
+	//InvalidateRect(hWnd,NULL,FALSE);
+	// MRS 2-22-01 Invalidate just the union of the old region and the new region - no need to invalidate all of the window.
+	{
+		RECT invalidate;
+		UnionRect(&invalidate,&previousDest,&destinationRectangle);
+		InvalidateRect(hWnd,&invalidate,FALSE);
+	}
 
 	return;
 }
@@ -1266,7 +1310,7 @@ BOOL Bounce_OnChange(long NewValue) {
 	if (!bounceEnabled) {
 		KillTimer(hWnd, TIMER_BOUNCE);
 	} else {
-	    SetTimer(hWnd, TIMER_BOUNCE, TIMER_BOUNCE_MS, NULL);
+	    SetTimer(hWnd, TIMER_BOUNCE, timerBounceMS, NULL);
 	}
 	return FALSE;
 }
@@ -1379,7 +1423,20 @@ SETTING AspectSettings[ASPECT_SETTING_LASTONE] =
 		NULL,
 		"ASPECT", "BouncePeriod", NULL,
 	},
+	{
+		"Defer Setting Overlay", ONOFF, 0, &deferedSetOverlay,
+		FALSE, 0, 1, 1, 1,
+		NULL,
+		"ASPECT", "deferedOverlay", NULL,
+	},
+	{
+		"Bounce Timer Period (ms)", NUMBER, 0, &timerBounceMS,
+		1000, 0, 2, 1, 1,
+		NULL,
+		"ASPECT", "BounceTimerPeriod", NULL,
+	},
 
+	
 };
 
 SETTING* Aspect_GetSetting(ASPECT_SETTING Setting)

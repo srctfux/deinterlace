@@ -34,6 +34,7 @@
 //                                     Got rid of global.h structs.h defines.h
 //
 // 20 Feb 2001   Michael Samblanet     Added TIMER_BOUNCE, TIMER_BOUNCE_MS
+// 21 Feb 2001   Michael Samblanet     Removed bounce timer - added as setting
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -77,7 +78,6 @@ BOOL IsStatusBarVisible();
 #define TIMER_AUTOSAVE_MS   1500
 
 #define TIMER_BOUNCE        42
-#define TIMER_BOUNCE_MS     10000
 
 extern HANDLE hInst;
 extern HWND hWnd;
