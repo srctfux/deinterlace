@@ -21,6 +21,7 @@
 
 long TemporalLuminanceThreshold = 6;	// Pixel luminance differences below this are considered noise.
 long TemporalChromaThreshold = 7;		// Pixel chroma differences below this are considered noise.
+FILTER_METHOD TemporalNoiseMethod;
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -104,6 +105,12 @@ SETTING FLT_TNoiseSettings[FLT_TNOISE_SETTING_LASTONE] =
 		NULL,
 		"NoiseFilter", "TemporalChromaThreshold", NULL,
 	},
+	{
+		"Noise Filter", ONOFF, 0, &TemporalNoiseMethod.bActive,
+		FALSE, 0, 1, 1, 1,
+		NULL,
+		"NoiseFilter", "UseTemporalNoiseFilter", NULL,
+	},
 };
 
 FILTER_METHOD TemporalNoiseMethod =
@@ -113,9 +120,14 @@ FILTER_METHOD TemporalNoiseMethod =
 	FALSE,
 	TRUE,
 	FilterTemporalNoise, 
-	1,
+	// IDM_NOISE_FILTER so that accelerator works
+	768,
 	FALSE,
 	NULL,
+	NULL,
+	NULL,
+	FLT_TNOISE_SETTING_LASTONE,
+	FLT_TNoiseSettings,
 };
 
 

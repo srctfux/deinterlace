@@ -22,6 +22,8 @@
 
 unsigned char GammaTable[256];
 
+FILTER_METHOD GammaMethod;
+
 long Gamma = 1000;
 BOOL bUseStoredTable = FALSE;
 
@@ -140,6 +142,12 @@ SETTING FLT_GammaSettings[FLT_GAMMA_SETTING_LASTONE] =
 		NULL,
 		"GammaFilter", "bUseStoredTable", UseStoredTable_OnChange,
 	},
+	{
+		"Gamma Filter", ONOFF, 0, &(GammaMethod.bActive),
+		FALSE, 0, 1, 1, 1,
+		NULL,
+		"GammaFilter", "UseGammaFilter", NULL,
+	},
 };
 
 void __stdcall FilterStartGamma(void)
@@ -159,6 +167,9 @@ FILTER_METHOD GammaMethod =
 	FALSE,
 	FilterStartGamma,
 	NULL,
+	NULL,
+	FLT_GAMMA_SETTING_LASTONE,
+	FLT_GammaSettings,
 };
 
 
