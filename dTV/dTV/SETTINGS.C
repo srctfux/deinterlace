@@ -25,6 +25,8 @@
 //               Conexant Systems      by adding non-zero InitialBDelay in .ini
 //                                     File. Changed NTSC defaults to 0x5C
 //
+// 21 Dec 2000   John Adcock           Added function to setup ini file name
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -46,21 +48,27 @@
 extern int source_aspect, target_aspect, aspect_mode, custom_source_aspect, custom_target_aspect;
 // END MRS 9-2-00
 
+char szIniFile[MAX_PATH] = "dTV.ini";
 
-void LoadSettingsFromIni(LPSTR Name)
+void SetIniFileForSettings(LPSTR Name)
 {
-	char szIniFile[MAX_PATH];
-	char szKey[128];
-	int i;
-
 	GetCurrentDirectory(MAX_PATH, szIniFile);
 	if (*Name == 0)			// add parm TRB 12/00
+	{
 		strcat(szIniFile, "\\dTV.ini");
+	}
 	else
 	{
 		strcat(szIniFile, "\\");
 		strcat(szIniFile, Name);
 	}
+}
+
+void LoadSettingsFromIni()
+{
+	char szKey[128];
+	int i;
+
 	emstartx = GetPrivateProfileInt("MainWindow", "StartLeft", 10, szIniFile);
 	emstarty = GetPrivateProfileInt("MainWindow", "StartTop", 10, szIniFile);
 	emsizex = GetPrivateProfileInt("MainWindow", "StartWidth", 754, szIniFile);
@@ -315,21 +323,10 @@ void LoadSettingsFromIni(LPSTR Name)
 	AspectConsistencyTime = GetPrivateProfileInt("ASPECT", "AspectConsistencyTime", AspectConsistencyTime, szIniFile);
 }
 
-void WriteSettingsToIni(LPSTR Name)
+void WriteSettingsToIni()
 {
-	char szIniFile[MAX_PATH];
 	char szKey[128];
 	int i;
-
-	GetCurrentDirectory(MAX_PATH, szIniFile);
-	
-	if (*Name == 0)			// add parm TRB 12/00
-		strcat(szIniFile, "\\dTV.ini");
-	else
-	{
-		strcat(szIniFile, "\\");
-		strcat(szIniFile, Name);
-	}
 
 	WritePrivateProfileInt("MainWindow", "AlwaysOnTop", bAlwaysOnTop, szIniFile);
 	WritePrivateProfileInt("MainWindow", "DisplaySplashScreen", bDisplaySplashScreen, szIniFile);

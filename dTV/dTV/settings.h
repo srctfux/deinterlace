@@ -30,6 +30,8 @@
 //                                     Cut out all decoding
 //                                     Cut out digital hardware stuff
 //
+// 21 Dec 2000   John Adcock           Added function to setup ini file name
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __SETTINGS_H___
@@ -39,8 +41,9 @@
 #include "structs.h"
 #include "globals.h"
 
-void LoadSettingsFromIni(LPSTR Name);  // add parm
-void WriteSettingsToIni(LPSTR Name);   // add parm
+void SetIniFileForSettings(LPSTR Name);
+void LoadSettingsFromIni();
+void WriteSettingsToIni();
 void WritePrivateProfileInt(LPCTSTR lpAppName,  LPCTSTR lpKeyName,  int nValue, LPCTSTR lpFileName);
 
 #define INIFILE "dTV.ini"

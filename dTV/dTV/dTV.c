@@ -30,6 +30,8 @@
 //                                     Cut out all decoding
 //                                     Cut out digital hardware stuff
 //
+// 21 Dec 2000   John Adcock           Stopped Timer after ini write
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -184,7 +186,11 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		return FALSE;
 	}
 
-	LoadSettingsFromIni(lpCmdLine);
+	// JA 21/12/2000
+	// Added single place to setup ini file name
+	SetIniFileForSettings(lpCmdLine);
+	LoadSettingsFromIni();
+
 	if (bDisplaySplashScreen)
 	{
 		SplashWnd = CreateDialog(hInst, "SPLASHBOX", NULL, SplashProc);
@@ -296,7 +302,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 	ExitDD();
 	// save settings
-	WriteSettingsToIni(lpCmdLine);
+	WriteSettingsToIni();
 	return msg.wParam;
 }
 
@@ -1426,7 +1432,10 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
             break;
         //-------------------------------
         case TIMER_AUTOSAVE:
-			WriteSettingsToIni(NULL);
+			// JA 21/12/00 Added KillTimer so that settings are not
+			// written repeatedly
+	        KillTimer(hWnd, TIMER_AUTOSAVE);
+			WriteSettingsToIni();
             break;
         //-------------------------------
         case OSD_TIMER_ID:
