@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendInPin.cpp,v 1.4 2002-03-11 19:26:57 tobbej Exp $
+// $Id: DSRendInPin.cpp,v 1.5 2002-05-09 14:48:53 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,10 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.4  2002/03/11 19:26:57  tobbej
+// fixed pause so it blocks properly
+// dont accept mediatypes with empty width/height
+//
 // Revision 1.3  2002/02/07 13:08:20  tobbej
 // fixed some syncronization problems
 //
@@ -530,6 +534,12 @@ HRESULT CDSRendInPin::CheckMediaType(const AM_MEDIA_TYPE *pmt)
 			{
 				VIDEOINFOHEADER2 *pHeader=(VIDEOINFOHEADER2*)pmt->pbFormat;
 				pBmi=&(pHeader->bmiHeader);
+				
+				//currently the filter dont support one field per sample
+				if(pHeader->dwInterlaceFlags & AMINTERLACE_IsInterlaced)
+				{
+					return E_FAIL;
+				}
 			}
 		}
 
