@@ -658,6 +658,9 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				if (IsStatusBarVisible())
 				{
 					sprintf(Text, "%d DF/S", nDropFramesLastSec);
+					
+					//TJ 010508: this will cause YUVOutThread thread to stop
+					//responding if main thread is not processing messages
 					StatusBar_ShowText(STATUS_FPS, Text);
 				}
 			}
