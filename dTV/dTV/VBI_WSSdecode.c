@@ -159,7 +159,7 @@ BOOL WSS625_DecodeLine(BYTE* vbiline)
 			if (decode_sequence (vbiline + pos, WSS625_start, WSS625_START_CODE_LENGTH, Threshold, ClockPixels))
 			{
 //				LOG("WSS start code detected");
-
+				pos = i + ROUND (ClockPixels * WSS625_START_CODE_LENGTH);
 				// Data bits decoding
 				nb = 0;
 				for (j = 0 ; j < WSS625_NB_DATA_BITS ; j++)
