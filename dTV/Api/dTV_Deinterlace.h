@@ -83,7 +83,7 @@ typedef struct _DEINTERLACE_METHOD
 
 // Call this function to init a plug-in
 // On exit pDeintMethod is a pointer to deinterlace properties
-typedef DEINTERLACE_METHOD* (__stdcall GETDEINTERLACEPLUGININFO)(long CpuFeatureFlags);
+typedef DEINTERLACE_METHOD* (__cdecl GETDEINTERLACEPLUGININFO)(long CpuFeatureFlags);
 
 
 #endif

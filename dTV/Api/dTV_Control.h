@@ -83,7 +83,8 @@
 #define IDM_OVERLAY_STOP                590
 #define IDM_OVERLAY_START               591
 #define IDM_HIDE_OSD                    592
-#define IDM_SHOW_OSD                    593 // IDM_SET_OSD_TEXT the lParam must be the handle of a global atom
+#define IDM_SHOW_OSD                    593
+// IDM_SET_OSD_TEXT the lParam must be the handle of a global atom
 #define IDM_SET_OSD_TEXT                594
 #define IDM_FAST_REPAINT                599
 #define IDM_ASPECT_FULLSCREEN           701

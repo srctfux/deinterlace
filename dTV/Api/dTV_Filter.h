@@ -65,6 +65,6 @@ typedef struct
 
 
 // Call this function to get plug-in info
-typedef FILTER_METHOD* (__stdcall GETFILTERPLUGININFO)(long CpuFeatureFlags);
+typedef FILTER_METHOD* (__cdecl GETFILTERPLUGININFO)(long CpuFeatureFlags);
 
 #endif

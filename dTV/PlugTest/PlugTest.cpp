@@ -27,101 +27,144 @@
 
 void memcpyTest(void *Dest, void *Src, size_t nBytes)
 {
-   memcpy(Dest, Src, nBytes);
+	memcpy(Dest, Src, nBytes);
 }
 
 BOOL FillInfoStruct(DEINTERLACE_INFO* info, char* SnapshotFile)
 {
 	FILE *file;
-   int i = 0;
-   int j;
+	unsigned int NumRead;
+	int i = 0;
+	int j;
 
-   file = fopen(SnapshotFile,"rb");
+	file = fopen(SnapshotFile,"rb");
 	if (!file)
 	{
 		printf("Could not open file %s\n", SnapshotFile);
 		return FALSE;
 	}
-   if(fread(info, sizeof(DEINTERLACE_INFO), 1, file) != sizeof(DEINTERLACE_INFO))
-   {
+	NumRead = fread(info, 1, sizeof(DEINTERLACE_INFO), file);
+	if(NumRead < sizeof(DEINTERLACE_INFO))
+	{
 		printf("Error reading file %s\n", SnapshotFile);
-      fclose(file);      
+		fclose(file);      
 		return FALSE;
-   }
-   // read in odd fields
-   i = 0;
-   while(i < MAX_FIELD_HISTORY && info->OddLines[i] != NULL)
-   {
-      info->OddLines[i] = (short**)malloc(info->FieldHeight * sizeof(short*));
-      for(j = 0; j < info->FieldHeight; ++j)
-      {
-         info->OddLines[i][j] = (short*)malloc(info->LineLength);
-         if(fread(info->OddLines[i][j], info->LineLength, 1, file) != info->LineLength)
-         {
-		      printf("Error reading file %s\n", SnapshotFile);
-            fclose(file);      
-		      return FALSE;
-         }
-      }
-      i++;
-   }
+	}
+	// read in odd fields
+	i = 0;
+	while(i < MAX_FIELD_HISTORY && info->OddLines[i] != NULL)
+	{
+		info->OddLines[i] = (short**)malloc(info->FieldHeight * sizeof(short*));
+		for(j = 0; j < info->FieldHeight; ++j)
+		{
+			info->OddLines[i][j] = (short*)malloc(info->LineLength);
+			NumRead = fread(info->OddLines[i][j], 1, info->LineLength, file);
+			if(NumRead < info->LineLength)
+			{
+				printf("Error reading file %s\n", SnapshotFile);
+				fclose(file);      
+				return FALSE;
+			}
+		}
+		i++;
+	}
 
-   // read in even fields
-   i = 0;
-   while(i < MAX_FIELD_HISTORY && info->EvenLines[i] != NULL)
-   {
-      info->EvenLines[i] = (short**)malloc(info->FieldHeight * sizeof(short*));
-      for(j = 0; j < info->FieldHeight; ++j)
-      {
-         info->EvenLines[i][j] = (short*)malloc(info->LineLength);
-         if(fread(info->EvenLines[i][j], info->LineLength, 1, file) != info->LineLength)
-         {
-		      printf("Error reading file %s\n", SnapshotFile);
-            fclose(file);      
-		      return FALSE;
-         }
-      }
-      i++;
-   }
+	// read in even fields
+	i = 0;
+	while(i < MAX_FIELD_HISTORY && info->EvenLines[i] != NULL)
+	{
+		info->EvenLines[i] = (short**)malloc(info->FieldHeight * sizeof(short*));
+		for(j = 0; j < info->FieldHeight; ++j)
+		{
+			info->EvenLines[i][j] = (short*)malloc(info->LineLength);
+			NumRead = fread(info->EvenLines[i][j], 1, info->LineLength, file);
+			if(NumRead < info->LineLength)
+			{
+				printf("Error reading file %s\n", SnapshotFile);
+				fclose(file);      
+				return FALSE;
+			}
+		}
+		i++;
+	}
 
-   info->Overlay = (BYTE*)malloc(info->OverlayPitch * info->FrameHeight);
-   info->CpuFeatureFlags = 0;
-   info->pMemcpy = memcpyTest;
-   fclose(file);      
-   return TRUE;
+	info->Overlay = (BYTE*)malloc(info->OverlayPitch * info->FrameHeight);
+	info->CpuFeatureFlags = 0;
+	info->pMemcpy = memcpyTest;
+	fclose(file);      
+	return TRUE;
 }
 
 void EmptyInfoStruct(DEINTERLACE_INFO* info)
 {
    int i, j;
 
-   i = 0;
-   while(i < MAX_FIELD_HISTORY && info->OddLines[i] != NULL)
-   {
-      for(j = 0; j < info->FieldHeight; ++j)
-      {
-         free(info->OddLines[i][j]);
-      }
-      free(info->OddLines[i]);
-      i++;
-   }
+	i = 0;
+	while(i < MAX_FIELD_HISTORY && info->OddLines[i] != NULL)
+	{
+		for(j = 0; j < info->FieldHeight; ++j)
+		{
+			free(info->OddLines[i][j]);
+		}
+		free(info->OddLines[i]);
+		i++;
+	}
 
-   i = 0;
-   while(i < MAX_FIELD_HISTORY && info->EvenLines[i] != NULL)
-   {
-      for(j = 0; j < info->FieldHeight; ++j)
-      {
-         free(info->EvenLines[i][j]);
-      }
-      free(info->EvenLines[i]);
-      i++;
-   }
+	i = 0;
+	while(i < MAX_FIELD_HISTORY && info->EvenLines[i] != NULL)
+	{
+		for(j = 0; j < info->FieldHeight; ++j)
+		{
+			free(info->EvenLines[i][j]);
+		}
+		free(info->EvenLines[i]);
+		i++;
+	}
 
    free(info->Overlay);
 }
 
+BOOL LoadFilterPlugin(LPCSTR szFileName, FILTER_METHOD** FilterMethod)
+{
+	GETFILTERPLUGININFO* pfnGetFilterPluginInfo;
+	FILTER_METHOD* pMethod;
+	HMODULE hPlugInMod;
 
-BOOL LoadDeintPlugin(LPCSTR szFileName, DEINTERLACE_METHOD* DeintMethod)
+	hPlugInMod = LoadLibrary(szFileName);
+	if(hPlugInMod == NULL)
+	{
+		return FALSE;
+	}
+	
+	pfnGetFilterPluginInfo = (GETFILTERPLUGININFO*)GetProcAddress(hPlugInMod, "GetFilterPluginInfo");
+	if(pfnGetFilterPluginInfo == NULL)
+	{
+		return FALSE;
+	}
+
+	pMethod = pfnGetFilterPluginInfo(0);
+	if(pMethod != NULL)
+	{
+		*FilterMethod = pMethod;
+		pMethod->hModule = hPlugInMod;
+		if(pMethod->pfnPluginStart != NULL)
+		{
+			pMethod->pfnPluginStart();
+		}
+	}
+	return TRUE;
+}
+
+void UnloadFilterPlugin(FILTER_METHOD* FilterMethod)
+{
+   if(FilterMethod->pfnPluginExit != NULL)
+   {
+      FilterMethod->pfnPluginExit();
+   }
+   FreeLibrary(FilterMethod->hModule);
+}
+
+BOOL LoadDeintPlugin(LPCSTR szFileName, DEINTERLACE_METHOD** DeintMethod)
 {
 	GETDEINTERLACEPLUGININFO* pfnGetDeinterlacePluginInfo;
 	DEINTERLACE_METHOD* pMethod;
@@ -132,7 +175,7 @@ BOOL LoadDeintPlugin(LPCSTR szFileName, DEINTERLACE_METHOD* DeintMethod)
 	{
 		return FALSE;
 	}
-	
+
 	pfnGetDeinterlacePluginInfo = (GETDEINTERLACEPLUGININFO*)GetProcAddress(hPlugInMod, "GetDeinterlacePluginInfo");
 	if(pfnGetDeinterlacePluginInfo == NULL)
 	{
@@ -142,22 +185,22 @@ BOOL LoadDeintPlugin(LPCSTR szFileName, DEINTERLACE_METHOD* DeintMethod)
 	pMethod = pfnGetDeinterlacePluginInfo(0);
 	if(pMethod != NULL)
 	{
-		DeintMethod = pMethod;
+		*DeintMethod = pMethod;
 		pMethod->hModule = hPlugInMod;
-      if(pMethod->pfnPluginStart != NULL)
-      {
-         pMethod->pfnPluginStart(0, NULL);
-      }
-      if(pMethod->pfnPluginSwitchTo != NULL)
-      {
-         pMethod->pfnPluginSwitchTo(NULL, NULL);
-      }
-	   return TRUE;
+		if(pMethod->pfnPluginStart != NULL)
+		{
+			pMethod->pfnPluginStart(0, NULL);
+		}
+		if(pMethod->pfnPluginSwitchTo != NULL)
+		{
+			pMethod->pfnPluginSwitchTo(NULL, NULL);
+		}
+		return TRUE;
 	}
-   else
-   {
-   	return FALSE;
-   }
+	else
+	{
+		return FALSE;
+	}
 }
 
 void UnloadDeintPlugin(DEINTERLACE_METHOD* DeintMethod)
@@ -361,45 +404,85 @@ BOOL MakeTifFile(DEINTERLACE_INFO* info, char* TifFile)
 	return TRUE;
 }
 
-int ProcessSnapShot(char* SnapshotFile, char* PluginFile, char* TifFile)
+int ProcessSnapShot(char* SnapshotFile, char* FilterPlugin, char* DeintPlugin, char* TifFile)
 {
-   DEINTERLACE_INFO info;
-   DEINTERLACE_METHOD* DeintMethod = NULL;
-   if(!FillInfoStruct(&info, SnapshotFile))
-   {
-   	return 1;
-   }
+	DEINTERLACE_INFO info;
+	DEINTERLACE_METHOD* DeintMethod = NULL;
+	FILTER_METHOD* FilterMethod = NULL;
+	
+	if(!FillInfoStruct(&info, SnapshotFile))
+	{
+		return 1;
+	}
 
-   if(!LoadDeintPlugin(PluginFile, DeintMethod))
-   {
-   	return 1;
-   }
-   
-   DeintMethod->pfnAlgorithm(&info);
+	if(FilterPlugin != NULL)
+	{
+		if(!LoadFilterPlugin(FilterPlugin, &FilterMethod))
+		{
+			return 1;
+		}
+	}
 
-   if(!MakeTifFile(&info, TifFile))
-   {
-   	return 1;
-   }
+	if(FilterMethod != NULL)
+	{
+		if(FilterMethod->bOnInput == TRUE)
+		{
+			FilterMethod->pfnAlgorithm(&info);
+		}
+	}
 
-   EmptyInfoStruct(&info);
-   return 0;
+	if(!LoadDeintPlugin(DeintPlugin, &DeintMethod))
+	{
+		return 1;
+	}
+
+	DeintMethod->pfnAlgorithm(&info);
+
+	if(FilterMethod != NULL)
+	{
+		if(FilterMethod->bOnInput == FALSE)
+		{
+			FilterMethod->pfnAlgorithm(&info);
+		}
+	}
+
+	if(!MakeTifFile(&info, TifFile))
+	{
+		return 1;
+	}
+
+	if(FilterMethod != NULL)
+	{
+		UnloadFilterPlugin(FilterMethod);
+	}
+
+	UnloadDeintPlugin(DeintMethod);
+
+	EmptyInfoStruct(&info);
+	return 0;
 }
 
 
 int main(int argc, char* argv[])
 {
-  	printf("PlugTest (c) 2001 John Adcock\n\n");
-   printf("PlugTest comes with ABSOLUTELY NO WARRANTY");
-   printf("This is free software, and you are welcome");
-   printf("to redistribute it under certain conditions.");
-   printf("See http://www.gnu.org/copyleft/gpl.html for details.");
-   
-   if(argc != 4)
-   {
-   	printf("\nUsage: PlugTest dTVSnapFile PlugInDll OutputTifFile\n");
-   	return 1;
-   }
-	return ProcessSnapShot(argv[1], argv[2], argv[3]);
+	printf("PlugTest (c) 2001 John Adcock\n\n");
+	printf("PlugTest comes with ABSOLUTELY NO WARRANTY");
+	printf("This is free software, and you are welcome");
+	printf("to redistribute it under certain conditions.");
+	printf("See http://www.gnu.org/copyleft/gpl.html for details.");
+
+	if(argc != 4 && argc != 5)
+	{
+		printf("\nUsage: PlugTest dTVSnapFile [FilterPlugIn] DeintPlugIn OutputTifFile\n");
+		return 1;
+	}
+	if(argc == 4)
+	{
+		return ProcessSnapShot(argv[1], NULL, argv[2], argv[3]);
+	}
+	else
+	{
+		return ProcessSnapShot(argv[1], argv[2], argv[3], argv[4]);
+	}
 }
 
