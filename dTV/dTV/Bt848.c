@@ -1768,7 +1768,7 @@ SETTING BT848Settings[BT848_SETTING_LASTONE] =
 		"Hardware", "BtWhiteCrushDown", BT848_WhiteCrushDown_OnChange,
 	},
 	{
-		"Horiz Video Sampling", SLIDER, 0, &CurrentX,
+		"Sharpness", SLIDER, 0, &CurrentX,
 		720, 120, DTV_MAX_WIDTH, 2, 1,
 		NULL,
 		"MainWindow", "CurrentX", CurrentX_OnChange,
