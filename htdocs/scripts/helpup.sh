@@ -22,7 +22,7 @@
 
 #Do the work from the dScaler subdirectory
 
-cd /home/groups/d/de/deinterlace/
+cd /home/groups/d/de/deinterlace/htdocs
 
 rm -R -f htdocs/Help
 rm -R -f htdocs/Help/images
