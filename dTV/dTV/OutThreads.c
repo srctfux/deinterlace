@@ -562,20 +562,22 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 					// only if we have been in the same mode for at least one flip
 					if(DoAccurateFlips && PrevPulldownMode == gPulldownMode && RefreshRate > 0)
 					{
+						DWORD FlipsToWait;
+						// work out the minimum number of flips to
+						// display each screen for
 						if(bIsPAL)
 						{
-							if(RefreshRate % DeintMethods[gPulldownMode].FrameRate50Hz == 0)
-							{
-								while((GetTickCount() - FlipTicks) < (1000 / DeintMethods[gPulldownMode].FrameRate50Hz - 3));
-							}
+							FlipsToWait = RefreshRate / DeintMethods[gPulldownMode].FrameRate50Hz;
 						}
 						else
 						{
-							if(RefreshRate % DeintMethods[gPulldownMode].FrameRate60Hz == 0)
-							{
-								while((GetTickCount() - FlipTicks) < (1000/DeintMethods[gPulldownMode].FrameRate60Hz - 3));
-							}
+							FlipsToWait = RefreshRate / DeintMethods[gPulldownMode].FrameRate60Hz;
 						}
+						// wait for the flip
+						// (1000 / Refresh rate is time between each flip
+						// the - 3 is just some margin for error and should
+						// give us enough time to get to the flip call
+						while((GetTickCount() - FlipTicks) < (1000 / RefreshRate) * FlipsToWait - 3);
 					}
 
 					// setup flip flag
