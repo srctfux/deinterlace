@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: Deinterlace.h,v 1.1 2001-08-08 15:37:02 tobbej Exp $
+// $Id: Deinterlace.h,v 1.2 2001-09-19 17:50:07 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2001 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1  2001/08/08 15:37:02  tobbej
+// moved dmo filter to new directory
+//
 // Revision 1.2  2001/08/07 20:22:35  tobbej
 // added new button in propertypage to show plugin ui
 // fixed Activate function
@@ -61,7 +64,7 @@ class CDeinterlace :
 	public ISpecifyPropertyPagesImpl<CDeinterlace>
 {
 public:
-	CDeinterlace():m_DIPlugin(NULL),m_InputSize(0),m_LastFrameProcessed(true)
+	CDeinterlace():m_DIPlugin(NULL),m_InputSize(0),m_LastFrameProcessed(true),m_mode(DI_FIELDINPUT)
 	{
 		m_pUnkMarshaler = NULL;
 		CPU_SetupFeatureFlag();
@@ -125,7 +128,26 @@ DECLARE_GET_CONTROLLING_UNKNOWN()
 	HRESULT InternalFreeStreamingResources();
 	HRESULT InternalProcessInput(DWORD dwInputStreamIndex, IMediaBuffer *pBuffer,DWORD dwFlags, REFERENCE_TIME rtTimestamp,REFERENCE_TIME rtTimelength);
 	HRESULT InternalProcessOutput(DWORD dwFlags, DWORD cOutputBufferCount,DMO_OUTPUT_DATA_BUFFER *pOutputBuffers,DWORD *pdwStatus);
-	HRESULT InternalAcceptingInput(DWORD dwInputStreamIndex);
+	HRESULT InternalAcceptingInput(DWORD dwInputStreamIndex);	
+
+// IDeinterlace
+public:
+	STDMETHOD(get_Mode)(/*[out, retval]*/ FieldFrameMode *pVal);
+	STDMETHOD(put_Mode)(/*[in]*/ FieldFrameMode newVal);
+	STDMETHOD(PluginHasUI)(/*[out, retval]*/ VARIANT_BOOL *hasUI);
+	STDMETHOD(ShowPluginUI)(long *hwndParent);
+	STDMETHOD(get_SettingValue)(/*[in]*/ int nIndex, /*[out, retval]*/ long *pValue);
+	STDMETHOD(put_SettingValue)(/*[in]*/ int nIndex, /*[in]*/ long lValue);
+	STDMETHOD(GetSettingCount)(/*[out, retval]*/long *pCount);
+	STDMETHOD(GetSetting)(/*[in]*/ int nIndex,/*[out]*/ DISETTING *);
+	STDMETHOD(GetPluginName)(/*[out, retval]*/ unsigned char **szName);
+	STDMETHOD(IsPluginLoaded)(/*[out, retval]*/ VARIANT_BOOL *pIsLoaded);
+	STDMETHOD(UnloadPlugin)();
+	STDMETHOD(LoadPlugin)(/*[in]*/ LPCSTR szFileName);
+
+private:
+	void CreateErrorInfoObj(LPTSTR errorText);
+	HRESULT CanPerformDeinterlace(const DMO_MEDIA_TYPE *pmt);
 
 	CHistoryData m_InputHistory[MAX_FIELD_HISTORY];
 	int m_InputSize;
@@ -133,22 +155,7 @@ DECLARE_GET_CONTROLLING_UNKNOWN()
 	
 	DEINTERLACE_METHOD *m_DIPlugin;
 	DEINTERLACE_INFO m_DIInfo;
-	
-
-// IDeinterlace
-public:
-	STDMETHOD(PluginHasUI)(BOOL *hasUI);
-	STDMETHOD(ShowPluginUI)(long *hwndParent);
-	STDMETHOD(get_SettingValue)(int nIndex, long *pValue);
-	STDMETHOD(put_SettingValue)(int nIndex,long lValue);
-	STDMETHOD(GetSettingCount)(long *pCount);
-	STDMETHOD(GetSetting)(int nIndex,DISETTING *);
-	STDMETHOD(GetPluginName)(unsigned char **szName);
-	STDMETHOD(IsPluginLoaded)();
-	STDMETHOD(UnloadPlugin)();
-	STDMETHOD(LoadPlugin)(LPCSTR szFileName);
-private:
-	HRESULT CanPerformDeinterlace(const DMO_MEDIA_TYPE *pmt);
+	FieldFrameMode m_mode;
 };
 
 #endif // !defined(AFX_DEINTERLACE_H__A0A0DA1F_F61E_4595_989A_B0B8552A6C4C__INCLUDED_)

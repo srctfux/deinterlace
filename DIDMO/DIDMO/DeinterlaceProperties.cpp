@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DeinterlaceProperties.cpp,v 1.1 2001-08-08 15:37:02 tobbej Exp $
+// $Id: DeinterlaceProperties.cpp,v 1.2 2001-09-19 17:50:07 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2001 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1  2001/08/08 15:37:02  tobbej
+// moved dmo filter to new directory
+//
 // Revision 1.3  2001/08/07 20:22:35  tobbej
 // added new button in propertypage to show plugin ui
 // fixed Activate function
@@ -50,7 +53,10 @@ void CDeinterlaceProperties::UpdateUI()
 	ATLTRACE("%s(%d) : UpdateUI\n",__FILE__,__LINE__);
 	CComQIPtr<IDeinterlace,&IID_IDeinterlace> pDI(m_ppUnk[0]);
 	
-	if(SUCCEEDED(pDI->IsPluginLoaded()))
+	VARIANT_BOOL isLoaded;
+	pDI->IsPluginLoaded(&isLoaded);
+
+	if(isLoaded==OATRUE)
 	{
 		SetDlgItemText(IDC_PLUGIN_STATUS,_T("Loaded"));
 	}
@@ -69,7 +75,60 @@ void CDeinterlaceProperties::UpdateUI()
 		SetDlgItemText(IDC_PLUGIN_NAME,"");
 	}
 	
-	BOOL hasUI=FALSE;
+	FieldFrameMode fMode;
+	pDI->get_Mode(&fMode);
+	//combo box
+	HWND hCombo=GetDlgItem(IDC_PLUGIN_MODE);
+	if(hCombo!=NULL)
+	{
+		SendMessage(hCombo,CB_RESETCONTENT,0,0);
+		LRESULT index;
+		index=SendMessage(hCombo,CB_ADDSTRING,0,(LPARAM)_T("Always odd"));
+		if(index!=CB_ERR && index!=CB_ERRSPACE)
+		{
+			SendMessage(hCombo,CB_SETITEMDATA,index,DI_ALWAYS_ODD);
+			if(fMode==DI_ALWAYS_ODD)
+			{
+				SendMessage(hCombo,CB_SETCURSEL,index,0);
+				m_lastMode=DI_ALWAYS_ODD;
+			}
+		}
+		
+		index=SendMessage(hCombo,CB_ADDSTRING,0,(LPARAM)_T("Always even"));
+		if(index!=CB_ERR && index!=CB_ERRSPACE)
+		{
+			SendMessage(hCombo,CB_SETITEMDATA,index,DI_ALWAYS_EVEN);
+			if(fMode==DI_ALWAYS_EVEN)
+			{
+				SendMessage(hCombo,CB_SETCURSEL,index,0);
+				m_lastMode=DI_ALWAYS_EVEN;
+			}
+		}
+
+		index=SendMessage(hCombo,CB_ADDSTRING,0,(LPARAM)_T("Field"));
+		if(index!=CB_ERR && index!=CB_ERRSPACE)
+		{
+			SendMessage(hCombo,CB_SETITEMDATA,index,DI_FIELDINPUT);
+			if(fMode==DI_FIELDINPUT)
+			{
+				SendMessage(hCombo,CB_SETCURSEL,index,0);
+				m_lastMode=DI_FIELDINPUT;
+			}
+		}
+
+		index=SendMessage(hCombo,CB_ADDSTRING,0,(LPARAM)_T("Frame"));
+		if(index!=CB_ERR && index!=CB_ERRSPACE)
+		{
+			SendMessage(hCombo,CB_SETITEMDATA,index,DI_FRAMEINPUT);
+			if(fMode==DI_FRAMEINPUT)
+			{
+				SendMessage(hCombo,CB_SETCURSEL,index,0);
+				m_lastMode=DI_FRAMEINPUT;
+			}
+		}
+	}
+	
+	VARIANT_BOOL hasUI=OAFALSE;
 	pDI->PluginHasUI(&hasUI);
 	::EnableWindow(GetDlgItem(IDC_PLUGIN_SHOWUI),hasUI);
 	
@@ -169,5 +228,55 @@ LRESULT CDeinterlaceProperties::OnPluginShowUI(WORD wNotifyCode, WORD wID, HWND 
 		MessageBox(_T("Failed to show plugin UI"),_T("Error"));
 	}
 
+	return 0;
+}
+
+LRESULT CDeinterlaceProperties::OnPluginModeUpdLasMode(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled)
+{
+	ATLTRACE("%s(%d) : OnPluginMode\n",__FILE__,__LINE__);
+	LRESULT index=SendMessage(hWndCtl,CB_GETCURSEL,0,0);
+	if(index!=CB_ERR && index!=CB_ERRSPACE)
+	{
+		m_lastMode=index;
+	}
+	return 0;
+}
+
+LRESULT CDeinterlaceProperties::OnPluginModeChange(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled)
+{
+	ATLTRACE("%s(%d) : OnPluginMode\n",__FILE__,__LINE__);
+	CComQIPtr<IDeinterlace,&IID_IDeinterlace> pDI(m_ppUnk[0]);
+	USES_CONVERSION;
+
+	LRESULT index=SendMessage(hWndCtl,CB_GETCURSEL,0,0);
+	if(index==CB_ERR || index==CB_ERRSPACE)
+	{
+		//messagebox
+		return 0;
+	}
+	
+	LRESULT data=SendMessage(hWndCtl,CB_GETITEMDATA,index,0);
+	if(data==CB_ERR || data==CB_ERRSPACE)
+	{
+		return 0;
+	}
+	
+	if(FAILED(pDI->put_Mode((FieldFrameMode)data)))
+	{
+		CComPtr<IErrorInfo> pError;
+		CComBSTR strError;
+		GetErrorInfo(0, &pError);
+		if(pError!=NULL)
+		{
+			pError->GetDescription(&strError);
+			MessageBox(OLE2T(strError), _T("Error"), MB_ICONEXCLAMATION);
+		}
+		else
+		{
+			MessageBox("Unknown error","Error",MB_ICONEXCLAMATION);
+		}
+		bHandled=FALSE;
+		SendMessage(hWndCtl,CB_SETCURSEL,m_lastMode,0);
+	}
 	return 0;
 }

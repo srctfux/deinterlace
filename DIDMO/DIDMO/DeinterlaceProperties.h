@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DeinterlaceProperties.h,v 1.1 2001-08-08 15:37:02 tobbej Exp $
+// $Id: DeinterlaceProperties.h,v 1.2 2001-09-19 17:50:07 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2001 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1  2001/08/08 15:37:02  tobbej
+// moved dmo filter to new directory
+//
 // Revision 1.2  2001/08/07 20:22:35  tobbej
 // added new button in propertypage to show plugin ui
 // fixed Activate function
@@ -74,6 +77,8 @@ BEGIN_MSG_MAP(CDeinterlaceProperties)
 	COMMAND_HANDLER(IDC_PLUGIN_UNLOAD, BN_CLICKED, OnPluginUnload)
 	COMMAND_HANDLER(IDC_PLUGIN_BROWSE, BN_CLICKED, OnPluginBrowse)
 	COMMAND_HANDLER(IDC_PLUGIN_SHOWUI, BN_CLICKED, OnPluginShowUI)
+	COMMAND_HANDLER(IDC_PLUGIN_MODE, CBN_SELENDOK, OnPluginModeChange)
+	COMMAND_HANDLER(IDC_PLUGIN_MODE, CBN_SELCHANGE, OnPluginModeUpdLasMode)
 END_MSG_MAP()
 // Handler prototypes:
 //  LRESULT MessageHandler(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
@@ -117,6 +122,10 @@ private:
 	LRESULT OnPluginUnload(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
 	LRESULT OnPluginBrowse(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
 	LRESULT OnPluginShowUI(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
+	LRESULT OnPluginModeChange(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
+	LRESULT OnPluginModeUpdLasMode(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
+
+	LRESULT m_lastMode;
 };
 
 #endif //__DEINTERLACEPROPERTIES_H_

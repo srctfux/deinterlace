@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: StdAfx.h,v 1.1 2001-08-08 15:37:02 tobbej Exp $
+// $Id: StdAfx.h,v 1.2 2001-09-19 17:50:07 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2001 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1  2001/08/08 15:37:02  tobbej
+// moved dmo filter to new directory
+//
 // Revision 1.1.1.1  2001/07/30 16:14:44  tobbej
 // initial import of new dmo filter
 //
@@ -58,7 +61,13 @@ extern CComModule _Module;
 #include <atlcom.h>
 #include <atlctl.h>
 
+#ifndef OATRUE
+ #define OATRUE (-1)
+ #define OAFALSE (0)
+#endif
+
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
+
 
 #endif // !defined(AFX_STDAFX_H__DB20A20A_966E_49F2_B094_1B1267574A3F__INCLUDED)

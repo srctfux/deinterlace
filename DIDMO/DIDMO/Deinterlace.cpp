@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: Deinterlace.cpp,v 1.1 2001-08-08 15:37:02 tobbej Exp $
+// $Id: Deinterlace.cpp,v 1.2 2001-09-19 17:50:07 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2001 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1  2001/08/08 15:37:02  tobbej
+// moved dmo filter to new directory
+//
 // Revision 1.2  2001/08/07 20:22:35  tobbej
 // added new button in propertypage to show plugin ui
 // fixed Activate function
@@ -305,6 +308,7 @@ HRESULT CDeinterlace::InternalAllocateStreamingResources()
 	m_DIInfo.bRunningLate=FALSE;
 	m_DIInfo.bMissedFrame=FALSE;
 	m_DIInfo.bDoAccurateFlips=FALSE;
+	m_DIInfo.IsOdd=FALSE;
 	//m_DIInfo.SleepInterval=0;
 	memset(&m_DIInfo.SourceRect,0,sizeof(m_DIInfo.SourceRect));
 
@@ -430,7 +434,21 @@ HRESULT CDeinterlace::InternalProcessOutput(DWORD dwFlags,
 		m_DIInfo.Overlay=pbOutputBuffer;
 		
 		//this needs fixing
-		m_DIInfo.IsOdd=FALSE;
+		switch(m_mode)
+		{
+		case DI_ALWAYS_ODD:
+			m_DIInfo.IsOdd=TRUE;
+			break;
+		case DI_ALWAYS_EVEN:
+			m_DIInfo.IsOdd=FALSE;
+			break;
+		case DI_FIELDINPUT:
+			m_DIInfo.IsOdd=m_DIInfo.IsOdd==FALSE ? TRUE : FALSE;
+			break;
+		case DI_FRAMEINPUT:
+		default:
+			m_DIInfo.IsOdd=FALSE;
+		}
 		m_DIInfo.CombFactor=-1;
 		m_DIInfo.FieldDiff=-1;
 		
@@ -513,30 +531,22 @@ STDMETHODIMP CDeinterlace::LoadPlugin(LPCSTR szFileName)
 	GETDEINTERLACEPLUGININFO* pfnGetDeinterlacePluginInfo;
 	DEINTERLACE_METHOD* pMethod;
 	HMODULE hPlugInMod;
-
-	CComPtr<ICreateErrorInfo> cerrinfo;
-	CComPtr<IErrorInfo> errinfo;
 	HRESULT hr;
-	hr=CreateErrorInfo(&cerrinfo);
-	hr=cerrinfo.QueryInterface(&errinfo);
 
 	hPlugInMod=LoadLibrary(szFileName);
 	if(hPlugInMod==NULL)
 	{
 		char *str=new char[strlen(szFileName)+30];
 		wsprintf(str,"Failed to load plugin %s",szFileName);
-		cerrinfo->SetDescription(T2OLE(str));
-		SetErrorInfo(0,errinfo);
+		CreateErrorInfoObj(str);
 		delete [] str;
-		
 		return E_FAIL;
 	}
 
 	pfnGetDeinterlacePluginInfo=(GETDEINTERLACEPLUGININFO*)GetProcAddress(hPlugInMod, "GetDeinterlacePluginInfo");
 	if(pfnGetDeinterlacePluginInfo==NULL)
 	{
-		cerrinfo->SetDescription(T2OLE("GetProcAddress() failed, Are you sure this is a valid plugin?"));
-		SetErrorInfo(0,errinfo);
+		CreateErrorInfoObj("GetProcAddress() failed, Are you sure this is a valid plugin?");
 		return E_FAIL;
 	}
 
@@ -544,10 +554,9 @@ STDMETHODIMP CDeinterlace::LoadPlugin(LPCSTR szFileName)
 	if(pMethod!=NULL)
 	{
 		//check that the plugin has the right api version
-		if(pMethod->SizeOfStructure!=sizeof(DEINTERLACE_METHOD) || pMethod->DeinterlaceStructureVersion!=DEINTERLACE_VERSION_2)
+		if(pMethod->SizeOfStructure!=sizeof(DEINTERLACE_METHOD) || pMethod->DeinterlaceStructureVersion!=DEINTERLACE_CURRENT_VERSION)
 		{
-			cerrinfo->SetDescription(T2OLE("This version of the plugin is not supported"));
-			SetErrorInfo(0,errinfo);
+			CreateErrorInfoObj("This version of the plugin is not supported");
 			FreeLibrary(hPlugInMod);
 			return E_FAIL;
 		}
@@ -556,8 +565,7 @@ STDMETHODIMP CDeinterlace::LoadPlugin(LPCSTR szFileName)
 			pMethod->bNeedCombFactor==TRUE ||
 			pMethod->bIsHalfHeight==TRUE)
 		{
-			cerrinfo->SetDescription(T2OLE("Plugins that need FieldDiff, CombFactor or IsHalfHeight is currently not supported"));
-			SetErrorInfo(0,errinfo);
+			CreateErrorInfoObj("Plugins that need FieldDiff, CombFactor or IsHalfHeight is currently not supported");
 			FreeLibrary(hPlugInMod);
 			return E_FAIL;
 		}
@@ -586,12 +594,6 @@ STDMETHODIMP CDeinterlace::LoadPlugin(LPCSTR szFileName)
 			m_DIPlugin->pfnPluginStart(0, NULL,NULL);
 		}
 		
-		//this needs moving
-		/*if(m_DIPlugin->pfnPluginShowUI!=NULL)
-		{
-			m_DIPlugin->pfnPluginShowUI((HWND)hwndMain);
-		}*/
-		
 		return S_OK;
 	}
 	
@@ -614,18 +616,7 @@ STDMETHODIMP CDeinterlace::UnloadPlugin()
 	
 	if(!FreeLibrary(m_DIPlugin->hModule))
 	{
-		USES_CONVERSION;
-		CComPtr<ICreateErrorInfo> cerrinfo;
-		CComPtr<IErrorInfo> errinfo;
-
-		if(SUCCEEDED(CreateErrorInfo(&cerrinfo)))
-		{
-			if(SUCCEEDED(cerrinfo.QueryInterface(&errinfo)))
-			{
-				cerrinfo->SetDescription(T2OLE("FreeLibrary() failed"));
-				SetErrorInfo(0,errinfo);
-			}
-		}
+		CreateErrorInfoObj("FreeLibrary() failed");
 		return E_FAIL;
 	}
 	m_DIPlugin=NULL;
@@ -633,10 +624,14 @@ STDMETHODIMP CDeinterlace::UnloadPlugin()
 	return S_OK;
 }
 
-STDMETHODIMP CDeinterlace::IsPluginLoaded()
+STDMETHODIMP CDeinterlace::IsPluginLoaded(VARIANT_BOOL *pIsLoaded)
 {
 	ATLTRACE("%s(%d) : IsPluginLoaded\n",__FILE__,__LINE__);
-	return m_DIPlugin!=NULL ? S_OK : E_FAIL;
+	if(pIsLoaded==NULL)
+		return E_POINTER;
+	
+	*pIsLoaded=m_DIPlugin!=NULL ? OATRUE : OAFALSE;
+	return S_OK;
 }
 
 STDMETHODIMP CDeinterlace::GetPluginName(unsigned char **szName)
@@ -749,20 +744,72 @@ STDMETHODIMP CDeinterlace::ShowPluginUI(long *hwndParent)
 	return S_OK;
 }
 
-STDMETHODIMP CDeinterlace::PluginHasUI(BOOL *hasUI)
+STDMETHODIMP CDeinterlace::PluginHasUI(VARIANT_BOOL *hasUI)
 {
+	USES_CONVERSION;
 	if(m_DIPlugin==NULL)
 	{
+		CComPtr<ICreateErrorInfo> cerrinfo;
+		CComPtr<IErrorInfo> errinfo;
+
+		if(SUCCEEDED(CreateErrorInfo(&cerrinfo)))
+		{
+			if(SUCCEEDED(cerrinfo.QueryInterface(&errinfo)))
+			{
+				cerrinfo->SetDescription(T2OLE("No plugin is loaded"));
+				SetErrorInfo(0,errinfo);
+			}
+		}
 		return E_FAIL;
 	}
 	
 	if(m_DIPlugin->pfnPluginShowUI==NULL)
 	{
-		*hasUI=FALSE;
+		*hasUI=OAFALSE;
 	}
 	else
 	{
-		*hasUI=TRUE;
+		*hasUI=OATRUE;
 	}
 	return S_OK;
+}
+
+STDMETHODIMP CDeinterlace::get_Mode(FieldFrameMode *pVal)
+{
+	if(pVal==NULL)
+		return E_POINTER;
+	*pVal=m_mode;
+	return S_OK;
+}
+
+STDMETHODIMP CDeinterlace::put_Mode(FieldFrameMode newVal)
+{
+	switch(newVal)
+	{
+	case DI_ALWAYS_ODD:
+	case DI_ALWAYS_EVEN:
+	case DI_FIELDINPUT:
+		m_mode=newVal;
+		break;
+	case DI_FRAMEINPUT:
+		CreateErrorInfoObj("This mode is not yet implemented");
+		return E_NOTIMPL;
+	}
+	return S_OK;
+}
+
+void CDeinterlace::CreateErrorInfoObj(LPTSTR errorText)
+{
+	USES_CONVERSION;
+	CComPtr<ICreateErrorInfo> cerrinfo;
+	CComPtr<IErrorInfo> errinfo;
+
+	if(SUCCEEDED(CreateErrorInfo(&cerrinfo)))
+	{
+		if(SUCCEEDED(cerrinfo.QueryInterface(&errinfo)))
+		{
+			cerrinfo->SetDescription(T2OLE(errorText));
+			SetErrorInfo(0,errinfo);
+		}
+	}
 }

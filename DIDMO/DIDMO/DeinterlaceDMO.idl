@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DeinterlaceDMO.idl,v 1.1 2001-08-08 15:37:02 tobbej Exp $
+// $Id: DeinterlaceDMO.idl,v 1.2 2001-09-19 17:50:07 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2001 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1  2001/08/08 15:37:02  tobbej
+// moved dmo filter to new directory
+//
 // Revision 1.2  2001/08/07 20:22:35  tobbej
 // added new button in propertypage to show plugin ui
 // fixed Activate function
@@ -72,7 +75,33 @@ import "ocidl.idl";
 		//char* szIniSection;
 		//char* szIniEntry;
 	} DISETTING;
+	
+	[
+		helpstring("Handling of differences between DirectShow and plugins (filed/frame)")
+	]
+	typedef enum _tagFieldFrameMode
+	{
+		[
+			helpstring("even/odd flagg is always odd")
+		]
+		DI_ALWAYS_ODD,
+		
+		[
+			helpstring("even/odd flagg is always even")
+		]
+		DI_ALWAYS_EVEN,
 
+		[
+			helpstring("Input is fields, even/odd flag will alternate")
+		]
+		DI_FIELDINPUT,
+
+		[
+			helpstring("Input is frames, plugin will get called twice for each frame, one for even field and one for odd")
+		]
+		DI_FRAMEINPUT,
+	} FieldFrameMode;
+	
 	[
 		object,
 		uuid(064416B4-5A2E-4CF1-99A0-9A90FC5AD200),
@@ -86,14 +115,27 @@ import "ocidl.idl";
 
 		[id(1), helpstring("method LoadPlugin")] HRESULT LoadPlugin([in]LPCSTR szFileName);
 		[id(2), helpstring("method UnloadPlugin")] HRESULT UnloadPlugin();
-		[id(3), helpstring("method IsPluginLoaded")] HRESULT IsPluginLoaded();
-		[id(4), helpstring("method GetPluginName")] HRESULT GetPluginName([out,string] unsigned char **szName);
+		[id(3), helpstring("method IsPluginLoaded")] HRESULT IsPluginLoaded([out, retval] VARIANT_BOOL *pIsLoaded);
+		[id(4), helpstring("method GetPluginName")] HRESULT GetPluginName([out, retval] unsigned char **szName);
 		[id(5), helpstring("method GetSetting")] HRESULT GetSetting([in] int nIndex,[out] DISETTING *pSetting);
-		[id(6), helpstring("method GetSettingCount")] HRESULT GetSettingCount([out] long *pCount);
-		[id(7), helpstring("method put_SettingValue")] HRESULT put_SettingValue([in] int nIndex,[in] long lValue);
-		[id(8), helpstring("method get_SettingValue")] HRESULT get_SettingValue([in] int nIndex,[out] long *pValue);
-		[id(9), helpstring("method ShowPluginUI")] HRESULT ShowPluginUI(long *hwndParent);
-		[id(10), helpstring("method PluginHasUI")] HRESULT PluginHasUI(BOOL *hasUI);
+		[id(6), helpstring("method GetSettingCount")] HRESULT GetSettingCount([out, retval] long *pCount);
+		[propput, id(7), helpstring("property SettingValue")] HRESULT SettingValue([in] int nIndex,[in] long lValue);
+		[propget, id(7), helpstring("property SettingValue")] HRESULT SettingValue([in] int nIndex,[out, retval] long *pValue);
+		[id(8), helpstring("method ShowPluginUI")] HRESULT ShowPluginUI(long *hwndParent);
+		[id(9), helpstring("method PluginHasUI")] HRESULT PluginHasUI([out, retval] VARIANT_BOOL *hasUI);
+		[propget, id(10), helpstring("property Mode")] HRESULT Mode([out, retval] FieldFrameMode *pVal);
+		[propput, id(10), helpstring("property Mode")] HRESULT Mode([in] FieldFrameMode newVal);
+	};
+
+	[
+		object,
+		uuid(6029805B-2353-4F93-AABC-6886893B6CC7),
+		helpstring("IDIDMOWrapper Interface"),
+		pointer_default(unique),
+		hidden
+	]
+	interface IDIDMOWrapper : IUnknown
+	{
 	};
 
 [
@@ -109,7 +151,8 @@ library DEINTERLACEDMOLib
 	
 	[
 		uuid(DDA63A24-19EF-46AB-8CE9-7F94AACC9CC5),
-		helpstring("Deinterlace Class")
+		helpstring("Deinterlace Class"),
+		hidden
 	]
 	coclass Deinterlace
 	{
@@ -118,7 +161,8 @@ library DEINTERLACEDMOLib
 
 	[
 		uuid(BDE07C3C-91E1-4303-ABCE-97EFD690A409),
-		helpstring("DeinterlaceProperties Class")
+		helpstring("DeinterlaceProperties Class"),
+		hidden
 	]
 	coclass DeinterlaceProperties
 	{
@@ -127,10 +171,20 @@ library DEINTERLACEDMOLib
 
 	[
 		uuid(108D2313-90C1-4383-9341-DE4BC501E81C),
-		helpstring("DeinterlaceSettings Class")
+		helpstring("DeinterlaceSettings Class"),
+		hidden
 	]
 	coclass DeinterlaceSettings
 	{
 		interface IUnknown;
+	};
+	[
+		uuid(797852F1-24BD-477F-A078-690ED0378A00),
+		helpstring("DIDMOWrapper Class"),
+		hidden
+	]
+	coclass DIDMOWrapper
+	{
+		[default] interface IDIDMOWrapper;
 	};
 };

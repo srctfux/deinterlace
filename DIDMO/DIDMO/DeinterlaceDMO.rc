@@ -52,7 +52,7 @@ END
 // Dialog
 //
 
-IDD_DEINTERLACEPROPERTIES DIALOGEX 0, 0, 210, 171
+IDD_DEINTERLACEPROPERTIES DIALOGEX 0, 0, 211, 201
 STYLE WS_CHILD
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -77,6 +77,10 @@ BEGIN
     CTEXT           "Based on code from DScaler",IDC_STATIC,0,20,209,8
     PUSHBUTTON      "Show Plugin UI",IDC_PLUGIN_SHOWUI,135,150,55,14,
                     WS_DISABLED
+    LTEXT           "Input mode:",IDC_STATIC,5,180,38,8
+    COMBOBOX        IDC_PLUGIN_MODE,50,180,90,60,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "",IDC_STATIC,0,170,210,30
 END
 
 IDD_DEINTERLACESETTINGS DIALOG DISCARDABLE  0, 0, 211, 161
@@ -107,41 +111,13 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// String Table
-//
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    IDS_PROJNAME            "DeinterlaceDMO"
-    IDS_DEINTERLACE_DESC    "Deinterlace Class"
-    IDS_TITLEDeinterlaceProperties "Deinterlace Settings"
-    IDS_DOCSTRINGDeinterlaceProperties "Your Help String"
-    IDS_TITLEDeinterlaceSettings "Plugin settings"
-    IDS_HELPFILEDeinterlaceSettings "Help File Name"
-    IDS_DOCSTRINGDeinterlaceSettings "Your Help String"
-END
-
-#endif    // English (U.S.) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// Swedish resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_SVE)
-#ifdef _WIN32
-LANGUAGE LANG_SWEDISH, SUBLANG_DEFAULT
-#pragma code_page(1252)
-#endif //_WIN32
-
-/////////////////////////////////////////////////////////////////////////////
-//
 // REGISTRY
 //
 
 IDR_Deinterlace         REGISTRY DISCARDABLE    "Deinterlace.rgs"
 IDR_DEINTERLACEPROPERTIES REGISTRY DISCARDABLE    "DeinterlaceProperties.rgs"
 IDR_DEINTERLACESETTINGS REGISTRY DISCARDABLE    "DeinterlaceSettings.rgs"
+IDR_DIDMOWRAPPER        REGISTRY DISCARDABLE    "DIDMOWrapper.rgs"
 
 #ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
@@ -150,8 +126,8 @@ IDR_DEINTERLACESETTINGS REGISTRY DISCARDABLE    "DeinterlaceSettings.rgs"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,1,0,55
- PRODUCTVERSION 0,1,0,55
+ FILEVERSION 0,1,0,56
+ PRODUCTVERSION 0,1,0,56
  FILEFLAGSMASK 0x30003fL
 #ifdef _DEBUG
  FILEFLAGS 0xbL
@@ -170,7 +146,7 @@ BEGIN
             VALUE "Comments", "Torbjörn Jansson\0"
             VALUE "CompanyName", "\0"
             VALUE "FileDescription", "Deinterlace DMO filter\0"
-            VALUE "FileVersion", "0, 1, 0, 55\0"
+            VALUE "FileVersion", "0, 1, 0, 56\0"
             VALUE "InternalName", "DeinterlaceDMO.dll\0"
             VALUE "LegalCopyright", "Copyright © 2001\0"
             VALUE "LegalTrademarks", "This Program is covered by the term of the GNU GPL\0"
@@ -178,7 +154,7 @@ BEGIN
             VALUE "OriginalFilename", "DeinterlaceDMO.dll\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "\0"
-            VALUE "ProductVersion", "0, 1, 0, 55\0"
+            VALUE "ProductVersion", "0, 1, 0, 56\0"
             VALUE "SpecialBuild", "\0"
         END
     END
@@ -190,7 +166,24 @@ END
 
 #endif    // !_MAC
 
-#endif    // Swedish resources
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_PROJNAME            "DeinterlaceDMO"
+    IDS_DEINTERLACE_DESC    "Deinterlace Class"
+    IDS_TITLEDeinterlaceProperties "Deinterlace Settings"
+    IDS_DOCSTRINGDeinterlaceProperties "Your Help String"
+    IDS_TITLEDeinterlaceSettings "Plugin settings"
+    IDS_HELPFILEDeinterlaceSettings "Help File Name"
+    IDS_DOCSTRINGDeinterlaceSettings "Your Help String"
+END
+
+#endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

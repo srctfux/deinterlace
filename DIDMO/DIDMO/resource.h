@@ -15,6 +15,7 @@
 #define IDS_DOCSTRINGDeinterlaceSettings 110
 #define IDR_DEINTERLACESETTINGS         111
 #define IDD_DEINTERLACESETTINGS         112
+#define IDR_DIDMOWRAPPER                113
 #define IDC_PLUGIN_FILENAME             201
 #define IDC_PLUGIN_LOAD                 202
 #define IDC_PLUGIN_UNLOAD               203
@@ -29,14 +30,15 @@
 #define IDC_SETTINGS_COMBO              218
 #define IDC_SETTINGS_CHECK              219
 #define IDC_PLUGIN_SHOWUI               220
+#define IDC_PLUGIN_MODE                 221
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        201
+#define _APS_NEXT_RESOURCE_VALUE        204
 #define _APS_NEXT_COMMAND_VALUE         32768
-#define _APS_NEXT_CONTROL_VALUE         221
-#define _APS_NEXT_SYMED_VALUE           113
+#define _APS_NEXT_CONTROL_VALUE         223
+#define _APS_NEXT_SYMED_VALUE           114
 #endif
 #endif
