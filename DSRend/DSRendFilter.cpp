@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendFilter.cpp,v 1.4 2002-02-07 13:08:20 tobbej Exp $
+// $Id: DSRendFilter.cpp,v 1.5 2002-03-08 11:14:04 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.4  2002/02/07 13:08:20  tobbej
+// fixed some syncronization problems
+//
 // Revision 1.3  2002/02/06 15:01:24  tobbej
 // fixed race condition betwen stop and recive
 // updated some comments
@@ -105,8 +108,7 @@ HRESULT CDSRendFilter::Stop()
 		return S_OK;
 	}
 	
-	//free buffered sample
-	//sync with rendering thread
+	//free buffered sample and sync with rendering thread
 	stopWait();
 	CAutoLockCriticalSection rendLock(&m_renderLock);
 	m_sampleLock.Lock();
@@ -129,7 +131,6 @@ HRESULT CDSRendFilter::Pause()
 		m_filterState=State_Paused;
 		return S_OK;
 	}
-
 	m_filterState=State_Paused;
 	return S_OK;
 }
@@ -327,7 +328,7 @@ HRESULT CDSRendFilter::QueryVendorInfo(LPWSTR *pVendorInfo)
 // IQualProp
 HRESULT CDSRendFilter::get_AvgFrameRate(int *piAvgFrameRate)
 {
-	ATLTRACE(_T("%s(%d) : CDSRendFilter::get_AvgFrameRate\n"),__FILE__,__LINE__);
+	//ATLTRACE(_T("%s(%d) : CDSRendFilter::get_AvgFrameRate\n"),__FILE__,__LINE__);
 	CAutoLockCriticalSection lock(&m_Lock);
 
 	if(piAvgFrameRate==NULL)
@@ -350,29 +351,35 @@ HRESULT CDSRendFilter::get_AvgFrameRate(int *piAvgFrameRate)
 
 HRESULT CDSRendFilter::get_AvgSyncOffset(int *piAvg)
 {
-	ATLTRACE(_T("%s(%d) : CDSRendFilter::get_AvgSyncOffset\n"),__FILE__,__LINE__);
+	//ATLTRACE(_T("%s(%d) : CDSRendFilter::get_AvgSyncOffset\n"),__FILE__,__LINE__);
 	CAutoLockCriticalSection lock(&m_Lock);
 
 	if(piAvg==NULL)
 		return E_POINTER;
+	/*
 	*piAvg=m_iAvg;
 	return S_OK;
+	*/
+	return E_FAIL;
 }
 
 HRESULT CDSRendFilter::get_DevSyncOffset(int *piDev)
 {
-	ATLTRACE(_T("%s(%d) : CDSRendFilter::get_DevSyncOffset\n"),__FILE__,__LINE__);
+	//ATLTRACE(_T("%s(%d) : CDSRendFilter::get_DevSyncOffset\n"),__FILE__,__LINE__);
 	CAutoLockCriticalSection lock(&m_Lock);
 
 	if(piDev==NULL)
 		return E_POINTER;
+	/*
 	*piDev=m_iDev;
 	return S_OK;
+	*/
+	return E_FAIL;
 }
 
 HRESULT CDSRendFilter::get_FramesDrawn(int *pcFramesDrawn)
 {
-	ATLTRACE(_T("%s(%d) : CDSRendFilter::get_FramesDrawn\n"),__FILE__,__LINE__);
+	//ATLTRACE(_T("%s(%d) : CDSRendFilter::get_FramesDrawn\n"),__FILE__,__LINE__);
 	CAutoLockCriticalSection lock(&m_Lock);
 
 	if(pcFramesDrawn==NULL)
@@ -394,13 +401,16 @@ HRESULT CDSRendFilter::get_FramesDroppedInRenderer(int *pcFrames)
 
 HRESULT CDSRendFilter::get_Jitter(int *piJitter)
 {
-	ATLTRACE(_T("%s(%d) : CDSRendFilter::get_Jitter\n"),__FILE__,__LINE__);
+	//ATLTRACE(_T("%s(%d) : CDSRendFilter::get_Jitter\n"),__FILE__,__LINE__);
 	CAutoLockCriticalSection lock(&m_Lock);
 
 	if(piJitter==NULL)
 		return E_POINTER;
+	/*
 	*piJitter=m_iJitter;
 	return S_OK;
+	*/
+	return E_FAIL;
 }
 
 HRESULT CDSRendFilter::sendNotifyMsg(long eventCode,LONG_PTR param1,LONG_PTR param2)

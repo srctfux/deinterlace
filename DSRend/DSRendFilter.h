@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendFilter.h,v 1.3 2002-02-07 13:08:20 tobbej Exp $
+// $Id: DSRendFilter.h,v 1.4 2002-03-08 11:14:04 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.3  2002/02/07 13:08:20  tobbej
+// fixed some syncronization problems
+//
 // Revision 1.2  2002/02/06 15:01:24  tobbej
 // fixed race condition betwen stop and recive
 // updated some comments
@@ -69,6 +72,9 @@ private:
  * @todo add quality-control management
  * @todo add more statistics on IQualProp, not all data is updated
  * @todo add buffering of IMediaSamples, might need a IMemAllocator first
+ * @todo when pausing, rendering must block
+ * @todo add support for field input
+ * @todo maybe create a new mediatype enumerator object
  */
 class ATL_NO_VTABLE CDSRendFilter : 
 	public CComObjectRootEx<CComMultiThreadModel>,
@@ -166,7 +172,6 @@ public:
 	 * @return true if the filter is stopped
 	 */
 	bool isStopped();
-	bool isStreaming(){return false /*FIXME*/;};
 	
 	HRESULT sendNotifyMsg(long eventCode,LONG_PTR param1,LONG_PTR param2);
 
@@ -225,6 +230,7 @@ private:
 
 	CComPtr<IMediaSample> m_pSample;
 	CComAutoCriticalSection m_sampleLock;
+	///This event is used to signal that there is a new sample to be retrived.
 	CEvent m_nextSampleReady;
 };
 

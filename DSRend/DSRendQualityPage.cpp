@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendQualityPage.cpp,v 1.1.1.1 2002-02-03 10:52:53 tobbej Exp $
+// $Id: DSRendQualityPage.cpp,v 1.2 2002-03-08 11:14:04 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1.1.1  2002/02/03 10:52:53  tobbej
+// First import of new direct show renderer filter
+//
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -90,7 +93,7 @@ HRESULT CDSRendQualityPage::Apply()
 
 LRESULT CDSRendQualityPage::OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
-	ATLTRACE(_T("%s(%d) : CDSRendQualityPage::OnTimer\n"),__FILE__,__LINE__);
+	//ATLTRACE(_T("%s(%d) : CDSRendQualityPage::OnTimer\n"),__FILE__,__LINE__);
 	if(wParam==IDT_TIMER)
 	{
 		updateDialog();
@@ -204,7 +207,7 @@ void CDSRendQualityPage::findUpstreamFilter()
 
 void CDSRendQualityPage::updateDialog()
 {
-	ATLTRACE(_T("%s(%d) : CDSRendQualityPage::updateDialog\n"),__FILE__,__LINE__);
+	//ATLTRACE(_T("%s(%d) : CDSRendQualityPage::updateDialog\n"),__FILE__,__LINE__);
 	int frameRate=-1;
 	int syncOffset=-1;
 	int devSyncOffset=-1;
@@ -214,31 +217,66 @@ void CDSRendQualityPage::updateDialog()
 	TCHAR buffer[50];
 	
 	ATLASSERT(m_pQuality!=NULL);
+	
+	if(SUCCEEDED(m_pQuality->get_AvgFrameRate(&frameRate)))
+	{
+		wsprintf(buffer,TEXT("%d.%02d"),frameRate/100,frameRate%100);
+		SetDlgItemText(IDC_AVG_FRAME_RATE,buffer);
+	}
+	else
+	{
+		SetDlgItemText(IDC_AVG_FRAME_RATE,_T("?"));
+	}
 
-	HRESULT hr=m_pQuality->get_AvgFrameRate(&frameRate);
-	hr=m_pQuality->get_AvgSyncOffset(&syncOffset);
-	hr=m_pQuality->get_DevSyncOffset(&devSyncOffset);
-	hr=m_pQuality->get_FramesDrawn(&framesDrawn);
-	hr=m_pQuality->get_FramesDroppedInRenderer(&framesDropped);
-	hr=m_pQuality->get_Jitter(&jitter);
-
-	wsprintf(buffer,TEXT("%d.%02d"),frameRate/100,frameRate%100);
-	SetDlgItemText(IDC_AVG_FRAME_RATE,buffer);
-
-	wsprintf(buffer,TEXT("%d"),syncOffset);
-	SetDlgItemText(IDC_AVG_SYNC_OFFSET,buffer);
+	if(SUCCEEDED(m_pQuality->get_AvgSyncOffset(&syncOffset)))
+	{
+		wsprintf(buffer,TEXT("%d"),syncOffset);
+		SetDlgItemText(IDC_AVG_SYNC_OFFSET,buffer);
+	}
+	else
+	{
+		SetDlgItemText(IDC_AVG_SYNC_OFFSET,_T("?"));
+	}
 	
-	wsprintf(buffer,TEXT("%d"),devSyncOffset);
-	SetDlgItemText(IDC_STDDEV_SYNC_OFFSET,buffer);
+	if(SUCCEEDED(m_pQuality->get_DevSyncOffset(&devSyncOffset)))
+	{
+		wsprintf(buffer,TEXT("%d"),devSyncOffset);
+		SetDlgItemText(IDC_STDDEV_SYNC_OFFSET,buffer);
+	}
+	else
+	{
+		SetDlgItemText(IDC_STDDEV_SYNC_OFFSET,_T("?"));
+	}
 	
-	wsprintf(buffer,TEXT("%d"),framesDrawn-m_qualDrawnStart);
-	SetDlgItemText(IDC_FRAMES_DRAWN,buffer);
+	if(SUCCEEDED(m_pQuality->get_FramesDrawn(&framesDrawn)))
+	{
+		wsprintf(buffer,TEXT("%d"),framesDrawn-m_qualDrawnStart);
+		SetDlgItemText(IDC_FRAMES_DRAWN,buffer);
+	}
+	else
+	{
+		SetDlgItemText(IDC_FRAMES_DRAWN,_T("?"));
+	}
 	
-	wsprintf(buffer,TEXT("%d"),framesDropped-m_qualDroppedStart);
-	SetDlgItemText(IDC_FRAMES_DROPPED,buffer);
+	if(SUCCEEDED(m_pQuality->get_FramesDroppedInRenderer(&framesDropped)))
+	{
+		wsprintf(buffer,TEXT("%d"),framesDropped-m_qualDroppedStart);
+		SetDlgItemText(IDC_FRAMES_DROPPED,buffer);
+	}
+	else
+	{
+		SetDlgItemText(IDC_FRAMES_DROPPED,_T("?"));
+	}
 	
-	wsprintf(buffer,TEXT("%d"),jitter);
-	SetDlgItemText(IDC_JITTER,buffer);
+	if(SUCCEEDED(m_pQuality->get_Jitter(&jitter)))
+	{
+		wsprintf(buffer,TEXT("%d"),jitter);
+		SetDlgItemText(IDC_JITTER,buffer);
+	}
+	else
+	{
+		SetDlgItemText(IDC_JITTER,_T("?"));
+	}
 
 	if(m_pUpstreamDF==NULL)
 	{
@@ -264,8 +302,7 @@ void CDSRendQualityPage::updateDialog()
 		::EnableWindow(hWnd,TRUE);
 
 		long tmp;
-		HRESULT hr=m_pUpstreamDF->GetNumDropped(&tmp);
-		if(FAILED(hr))
+		if(FAILED(m_pUpstreamDF->GetNumDropped(&tmp)))
 		{
 			SetDlgItemText(IDC_UPSTREAM_DROPPED,_T("?"));
 		}
@@ -274,8 +311,7 @@ void CDSRendQualityPage::updateDialog()
 			SetDlgItemInt(IDC_UPSTREAM_DROPPED,tmp-m_UpStreamDroppedStart,FALSE);
 		}
 		
-		hr=m_pUpstreamDF->GetNumNotDropped(&tmp);
-		if(FAILED(hr))
+		if(FAILED(m_pUpstreamDF->GetNumNotDropped(&tmp)))
 		{
 			SetDlgItemText(IDC_UPSTREAM_NOTDROPPED,_T("?"));
 		}
@@ -283,8 +319,8 @@ void CDSRendQualityPage::updateDialog()
 		{
 			SetDlgItemInt(IDC_UPSTREAM_NOTDROPPED,tmp-m_UpStreamDrawnStart,FALSE);
 		}
-		hr=m_pUpstreamDF->GetAverageFrameSize(&tmp);
-		if(FAILED(hr))
+
+		if(FAILED(m_pUpstreamDF->GetAverageFrameSize(&tmp)))
 		{
 			SetDlgItemText(IDC_UPSTREAM_AVGSIZE,_T("?"));
 		}
