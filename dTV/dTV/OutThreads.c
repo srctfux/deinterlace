@@ -64,7 +64,8 @@ HANDLE              OutThread;
 // Dynamically updated variables
 ePULLDOWNMODES      gPulldownMode = VIDEO_MODE;
 int                 CurrentFrame=0;
-DWORD               dwLastFlipTicks = -1;
+//DWORD               dwLastTicks = -1;     // Guessing this should be dwLastFlipTicks
+DWORD               dwLastFlipTicks = -1;   // TRB 10/28/00
 DWORD				ModeSwitchTimestamps[MAXMODESWITCHES];
 long				NextPulldownRepeatCount = 0;    // for temporary increases of PullDownRepeatCount
 
@@ -82,7 +83,14 @@ long				StaticImageFieldCount = 16;
 BOOL                bAutoDetectMode = TRUE;
 BOOL                bFallbackToVideo = TRUE;
 
-
+// TRB 10/28/00 changes, parms, and new fields for sync problem fixes
+BYTE			    * lpCurOverlay;				// made static for Lock rtn, curr vid buff ptr
+DDSURFACEDESC		ddsd;						// also add a surface descriptor for Lock			
+BOOL				RunningLate=FALSE;          // Set when we are not keeping up
+HRESULT             FlipResult = 0;             // Need to try again for flip?
+BOOL                Wait_For_Flip;              // User parm, default=FALSE
+BOOL	            Hurry_When_Late;            // " , default=TRUE, skip processing if behind
+long				Sleep_Interval;             // " , default=0, how long to wait for BT chip
 ///////////////////////////////////////////////////////////////////////////////
 void Start_Thread()
 {
@@ -184,15 +192,39 @@ void Stop_Capture()
 	BT848_MaskDataByte(BT848_CAP_CTL, 0, 0x0f);
 }
 
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+// The following function will continually check the BT chip's Interupt Status Flag
+// (specifying even/odd field processing) until it is  is different from what we
+// already have.  We get the buffer (or frame) number from the high 4 bits of that
+// register which changes when the frame changes, in a pattern like 1,0,2,0...5,0,1,0..
+// In other words, 0 means only an even/odd change (don't remember which).
+//
+// Added code here to use a user specified parameter for how long to sleep.  Note that
+// windows timer tick resolution is really MUCH worse than 1 millesecond.  Who knows 
+// what logic W98 really uses?
+//
+// Note also that sleep(0) just tells the operating system to dispatch some other
+// task now if one is ready, not to sleep for zero seconds.  Since I've taken most
+// of the unneeded waits out of other processing here Windows will eventually take 
+// control away from us anyway, We might as well choose the best time to do it, without
+// waiting more than needed. 
+//
+// Also added code to HurryWhenLate.  This checks if the new field is already here by
+// the time we arrive.  If so, assume we are not keeping up with the BT chip and skip
+// some later processing.  Skip displaying this field and use the CPU time gained to 
+// get back here faster for the next one.  This should help us degrade gracefully on
+// slower or heavily loaded systems but use all available time for processing a good
+// picture when nothing else is running.  TRB 10/28/00
+//
 BOOL WaitForNextField(BOOL LastField)
 {
 	BOOL bIsOddField;
 	DWORD stat = BT848_ReadDword(BT848_INT_STAT);
-
+	RunningLate = Hurry_When_Late;        // user specified bool parm
 	while(LastField == ((stat & BT848_INT_FIELD) == BT848_INT_FIELD))
 	{
-		Sleep(5);
+		Sleep(Sleep_Interval);
+		RunningLate = FALSE;			// if we waited then we are not late
 		stat = BT848_ReadDword(BT848_INT_STAT);
 	}
 
@@ -810,6 +842,37 @@ void Weave(short** pOddLines, short** pEvenLines, BYTE* lpOverlay)
 	}
 }
 
+//
+// Add a function to Lock the overlay surface and update some info from it.
+// We always lock and write to the back buffer.
+// Flipping takes care of the proper buffer addresses.
+// Some of this info can change each time.  
+// We also check to see if we still need to Flip because the
+// non-waiting last flip failed.  If so, try it one more time,
+// then give up.  Tom Barry 10/26/00
+//
+BYTE* LockOverlay()
+{
+
+	HRESULT ddrval;
+
+	if (FAILED(FlipResult))				// prev flip was busy?
+	{
+		IDirectDrawSurface_Flip(lpDDOverlay, NULL, DDFLIP_DONOTWAIT);  
+		FlipResult = 0;					// but no time to try any more
+	}
+
+	memset(&ddsd, 0x00, sizeof(ddsd));
+	ddsd.dwSize = sizeof(ddsd);
+	ddrval = IDirectDrawSurface_Lock(lpDDOverlayBack, NULL, &ddsd, 
+		DDLOCK_WAIT | DDLOCK_NOSYSLOCK, NULL);
+	OverlayPitch = ddsd.lPitch;			// Set new pitch, may change
+	lpCurOverlay = ddsd.lpSurface;		// Set new address, also changes
+	return ddsd.lpSurface;
+}
+
+
+
 DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 {
 	char Text[128];
@@ -817,7 +880,6 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 	int nLineTarget;
 	int nFrame = 0;
 	DWORD dwLastSecondTicks;
-	BYTE* lpCurOverlay = lpOverlayBack;
 	long CompareResult;
 	long CombFactor;
 	short* ppEvenLines[5][CLEARLINES];
@@ -828,8 +890,11 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 	int CombNum = 0;
 	BOOL bFlipNow = TRUE;
 	BOOL bIsOddField = FALSE;
+	HRESULT ddrval;
+
 	BOOL bIsPAL = TVSettings[TVTYPE].Is25fps;
-	
+	lpCurOverlay = lpOverlayBack;		
+
 	if (lpDDOverlay == NULL || lpDDOverlay == NULL || lpOverlayBack == NULL || lpOverlay == NULL)
 	{
 		ExitThread(-1);
@@ -868,7 +933,6 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 		bIsOddField = WaitForNextField(bIsOddField);
 		if(bIsPaused == FALSE)
 		{
-			pDest = lpCurOverlay;
 			if(bIsOddField)
 			{
 				if(bAutoDetectMode == TRUE)
@@ -898,9 +962,18 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 						VBI_DecodeLine(pVBI + nLineTarget * 2048, nLineTarget - VBI_lpf);
 					}
 				}
-
+				if (!RunningLate)
+				{
+					pDest=LockOverlay();	// Ready to access screen, Lock back buffer berfore accessing
+											// can't do this until after Lock Call
+				}
+				
+				if (RunningLate)
+				{
+				// do nothing
+				}
 				// if we have dropped a field then do BOB 
-				if(LastEvenFrame != CurrentFrame || gPulldownMode == INTERPOLATE_BOB)
+				else if(LastEvenFrame != CurrentFrame || gPulldownMode == INTERPOLATE_BOB)
 				{
 					for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
 					{
@@ -919,7 +992,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				{
 					DeinterlaceField(ppOddLines[CurrentFrame], ppEvenLines[LastEvenFrame],
 					                 ppOddLines[(CurrentFrame + 4) % 5], lpCurOverlay, TRUE);
-					// OldDeinterlaceField(ppOddLines[CurrentFrame], ppEvenLines[LastEvenFrame], lpCurOverlay, TRUE);
+					 //OldDeinterlaceField(ppOddLines[CurrentFrame], ppEvenLines[LastEvenFrame], lpCurOverlay, TRUE);
 				}
 				else if(gPulldownMode == SIMPLE_WEAVE)
 				{
@@ -994,8 +1067,19 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 					}
 				}
 
+				if (!RunningLate)
+				{
+					pDest = LockOverlay();	// Ready to access screen, Lock back buffer berfore accessing
+											// can't do this until after Lock Call
+				}
+				
+				if (RunningLate)
+				{
+					// do nothing
+				}
+
 				// if we have dropped a field then do BOB
-				if(LastOddFrame != ((CurrentFrame + 4) % 5) || gPulldownMode == INTERPOLATE_BOB)
+				else if(LastOddFrame != ((CurrentFrame + 4) % 5) || gPulldownMode == INTERPOLATE_BOB)
 				{
 					for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
 					{
@@ -1016,7 +1100,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 					DeinterlaceField(ppOddLines[LastOddFrame], ppEvenLines[CurrentFrame],
 					                 ppEvenLines[(CurrentFrame + 4) % 5], lpCurOverlay, FALSE);
 					
-					// OldDeinterlaceField(ppOddLines[LastOddFrame], ppEvenLines[CurrentFrame], lpCurOverlay, FALSE);
+					 //OldDeinterlaceField(ppOddLines[LastOddFrame], ppEvenLines[CurrentFrame], lpCurOverlay, FALSE);
 				}
 				else if(gPulldownMode == SIMPLE_WEAVE)
 				{
@@ -1057,21 +1141,29 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				}
 				LastEvenFrame = CurrentFrame;
 			}
-
-			if(DoWeWantToFlip(bFlipNow, bIsOddField))
+			// somewhere above we will have locked the buffer, unlock before flip
+			if (!RunningLate)
 			{
-				AdjustAspectRatio();
-				IDirectDrawSurface_Flip(lpDDOverlay, lpDDOverlayBack, DDFLIP_WAIT);
-				dwLastFlipTicks = GetTickCount();
-				if(lpCurOverlay == lpOverlay)
+				ddrval = IDirectDrawSurface_Unlock(lpDDOverlayBack, lpCurOverlay);
+//					IDirectDrawSurface_Flip(lpDDOverlay, lpDDOverlayBack, DDFLIP_WAIT);
+
+				if(DoWeWantToFlip(bFlipNow, bIsOddField) )
 				{
-					lpCurOverlay = lpOverlayBack;
-				}
-				else
-				{
-					lpCurOverlay = lpOverlay;
+					AdjustAspectRatio();
+					if (Wait_For_Flip)			// user parm
+					{
+						FlipResult =
+							IDirectDrawSurface_Flip(lpDDOverlay, NULL, DDFLIP_WAIT); 
+					}
+					else 
+					{
+						FlipResult =
+							IDirectDrawSurface_Flip(lpDDOverlay, NULL, DDFLIP_DONOTWAIT);   
+					}
+					dwLastFlipTicks = GetTickCount();		
 				}
 			}
+
 		}
 
 		if (bDisplayStatusBar == TRUE)

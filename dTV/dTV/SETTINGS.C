@@ -75,6 +75,12 @@ void LoadSettingsFromIni(LPSTR Name)
 	MainProcessor = GetPrivateProfileInt("Threads", "WindowProcessor", 0, szIniFile);
 	DecodeProcessor = GetPrivateProfileInt("Threads", "DecodeProcessor", 0, szIniFile);
 
+	// Added new performance related parms to Threads group - TRB 10/28/00
+	Hurry_When_Late = (GetPrivateProfileInt("Threads", "Hurry_When_Late", 1, szIniFile) != 0);
+	Wait_For_Flip = (GetPrivateProfileInt("Threads", "Wait_For_Flip", 0, szIniFile) != 0);
+	Back_Buffers = GetPrivateProfileInt("Threads", "Back_Buffers", 2, szIniFile);
+	Sleep_Interval = GetPrivateProfileInt("Threads", "Sleep_Interval", 0, szIniFile);
+
 	bDisplayStatusBar = (GetPrivateProfileInt("Show", "StatusBar", 1, szIniFile) != 0);
 	Show_Menu = (GetPrivateProfileInt("Show", "Menu", 1, szIniFile) != 0);
 
@@ -98,7 +104,7 @@ void LoadSettingsFromIni(LPSTR Name)
 	SpatialTolerance = GetPrivateProfileInt("Deinterlace", "SpatialTolerance", SpatialTolerance, szIniFile);
 	TemporalTolerance = GetPrivateProfileInt("Deinterlace", "TemporalTolerance", TemporalTolerance, szIniFile);
 	SimilarityThreshold = GetPrivateProfileInt("Deinterlace", "SimilarityThreshold", SimilarityThreshold, szIniFile);
-
+	
 	VBI_Flags = 0;
 	if(GetPrivateProfileInt("VBI", "VT", 0, szIniFile) != 0)
 	{
@@ -318,6 +324,13 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("Threads", "ThreadPriority", ThreadClassId, szIniFile);
 	WritePrivateProfileInt("Threads", "WindowProcessor", MainProcessor, szIniFile);
 	WritePrivateProfileInt("Threads", "DecodeProcessor", DecodeProcessor, szIniFile);
+
+	// Added new performance related parms to Threads group - TRB 10/28/00
+	WritePrivateProfileInt("Threads", "Hurry_When_Late", Hurry_When_Late, szIniFile);
+	WritePrivateProfileInt("Threads", "Wait_For_Flip", Wait_For_Flip, szIniFile);
+	WritePrivateProfileInt("Threads", "Back_Buffers", Back_Buffers, szIniFile);
+	WritePrivateProfileInt("Threads", "Sleep_Interval", Sleep_Interval, szIniFile);
+
 
 	WritePrivateProfileInt("Pulldown", "PulldownThresholdLow", PulldownThresholdLow, szIniFile);
 	WritePrivateProfileInt("Pulldown", "PulldownThresholdHigh", PulldownThresholdHigh, szIniFile);

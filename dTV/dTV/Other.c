@@ -66,7 +66,7 @@ BOOL Can_ColorKey=FALSE;
 DWORD DestSizeAlign;
 DWORD SrcSizeAlign;
 COLORREF OverlayColor = RGB(255, 0, 255);
-
+int Back_Buffers;		// Make new user parm, TRB 10/28/00
 void ExitDD(void)
 {
 	if (lpDD != NULL)
@@ -188,7 +188,7 @@ BOOL Overlay_Create()
 	// this ensures that we can use the bTV plugin
 	ddsd.dwWidth = BTV_VER1_WIDTH;
 	ddsd.dwHeight = BTV_VER1_HEIGHT;
-	ddsd.dwBackBufferCount = 1;
+	ddsd.dwBackBufferCount = Back_Buffers;
 
 	ddsd.ddpfPixelFormat = PixelFormat;
 	ddrval = IDirectDraw_CreateSurface(lpDD, &ddsd, &lpDDOverlay, NULL);
