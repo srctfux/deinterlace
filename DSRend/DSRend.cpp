@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRend.cpp,v 1.1.1.1 2002-02-03 10:52:53 tobbej Exp $
+// $Id: DSRend.cpp,v 1.2 2002-07-06 16:43:01 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1.1.1  2002/02/03 10:52:53  tobbej
+// First import of new direct show renderer filter
+//
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -42,9 +45,9 @@
 #include "DSRend.h"
 
 #include "DSRend_i.c"
-//#include "DSRendInPin.h"
 #include "DSRendFilter.h"
 #include "DSRendQualityPage.h"
+#include "Cpu.h"
 
 CComModule _Module;
 
@@ -64,6 +67,7 @@ BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID /*lpReserved*/)
     {
         _Module.Init(ObjectMap, hInstance, &LIBID_DSRENDLib);
         DisableThreadLibraryCalls(hInstance);
+		CPU_SetupFeatureFlag();
     }
     else if (dwReason == DLL_PROCESS_DETACH)
         _Module.Term();

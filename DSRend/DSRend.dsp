@@ -280,6 +280,10 @@ SOURCE=.\AutoLockCriticalSection.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\Cpu.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\DSRend.cpp
 # End Source File
 # Begin Source File
@@ -313,7 +317,94 @@ SOURCE=.\Event.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\FieldBufferHandler.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\mediatypes.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\mem.asm
+
+!IF  "$(CFG)" == "DSRend - Win32 Debug"
+
+# Begin Custom Build
+IntDir=.\Debug
+InputPath=.\mem.asm
+InputName=mem
+
+"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	ml /c /Zd /coff /nologo /Fo$(IntDir)\$(InputName).obj $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "DSRend - Win32 Unicode Debug"
+
+# Begin Custom Build
+IntDir=.\DebugU
+InputPath=.\mem.asm
+InputName=mem
+
+"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	ml /c /Zd /coff /nologo /Fo$(IntDir)\$(InputName).obj $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "DSRend - Win32 Release MinSize"
+
+# Begin Custom Build
+IntDir=.\ReleaseMinSize
+InputPath=.\mem.asm
+InputName=mem
+
+"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	ml /c /coff /nologo /Fo$(IntDir)\$(InputName).obj $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "DSRend - Win32 Release MinDependency"
+
+# Begin Custom Build
+IntDir=.\ReleaseMinDependency
+InputPath=.\mem.asm
+InputName=mem
+
+"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	ml /c /coff /nologo /Fo$(IntDir)\$(InputName).obj $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "DSRend - Win32 Unicode Release MinSize"
+
+# Begin Custom Build
+IntDir=.\ReleaseUMinSize
+InputPath=.\mem.asm
+InputName=mem
+
+"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	ml /c /coff /nologo /Fo$(IntDir)\$(InputName).obj $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "DSRend - Win32 Unicode Release MinDependency"
+
+# Begin Custom Build
+IntDir=.\ReleaseUMinDependency
+InputPath=.\mem.asm
+InputName=mem
+
+"$(IntDir)\$(InputName).obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	ml /c /coff /nologo /Fo$(IntDir)\$(InputName).obj $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\memalloc.cpp
 # End Source File
 # Begin Source File
 
@@ -327,6 +418,10 @@ SOURCE=.\StdAfx.cpp
 # Begin Source File
 
 SOURCE=.\AutoLockCriticalSection.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\Cpu.h
 # End Source File
 # Begin Source File
 
@@ -350,7 +445,15 @@ SOURCE=.\Event.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\FieldBufferHandler.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\mediatypes.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\mem.h
 # End Source File
 # Begin Source File
 

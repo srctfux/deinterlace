@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: StdAfx.h,v 1.1.1.1 2002-02-03 10:52:53 tobbej Exp $
+// $Id: StdAfx.h,v 1.2 2002-07-06 16:44:48 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1.1.1  2002/02/03 10:52:53  tobbej
+// First import of new direct show renderer filter
+//
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -51,9 +54,9 @@
 
 //hmm... why does _ATL_DEBUG_INTERFACES create problems with the input pin?
 //looks like _QIThunk is deleted when it shoud not, why?
-//#define _ATL_DEBUG_INTERFACES	//reference count debuging
-#define ATL_TRACE_LEVEL 2
-#define _ATL_DEBUG_QI			//queryinterface debugging
+////#define _ATL_DEBUG_INTERFACES	//reference count debuging
+//#define ATL_TRACE_LEVEL 2
+//#define _ATL_DEBUG_QI			//queryinterface debugging
 #endif
 
 #include <atlbase.h>
