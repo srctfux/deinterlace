@@ -39,21 +39,21 @@ IDR_MAINFRAME MENU PRELOAD DISCARDABLE
 BEGIN
     POPUP "&File"
     BEGIN
-        MENUITEM "Open file...",                ID_FILE_OPEN
-        MENUITEM "Close file",                  ID_FILE_CLOSE
-        MENUITEM "Properties...",               ID_FILE_PROPERTIES
+        MENUITEM "&Open file...\tCtrl+O",       ID_FILE_OPEN
+        MENUITEM "&Close file\tCtrl+C",         ID_FILE_CLOSE
+        MENUITEM "&Properties...\tAlt+Enter",   ID_FILE_PROPERTIES
         MENUITEM SEPARATOR
         MENUITEM "E&xit",                       ID_APP_EXIT
     END
-    POPUP "Controls"
+    POPUP "&Controls"
     BEGIN
-        MENUITEM "Play",                        ID_CONTROLS_PLAY
-        MENUITEM "Pause",                       ID_CONTROLS_PAUSE
-        MENUITEM "Stop",                        ID_CONTROLS_STOP
+        MENUITEM "&Play\t",                     ID_CONTROLS_PLAY
+        MENUITEM "P&ause",                      ID_CONTROLS_PAUSE
+        MENUITEM "&Stop",                       ID_CONTROLS_STOP
     END
     POPUP "&View"
     BEGIN
-        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM "&Status Bar\tS",              ID_VIEW_STATUS_BAR
     END
     POPUP "&Help"
     BEGIN
@@ -69,8 +69,12 @@ END
 
 IDR_MAINFRAME ACCELERATORS PRELOAD MOVEABLE PURE 
 BEGIN
+    "C",            ID_FILE_CLOSE,          VIRTKEY, CONTROL, NOINVERT
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
+    "S",            ID_VIEW_STATUS_BAR,     VIRTKEY, NOINVERT
     VK_F6,          ID_NEXT_PANE,           VIRTKEY, NOINVERT
     VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
+    VK_RETURN,      ID_FILE_PROPERTIES,     VIRTKEY, ALT, NOINVERT
 END
 
 
