@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: util.cpp,v 1.1 2001-08-08 15:37:02 tobbej Exp $
+// $Id: util.cpp,v 1.2 2001-09-19 17:39:25 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2001 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1  2001/08/08 15:37:02  tobbej
+// moved dmo filter to new directory
+//
 // Revision 1.1.1.1  2001/07/30 16:14:44  tobbej
 // initial import of new dmo filter
 //
@@ -42,7 +45,7 @@ bool TypesMatch(const DMO_MEDIA_TYPE *pmt1, const DMO_MEDIA_TYPE *pmt2)
 	LPBITMAPINFOHEADER pb2;
 	if(pmt1->majortype==pmt2->majortype && pmt1->subtype==pmt2->subtype)
 	{
-		if(pmt1->formattype==FORMAT_VideoInfo)
+		if(pmt1->formattype==FORMAT_VideoInfo && pmt2->formattype==FORMAT_VideoInfo)
 		{
 			pb1=&(((VIDEOINFOHEADER *)pmt1->pbFormat)->bmiHeader);
 			pb2=&(((VIDEOINFOHEADER *)pmt2->pbFormat)->bmiHeader);
