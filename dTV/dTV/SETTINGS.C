@@ -197,10 +197,10 @@ void LoadPluginsSettingsFromIni()
 	Filter_ReadSettingsFromIni();
 }
 
-LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lParam)
+LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lParam, BOOL* bDone)
 {
 	LONG RetVal = 0;
-	BOOL bDone = TRUE;
+	*bDone = TRUE;
 
 	switch(message)
 	{
@@ -316,37 +316,10 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 			break;
 		
 		default:
-			bDone = FALSE;
+			*bDone = FALSE;
 			break;
 	}
-
-	if(!bDone)
-	{
-		RetVal = Deinterlace_HandleSettingsMsg(hWnd, message, wParam, lParam, &bDone);
-	}
-	if(!bDone)
-	{
-		RetVal = Filter_HandleSettingsMsg(hWnd, message, wParam, lParam, &bDone);
-	}
-	
-	if(bDone)
-	{
-		// Updates the menu checkbox settings
-		SetMenuAnalog();
-
-		// Set the configuration file autosave timer.
-		// We use an autosave timer so that when the user has finished
-		// making adjustments and at least a small delay has occured,
-		// that the DTV.INI file is properly up to date, even if 
-		// the system crashes or system is turned off abruptly.
-		KillTimer(hWnd, TIMER_AUTOSAVE);
-		SetTimer(hWnd, TIMER_AUTOSAVE, TIMER_AUTOSAVE_MS, NULL);
-		return RetVal;
-	}
-	else
-	{
-		return DefWindowProc(hWnd, message, wParam, lParam);
-	}
+    return RetVal;
 }
 
 

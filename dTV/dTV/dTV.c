@@ -149,6 +149,7 @@ BOOL bDisplayStatusBar = TRUE;
 BOOL bDisplaySplashScreen = TRUE;
 BOOL bIsFullScreen = FALSE;
 BOOL bForceFullScreen = FALSE;
+BOOL bUseAutoSave = FALSE;
 
 HFONT currFont = NULL;
 
@@ -1425,13 +1426,16 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
         // Updates the menu checkbox settings
 		SetMenuAnalog();
 
-        // Set the configuration file autosave timer.
-        // We use an autosave timer so that when the user has finished
-        // making adjustments and at least a small delay has occured,
-        // that the DTV.INI file is properly up to date, even if 
-        // the system crashes or system is turned off abruptly.
-        KillTimer(hWnd, TIMER_AUTOSAVE);
-        SetTimer(hWnd, TIMER_AUTOSAVE, TIMER_AUTOSAVE_MS, NULL);
+        if(bUseAutoSave)
+        {
+            // Set the configuration file autosave timer.
+            // We use an autosave timer so that when the user has finished
+            // making adjustments and at least a small delay has occured,
+            // that the DTV.INI file is properly up to date, even if 
+            // the system crashes or system is turned off abruptly.
+            KillTimer(hWnd, TIMER_AUTOSAVE);
+            SetTimer(hWnd, TIMER_AUTOSAVE, TIMER_AUTOSAVE_MS, NULL);
+        }
         break;
 
 	case WM_CREATE:
@@ -1738,7 +1742,39 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		break;
 
 	default:
-		return Settings_HandleSettingMsgs(hWnd, message, wParam, lParam);
+        {
+    		LONG RetVal = Settings_HandleSettingMsgs(hWnd, message, wParam, lParam, &bDone);
+        	if(!bDone)
+            {
+	            RetVal = Deinterlace_HandleSettingsMsg(hWnd, message, wParam, lParam, &bDone);
+            }
+            if(!bDone)
+            {
+	            RetVal = Filter_HandleSettingsMsg(hWnd, message, wParam, lParam, &bDone);
+            }
+
+            if(bDone)
+            {
+	            // Updates the menu checkbox settings
+	            SetMenuAnalog();
+
+                if(bUseAutoSave)
+                {
+	                // Set the configuration file autosave timer.
+	                // We use an autosave timer so that when the user has finished
+	                // making adjustments and at least a small delay has occured,
+	                // that the DTV.INI file is properly up to date, even if 
+	                // the system crashes or system is turned off abruptly.
+	                KillTimer(hWnd, TIMER_AUTOSAVE);
+	                SetTimer(hWnd, TIMER_AUTOSAVE, TIMER_AUTOSAVE_MS, NULL);
+                }
+	            return RetVal;
+            }
+            else
+            {
+	            return DefWindowProc(hWnd, message, wParam, lParam);
+            }
+        }
 		break;
 	}
 	return DefWindowProc(hWnd, message, wParam, lParam);
@@ -2592,6 +2628,12 @@ SETTING dTVSettings[DTV_SETTING_LASTONE] =
 		1, 0, 4, 1, 1,
 		NULL,
 		"Threads", "ThreadPriority", NULL,
+	},
+	{
+		"Autosave settings", ONOFF, 0, &bUseAutoSave,
+		FALSE, 0, 1, 1, 1,
+		NULL,
+		"MainWindow", "UseAutoSave", NULL,
 	},
 };
 
