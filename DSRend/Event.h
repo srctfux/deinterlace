@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: Event.h,v 1.1.1.1 2002-02-03 10:52:53 tobbej Exp $
+// $Id: Event.h,v 1.2 2002-06-03 18:20:24 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1.1.1  2002/02/03 10:52:53  tobbej
+// First import of new direct show renderer filter
+//
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -49,16 +52,20 @@ public:
 	virtual ~CEvent();
 	
 	/// sets the event to signaled state
-	BOOL setEvent();
+	BOOL SetEvent();
 	/// sets the event to unsignaled state
-	BOOL resetEvent();
+	BOOL ResetEvent();
 	/// @return true if event was signaled before timeout
-	bool wait(DWORD dwMilliseconds);
+	bool Wait(DWORD dwMilliseconds);
+	bool Check();
 	
 	/// @return handle to win32 event object
-	HANDLE getHandle(){return m_hEvent;}
+	HANDLE GetHandle(){return m_hEvent;}
 
 private:
+	CEvent(const CEvent &refEvent);
+    CEvent &operator=(const CEvent &refEvent);
+
 	///handle to event
 	HANDLE m_hEvent;
 };
