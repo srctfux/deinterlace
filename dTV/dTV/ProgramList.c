@@ -38,6 +38,8 @@
 //
 // 11 Mar 2001   Laurent Garnier       Previous Channel feature added
 //
+// 06 Apr 2001   Laurent Garnier       New menu to select channel
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -597,6 +599,7 @@ BOOL APIENTRY AnalogScanProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 		if (LOWORD(wParam) == IDOK)
 		{
 			Write_Program_List_ASCII();
+			Channels_UpdateMenu(GetMenu(hWnd));
 			DeleteObject(RedBulb);
 			DeleteObject(GreenBulb);
 			EndDialog(hDlg, TRUE);
@@ -635,5 +638,59 @@ void ChangeChannel(int NewChannel)
 				VT_ChannelChange();
 			}
 		}
+	}
+}
+
+void Channels_UpdateMenu(HMENU hMenu)
+{
+	HMENU			hMenuChannels;
+	MENUITEMINFO	MenuItemInfo;
+	int				i, j;
+
+	hMenuChannels = GetSubMenu(hMenu, 1);
+	hMenuChannels = GetSubMenu(hMenuChannels, 2);
+
+	i = GetMenuItemCount(hMenuChannels) - 1;
+	while (i>=2)
+	{
+		RemoveMenu(hMenuChannels, i, MF_BYPOSITION);
+		i--;
+	}
+	for (i=0,j=2 ; i<MAXPROGS ; i++)
+	{
+		if (Programm[i].freq != 0)
+		{
+			MenuItemInfo.cbSize = sizeof (MenuItemInfo);
+			MenuItemInfo.fMask = MIIM_TYPE | MIIM_STATE | MIIM_ID;
+			MenuItemInfo.fType = MFT_STRING;
+			MenuItemInfo.dwTypeData = Programm[i].Name;
+			MenuItemInfo.cch = strlen (Programm[i].Name);
+			MenuItemInfo.fState = (CurrentProgramm == i) ? MFS_CHECKED : MFS_ENABLED;
+			MenuItemInfo.wID = IDM_CHANNEL_SELECT + i + 1;
+			InsertMenuItem(hMenuChannels, j, TRUE, &MenuItemInfo);
+			j++;
+		}
+	}
+}
+
+void Channels_SetMenu(HMENU hMenu)
+{
+	HMENU	hMenuChannels;
+	int		i;
+	int		nb;
+
+	hMenuChannels = GetSubMenu(hMenu, 1);
+	hMenuChannels = GetSubMenu(hMenuChannels, 2);
+
+	nb = GetMenuItemCount(hMenuChannels) - 2;
+	i = nb + 1;
+	while (i>=2)
+	{
+		CheckMenuItem(hMenuChannels, i, MF_BYPOSITION | MF_UNCHECKED);
+		i--;
+	}
+	if (CurrentProgramm < nb)
+	{
+		CheckMenuItem(hMenuChannels, CurrentProgramm + 2, MF_BYPOSITION | MF_CHECKED);
 	}
 }

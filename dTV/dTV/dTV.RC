@@ -735,6 +735,12 @@ BEGIN
     BEGIN
         MENUITEM "Channel &Scan",               IDM_ANALOGSCAN
         MENUITEM "Channel &List\tHome",         IDM_CHANNEL_LIST
+        POPUP "&Channel Select"
+        BEGIN
+            MENUITEM "___Channels___",              IDM_CHANNEL_SELECT
+            , GRAYED
+            MENUITEM SEPARATOR
+        END
         MENUITEM SEPARATOR
         MENUITEM "&Next Channel\tPgUp",         IDM_CHANNELPLUS
         MENUITEM "&Previous Channel\tPgDn",     IDM_CHANNELMINUS

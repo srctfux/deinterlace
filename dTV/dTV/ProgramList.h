@@ -35,6 +35,8 @@
 //
 // 11 Mar 2001   Laurent Garnier       Previous Channel feature added
 //
+// 06 Apr 2001   Laurent Garnier       New menu to select channel
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __PROGRAMLIST_H___
@@ -96,8 +98,8 @@ BOOL APIENTRY ProgramListProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 BOOL APIENTRY ChannelNumberProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 BOOL APIENTRY AnalogScanProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 void ChangeChannel(int NewChannel);
-
-#define MAXPROGS 4096
+void Channels_UpdateMenu(HMENU hMenu);
+void Channels_SetMenu(HMENU hMenu);
 
 extern struct TProgramm Programm[MAXPROGS+1];
 extern int CountryCode;

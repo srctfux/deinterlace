@@ -202,6 +202,7 @@
 #define IDM_AUTOHIDE_OSD                815
 #define ID_SETTINGS_FILTERS_FILTERS     816
 #define IDM_AUTOHIDE_CURSOR             817
+#define IDM_CHANNEL_SELECT              1650
 #define IDM_END                         1032
 #define IDM_SOURCE_TUNER                1089
 #define IDM_SOURCE_COMPOSITE            1090
@@ -797,7 +798,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        158
-#define _APS_NEXT_COMMAND_VALUE         818
+#define _APS_NEXT_COMMAND_VALUE         5750
 #define _APS_NEXT_CONTROL_VALUE         1879
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

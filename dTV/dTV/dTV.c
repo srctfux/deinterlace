@@ -156,8 +156,11 @@ HFONT currFont = NULL;
 
 UINT CpuFeatureFlags;		// TRB 12/20/00 Processor capability flags
 
+BOOL bInMenuOrDialogBox = FALSE;
+
 BOOL IsFullScreen_OnChange(long NewValue);
 BOOL DisplayStatusBar_OnChange(long NewValue);
+void Cursor_UpdateVisibility();
 void Cursor_SetVisibility(BOOL bVisible);
 const char * GetSourceName(int nVideoSource);
 void MainWndOnDestroy();
@@ -331,11 +334,21 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
 	case WM_COMMAND:
 
+		if ( (LOWORD(wParam) > IDM_CHANNEL_SELECT) && (LOWORD(wParam) <= (IDM_CHANNEL_SELECT+MAXPROGS)) )
+		{
+			PostMessage(hWnd, WM_COMMAND, IDM_CHANNEL_SELECT, LOWORD(wParam)-IDM_CHANNEL_SELECT-1);
+			break;
+		}
+
 		switch (LOWORD(wParam))
 		{
 		case IDM_SETUPCARD:
 			Stop_Capture();
+			bInMenuOrDialogBox = TRUE;
+			Cursor_UpdateVisibility();
 			DialogBox(hInst, "SELECTCARD", hWnd, (DLGPROC) SelectCardProc);
+			bInMenuOrDialogBox = FALSE;
+			Cursor_UpdateVisibility();
 			Card_Init();
 			Tuner_Init();
             Reset_Capture();
@@ -424,6 +437,17 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			}
 			break;
 
+		case IDM_CHANNEL_SELECT:
+			if (Setting_GetValue(BT848_GetSetting(VIDEOSOURCE)) == SOURCE_TUNER)
+			{
+				if (Programm[lParam].freq != 0)
+					ChangeChannel(lParam);
+
+				StatusBar_ShowText(STATUS_KEY, Programm[CurrentProgramm].Name);
+				OSD_ShowText(hWnd,Programm[CurrentProgramm].Name, 0);
+			}
+			break;
+
 		case IDM_RESET:
             Reset_Capture();
 	        Sleep(100);
@@ -484,7 +508,11 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_ABOUT:
+			bInMenuOrDialogBox = TRUE;
+			Cursor_UpdateVisibility();
 			DialogBox(hInst, "ABOUT", hWnd, AboutProc);
+			bInMenuOrDialogBox = FALSE;
+			Cursor_UpdateVisibility();
 			break;
 
 		case IDM_BRIGHTNESS_PLUS:
@@ -776,18 +804,14 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
 		case IDM_AUTOHIDE_CURSOR:
 			bAutoHideCursor = !bAutoHideCursor;
-			if (!bAutoHideCursor)
-			{
-		        KillTimer(hWnd, TIMER_HIDECURSOR);
-				Cursor_SetVisibility(bShowCursor);
-			}
+			Cursor_UpdateVisibility();
 			break;
 
 		case IDM_TOGGLECURSOR:
-			if(bIsFullScreen == FALSE)
+			if(!bAutoHideCursor && bIsFullScreen == FALSE)
 			{
 				bShowCursor = !bShowCursor;
-				Cursor_SetVisibility(bShowCursor);
+				Cursor_UpdateVisibility();
 			}
 			break;
 
@@ -870,7 +894,11 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 		        
 		case IDM_HWINFO:
+			bInMenuOrDialogBox = TRUE;
+			Cursor_UpdateVisibility();
 			DialogBox(hInst, "HWINFO", hWnd, (DLGPROC) ChipSettingProc);
+			bInMenuOrDialogBox = FALSE;
+			Cursor_UpdateVisibility();
 			break;
 
 		case IDM_VBI_VT:
@@ -921,27 +949,51 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_AUDIOSETTINGS:
+			bInMenuOrDialogBox = TRUE;
+			Cursor_UpdateVisibility();
 			DialogBox(hInst, "AUDIOEINSTELLUNGEN", hWnd, AudioSettingProc);
+			bInMenuOrDialogBox = FALSE;
+			Cursor_UpdateVisibility();
 			break;
 
 		case IDM_AUDIOSETTINGS1:
+			bInMenuOrDialogBox = TRUE;
+			Cursor_UpdateVisibility();
 			DialogBox(hInst, "AUDIOEINSTELLUNGEN1", hWnd, AudioSettingProc1);
+			bInMenuOrDialogBox = FALSE;
+			Cursor_UpdateVisibility();
 			break;
 
 		case IDM_VIDEOSETTINGS:
+			bInMenuOrDialogBox = TRUE;
+			Cursor_UpdateVisibility();
 			DialogBox(hInst, "VIDEOSETTINGS", hWnd, VideoSettingProc);
+			bInMenuOrDialogBox = FALSE;
+			Cursor_UpdateVisibility();
 			break;
 
 		case IDM_ADV_VIDEOSETTINGS:
+			bInMenuOrDialogBox = TRUE;
+			Cursor_UpdateVisibility();
 			DialogBox(hInst, "ADV_VIDEOSETTINGS", hWnd, AdvVideoSettingProc);
+			bInMenuOrDialogBox = FALSE;
+			Cursor_UpdateVisibility();
 			break;
 
 		case IDM_VPS_OUT:
+			bInMenuOrDialogBox = TRUE;
+			Cursor_UpdateVisibility();
 			DialogBox(hInst, "VPSSTATUS", hWnd, VPSInfoProc);
+			bInMenuOrDialogBox = FALSE;
+			Cursor_UpdateVisibility();
 			break;
 
 		case IDM_VT_OUT:
+			bInMenuOrDialogBox = TRUE;
+			Cursor_UpdateVisibility();
 			DialogBox(hInst, "VTSTATUS", hWnd, VTInfoProc);
+			bInMenuOrDialogBox = FALSE;
+			Cursor_UpdateVisibility();
 			break;
 
 		case IDM_VBI:
@@ -955,7 +1007,11 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_AUDIO_MIXER:
+			bInMenuOrDialogBox = TRUE;
+			Cursor_UpdateVisibility();
 			DialogBox(hInst, "MIXERSETUP", hWnd, MixerSetupProc);
+			bInMenuOrDialogBox = FALSE;
+			Cursor_UpdateVisibility();
 			break;
 
 		case IDM_STATUSBAR:
@@ -973,13 +1029,21 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
 		case IDM_ANALOGSCAN:
 			SendMessage(hWnd, WM_COMMAND, IDM_SOURCE_TUNER, 0);
+			bInMenuOrDialogBox = TRUE;
+			Cursor_UpdateVisibility();
 			DialogBox(hInst, "ANALOGSCAN", hWnd, (DLGPROC) AnalogScanProc);
+			bInMenuOrDialogBox = FALSE;
+			Cursor_UpdateVisibility();
 			break;
 
 		case IDM_CHANNEL_LIST:
 			if (Setting_GetValue(BT848_GetSetting(VIDEOSOURCE)) == SOURCE_TUNER)
 			{
+				bInMenuOrDialogBox = TRUE;
+				Cursor_UpdateVisibility();
 				DialogBox(hInst, "CHANNELLIST", hWnd, (DLGPROC) ProgramListProc);
+				bInMenuOrDialogBox = FALSE;
+				Cursor_UpdateVisibility();
 				OSD_ShowText(hWnd,Programm[CurrentProgramm].Name, 0);
 			}
 			break;
@@ -1286,12 +1350,29 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		break;
 
 //	case WM_RBUTTONUP:
-//		if(bIsFullScreen == FALSE)
+//		if(!bAutoHideCursor && bIsFullScreen == FALSE)
 //		{
 //			bShowCursor = !bShowCursor;
-//			Cursor_SetVisibility(bShowCursor);
+//			Cursor_UpdateVisibility();
 //		}
 //		break;
+
+	case WM_NCHITTEST:
+		if (!bInMenuOrDialogBox && bAutoHideCursor)
+		{
+			Cursor_UpdateVisibility();
+		}
+		break;
+
+	case WM_ENTERMENULOOP:
+		bInMenuOrDialogBox = TRUE;
+		Cursor_UpdateVisibility();
+		break;
+
+	case WM_EXITMENULOOP:
+		bInMenuOrDialogBox = FALSE;
+		Cursor_UpdateVisibility();
+		break;
 
 	case WM_INITMENU: 
 		SetMenuAnalog();
@@ -1390,19 +1471,12 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
         //-------------------------------
         case TIMER_HIDECURSOR:
 	        KillTimer(hWnd, TIMER_HIDECURSOR);
-			Cursor_SetVisibility(FALSE);
+			if (!bInMenuOrDialogBox)
+				Cursor_SetVisibility(FALSE);
             break;
 		}
 		break;
 	
-	case WM_NCHITTEST:
-		if (bAutoHideCursor)
-		{
-			Cursor_SetVisibility(TRUE);
-			SetTimer(hWnd, TIMER_HIDECURSOR, TIMER_HIDECURSOR_MS, NULL);
-		}
-		break;
-
 	// support for mouse wheel
 	// the WM_MOUSEWHEEL message is not defined but this is it's value
 	case WM_MOUSELAST + 1:
@@ -1441,8 +1515,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				if(bIsFullScreen == FALSE)
 				{
 					bIsFullScreen = TRUE;
-					if (!bAutoHideCursor)
-						Cursor_SetVisibility(FALSE);
+					Cursor_UpdateVisibility();
 					WorkoutOverlaySize();
 				}
 				break;
@@ -1592,7 +1665,11 @@ void MainWndOnInitBT(HWND hWnd)
 		if(Setting_GetValue(TVCard_GetSetting(CURRENTCARDTYPE)) == TVCARD_UNKNOWN)
 		{
 			HideSplashScreen();
+			bInMenuOrDialogBox = TRUE;
+			Cursor_UpdateVisibility();
 			TVCard_FirstTimeSetupHardware(hInst, hWnd);
+			bInMenuOrDialogBox = FALSE;
+			Cursor_UpdateVisibility();
 		}
 
 		WStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
@@ -1678,6 +1755,8 @@ void MainWndOnInitBT(HWND hWnd)
   		BT848_SetGeoSize();
 		WorkoutOverlaySize();
 		
+		Channels_UpdateMenu(hMenu);
+
 		SetMenuAnalog();
 
 		SetTimer(hWnd, 10, 5000, NULL);
@@ -1794,17 +1873,10 @@ void MainWndOnCreate(HWND hWnd)
 	ProcessorMask = 1 << (MainProcessor);
 	i = SetThreadAffinityMask(GetCurrentThread(), ProcessorMask);
 
-	if(bIsFullScreen == TRUE)
+	Cursor_UpdateVisibility();
+	if(bIsFullScreen == FALSE && bDisplayStatusBar == TRUE)
 	{
-		if (!bAutoHideCursor)
-			Cursor_SetVisibility(FALSE);
-	}
-	else
-	{
-		if (bDisplayStatusBar == TRUE)
-		{
-			SetTimer(hWnd, TIMER_STATUS, TIMER_STATUS_MS, NULL);
-		}
+		SetTimer(hWnd, TIMER_STATUS, TIMER_STATUS_MS, NULL);
 	}
 
 	PostMessage(hWnd, INIT_BT, 0, 0);
@@ -1964,6 +2036,7 @@ void SetMenuAnalog()
 	BT848_SetMenu(hMenu);
 	TVCard_SetMenu(hMenu);
 	VBI_SetMenu(hMenu);
+	Channels_SetMenu(hMenu);
 }
 
 //---------------------------------------------------------------------------
@@ -2115,6 +2188,27 @@ void Cursor_SetVisibility(BOOL bVisible)
 	}
 }
 
+void Cursor_UpdateVisibility()
+{
+	KillTimer(hWnd, TIMER_HIDECURSOR);
+	if (bInMenuOrDialogBox)
+	{
+		Cursor_SetVisibility(TRUE);
+	}
+	else if (!bAutoHideCursor)
+	{
+		if (bIsFullScreen)
+			Cursor_SetVisibility(FALSE);
+		else
+			Cursor_SetVisibility(bShowCursor);
+	}
+	else
+	{
+		Cursor_SetVisibility(TRUE);
+		SetTimer(hWnd, TIMER_HIDECURSOR, TIMER_HIDECURSOR_MS, NULL);
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////
 // On Change Functions for settings
 /////////////////////////////////////////////////////////////////////////////
@@ -2130,8 +2224,6 @@ BOOL IsFullScreen_OnChange(long NewValue)
 		if(bIsFullScreen == FALSE)
 		{
 			SetWindowPos(hWnd, 0, emstartx, emstarty, emsizex, emsizey, SWP_SHOWWINDOW);
-			if (!bAutoHideCursor)
-				Cursor_SetVisibility(bShowCursor);
 			if (bDisplayStatusBar == TRUE)
 			{
 				SetTimer(hWnd, TIMER_STATUS, TIMER_STATUS_MS, NULL);
@@ -2140,9 +2232,8 @@ BOOL IsFullScreen_OnChange(long NewValue)
 		else
 		{
 			SaveWindowPos(hWnd);
-			if (!bAutoHideCursor)
-				Cursor_SetVisibility(FALSE);
 		}
+		Cursor_UpdateVisibility();
 		InvalidateRect(hWnd, NULL, FALSE);
 		WorkoutOverlaySize();
 	}
