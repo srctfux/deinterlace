@@ -848,10 +848,13 @@ BEGIN
                                                     IDM_SOURCE_COMPVIASVIDEO
             MENUITEM "Other - &1\tCtrl+Alt+F5",     IDM_SOURCE_OTHER1
             MENUITEM "Other - &2\tCtrl+Alt+F6",     IDM_SOURCE_OTHER2
-            MENUITEM "Other - CC&IR 1\tCtrl+Alt+F7",  IDM_SOURCE_CCIR656_1
-            MENUITEM "Other - CC&IR 2",             IDM_SOURCE_CCIR656_2
-            MENUITEM "Other - CC&IR 3",             IDM_SOURCE_CCIR656_3
-            MENUITEM "Other - CC&IR 4",             IDM_SOURCE_CCIR656_4
+            POPUP "&CCIR"
+            BEGIN
+                MENUITEM "CCIR &1",                     IDM_SOURCE_CCIR656_1
+                MENUITEM "CCIR &2",                     IDM_SOURCE_CCIR656_2
+                MENUITEM "CCIR &3",                     IDM_SOURCE_CCIR656_3
+                MENUITEM "CCIR &4",                     IDM_SOURCE_CCIR656_4
+            END
         END
         POPUP "Video &Format"
         BEGIN
@@ -1266,7 +1269,6 @@ BEGIN
     VK_F6,          IDM_AUDIO_5,            VIRTKEY, SHIFT, CONTROL, 
                                                     NOINVERT
     VK_F6,          IDM_TYPEFORMAT_5,       VIRTKEY, SHIFT, ALT, NOINVERT
-    VK_F7,          IDM_SOURCE_CCIR656_1,     VIRTKEY, CONTROL, ALT, NOINVERT
     VK_F7,          IDM_TYPEFORMAT_6,       VIRTKEY, SHIFT, ALT, NOINVERT
     VK_HOME,        IDM_CHANNEL_LIST,       VIRTKEY, NOINVERT
     VK_LEFT,        IDM_VT_PAGE_MINUS,      VIRTKEY, NOINVERT
