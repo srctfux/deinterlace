@@ -127,6 +127,8 @@ extern int InitialContrast;
 extern int InitialProg;
 extern int InitialSaturationU;
 extern int InitialSaturationV;
+extern int InitialBrightness;
+extern int InitialHue;
 
 // MAE 2 Nov 2000 - Start of change for Macrovision fix
 extern int InitialBDelay;
@@ -173,8 +175,6 @@ extern struct TVT VTFrame[800];
 extern struct TVTDialog VTDialog[MAXVTDIALOG];
 extern struct TTVSetting TVSettings[];
 extern unsigned char *pBurstLine[5];
-extern char InitialBrightness;
-extern char InitialHue;
 extern unsigned int ManuellAudio[8];
 extern unsigned short cp_odd[256][285];
 extern unsigned short UTCount;

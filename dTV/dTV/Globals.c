@@ -34,6 +34,7 @@
 
 #include "stdafx.h"
 #include "globals.h"
+#include "Audio.h"
 #include "bt848.h"
 
 int InitialVolume = 1000;
@@ -50,24 +51,36 @@ HWND ShowPDCInfo=NULL;
 HWND ShowVTInfo=NULL;
 HWND ShowVPSInfo=NULL;
 
-// MAE 3 Nov 2000 Changed all BDELAY values from 5D to 5C for Macrovision fix
+// MAE, 3 Nov 2000
+//    Changed all BDELAY values from 5D to 5C for Macrovision fix
+//
+// John Adcock, 19 Dec 2000
+//    Fixed PAL-N to stop it from crashing, improved PAL-M values
+//    These were the old PAL-N Values that crashed dTV
+//    /* PAL-M */
+//    { 754, 480,  910, 0x70, 0x5c, (BT848_IFORM_PAL_M|BT848_IFORM_XT0),
+//        910, 754, 135, 754, 0x1a, 0, FALSE, 400},
+//    /* PAL-N */
+//    { 922, 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_N|BT848_IFORM_XT1),
+//	      1135, 922, 186, 922, 0x1c, 0, TRUE, 400},
+//
 struct TTVSetting TVSettings[9] =
 {
 	/* PAL-BDGHI */
 	{ 768, 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_BDGHI|BT848_IFORM_XT1),
 	    944, 768, 186, 922, 0x20, 0, TRUE, 511},
 	/* NTSC CCIR601 */
-	{ 720, 480,  910, 0x68, 0x5c, (BT848_IFORM_NTSC|BT848_IFORM_XT0),
+	{ 720, 480, 910, 0x68, 0x5c, (BT848_IFORM_NTSC|BT848_IFORM_XT0),
 	    858, 720, 137, 754, 0x1a, 0, FALSE, 400},
 	/* SECAM */
 	{ 768, 576, 1135, 0x7f, 0xb0, (BT848_IFORM_SECAM|BT848_IFORM_XT1),
 	    944, 768, 186, 922, 0x20, 0, TRUE, 511},
 	/* PAL-M */
-	{ 754, 480,  910, 0x70, 0x5c, (BT848_IFORM_PAL_M|BT848_IFORM_XT0),
-	    910, 754, 135, 754, 0x1a, 0, FALSE, 400},
-	/* PAL-N */
-	{ 922, 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_N|BT848_IFORM_XT1),
-	    1135, 922, 186, 922, 0x1c, 0, TRUE, 400},
+	{ 720, 480,  910, 0x68, 0x5c, (BT848_IFORM_PAL_M|BT848_IFORM_XT0),
+	    858, 720, 137, 754, 0x1a, 0, FALSE, 400},
+    /* PAL-N */
+    { 768, 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_N|BT848_IFORM_XT1),
+        944, 768, 186, 922, 0x20, 0, TRUE, 511},
 	/* NTSC Japan*/
 	{ 754, 480,  910, 0x70, 0x5c, (BT848_IFORM_NTSC_JAP|BT848_IFORM_XT0),
 	    910, 754, 135, 754, 0x1a, 0, FALSE, 400},
@@ -145,8 +158,8 @@ PMemStruct Burst_dma[5];
 HANDLE Bt848Device=NULL;
 
 int TVFormat;
-int AudioSource = 4;
-int VideoSource = 1;
+int AudioSource = AUDIOMUX_MUTE;
+int VideoSource = SOURCE_COMPOSITE;
 int CountryCode=0;
 int TVTYPE = -1;
 
@@ -166,8 +179,8 @@ unsigned short VTColourTable[9] =
 
 // 10/19/2000 Mark Rejhon
 // Better NTSC defaults
-char InitialHue        = 0;
-char InitialBrightness = 20;
+int InitialHue         = 0;
+int InitialBrightness  = 20;
 int InitialContrast    = 207;
 int InitialSaturationU = 254;
 int InitialSaturationV = 219;
@@ -179,8 +192,8 @@ int	InitialBDelay = 0x00;  // Original hardware default value was 0x5D
 // MAE 2 Nov 2000 - End of change for Macrovision fix
 
 // These are the original defaults, likely optimized for PAL (could use refinement).
-//char InitialHue        = 0x00;
-//char InitialBrightness = 0x00;
+//int InitialHue        = 0x00;
+//int InitialBrightness = 0x00;
 //int InitialContrast    = 0xd8;
 //int InitialSaturationU = 0xfe;
 //int InitialSaturationV = 0xb4;
