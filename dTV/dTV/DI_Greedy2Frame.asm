@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
-// DI_TwoFrame.asm
+// DI_Greedy2Frame.asm
 /////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2000 Steven Grimm.  All rights reserved.
+// Copyright (c) 2000 John Adcock, Tom Barry, Steve Grimm  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
 //
 //	This file is subject to the terms of the GNU General Public License as
@@ -16,8 +16,8 @@
 //	GNU General Public License for more details
 /////////////////////////////////////////////////////////////////////////////
 
-// This is the implementation of the two-frame deinterlace algorithm described in
-// DI_TwoFrame.c.  It's in a separate file so we can compile variants for different
+// This is the implementation of the Greedy 2-frame deinterlace algorithm described in
+// DI_Greedy2Frame.c.  It's in a separate file so we can compile variants for different
 // CPU types; most of the code is the same in the different variants.
 
 #ifdef IS_SSE
@@ -85,7 +85,7 @@ MAINLOOP_LABEL:
 
 // if |M1-M0| > Threshold we want dword worth of twos
 		pcmpgtb mm5, qwGreedyTwoFrameThreshold
-		psrld   mm5, 1					// get rid of sign bit
+		pand	mm5, Mask				// get rid of any sign bit
 		pcmpgtd mm5, DwordOne			// do we want to bob
 		pandn   mm5, DwordTwo
 		movq mm4, mm5					
@@ -103,7 +103,7 @@ MAINLOOP_LABEL:
 
 // if |T1-T0| > Threshold we want dword worth of ones
 		pcmpgtb mm5, qwGreedyTwoFrameThreshold
-		psrld   mm5, 1					// get rid of sign bit
+		pand	mm5, Mask				// get rid of any sign bit
 		pcmpgtd mm5, DwordOne			
 		pandn   mm5, DwordOne
 		paddd mm4, mm5					
@@ -121,12 +121,12 @@ MAINLOOP_LABEL:
 
 // if |B1-B0| > Threshold we want dword worth of ones
 		pcmpgtb mm5, qwGreedyTwoFrameThreshold
-		psrld   mm5, 1					// get rid of sign bit
+		pand	mm5, Mask				// get rid of any sign bit
 		pcmpgtd mm5, DwordOne			
 		pandn   mm5, DwordOne
 		paddd mm4, mm5					
 
-		pcmpgtd mm4, DwordTwo			
+		pcmpgtd mm4, DwordTwo
 
 		movq mm5, mm4
 // mm4 now is 1 where we want to bob and 0 where we want to weave

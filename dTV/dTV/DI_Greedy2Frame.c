@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // DI_Greedy2Frame.c
 /////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2000 Steven Grimm.  All rights reserved.
+// Copyright (c) 2000 John Adcock, Tom Barry, Steve Grimm  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
 //
 //	This file is subject to the terms of the GNU General Public License as
@@ -19,7 +19,7 @@
 //
 // Date          Developer             Changes
 //
-// 30 Dec 2000   Mark Rejhon           Split into separate module
+// 08 Feb 2000   John Adcock           New Method
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -152,7 +152,7 @@ SETTING DI_Greedy2FrameSettings[DI_GREEDY2FRAME_SETTING_LASTONE] =
 {
 	{
 		"Greedy 2 Frame Threshold", SLIDER, 0, &GreedyTwoFrameThreshold,
-		8, 0, 128, 1, 1,
+		4, 0, 128, 1, 1,
 		NULL,
 		"Deinterlace", "GreedyTwoFrameThreshold", NULL,
 	},
