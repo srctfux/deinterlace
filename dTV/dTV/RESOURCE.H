@@ -67,12 +67,6 @@
 #define IDM_CLOSEDCAPTION               482
 #define IDM_SETUPCARD                   483
 #define IDM_TAKESTILL                   485
-#define IDM_VIDEO_BOB                   530
-#define IDM_VIDEO_WEAVE                 531
-#define IDM_VIDEO_2FRAME                532
-#define IDM_WEAVE                       533
-#define IDM_BOB                         534
-#define IDM_SCALER_BOB                  535
 #define IDM_22PULLODD                   536
 #define IDM_22PULLEVEN                  537
 #define IDM_32PULL1                     538
@@ -80,12 +74,6 @@
 #define IDM_32PULL3                     540
 #define IDM_32PULL4                     541
 #define IDM_32PULL5                     542
-#define IDM_EVEN_ONLY                   543
-#define IDM_ODD_ONLY                    544
-#define IDM_BLENDED_CLIP                545
-#define IDM_ADAPTIVE                    546
-#define IDM_VIDEO_GREEDY                547
-#define IDM_VIDEO_GREEDY2FRAME          548
 #define IDM_ADV_VIDEOSETTINGS           580
 #define IDM_SHIFT_SPACEBAR              581
 #define IDM_SPLASH_ON_STARTUP           582
@@ -799,7 +787,10 @@
 #define IDC_BYINPUT                     1876
 #define IDC_ALLFORMATS                  1877
 #define IDC_ALLINPUTS                   1878
-#define IDM_TAKESTREAMSNAP              1900
+#define IDM_TAKESTREAMSNAP              1899
+#define IDM_FIRST_DEINTMETHOD           1900
+#define IDM_LAST_DEINTMETHOD            1999
+
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -807,7 +798,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        159
-#define _APS_NEXT_COMMAND_VALUE         1901
+#define _APS_NEXT_COMMAND_VALUE         2000
 #define _APS_NEXT_CONTROL_VALUE         1879
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

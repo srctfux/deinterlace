@@ -136,19 +136,12 @@
 #define IDM_TASPECT_200                 745
 #define IDM_TASPECT_235                 746
 
-// Messages for the Video Deinterlace Algorithm
-#define IDM_VIDEO_BOB                   530
-#define IDM_VIDEO_WEAVE                 531
-#define IDM_VIDEO_2FRAME                532
-#define IDM_WEAVE                       533
-#define IDM_BOB                         534
-#define IDM_SCALER_BOB                  535
-#define IDM_EVEN_ONLY                   543
-#define IDM_ODD_ONLY                    544
-#define IDM_BLENDED_CLIP                545
-#define IDM_ADAPTIVE                    546
-#define IDM_VIDEO_GREEDY                547
-#define IDM_VIDEO_GREEDY2FRAME          548
+// Indexes for the Video Deinterlace Algorithms
+// to select a deinterlace method send a WM_COMMAND message
+// with the relevant index added to this message
+// e.g. To switch to adaptive
+// SendMessage(hWndDTV, WM_COMMAND, IDM_FIRST_DEINTMETHOD + INDEX_ADAPTIVE, 0);
+#define IDM_FIRST_DEINTMETHOD             1900
 
 /////////////////////////////////////////////////////////////////////////////
 // For setting of certain values
@@ -161,10 +154,10 @@ typedef enum
 	SOURCE_OTHER1,
 	SOURCE_OTHER2,
 	SOURCE_COMPVIASVIDEO,
-    SOURCE_CCIR656_1,
-    SOURCE_CCIR656_2,
-    SOURCE_CCIR656_3,
-    SOURCE_CCIR656_4,
+	SOURCE_CCIR656_1,
+	SOURCE_CCIR656_2,
+	SOURCE_CCIR656_3,
+	SOURCE_CCIR656_4,
 } VIDEOSOURCETYPE;
 
 typedef enum

@@ -328,31 +328,40 @@ void DecrementDeinterlaceMode()
 BOOL ProcessDeinterlaceSelection(HWND hWnd, WORD wMenuID)
 {
 	int i;
-	for(i = 0; i < NumVideoModes; i++)
+	if(wMenuID >= IDM_FIRST_DEINTMETHOD && wMenuID <= IDM_LAST_DEINTMETHOD)
 	{
-		if(wMenuID == VideoDeintMethods[i]->MenuId)
-		{
-			if(!bIsFilmMode)
-			{
-				SetVideoDeinterlaceMode(i);
-				OSD_ShowText(hWnd, GetDeinterlaceModeName(), 0);
-			}
-			else
-			{
-				gVideoPulldownMode = i;
-			}
-			if(BT848_GetTVFormat()->Is25fps)
-			{
-				Setting_SetValue(FD50_GetSetting(PALFILMFALLBACKMODE), VideoDeintMethods[i]->nMethodIndex);
-			}
-			else
-			{
-				Setting_SetValue(FD60_GetSetting(NTSCFILMFALLBACKMODE), VideoDeintMethods[i]->nMethodIndex);
-			}
-			return TRUE;
-		}
+		SetVideoDeinterlaceIndex(wMenuID - IDM_FIRST_DEINTMETHOD);
+		OSD_ShowText(hWnd, GetDeinterlaceModeName(), 0);
+		return TRUE;
 	}
-	return FALSE;
+	else
+	{
+	   for(i = 0; i < NumVideoModes; i++)
+	   {
+		   if(wMenuID == VideoDeintMethods[i]->MenuId)
+		   {
+			   if(!bIsFilmMode)
+			   {
+				   SetVideoDeinterlaceMode(i);
+				   OSD_ShowText(hWnd, GetDeinterlaceModeName(), 0);
+			   }
+			   else
+			   {
+				   gVideoPulldownMode = i;
+			   }
+			   if(BT848_GetTVFormat()->Is25fps)
+			   {
+				   Setting_SetValue(FD50_GetSetting(PALFILMFALLBACKMODE), VideoDeintMethods[i]->nMethodIndex);
+			   }
+			   else
+			   {
+				   Setting_SetValue(FD60_GetSetting(NTSCFILMFALLBACKMODE), VideoDeintMethods[i]->nMethodIndex);
+			   }
+			   return TRUE;
+		   }
+	   }
+	   return FALSE;
+   }
 }
 
 void LoadDeintPlugin(LPCSTR szFileName)
