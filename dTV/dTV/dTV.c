@@ -625,7 +625,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_COLOR_CURRENT:
-			Setting_OSDShow(BT848_GetSetting(SATURATIONU), hWnd);
+			Setting_OSDShow(BT848_GetSetting(SATURATION), hWnd);
 			break;
 
 		case IDM_HUE_PLUS:

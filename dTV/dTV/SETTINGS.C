@@ -646,14 +646,14 @@ void Setting_OSDShow(SETTING* pSetting, HWND hWnd)
 	switch(pSetting->Type)
 	{
 	case ITEMFROMLIST:
-		sprintf(szBuffer, "%s - %s", pSetting->szDisplayName, pSetting->pszList[*(pSetting->pValue)]);
+		sprintf(szBuffer, "%s : %s", pSetting->szDisplayName, pSetting->pszList[*(pSetting->pValue)]);
 		break;
 	case YESNO:
-		sprintf(szBuffer, "%s - %s", pSetting->szDisplayName, *(pSetting->pValue)?"YES":"NO");
+		sprintf(szBuffer, "%s : %s", pSetting->szDisplayName, *(pSetting->pValue)?"YES":"NO");
 		break;
 	case SLIDER:
 	case NUMBER:
-		sprintf(szBuffer, "%s - %d", pSetting->szDisplayName, *(pSetting->pValue));
+		sprintf(szBuffer, "%s : %d", pSetting->szDisplayName, *(pSetting->pValue));
 		break;
 	default:
 		break;
