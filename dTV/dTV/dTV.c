@@ -987,6 +987,10 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			DialogBox(hInst, "VIDEOSETTINGS", hWnd, VideoSettingProc);
 			WorkoutOverlaySize();
 			break;
+		
+		case IDM_ADV_VIDEOSETTINGS:
+			DialogBox(hInst, "ADV_VIDEOSETTINGS", hWnd, AdvVideoSettingProc);
+			break;
 
 		case IDM_VPS_OUT:
 			DialogBox(hInst, "VPSSTATUS", hWnd, VPSInfoProc);

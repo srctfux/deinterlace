@@ -835,6 +835,40 @@ BEGIN
                     IDC_STATIC,7,34,284,22
 END
 
+ADV_VIDEOSETTINGS DIALOG DISCARDABLE  0, 0, 208, 124
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Advanced Video Flags"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,151,103,50,14
+    CONTROL         "Automatic Gain Control",IDC_AGC,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,12,13,84,10
+    CONTROL         "Adaptive AGC (CRUSH)",IDC_CRUSH,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,12,26,88,10
+    CONTROL         "Even Chroma AGC",IDC_E_CAGC,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,12,39,72,10
+    CONTROL         "Odd Chroma AGC",IDC_O_CAGC,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,12,52,70,10
+    CONTROL         "Even Luma Peaking",IDC_E_LUMA_PEAK,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,12,65,76,10
+    CONTROL         "Odd Luma Peaking",IDC_O_LUMA_PEAK,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,12,78,74,10
+    CONTROL         "Full Luma Range",IDC_LUMA_RANGE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,12,91,67,10
+    CONTROL         "Even Luma Decimation ",IDC_E_LUMA_DEC,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,106,13,87,10
+    CONTROL         "Even Chroma Comb",IDC_E_COMB,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,106,39,76,10
+    CONTROL         "Color Bars",IDC_COLOR_BARS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,106,65,48,10
+    CONTROL         "Gamma Corr Removal",IDC_GAMMA_CORR,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,106,78,83,10
+    CONTROL         "Odd Luma Decimation ",IDC_O_LUMA_DEC,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,106,26,84,10
+    CONTROL         "Odd Chroma Comb",IDC_O_COMB,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,106,52,74,10
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -944,7 +978,7 @@ BEGIN
     POPUP "&Settings"
     BEGIN
         MENUITEM "&Video Adjustments ...",      IDM_VIDEOSETTINGS
-        POPUP "&Deinterlace"
+        POPUP "&Deinterlace Mode"
         BEGIN
             MENUITEM "&Automatic Pulldown Detect",  IDM_AUTODETECT
             MENUITEM "&Fall Back to Video on Bad Pulldown", IDM_FALLBACK
@@ -988,28 +1022,10 @@ BEGIN
             MENUITEM "PA&L-N",                      IDM_TYPEFORMAT_4
             MENUITEM "NTSC Japan",                  IDM_TYPEFORMAT_5
         END
-        POPUP "Thread &Priorities"
-        BEGIN
-            POPUP "Program"
-            BEGIN
-                MENUITEM "NORMAL_PRIORITY_CLASS",       IDM_PRIORCLASS_0
-                MENUITEM "HIGH_PRIORITY_CLASS",         IDM_PRIORCLASS_1
-                MENUITEM "REALTIME_PRIORITY_CLASS",     IDM_PRIORCLASS_2
-            END
-            POPUP "Decoding and output"
-            BEGIN
-                MENUITEM "THREAD_PRIORITY_BELOW_NORMAL", IDM_TREADPRIOR_0
-                MENUITEM "THREAD_PRIORITY_NORMAL",      IDM_TREADPRIOR_1
-                MENUITEM "THREAD_PRIORITY_ABOVE_NORMAL", IDM_TREADPRIOR_2
-                MENUITEM "THREAD_PRIORITY_HIGHEST",     IDM_TREADPRIOR_3
-                MENUITEM "THREAD_PRIORITY_TIME_CRITICAL", IDM_TREADPRIOR_4
-            END
-        END
-        MENUITEM "Capture VBI-&Data",           IDM_VBI
     END
     POPUP "&Hardware"
     BEGIN
-        MENUITEM "&Select Video Card ...",      IDM_SETUPCARD
+        MENUITEM "&Select Capture Card ...",    IDM_SETUPCARD
         MENUITEM "&Hardware Info ...",          IDM_HWINFO
         POPUP "MSP/Radio"
         BEGIN
@@ -1048,11 +1064,13 @@ BEGIN
             MENUITEM SEPARATOR
             MENUITEM "Automatic Stereo Adjustment", IDM_AUTOSTEREO
         END
-        MENUITEM "BT Reset",                    IDM_RESET
+        MENUITEM "Reset Capture Card",          IDM_RESET
         MENUITEM "Audio-Mi&xer Setup",          IDM_AUDIO_MIXER
     END
-    POPUP "Video&Data"
+    POPUP "&Datacasting"
     BEGIN
+        MENUITEM "Capture VBI-&Data",           IDM_VBI
+        MENUITEM SEPARATOR
         MENUITEM "Video&Text",                  IDM_VBI_VT, GRAYED
         MENUITEM "&InterCast",                  IDM_VBI_IC, GRAYED
         MENUITEM "V&PS-Data",                   IDM_VBI_VPS, GRAYED
@@ -1075,6 +1093,27 @@ BEGIN
         MENUITEM "VideoText Setup",             IDM_VT_SETUP
         MENUITEM "InterCast Setup",             IDM_INTERCAST_SETUP
         MENUITEM "VideoDat Setup",              IDM_VIDEODAT_SETUP
+    END
+    POPUP "Adva&nced"
+    BEGIN
+        POPUP "Thread &Priorities"
+        BEGIN
+            POPUP "Program"
+            BEGIN
+                MENUITEM "NORMAL_PRIORITY_CLASS",       IDM_PRIORCLASS_0
+                MENUITEM "HIGH_PRIORITY_CLASS",         IDM_PRIORCLASS_1
+                MENUITEM "REALTIME_PRIORITY_CLASS",     IDM_PRIORCLASS_2
+            END
+            POPUP "Decoding and Output"
+            BEGIN
+                MENUITEM "THREAD_PRIORITY_BELOW_NORMAL", IDM_TREADPRIOR_0
+                MENUITEM "THREAD_PRIORITY_NORMAL",      IDM_TREADPRIOR_1
+                MENUITEM "THREAD_PRIORITY_ABOVE_NORMAL", IDM_TREADPRIOR_2
+                MENUITEM "THREAD_PRIORITY_HIGHEST",     IDM_TREADPRIOR_3
+                MENUITEM "THREAD_PRIORITY_TIME_CRITICAL", IDM_TREADPRIOR_4
+            END
+        END
+        MENUITEM "Advanced Video Flags ...",    IDM_ADV_VIDEOSETTINGS
     END
     POPUP "&Help"
     BEGIN
@@ -1257,6 +1296,14 @@ BEGIN
         RIGHTMARGIN, 291
         TOPMARGIN, 7
         BOTTOMMARGIN, 115
+    END
+
+    "ADV_VIDEOSETTINGS", DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 201
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 117
     END
 END
 #endif    // APSTUDIO_INVOKED

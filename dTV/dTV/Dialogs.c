@@ -244,6 +244,178 @@ BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 	return (FALSE);
 }
 
+BOOL APIENTRY AdvVideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
+{
+	BYTE flag;
+	
+	switch (message)
+	{
+	case WM_INITDIALOG:
+
+		// Luma AGC, 0 says AGC enabled
+		CheckDlgButton(hDlg, IDC_AGC, 
+			((BT848_ReadByte(BT848_ADC) & BT848_ADC_AGC_EN) == 0));
+
+		// Adaptive AGC, 0 says Crush disabled
+		CheckDlgButton(hDlg, IDC_CRUSH, 
+			((BT848_ReadByte(BT848_ADC) & BT848_ADC_CRUSH) != 0));
+
+		// Even CAGC, 0 says CAGC disable
+		CheckDlgButton(hDlg, IDC_E_CAGC, 
+			((BT848_ReadByte(BT848_E_SCLOOP) & BT848_SCLOOP_CAGC) != 0));
+
+		// Odd CAGC
+		CheckDlgButton(hDlg, IDC_O_CAGC, 
+			((BT848_ReadByte(BT848_O_SCLOOP) & BT848_SCLOOP_CAGC) != 0));
+		
+		// Even Peak, 0 says normal, not Luma peak
+		CheckDlgButton(hDlg, IDC_E_LUMA_PEAK, 
+			((BT848_ReadByte(BT848_E_SCLOOP) & BT848_SCLOOP_LUMA_PEAK) != 0));
+		
+		// Odd Peak
+		CheckDlgButton(hDlg, IDC_O_LUMA_PEAK,  
+			((BT848_ReadByte(BT848_O_SCLOOP) & BT848_SCLOOP_LUMA_PEAK) != 0));
+
+		// Luma Output Range, 0 says Luma Normal, 1=Full	
+		CheckDlgButton(hDlg, IDC_LUMA_RANGE, 
+			((BT848_ReadByte(BT848_OFORM) & BT848_OFORM_RANGE) != 0));
+		
+		// Even Luma decimation,  0 says disable
+		CheckDlgButton(hDlg, IDC_E_LUMA_DEC, 
+			((BT848_ReadByte(BT848_E_CONTROL) & BT848_CONTROL_LDEC) != 0));
+		
+		// Odd Luma decimation
+		CheckDlgButton(hDlg, IDC_O_LUMA_DEC, 
+			((BT848_ReadByte(BT848_O_CONTROL) & BT848_CONTROL_LDEC) != 0));
+
+		// Even COMB, 0 = disable
+		CheckDlgButton(hDlg, IDC_E_COMB, 
+			((BT848_ReadByte(BT848_E_VSCALE_HI) & BT848_VSCALE_COMB) != 0));
+		
+		// Odd COMB
+		CheckDlgButton(hDlg, IDC_O_COMB, 
+			((BT848_ReadByte(BT848_O_VSCALE_HI) & BT848_VSCALE_COMB) != 0));
+		
+		// Color Bars, 0 = disable
+		CheckDlgButton(hDlg, IDC_COLOR_BARS, 
+			((BT848_ReadByte(BT848_COLOR_CTL) & BT848_COLOR_CTL_COLOR_BARS) != 0));
+		
+		// Gamma correction removal, 0=enabled
+		CheckDlgButton(hDlg, IDC_GAMMA_CORR, 
+			((BT848_ReadByte(BT848_COLOR_CTL) & BT848_COLOR_CTL_GAMMA) == 0));
+		
+
+		break;
+
+	case WM_MOUSEMOVE:
+
+		return (FALSE);
+
+	case WM_COMMAND:
+
+		switch LOWORD(wParam)
+		{
+		case IDOK:							// Is Done
+			EndDialog(hDlg, TRUE);
+			break;
+
+		case IDC_AGC:						// Changed AGC
+			flag = (BYTE)(BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_AGC)
+				? 0 
+				: BT848_ADC_AGC_EN);		// 0 says AGC enabled
+			BT848_MaskDataByte(BT848_ADC, flag, BT848_ADC_AGC_EN);
+			break;  
+
+		case IDC_CRUSH:						// Changed Adaptive AGC
+			flag = (BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_CRUSH)
+				? BT848_ADC_CRUSH
+				:0);						// 0 says Crush disabled
+			BT848_MaskDataByte(BT848_ADC, flag, BT848_ADC_CRUSH);
+			break;  
+
+		case IDC_E_CAGC:					// Changed Even CAGC
+			flag = (BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_E_CAGC)
+				? BT848_SCLOOP_CAGC
+				: 0);						// 0 says CAGC disable
+			BT848_MaskDataByte(BT848_E_SCLOOP, flag, BT848_SCLOOP_CAGC);
+			break;
+
+		case IDC_O_CAGC:					// Changed Odd CAGC
+			flag = (BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_O_CAGC)
+				? BT848_SCLOOP_CAGC
+				: 0);						// 0 says CAGC disable
+			BT848_MaskDataByte(BT848_O_SCLOOP, flag, BT848_SCLOOP_CAGC);
+			break;
+
+		case IDC_E_LUMA_PEAK:				// Changed Even Peak
+			flag = (BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_E_LUMA_PEAK)
+				? BT848_SCLOOP_LUMA_PEAK
+				: 0);						// 0 says normal, not Luma peak
+			BT848_MaskDataByte(BT848_E_SCLOOP, flag, BT848_SCLOOP_LUMA_PEAK);
+			break;
+
+		case IDC_O_LUMA_PEAK:				// Changed Odd Peak
+			flag = (BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_O_LUMA_PEAK)
+				? BT848_SCLOOP_LUMA_PEAK
+				: 0);						// 0 says normal, not Luma peak
+			BT848_MaskDataByte(BT848_O_SCLOOP, flag, BT848_SCLOOP_LUMA_PEAK);
+			break;
+
+		case IDC_LUMA_RANGE:				// Luma Output Range
+			flag = (BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_LUMA_RANGE)
+				? BT848_OFORM_RANGE
+				: 0);						// 0 says Luma Normal, 1=Full
+			BT848_MaskDataByte(BT848_OFORM, flag, BT848_OFORM_RANGE);
+			break;
+
+		case IDC_E_LUMA_DEC:				// Changed Even L.decimation
+			flag = (BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_E_LUMA_DEC)
+				? BT848_CONTROL_LDEC
+				: 0);						// 0 says disable
+			BT848_MaskDataByte(BT848_E_CONTROL, flag, BT848_CONTROL_LDEC);
+			break;
+
+		case IDC_O_LUMA_DEC:				// Changed Odd L.decimation
+			flag = (BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_O_LUMA_DEC)
+				? BT848_CONTROL_LDEC
+				: 0);						// 0 says disable
+			BT848_MaskDataByte(BT848_O_CONTROL, flag, BT848_CONTROL_LDEC);
+			break;
+
+		case IDC_E_COMB:					// Changed Even COMB
+			flag = (BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_E_COMB)
+				? BT848_VSCALE_COMB
+				: 0);						// 0 says disable
+			BT848_MaskDataByte(BT848_E_VSCALE_HI, flag, BT848_VSCALE_COMB);
+			break;
+
+		case IDC_O_COMB:					// Changed Odd COMB
+			flag = (BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_O_COMB)
+				? BT848_VSCALE_COMB
+				: 0);						// 0 says disable
+			BT848_MaskDataByte(BT848_O_VSCALE_HI, flag, BT848_VSCALE_COMB);
+			break;
+
+		case IDC_COLOR_BARS:				// Color Bars
+			flag = (BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_COLOR_BARS)
+				? BT848_COLOR_CTL_COLOR_BARS
+				: 0);						// 0 says disable
+			BT848_MaskDataByte(BT848_COLOR_CTL, flag, BT848_COLOR_CTL_COLOR_BARS);
+			break;
+
+		case IDC_GAMMA_CORR:				// Gamma correction removal
+			flag = (BYTE)(BST_CHECKED == IsDlgButtonChecked(hDlg, IDC_GAMMA_CORR)
+				? 0
+				: BT848_COLOR_CTL_GAMMA );	// 0 says enabled
+			BT848_MaskDataByte(BT848_COLOR_CTL, flag, BT848_COLOR_CTL_GAMMA);
+			break;
+		}
+		break;
+	}
+	return (FALSE);
+}
+
+
 
 BOOL APIENTRY AudioSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 {
