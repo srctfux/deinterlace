@@ -38,6 +38,30 @@ ePULLDOWNMODES		StaticImageMode = SIMPLE_WEAVE;
 ePULLDOWNMODES		LowMotionMode = VIDEO_MODE_2FRAME;
 ePULLDOWNMODES		HighMotionMode = VIDEO_MODE_2FRAME;
 
+static ePULLDOWNMODES CurrentMode = PULLDOWNMODES_LAST_ONE;		// Will use HighMotionMode after ini file is read
+
+///////////////////////////////////////////////////////////////////////////////
+// UpdateAdaptiveMode
+//
+// Switches to a new adaptive mode.  Updates the status bar if needed.
+///////////////////////////////////////////////////////////////////////////////
+static void UpdateAdaptiveMode(ePULLDOWNMODES mode)
+{
+	char AdaptiveName[200], *ModeName;
+
+	if (CurrentMode == mode)
+		return;
+
+	ModeName = DeintMethods[mode].szAdaptiveName;
+	if (ModeName == NULL)
+		ModeName = DeintMethods[mode].szName;
+
+	sprintf(AdaptiveName, "Adaptive - %s", ModeName);
+	StatusBar_ShowText(STATUS_PAL, AdaptiveName);
+	CurrentMode = mode;
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // AdaptiveDeinterlace
 //
@@ -58,16 +82,18 @@ BOOL AdaptiveDeinterlace(DEINTERLACE_INFO *info)
 {
 	int CombFactor = 0;
 	static long MATCH_COUNT = 0;
-	static ePULLDOWNMODES CurrentMode = VIDEO_MODE_2FRAME;
 
+	// If this is our first time, update the current adaptive mode to whatever
+	// the ini file said our high-motion mode should be.
+	if (CurrentMode == PULLDOWNMODES_LAST_ONE)
+		UpdateAdaptiveMode(HighMotionMode);
 
 	// reset MATCH_COUNT when we are called and the info
 	// struct doesn't contain at least an odd and an even frame
 	if(info->EvenLines[0] == NULL || info->OddLines[0] == NULL)
 	{
 		MATCH_COUNT = 0;
-		CurrentMode = HighMotionMode;
-		StatusBar_ShowText(STATUS_PAL, "Adaptive - High Motion");
+		UpdateAdaptiveMode(HighMotionMode);
 		return Bob(info);
 	}
 
@@ -84,15 +110,13 @@ BOOL AdaptiveDeinterlace(DEINTERLACE_INFO *info)
 		if (CurrentMode == StaticImageMode &&
 			info->FieldDiff < ThresholdPulldownMismatch)
 		{
-			CurrentMode = LowMotionMode;
 			LOG(" Match count 0, switching to low-motion");
-			StatusBar_ShowText(STATUS_PAL, "Adaptive - Low Motion");
+			UpdateAdaptiveMode(LowMotionMode);
 		}
 		else if(CurrentMode != HighMotionMode)
 		{
-			CurrentMode = HighMotionMode;
 			LOG(" Match count 0, switching to high-motion");
-			StatusBar_ShowText(STATUS_PAL, "Adaptive - High Motion");
+			UpdateAdaptiveMode(HighMotionMode);
 		}
 	}
     else
@@ -102,16 +126,14 @@ BOOL AdaptiveDeinterlace(DEINTERLACE_INFO *info)
 		if (MATCH_COUNT >= LowMotionFieldCount &&
 			CurrentMode == HighMotionMode)
 		{
-			CurrentMode = LowMotionMode;
 			LOG(" Match count %ld, switching to low-motion", MATCH_COUNT);
-			StatusBar_ShowText(STATUS_PAL, "Adaptive - Low Motion");
+			UpdateAdaptiveMode(LowMotionMode);
 		}
 		if (MATCH_COUNT >= StaticImageFieldCount &&
 			CurrentMode == LowMotionMode)
 		{
-			CurrentMode = StaticImageMode;
 			LOG(" Match count %ld, switching to static-image", MATCH_COUNT);
-			StatusBar_ShowText(STATUS_PAL, "Adaptive - Static");
+			UpdateAdaptiveMode(StaticImageMode);
 		}
 	}
 	return DeintMethods[CurrentMode].pfnAlgorithm(info);
