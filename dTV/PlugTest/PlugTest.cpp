@@ -341,7 +341,7 @@ static void FillTiffDirEntry(struct TiffDirEntry *entry, WORD tag, DWORD value, 
 
 //-----------------------------------------------------------------------------
 // Fill a TIFF header with information about the current image.
-static void FillTiffHeader(struct TiffHeader *head, char *description, char *make, char *model, DEINTERLACE_INFO* info)
+static void FillTiffHeader(struct TiffHeader *head, char *description, char *make, char *model, int Height, DEINTERLACE_INFO* info)
 {
 	memset(head, 0, sizeof(struct TiffHeader));
 
@@ -378,19 +378,19 @@ static void FillTiffHeader(struct TiffHeader *head, char *description, char *mak
 
 	FillTiffDirEntry(&head->fileType, 254, 0, Long);						// Just the image, no thumbnails
 	FillTiffDirEntry(&head->width, 256, info->FrameWidth, Short);
-	FillTiffDirEntry(&head->height, 257, info->FrameHeight, Short);
+	FillTiffDirEntry(&head->height, 257, Height, Short);
 	FillTiffDirEntry(&head->compression, 259, 1, Short);					// No compression
 	FillTiffDirEntry(&head->photometricInterpretation, 262, 2, Short);		// RGB image data
 	FillTiffDirEntry(&head->stripOffset, 273, sizeof(struct TiffHeader), Long);	// Image comes after header
 	FillTiffDirEntry(&head->samplesPerPixel, 277, 3, Short);				// RGB = 3 channels/pixel
-	FillTiffDirEntry(&head->rowsPerStrip, 278, info->FrameHeight, Short);			// Whole image is one strip
-	FillTiffDirEntry(&head->stripByteCounts, 279, info->FrameWidth * info->FrameHeight * 3, Long);	// Size of image data
+	FillTiffDirEntry(&head->rowsPerStrip, 278, Height, Short);			// Whole image is one strip
+	FillTiffDirEntry(&head->stripByteCounts, 279, info->FrameWidth * Height * 3, Long);	// Size of image data
 	FillTiffDirEntry(&head->planarConfiguration, 284, 1, Short);			// RGB bytes are interleaved
 }
 
 //-----------------------------------------------------------------------------
 // Save still image snapshot as TIFF format to disk
-BOOL MakeTifFile(DEINTERLACE_INFO* info, char* TifFile)
+BOOL MakeTifFile(DEINTERLACE_INFO* info, char* TifFile, int OddField, int EvenField)
 {
 	int y, cr, cb, r, g, b, i, j, n = 0;
 	FILE *file;
@@ -398,6 +398,7 @@ BOOL MakeTifFile(DEINTERLACE_INFO* info, char* TifFile)
 	BYTE* buf;
 	struct TiffHeader head;
 	char description[] = "dTV image";
+	int NbLines;
 
 	file = fopen(TifFile,"wb");
 	if (!file)
@@ -406,12 +407,28 @@ BOOL MakeTifFile(DEINTERLACE_INFO* info, char* TifFile)
 		return FALSE;
 	}
 
-	FillTiffHeader(&head, description, "http://deinterlace.sourceforge.net/", "PlugTest", info);
+	if (OddField >= 0 && EvenField >= 0)
+		NbLines = info->FieldHeight * 2;
+	else if (OddField >= 0 || EvenField >= 0)
+		NbLines = info->FieldHeight;
+	else
+		NbLines = info->FrameHeight;
+
+	FillTiffHeader(&head, description, "http://deinterlace.sourceforge.net/", "PlugTest", NbLines, info);
 	fwrite(&head, sizeof(head), 1, file);
 
-	for (i = 0; i < info->FrameHeight; i++)
+	for (i = 0; i < NbLines; i++)
 	{
-		buf = (BYTE*)info->Overlay + i * info->OverlayPitch;
+		if (OddField >= 0 && EvenField < 0)
+			buf = (BYTE*)info->OddLines[OddField][i];
+		else if (EvenField >= 0 && OddField < 0)
+			buf = (BYTE*)info->EvenLines[EvenField][i];
+		else if (OddField >= 0 && i < info->FieldHeight)
+			buf = (BYTE*)info->OddLines[OddField][i];
+		else if (EvenField >= 0 && i >= info->FieldHeight)
+			buf = (BYTE*)info->EvenLines[EvenField][i-info->FieldHeight];
+		else
+			buf = (BYTE*)info->Overlay + i * info->OverlayPitch;
 		for (j = 0; j < info->FrameWidth ; j+=2)
 		{
 			cb = buf[1] - 128;
@@ -451,6 +468,8 @@ int ProcessSnapShot(char* SnapshotFile, char* FilterPlugin, char* DeintPlugin, c
 	LARGE_INTEGER EndTime;
 	LARGE_INTEGER StartTime;
 	LARGE_INTEGER TimerFrequency;
+	int OddField = -1;
+	int EvenField = -1;
 
 	// get the Frequency of the high resolution timer
 	QueryPerformanceFrequency(&TimerFrequency);
@@ -481,6 +500,54 @@ int ProcessSnapShot(char* SnapshotFile, char* FilterPlugin, char* DeintPlugin, c
 		}
 	}
 
+	if (!strcmp(DeintPlugin, "odd1"))
+		OddField = 0;
+	else if (!strcmp(DeintPlugin, "odd2"))
+		OddField = 1;
+	else if (!strcmp(DeintPlugin, "odd3"))
+		OddField = 2;
+	else if (!strcmp(DeintPlugin, "odd4"))
+		OddField = 3;
+	else if (!strcmp(DeintPlugin, "odd5"))
+		OddField = 4;
+	else if (!strcmp(DeintPlugin, "even1"))
+		EvenField = 0;
+	else if (!strcmp(DeintPlugin, "even2"))
+		EvenField = 1;
+	else if (!strcmp(DeintPlugin, "even3"))
+		EvenField = 2;
+	else if (!strcmp(DeintPlugin, "even4"))
+		EvenField = 3;
+	else if (!strcmp(DeintPlugin, "even5"))
+		EvenField = 4;
+	else if (!strcmp(DeintPlugin, "field1"))
+	{
+		OddField = 0;
+		EvenField = 0;
+	}
+	else if (!strcmp(DeintPlugin, "field2"))
+	{
+		OddField = 1;
+		EvenField = 1;
+	}
+	else if (!strcmp(DeintPlugin, "field3"))
+	{
+		OddField = 2;
+		EvenField = 2;
+	}
+	else if (!strcmp(DeintPlugin, "field4"))
+	{
+		OddField = 3;
+		EvenField = 3;
+	}
+	else if (!strcmp(DeintPlugin, "field5"))
+	{
+		OddField = 4;
+		EvenField = 4;
+	}
+	else
+	{
+
 	if(!LoadDeintPlugin(DeintPlugin, &DeintMethod))
 	{
 		return 1;
@@ -504,7 +571,9 @@ int ProcessSnapShot(char* SnapshotFile, char* FilterPlugin, char* DeintPlugin, c
 		}
 	}
 
-	if(!MakeTifFile(&info, TifFile))
+	}
+
+	if(!MakeTifFile(&info, TifFile, OddField, EvenField))
 	{
 		return 1;
 	}
@@ -514,7 +583,10 @@ int ProcessSnapShot(char* SnapshotFile, char* FilterPlugin, char* DeintPlugin, c
 		UnloadFilterPlugin(FilterMethod);
 	}
 
-	UnloadDeintPlugin(DeintMethod);
+	if (OddField == -1 && EvenField == -1)
+	{
+		UnloadDeintPlugin(DeintMethod);
+	}
 
 	EmptyInfoStruct(&info);
 	return 0;
