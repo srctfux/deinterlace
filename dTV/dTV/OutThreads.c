@@ -851,42 +851,50 @@ SETTING OutThreadsSettings[OUTTHREADS_SETTING_LASTONE] =
 {
 	{
 		"Hurry When Late", ONOFF, 0, &Hurry_When_Late,
-		FALSE, 0, 1, 1, NULL,
+		FALSE, 0, 1, 1, 1,
+		NULL,
 		"Threads", "Hurry_When_Late", NULL,
 	},
 	{
 		"Wait For Flip", ONOFF, 0, &Wait_For_Flip,
-		TRUE, 0, 1, 1, NULL,
+		TRUE, 0, 1, 1, 1,
+		NULL,
 		"Threads", "Wait_For_Flip", NULL,
 	},
 	{
 		"Do Accurate Flips", ONOFF, 0, &DoAccurateFlips,
-		FALSE, 0, 1, 1, NULL,
+		FALSE, 0, 1, 1, 1,
+		NULL,
 		"Threads", "DoAccurateFlips", NULL,
 	},
 	{
 		"Sleep Interval", SLIDER, 0, &Sleep_Interval,
-		0, 0, 100, 1, NULL,
+		0, 0, 100, 1, 1,
+		NULL,
 		"Threads", "Sleep_Interval", NULL,
 	},
 	{
 		"Auto Detect Mode", ONOFF, 0, &bAutoDetectMode,
-		TRUE, 0, 1, 1, NULL,
+		TRUE, 0, 1, 1, 1,
+		NULL,
 		"Pulldown", "bAutoDetectMode", NULL,
 	},
 	{
 		"Pulldown Mode", ITEMFROMLIST, 0, &gPulldownMode,
-		VIDEO_MODE_2FRAME, 0, PULLDOWNMODES_LAST_ONE - 1, 1, DeintModeNames,
+		VIDEO_MODE_2FRAME, 0, PULLDOWNMODES_LAST_ONE - 1, 1, 1,
+		DeintModeNames,
 		"Deinterlace", "DeinterlaceMode", NULL,
 	},
 	{
 		"Refresh Rate", SLIDER, 0, &RefreshRate,
-		0, 0, 120, 1, NULL,
+		0, 0, 120, 1, 1,
+		NULL,
 		"Pulldown", "RefreshRate", NULL,
 	},
 	{
 		"Wait For VSync", ONOFF, 0, &bWaitForVsync,
-		FALSE, 0, 1, 1, NULL,
+		FALSE, 0, 1, 1, 1,
+		NULL,
 		"Threads", "bWaitForVsync", NULL,
 	},
 };

@@ -220,27 +220,32 @@ SETTING FD50Settings[FD50_SETTING_LASTONE] =
 {
 	{
 		"Pulldown Threshold Low", SLIDER, 0, &PulldownThresholdLow,
-		40, 0, 100, 2, NULL,
+		40, 0, 100, 2, 1,
+		NULL,
 		"Pulldown", "PulldownThresholdLow", NULL,
 	},
 	{
 		"Pulldown Threshold High", SLIDER, 0, &PulldownThresholdHigh,
-		10, 0, 200, 2, NULL,
+		10, 0, 200, 2, 1,
+		NULL,
 		"Pulldown", "PulldownThresholdHigh", NULL,
 	},
 	{
 		"PAL Film Fallback Mode", ITEMFROMLIST, 0, &gPALFilmFallbackMode,
-		VIDEO_MODE_2FRAME, 0, PULLDOWNMODES_LAST_ONE - 1, 1, DeintModeNames,
+		VIDEO_MODE_2FRAME, 0, PULLDOWNMODES_LAST_ONE - 1, 1, 1,
+		DeintModeNames,
 		"Pulldown", "PALFilmFallbackMode", NULL,
 	},
 	{
 		"PAL Pulldown Repeat Count In", SLIDER, 0, &PALPulldownRepeatCount,
-		3, 1, 10, 1, NULL,
+		3, 1, 10, 1, 1,
+		NULL,
 		"Pulldown", "PALPulldownRepeatCount", NULL,
 	},
 	{
 		"PAL Pulldown Repeat Count Out", SLIDER, 0, &PALPulldownRepeatCount2,
-		1, 1, 10, 1, NULL,
+		1, 1, 10, 1, 1,
+		NULL,
 		"Pulldown", "PALPulldownRepeatCount2", NULL,
 	},
 };

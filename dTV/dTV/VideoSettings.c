@@ -230,21 +230,15 @@ void VideoSettings_SetupDefaults()
 		break;
 	}
 
+	// set up defaults fro position parameters
 	if(bSavePerFormat)
 	{
 		BT848_GetSetting(BDELAY)->Default = BT848_GetTVFormat()->bDelayB;
 		BT848_GetSetting(HDELAY)->Default = BT848_GetTVFormat()->wHDelayx1;
 		BT848_GetSetting(VDELAY)->Default = BT848_GetTVFormat()->wVDelay;
-		
-		// we probably came in here with the defaults
-		// reset to actual values so that key commands work
-		// properly
-		if(Setting_GetValue(BT848_GetSetting(BDELAY)) == 0)
-			Setting_SetDefault(BT848_GetSetting(BDELAY));
-		if(Setting_GetValue(BT848_GetSetting(HDELAY)) == 0)
-			Setting_SetDefault(BT848_GetSetting(HDELAY));
-		if(Setting_GetValue(BT848_GetSetting(VDELAY)) == 0)
-			Setting_SetDefault(BT848_GetSetting(VDELAY));
+		*BT848_GetSetting(BDELAY)->pValue = BT848_GetTVFormat()->bDelayB;
+		*BT848_GetSetting(HDELAY)->pValue = BT848_GetTVFormat()->wHDelayx1;
+		*BT848_GetSetting(VDELAY)->pValue = BT848_GetTVFormat()->wVDelay;
 	}
 	else
 	{
@@ -328,9 +322,9 @@ void VideoSettings_Load()
 	Setting_ReadFromIni(BT848_GetSetting(VDELAY));
 	Setting_ReadFromIni(BT848_GetSetting(CURRENTX));
 	Setting_ReadFromIni(Aspect_GetSetting(OVERSCAN));
-	Setting_SetValue(BT848_GetSetting(SATURATION),
+	*BT848_GetSetting(SATURATION)->pValue = 
 		(Setting_GetValue(BT848_GetSetting(SATURATIONU)) + 
-		Setting_GetValue(BT848_GetSetting(SATURATIONV))) / 2);
+		Setting_GetValue(BT848_GetSetting(SATURATIONV))) / 2;
 }
 
 void VideoSettings_Save()
@@ -371,12 +365,14 @@ SETTING VideoSettingsSettings[VIDEOSETTINGS_SETTING_LASTONE] =
 {
 	{
 		"Save Settings Per Input", YESNO, 0, &bSavePerInput,
-		 FALSE, 0, 1, 1, NULL,
+		 FALSE, 0, 1, 1, 1,
+		 NULL,
 		"VideoSettings", "SavePerInput", SavePerInput_OnChange,
 	},
 	{
 		"Save Settings Per Format", YESNO, 0, &bSavePerFormat,
-		 FALSE, 0, 1, 1, NULL,
+		 FALSE, 0, 1, 1, 1,
+		 NULL,
 		"VideoSettings", "SavePerFormat", SavePerFormat_OnChange,
 	},
 };

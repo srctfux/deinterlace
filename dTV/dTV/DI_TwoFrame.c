@@ -184,12 +184,14 @@ SETTING DI_TwoFrameSettings[DI_TWOFRAME_SETTING_LASTONE] =
 {
 	{
 		"2 Frame Spatial Tolerance", SLIDER, 0, &TwoFrameSpatialTolerance,
-		600, 0, 5000, 10, NULL,
+		600, 0, 5000, 10, 1,
+		NULL,
 		"Deinterlace", "TwoFrameSpatialTolerance", NULL,
 	},
 	{
 		"2 Frame Temporal Tolerance", SLIDER, 0, &TwoFrameTemporalTolerance,
-		300, 0, 5000, 10, NULL,
+		300, 0, 5000, 10, 1,
+		NULL,
 		"Deinterlace", "TwoFrameTemporalTolerance", NULL,
 	},
 };

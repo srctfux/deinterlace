@@ -444,48 +444,57 @@ SETTING FD60Settings[FD60_SETTING_LASTONE] =
 {
 	{
 		"NTSC Film Fallback Mode", ITEMFROMLIST, 0, &gNTSCFilmFallbackMode,
-		ADAPTIVE, 0, PULLDOWNMODES_LAST_ONE - 1, 1, DeintModeNames,
+		ADAPTIVE, 0, PULLDOWNMODES_LAST_ONE - 1, 1, 1,
+		DeintModeNames,
 		"Pulldown", "NTSCFilmFallbackMode", NULL,
 	},
 	{
 		"NTSC Pulldown Repeat Count In", SLIDER, 0, &PulldownRepeatCount,
-		4, 1, 10, 1, NULL,
+		4, 1, 10, 1, 1,
+		NULL,
 		"Pulldown", "PulldownRepeatCount", NULL,
 	},
 	{
 		"NTSC Pulldown Repeat Count Out", SLIDER, 0, &PulldownRepeatCount2,
-		2, 1, 10, 1, NULL,
+		2, 1, 10, 1, 1,
+		NULL,
 		"Pulldown", "PulldownRepeatCount2", NULL,
 	},
 	{
 		"Threshold 3:2 Pulldown", SLIDER, 0, &Threshold32Pulldown,
-		15, 1, 5000, 5, NULL,
+		15, 1, 5000, 5, 1,
+		NULL,
 		"Pulldown", "Threshold32Pulldown", NULL,
 	},
 	{
 		"Threshold 3:2 Pulldown Mismatch", SLIDER, 0, &ThresholdPulldownMismatch,
-		900, 1, 10000, 10, NULL,
+		900, 1, 10000, 10, 1,
+		NULL,
 		"Pulldown", "ThresholdPulldownMismatch", NULL,
 	},
 	{
 		"Threshold 3:2 Pulldown Comb", SLIDER, 0, &ThresholdPulldownComb,
-		150, 1, 5000, 10, NULL,
+		150, 1, 5000, 10, 1,
+		NULL,
 		"Pulldown", "ThresholdPulldownComb", NULL,
 	},
 	{
 		"Bad Pulldown Filter", ONOFF, 0, &bFallbackToVideo,
-		TRUE, 0, 1, 1, NULL,
+		TRUE, 0, 1, 1, 1,
+		NULL,
 		"Pulldown", "bFallbackToVideo", NULL,
 	},
 	{
 		"Pulldown Switch Interval", SLIDER, 0, &PulldownSwitchInterval,
-		3000, 0, 10000, 10, NULL,
+		3000, 0, 10000, 10, 1,
+		NULL,
 		"Pulldown", "PulldownSwitchInterval", NULL,
 
 	},
 	{
 		"Pulldown Switch Max", SLIDER, 0, &PulldownSwitchMax,
-		4, 0, 100, 10, NULL,
+		4, 0, 100, 10, 1,
+		NULL,
 		"Pulldown", "PulldownSwitchMax", NULL,
 
 	},

@@ -1030,22 +1030,26 @@ SETTING TVCardSettings[TVCARD_SETTING_LASTONE] =
 {
 	{
 		"Card Type", NUMBER, 0, &CardType,
-		 TVCARD_UNKNOWN, TVCARD_UNKNOWN, TVCARD_LASTONE - 1, 1, NULL,
+		 TVCARD_UNKNOWN, TVCARD_UNKNOWN, TVCARD_LASTONE - 1, 1, 1,
+		 NULL,
 		"Hardware", "CardType", NULL,
 	},
 	{
 		"Tuner Type", NUMBER, 0, &TunerType,
-		 TUNER_ABSENT, TUNER_ABSENT, TUNER_LASTONE - 1, 1, NULL,
+		 TUNER_ABSENT, TUNER_ABSENT, TUNER_LASTONE - 1, 1, 1,
+		 NULL,
 		"Hardware", "TunerType", NULL,
 	},
 	{
 		"Processor Speed", NUMBER, 0, &ProcessorSpeed,
-		 1, 0, 2, 1, NULL,
+		 1, 0, 2, 1, 1,
+		 NULL,
 		"Hardware", "ProcessorSpeed", NULL,
 	},
 	{
 		"Trade Off", NUMBER, 0, &TradeOff,
-		 1, 0, 1, 1, NULL,
+		 1, 0, 1, 1, 1,
+		 NULL,
 		"Hardware", "TradeOff", NULL,
 	},
 };

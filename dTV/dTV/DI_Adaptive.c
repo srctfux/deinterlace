@@ -152,37 +152,44 @@ SETTING DI_AdaptiveSettings[DI_ADAPTIVE_SETTING_LASTONE] =
 {
 	{
 		"Low Motion Field Count", SLIDER, 0, &LowMotionFieldCount,
-		4, 1, 1000, 1, NULL,
+		4, 1, 1000, 1, 1,
+		NULL,
 		"Pulldown", "LowMotionFieldCount", NULL,
 	},
 	{
 		"Static Image Field Count", SLIDER, 0, &StaticImageFieldCount,
-		100, 1, 1000, 1, NULL,
+		100, 1, 1000, 1, 1,
+		NULL,
 		"Pulldown", "StaticImageFieldCount", NULL,
 	},
 	{
 		"Static Image Mode", ITEMFROMLIST, 0, &StaticImageMode,
-		SIMPLE_WEAVE, 0, PULLDOWNMODES_LAST_ONE - 1, 1, DeintModeNames,
+		SIMPLE_WEAVE, 0, PULLDOWNMODES_LAST_ONE - 1, 1, 1,
+		DeintModeNames,
 		"Pulldown", "StaticImageMode", NULL,
 	},
 	{
 		"Low Motion Mode", ITEMFROMLIST, 0, &LowMotionMode,
-		VIDEO_MODE_2FRAME, 0, PULLDOWNMODES_LAST_ONE - 1, 1, DeintModeNames,
+		VIDEO_MODE_2FRAME, 0, PULLDOWNMODES_LAST_ONE - 1, 1, 1,
+		DeintModeNames,
 		"Pulldown", "LowMotionMode", NULL,
 	},
 	{
 		"High Motion Mode", ITEMFROMLIST, 0, &HighMotionMode,
-		VIDEO_MODE_2FRAME, 0, PULLDOWNMODES_LAST_ONE - 1, 1, DeintModeNames,
+		VIDEO_MODE_2FRAME, 0, PULLDOWNMODES_LAST_ONE - 1, 1, 1,
+		DeintModeNames,
 		"Pulldown", "HighMotionMode", NULL,
 	},
 	{
 		"Adaptive Threshold 3:2 Pulldown", SLIDER, 0, &AdaptiveThres32Pulldown,
-		15, 1, 5000, 5, NULL,
+		15, 1, 5000, 5, 1,
+		NULL,
 		"Pulldown", "AdaptiveThres32Pulldown", NULL,
 	},
 	{
 		"Adaptive Threshold 3:2 Pulldown Mismatch", SLIDER, 0, &AdaptiveThresPulldownMismatch,
-		900, 1, 10000, 10, NULL,
+		900, 1, 10000, 10, 1,
+		NULL,
 		"Pulldown", "AdaptiveThresPulldownMismatch", NULL,
 	},
 };

@@ -73,6 +73,7 @@ typedef struct
 	long MinValue;
 	long MaxValue;
 	long StepValue;
+	long OSDDivider;
 	char** pszList;
 	char* szIniSection;
 	char* szIniEntry;

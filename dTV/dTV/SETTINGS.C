@@ -57,6 +57,7 @@
 #include "AspectRatio.h"
 #include "DebugLog.h"
 #include "FLT_TNoise.h"
+#include "FLT_Gamma.h"
 #include "MixerDev.h"
 #include "dTV.h"
 #include "ProgramList.h"
@@ -106,6 +107,8 @@ void LoadSettingsFromIni()
 	// other settings, but we need to be able to override the defaults.
 	TVCard_ReadSettingsFromIni();
 
+	BT848_ReadSettingsFromIni();
+
 	// Video Settings Also modifies defaults and ini sections in other
 	// files so must be called early
 	VideoSettings_ReadSettingsFromIni();
@@ -125,6 +128,7 @@ void LoadSettingsFromIni()
 	DI_TwoFrame_ReadSettingsFromIni();
 	Deinterlace_ReadSettingsFromIni();
 	FLT_TNoise_ReadSettingsFromIni();
+	FLT_Gamma_ReadSettingsFromIni();
 	OSD_ReadSettingsFromIni();
 	Filter_ReadSettingsFromIni();
 
@@ -281,6 +285,9 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 		case WM_FILTER_GETVALUE:		
 			return Setting_GetValue(Filter_GetSetting((FILTER_SETTING)wParam));
 			break;
+		case WM_FLT_GAMMA_GETVALUE:		
+			return Setting_GetValue(FLT_Gamma_GetSetting((FLT_GAMMA_SETTING)wParam));
+			break;
 
 		case WM_ASPECT_SETVALUE:
 			Setting_SetValue(Aspect_GetSetting((ASPECT_SETTING)wParam), lParam);
@@ -338,6 +345,9 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 			break;
 		case WM_FILTER_SETVALUE:		
 			Setting_SetValue(Filter_GetSetting((FILTER_SETTING)wParam), lParam);
+			break;
+		case WM_FLT_GAMMA_SETVALUE:		
+			Setting_SetValue(FLT_Gamma_GetSetting((FLT_GAMMA_SETTING)wParam), lParam);
 			break;
 
 		case WM_ASPECT_CHANGEVALUE:
@@ -397,6 +407,9 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 		case WM_FILTER_CHANGEVALUE:		
 			Setting_ChangeValue(Filter_GetSetting((FILTER_SETTING)wParam), lParam);
 			break;
+		case WM_FLT_GAMMA_CHANGEVALUE:		
+			Setting_ChangeValue(FLT_Gamma_GetSetting((FLT_GAMMA_SETTING)wParam), lParam);
+			break;
 		
 		default:
 			break;
@@ -436,6 +449,7 @@ void WriteSettingsToIni()
 	DI_TwoFrame_WriteSettingsToIni();
 	Deinterlace_WriteSettingsToIni();
 	FLT_TNoise_WriteSettingsToIni();
+	FLT_Gamma_WriteSettingsToIni();
 	TVCard_WriteSettingsToIni();
 	VideoSettings_WriteSettingsToIni();
 	OSD_WriteSettingsToIni();
@@ -767,7 +781,14 @@ void Setting_OSDShow(SETTING* pSetting, HWND hWnd)
 		break;
 	case SLIDER:
 	case NUMBER:
-		sprintf(szBuffer, "%s %d", pSetting->szDisplayName, *(pSetting->pValue));
+		if(pSetting->OSDDivider == 1)
+		{
+			sprintf(szBuffer, "%s %d", pSetting->szDisplayName, *(pSetting->pValue));
+		}
+		else
+		{
+			sprintf(szBuffer, "%s %f", pSetting->szDisplayName, (float)*(pSetting->pValue) / (float)pSetting->OSDDivider);
+		}
 		break;
 	default:
 		break;

@@ -78,12 +78,14 @@ SETTING FilterSettings[FILTER_SETTING_LASTONE] =
 {
 	{
 		"Noise Filter", ONOFF, 0, &Filters[TEMPORAL_NOISE].bActive,
-		FALSE, 0, 1, 1, NULL,
+		FALSE, 0, 1, 1, 1,
+		NULL,
 		"NoiseFilter", "UseTemporalNoiseFilter", NULL,
 	},
 	{
 		"Gamma Filter", ONOFF, 0, &Filters[GAMMA].bActive,
-		FALSE, 0, 1, 1, NULL,
+		FALSE, 0, 1, 1, 1,
+		NULL,
 		"GammaFilter", "UseGammaFilter", NULL,
 	},
 };

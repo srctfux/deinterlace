@@ -4,6 +4,10 @@
 #include "settings.h"
 #include "Filter.h"
 
+SETTING* FLT_Gamma_GetSetting(FLT_GAMMA_SETTING Setting);
+void FLT_Gamma_ReadSettingsFromIni();
+void FLT_Gamma_WriteSettingsToIni();
+
 
 
 #endif /* _NOISE_H_ */

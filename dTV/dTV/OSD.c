@@ -267,32 +267,38 @@ SETTING OSDSettings[OSD_SETTING_LASTONE] =
 {
 	{
 		"OSD Outline Color", NUMBER, 0, &OutlineColor,
-		 RGB(0,0,0), 0, RGB(255,255,255), 1, NULL,
+		 RGB(0,0,0), 0, RGB(255,255,255), 1, 1,
+		 NULL,
 		"OSD", "OutlineColor", NULL,
 	},
 	{
 		"OSD Text Color", NUMBER, 0, &TextColor,
-		 RGB(0,255,0), 0, RGB(255,255,255), 1, NULL,
+		 RGB(0,255,0), 0, RGB(255,255,255), 1, 1,
+		 NULL,
 		"OSD", "TextColor", NULL,
 	},
 	{
 		"OSD Default Size", NUMBER, 0, &DefaultSizePerc,
-		 10, 0, 100, 1, NULL,
+		 10, 0, 100, 1, 1,
+		 NULL,
 		"OSD", "DefaultSizePerc", NULL,
 	},
 	{
 		"OSD Anti Alias", ONOFF, 0, &bAntiAlias,
-		 TRUE, 0, 1, 1, NULL,
+		 TRUE, 0, 1, 1, 1,
+		 NULL,
 		"OSD", "AntiAlias", NULL,
 	},
 	{
 		"OSD Background", NUMBER, 0, &Background,
-		 OSDB_TRANSPARENT, 0, OSDBACK_LASTONE - 1, 1, NULL,
+		 OSDB_TRANSPARENT, 0, OSDBACK_LASTONE - 1, 1, 1,
+		 NULL,
 		"OSD", "Background", NULL,
 	},
 	{
 		"OSD Outline Text", ONOFF, 0, &bOutline,
-		 TRUE, 0,  1, 1, NULL,
+		 TRUE, 0,  1, 1, 1,
+		 NULL,
 		"OSD", "Outline", NULL,
 	},
 };

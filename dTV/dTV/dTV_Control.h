@@ -556,4 +556,19 @@ typedef enum
 #define WM_FILTER_SETVALUE		(WM_USER + 119)
 #define WM_FILTER_CHANGEVALUE	(WM_USER + 219)
 
+/////////////////////////////////////////////////////////////////////////////
+// Control settings contained in FLT_Gamma.c
+/////////////////////////////////////////////////////////////////////////////
+
+typedef enum
+{
+	GAMMAVALUE = 0,
+	USESTOREDTABLE,
+	FLT_GAMMA_SETTING_LASTONE,
+} FLT_GAMMA_SETTING;
+
+#define WM_FLT_GAMMA_GETVALUE		(WM_USER + 20)
+#define WM_FLT_GAMMA_SETVALUE		(WM_USER + 120)
+#define WM_FLT_GAMMA_CHANGEVALUE	(WM_USER + 220)
+
 #endif
