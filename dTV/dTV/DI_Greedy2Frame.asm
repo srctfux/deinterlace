@@ -87,7 +87,7 @@ MAINLOOP_LABEL:
 		pcmpgtb mm5, qwGreedyTwoFrameThreshold
 		psrld   mm5, 1					// get rid of sign bit
 		pcmpgtd mm5, DwordOne			// do we want to bob
-		pand   mm5, DwordTwo
+		pandn   mm5, DwordTwo
 		movq mm4, mm5					
 
 		movq	mm2, qword ptr[esp]		// mm2 = T0
@@ -105,7 +105,7 @@ MAINLOOP_LABEL:
 		pcmpgtb mm5, qwGreedyTwoFrameThreshold
 		psrld   mm5, 1					// get rid of sign bit
 		pcmpgtd mm5, DwordOne			
-		pand   mm5, DwordOne
+		pandn   mm5, DwordOne
 		paddd mm4, mm5					
 
 		movq	mm2, qword ptr[edi]     // B0
@@ -123,15 +123,15 @@ MAINLOOP_LABEL:
 		pcmpgtb mm5, qwGreedyTwoFrameThreshold
 		psrld   mm5, 1					// get rid of sign bit
 		pcmpgtd mm5, DwordOne			
-		pand   mm5, DwordOne
+		pandn   mm5, DwordOne
 		paddd mm4, mm5					
 
 		pcmpgtd mm4, DwordTwo			
 
 		movq mm5, mm4
 // mm4 now is 1 where we want to bob and 0 where we want to weave
-		pandn	mm4, mm0				
-		pand	mm5, mm7				
+		pand	mm4, mm0				
+		pandn	mm5, mm7				
 		por		mm4, mm5				
 
 		// Put the pixels in place.
