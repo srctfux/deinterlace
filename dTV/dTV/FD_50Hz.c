@@ -38,7 +38,7 @@
 #include "FD_Common.h"
 #define DOLOGGING
 #include "DebugLog.h"
-#include "DI_BobAndWeave.h"
+#include "DI_Weave.h"
 
 ePULLDOWNMODES gPALFilmFallbackMode = VIDEO_MODE_2FRAME;
 // Default values which can be overwritten by the INI file

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// DI_BobAndWeave.h
+// DI_Weave.h
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2000 John adcock, Mark Rejhon, Steve Grimm.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,19 +24,11 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef __BOBANDWEAVE_H___
-#define __BOBANDWEAVE_H___
+#ifndef __WEAVE_H___
+#define __WEAVE_H___
 
 #include "settings.h"
 
-// Get Hold of the  DI_BobAndWeave.c file settings
-SETTING* DI_BobWeave_GetSetting(DI_BOBWEAVE_SETTING Setting);
-void DI_BobWeave_ReadSettingsFromIni();
-void DI_BobWeave_WriteSettingsToIni();
-
-BOOL Bob(DEINTERLACE_INFO *info);
 BOOL Weave(DEINTERLACE_INFO *info);
-
-
 
 #endif

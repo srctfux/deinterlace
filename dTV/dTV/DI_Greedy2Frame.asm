@@ -75,10 +75,10 @@ MAINLOOP_LABEL:
 		paddw mm7, mm5					// mm7 = (T1 + B1) / 2
 #endif
 
-// calculate |M1-M0| put result in mm2 nned to keep mm0 intact
+// calculate |M1-M0| put result in mm4 nned to keep mm0 intact
 		movq	mm4, mm0
-		psubusb mm2, mm0
 		psubusb mm4, mm2
+		psubusb mm2, mm0
 		por		mm4, mm2
 		psrlw	mm4, 1
 		pand	mm4, mm6

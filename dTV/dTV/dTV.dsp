@@ -147,7 +147,7 @@ SOURCE=.\DI_BlendedClip.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\DI_BobAndWeave.c
+SOURCE=.\DI_Bob.c
 # End Source File
 # Begin Source File
 
@@ -164,6 +164,18 @@ SOURCE=.\DI_HalfHeight.c
 # Begin Source File
 
 SOURCE=.\DI_TwoFrame.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\DI_VideoBob.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\DI_VideoWeave.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\DI_Weave.c
 # End Source File
 # Begin Source File
 
@@ -307,7 +319,7 @@ SOURCE=.\DI_BlendedClip.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\DI_BobAndWeave.h
+SOURCE=.\DI_Bob.h
 # End Source File
 # Begin Source File
 
@@ -320,6 +332,18 @@ SOURCE=.\DI_Greedy2Frame.h
 # Begin Source File
 
 SOURCE=.\DI_TwoFrame.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\DI_VideoBob.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\DI_VideoWeave.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\DI_Weave.h
 # End Source File
 # Begin Source File
 
@@ -576,11 +600,6 @@ SOURCE=.\READ_ME_FIRST_NOW.txt
 # End Source File
 # End Target
 # End Project
-# Section dTV : {F08DF952-8592-11D1-B16A-00C0F0283628}
-# 	2:5:Class:CSlider
-# 	2:10:HeaderFile:slider.h
-# 	2:8:ImplFile:slider.cpp
-# End Section
 # Section dTV : {7BF80981-BF32-101A-8BBB-00AA00300CAB}
 # 	2:5:Class:CPicture
 # 	2:10:HeaderFile:picture.h
@@ -589,4 +608,9 @@ SOURCE=.\READ_ME_FIRST_NOW.txt
 # Section dTV : {F08DF954-8592-11D1-B16A-00C0F0283628}
 # 	2:21:DefaultSinkHeaderFile:slider.h
 # 	2:16:DefaultSinkClass:CSlider
+# End Section
+# Section dTV : {F08DF952-8592-11D1-B16A-00C0F0283628}
+# 	2:5:Class:CSlider
+# 	2:10:HeaderFile:slider.h
+# 	2:8:ImplFile:slider.cpp
 # End Section

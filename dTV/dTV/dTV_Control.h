@@ -436,22 +436,19 @@ typedef enum
 #define WM_DI_ADAPTIVE_CHANGEVALUE	(WM_USER + 209)
 
 /////////////////////////////////////////////////////////////////////////////
-// Control settings contained in DI_BobAndWeave.c
+// Control settings contained in DI_VideoBob.c
 /////////////////////////////////////////////////////////////////////////////
 
 typedef enum
 {
 	WEAVEEDGEDETECT = 0,
 	WEAVEJAGGIETHRESHOLD,
-	TEMPORALTOLERANCE,
-	SPATIALTOLERANCE,
-	SIMILARITYTHRESHOLD,
-	DI_BOBWEAVE_SETTING_LASTONE,
-} DI_BOBWEAVE_SETTING;
+	DI_VIDEOBOB_SETTING_LASTONE,
+} DI_VIDEOBOB_SETTING;
 
-#define WM_DI_BOBWEAVE_GETVALUE		(WM_USER + 10)
-#define WM_DI_BOBWEAVE_SETVALUE		(WM_USER + 110)
-#define WM_DI_BOBWEAVE_CHANGEVALUE	(WM_USER + 210)
+#define WM_DI_VIDEOBOB_GETVALUE		(WM_USER + 10)
+#define WM_DI_VIDEOBOB_SETVALUE		(WM_USER + 110)
+#define WM_DI_VIDEOBOB_CHANGEVALUE	(WM_USER + 210)
 
 /////////////////////////////////////////////////////////////////////////////
 // Control settings contained in DI_BlendedClip.c
@@ -652,5 +649,20 @@ typedef enum
 #define WM_DI_GREEDY2FRAME_SETVALUE		(WM_USER + 122)
 #define WM_DI_GREEDY2FRAME_CHANGEVALUE	(WM_USER + 222)
 
+/////////////////////////////////////////////////////////////////////////////
+// Control settings contained in DI_VideoWeave.c
+/////////////////////////////////////////////////////////////////////////////
+
+typedef enum
+{
+	TEMPORALTOLERANCE = 0,
+	SPATIALTOLERANCE,
+	SIMILARITYTHRESHOLD,
+	DI_VIDEOWEAVE_SETTING_LASTONE,
+} DI_VIDEOWEAVE_SETTING;
+
+#define WM_DI_VIDEOWEAVE_GETVALUE		(WM_USER + 23)
+#define WM_DI_VIDEOWEAVE_SETVALUE		(WM_USER + 123)
+#define WM_DI_VIDEOWEAVE_CHANGEVALUE	(WM_USER + 223)
 
 #endif

@@ -82,7 +82,8 @@
 #include "FD_60Hz.h"
 #include "FD_50Hz.h"
 #include "FD_Common.h"
-#include "DI_BobAndWeave.h"
+#include "DI_Weave.h"
+#include "DI_Bob.h"
 
 // Thread related variables
 BOOL                bStopThread = FALSE;

@@ -25,171 +25,13 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "deinterlace.h"
-#include "DI_BobAndWeave.h"
 #include "cpu.h"
+#include "deinterlace.h"
+#include "DI_VideoWeave.h"
 
-long EdgeDetect = 625;
-long JaggieThreshold = 73;
 long TemporalTolerance = 300;
 long SpatialTolerance = 600;
 long SimilarityThreshold = 25;
-
-void memcpyBOBMMX(void *Dest1, void *Dest2, void *Src, size_t nBytes);
-
-///////////////////////////////////////////////////////////////////////////////
-// DeinterlaceFieldBob
-//
-// Deinterlaces a field with a tendency to bob rather than weave.  Best for
-// high-motion scenes like sports.
-//
-// The algorithm for this was taken from the 
-// Deinterlace - area based Vitual Dub Plug-in by
-// Gunnar Thalin
-///////////////////////////////////////////////////////////////////////////////
-BOOL DeinterlaceFieldBob(DEINTERLACE_INFO *info)
-{
-	int Line;
-	short* YVal1;
-	short* YVal2;
-	short* YVal3;
-	BYTE* Dest;
-	short **pOddLines = info->OddLines[0];
-	short **pEvenLines = info->EvenLines[0];
-	DWORD LineLength = info->LineLength;
-	
-	__int64 qwEdgeDetect;
-	__int64 qwThreshold;
-	const __int64 Mask = 0x7f7f7f7f7f7f7f7f;
-	const __int64 YMask    = 0x00ff00ff00ff00ff;
-
-	qwEdgeDetect = EdgeDetect;
-	qwEdgeDetect += (qwEdgeDetect << 48) + (qwEdgeDetect << 32) + (qwEdgeDetect << 16);
-	qwThreshold = JaggieThreshold;
-	qwThreshold += (qwThreshold << 48) + (qwThreshold << 32) + (qwThreshold << 16);
-
-
-	// copy first even line no matter what, and the first odd line if we're
-	// processing an odd field.
-	memcpyMMX(info->Overlay, pEvenLines[0], LineLength);
-	if (info->IsOdd)
-		memcpyMMX(info->Overlay + info->OverlayPitch, pOddLines[0], LineLength);
-
-	for (Line = 0; Line < info->FieldHeight - 1; ++Line)
-	{
-		if (info->IsOdd)
-		{
-			YVal1 = pOddLines[Line];
-			YVal2 = pEvenLines[Line + 1];
-			YVal3 = pOddLines[Line + 1];
-			Dest = info->Overlay + (Line * 2 + 2) * info->OverlayPitch;
-		}
-		else
-		{
-			YVal1 = pEvenLines[Line];
-			YVal2 = pOddLines[Line];
-			YVal3 = pEvenLines[Line + 1];
-			Dest = info->Overlay + (Line * 2 + 1) * info->OverlayPitch;
-		}
-
-		// For ease of reading, the comments below assume that we're operating on an odd
-		// field (i.e., that bIsOdd is true).  The exact same processing is done when we
-		// operate on an even field, but the roles of the odd and even fields are reversed.
-		// It's just too cumbersome to explain the algorithm in terms of "the next odd
-		// line if we're doing an odd field, or the next even line if we're doing an
-		// even field" etc.  So wherever you see "odd" or "even" below, keep in mind that
-		// half the time this function is called, those words' meanings will invert.
-
-		// Copy the odd line to the overlay verbatim.
-		memcpyMMX(Dest + info->OverlayPitch, YVal3, LineLength);
-
-		_asm
-		{
-			mov ecx, LineLength
-			mov eax, dword ptr [YVal1]
-			mov ebx, dword ptr [YVal2]
-			mov edx, dword ptr [YVal3]
-			mov edi, dword ptr [Dest]
-			shr ecx, 3       // there are LineLength / 8 qwords
-
-align 8
-DoNext8Bytes:			
-			movq mm0, qword ptr[eax] 
-			movq mm1, qword ptr[ebx] 
-			movq mm2, qword ptr[edx]
-
-			// get intensities in mm3 - 4
-			movq mm3, mm0
-			movq mm4, mm1
-			movq mm5, mm2
-
-			pand mm3, YMask
-			pand mm4, YMask
-			pand mm5, YMask
-
-			// get average in mm0
-			psrlw mm0, 01
-			psrlw mm2, 01
-			pand  mm0, Mask
-			pand  mm2, Mask
-			paddw mm0, mm2
-
-			// work out (O1 - E) * (O2 - E) / 2 - EdgeDetect * (O1 - O2) ^ 2 >> 12
-			// result will be in mm6
-
-			psrlw mm3, 01
-			psrlw mm4, 01
-			psrlw mm5, 01
-
-			movq mm6, mm3
-			psubw mm6, mm4	//mm6 = O1 - E
-
-			movq mm7, mm5
-			psubw mm7, mm4	//mm7 = O2 - E
-
-			pmullw mm6, mm7		// mm0 = (O1 - E) * (O2 - E)
-
-			movq mm7, mm3
-			psubw mm7, mm5		// mm7 = (O1 - O2)
-			pmullw mm7, mm7		// mm7 = (O1 - O2) ^ 2
-			psrlw mm7, 12		// mm7 = (O1 - O2) ^ 2 >> 12
-			pmullw mm7, qwEdgeDetect		// mm7  = EdgeDetect * (O1 - O2) ^ 2 >> 12
-
-			psubw mm6, mm7      // mm6 is what we want
-
-			pcmpgtw mm6, qwThreshold
-
-			movq mm7, mm6
-
-			pand mm0, mm6
-
-			pandn mm7, mm1
-
-			por mm7, mm0
-
-			movq qword ptr[edi], mm7
-
-			add eax, 8
-			add ebx, 8
-			add edx, 8
-			add edi, 8
-			dec ecx
-			jne near DoNext8Bytes
-			emms
-		}
-	}
-
-	// Copy last odd line if we're processing an even field.
-	if (! info->IsOdd)
-	{
-		memcpyMMX(info->Overlay + (info->FrameHeight - 1) * info->OverlayPitch,
-				  pOddLines[info->FieldHeight - 1],
-				  LineLength);
-	}
-
-	return TRUE;
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Deinterlace the latest field, with a tendency to weave rather than bob.
@@ -381,176 +223,11 @@ DoNext8Bytes:
 	return TRUE;
 }
 
-
-
-/////////////////////////////////////////////////////////////////////////////
-// Copies memory to two locations using MMX registers for speed.
-void memcpyBOBMMX(void *Dest1, void *Dest2, void *Src, size_t nBytes)
-{
-	__asm
-	{
-		mov		esi, dword ptr[Src]
-		mov		edi, dword ptr[Dest1]
-		mov     ebx, dword ptr[Dest2]
-		mov		ecx, nBytes
-		shr     ecx, 6                      // nBytes / 64
-align 8
-CopyLoop:
-		movq	mm0, qword ptr[esi]
-		movq	mm1, qword ptr[esi+8*1]
-		movq	mm2, qword ptr[esi+8*2]
-		movq	mm3, qword ptr[esi+8*3]
-		movq	mm4, qword ptr[esi+8*4]
-		movq	mm5, qword ptr[esi+8*5]
-		movq	mm6, qword ptr[esi+8*6]
-		movq	mm7, qword ptr[esi+8*7]
-		movq	qword ptr[edi], mm0
-		movq	qword ptr[edi+8*1], mm1
-		movq	qword ptr[edi+8*2], mm2
-		movq	qword ptr[edi+8*3], mm3
-		movq	qword ptr[edi+8*4], mm4
-		movq	qword ptr[edi+8*5], mm5
-		movq	qword ptr[edi+8*6], mm6
-		movq	qword ptr[edi+8*7], mm7
-		movq	qword ptr[ebx], mm0
-		movq	qword ptr[ebx+8*1], mm1
-		movq	qword ptr[ebx+8*2], mm2
-		movq	qword ptr[ebx+8*3], mm3
-		movq	qword ptr[ebx+8*4], mm4
-		movq	qword ptr[ebx+8*5], mm5
-		movq	qword ptr[ebx+8*6], mm6
-		movq	qword ptr[ebx+8*7], mm7
-		add		esi, 64
-		add		edi, 64
-		add		ebx, 64
-		dec ecx
-		jne near CopyLoop
-
-		mov		ecx, nBytes
-		and     ecx, 63
-		cmp     ecx, 0
-		je EndCopyLoop
-align 8
-CopyLoop2:
-		mov dl, byte ptr[esi] 
-		mov byte ptr[edi], dl
-		mov byte ptr[ebx], dl
-		inc esi
-		inc edi
-		inc ebx
-		dec ecx
-		jne near CopyLoop2
-EndCopyLoop:
-		emms
-	}
-}
-
-
-/////////////////////////////////////////////////////////////////////////////
-// Simple Bob.  Copies the most recent field to the overlay, with each scanline
-// copied twice.
-/////////////////////////////////////////////////////////////////////////////
-BOOL Bob(DEINTERLACE_INFO *info)
-{
-	int i;
-	BYTE *lpOverlay = info->Overlay;
-	short **lines;
- 
-// If field is odd we will offset it down 1 line to avoid jitter  TRB 1/21/01
-#if TRUE		// use this and leave the old code in below for a/b compare
-	if (info->IsOdd)
-	{
-		lines = info->OddLines[0];
-		// No recent data?  We can't do anything.
-		if (lines == NULL)
-			return FALSE;
-
-		memcpyMMX(lpOverlay, lines[0], info->LineLength);	// extra copy of first line
-		lpOverlay += info->OverlayPitch;					// and offset out output ptr
-		for (i = 0; i < info->FieldHeight - 1; i++)
-		{
-			memcpyBOBMMX(lpOverlay, lpOverlay + info->OverlayPitch,
-				lines[i], info->LineLength);
-			lpOverlay += 2 * info->OverlayPitch;
-		}
-		memcpyMMX(lpOverlay, lines[i], info->LineLength);	// only 1 copy of last line
-	}	
-	else
-	{
-		lines = info->EvenLines[0];
-		if (lines == NULL)
-				return FALSE;
-		for (i = 0; i < info->FieldHeight; i++)
-		{
-			memcpyBOBMMX(lpOverlay, lpOverlay + info->OverlayPitch,
-				lines[i], info->LineLength);
-			lpOverlay += 2 * info->OverlayPitch;
-		}
-	}
-#else
-	// leave old code in for now for a/b compare
-	if (info->IsOdd)
-	{
-		lines = info->OddLines[0];
-	}
-	else
-	{
-		lines = info->EvenLines[0];
-	}
-	if (lines == NULL)
-		return FALSE;
-
-	for (i = 0; i < info->FieldHeight; i++)
-	{
-		memcpyBOBMMX(lpOverlay, lpOverlay + info->OverlayPitch, lines[i], info->LineLength);
-		lpOverlay += 2 * info->OverlayPitch;
-	}
-#endif
-
-
-	return TRUE;
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Simple Weave.  Copies alternating scanlines from the most recent fields.
-BOOL Weave(DEINTERLACE_INFO *info)
-{
-	int i;
-	BYTE *lpOverlay = info->Overlay;
-
-	if (info->EvenLines[0] == NULL || info->OddLines[0] == NULL)
-		return FALSE;
-
-	for (i = 0; i < info->FieldHeight; i++)
-	{
-		memcpyMMX(lpOverlay, info->EvenLines[0][i], info->LineLength);
-		lpOverlay += info->OverlayPitch;
-
-		memcpyMMX(lpOverlay, info->OddLines[0][i], info->LineLength);
-		lpOverlay += info->OverlayPitch;
-	}
-
-	return TRUE;
-}
-
 ////////////////////////////////////////////////////////////////////////////
 // Start of Settings related code
 /////////////////////////////////////////////////////////////////////////////
-SETTING DI_BobWeaveSettings[DI_BOBWEAVE_SETTING_LASTONE] =
+SETTING DI_VideoWeaveSettings[DI_VIDEOWEAVE_SETTING_LASTONE] =
 {
-	{
-		"Weae Edge Detect", SLIDER, 0, &EdgeDetect,
-		625, 0, 10000, 5, 1,
-		NULL,
-		"Deinterlace", "EdgeDetect", NULL,
-	},
-	{
-		"Weave Jaggie Threshold", SLIDER, 0, &JaggieThreshold,
-		73, 0, 5000, 5, 1,
-		NULL,
-		"Deinterlace", "JaggieThreshold", NULL,
-	},
 	{
 		"Temporal Tolerance", SLIDER, 0, &TemporalTolerance,
 		300, 0, 5000, 10, 1,
@@ -571,11 +248,11 @@ SETTING DI_BobWeaveSettings[DI_BOBWEAVE_SETTING_LASTONE] =
 	},
 };
 
-SETTING* DI_BobWeave_GetSetting(DI_BOBWEAVE_SETTING Setting)
+SETTING* DI_VideoWeave_GetSetting(DI_VIDEOWEAVE_SETTING Setting)
 {
-	if(Setting > -1 && Setting < DI_BOBWEAVE_SETTING_LASTONE)
+	if(Setting > -1 && Setting < DI_VIDEOWEAVE_SETTING_LASTONE)
 	{
-		return &(DI_BobWeaveSettings[Setting]);
+		return &(DI_VideoWeaveSettings[Setting]);
 	}
 	else
 	{
@@ -583,20 +260,20 @@ SETTING* DI_BobWeave_GetSetting(DI_BOBWEAVE_SETTING Setting)
 	}
 }
 
-void DI_BobWeave_ReadSettingsFromIni()
+void DI_VideoWeave_ReadSettingsFromIni()
 {
 	int i;
-	for(i = 0; i < DI_BOBWEAVE_SETTING_LASTONE; i++)
+	for(i = 0; i < DI_VIDEOWEAVE_SETTING_LASTONE; i++)
 	{
-		Setting_ReadFromIni(&(DI_BobWeaveSettings[i]));
+		Setting_ReadFromIni(&(DI_VideoWeaveSettings[i]));
 	}
 }
 
-void DI_BobWeave_WriteSettingsToIni()
+void DI_VideoWeave_WriteSettingsToIni()
 {
 	int i;
-	for(i = 0; i < DI_BOBWEAVE_SETTING_LASTONE; i++)
+	for(i = 0; i < DI_VIDEOWEAVE_SETTING_LASTONE; i++)
 	{
-		Setting_WriteToIni(&(DI_BobWeaveSettings[i]));
+		Setting_WriteToIni(&(DI_VideoWeaveSettings[i]));
 	}
 }

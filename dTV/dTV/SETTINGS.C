@@ -63,7 +63,8 @@
 #include "ProgramList.h"
 #include "DI_Adaptive.h"
 #include "DI_BlendedClip.h"
-#include "DI_BobAndWeave.h"
+#include "DI_VideoBob.h"
+#include "DI_VideoWeave.h"
 #include "DI_TwoFrame.h"
 #include "DI_Greedy.h"
 #include "DI_Greedy2Frame.h"
@@ -124,7 +125,8 @@ void LoadSettingsFromIni()
 	FD60_ReadSettingsFromIni();
 	FD_Common_ReadSettingsFromIni();
 	DI_Adaptive_ReadSettingsFromIni();
-	DI_BobWeave_ReadSettingsFromIni();
+	DI_VideoBob_ReadSettingsFromIni();
+	DI_VideoWeave_ReadSettingsFromIni();
 	DI_BlendedClip_ReadSettingsFromIni();
 	DI_TwoFrame_ReadSettingsFromIni();
 	DI_Greedy2Frame_ReadSettingsFromIni();
@@ -239,8 +241,8 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 		case WM_DI_ADAPTIVE_GETVALUE:	
 			return Setting_GetValue(DI_Adaptive_GetSetting((DI_ADAPTIVE_SETTING)wParam));
 			break;
-		case WM_DI_BOBWEAVE_GETVALUE:	
-			return Setting_GetValue(DI_BobWeave_GetSetting((DI_BOBWEAVE_SETTING)wParam));
+		case WM_DI_VIDEOBOB_GETVALUE:	
+			return Setting_GetValue(DI_VideoBob_GetSetting((DI_VIDEOBOB_SETTING)wParam));
 			break;
 		case WM_DI_BLENDEDCLIP_GETVALUE:
 			return Setting_GetValue(DI_BlendedClip_GetSetting((DI_BLENDEDCLIP_SETTING)wParam));
@@ -278,6 +280,9 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 		case WM_DI_GREEDY2FRAME_GETVALUE:		
 			return Setting_GetValue(DI_Greedy2Frame_GetSetting((DI_GREEDY2FRAME_SETTING)wParam));
 			break;
+		case WM_DI_VIDEOWEAVE_GETVALUE:	
+			return Setting_GetValue(DI_VideoWeave_GetSetting((DI_VIDEOWEAVE_SETTING)wParam));
+			break;
 
 		case WM_ASPECT_SETVALUE:
 			Setting_SetValue(Aspect_GetSetting((ASPECT_SETTING)wParam), lParam);
@@ -306,8 +311,8 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 		case WM_DI_ADAPTIVE_SETVALUE:	
 			Setting_SetValue(DI_Adaptive_GetSetting((DI_ADAPTIVE_SETTING)wParam), lParam);
 			break;
-		case WM_DI_BOBWEAVE_SETVALUE:	
-			Setting_SetValue(DI_BobWeave_GetSetting((DI_BOBWEAVE_SETTING)wParam), lParam);
+		case WM_DI_VIDEOBOB_SETVALUE:	
+			Setting_SetValue(DI_VideoBob_GetSetting((DI_VIDEOBOB_SETTING)wParam), lParam);
 			break;
 		case WM_DI_BLENDEDCLIP_SETVALUE:
 			Setting_SetValue(DI_BlendedClip_GetSetting((DI_BLENDEDCLIP_SETTING)wParam), lParam);
@@ -345,6 +350,9 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 		case WM_DI_GREEDY2FRAME_SETVALUE:		
 			Setting_SetValue(DI_Greedy2Frame_GetSetting((DI_GREEDY2FRAME_SETTING)wParam), lParam);
 			break;
+		case WM_DI_VIDEOWEAVE_SETVALUE:	
+			Setting_SetValue(DI_VideoWeave_GetSetting((DI_VIDEOWEAVE_SETTING)wParam), lParam);
+			break;
 
 		case WM_ASPECT_CHANGEVALUE:
 			Setting_ChangeValue(Aspect_GetSetting((ASPECT_SETTING)wParam), lParam);
@@ -373,8 +381,8 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 		case WM_DI_ADAPTIVE_CHANGEVALUE:	
 			Setting_ChangeValue(DI_Adaptive_GetSetting((DI_ADAPTIVE_SETTING)wParam), lParam);
 			break;
-		case WM_DI_BOBWEAVE_CHANGEVALUE:	
-			Setting_ChangeValue(DI_BobWeave_GetSetting((DI_BOBWEAVE_SETTING)wParam), lParam);
+		case WM_DI_VIDEOBOB_CHANGEVALUE:	
+			Setting_ChangeValue(DI_VideoBob_GetSetting((DI_VIDEOBOB_SETTING)wParam), lParam);
 			break;
 		case WM_DI_BLENDEDCLIP_CHANGEVALUE:
 			Setting_ChangeValue(DI_BlendedClip_GetSetting((DI_BLENDEDCLIP_SETTING)wParam), lParam);
@@ -412,6 +420,9 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 		case WM_DI_GREEDY2FRAME_CHANGEVALUE:		
 			Setting_ChangeValue(DI_Greedy2Frame_GetSetting((DI_GREEDY2FRAME_SETTING)wParam), lParam);
 			break;
+		case WM_DI_VIDEOWEAVE_CHANGEVALUE:	
+			Setting_ChangeValue(DI_VideoWeave_GetSetting((DI_VIDEOWEAVE_SETTING)wParam), lParam);
+			break;
 		
 		default:
 			break;
@@ -446,7 +457,8 @@ void WriteSettingsToIni()
 	FD60_WriteSettingsToIni();
 	FD_Common_WriteSettingsToIni();
 	DI_Adaptive_WriteSettingsToIni();
-	DI_BobWeave_WriteSettingsToIni();
+	DI_VideoBob_WriteSettingsToIni();
+	DI_VideoWeave_WriteSettingsToIni();
 	DI_BlendedClip_WriteSettingsToIni();
 	DI_TwoFrame_WriteSettingsToIni();
 	DI_Greedy2Frame_WriteSettingsToIni();

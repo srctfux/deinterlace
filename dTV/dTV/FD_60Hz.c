@@ -46,7 +46,7 @@
 #include "FD_Common.h"
 #define DOLOGGING
 #include "DebugLog.h"
-#include "DI_BobAndWeave.h"
+#include "DI_Weave.h"
 
 // Settings
 // Default values which can be overwritten by the INI file

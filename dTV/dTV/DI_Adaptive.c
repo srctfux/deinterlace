@@ -33,7 +33,7 @@
 #include "FD_60Hz.h"
 #include "FD_Common.h"
 #include "DI_Adaptive.h"
-#include "DI_BobAndWeave.h"
+#include "DI_Bob.h"
 
 long				StaticImageFieldCount = 100;
 long				LowMotionFieldCount = 4;
