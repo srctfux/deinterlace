@@ -1,0 +1,42 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>dTV Bugs</title>
+</head>
+
+<body>
+
+<h1>dTV Bugs</h1>
+dTV is still in the early stages of development.&nbsp; It will probably never be
+truly stable and shrink-warp quality.&nbsp; That being said the developers are
+keen to have the software running as well as possible.&nbsp; This file is
+intended to used as a place to keep track of the current known bugs so that
+people who want to join the project have a good place to start looking for
+problems to fix.<br>
+<ol>
+  <li>VBI code sometimes cases video to jump about.&nbsp; (cause could be
+    constant DMA overruns)</li>
+  <li>After either pauses, format&nbsp;changes or maximizing the software will
+    no longer lock onto correct pulldown mode and run with bad artifacts.&nbsp;
+    BT Reset does no cure this but software behaves well after it is started and
+    stopped (Agian appears to be DMA related, or possible bug in the output code
+    causing the flip frames to get out of sync)</li>
+  <li>Does not work on Mpact video cards in 24 bit hacked mode (not sure if this
+    is possible to fix although DVD software run on these cards)</li>
+  <li>Playback is jumpy.&nbsp; This is because there is no code to try and synchronize
+    the TV data to the PV Video card refresh rate.&nbsp; On slower machines this
+    should be less of a problem but at higher speeds the TV frames will not be
+    displayed smoothly.</li>
+  <li>Tearing appears.&nbsp; May be linked to some of the above bugs, in
+    particular number 2.</li>
+  <li>The tuner operation of the software is extremely buggy. Improvement in
+    this area are most welcome.</li>
+</ol>
+<p>Feel free to add your own!</p>
+
+</body>
+
+</html>

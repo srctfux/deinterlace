@@ -1,0 +1,78 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>dTV.ini Settings</title>
+</head>
+
+<body>
+<h2>dTV.ini Settings</h2>
+
+<p>Many features of the program are configurable through the menu system.&nbsp;
+Some advanced settings and functions in beta test will require changes to this
+ini file to work properly.&nbsp; All the settings used by the program are stored
+here and no changes are made to the registry.</p>
+
+<h3>[Pulldown]</h3>
+
+<p><b>PulldownThresholdLow </b>Determines when PAL pulldown detection will
+detect a noticable improvement in combing.&nbsp; Lower values (more negative)
+will make detection require more combing to change.&nbsp; Change this if PAL
+detection is not working for you.</p>
+
+<p><b>PulldownThresholdHigh </b>Determines when PAL pulldown detection will go
+back from movie mode to video mode.&nbsp; This value copes with certain types of
+video noise, if it is set too low then it will flip back on static movie images,
+if set too high it will remain in movie mode for too long.</p>
+
+<p><b>PulldownRepeatCount </b>This is the number of times the pulldown pattern
+must be detected before switching.</p>
+
+<p><b>Threshold32Pulldown&nbsp;</b> This is the number of pixels per field that
+need to be similar for NTSC movie detection to detect a triplet of fields from
+the smae movie frame.&nbsp; Higher values will cope with more video noise but
+will not detect the movies as well.</p>
+
+<p><b>BitShift </b>This is used by the NTSC detection code to limit what
+pixels are the same.&nbsp; This should allow for noise in source.&nbsp; The
+value is applied to the square of the pixel difference with the results
+bitshifted right by this amount.</p>
+
+<p><b>DiffThreshold </b>.Not Used</p>
+
+<p><b>PulldownRepeatCount2 </b>The number of times an unexpected pattern can
+occur before switching back to video video mode from a film mode.&nbsp;</p>
+
+<h3>[BTVPlugin]</h3>
+
+<p><b>Name </b>Which bTV plug-in to load, the dll should be in the path or in
+the dTV directory.</p>
+
+<p><b>Level1 </b>Parameter passed to the plug-in</p>
+
+<p><b>Level2 </b>Parameter passed to the plug-in</p>
+
+<p><b>x</b> Parameter passed to the plug-in</p>
+
+<p><b>y</b> Parameter passed to the plug-in</p>
+
+<p><b>UseKey1</b> Parameter passed to the plug-in</p>
+
+<p><b>UseKey2</b> Parameter passed to the plug-in</p>
+
+<h3>[Deinterlace]</h3>
+
+<p><b>EdgeDetect</b> This values governs the strength of edge detection, use
+higher values if you think that the video deinterlacing is occurring too often.</p>
+
+<p><b>JaggieThreshold</b> This values governs the threshold for fine line
+dtection, use higher values if you get problems with small text</p>
+
+<p><br>
+</p>
+
+</body>
+
+</html>
