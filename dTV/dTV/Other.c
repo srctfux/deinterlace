@@ -217,10 +217,11 @@ BOOL Overlay_Create()
 	ddsd.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT | DDSD_BACKBUFFERCOUNT;
 	ddsd.ddsCaps.dwCaps = DDSCAPS_OVERLAY | DDSCAPS_VIDEOMEMORY | DDSCAPS_FLIP | DDSCAPS_COMPLEX;
 
-	// create a much bigger surface than we need
-	// this ensures that we can use the bTV plugin
-	ddsd.dwWidth = BTV_VER1_WIDTH;
-	ddsd.dwHeight = BTV_VER1_HEIGHT;
+	// create a surface big enough to hold the largest resolution supported
+	// this ensures that we can always have enough space to allow
+	// mode changes without recreating the overlay
+	ddsd.dwWidth = DTV_MAX_WIDTH;
+	ddsd.dwHeight = DTV_MAX_HEIGHT;
 	ddsd.dwBackBufferCount = Back_Buffers;
 
 	ddsd.ddpfPixelFormat = PixelFormat;

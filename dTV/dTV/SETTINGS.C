@@ -37,7 +37,6 @@
 #include "audio.h"
 #include "bt848.h"
 #include "vbi.h"
-#include "bTVPlugin.h"
 #include "OutThreads.h"
 #include "deinterlace.h"
 #include "AspectRatio.h"
@@ -109,7 +108,6 @@ void LoadSettingsFromIni()
 	Threshold32Pulldown  = GetPrivateProfileInt("Pulldown", "Threshold32Pulldown", Threshold32Pulldown, szIniFile);
 	ThresholdPulldownMismatch  = GetPrivateProfileInt("Pulldown", "ThresholdPulldownMismatch", ThresholdPulldownMismatch, szIniFile);
 	ThresholdPulldownComb  = GetPrivateProfileInt("Pulldown", "ThresholdPulldownComb", ThresholdPulldownComb, szIniFile);
-	bAutoDetectMode = (GetPrivateProfileInt("Pulldown", "bAutoDetectMode", bAutoDetectMode, szIniFile) != 0);
 	bFallbackToVideo = (GetPrivateProfileInt("Pulldown", "bFallbackToVideo", bFallbackToVideo, szIniFile) != 0);
 	BitShift = GetPrivateProfileInt("Pulldown", "BitShift", BitShift, szIniFile);
 	DiffThreshold = GetPrivateProfileInt("Pulldown", "DiffThreshold", DiffThreshold, szIniFile);
@@ -120,8 +118,11 @@ void LoadSettingsFromIni()
 	StaticImageMode = GetPrivateProfileInt("Pulldown", "StaticImageMode", StaticImageMode, szIniFile);
 	LowMotionMode = GetPrivateProfileInt("Pulldown", "LowMotionMode", LowMotionMode, szIniFile);
 	HighMotionMode = GetPrivateProfileInt("Pulldown", "HighMotionMode", HighMotionMode, szIniFile);
-	// TRB 12/00
-	gPulldownMode = GetPrivateProfileInt("Deinterlace", "DeinterlaceMode", gPulldownMode, szIniFile);
+
+	// JA 02/01/2001
+	// use SetDeinterlaceFunction so that Half height gets set correctly
+	SetDeinterlaceMode(GetPrivateProfileInt("Deinterlace", "DeinterlaceMode", gPulldownMode, szIniFile));
+	bAutoDetectMode = (GetPrivateProfileInt("Pulldown", "bAutoDetectMode", bAutoDetectMode, szIniFile) != 0);
 
 	EdgeDetect = GetPrivateProfileInt("Deinterlace", "EdgeDetect", EdgeDetect, szIniFile);
 	JaggieThreshold = GetPrivateProfileInt("Deinterlace", "JaggieThreshold", JaggieThreshold, szIniFile);
@@ -340,14 +341,6 @@ void LoadSettingsFromIni()
 			MixerLoad[i].MixerValues.Kanal4 = GetPrivateProfileInt(szKey, "Channel4", 0, szIniFile);
 		}
 	}
-
-	GetPrivateProfileString("BTVPlugin", "Name", "bDeinterlace.dll", szBTVPluginName, MAX_PATH, szIniFile);
-	BTVParams.Level1 = GetPrivateProfileInt("BTVPlugin", "Level1", BTVParams.Level1, szIniFile);
-	BTVParams.Level2 = GetPrivateProfileInt("BTVPlugin", "Level2", BTVParams.Level2, szIniFile);
-	BTVParams.x = GetPrivateProfileInt("BTVPlugin", "x", BTVParams.x, szIniFile);
-	BTVParams.y = GetPrivateProfileInt("BTVPlugin", "y", BTVParams.y, szIniFile);
-	BTVParams.UseKey1 = GetPrivateProfileInt("BTVPlugin", "UseKey1", BTVParams.UseKey1, szIniFile);
-	BTVParams.UseKey2 = GetPrivateProfileInt("BTVPlugin", "UseKey2", BTVParams.UseKey2, szIniFile);
 
 	// MRS 9/2/00
 	// Load Aspect Mode from INI- using strings would be more elegant long-term
@@ -590,14 +583,6 @@ void WriteSettingsToIni()
 			WritePrivateProfileInt(szKey, "Channel4", MixerLoad[i].MixerValues.Kanal4, szIniFile);
 		}
 	}
-
-	WritePrivateProfileString("BTVPlugin", "Name", szBTVPluginName, szIniFile);
-	WritePrivateProfileInt("BTVPlugin", "Level1", BTVParams.Level1, szIniFile);
-	WritePrivateProfileInt("BTVPlugin", "Level2", BTVParams.Level2, szIniFile);
-	WritePrivateProfileInt("BTVPlugin", "x", BTVParams.x, szIniFile);
-	WritePrivateProfileInt("BTVPlugin", "y", BTVParams.y, szIniFile);
-	WritePrivateProfileInt("BTVPlugin", "UseKey1", BTVParams.UseKey1, szIniFile);
-	WritePrivateProfileInt("BTVPlugin", "UseKey2", BTVParams.UseKey2, szIniFile);
 
 	// MRS 9/2/00
 	// Save Aspect Mode from INI- using strings would be more elegant long-term

@@ -42,7 +42,6 @@
 void VBI_DecodeLine(unsigned char *VBI_Buffer, int line);
 void VBI_AGC(BYTE * Buffer, int start, int stop, int step);
 
-extern int VBI_lpf;
 extern int VBI_Flags;
 extern int VBI_FPS;
 extern BYTE VBI_thresh;

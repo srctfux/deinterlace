@@ -30,6 +30,8 @@
 //                                     Cut out all decoding
 //                                     Cut out digital hardware stuff
 //
+// 02 Jan 2001   John Adcock           Changed IS_VIDEO_MODE
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __DEFINES_H___
@@ -47,7 +49,7 @@ typedef enum
 	VIDEO_MODE_2FRAME = 2,
 	SIMPLE_WEAVE = 3,
 	SIMPLE_BOB = 4,
-	BTV_PLUGIN = 5,
+	SCALER_BOB = 5,
 	FILM_22_PULLDOWN_ODD = 6,
 	FILM_22_PULLDOWN_EVEN = 7,
 	FILM_32_PULLDOWN_0 = 8,
@@ -68,11 +70,12 @@ typedef enum
 							 (x) == FILM_32_PULLDOWN_2 || \
 							 (x) == FILM_32_PULLDOWN_3 || \
 							 (x) == FILM_32_PULLDOWN_4)
-#define IS_VIDEO_MODE(x) ((x) == VIDEO_MODE_WEAVE || \
-                          (x) == VIDEO_MODE_BOB || \
-						  (x) == VIDEO_MODE_2FRAME)
+
+#define IS_VIDEO_MODE(x) !IS_PULLDOWN_MODE(x)
+
 #define IS_HALF_HEIGHT(x) ((x) == EVEN_ONLY || \
-						   (x) == ODD_ONLY)
+						   (x) == ODD_ONLY || \
+							(x) == SCALER_BOB)
 
 #define MAXVTDIALOG 8
 #define MAXPROGS 4096
@@ -625,8 +628,8 @@ typedef enum
 
 #define VCCLEARLINES 287
 
-#define BTV_VER1_WIDTH 768
-#define BTV_VER1_HEIGHT 576
+#define DTV_MAX_WIDTH 768
+#define DTV_MAX_HEIGHT 576
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 

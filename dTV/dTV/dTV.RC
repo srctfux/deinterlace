@@ -1059,7 +1059,7 @@ BEGIN
             MENUITEM "Simple &Weave",               IDM_WEAVE
             MENUITEM "Simple &Bob",                 IDM_BOB
             MENUITEM "Blended &Clip ...",           IDM_BLENDED_CLIP
-            MENUITEM "B&TV Plugin",                 IDM_BTV
+            MENUITEM "&Scaler BOB",                 IDM_SCALER_BOB
             MENUITEM "3:2 Pulldown, Skip Field &1", IDM_32PULL1
             MENUITEM "3:2 Pulldown, Skip Field &2", IDM_32PULL2
             MENUITEM "3:2 Pulldown, Skip Field &3", IDM_32PULL3

@@ -30,6 +30,8 @@
 //                                     Cut out all decoding
 //                                     Cut out digital hardware stuff
 //
+// 02 Jan 2001   John Adcock           Added VBI Lines to TVSettings
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -68,25 +70,25 @@ struct TTVSetting TVSettings[] =
 {
 	/* PAL-BDGHI */
 	{ "PAL DBGHI", 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_BDGHI|BT848_IFORM_XT1),
-	    186, 922, 0x20, 0, TRUE, 511},
+	    186, 922, 0x20, 0, TRUE, 511, 19},
 	/* NTSC */
 	{ "NTSC", 480, 910, 0x68, 0x5c, (BT848_IFORM_NTSC|BT848_IFORM_XT0),
-	    137, 754, 0x1a, 0, FALSE, 400},
+	    137, 754, 0x1a, 0, FALSE, 400, 13},
 	/* SECAM */
 	{ "SECAM", 576, 1135, 0x7f, 0xb0, (BT848_IFORM_SECAM|BT848_IFORM_XT1),
-	    186, 922, 0x20, 0, TRUE, 511},
+	    186, 922, 0x20, 0, TRUE, 511, 19},
 	/* PAL-M */
 	{ "PAL-M", 480,  910, 0x68, 0x5c, (BT848_IFORM_PAL_M|BT848_IFORM_XT0),
-	    137, 754, 0x1a, 0, FALSE, 400},
+	    137, 754, 0x1a, 0, FALSE, 400, 13},
     /* PAL-N */
     { "PAL-M", 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_N|BT848_IFORM_XT1),
-        186, 922, 0x20, 0, TRUE, 511},
+        186, 922, 0x20, 0, TRUE, 511, 19},
 	/* NTSC Japan*/
 	{ "NTSC Japan", 480,  910, 0x70, 0x5c, (BT848_IFORM_NTSC_JAP|BT848_IFORM_XT0),
-	    135, 754, 0x1a, 0, FALSE, 400},
+	    135, 754, 0x1a, 0, FALSE, 400, 13},
     /* PAL-60 */
 	{ "PAL 60", 480, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_BDGHI|BT848_IFORM_XT1),
-	    186, 922, 0x1a, 0, TRUE, 400},
+	    186, 922, 0x1a, 0, TRUE, 400, 13},
 };
 
 
@@ -147,7 +149,6 @@ BOOL bDisplayStatusBar = TRUE;
 PMemStruct Risc_dma;
 PMemStruct Vbi_dma[5];
 PMemStruct Display_dma[5];
-PMemStruct Burst_dma[5];
 
 HANDLE Bt848Device=NULL;
 

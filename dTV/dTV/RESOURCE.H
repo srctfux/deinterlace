@@ -76,7 +76,7 @@
 #define IDM_VIDEO_2FRAME                532
 #define IDM_WEAVE                       533
 #define IDM_BOB                         534
-#define IDM_BTV                         535
+#define IDM_SCALER_BOB                  535
 #define IDM_22PULLODD                   536
 #define IDM_22PULLEVEN                  537
 #define IDM_32PULL1                     538

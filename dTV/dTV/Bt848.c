@@ -26,6 +26,8 @@
 //               Conexant Systems      by adding non-zero InitialBDelay in .ini
 //                                     File. Changed NTSC defaults to 0x5C
 //
+// 02 Jan 2001   John Adcock           Made RISC Code linear
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -46,11 +48,7 @@ BT848_STRUCT* hBT8X8 = NULL;
 
 PHYS    RiscBasePhysical; 
 DWORD  *RiscBaseLinear;
-DWORD *m_pRiscJump;
-DWORD *m_pRiscVBIOdd[5];
-DWORD *m_pRiscFrameEven[5];
-DWORD *m_pRiscVBIEven[5];
-DWORD *m_pRiscFrameOdd[5];
+long BytesPerRISCField = 1;
 
 BOOL BT848_FindTVCard(HWND hWnd)
 {
@@ -222,53 +220,25 @@ BOOL BT848_MemoryInit(void)
 	
 	for (i = 0; i < 5; i++)
 	{
-		if (!Alloc_DMA(VBI_DATA_SIZE, &Vbi_dma[i], 0))
+		// JA 02/01/2001
+		// Allocate some extra memory so that we can skip
+		// start of buffer that is not page aligned
+		if (!Alloc_DMA(2048 * 19 * 2 + 4095, &Vbi_dma[i], 0))
 		{
-			ErrorBox("VideoText Memory ( 77 KB ) for DMA not allocated");
+			ErrorBox("VBI Memory for DMA not allocated");
 			return (FALSE);
 		}
+		pVBILines[i] = GetFirstFullPage(Vbi_dma[i]);
 		// JA 29/12/2000
 		// Allocate some extra memory so that we can skip
 		// start of buffer that is not page aligned
 		if (!Alloc_DMA(1024 * 576 * 2 + 4095, &Display_dma[i], 0))
 		{
-			ErrorBox("Display Memory (1 MB) for DMA not allocated");
+			ErrorBox("Display Memory for DMA not allocated");
 			return (FALSE);
 		}
-		if (!Alloc_DMA(256, &Burst_dma[i], 0))
-		{
-			ErrorBox("Burst Memory (256 Bytes) for DMA not allocated");
-			return (FALSE);
-		}
-
-		pBurstLine[i] = Burst_dma[i]->dwUser;
+		pDisplay[i] = GetFirstFullPage(Display_dma[i]);
 	}
-
-	m_pRiscJump = RiscBaseLinear;
-	m_pRiscVBIOdd[0] = RiscBaseLinear + 64;
-	m_pRiscVBIEven[0] = m_pRiscVBIOdd[0] + 160;
-	m_pRiscFrameOdd[0] = m_pRiscVBIEven[0] + 160;
-	m_pRiscFrameEven[0] = m_pRiscFrameOdd[0] + 1536;
-
-	m_pRiscVBIOdd[1] = m_pRiscFrameEven[0] + 1536;
-	m_pRiscVBIEven[1] = m_pRiscVBIOdd[1] + 160;
-	m_pRiscFrameOdd[1] = m_pRiscVBIEven[1] + 160;
-	m_pRiscFrameEven[1] = m_pRiscFrameOdd[1] + 1536;
-
-	m_pRiscVBIOdd[2] = m_pRiscFrameEven[1] + 1536;
-	m_pRiscVBIEven[2] = m_pRiscVBIOdd[2] + 160;
-	m_pRiscFrameOdd[2] = m_pRiscVBIEven[2] + 160;
-	m_pRiscFrameEven[2] = m_pRiscFrameOdd[2] + 1536;
-
-	m_pRiscVBIOdd[3] = m_pRiscFrameEven[2] + 1536;
-	m_pRiscVBIEven[3] = m_pRiscVBIOdd[3] + 160;
-	m_pRiscFrameOdd[3] = m_pRiscVBIEven[3] + 160;
-	m_pRiscFrameEven[3] = m_pRiscFrameOdd[3] + 1536;
-
-	m_pRiscVBIOdd[4] = m_pRiscFrameEven[3] + 1536;
-	m_pRiscVBIEven[4] = m_pRiscVBIOdd[4] + 160;
-	m_pRiscFrameOdd[4] = m_pRiscVBIEven[4] + 160;
-	m_pRiscFrameEven[4] = m_pRiscFrameOdd[4] + 1536;
 
 	return (TRUE);
 }
@@ -278,7 +248,7 @@ void BT848_Restart_RISC_Code()
 	BYTE CapCtl = BT848_ReadByte(BT848_CAP_CTL);
 	BT848_MaskDataByte(BT848_CAP_CTL, 0, (BYTE) 0x0f);
 	BT848_WriteDword(BT848_INT_STAT, (DWORD) 0x0fffffff);
-	BT848_WriteDword(BT848_RISC_STRT_ADD, RiscLogToPhys(m_pRiscJump + 2));
+	BT848_WriteDword(BT848_RISC_STRT_ADD, RiscBasePhysical);
 	BT848_WriteByte(BT848_CAP_CTL, CapCtl);
 }
 
@@ -308,7 +278,7 @@ void BT848_ResetHardware()
 {
 	BT848_SetDMA(FALSE);
 	BT848_WriteByte(BT848_SRESET, 0);
-	BT848_WriteDword(BT848_RISC_STRT_ADD, RiscLogToPhys(m_pRiscJump + 2));
+	BT848_WriteDword(BT848_RISC_STRT_ADD, RiscBasePhysical);
 	BT848_WriteByte(BT848_CAP_CTL, 0x00);
 	BT848_WriteByte(BT848_VBI_PACK_SIZE, (VBI_SPL / 4) & 0xff);
 	BT848_WriteByte(BT848_VBI_PACK_DEL, (VBI_SPL / 4) >> 8);
@@ -368,73 +338,6 @@ void BT848_ResetHardware()
 PHYS RiscLogToPhys(DWORD * pLog)
 {
 	return (RiscBasePhysical + (pLog - RiscBaseLinear) * 4);
-}
-
-void BT848_MakeVBITable(int VBI_Lines)
-{
-	int nLine;
-	int nIndex;
-	PHYS pPhysVBI;
-
-	int GotBytesPerLine;
-
-	for(nIndex = 0; nIndex < 5; nIndex++)
-	{
-		DWORD *po = m_pRiscVBIOdd[nIndex];
-		DWORD *pe = m_pRiscVBIEven[nIndex];
-		LPBYTE pVBI = (LPBYTE) Vbi_dma[nIndex]->dwUser;
-
-		*(pe++) = (BT848_RISC_SYNC | BT848_FIFO_STATUS_FM1);
-		*(pe++) = 0;
-		for (nLine = 0; nLine < VBI_Lines; nLine++)
-		{
-			pPhysVBI = GetPhysicalAddress(Vbi_dma[nIndex], pVBI, VBI_SPL, &GotBytesPerLine);
-			if (GotBytesPerLine < VBI_SPL)
-			{
-				*(pe++) = BT848_RISC_WRITE | BT848_RISC_SOL | GotBytesPerLine;
-				*(pe++) = pPhysVBI;
-				// Assumes lines aren't >8K long!
-				pPhysVBI = GetPhysicalAddress(Vbi_dma[nIndex], pVBI + GotBytesPerLine, 0, 0);
-				*(pe++) = BT848_RISC_WRITE | BT848_RISC_EOL | (VBI_SPL - GotBytesPerLine);
-				*(pe++) = pPhysVBI;
-			}
-			else
-			{
-				*(pe++) = BT848_RISC_WRITE | BT848_RISC_SOL | BT848_RISC_EOL | VBI_SPL;
-				*(pe++) = pPhysVBI;
-			}
-			pVBI += 2048;
-		}
-
-		*(pe++) = BT848_RISC_JUMP;
-		*(pe++) = RiscLogToPhys(m_pRiscJump + 4 + nIndex * 12);
-
-
-		*(po++) = (BT848_RISC_SYNC | BT848_FIFO_STATUS_FM1);
-		*(po++) = 0;
-
-		for (nLine = VBI_Lines; nLine < VBI_Lines * 2; nLine++)
-		{
-			pPhysVBI = GetPhysicalAddress(Vbi_dma[nIndex], pVBI, VBI_SPL, &GotBytesPerLine);
-			if (GotBytesPerLine < VBI_SPL)
-			{
-				*(po++) = BT848_RISC_WRITE | BT848_RISC_SOL | GotBytesPerLine;
-				*(po++) = pPhysVBI;
-				// Assumes lines aren't >8K long!
-				pPhysVBI = GetPhysicalAddress(Vbi_dma[nIndex], pVBI + GotBytesPerLine, 0, 0);
-				*(po++) = BT848_RISC_WRITE | BT848_RISC_EOL | (VBI_SPL - GotBytesPerLine);
-				*(po++) = pPhysVBI;
-			}
-			else
-			{
-				*(po++) = BT848_RISC_WRITE | BT848_RISC_SOL | BT848_RISC_EOL | VBI_SPL;
-				*(po++) = pPhysVBI;
-			}
-			pVBI += 2048;
-		}
-		*(po++) = BT848_RISC_JUMP;
-		*(po++) = RiscLogToPhys(m_pRiscJump + 10 + nIndex * 12);
-	}
 }
 
 void BT848_SetPLL(PLLFREQ PLL)
@@ -501,6 +404,7 @@ BOOL BT848_SetGeoSize()
 	BYTE crop, vtc, ColourFormat;
 
 	CurrentY = TVSettings[TVTYPE].wCropHeight;
+	CurrentVBILines = TVSettings[TVTYPE].VBILines;
 
 	// set the pll on the card if appropriate
 	if(TVSettings[TVTYPE].Is25fps == TRUE && TVCards[CardType].pll != PLL_NONE)
@@ -547,7 +451,6 @@ BOOL BT848_SetGeoSize()
 	BT848_SetGeometryEvenOdd(FALSE, vtc, hscale, vscale, hactive, vactive, hdelay, vdelay, crop);
 	BT848_SetGeometryEvenOdd(TRUE, vtc, hscale, vscale, hactive, vactive, hdelay, vdelay, crop);
 
-	MakeVideoTableForDisplay();
 	return TRUE;
 }
 
@@ -671,304 +574,111 @@ BOOL BT848_IsVideoPresent()
 	return ((BT848_ReadByte(BT848_DSTATUS) & (BT848_DSTATUS_PRES | BT848_DSTATUS_HLOC)) == (BT848_DSTATUS_PRES | BT848_DSTATUS_HLOC)) ? TRUE : FALSE;
 }
 
-void BT848_SetRiscJumpsDecode(int nFlags)
+// Creates the RISC code
+// First syncs to field
+// Then waits for data
+// Then tells the bt848 where to put each line of data
+
+void BT848_CreateRiscCode(int nFlags)
 {
-	m_pRiscJump = Risc_dma->dwUser;
-
-	m_pRiscJump[0] = (DWORD) (BT848_RISC_SYNC | BT848_RISC_RESYNC | BT848_FIFO_STATUS_VRE);
-	m_pRiscJump[1] = 0;
-
-	m_pRiscJump[2] = BT848_RISC_JUMP;
-	if (nFlags & BT848_CAP_CTL_CAPTURE_VBI_EVEN)
-	{
-		m_pRiscJump[3] = RiscLogToPhys(m_pRiscVBIEven[0]);
-	}
-	else
-	{
-		m_pRiscJump[3] = RiscLogToPhys(m_pRiscJump + 4);
-	}
-
-	m_pRiscJump[4] = BT848_RISC_JUMP;
-	if (nFlags & BT848_CAP_CTL_CAPTURE_EVEN)
-	{
-		m_pRiscJump[5] = RiscLogToPhys(m_pRiscFrameEven[0]);
-	}
-	else
-	{
-		m_pRiscJump[5] = RiscLogToPhys(m_pRiscJump + 6);
-	}
-
-	m_pRiscJump[6] = (DWORD) (BT848_RISC_SYNC | BT848_RISC_RESYNC | BT848_FIFO_STATUS_VRO);
-	m_pRiscJump[7] = 0;
-
-	m_pRiscJump[8] = BT848_RISC_JUMP;
-	if (nFlags & BT848_CAP_CTL_CAPTURE_VBI_ODD)
-	{
-		m_pRiscJump[9] = RiscLogToPhys(m_pRiscVBIOdd[0]);
-	}
-	else
-	{
-		m_pRiscJump[9] = RiscLogToPhys(m_pRiscJump + 10);
-	}
-
-	m_pRiscJump[10] = BT848_RISC_JUMP;
-	if (nFlags & BT848_CAP_CTL_CAPTURE_ODD)
-	{
-		m_pRiscJump[11] = RiscLogToPhys(m_pRiscFrameOdd[0]);
-	}
-	else
-	{
-		m_pRiscJump[11] = RiscLogToPhys(m_pRiscJump + 12);
-	}
-
-	// 2. Bild
-	m_pRiscJump[12] = (DWORD) (BT848_RISC_SYNC | BT848_RISC_RESYNC | BT848_FIFO_STATUS_VRE);
-	m_pRiscJump[13] = 0;
-
-	m_pRiscJump[14] = BT848_RISC_JUMP;
-	if (nFlags & BT848_CAP_CTL_CAPTURE_VBI_EVEN)
-	{
-		m_pRiscJump[15] = RiscLogToPhys(m_pRiscVBIEven[1]);
-	}
-	else
-	{
-		m_pRiscJump[15] = RiscLogToPhys(m_pRiscJump + 16);
-	}
-
-	m_pRiscJump[16] = BT848_RISC_JUMP;
-	if (nFlags & BT848_CAP_CTL_CAPTURE_EVEN)
-	{
-		m_pRiscJump[17] = RiscLogToPhys(m_pRiscFrameEven[1]);
-	}
-	else
-	{
-		m_pRiscJump[17] = RiscLogToPhys(m_pRiscJump + 18);
-	}
-
-	m_pRiscJump[18] = (DWORD) (BT848_RISC_SYNC | BT848_RISC_RESYNC | BT848_FIFO_STATUS_VRO);
-	m_pRiscJump[19] = 0;
-
-	m_pRiscJump[20] = BT848_RISC_JUMP;
-	if (nFlags & BT848_CAP_CTL_CAPTURE_VBI_ODD)
-	{
-		m_pRiscJump[21] = RiscLogToPhys(m_pRiscVBIOdd[1]);
-	}
-	else
-	{
-		m_pRiscJump[21] = RiscLogToPhys(m_pRiscJump + 22);
-	}
-
-	m_pRiscJump[22] = BT848_RISC_JUMP;
-	if (nFlags & BT848_CAP_CTL_CAPTURE_ODD)
-	{
-		m_pRiscJump[23] = RiscLogToPhys(m_pRiscFrameOdd[1]);
-	}
-	else
-	{
-		m_pRiscJump[23] = RiscLogToPhys(m_pRiscJump + 24);
-	}
-
-	// 3. Bild
-
-	m_pRiscJump[24] = (DWORD) (BT848_RISC_SYNC | BT848_RISC_RESYNC | BT848_FIFO_STATUS_VRE);
-	m_pRiscJump[25] = 0;
-
-	m_pRiscJump[26] = BT848_RISC_JUMP;
-	if (nFlags & BT848_CAP_CTL_CAPTURE_VBI_EVEN)
-	{
-		m_pRiscJump[27] = RiscLogToPhys(m_pRiscVBIEven[2]);
-	}
-	else
-	{
-		m_pRiscJump[27] = RiscLogToPhys(m_pRiscJump + 28);
-	}
-
-	m_pRiscJump[28] = BT848_RISC_JUMP;
-	if (nFlags & BT848_CAP_CTL_CAPTURE_EVEN)
-	{
-		m_pRiscJump[29] = RiscLogToPhys(m_pRiscFrameEven[2]);
-	}
-	else
-	{
-		m_pRiscJump[29] = RiscLogToPhys(m_pRiscJump + 30);
-	}
-
-	m_pRiscJump[30] = (DWORD) (BT848_RISC_SYNC | BT848_RISC_RESYNC | BT848_FIFO_STATUS_VRO);
-	m_pRiscJump[31] = 0;
-
-	m_pRiscJump[32] = BT848_RISC_JUMP;
-	if (nFlags & BT848_CAP_CTL_CAPTURE_VBI_ODD)
-	{
-		m_pRiscJump[33] = RiscLogToPhys(m_pRiscVBIOdd[2]);
-	}
-	else
-	{
-		m_pRiscJump[33] = RiscLogToPhys(m_pRiscJump + 34);
-	}
-
-	m_pRiscJump[34] = BT848_RISC_JUMP;
-	if (nFlags & BT848_CAP_CTL_CAPTURE_ODD)
-	{
-		m_pRiscJump[35] = RiscLogToPhys(m_pRiscFrameOdd[2]);
-	}
-	else
-	{
-		m_pRiscJump[35] = RiscLogToPhys(m_pRiscJump);
-	}
-
-	// 4. Bild
-
-	m_pRiscJump[36] = (DWORD) (BT848_RISC_SYNC | BT848_RISC_RESYNC | BT848_FIFO_STATUS_VRE);
-	m_pRiscJump[37] = 0;
-
-	m_pRiscJump[38] = BT848_RISC_JUMP;
-	if (nFlags & BT848_CAP_CTL_CAPTURE_VBI_EVEN)
-	{
-		m_pRiscJump[39] = RiscLogToPhys(m_pRiscVBIEven[3]);
-	}
-	else
-	{
-		m_pRiscJump[39] = RiscLogToPhys(m_pRiscJump + 40);
-	}
-
-	m_pRiscJump[40] = BT848_RISC_JUMP;
-	if (nFlags & BT848_CAP_CTL_CAPTURE_EVEN)
-	{
-		m_pRiscJump[41] = RiscLogToPhys(m_pRiscFrameEven[3]);
-	}
-	else
-	{
-		m_pRiscJump[41] = RiscLogToPhys(m_pRiscJump + 42);
-	}
-
-	m_pRiscJump[42] = (DWORD) (BT848_RISC_SYNC | BT848_RISC_RESYNC | BT848_FIFO_STATUS_VRO);
-	m_pRiscJump[43] = 0;
-
-	m_pRiscJump[44] = BT848_RISC_JUMP;
-	if (nFlags & BT848_CAP_CTL_CAPTURE_VBI_ODD)
-	{
-		m_pRiscJump[45] = RiscLogToPhys(m_pRiscVBIOdd[3]);
-	}
-	else
-	{
-		m_pRiscJump[45] = RiscLogToPhys(m_pRiscJump + 46);
-	}
-
-	m_pRiscJump[46] = BT848_RISC_JUMP;
-	if (nFlags & BT848_CAP_CTL_CAPTURE_ODD)
-	{
-		m_pRiscJump[47] = RiscLogToPhys(m_pRiscFrameOdd[3]);
-	}
-	else
-	{
-		m_pRiscJump[47] = RiscLogToPhys(m_pRiscJump);
-	}
-
-	// 5. Bild
-
-	m_pRiscJump[48] = (DWORD) (BT848_RISC_SYNC | BT848_RISC_RESYNC | BT848_FIFO_STATUS_VRE);
-	m_pRiscJump[49] = 0;
-
-	m_pRiscJump[50] = BT848_RISC_JUMP;
-	if (nFlags & BT848_CAP_CTL_CAPTURE_VBI_EVEN)
-	{
-		m_pRiscJump[51] = RiscLogToPhys(m_pRiscVBIEven[4]);
-	}
-	else
-	{
-		m_pRiscJump[51] = RiscLogToPhys(m_pRiscJump + 52);
-	}
-
-	m_pRiscJump[52] = BT848_RISC_JUMP;
-	if (nFlags & BT848_CAP_CTL_CAPTURE_EVEN)
-	{
-		m_pRiscJump[53] = RiscLogToPhys(m_pRiscFrameEven[4]);
-	}
-	else
-	{
-		m_pRiscJump[53] = RiscLogToPhys(m_pRiscJump + 54);
-	}
-
-	m_pRiscJump[54] = (DWORD) (BT848_RISC_SYNC | BT848_RISC_RESYNC | BT848_FIFO_STATUS_VRO);
-	m_pRiscJump[55] = 0;
-
-	m_pRiscJump[56] = BT848_RISC_JUMP;
-	if (nFlags & BT848_CAP_CTL_CAPTURE_VBI_ODD)
-	{
-		m_pRiscJump[57] = RiscLogToPhys(m_pRiscVBIOdd[4]);
-	}
-	else
-	{
-		m_pRiscJump[57] = RiscLogToPhys(m_pRiscJump + 58);
-	}
-
-	m_pRiscJump[58] = BT848_RISC_JUMP;
-	if (nFlags & BT848_CAP_CTL_CAPTURE_ODD)
-	{
-		m_pRiscJump[59] = RiscLogToPhys(m_pRiscFrameOdd[4]);
-	}
-	else
-	{
-		m_pRiscJump[59] = RiscLogToPhys(m_pRiscJump);
-	}
-
-	BT848_WriteDword(BT848_RISC_STRT_ADD, RiscLogToPhys(m_pRiscJump + 2));
-}
-
-void MakeVideoTableForDisplay()
-{
-	DWORD *ro = m_pRiscFrameOdd[0];
-	DWORD *re = m_pRiscFrameEven[0];
-	DWORD **rp;
-	LPBYTE pLinDisplay;
-
-	PHYS pPhysDisplay;
+	DWORD *pRiscCode;
+	int nField;
+	int nLine;
+	LPBYTE pUser;
+	PHYS pPhysical;
 	DWORD GotBytesPerLine;
-	DWORD BytesPerLine = CurrentX * 2;	// Untested
-	int i;
-	int nBuffer;
+	DWORD BytesPerLine = 0;
+	
+	pRiscCode = Risc_dma->dwUser;
 
-	for(nBuffer = 0; nBuffer < 5; nBuffer++)
+	// we create the RISC code for 10 fields
+	// the first one (0) is even
+	// last one (9) is odd
+	for(nField = 0; nField < 10; nField++)
 	{
-		re = m_pRiscFrameEven[nBuffer];
-		ro = m_pRiscFrameOdd[nBuffer];
-		pLinDisplay = (LPBYTE) pDisplay[nBuffer];
-
-		*(re++) = (BT848_RISC_SYNC | BT848_FIFO_STATUS_FM1);
-		*(re++) = 0;
-		*(ro++) = (BT848_RISC_SYNC | BT848_FIFO_STATUS_FM1);	//|(14<<20));
-		*(ro++) = 0;
-
-		for (i = 0; i < CurrentY; i++)
+		// First we sync onto either the odd or even field
+		if(nField & 1)
 		{
-			rp = (i & 1) ? &ro : &re;
-
-			pPhysDisplay = GetPhysicalAddress(Display_dma[nBuffer], pLinDisplay, BytesPerLine, &GotBytesPerLine);
-			if(pPhysDisplay == 0)
-			{
-				return;
-			}
-			// 27/12/2000 JA
-			// pDisplay is now aligned to a page boundary
-			// this means if we increment a half apge at a time
-			// then we always will ahve enough room and will not need
-			// to split the line as before
-			*((*rp)++) = BT848_RISC_WRITE | BT848_RISC_SOL | BT848_RISC_EOL | BytesPerLine;
-			*((*rp)++) = pPhysDisplay;
-			pLinDisplay += 2048;
-		}
-		*(re++) = BT848_RISC_JUMP | ((0xF0) << 16);
-		*(re++) = RiscLogToPhys(m_pRiscJump + 6 + nBuffer * 12);
-		*(ro++) = BT848_RISC_JUMP | ((0xF1 + nBuffer) << 16);
-		if(nBuffer != 4)
-		{
-			*(ro++) = RiscLogToPhys(m_pRiscJump + 12 + nBuffer * 12);
+			*(pRiscCode++) = (DWORD) (BT848_RISC_SYNC | BT848_RISC_RESYNC | BT848_FIFO_STATUS_VRO);
 		}
 		else
 		{
-			*(ro++) = RiscLogToPhys(m_pRiscJump);
+			*(pRiscCode++) = (DWORD) (BT848_RISC_SYNC | BT848_RISC_RESYNC | BT848_FIFO_STATUS_VRE  | ((0xF1 + nField / 2) << 16));
+		}
+		*(pRiscCode++) = 0;
+
+		// Create VBI code of required
+		if (nField % 2 == 0 && nFlags & BT848_CAP_CTL_CAPTURE_VBI_EVEN ||
+			nField % 2 == 1 && nFlags & BT848_CAP_CTL_CAPTURE_VBI_ODD)
+		{
+			*(pRiscCode++) = (DWORD) (BT848_RISC_SYNC | BT848_FIFO_STATUS_FM1);
+			*(pRiscCode++) = 0;
+
+			pUser = pVBILines[nField / 2];
+			if(nField & 1)
+			{
+				pUser += CurrentVBILines * 2048;
+			}
+			for (nLine = 0; nLine < CurrentVBILines; nLine++)
+			{
+				pPhysical = GetPhysicalAddress(Vbi_dma[nField / 2], pUser, VBI_SPL, &GotBytesPerLine);
+				if(pPhysical == 0 || VBI_SPL > GotBytesPerLine)
+				{
+					return;
+				}
+				*(pRiscCode++) = BT848_RISC_WRITE | BT848_RISC_SOL | BT848_RISC_EOL | BytesPerLine;
+				*(pRiscCode++) = pPhysical;
+				pUser += 2048;
+			}
+		}
+
+		*(pRiscCode++) = (DWORD) (BT848_RISC_SYNC | BT848_FIFO_STATUS_FM1);
+		*(pRiscCode++) = 0;
+
+
+		// work out the position of the first line
+		// first line is line zero an even line
+		pUser = pDisplay[nField / 2];
+		if(nField & 1)
+		{
+			pUser += 2048;
+		}
+		BytesPerLine = CurrentX * 2;
+		for (nLine = 0; nLine < CurrentY / 2; nLine++)
+		{
+
+			pPhysical = GetPhysicalAddress(Display_dma[nField / 2], pUser, BytesPerLine, &GotBytesPerLine);
+			if(pPhysical == 0 || BytesPerLine > GotBytesPerLine)
+			{
+				return;
+			}
+			*(pRiscCode++) = BT848_RISC_WRITE | BT848_RISC_SOL | BT848_RISC_EOL | BytesPerLine;
+			*(pRiscCode++) = pPhysical;
+			// since we are doing all the lines of the same
+			// polarity at the same time we skip two lines
+			pUser += 4096;
 		}
 	}
+
+	BytesPerRISCField = ((long)pRiscCode - (long)Risc_dma->dwUser) / 10;
+	*(pRiscCode++) = BT848_RISC_JUMP;
+	*(pRiscCode++) = RiscBasePhysical;
+
+	BT848_WriteDword(BT848_RISC_STRT_ADD, RiscBasePhysical);
+}
+
+// Works out a field number between 0-9 indicating which field we are currently
+// sending to memory
+int BT848_GetRISCPosAsInt()
+{
+	int CurrentPos = 10;
+	while(CurrentPos > 9)
+	{
+		DWORD CurrentRiscPos = BT848_ReadDword(BT848_RISC_COUNT);
+		CurrentPos = (CurrentRiscPos - RiscBasePhysical) / BytesPerRISCField;
+	}
+
+	return CurrentPos;
 }
 
 
@@ -1268,8 +978,6 @@ BOOL BT848_Enable656()
 
 	BT848_SetGeometryEvenOdd(FALSE, BT848_VTC_HSFMT_32, hscale, vscale, hactive, vactive, hdelay, vdelay, crop);
 	BT848_SetGeometryEvenOdd(TRUE, BT848_VTC_HSFMT_32, hscale, vscale, hactive, vactive, hdelay, vdelay, crop);
-
-	MakeVideoTableForDisplay();
 
 	return TRUE;
 }

@@ -30,6 +30,8 @@
 //                                     Cut out all decoding
 //                                     Cut out digital hardware stuff
 //
+// 02 Jan 2001   John Adcock           Made RISC Code linear
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __BT848_H___
@@ -58,9 +60,9 @@ BOOL BT848_MemoryInit(void);
 void BT848_ResetHardware();
 int BT848_Open(DWORD dwVendorID, DWORD dwDeviceID,  DWORD options,BOOL Lock);
 void BT848_Close();
-void BT848_MakeVBITable(int VBI_Lines);
 void BT848_SetPLL(PLLFREQ PLL);
-void BT848_SetRiscJumpsDecode(int nFlags);
+void BT848_CreateRiscCode(int nFlags);
+int BT848_GetRISCPosAsInt();
 BOOL BT848_SetGeoSize();
 BOOL BT848_SetBrightness(int wBrightness);
 BOOL BT848_SetHue(int wHue);
@@ -96,7 +98,6 @@ void BT848_OrDataWord(int Offset, unsigned short d);
 
 // Internal Functions
 PHYS RiscLogToPhys(DWORD * pLog);
-void MakeVideoTableForDisplay();
 void Free_Display_DMA(int NR);
 
 BOOL Alloc_DMA(DWORD dwSize, PMemStruct * dma, int Option);

@@ -30,6 +30,8 @@
 //                                     Cut out all decoding
 //                                     Cut out digital hardware stuff
 //
+// 02 Jan 2001   John Adcock           Added VBILines to TVSettings
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __STRUCTS_H___
@@ -241,6 +243,7 @@ struct TTVSetting
 	WORD wCropOffset;
 	BOOL Is25fps;
 	WORD VBIPacketSize;
+	WORD VBILines;
 };
 
 struct TMixerAccess

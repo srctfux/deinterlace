@@ -34,6 +34,10 @@
 //
 // 26 Dec 2000   Eric Schmidt          Fixed remember-last-audio-input-at-start.
 //
+// 02 Jan 2001   John Adcock           Added pVBILines
+//                                     Removed bTV plug-in
+//                                     Added Scaled BOB method
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -48,7 +52,6 @@
 #include "ProgramList.h"
 #include "Dialogs.h"
 #include "OutThreads.h"
-#include "bTVPlugin.h"
 #include "OSD.h"
 #include "audio.h"
 #include "tuner.h"
@@ -98,6 +101,7 @@ unsigned int srate;
 struct TBL ButtonList[15];
 
 BYTE  *pDisplay[5] =  { NULL,NULL,NULL,NULL,NULL  };
+BYTE  *pVBILines[5] =  { NULL,NULL,NULL,NULL,NULL  };
 
 int MoveXDist=-1;
 int MoveYDist=-1;
@@ -130,8 +134,7 @@ int LastFrame;
 
 int CurrentX = 720;
 int CurrentY;
-
-unsigned char *pBurstLine[5];
+int CurrentVBILines = 0;
 
 int FORMAT_MASK = 0x0F;
 int PalFormat = 0;
@@ -150,9 +153,6 @@ int  MIXER_LINKER_KANAL=-1;
 int  MIXER_RECHTER_KANAL=-1;
 int MixerVolumeStep=-1;
 int MixerVolumeMax=-1;
-
-// Fantasio for Secam-Extensions
-short NullTable[4] = {8192, 0, 0, 8192};
 
 int InitialProg=-1;
 
@@ -202,9 +202,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 #ifndef _DEBUG
 	SetWindowPos(SplashWnd, HWND_TOPMOST, 10, 10, 20, 20, SWP_NOMOVE | SWP_NOCOPYBITS | SWP_NOSIZE);
 #endif
-
-	// try to load up bTV plugin
-	bUseBTVPlugin = BTVPluginLoad(szBTVPluginName);
 
 	if (strlen(IC_BASE_DIR) > 0)
 	{
@@ -300,9 +297,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	DeleteObject(VTCharSetSmall);
 	DeleteObject(RedBulb);
 	DeleteObject(GreenBulb);
-
-	// unload any bTV plugin loaded
-	BTVPluginUnload();
 
 	ExitDD();
 	// save settings
@@ -548,6 +542,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_EVEN_ONLY:
 		case IDM_ODD_ONLY:
 		case IDM_VIDEO_2FRAME:
+		case IDM_SCALER_BOB:
 			SetDeinterlaceMode(LOWORD(wParam) - IDM_VIDEO_BOB);
 			ShowText(hWnd, DeinterlaceModeName(-1));
 			break;
@@ -1013,8 +1008,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				{
 					VBI_Flags -= VBI_VD;
 					VideoDat_Exit();
-					VBI_lpf = 19;
-					BT848_MakeVBITable(VBI_lpf);
 					TVTYPE = BeforeVD;
 					break;
 				}
@@ -1026,8 +1019,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				if (TVTYPE != 7)
 				{
 					VBI_Flags += VBI_VD;	//
-					VBI_lpf = 19;
-					BT848_MakeVBITable(VBI_lpf);
 					TVTYPE = 7;
 					break;
 				}
@@ -1257,11 +1248,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				int NewPulldownMode = gPulldownMode + 1;
 
 				// if we can't use a bTV plug-in then skip it
-				if(NewPulldownMode == BTV_PLUGIN && bUseBTVPlugin == FALSE)
-				{
-					NewPulldownMode++;
-				}
-				else if(NewPulldownMode == PULLDOWNMODES_LAST_ONE)
+				if(NewPulldownMode == PULLDOWNMODES_LAST_ONE)
 				{
 					NewPulldownMode = VIDEO_MODE_BOB;
 				}
@@ -1279,8 +1266,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 					NewPulldownMode = PULLDOWNMODES_LAST_ONE;
 
 				NewPulldownMode--;
-				if (NewPulldownMode == BTV_PLUGIN && bUseBTVPlugin == FALSE)
-					NewPulldownMode--;
 
 				SetDeinterlaceMode(NewPulldownMode);
 				ShowText(hWnd, DeinterlaceModeName(-1));
@@ -1666,8 +1651,6 @@ void MainWndOnInitBT(HWND hWnd)
 			}
 		}
 
-		BT848_MakeVBITable(VBI_lpf);
-
 		WStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
 		if (bAlwaysOnTop == FALSE)
 		{
@@ -1739,11 +1722,6 @@ void MainWndOnInitBT(HWND hWnd)
 		if (bDisplayStatusBar == TRUE)
 		{
 			SetWindowText(hwndKeyField, Text);
-		}
-
-		for (i = 0; i < 5; i++)
-		{
-			pDisplay[i] = GetFirstFullPage(Display_dma[i]);
 		}
 
         // OK we're ready to go
@@ -2096,7 +2074,7 @@ void SetMenuAnalog()
 	CheckMenuItem(GetMenu(hWnd), IDM_VIDEO_2FRAME, (gPulldownMode == VIDEO_MODE_2FRAME && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_WEAVE, (gPulldownMode == SIMPLE_WEAVE && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_BOB, (gPulldownMode == SIMPLE_BOB && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_BTV, (gPulldownMode == BTV_PLUGIN && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_SCALER_BOB, (gPulldownMode == SCALER_BOB && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_22PULLODD, (gPulldownMode == FILM_22_PULLDOWN_ODD && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_22PULLEVEN, (gPulldownMode == FILM_22_PULLDOWN_EVEN && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_32PULL1, (gPulldownMode == FILM_32_PULLDOWN_0 && ! bAutoDetectMode) ?MF_CHECKED:MF_UNCHECKED);
@@ -2133,7 +2111,6 @@ void CleanUpMemory()
 	{
 		Free_DMA(&Vbi_dma[i]);
 		Free_Display_DMA(i);
-		Free_DMA(&Burst_dma[i]);
 	}
 
 	for (i = 0; i < MAXVTDIALOG; i++)

@@ -28,12 +28,22 @@
 // 17 Sep 2000   Mark Rejhon           Implemented Steve Grimm's changes
 //                                     Some cleanup done.
 //                                     Made refinements to Steve Grimm's changes
+//
 // 24 Jul 2000   John Adcock           Original Release
 //                                     Translated most code from German
 //                                     Combined Header files
 //                                     Cut out all decoding
 //                                     Cut out digital hardware stuff
-// 09 Aug 2000   John Adcock           Fixed bug at end of GetCombFactor assember
+//
+// 09 Aug 2000   John Adcock           Changed WaitForNextFrame to use current RISC
+//                                     pointer rather than the status flag
+//                                     Also changed VBI processing 
+//
+// 02 Jan 2001   John Adcock           Fixed bug at end of GetCombFactor assember
+//                                     Made PAL pulldown detect remember last video
+//                                     mode
+//                                     Removed bTV plug-in
+//                                     Added Scaled BOB method
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -41,7 +51,6 @@
 #include "OutThreads.h"
 #include "other.h"
 #include "bt848.h"
-#include "bTVPlugin.h"
 #include "VBI_VideoText.h"
 #include "vbi.h"
 #include "deinterlace.h"
@@ -98,15 +107,9 @@ long				Sleep_Interval = 0;         // " , default=0, how long to wait for BT ch
 ///////////////////////////////////////////////////////////////////////////////
 void Start_Thread()
 {
-	int i;
 	DWORD LinkThreadID;
 
 	CurrentFrame = 0;
-
-	for (i = 0; i < 5; i++)
-	{
-		pDisplay[i] = GetFirstFullPage(Display_dma[i]);
-	}
 
 	// make sure we start with a clean sheet of paper
 	Overlay_Clean();
@@ -179,7 +182,7 @@ void Start_Capture()
 	InterCast.datap = 0;
 	InterCast.lastci = 0xff;
 
-	BT848_SetRiscJumpsDecode(nFlags);
+	BT848_CreateRiscCode(nFlags);
 	BT848_MaskDataByte(BT848_CAP_CTL, (BYTE) nFlags, (BYTE) 0x0f);
 	BT848_SetDMA(TRUE);
 
@@ -208,11 +211,10 @@ void Reset_Capture()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
-// The following function will continually check the BT chip's Interupt Status Flag
-// (specifying even/odd field processing) until it is  is different from what we
-// already have.  We get the buffer (or frame) number from the high 4 bits of that
-// register which changes when the frame changes, in a pattern like 1,0,2,0...5,0,1,0..
-// In other words, 0 means only an even/odd change (don't remember which).
+// The following function will continually check the position in the RISC code
+// until it is  is different from what we already have.
+// We know were we are so we set the current field to be the last one
+// that has definitely finished.
 //
 // Added code here to use a user specified parameter for how long to sleep.  Note that
 // windows timer tick resolution is really MUCH worse than 1 millesecond.  Who knows 
@@ -234,42 +236,27 @@ void Reset_Capture()
 BOOL WaitForNextField(BOOL LastField)
 {
 	BOOL bIsOddField;
-	DWORD stat = BT848_ReadDword(BT848_INT_STAT);
+	int OldPos = CurrentFrame * 2 + LastField;
 	RunningLate = Hurry_When_Late;        // user specified bool parm
-	while(LastField == ((stat & BT848_INT_FIELD) == BT848_INT_FIELD))
+	while(OldPos == BT848_GetRISCPosAsInt())
 	{
 		Sleep(Sleep_Interval);
 		RunningLate = FALSE;			// if we waited then we are not late
-		stat = BT848_ReadDword(BT848_INT_STAT);
 	}
 
-	bIsOddField = ((stat & BT848_INT_FIELD) == BT848_INT_FIELD);
-
-	switch(stat >> 28)
+	switch(BT848_GetRISCPosAsInt())
 	{
-	case 1:  CurrentFrame = 0;  break;
-	case 2:  CurrentFrame = 1;  break;
-	case 3:  CurrentFrame = 2;  break;
-	case 4:  CurrentFrame = 3;  break;
-	case 5:  CurrentFrame = 4;  break;
-	default: break;
+	case 0: bIsOddField = TRUE;  CurrentFrame = 4; break;
+	case 1: bIsOddField = FALSE; CurrentFrame = 0; break;
+	case 2: bIsOddField = TRUE;  CurrentFrame = 0; break;
+	case 3: bIsOddField = FALSE; CurrentFrame = 1; break;
+	case 4: bIsOddField = TRUE;  CurrentFrame = 1; break;
+	case 5: bIsOddField = FALSE; CurrentFrame = 2; break;
+	case 6: bIsOddField = TRUE;  CurrentFrame = 2; break;
+	case 7: bIsOddField = FALSE; CurrentFrame = 3; break;
+	case 8: bIsOddField = TRUE;  CurrentFrame = 3; break;
+	case 9: bIsOddField = FALSE; CurrentFrame = 4; break;
 	}
-
-	BT848_WriteDword(BT848_INT_STAT, (DWORD) 0x0fffffff);
-
-// taken out for testing may still have to use BT rest to recover from overruns
-// Note: I don't think it is necessary for overruns.
-// FIXME: We should blank out old video overlay buffers during overruns.
-//
-/*	if(stat & (BT848_INT_PPERR | BT848_INT_SCERR | BT848_INT_FBUS | BT848_INT_FTRGT | BT848_INT_RIPERR))
-	{
-		BT848_Restart_RISC_Code();
-		CurrentFrame = 0;
-		bIsOddField = TRUE;
-		UpdatePALPulldownMode(-1, FALSE);
-		UpdateNTSCPulldownMode(-1, FALSE);
-	}
-*/
 
 	return bIsOddField;
 }
@@ -349,6 +336,7 @@ void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField)
 	static long RepeatCount;
 	static long LastPolarity;
 	static long LastDiff;
+	static ePULLDOWNMODES OldPulldownMode = VIDEO_MODE_BOB;
 
 	// call with CombFactors -1 to reset static variables when we start the thread
 	// each time
@@ -364,6 +352,7 @@ void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField)
 	}
 	if(IS_VIDEO_MODE(gPulldownMode))
 	{
+		OldPulldownMode = gPulldownMode;
 		if((CombFactor - LastCombFactor) < PulldownThresholdLow && LastDiff > PulldownThresholdLow)
 		{
 			if(LastPolarity == IsOddField)
@@ -433,7 +422,7 @@ void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField)
 		}
 		if(RepeatCount == PulldownRepeatCount - PulldownRepeatCount2)
 		{
-			gPulldownMode = VIDEO_MODE_WEAVE;
+			gPulldownMode = OldPulldownMode;
 			RepeatCount = 0;
 			UpdatePulldownStatus();
 			LOG("Back To Video Mode");
@@ -853,8 +842,8 @@ char *DeinterlaceModeName(int mode)
 		return "Simple Bob";
 	case BLENDED_CLIP:
 		return "Blended Clip";
-	case BTV_PLUGIN:
-		return "Using bTV Plugin";
+	case SCALER_BOB:
+		return "Scaler BOB";
 	case FILM_22_PULLDOWN_ODD:
 		return "2:2 Pulldown Flip on Odd";
 	case FILM_22_PULLDOWN_EVEN:
@@ -940,7 +929,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 	int LastOddFrame = 0;
 	int CombNum = 0;
 	BOOL bFlipNow = TRUE;
-	BOOL ForceBob;
+	BOOL bMissedFrame;
 	HRESULT ddrval;
 	DEINTERLACE_INFO info;
 
@@ -956,10 +945,9 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 	SetupProcessorAndThread();
 
 	// Set up 5 sets of pointers to the start of odd and even lines
-	// we will always go up to the limit so that we can use bTV
 	for (j = 0; j < 5; j++)
 	{
-		for (i = 0; i < BTV_VER1_HEIGHT; i += 2)
+		for (i = 0; i < CurrentY; i += 2)
 		{
 			ppOddLines[j][i / 2] = (short *) pDisplay[j] + (i + 1) * 1024;
 			ppEvenLines[j][i / 2] = (short *) pDisplay[j] + i * 1024;
@@ -992,7 +980,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 			info.FrameHeight = CurrentY;
 			info.FieldHeight = CurrentY / 2;
 
-			ForceBob = FALSE;
+			bMissedFrame = FALSE;
 			bFlipNow = FALSE;
 
 			if(info.IsOdd)
@@ -1007,7 +995,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				{
 					memmove(&info.EvenLines[1], &info.EvenLines[0], sizeof(info.EvenLines) - sizeof(info.EvenLines[0]));
 					info.EvenLines[0] = NULL;
-					ForceBob = TRUE;
+					bMissedFrame = TRUE;
 					nFrame++;
 				}
 			}
@@ -1023,12 +1011,12 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				{
 					memmove(&info.OddLines[1], &info.OddLines[0], sizeof(info.OddLines) - sizeof(info.OddLines[0]));
 					info.OddLines[0] = NULL;
-					ForceBob = TRUE;
+					bMissedFrame = TRUE;
 					nFrame++;
 				}
 			}
 
-			if(bAutoDetectMode == TRUE && ! ForceBob)
+			if(bAutoDetectMode == TRUE && !bMissedFrame)
 			{
 				if (bIsPAL)
 				{
@@ -1055,12 +1043,16 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				}
 			}
 
-			if (Capture_VBI == TRUE)
+			if (!RunningLate && Capture_VBI == TRUE)
 			{
-				BYTE * pVBI = (LPBYTE) Vbi_dma[CurrentFrame]->dwUser;
-				for (nLineTarget = VBI_lpf; nLineTarget < 2 * VBI_lpf ; nLineTarget++)
+				BYTE * pVBI = (LPBYTE) pVBILines[CurrentFrame];
+				if (info.IsOdd)
 				{
-					VBI_DecodeLine(pVBI + nLineTarget * 2048, nLineTarget - VBI_lpf);
+					pVBI += CurrentVBILines * 2048;
+				}
+				for (nLineTarget = 0; nLineTarget < CurrentVBILines ; nLineTarget++)
+				{
+					VBI_DecodeLine(pVBI + nLineTarget * 2048, nLineTarget);
 				}
 			}
 
@@ -1071,13 +1063,16 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				info.Overlay = pDest;
 			}
 
-
 			if (RunningLate)
 			{
 				// do nothing
 			}
 			// if we have dropped a field then do BOB 
-			else if(ForceBob || gPulldownMode == SIMPLE_BOB)
+			// if we are doing a half height mode then just do that
+			// anyway
+			else if(bMissedFrame && !IS_HALF_HEIGHT(gPulldownMode))
+				bFlipNow = Bob(&info);
+			else if(gPulldownMode == SIMPLE_BOB)
 				bFlipNow = Bob(&info);
 			else if (gPulldownMode == VIDEO_MODE_2FRAME)
 				bFlipNow = DeinterlaceFieldTwoFrame(&info);
@@ -1089,31 +1084,26 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				bFlipNow = Weave(&info);
 			else if(gPulldownMode == BLENDED_CLIP)
 				bFlipNow = BlendedClipping(&info);
-			else if(gPulldownMode == BTV_PLUGIN)
+			else if(gPulldownMode == SCALER_BOB)
 			{
-				BYTE* pDestEven[CLEARLINES];
-				BYTE* pDestOdd[CLEARLINES];
-				
-				// set up desination pointers
-				// may need to optimize this later
-				for (i = 0; i < BTV_VER1_HEIGHT; i += 2)
+				for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
 				{
-					pDestEven[i / 2] = pDest;
-					pDest += OverlayPitch;
-					pDestOdd[i / 2] = pDest;
+					// copy latest field's rows to overlay, resulting in a half-height image.
+					if (info.IsOdd)
+					{
+						memcpyMMX(pDest,
+									info.OddLines[0][nLineTarget],
+									CurrentX * 2);
+					}
+					else
+					{
+						memcpyMMX(pDest,
+									info.EvenLines[0][nLineTarget],
+									CurrentX * 2);
+					}
 					pDest += OverlayPitch;
 				}
-				
-				BTVParams.IsOddField = info.IsOdd;
-				BTVParams.ppCurrentField = info.IsOdd ? info.OddLines[0] : info.EvenLines[0];
-				BTVParams.ppLastField = info.IsOdd ? info.EvenLines[0] : info.OddLines[0];
-				BTVParams.ppEvenDest = pDestEven;
-				BTVParams.ppOddDest = pDestOdd;
-
-				if (BTVParams.ppCurrentField != NULL && BTVParams.ppLastField != NULL)
-					bFlipNow = BTVPluginDoField(&BTVParams);
-				else
-					bFlipNow = FALSE;
+				bFlipNow = TRUE;
 			}
 			else if (gPulldownMode == ODD_ONLY)
 			{
@@ -1122,8 +1112,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 					for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
 					{
 						// copy latest field's odd rows to overlay, resulting in a half-height image.
-						memcpyBOBMMX(pDest,
-									pDest + OverlayPitch,
+						memcpyMMX(pDest,
 									info.OddLines[0][nLineTarget],
 									CurrentX * 2);
 						pDest += OverlayPitch;
@@ -1138,8 +1127,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 					for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
 					{
 						// copy latest field's even rows to overlay, resulting in a half-height image.
-						memcpyBOBMMX(pDest,
-									pDest + OverlayPitch,
+						memcpyMMX(pDest,
 									info.EvenLines[0][nLineTarget],
 									CurrentX * 2);
 						pDest += OverlayPitch;

@@ -30,6 +30,8 @@
 //                                     Cut out all decoding
 //                                     Cut out digital hardware stuff
 //
+// 02 Jan 2001   John Adcock           Started VBI Clean Up
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -41,18 +43,12 @@
 BOOL bStopVBI;
 HANDLE VBIThread;
 
-int VBI_lpf = 16;   // lines per field
 BYTE VBI_thresh;
 BYTE VBI_off;
 int vtstep;
 
 void VBI_DecodeLine(unsigned char *VBI_Buffer, int line)
 {
-	if (line >= VBI_lpf)
-	{
-		line -= VBI_lpf;
-	}
-
 	vtstep = (int) ((28.636363 / 5.72725) * FPFAC + 0.5);
 
 	// set up threshold and offset data

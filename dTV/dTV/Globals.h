@@ -39,6 +39,8 @@
 //                                     Cut out all decoding
 //                                     Cut out digital hardware stuff
 //
+// 02 Jan 2001   John Adcock           Added CurrentVBILines and removed BurstDMA
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __GLOBALS_H___
@@ -77,7 +79,8 @@ extern BOOL VT_NL;
 extern BOOL VT_REVEAL;
 extern BOOL VT_STRIPPED;
 extern BOOL VTLarge;
-extern BYTE *pDisplay[5];
+extern BYTE* pDisplay[5];
+extern BYTE* pVBILines[5];
 extern BYTE VT_Header_Line[40];
 extern char BTTyp[30];
 extern char IC_BASE_DIR[128];
@@ -120,6 +123,7 @@ extern int CurrentPitch;
 extern int CurrentProgramm;
 extern int CurrentX;
 extern int CurrentY;
+extern int CurrentVBILines;
 extern int DeviceNumber;
 extern int FirstWidthEven;
 extern int FirstWidthOdd;
@@ -174,7 +178,6 @@ extern struct TVDat VDat;
 extern struct TVT VTFrame[800];
 extern struct TVTDialog VTDialog[MAXVTDIALOG];
 extern struct TTVSetting TVSettings[];
-extern unsigned char *pBurstLine[5];
 extern unsigned int ManuellAudio[8];
 extern unsigned short cp_odd[256][285];
 extern unsigned short UTCount;
@@ -183,7 +186,6 @@ extern unsigned short UTPages[12];
 extern unsigned short UTPages[12];
 extern unsigned short VTColourTable[9];
 extern PMemStruct Display_dma[5];
-extern PMemStruct Burst_dma[5];
 extern PMemStruct Risc_dma;
 extern PMemStruct Vbi_dma[5];
 
