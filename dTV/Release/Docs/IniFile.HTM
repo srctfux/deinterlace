@@ -28,9 +28,9 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
     <td height="1" width="501"><img src="images/spacer.gif" width="1" height="1"></td>
   </tr>
   <tr> 
-    <td width="160"><img src="images/dtvlogotvthumb.jpg" width="160" height="140" alt="dTV Logo"></td>
+    <td width="160"><img src="images/dtvlogotvthumb.jpg" alt="DScaler Logo" width="329" height="140"></td>
     <td colspan="2" align="right" valign="bottom">
-      <font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><!-- #BeginEditable "Page%20Title" -->dScaler.ini 
+      <font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><!-- #BeginEditable "Page%20Title" -->DScaler.ini 
       Settings &nbsp;<!-- #EndEditable --></b></font></td>
   </tr>
   <tr bgcolor="#FFCC00" align="right"> 
@@ -45,12 +45,12 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         Some advanced settings and functions in beta test will require changes 
         to this ini file to work properly.&nbsp; All the settings used by the 
         program are stored here and no changes are made to the registry.</p>
-      <p>While the default name of this file is dScaler.ini, other names and copies
+      <p>While the default name of this file is DScaler.ini, other names and copies
       may be used, to create multiple profiles.&nbsp; Just create a shortcut to
-      invoke dScaler with a single parameter such as &quot;dScaler.exe vcr.ini&quot;.&nbsp;
+      invoke DScaler with a single parameter such as &quot;DScaler.exe vcr.ini&quot;.&nbsp;
       This would cause the vcr.ini (or whatever) file to be used and saved on
-      exit.&nbsp; Doing this is easiest if you copy a working dScaler.ini file first
-      and then change it using the dScaler menus.</p>
+      exit.&nbsp; Doing this is easiest if you copy a working DScaler.ini file first
+      and then change it using the DScaler menus.</p>
        
       <table border="1">
         <tr> 
@@ -201,7 +201,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
           <td>16</td>
           <td>The Adaptive video deinterlace mode considers an image to be static if it
             stays the same (or nearly the same, subject to Threshold32Pulldown) for this
-            many fields.  In Adaptive mode, dScaler will switch from LowMotionMode to
+            many fields.  In Adaptive mode, DScaler will switch from LowMotionMode to
             StaticImageMode for as long as the image remains the same.  This
             helps reduce CPU consumption on still images such as DVD menu screens.</td>
         </tr>
@@ -211,7 +211,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
           <td>4</td>
           <td>The Adaptive video deinterlace mode considers an image to be
             low-motion if its difference stays below Threshold32Pulldown for this many fields.
-            When that happens, dScaler will switch from high-motion to low-motion mode.</td>
+            When that happens, DScaler will switch from high-motion to low-motion mode.</td>
         </tr>
 
         <tr>
@@ -348,7 +348,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
             1
           </td>
           <td> 
-            Luma Output Range. dScaler defaults to 1 but maybe should be set to 0 for
+            Luma Output Range. DScaler defaults to 1 but maybe should be set to 0 for
             NTSC systems. (Adv. Video Flags)
           </td>
         </tr>
@@ -445,7 +445,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
             0
           </td>
           <td> 
-            Turns on hardware Horizontal filter.  Because of dScalers large scale only values 0 and 1 are valid.
+            Turns on hardware Horizontal filter.  Because of DScalers large scale only values 0 and 1 are valid.
             0=normal 2 tap filter (like before), 4 adds a little more filter but works (I think) only when the BtLumaPeak and
             BtLumaDec are also both on.  It makes thing a little softer. (Adv.
             Video Flags)<br>
@@ -459,7 +459,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
             0
           </td>
           <td> 
-            Vertical filter. Valid values would be 0-7 but at dScaler's resolution only 0 and 4 are allowed.  0 = 2-tap
+            Vertical filter. Valid values would be 0-7 but at DScaler's resolution only 0 and 4 are allowed.  0 = 2-tap
             interpolation only. 4 = 2-tap plus z filter. This make thing a lot softer.
             (Adv. Video Flags)
           </td>
@@ -489,7 +489,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
             <p align="center">0
           </td>
           <td> 
-            Performance parameter.&nbsp; If set to 1 will cause dScaler to bypass
+            Performance parameter.&nbsp; If set to 1 will cause DScaler to bypass
             some processing to conserve CPU time if it seems to not be keeping
             up with the input video stream. May be set to 1for slower machines.
           </td>
@@ -515,9 +515,9 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
             <p align="center">1
           </td>
           <td> 
-            Performance parameter. The number of milliseconds dScaler will sleep,
+            Performance parameter. The number of milliseconds DScaler will sleep,
             waiting for the next video input buffer. May be set to 0 for slower
-            machines. If this is set to 0 it may appear on a CPU monitor that dScaler
+            machines. If this is set to 0 it may appear on a CPU monitor that DScaler
             is using 100% of available CPU processor time but it will still
             be a good citizen and yield control if another task is ready to run.
             May be set to 0 for slower machines.
@@ -562,7 +562,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
             <p align="center">&nbsp; 2
           </td>
           <td> 
-            The Deinterlace mode to be used. The best way to set this is run dScaler
+            The Deinterlace mode to be used. The best way to set this is run DScaler
             and set it from the menu.&nbsp; The current mode will be saved on
             exit.
           </td>
@@ -842,7 +842,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
           <td> 
             Controls whether the code analyzes each frame to detect the current 
               aspect ratio. This may be toggled using the "Autodetect" Aspect 
-              menu option. If deactivated, you can get dScaler to detect the aspect 
+              menu option. If deactivated, you can get DScaler to detect the aspect 
               ratio of the current frame using the "Compute" Aspect menu option.
           </td>
         </tr>
@@ -857,7 +857,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
             Controls how bright letterbox bars are allowed to get. Valid values 
               are 0 through 127. Any pixel with lower luminance than this is considered 
               black by the aspect ratio detection code. Lowering this value will 
-              allow dScaler to detect letterbox modes on darker scenes, at the cost 
+              allow DScaler to detect letterbox modes on darker scenes, at the cost 
               of increasing the chance that video noise in the letterbox bars 
               will be treated as part of the picture. <em>If all your letterboxed 
               material is from a clean signal source, you'll probably want to 
@@ -1018,7 +1018,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         <tr>
           <td>UseTemporalNoiseFilter</td>
           <td align="center">0</td>
-          <td>Controls whether the temporal noise filter is activated when dScaler
+          <td>Controls whether the temporal noise filter is activated when DScaler
             starts up.  0 means it isn't; any other number means it is.</td>
         </tr>
 
@@ -1053,7 +1053,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
 <h2 id="modes">Deinterlace Modes</h2>
 
 <p>The following numeric codes correspond to the various deinterlace modes
-supported by dScaler.  They are used in the DeinterlaceMode, LowMotionMode,
+supported by DScaler.  They are used in the DeinterlaceMode, LowMotionMode,
 HighMotionMode, and StillImageMode settings.
 
 <p>
@@ -1114,7 +1114,7 @@ to and from this mode may produce brief distortions in the picture.</td>
 <td>6-7</td>
 <td>2:2 Pulldown</td>
 <td>PAL film modes, each film frame corresponding to two video fields
-for a frame rate of 25FPS. Generally you will want to let dScaler automatically
+for a frame rate of 25FPS. Generally you will want to let DScaler automatically
 detect these modes rather than setting them by hand.</td>
 </tr>
 
@@ -1122,7 +1122,7 @@ detect these modes rather than setting them by hand.</td>
 <td>8-12</td>
 <td>3:2 Pulldown</td>
 <td>NTSC film modes, each pair of film frames corresponding to five video
-fields for a frame rate of 24FPS. Generally you will want to let dScaler automatically detect these modes rather than setting them by hand.</td>
+fields for a frame rate of 24FPS. Generally you will want to let DScaler automatically detect these modes rather than setting them by hand.</td>
 </tr>
 
 <tr>

@@ -29,7 +29,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
     <td height="1" width="501"><img src="images/spacer.gif" width="1" height="1"></td>
   </tr>
   <tr> 
-    <td width="160" rowspan="2"><img src="images/dtvlogotvthumb.jpg" alt="dTV Logo" width="160" height="140"></td>
+    <td width="160" rowspan="2"><img src="images/dtvlogotvthumb.jpg" alt="DScaler Logo" width="329" height="140"></td>
     <td colspan="2" align="right" valign="top"> <font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><font size="1"><!-- #BeginEditable "Language%20Selector" --><!-- #EndEditable --></font></b></font></td>
   </tr>
   <tr> 
@@ -48,14 +48,14 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <h2>Where can I find the latest FAQ ?</h2>
       <p> <a href="http://deinterlace.sourceforge.net/FAQ.htm">Here at
       deinterlace.sourceforge.net/FAQ.htm&nbsp;</a>
-      <h2>What is dScaler ?</h2>
-      <p> dScaler is a piece of software that grabs analog, interlaced video, and 
+      <h2>What is DScaler ?</h2>
+      <p> DScaler is a piece of software that grabs analog, interlaced video, and 
         deinterlaces it to make it a progressive scan feed for use on your computer 
         monitor or projector and then allows scaling to any resolution.
       <p> Analog, interlaced video is what devices like VCRs, laserdisc, and
         game consoles output.
-      <h2>What is so special about dScaler ?</h2>
-      <p> Unlike most existing software for use with TV cards, dScaler implements 
+      <h2>What is so special about DScaler ?</h2>
+      <p> Unlike most existing software for use with TV cards, DScaler implements 
         very sophisticated algorithms to deinterlace such sources. Using such 
         algorithms makes sure that each kind of video source is handled a different 
         way. It provides the user with a level of image quality unknown to PC owners
@@ -72,32 +72,32 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         with progressive scan images.
       <h2>
       What is dTV?</h2>
-      <p>dTV is the old name for dScaler, we changed the name as people use DTV
+      <p>dTV is the old name for DScaler, we changed the name as people use DTV
       to refer to digital television and this was causing confusion.&nbsp; In
       the source and on the website you will still see references to dTV but
-      please refer to the program as dScaler from now on. 
+      please refer to the program as DScaler from now on. 
       <h2>Who made what ?</h2>
-      <p>See <a href="Authors.htm">dTV -- Authors</a> for the main contributors
-      and <a href="Thanks.htm">dTV -- Thanks</a> for a list of people who have
-      helped make dTV a success.</p>
-      <h2>How much does dScaler cost ?</h2>
-      <p> $1000 (plus taxes) :-) Of course not, dScaler is fully free of charge,
+      <p>See <a href="Authors.htm">DScaler</a> <a href="Authors.htm"> -- Authors</a> for the main contributors
+      and <a href="Thanks.htm">DScaler</a> <a href="Thanks.htm"> -- Thanks</a> for a list of people who have
+      helped make DScaler a success.</p>
+      <h2>How much does DScaler cost ?</h2>
+      <p> $1000 (plus taxes) :-) Of course not, DScaler is fully free of charge,
       open-source, 
         coded under GPL. 
       <h1>General issues</h1>
-      <h2>Should I use dScaler to deinterlace the output from my set-top dvd player 
+      <h2>Should I use DScaler to deinterlace the output from my set-top dvd player 
         ?</h2>
-      <p> While it's feasible and works quite fine (see the "dTV Windvd challenge" 
+      <p> While it's feasible and works quite fine (see the &quot;DScaler Windvd challenge" 
         in the <a href="/screenshots.htm">screenshots</a> section), home theatre
       pc's have shown the best results while using dvd decoding software along 
         with a dvd-rom and a modern graphic card. However, it's been used quite 
         often for test purposes (testing of grab quality on a high quality source, 
         testing pulldown techniques on well encoded sources etc..). 
-      <p> Some people have found that dScaler does a better job with non-film DVDs
+      <p> Some people have found that DScaler does a better job with non-film DVDs
         (concert videos or DVDs of some television shows, for example) than the
         software players. 
       <h1>Software issues</h1>
-      <h2>Which operating system can I use dScaler on ?</h2>
+      <h2>Which operating system can I use DScaler on ?</h2>
       <p> Windows 95 ok <i>uses VxD running in ring-0</i><br>
         Windows 98 ok <i>uses VxD running in ring-0</i><br>
         Windows NT ok <i>uses sys running in ring-0</i><br>
@@ -131,10 +131,10 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         by those interested in what works for video deinterlacing. When it is 
         selected it will pop up a control panel with many controls to adjust various 
         parameters. These all correspond to Blc... parameters in the [Deinterlace] 
-        section of the dScaler.ini file and are documented there. It is probably not 
+        section of the DScaler.ini file and are documented there. It is probably not 
         the single best method for anything but it can be used to create custom 
         deinterlace methods for special purposes. These can be saved in a separate 
-        ini file and invoked by a command line parameter when starting dScaler.exe. 
+        ini file and invoked by a command line parameter when starting DScaler.exe. 
         Somewhat CPU intensive
       <h3> Scaler Bob</h3>
       <p> Uses the DirectDraw hardware bob feature (if available), this uses the
@@ -169,33 +169,33 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         3 and 2 times respectively. With regard to fields, the order played will 
         be come: Odd, Even, Odd (of frame 1) and Even, Odd (of Frame 2), and so 
         on. In order to create a pure progressive image (which is 1 frame of the 
-        24-fps material), dScaler will only need to take the odd and even field, weaves 
+        24-fps material), DScaler will only need to take the odd and even field, weaves 
         them together, skip the next odd frame and wait until the next odd and 
         even field arrives, weaves them together and put it out again. In the 
         field sequence, out of every 5 field, 1 field can be skipped. That field 
         that is skipped will be the number displayed on the pulldown Skip Field. 
-        If all the sequences are coming in as perfect as described, and dScaler detects 
+        If all the sequences are coming in as perfect as described, and DScaler detects 
         it perfectly, the 3:2 pulldown method selected will always be set the 
         same. If the PC is rather slow (dropping fields), or the sequence is altered 
-        (abruptly changing scenes), or dTV's tolerance in comparison is exceeded, 
+        (abruptly changing scenes), or DScaler's tolerance in comparison is exceeded, 
         it will retry to lock again to the 3:2 pulldown, and might end up with 
         a different field to skip. 
       <h3>2:2 Pulldown</h3>
       <p> PAL movies are made of sequences of 2:2 frames. Once such a sequence 
         is detected, the Odd and Even fields are taken, weaved to form 1 frame 
         of the 24-fps material, and displayed. 
-      <h2>Can I <i>remote control</i> dScaler ? <b>YES</b></h2>
-      <p> Yes you can. dScaler is being developped mainly by people using it as an 
-        analog source scaler for their projector and they prefer for sure using dScaler
+      <h2>Can I <i>remote control</i> DScaler ? <b>YES</b></h2>
+      <p> Yes you can. DScaler is being developped mainly by people using it as an 
+        analog source scaler for their projector and they prefer for sure using DScaler
       from their remote on the sofa rather than from their desk ;-)
-      <p> dScaler is thus filled with <a href="keyboard.htm">keyboard shortcuts</a> 
+      <p> DScaler is thus filled with <a href="keyboard.htm">keyboard shortcuts</a> 
         for all main options so that you can do everything quickly.<br>
         More, we suggest the use of <a href="http://www.stack.nl/~stilgar/windoze/girder.html">Girder</a> 
         from Ron Bessems as the application of choice for remote controlling your 
         computer.
       <p>
-      <h2>Can I record video to my hard disk with dScaler?</h2>
-      <p> No. dScaler isn't an all-in-one desktop video utility.  The development
+      <h2>Can I record video to my hard disk with DScaler?</h2>
+      <p> No. DScaler isn't an all-in-one desktop video utility.  The development
         team has chosen to concentrate on making it the best video processor it can be,
         and features like recording would require a lot of time and effort
         we'd rather spend fine-tuning the deinterlacing algorithms or adding
@@ -213,13 +213,13 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
           post-process
           video.
       </ul>
-      <p> Of course, if you want to add video recording to dScaler, there's nothing
+      <p> Of course, if you want to add video recording to DScaler, there's nothing
         stopping you!  That's what open source is all about. 
       <h1>Hardware issues</h1>
       <h2>Can I use any vga card as a display device ?</h2>
       <p> Despite this statement from Mark Rejhon ;
-      <p> &quot;dScaler requires an AGP card. It is impossible to do on a PCI video card.
-      dScaler uses massive amounts of *bidirectional* bus bandwidth: 250 megabits 
+      <p> &quot;DScaler requires an AGP card. It is impossible to do on a PCI video card.
+      DScaler uses massive amounts of *bidirectional* bus bandwidth: 250 megabits 
         per second incoming bandwidth (from TV card) and about 500 megabits per 
         second outgoing bandwidth (to videocard). This bus data firehose is not 
         feasible on PCI bus, as PCI can reliably continuously transfer up to about 
@@ -232,12 +232,12 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         are tried ; 
       <p> IanD reported <i>I have an 8MB 3dfusion PCI on a BX mobo Celeron 566 
         64MB RAM 66MHz FSB, with Dynalink Magic TView (Conexant 878) and can only 
-        execute dScaler at 16 bit colour depth. When running a 1024x768 desktop,
-      dScaler v1.9 with a 720x576 @ 50Hz PAL composite input gives 0 DFS in manual Video 
-        De-interlace mode for dScaler window sizes up to 848x629 (as determined from 
-        dtv.ini) but 7+ DFS for window sizes even 1 pixel above either of these 
+        execute DScaler at 16 bit colour depth. When running a 1024x768 desktop,
+      DScaler v1.9 with a 720x576 @ 50Hz PAL composite input gives 0 DFS in manual Video 
+        De-interlace mode for DScaler window sizes up to 848x629 (as determined from
+      DScaler.ini) but 7+ DFS for window sizes even 1 pixel above either of these 
         dimensions</i>
-      <p> Bottom line ; no specific requirement for dScaler. Probably works not so 
+      <p> Bottom line ; no specific requirement for DScaler. Probably works not so 
         bad on any vga card. However, as of today, GeForce based cards or (dualhead) 
         Matrox G4x0 are successfully used by a lot of users.
       <p> 
@@ -259,13 +259,13 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       </ul>
       <p>Take a look at the <a href="/card_support.htm">card list</a>. This will 
       never be complete so feel free to drop us an email reporting your experience 
-      with dScaler and your card.&nbsp; Also note that just because a card is on
+      with DScaler and your card.&nbsp; Also note that just because a card is on
       the list does not mean that it will work properly.&nbsp; Some features
       especially sound may not work correctly.</p>
       <p> <i>This list is originally based on the linux bttv driver on which the 
         program was originally based.</i>
       <h2>Can I use my existing <whatever> card's video input ?</h2>
-      <p> Probably not. dScaler is supporting (see previous question) the Brooktree/Conexant 
+      <p> Probably not. DScaler is supporting (see previous question) the Brooktree/Conexant 
         chipset. Supporting others chipsets, while feasable, means some hard work 
         and some solid knowledges of those chipsets. And <b>unfortunately, no 
         recent vga card with video-in feature includes Brooktree/Conexant chipset</b>. 
@@ -275,11 +275,11 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         can I help</a>" section.
       <h2>Can I use more than one video input ?</h2>
       <p> Some "nut" people (he's admitting it himself ;-) who are playing with 
-        Picture In Picture a lot have asked if dScaler could drive multiple cards 
+        Picture In Picture a lot have asked if DScaler could drive multiple cards 
         or multiple inputs. A card allowing at worst 4 video inputs is manufactured 
         by Leadtek. It's the <a href="http://www.leadtek.com.tw/ewv605.htm">Winview 
         605</a>. 
-      <p> It is Brooktree based so it might work with dScaler but clearly nothing 
+      <p> It is Brooktree based so it might work with DScaler but clearly nothing 
         is done right now to drive multiple video inputs at the same time.
       <p> See the <a href="http://www.avsforum.com/ubb/Forum12/HTML/004431.html">associated 
         topic</a> on AVS forum.
@@ -294,12 +294,12 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <h2> 
       I have problems with sound?</h2>
       <p>Note that support for sound from cards internal tuners is not a
-      priority for most of the developers of dTV.&nbsp; Almost all the
+      priority for most of the developers of DScaler.&nbsp; Almost all the
       developers use some kind of external TV tuner and bypass the sound
       issue.&nbsp; Having said that we will be pleased to accept fixes for any
       card but are not in a position to add support for new cards ourselves.
       <h2>What is this "purple stripes" issue ?</h2>
-      <p> When feeding some analog sources to the combination grab card/dScaler, some 
+      <p> When feeding some analog sources to the combination grab card/DScaler, some 
         numerous horizontal colores lines appear on the image.
       <p> See <a href="/images/Mummy_MacrovisionOn.jpg">this picture</a> where 
         macrovision has been added to the video signal. The same video signal 
@@ -311,7 +311,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <p> Other examples of this phenomenon can be seen here ;<br>
         <a href="http://www.avsforum.com/ubb/Forum12/HTML/004317.html">avs:MacroVision 
         side effect</a><br>
-      <a href="http://www.avsforum.com/ubb/Forum12/HTML/004436.html">avs:dScaler 
+      <a href="http://www.avsforum.com/ubb/Forum12/HTML/004436.html">avs:DScaler 
         Purple Stripes - is this capture card dependent?</a>
       <p> Some infos from the <a href="http://www.dvddemystified.com/dvdfaq.html">Dvd 
         Faq</a> ;
@@ -328,7 +328,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <p>So in common cases, you don't have to worry about this.
       <h2>Despite having a very powerful system, I still get some dropped frames?</h2>
       <p>Some people experienced some dropped frames (signs of a machine that has 
-      problems keeping up with the workload of dScaler) even on powerful systems. 
+      problems keeping up with the workload of DScaler) even on powerful systems. 
       An hypothesis is that some motherboard agp speed issue might be the cause 
       of such behavior.</p>
       <p> JackB reported <i>We looked at his BIOS settings and the only major 
@@ -344,16 +344,16 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         <code>Error calling overlay update. D:/source/deinterlace/dtv/other.c 
         at line 161</code><br>
         We don't have any full explanation of the problem but it happens when 
-        resizing dScaler or making it go from fullscreen to window mode. Also the 
+        resizing DScaler or making it go from fullscreen to window mode. Also the 
         color depth, frequency and size of the desktop might be related. The problem 
-        seems to have disappeared with dScaler starting from version 2.0.0 
+        seems to have disappeared with DScaler starting from version 2.0.0 
       <p> Some more infos on this issue in <a href="http://www.avsforum.com/ubb/Forum12/HTML/004895.html">this 
         avs topic</a>
       <p> 
       <a name="HELP"></a>
       <h1>How can I help ?</h1>
       <h2>Testing</h2>
-      <p>More and more people are giving dScaler a try. Why don't you?<br>
+      <p>More and more people are giving DScaler a try. Why don't you?<br>
       We'd like to know about your experience with it. What does (not) work?
       What can be improved, what features you would like. All feedback is
       useful.
