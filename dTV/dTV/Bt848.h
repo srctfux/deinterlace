@@ -37,6 +37,16 @@
 
 #include "tvcards.h"
 
+typedef enum
+{
+	SOURCE_TUNER = 0,
+	SOURCE_COMPOSITE,
+	SOURCE_SVIDEO,
+	SOURCE_OTHER1,
+	SOURCE_OTHER2,
+	SOURCE_COMPVIASVIDEO
+} VIDEOSOURCETYPE;
+
 // create new type for physical memory
 typedef unsigned long PHYS;
 
@@ -51,8 +61,8 @@ void BT848_MakeVBITable(int VBI_Lines);
 void BT848_SetPLL(PLLFREQ PLL);
 void BT848_SetRiscJumpsDecode(int nFlags);
 BOOL BT848_SetGeoSize();
-BOOL BT848_SetBrightness(char bBrightness);
-BOOL BT848_SetHue(char bHue);
+BOOL BT848_SetBrightness(int wBrightness);
+BOOL BT848_SetHue(int wHue);
 BOOL BT848_SetContrast(int wContrast);
 BOOL BT848_SetSaturationU(int wData);
 BOOL BT848_SetSaturationV(int wData);

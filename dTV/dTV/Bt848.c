@@ -523,15 +523,15 @@ BOOL BT848_SetGeoSize()
 	return TRUE;
 }
 
-BOOL BT848_SetBrightness(char bBrightness)
+BOOL BT848_SetBrightness(int wBrightness)
 {
-	BT848_WriteByte(BT848_BRIGHT, bBrightness);
+	BT848_WriteByte(BT848_BRIGHT, (BYTE) (wBrightness & 0xff));
 	return TRUE;
 }
 
-BOOL BT848_SetHue(char bHue)
+BOOL BT848_SetHue(int wHue)
 {
-	BT848_WriteByte(BT848_HUE, bHue);
+	BT848_WriteByte(BT848_HUE, (BYTE) (wHue & 0xff));
 	return TRUE;
 }
 
