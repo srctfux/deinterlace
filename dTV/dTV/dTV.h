@@ -33,6 +33,8 @@
 // 08 Jan 2001   John Adcock           Global Variable Tidy up
 //                                     Got rid of global.h structs.h defines.h
 //
+// 20 Feb 2001   Michael Samblanet     Added TIMER_BOUNCE, TIMER_BOUNCE_MS
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __DTV_H___
@@ -73,6 +75,9 @@ BOOL IsStatusBarVisible();
 
 #define TIMER_AUTOSAVE      55
 #define TIMER_AUTOSAVE_MS   1500
+
+#define TIMER_BOUNCE        42
+#define TIMER_BOUNCE_MS     10000
 
 extern HANDLE hInst;
 extern HWND hWnd;

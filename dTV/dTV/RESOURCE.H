@@ -189,6 +189,10 @@
 #define IDM_TEXT2                       801
 #define IDM_TEXT3                       802
 #define IDM_TEXT4                       803
+#define IDM_SASPECT_155                 806
+#define IDM_SASPECT_144                 807
+#define IDM_SASPECT_CLIP                808
+#define IDM_WINPOS_BOUNCE               809
 #define IDM_END                         1032
 #define IDM_SOURCE_TUNER                1089
 #define IDM_SOURCE_COMPOSITE            1090
@@ -784,7 +788,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        158
-#define _APS_NEXT_COMMAND_VALUE         805
+#define _APS_NEXT_COMMAND_VALUE         810
 #define _APS_NEXT_CONTROL_VALUE         1879
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

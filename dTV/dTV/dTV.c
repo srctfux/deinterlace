@@ -47,6 +47,10 @@
 // 08 Jan 2001   John Adcock           Global Variable Tidy up
 //                                     Got rid of global.h structs.h defines.h
 //
+// 20 Feb 2001   Michael Samblanet     Added bounce timer - see AspectRatio.c
+//									   Corrected bug in SaveWindowPos - length 
+//									   not set in placement structure
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -208,6 +212,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 	// 2000-10-31 Added by Mark: Changed to WS_POPUP for more cosmetic direct-to-full-screen startup,
 	// let UpdateWindowState() handle initialization of windowed dTV instead.
+
+
 	hWnd = CreateWindow("dTV", "dTV", WS_POPUP, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), NULL, NULL, hInstance, NULL);
 	if (!hWnd) return FALSE;
 	if (!bIsFullScreen) SetWindowPos(hWnd, 0, emstartx, emstarty, emsizex, emsizey, SWP_SHOWWINDOW);
@@ -1432,6 +1438,12 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			OSD_Clear(hWnd);
             break;
 		}
+		//-------------------------------
+		case TIMER_BOUNCE:
+			// MRS 2-20-01 - Resetup the display for bounce and orbiting
+			// Happens every 30 seconds if one is enabled.
+			WorkoutOverlaySize(); // Takes care of everything...
+			break;
 		break;
 	
 	// support for mouse wheel
@@ -1549,6 +1561,10 @@ void SaveWindowPos(HWND hWnd)
 	WINDOWPLACEMENT WndPlace;
 	if(hWnd != NULL)
 	{
+		// MRS 2-20-01 - length must be set in WindowPlacement structure
+		memset(&WndPlace,0,sizeof(WndPlace));
+		WndPlace.length = sizeof(WndPlace);
+		// End 2-20-01
 		GetWindowPlacement(hWnd, &WndPlace);
 		emstarty = WndPlace.rcNormalPosition.top;
 		emsizey = WndPlace.rcNormalPosition.bottom - WndPlace.rcNormalPosition.top;

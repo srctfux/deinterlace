@@ -45,8 +45,10 @@
 //                                     Fixed bug in FindBottomOfImage when
 //                                     Overscan is 0
 //
-// 21 Feb 2001   Michael Samblanet     None - just testing that check-in works
-//									   prior to beginning changes
+// 21 Feb 2001   Michael Samblanet     Added 1.44 and 1.55 ratio support
+//                                     Added code to handle clipped menu item
+//									   Added prototype image bouncing code
+//									     (currently has issues with purple flashing)
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -151,6 +153,23 @@ RECT sourceRectangle = {0,0,0,0};
 
 int InitialOverscan    = 4;
 
+// If TRUE, black bars are drawn.  If FALSE, we leave any leftover image on the screen
+// For advanced use - typically used FALSE with top-aligned for viewing captions
+BOOL aspectImageClipped = TRUE;
+
+// If TRUE, the WorkoutOverlaySize function will gradually bounce the image
+// across any black space, starting at the middle, working to the right/bottom
+// then bouncing to the right/top.
+// NOTE: SOMETHING ELSE must take responsibility for calling WorkoutOverlaySize
+// to ensure the bouncing takes place.
+BOOL bounceEnabled = FALSE;
+// Time to consider bouncing as started - once set it is not reset
+// until dTV is restarted.
+time_t bounceStartTime = 0;
+// Number of minutes for a complete cycle of bounce to occur (default is half hour)
+time_t bouncePeriod = 60*30;
+BOOL Bounce_OnChange(long NewValue); // Forward declaration to reuse this code...
+
 //----------------------------------------------------------------------------
 // Switch to a new aspect ratio and record it in the ratio history list.
 // Use nRatio = -1 to only switch between anamorphic/nonanamorphic
@@ -203,6 +222,8 @@ void AspectRatio_SetMenu(HMENU hMenu)
 	CheckMenuItem(hMenu, IDM_ASPECT_ANAMORPHIC, MF_UNCHECKED);
 
 	CheckMenuItem(hMenu, IDM_SASPECT_133, MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_SASPECT_144, MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_SASPECT_155, MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_SASPECT_166, MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_SASPECT_178, MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_SASPECT_185, MF_UNCHECKED);
@@ -226,6 +247,12 @@ void AspectRatio_SetMenu(HMENU hMenu)
 		case 1333:
 			CheckMenuItem(hMenu, IDM_SASPECT_133, MF_CHECKED);
 			CheckMenuItem(hMenu, IDM_ASPECT_FULLSCREEN, MF_CHECKED);
+			break;
+		case 1444:
+			CheckMenuItem(hMenu, IDM_SASPECT_144, MF_CHECKED);
+			break;
+		case 1555:
+			CheckMenuItem(hMenu, IDM_SASPECT_155, MF_CHECKED);
 			break;
 		case 1667:
 			CheckMenuItem(hMenu, IDM_SASPECT_166, MF_CHECKED);
@@ -287,6 +314,10 @@ void AspectRatio_SetMenu(HMENU hMenu)
 	CheckMenuItem(hMenu, IDM_WINPOS_HORZ_CENTRE, (HorizontalPos == HORZ_POS_CENTRE)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_WINPOS_HORZ_LEFT, (HorizontalPos == HORZ_POS_LEFT)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_WINPOS_HORZ_RIGHT, (HorizontalPos == HORZ_POS_RIGHT)?MF_CHECKED:MF_UNCHECKED);
+
+	CheckMenuItem(hMenu, IDM_SASPECT_CLIP, (aspectImageClipped)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_WINPOS_BOUNCE, (bounceEnabled)?MF_CHECKED:MF_UNCHECKED);
+	
 }
 
 //----------------------------------------------------------------------------
@@ -359,7 +390,17 @@ int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 		WorkoutOverlaySize();
 		break;
 
-	//------------------------------------------------------------------
+	case IDM_SASPECT_CLIP:
+		aspectImageClipped = !aspectImageClipped;
+		ShowText(hWnd, aspectImageClipped ? "Image Clipping ON" : "Image Clipping OFF");
+		break;
+
+	case IDM_WINPOS_BOUNCE:
+		Bounce_OnChange(!bounceEnabled);
+		ShowText(hWnd, bounceEnabled ? "Image Bouncing ON" : "Image Bouncing OFF");
+		break;
+
+	//-----------------------------------------------------------------
 	// Autodetect aspect ratio toggles
 	case IDM_SASPECT_AUTO_ON:
 		AutoDetectAspect = TRUE;
@@ -440,6 +481,14 @@ int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 		case IDM_SASPECT_133:
 			SwitchToRatio(AR_NONANAMORPHIC, 1333);
 			ShowText(hWnd, "4:3 Fullscreen Signal");
+			break;
+		case IDM_SASPECT_144:
+			SwitchToRatio(AR_NONANAMORPHIC, 1444);
+			ShowText(hWnd, "1.44:1 Letterbox Signal");
+			break;
+		case IDM_SASPECT_155:
+			SwitchToRatio(AR_NONANAMORPHIC, 1555);
+			ShowText(hWnd, "1.55:1 Letterbox Signal");
 			break;
 		case IDM_SASPECT_166:
 			SwitchToRatio(AR_NONANAMORPHIC, 1667);
@@ -618,7 +667,11 @@ void WorkoutOverlaySize()
 	#define RHEIGHT(aa) (aa.bottom-aa.top)
 	#define ASPECT(aa) ((double)RWIDTH(aa)) / ((double)RHEIGHT(aa))
 
+
 	if (aspect_mode) {
+		RECT rOriginalDest;
+		RECT rOriginalSrc;	
+		
 		// OK - Lots of aspects to calculate
 		// I am certain we could make this more efficient by caching values
 		// and not calculating values needed - but this function is rarely called (window size, hardware setup, and aspect size changes)
@@ -659,7 +712,11 @@ void WorkoutOverlaySize()
 		double TargetSrcAspect; 
 		double TargetDestAspect;
 
+		// Save original source and dest rectangles
+		memcpy(&rOriginalDest,&rOverlayDest,sizeof(rOverlayDest));
+		memcpy(&rOriginalSrc,&rOverlaySrc,sizeof(rOverlaySrc));
 		ActualSourceFrameAspect = GetActualSourceFrameAspect();
+
 		TargetSrcAspect = MaterialAspect * SourceFrameAspect / ActualSourceFrameAspect;
 		TargetDestAspect = MaterialAspect * ComputerAspect / ScreenAspect;	
 
@@ -681,42 +738,77 @@ void WorkoutOverlaySize()
 		// Crop the destination rectangle
 		if (TargetDestAspect > .1)
 		{
+			#define BOUNCE_POS (abs(MulDiv((time(NULL)-bounceStartTime)%bouncePeriod,200,bouncePeriod)+50)*100)
+			if (bounceEnabled && bounceStartTime == 0) time(&bounceStartTime);
+
+
 			if (WindowAspect > TargetDestAspect)
 			{
 				// Source is wider - crop Left and Right
-				int NewWidth = (int) floor((TargetDestAspect*RHEIGHT(rOverlayDest))+.5);
-				switch(HorizontalPos)
-				{
-				case HORZ_POS_CENTRE:
-					rOverlayDest.left += (RWIDTH(rOverlayDest) - NewWidth)/2;
-					rOverlayDest.right = rOverlayDest.left + NewWidth;
-					break;
-				case HORZ_POS_LEFT:
-					rOverlayDest.right = rOverlayDest.left + NewWidth;
-					break;
-				case HORZ_POS_RIGHT:
-					rOverlayDest.left = rOverlayDest.right - NewWidth;
-					break;
+				int pos;
+				int NewWidth;
+				if (bounceEnabled) pos = BOUNCE_POS;
+				else switch (HorizontalPos) {
+					case HORZ_POS_LEFT: pos = 0; break;
+					case HORZ_POS_RIGHT: pos = 10000; break;
+					default: pos = 5000; break;
 				}
+				if (pos > 10000) pos = 20000 - pos;
+				NewWidth = (int) floor((TargetDestAspect*RHEIGHT(rOverlayDest))+.5);
+				rOverlayDest.left += MulDiv(RWIDTH(rOverlayDest)-NewWidth,pos,10000);
+				rOverlayDest.right = rOverlayDest.left + NewWidth;
 			}
 			else
 			{
 				// Source is taller - crop top and bottom
-				int NewHeight = (int) floor((RWIDTH(rOverlayDest)/TargetDestAspect)+.5);
-				switch(VerticalPos)
-				{
-				case VERT_POS_CENTRE:
-					rOverlayDest.top += (RHEIGHT(rOverlayDest) - NewHeight)/2;
-					rOverlayDest.bottom = rOverlayDest.top + NewHeight;
-					break;
-				case VERT_POS_TOP:
-					rOverlayDest.bottom = rOverlayDest.top + NewHeight;
-					break;
-				case VERT_POS_BOTTOM:
-					rOverlayDest.top = rOverlayDest.bottom - NewHeight;
-					break;
+				int pos;
+				int NewWidth;
+				if (bounceEnabled) pos = BOUNCE_POS;
+				else switch (VerticalPos) {
+					case VERT_POS_TOP: pos = 0; break;
+					case VERT_POS_BOTTOM: pos = 10000; break;
+					default: pos = 5000; break;
 				}
+				if (pos > 10000) pos = 20000 - pos;
+				NewWidth = (int) floor((RWIDTH(rOverlayDest)/TargetDestAspect)+.5);
+				rOverlayDest.top += MulDiv((RHEIGHT(rOverlayDest) - NewWidth),pos,10000);
+				rOverlayDest.bottom = rOverlayDest.top + NewWidth;
 			}
+		}
+
+
+		if (!aspectImageClipped) {
+			// The user requested we not clip the image
+			// Figure out where we have space left and add it back in
+			// (up to the amount of image we have)
+			// Note: This could likely be done easier, but restructuring of all
+			// the above code would be required.  Unless performance justified
+			// I do not see this being worth the bug risk at this point
+			// MRS 2-20-01
+			RECT lastSrc;
+			double vScale = (double)RHEIGHT(rOverlayDest) / (double)RHEIGHT(rOverlaySrc);
+			double hScale = (double)RWIDTH(rOverlayDest) / (double)RWIDTH(rOverlaySrc);
+
+			// Backup source so we can scale back
+			memcpy(&lastSrc,&rOverlaySrc,sizeof(rOverlaySrc));
+
+			// Scale the source image to use the entire image
+			rOverlaySrc.left = rOverlaySrc.left - (int)floor((rOverlayDest.left - rOriginalDest.left)/hScale);
+			rOverlaySrc.right = rOverlaySrc.right + (int)floor((rOriginalDest.right - rOverlayDest.right)/hScale);
+			rOverlaySrc.top = rOverlaySrc.top - (int)floor((rOverlayDest.top - rOriginalDest.top)/vScale);
+			rOverlaySrc.bottom = rOverlaySrc.bottom + (int)floor((rOriginalDest.bottom - rOverlayDest.bottom)/vScale);
+
+			// Clip the source image to actually available image
+			if (rOverlaySrc.left < rOriginalSrc.left) rOverlaySrc.left = rOriginalSrc.left;
+			if (rOverlaySrc.right > rOriginalSrc.right) rOverlaySrc.right = rOriginalSrc.right;
+			if (rOverlaySrc.top < rOriginalSrc.top) rOverlaySrc.top = rOriginalSrc.top;
+			if (rOverlaySrc.bottom > rOriginalSrc.bottom) rOverlaySrc.bottom = rOriginalSrc.bottom;
+			
+			// Now scale the destination to the source remaining
+			rOverlayDest.left += (int)floor((rOverlaySrc.left-lastSrc.left)*hScale);
+			rOverlayDest.right -= (int)floor((lastSrc.right-rOverlaySrc.right)*hScale);
+			rOverlayDest.top += (int)floor((rOverlaySrc.top-lastSrc.top)*vScale);
+			rOverlayDest.bottom -= (int)floor((lastSrc.bottom-rOverlaySrc.bottom)*vScale);
 		}
 
 		//#define DEBUGASPECT
@@ -1169,6 +1261,15 @@ BOOL VertPos_OnChange(long NewValue)
 	return FALSE;
 }
 
+BOOL Bounce_OnChange(long NewValue) {
+	bounceEnabled = NewValue != 0;
+	if (!bounceEnabled) {
+		KillTimer(hWnd, TIMER_BOUNCE);
+	} else {
+	    SetTimer(hWnd, TIMER_BOUNCE, TIMER_BOUNCE_MS, NULL);
+	}
+	return FALSE;
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // Start of Settings related code
@@ -1260,6 +1361,25 @@ SETTING AspectSettings[ASPECT_SETTING_LASTONE] =
 		HorzPosString,
 		"ASPECT", "HorizontalPos", HorizPos_OnChange,
 	},
+	{
+		"Clipping", ONOFF, 0, &aspectImageClipped,
+		TRUE, 0, 1, 1, 1,
+		NULL,
+		"ASPECT", "Clipping", NULL,
+	},
+	{
+		"Bounce", ONOFF, 0, &bounceEnabled,
+		FALSE, 0, 1, 1, 1,
+		NULL,
+		"ASPECT", "Bounce", Bounce_OnChange,
+	},
+	{
+		"Bounce Period", NUMBER, 0, &aspect_mode,
+		60*30, 0, 2, 1, 1,
+		NULL,
+		"ASPECT", "BouncePeriod", NULL,
+	},
+
 };
 
 SETTING* Aspect_GetSetting(ASPECT_SETTING Setting)

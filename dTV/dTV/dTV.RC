@@ -760,6 +760,8 @@ BEGIN
             MENUITEM "Detect from Current Image\t`", IDM_SASPECT_COMPUTE
             MENUITEM "Stretch to Window\tCtrl+0",   IDM_SASPECT_0
             MENUITEM "1.33\tCtrl+1",                IDM_SASPECT_133
+            MENUITEM "1.44   Letterboxed\tCtrl+7",  IDM_SASPECT_144
+            MENUITEM "1.55   Letterboxed\tCtrl+8",  IDM_SASPECT_155
             MENUITEM "1.66   Letterboxed\tCtrl+2",  IDM_SASPECT_166
             MENUITEM "1.78   Letterboxed\tCtrl+3",  IDM_SASPECT_178
             MENUITEM "1.85   Letterboxed\tCtrl+4",  IDM_SASPECT_185
@@ -771,6 +773,9 @@ BEGIN
             MENUITEM "2.00   Anamorphic\tCtrl+Shift+5", IDM_SASPECT_200A
             MENUITEM "2.35   Anamorphic\tCtrl+Shift+6", IDM_SASPECT_235A
             MENUITEM "Custom  (from .INI file)\tCtrl+9", IDM_SASPECT_CUSTOM
+            MENUITEM SEPARATOR
+            MENUITEM "Clipped (Add Black Bars if Necessary)\tCtrl+P", 
+                                                    IDM_SASPECT_CLIP
         END
         POPUP "Aspect Ratio of Display Screen"
         BEGIN
@@ -785,9 +790,9 @@ BEGIN
         END
         POPUP "Window Vertical Position"
         BEGIN
-            MENUITEM "&Top",                        IDM_WINPOS_VERT_TOP
-            MENUITEM "&Centre",                     IDM_WINPOS_VERT_CENTRE
-            MENUITEM "&Bottom",                     IDM_WINPOS_VERT_BOTTOM
+            MENUITEM "&Top\tCtrl+Numpad-Up",        IDM_WINPOS_VERT_TOP
+            MENUITEM "&Centre\tCtrl+Numpad 5",      IDM_WINPOS_VERT_CENTRE
+            MENUITEM "&Bottom\tCtrl+Numpad-Down",   IDM_WINPOS_VERT_BOTTOM
         END
         POPUP "Window Horizontal Position"
         BEGIN
@@ -795,6 +800,8 @@ BEGIN
             MENUITEM "&Centre",                     IDM_WINPOS_HORZ_CENTRE
             MENUITEM "&Right",                      IDM_WINPOS_HORZ_RIGHT
         END
+        MENUITEM "Bounce Window Position (expieremental)\tCtrl+B", 
+                                                IDM_WINPOS_BOUNCE
     END
     POPUP "&Settings"
     BEGIN
@@ -1182,6 +1189,8 @@ BEGIN
     "6",            IDM_TASPECT_235,        VIRTKEY, ALT, NOINVERT
     "6",            IDM_SASPECT_235A,       VIRTKEY, SHIFT, CONTROL, 
                                                     NOINVERT
+    "7",            IDM_SASPECT_144,        VIRTKEY, CONTROL, NOINVERT
+    "8",            IDM_SASPECT_155,        VIRTKEY, CONTROL, NOINVERT
     "9",            IDM_SASPECT_CUSTOM,     VIRTKEY, CONTROL, NOINVERT
     "9",            IDM_TASPECT_CUSTOM,     VIRTKEY, ALT, NOINVERT
     "=",            IDM_VOLUMEPLUS,         ASCII,  NOINVERT
@@ -1190,6 +1199,7 @@ BEGIN
     "A",            IDM_SASPECT_AUTO_TOGGLE, VIRTKEY, SHIFT, CONTROL, 
                                                     NOINVERT
     "B",            IDM_BRIGHTNESS_MINUS,   VIRTKEY, NOINVERT
+    "B",            IDM_WINPOS_BOUNCE,      VIRTKEY, CONTROL, NOINVERT
     "B",            IDM_BRIGHTNESS_PLUS,    VIRTKEY, SHIFT, NOINVERT
     "B",            IDM_BRIGHTNESS_CURRENT, VIRTKEY, SHIFT, CONTROL, 
                                                     NOINVERT
@@ -1223,6 +1233,7 @@ BEGIN
     "O",            IDM_OVERSCAN_CURRENT,   VIRTKEY, SHIFT, CONTROL, 
                                                     NOINVERT
     "P",            IDM_CAPTURE_PAUSE,      VIRTKEY, NOINVERT
+    "P",            IDM_SASPECT_CLIP,       VIRTKEY, CONTROL, NOINVERT
     "Q",            IDM_HDELAY_MINUS,       VIRTKEY, NOINVERT
     "Q",            IDM_HDELAY_PLUS,        VIRTKEY, SHIFT, NOINVERT
     "Q",            IDM_HDELAY_CURRENT,     VIRTKEY, SHIFT, CONTROL, 
@@ -1273,6 +1284,9 @@ BEGIN
     VK_HOME,        IDM_CHANNEL_LIST,       VIRTKEY, NOINVERT
     VK_LEFT,        IDM_VT_PAGE_MINUS,      VIRTKEY, NOINVERT
     VK_NEXT,        IDM_CHANNELMINUS,       VIRTKEY, NOINVERT
+    VK_NUMPAD2,     IDM_WINPOS_VERT_BOTTOM, VIRTKEY, CONTROL, NOINVERT
+    VK_NUMPAD5,     IDM_WINPOS_VERT_CENTRE, VIRTKEY, CONTROL, NOINVERT
+    VK_NUMPAD8,     IDM_WINPOS_VERT_TOP,    VIRTKEY, CONTROL, NOINVERT
     VK_PRIOR,       IDM_CHANNELPLUS,        VIRTKEY, NOINVERT
     VK_RETURN,      IDM_SHOW_OSD,           VIRTKEY, NOINVERT
     VK_RETURN,      IDM_TOGGLECURSOR,       VIRTKEY, CONTROL, NOINVERT

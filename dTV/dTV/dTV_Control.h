@@ -63,6 +63,9 @@
 // 16 Jan 2001   John Adcock           Moved all parts that could be used to
 //                                     Control dTV externally to this file
 //
+// 20 Feb 2001   Michael Samblanet     Added new values for Aspect Control
+//                                     (bounce & clipping modes)
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __DTV_CONTROL_H___
@@ -227,6 +230,9 @@ typedef enum
 	ASPECTCONSISTENCYTIME,
 	VERTICALPOS,
 	HORIZONTALPOS,
+	CLIPPING,
+	BOUNCE,
+	BOUNCEPERIOD,
 	ASPECT_SETTING_LASTONE,
 } ASPECT_SETTING;
 
