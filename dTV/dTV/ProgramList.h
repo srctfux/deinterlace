@@ -42,7 +42,7 @@
 #ifndef __PROGRAMLIST_H___
 #define __PROGRAMLIST_H___
 
-#define MAXPROGS 4096
+#define MAXPROGS 255
 
 struct PIDFilters
 {
