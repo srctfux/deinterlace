@@ -29,167 +29,375 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "math.h"
 #include "VBI_WSSdecode.h"
+#include "vbi.h"
 #include "bt848.h"
 #include "AspectRatio.h"
 #define DOLOGGING
 #include "DebugLog.h"
 
-// Possible ratio values for 625-line systems
-#define	WSS625_RATIO_133					0x08
-#define	WSS625_RATIO_155					0x0e
-#define	WSS625_RATIO_177_ANAMORPHIC			0x07
-#define	WSS625_RATIO_155_LETTERBOX_CENTER	0x01
-#define	WSS625_RATIO_155_LETTERBOX_TOP		0x02
-#define	WSS625_RATIO_177_LETTERBOX_CENTER	0x0b
-#define	WSS625_RATIO_177_LETTERBOX_TOP		0x04
-#define	WSS625_RATIO_BIG_LETTERBOX_CENTER	0x0d
+#define	WSS625_RUNIN_CODE_LENGTH	29
+#define	WSS625_START_CODE_LENGTH	24
+#define	WSS625_BEFORE_DATA_LENGTH	(WSS625_RUNIN_CODE_LENGTH+WSS625_START_CODE_LENGTH)
+#define	WSS625_DATA_BIT_LENGTH		6
 
-// Possible ratio values for 525-line systems
-#define	WSS525_RATIO_133					0x00
-#define	WSS525_RATIO_177_ANAMORPHIC			0x01
-#define	WSS525_RATIO_133_LETTERBOX			0x02
+#define	WSS625_NB_DATA_BITS			14
+
+#define ROUND(d)	(int)floor((d)+0.5)
 
 extern void SwitchToRatio(int nMode, int nRatio);
+extern int decodebit(unsigned char *data, int threshold, int NumPixels);
 
-// Last value decoded
-unsigned char	WSSCurrentRatio = -1;
+// Last WSS data decoded
+int		WSSRatio = -1;
+BOOL	WSSFilmMode = FALSE;
+BOOL	WSSColorPlus = FALSE;
+BOOL	WSSHelperSignals = FALSE;
+BOOL	WSSTeletextSubtitle = FALSE;
+int		WSSOpenSubtitles = WSS625_SUBTITLE_NO;
+BOOL	WSSSurroundSound = FALSE;
+BOOL	WSSCopyrightAsserted = FALSE;
+BOOL	WSSCopyProtection = FALSE;
 
-// #define TEST_WSS
+BOOL	WSSDecodeOk = FALSE;	//	Status of last decoding
+int		WSSDecodeErr = 0;		// Number of decoding errors
 
-#ifdef TEST_WSS
-// Only for preliminary tests
-#define	CST_TST	500
-int	cpt = 0;
-unsigned char Ratios625[8] = {
-	WSS625_RATIO_133,
-	WSS625_RATIO_155,
-	WSS625_RATIO_177_ANAMORPHIC,
-	WSS625_RATIO_155_LETTERBOX_CENTER,
-	WSS625_RATIO_155_LETTERBOX_TOP,
-	WSS625_RATIO_177_LETTERBOX_CENTER,
-	WSS625_RATIO_177_LETTERBOX_TOP,
-	WSS625_RATIO_BIG_LETTERBOX_CENTER,
-};
-unsigned char Ratios525[3] = {
-	WSS525_RATIO_133,
-	WSS525_RATIO_177_ANAMORPHIC,
-	WSS525_RATIO_133_LETTERBOX,
-};
-#endif
+// Sequence values for run-in code
+int WSS625_runin[WSS625_RUNIN_CODE_LENGTH] = { 1,1,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1 };
 
-int WSS625_DecodeLine(BYTE* vbiline)
+// Sequence values for start code
+int WSS625_start[WSS625_START_CODE_LENGTH] = { 0,0,0,1,1,1,1,0,0,0,1,1,1,1,0,0,0,0,0,1,1,1,1,1 };
+
+// Sequence values for a data bit = 0
+int WSS625_0[WSS625_DATA_BIT_LENGTH] = { 0,0,0,1,1,1 };
+
+// Sequence values for a data bit = 0
+int WSS625_1[WSS625_DATA_BIT_LENGTH] = { 1,1,1,0,0,0 };
+
+void log_databit(int bit_pos, int decoded_bit, BYTE* vbiline, double ClockPixels)
 {
-	unsigned char	NewRatio;
+	int	i, pos;
 
-#ifdef TEST_WSS
-	// Only for preliminary tests
-	if (cpt >= (CST_TST*8))
+	for (i = 0 ; i < WSS625_DATA_BIT_LENGTH ; i++)
 	{
-		cpt = 0;
+		pos = ROUND (ClockPixels * i);
+		LOG("WSS bit b%d : %d => %x %x %x %x %x %x %x", bit_pos, decoded_bit, vbiline[pos], vbiline[pos+1], vbiline[pos+2], vbiline[pos+3], vbiline[pos+4], vbiline[pos+5], vbiline[pos+6]);
 	}
-	cpt++;
-	if ((cpt % CST_TST) == 0)
-	{
-		NewRatio = Ratios625[(cpt / CST_TST) - 1];
-	}
-	else
-	{
-		NewRatio = WSSCurrentRatio;
-	}
-#else
-	NewRatio = WSSCurrentRatio;
-#endif
-
-	if (NewRatio == WSSCurrentRatio)	return (0);
-
-	WSSCurrentRatio = NewRatio;
-
-	switch (WSSCurrentRatio)
-	{
-	case WSS625_RATIO_133:
-		SwitchToRatio(1,1333);
-		LOG("WSS ratio (%x): 1.33", WSSCurrentRatio);
-		break;
-	case WSS625_RATIO_177_ANAMORPHIC:
-		SwitchToRatio(2,1778);
-		LOG("WSS ratio (%x) : 1.77 anamorphic", WSSCurrentRatio);
-		break;
-	case WSS625_RATIO_155:
-	case WSS625_RATIO_155_LETTERBOX_CENTER:
-	case WSS625_RATIO_155_LETTERBOX_TOP:
-		SwitchToRatio(1,1555);
-		LOG("WSS ratio (%x) : 1.55 letterbox", WSSCurrentRatio);
-		break;
-	case WSS625_RATIO_177_LETTERBOX_CENTER:
-	case WSS625_RATIO_177_LETTERBOX_TOP:
-		SwitchToRatio(1,1778);
-		LOG("WSS ratio (%x) : 1.77 letterbox", WSSCurrentRatio);
-		break;
-	case WSS625_RATIO_BIG_LETTERBOX_CENTER:
-	default:
-		LOG("WSS ratio (%x) : ???", WSSCurrentRatio);
-		break;
-	}
-	return 0;
 }
 
-int WSS525_DecodeLine(BYTE* vbiline)
+BOOL decode_sequence(BYTE* vbiline, int *DecodedVals, int NbVal, int Threshold, double ClockPixels)
 {
-	unsigned char	NewRatio;
+	int	i;
+	int	NbPixels = ROUND (ClockPixels);
 
-#ifdef TEST_WSS
-	// Only for preliminary tests
-	if (cpt >= (CST_TST*3))
+	for (i = 0 ; i < NbVal ; i++)
 	{
-		cpt = 0;
+		if (decodebit (vbiline + ROUND (ClockPixels * i), Threshold, NbPixels) != DecodedVals[i])
+			break;
 	}
-	cpt++;
-	if ((cpt % CST_TST) == 0)
-	{
-		NewRatio = Ratios525[(cpt / CST_TST) - 1];
-	}
-	else
-	{
-		NewRatio = WSSCurrentRatio;
-	}
-#else
-	NewRatio = WSSCurrentRatio;
-#endif
+	return ( (i == NbVal) ? TRUE : FALSE );
+}
 
-	if (NewRatio == WSSCurrentRatio)	return (0);
+BOOL WSS625_DecodeLine(BYTE* vbiline)
+{
+	int		OldRatio;
+	int		OldFilmMode;
+	int		OldColorPlus;
+	int		OldHelperSignals;
+	int		OldTeletextSubtitle;
+	int		OldOpenSubtitles;
+	int		OldSurroundSound;
+	int		OldCopyrightAsserted;
+	int		OldCopyProtection;
+	int		i, j;
+	BOOL	DecodeOk = FALSE;
+	double	ClockPixels;
+	int		Threshold = 0;
+	int		pos;
+	int		bits[WSS625_NB_DATA_BITS];
+	int		packedbits;
+	int		nb;
 
-	WSSCurrentRatio = NewRatio;
+//	int		min = 255;
+//	int		max = 0;
 
-	switch (WSSCurrentRatio)
+	ClockPixels = 7.09379;
+	Threshold = VBI_thresh;
+//	for (i = 50 ; i < 1500 ; i++)
+//	{
+//		if (vbiline[i] > max)	max = vbiline[i];
+//		if (vbiline[i] < min)	min = vbiline[i];
+//	}
+//	Threshold = (max - min) / 2 + min;
+	if (Threshold < 10)
 	{
-	case WSS525_RATIO_133:
-	case WSS525_RATIO_133_LETTERBOX:
-		SwitchToRatio(1,1333);
-		LOG("WSS ratio (%x): 1.33", WSSCurrentRatio);
-		break;
-	case WSS525_RATIO_177_ANAMORPHIC:
-		SwitchToRatio(2,1778);
-		LOG("WSS ratio (%x) : 1.77 anamorphic", WSSCurrentRatio);
-		break;
-	default:
-		LOG("WSS ratio (%x) : ???", WSSCurrentRatio);
-		break;
+//		LOG("WSS signal threshold < 10");
+		return FALSE;
 	}
-	return 0;
+
+	OldRatio = WSSRatio;
+	OldFilmMode = WSSFilmMode;
+	OldColorPlus = WSSColorPlus;
+	OldHelperSignals = WSSHelperSignals;
+	OldTeletextSubtitle = WSSTeletextSubtitle;
+	OldOpenSubtitles = WSSOpenSubtitles;
+	OldSurroundSound = WSSSurroundSound;
+	OldCopyrightAsserted = WSSCopyrightAsserted;
+	OldCopyProtection = WSSCopyProtection;
+
+	for (i = 50 ; i < 200 ; i++)
+	{
+		// run-in code decoding
+		pos = i;
+		if (decode_sequence (vbiline + pos, WSS625_runin, WSS625_RUNIN_CODE_LENGTH, Threshold, ClockPixels))
+		{
+//			LOG("WSS run-in code detected (i = %d, Threshold = %x)", i, Threshold);
+
+			// Start code decoding
+			pos = i + ROUND (ClockPixels * WSS625_RUNIN_CODE_LENGTH);
+			if (decode_sequence (vbiline + pos, WSS625_start, WSS625_START_CODE_LENGTH, Threshold, ClockPixels))
+			{
+//				LOG("WSS start code detected");
+
+				// Data bits decoding
+				nb = 0;
+				for (j = 0 ; j < WSS625_NB_DATA_BITS ; j++)
+				{
+					pos = i + ROUND (ClockPixels * (WSS625_BEFORE_DATA_LENGTH + j * WSS625_DATA_BIT_LENGTH));
+					if (decode_sequence (vbiline + pos, WSS625_0, WSS625_DATA_BIT_LENGTH, Threshold, ClockPixels))
+					{
+						bits[j] = 0;
+						nb++;
+//						LOG("WSS b%d = 0 (i = %d, Threshold = %x)", j, i, Threshold);
+					}
+					else if (decode_sequence (vbiline + pos, WSS625_1, WSS625_DATA_BIT_LENGTH, Threshold, ClockPixels))
+					{
+						bits[j] = 1;
+						nb++;
+//						LOG("WSS b%d = 1 (i = %d, Threshold = %x)", j, i, Threshold);
+					}
+					else
+					{
+						bits[j] = -1;
+//						LOG("WSS b%d = ?", j);
+					}
+				}
+				if (nb == WSS625_NB_DATA_BITS)
+				{
+					DecodeOk = TRUE;
+					break;
+				}
+			}
+		}
+	}
+
+//	if (! DecodeOk)
+//	{
+//		i = 0;
+//		LOG("WSS start pos = %d, Threshold = %x, Min = %x, Max = %x", i, Threshold, min, max);
+//		for (j = 0 ; j < 250 ; j++)
+//		{
+//			pos = i + ROUND (ClockPixels * j);
+//			LOG("WSS pos = %d : %x %x %x %x %x %x %x", pos, vbiline[pos], vbiline[pos + 1], vbiline[pos + 2], vbiline[pos + 3], vbiline[pos + 4], vbiline[pos + 5], vbiline[pos + 6]);
+//		}
+//	}
+//	else
+//	{
+//		LOG("WSS start pos = %d, Threshold = %x", i, Threshold);
+//		for (j = 0 ; j < WSS625_NB_DATA_BITS ; j++)
+//		{
+//			pos = i + ROUND (ClockPixels * (WSS625_BEFORE_DATA_LENGTH + j * WSS625_DATA_BIT_LENGTH));
+//			log_databit (j, bits[j], vbiline + pos, ClockPixels);
+//			LOG("WSS bit b%d = %d",j,bits[j]);
+//		}
+//	}
+
+	if (DecodeOk)
+	{
+		packedbits = 0;
+		for (i = 0 ; i < WSS625_NB_DATA_BITS ; i++)
+		{
+			packedbits |= bits[i]<<i;
+		}
+
+		WSSRatio = packedbits & 0x000f;
+		WSSFilmMode = (packedbits & 0x0010) ? TRUE : FALSE;
+		WSSColorPlus = (packedbits & 0x0020) ? TRUE : FALSE;
+		WSSHelperSignals = (packedbits & 0x0040) ? TRUE : FALSE;
+		WSSTeletextSubtitle = (packedbits & 0x0100) ? TRUE : FALSE;
+		WSSOpenSubtitles = packedbits & 0x0600;
+		WSSSurroundSound = (packedbits & 0x0800) ? TRUE : FALSE;
+		WSSCopyrightAsserted = (packedbits & 0x1000) ? TRUE : FALSE;
+		WSSCopyProtection = (packedbits & 0x2000) ? TRUE : FALSE;
+	}
+
+	if (OldRatio != WSSRatio)
+	{
+		switch (WSSRatio)
+		{
+		case WSS625_RATIO_133:
+			SwitchToRatio(1,1333);
+			LOG("WSS ratio (%x) : 1.33", WSSRatio);
+			break;
+		case WSS625_RATIO_177_ANAMORPHIC:
+			SwitchToRatio(2,1778);
+			LOG("WSS ratio (%x) : 1.77 anamorphic", WSSRatio);
+			break;
+		case WSS625_RATIO_155:
+		case WSS625_RATIO_155_LETTERBOX_CENTER:
+		case WSS625_RATIO_155_LETTERBOX_TOP:
+			SwitchToRatio(1,1555);
+			LOG("WSS ratio (%x) : 1.55 letterbox", WSSRatio);
+			break;
+		case WSS625_RATIO_177_LETTERBOX_CENTER:
+		case WSS625_RATIO_177_LETTERBOX_TOP:
+			SwitchToRatio(1,1778);
+			LOG("WSS ratio (%x) : 1.77 letterbox", WSSRatio);
+			break;
+		case WSS625_RATIO_BIG_LETTERBOX_CENTER:
+		default:
+			LOG("WSS ratio (%x) : ???", WSSRatio);
+			break;
+		}
+	}
+
+	if (OldFilmMode != WSSFilmMode)
+	{
+		if (WSSFilmMode)
+			LOG("WSS mode = film mode");
+		else
+			LOG("WSS mode = camera mode");
+	}
+
+	if (OldColorPlus != WSSColorPlus)
+	{
+		if (WSSColorPlus)
+			LOG("WSS color encoding = normal Pal");
+		else
+			LOG("WSS color encoding = Motion Adaptative ColorPlus");
+	}
+
+	if (OldHelperSignals != WSSHelperSignals)
+	{
+		if (WSSHelperSignals)
+			LOG("WSS helper signals = yes");
+		else
+			LOG("WSS helper signals = no");
+	}
+
+	if (OldTeletextSubtitle != WSSTeletextSubtitle)
+	{
+		if (WSSTeletextSubtitle)
+			LOG("WSS teletext subtitles = yes");
+		else
+			LOG("WSS teletext subtitles = no");
+	}
+
+	if (OldOpenSubtitles != WSSOpenSubtitles)
+	{
+		switch (WSSOpenSubtitles)
+		{
+		case WSS625_SUBTITLE_NO:
+			LOG("WSS open subtitles = no");
+			break;
+		case WSS625_SUBTITLE_INSIDE:
+			LOG("WSS open subtitles = inside active picture");
+			break;
+		case WSS625_SUBTITLE_OUTSIDE:
+			LOG("WSS open subtitles = outside active picture");
+			break;
+		default:
+			LOG("WSS open subtitles = ???");
+			break;
+		}
+	}
+
+	if (OldSurroundSound != WSSSurroundSound)
+	{
+		if (WSSSurroundSound)
+			LOG("WSS surround sound = yes");
+		else
+			LOG("WSS surround sound = no");
+	}
+
+	if (OldCopyrightAsserted != WSSCopyrightAsserted)
+	{
+		if (WSSCopyrightAsserted)
+			LOG("WSS copyright asserted = yes");
+		else
+			LOG("WSS copyright asserted = no");
+	}
+
+	if (OldCopyProtection != WSSCopyProtection)
+	{
+		if (WSSCopyProtection)
+			LOG("WSS copy protection = yes");
+		else
+			LOG("WSS copy protection = no");
+	}
+
+	return DecodeOk;
+}
+
+BOOL WSS525_DecodeLine(BYTE* vbiline)
+{
+	int		OldRatio;
+	BOOL	DecodeOk = FALSE;
+
+	OldRatio = WSSRatio;
+
+	WSSRatio = OldRatio;
+
+	if (OldRatio != WSSRatio)
+	{
+		switch (WSSRatio)
+		{
+		case WSS525_RATIO_133:
+		case WSS525_RATIO_133_LETTERBOX:
+			SwitchToRatio(1,1333);
+			LOG("WSS ratio (%x) : 1.33", WSSRatio);
+			break;
+		case WSS525_RATIO_177_ANAMORPHIC:
+			SwitchToRatio(2,1778);
+			LOG("WSS ratio (%x) : 1.77 anamorphic", WSSRatio);
+			break;
+		default:
+			LOG("WSS ratio (%x) : ???", WSSRatio);
+			break;
+		}
+	}
+
+	return DecodeOk;
 }
 
 int WSS_DecodeLine(BYTE* vbiline)
 {
+	switch (BT848_GetTVFormat()->wCropHeight)
+	{
 	// 625-line systems
-	if (BT848_GetTVFormat()->wCropHeight == 576)
-	{
-		return (WSS625_DecodeLine(vbiline));
-	}
+	case 576:
+		WSSDecodeOk = WSS625_DecodeLine(vbiline);
+		break;
+
 	// 525-line systems
-	else if (BT848_GetTVFormat()->wCropHeight == 480)
-	{
-		return (WSS525_DecodeLine(vbiline));
+	case 400:
+		WSSDecodeOk = WSS525_DecodeLine(vbiline);
+		break;
+
+	default:
+		WSSDecodeOk = FALSE;
+		break;
 	}
-	return 0;
+
+	if (! WSSDecodeOk)
+	{
+		WSSDecodeErr ++;
+//		LOG("WSS nb decoding errors = %d", WSSDecodeErr);
+		return -1;
+	}
+	else
+	{
+		return 0;
+	}
 }
