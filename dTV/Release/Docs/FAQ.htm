@@ -39,7 +39,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
     <td colspan="3"><img src="images/yellowspacer.gif" width="100%" height="2"></td>
   </tr>
   <tr> 
-    <td colspan="3">Last update; January, 25, 2001&nbsp;</td>
+    <td colspan="3">Last update: May7th 2001</td>
   </tr>
   <tr> 
     <td colspan="3"><!-- #BeginEditable "Text" --> 
@@ -48,125 +48,56 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <h2>Where can I find the latest FAQ ?</h2>
       <p> <a href="http://deinterlace.sourceforge.net/FAQ.htm">Here at
       deinterlace.sourceforge.net/FAQ.htm&nbsp;</a>
-      <h2>What is dTV ?</h2>
-      <p> dTV is a piece of software that grabs analog, interlaced video, and 
+      <h2>What is dScaler ?</h2>
+      <p> dScaler is a piece of software that grabs analog, interlaced video, and 
         deinterlaces it to make it a progressive scan feed for use on your computer 
-        monitor or projector.
+        monitor or projector and then allows scaling to any resolution.
       <p> Analog, interlaced video is what devices like VCRs, laserdisc, and
         game consoles output.
-      <p>
-      <h2>What is so special about dTV ?</h2>
-      <p> Unlike most existing software that tries to do the same, dTV implements 
+      <h2>What is so special about dScaler ?</h2>
+      <p> Unlike most existing software for use with TV cards, dScaler implements 
         very sophisticated algorithms to deinterlace such sources. Using such 
         algorithms makes sure that each kind of video source is handled a different 
-        way. It provides the user with a level of image quality unknown to pc 
-        owners up to now. 
+        way. It provides the user with a level of image quality unknown to PC owners
+      until now. 
       <p> Some of those techniques are ;
       <ul>
         <li>video source deinterlacing</li>
-        <li>inverse telecine detection</li>
-        <li>2:2 (for pal movies) as well as 3:2 (for ntsc movies) pulldown</li>
+        <li>inverse telecine detection: 2:2 (for pal movies) as well as 3:2 (for ntsc movies) pulldown</li>
+        <li>Automatic aspect ratio control</li>
+        <li>Judder elimination</li>
       </ul>
       <p> The image quality resulting from those complex operations is high and 
         allows some people equipped with data capable projectors to feed them 
-        with a progressive scan source that was interlaced right before.
-      <p> 
+        with progressive scan images.
+      <h2>
+      What is dTV?</h2>
+      <p>dTV is the old name for dScaler, we changed the name as people use DTV
+      to refer to digital television and this was causing confusion.&nbsp; In
+      the source and on the website you will still see references to dTV but
+      please refer to the program as dScaler from now on. 
       <h2>Who made what ?</h2>
-      <p> 
-      <h3>Developers</h3>
-      <p> 
-      <h3><i>John Adcock</i></h3>
-      <p>John is the founder of the project. He did huge amounts of full time 
-        development over a three-month period during a lucky work break on versions 
-        1.0 through 1.06 Beta 4. He did most of the work cleaning, translating 
-        and legalizing Multidec. He put into code, the world's first open-source 
-        real-time 3:2 pulldown software deinterlacer (based on Mark Rejhon's algorithm 
-        article). He also designed an open-source video-material deinterlacer 
-        that is superior to those in virtually any other any PC-based video software 
-        product.</p>
-      <h3><br>
-        <i> Mark Rejhon</i></h3>
-      <p>As of version 1.07, Mark is the project admin. He is also the moderator 
-        of the Internet's largest Home Theater Computers forum at <a href="../../../htdocs/www.avsforum.com">AVSFORUM</a>. 
-        Mark authored the 3:2 pulldown algorithm that forms the basis of the algorithm 
-        implemented into dTV by JohnAd. He also does other programming tasks like 
-        code cleanup, merging, documenting, testing, enhancing of contributors' 
-        changes that are submitted to the project. He also enhances dTV with his 
-        own changes to certain parts of the code, including improvements to the 
-        deinterlacer modes.</p>
-      <h3><br>
-        <i> Steve Grimm</i></h3>
-      <p>Steve is contributing enhancements to the deinterlacing modes including 
-        better automatic switching between video mode and 3:2 pulldown mode, and 
-        handling of material that has bad 3:2 pulldown. He also worked on an early 
-        version of a 3:2 pulldown deinterlacing algorithm.</p>
-      <h3><br>
-        <i> Michael Samblanet</i></h3>
-      <p>Michael is continuing to upgrade his aspect ratio control code.</p>
-      <p><br>
-      </p>
-      <h3><i>Tom Barry</i></h3>
-      <p> Tom contributed the triple buffering code and synchronization fixes 
-        for version 2.0.0. Also, he has authored several MMX assembly optimizations 
-        to the video deinterlace mode and added the advanced Brooktree/Conexant 
-        chipset settings menu, both of which were included in version 1.9. <br>
-      <p><br>
-      </p>
-      <h3><i>Michael Eskin</i></h3>
-      <p> Michael works for Conexant and brings his technical expertise of the 
-        capture chipset to the dTV project. He's also contributing to various 
-        parts of the code among which, the OSD code. <br>
-      <a name="THANKS"></a>
-      <h3>Thanks to those various helping hands</h3>
-      <p> 
-      <p>See <a href="/MultiDec_ReadMe.txt"> MultiDec_ReadMe.txt</a> for a list 
-        of thanks for the project dTV was based upon.</p>
-      <ol>
-        <li>A big debt a gratitude is due to Mark Rejhon for his 3:2 alogirthm 
-          and his help testing, promoting dTV but particularly for his vision 
-          and his refusal to accept second best.</li>
-        <li>Thanks to Paul Samblanet, who contributed the aspect ratio control 
-          code. </li>
-        <li>Thanks to Daniel Schmelzer for his hard work creating and updating 
-          the website. Love the logo!&nbsp;</li>
-        <li>Thanks to Steve Grimm for his work on the old method of 3:2 pulldown.</li>
-        <li>Thanks to everybody on the deinterlace project mailing list</li>
-        <li>Thanks to Borg, creator of bTV, for writing the first ever computer 
-          deinterlacing program the inspiration for this project</li>
-        <li>Thanks to Yvon Quere and Ali for finding bTV and Yvon for creating 
-          and updating the FAQ.&nbsp;</li>
-        <li>Thanks to all at the AVSForums for your encouragement and help. The 
-          HTPC forum is easily the best group on the internet.</li>
-        <li>Thanks to the authors of VirtualDub for the the PAL detection algorithm.</li>
-        <li>Thanks to Gunnar Thalin for his Area based deinterlacing plug-in which 
-          was the basis for the current deinterlacing method.</li>
-        <li>Thanks to Steaphan Greene, Øyvind Aabling, Octavian Purdila, Vladimir 
-          Dergachev and Christian Lupien&#151;the GATOS developers&#151;for the 
-          screen capture code. </li>
-      </ol>
-      <p> 
-      <h2>How much does dTV cost ?</h2>
-      <p> $1000 (plus taxes) :-) Of course not, dTV is fully free of charge, freeware, 
+      <p>See <a href="Authors.htm">dTV -- Authors</a> for the main contributors
+      and <a href="Thanks.htm">dTV -- Thanks</a> for a list of people who have
+      helped make dTV a success.</p>
+      <h2>How much does dScaler cost ?</h2>
+      <p> $1000 (plus taxes) :-) Of course not, dScaler is fully free of charge,
+      open-source, 
         coded under GPL. 
-      <p> 
       <h1>General issues</h1>
-      <p> 
-      <p>
-      <h2>Should I use dTV to deinterlace the output from my set-top dvd player 
+      <h2>Should I use dScaler to deinterlace the output from my set-top dvd player 
         ?</h2>
-      <p> While it's feasable and works quite fine (see the "dTV Windvd challenge" 
-        in the <a href="/screenshots.htm">screenshots</a> section), home theater 
-        pc's have shown the best results while using dvd decoding software along 
+      <p> While it's feasible and works quite fine (see the "dTV Windvd challenge" 
+        in the <a href="/screenshots.htm">screenshots</a> section), home theatre
+      pc's have shown the best results while using dvd decoding software along 
         with a dvd-rom and a modern graphic card. However, it's been used quite 
         often for test purposes (testing of grab quality on a high quality source, 
         testing pulldown techniques on well encoded sources etc..). 
-      <p> Some people have found that dTV does a better job with non-film DVDs
+      <p> Some people have found that dScaler does a better job with non-film DVDs
         (concert videos or DVDs of some television shows, for example) than the
-        software players.
-      <p> 
+        software players. 
       <h1>Software issues</h1>
-      <p> 
-      <h2>Which operating system can I use dTV on ?</h2>
+      <h2>Which operating system can I use dScaler on ?</h2>
       <p> Windows 95 ok <i>uses VxD running in ring-0</i><br>
         Windows 98 ok <i>uses VxD running in ring-0</i><br>
         Windows NT ok <i>uses sys running in ring-0</i><br>
@@ -200,10 +131,10 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         by those interested in what works for video deinterlacing. When it is 
         selected it will pop up a control panel with many controls to adjust various 
         parameters. These all correspond to Blc... parameters in the [Deinterlace] 
-        section of the dTV.ini file and are documented there. It is probably not 
+        section of the dScaler.ini file and are documented there. It is probably not 
         the single best method for anything but it can be used to create custom 
         deinterlace methods for special purposes. These can be saved in a separate 
-        ini file and invoked by a command line parameter when starting dTV.exe. 
+        ini file and invoked by a command line parameter when starting dScaler.exe. 
         Somewhat CPU intensive
       <h3> Scaler Bob</h3>
       <p> Uses the DirectDraw hardware bob feature (if available), this uses the
@@ -225,19 +156,25 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         Quite by accident, it can also do a decent job on poorly mastered 3:2 
         or 2:2 pull down film source material like some anime movies, regardless 
         of low or high motion. Try it if you have a movie source that is not giving 
-        good results with normal Auto Pull Down processing. 
+        good results with normal Auto Pull Down processing.<h3>Greedy 2 Frame
+      method</h3>
+      <p>This method tries to combine the best features of the 2-frame algorithm
+      with the looking ahead ability of the greedy method.&nbsp; I find this methods
+      works well on sports and other high motion material.&nbsp; With static
+      images and low quality sources there may be unacceptable levels of
+      bobbing. 
       <h3>3:2 Pulldown, Skip Field X</h3>
       <p> Mostly on NTSC format, on a 24-fps film material, the material is encoded 
         as 48 fields (24 odd and 24 even). Each frame will be alternatingly played 
         3 and 2 times respectively. With regard to fields, the order played will 
         be come: Odd, Even, Odd (of frame 1) and Even, Odd (of Frame 2), and so 
         on. In order to create a pure progressive image (which is 1 frame of the 
-        24-fps material), dTV will only need to take the odd and even field, weaves 
+        24-fps material), dScaler will only need to take the odd and even field, weaves 
         them together, skip the next odd frame and wait until the next odd and 
         even field arrives, weaves them together and put it out again. In the 
         field sequence, out of every 5 field, 1 field can be skipped. That field 
         that is skipped will be the number displayed on the pulldown Skip Field. 
-        If all the sequences are coming in as perfect as described, and dTV detects 
+        If all the sequences are coming in as perfect as described, and dScaler detects 
         it perfectly, the 3:2 pulldown method selected will always be set the 
         same. If the PC is rather slow (dropping fields), or the sequence is altered 
         (abruptly changing scenes), or dTV's tolerance in comparison is exceeded, 
@@ -247,31 +184,19 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <p> PAL movies are made of sequences of 2:2 frames. Once such a sequence 
         is detected, the Odd and Even fields are taken, weaved to form 1 frame 
         of the 24-fps material, and displayed. 
-      <h2>When taking a snapshot, dTV outputs ppm files, what are those ?</h2>
-      <i>Deprecated ; Since version 2, dTV outputs more widely used TIFF files 
-      that are supported by many applications out there</i> 
-      <p> It's called Portable PixMap. Actually, this is the only graphic file 
-        code that John Adcock had when writing dTV ;-)<br>
-        It's perfectly handled by several applications including 
-      <ul>
-        <li>ACDSee 3 <a href="http://www.acdsystems.com/english/products/acdsee/index.htm">http://www.acdsystems.com/english/products/acdsee/index.htm</a> 
-        <li>Irfanview <a href="http://www.irfanview.com/english.htm">http://www.irfanview.com/english.htm</a> 
-        <li>Paint Shop Pro <a href="http://www.jasc.com/product.asp?pf%5Fid=001">http://www.jasc.com/product.asp?pf%5Fid=001</a> 
-      </ul>
-      <p> 
-      <h2>Can I <i>remote control</i> dTV ? <b>YES</b></h2>
-      <p> Yes you can. dTV is being developped mainly by people using it as an 
-        analog source scaler for their projector and they prefer for sure using 
-        dTV from their remote on the sofa rather than from their desk ;-)
-      <p> dTV is thus filled with <a href="/keyboard.htm">keyboard shortcuts</a> 
+      <h2>Can I <i>remote control</i> dScaler ? <b>YES</b></h2>
+      <p> Yes you can. dScaler is being developped mainly by people using it as an 
+        analog source scaler for their projector and they prefer for sure using dScaler
+      from their remote on the sofa rather than from their desk ;-)
+      <p> dScaler is thus filled with <a href="keyboard.htm">keyboard shortcuts</a> 
         for all main options so that you can do everything quickly.<br>
         More, we suggest the use of <a href="http://www.stack.nl/~stilgar/windoze/girder.html">Girder</a> 
-        from Ron Bessems as the application of choice for remote controling your 
+        from Ron Bessems as the application of choice for remote controlling your 
         computer.
       <p>
-      <h2>Can I record video to my hard disk with dTV?</h2>
-      <p> No.  dTV isn't an all-in-one desktop video utility.  The development
-        team has chosen to concentrate on making it the best scaler it can be,
+      <h2>Can I record video to my hard disk with dScaler?</h2>
+      <p> No. dScaler isn't an all-in-one desktop video utility.  The development
+        team has chosen to concentrate on making it the best video processor it can be,
         and features like recording would require a lot of time and effort
         we'd rather spend fine-tuning the deinterlacing algorithms or adding
         new convenience features for aspect ratio control.
@@ -284,19 +209,17 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
           video recording application that specializes in keeping audio locked to
           video even in the face of dropped frames.
         <li> <a href="http://www.virtualdub.org/">VirtualDub</a>, an open-source
-          desktop video application, can capture as well as edit and postprocess
+          desktop video application, can capture as well as edit and
+          post-process
           video.
       </ul>
-      <p> Of course, if you want to add video recording to dTV, there's nothing
-        stopping you!  That's what open source is all about.
-      <p> 
-      <p> 
+      <p> Of course, if you want to add video recording to dScaler, there's nothing
+        stopping you!  That's what open source is all about. 
       <h1>Hardware issues</h1>
-      <p> 
       <h2>Can I use any vga card as a display device ?</h2>
       <p> Despite this statement from Mark Rejhon ;
-      <p> "dTV requires an AGP card. It is impossible to do on a PCI video card. 
-        dTV uses massive amounts of *bidirectional* bus bandwidth: 250 megabits 
+      <p> &quot;dScaler requires an AGP card. It is impossible to do on a PCI video card.
+      dScaler uses massive amounts of *bidirectional* bus bandwidth: 250 megabits 
         per second incoming bandwidth (from TV card) and about 500 megabits per 
         second outgoing bandwidth (to videocard). This bus data firehose is not 
         feasible on PCI bus, as PCI can reliably continuously transfer up to about 
@@ -309,12 +232,12 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         are tried ; 
       <p> IanD reported <i>I have an 8MB 3dfusion PCI on a BX mobo Celeron 566 
         64MB RAM 66MHz FSB, with Dynalink Magic TView (Conexant 878) and can only 
-        execute dTV at 16 bit colour depth. When running a 1024x768 desktop, dTV 
-        v1.9 with a 720x576 @ 50Hz PAL composite input gives 0 DFS in manual Video 
-        De-interlace mode for dTV window sizes up to 848x629 (as determined from 
+        execute dScaler at 16 bit colour depth. When running a 1024x768 desktop,
+      dScaler v1.9 with a 720x576 @ 50Hz PAL composite input gives 0 DFS in manual Video 
+        De-interlace mode for dScaler window sizes up to 848x629 (as determined from 
         dtv.ini) but 7+ DFS for window sizes even 1 pixel above either of these 
         dimensions</i>
-      <p> Bottom line ; no specific requirement for dTV. Probably works not so 
+      <p> Bottom line ; no specific requirement for dScaler. Probably works not so 
         bad on any vga card. However, as of today, GeForce based cards or (dualhead) 
         Matrox G4x0 are successfully used by a lot of users.
       <p> 
@@ -328,7 +251,6 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <p> While we can't claim "this card is the one you need", let's give you 
         a couple ones that, at least, have been sucessfully used by some users 
         ;
-      <p> 
       <ul>
         <li>Zoltrix Genie TV <a href="http://www.zoltix.com/products/GenieTVspecs.htm">http://www.zoltix.com/products/GenieTVspecs.htm</a> 
         <li>The WinTV series from Hauppage <a href="http://www.hauppage.com/html/products.htm">http://www.hauppage.com/html/products.htm</a> 
@@ -337,12 +259,13 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       </ul>
       <p>Take a look at the <a href="/card_support.htm">card list</a>. This will 
       never be complete so feel free to drop us an email reporting your experience 
-      with dTV and your card.</p>
+      with dScaler and your card.&nbsp; Also note that just because a card is on
+      the list does not mean that it will work properly.&nbsp; Some features
+      especially sound may not work correctly.</p>
       <p> <i>This list is originally based on the linux bttv driver on which the 
         program was originally based.</i>
-      <p> 
       <h2>Can I use my existing <whatever> card's video input ?</h2>
-      <p> Probably not. dTV is supporting (see previous question) the Brooktree/Conexant 
+      <p> Probably not. dScaler is supporting (see previous question) the Brooktree/Conexant 
         chipset. Supporting others chipsets, while feasable, means some hard work 
         and some solid knowledges of those chipsets. And <b>unfortunately, no 
         recent vga card with video-in feature includes Brooktree/Conexant chipset</b>. 
@@ -350,14 +273,13 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <p> If you have some programming knowledge regarding the grab chipsets used 
         in those card, you might want to help us. See the "<a href="#HELP">How 
         can I help</a>" section.
-      <p> 
       <h2>Can I use more than one video input ?</h2>
       <p> Some "nut" people (he's admitting it himself ;-) who are playing with 
-        Picture In Picture a lot have asked if dTV could drive multiple cards 
+        Picture In Picture a lot have asked if dScaler could drive multiple cards 
         or multiple inputs. A card allowing at worst 4 video inputs is manufactured 
         by Leadtek. It's the <a href="http://www.leadtek.com.tw/ewv605.htm">Winview 
         605</a>. 
-      <p> It is Brooktree based so it might work with dTV but clearly nothing 
+      <p> It is Brooktree based so it might work with dScaler but clearly nothing 
         is done right now to drive multiple video inputs at the same time.
       <p> See the <a href="http://www.avsforum.com/ubb/Forum12/HTML/004431.html">associated 
         topic</a> on AVS forum.
@@ -369,8 +291,15 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <h1>Troubleshooting</h1>
       <p> 
       <a name="PURPLESTRIPES"></a>
+      <h2> 
+      I have problems with sound?</h2>
+      <p>Note that support for sound from cards internal tuners is not a
+      priority for most of the developers of dTV.&nbsp; Almost all the
+      developers use some kind of external TV tuner and bypass the sound
+      issue.&nbsp; Having said that we will be pleased to accept fixes for any
+      card but are not in a position to add support for new cards ourselves.
       <h2>What is this "purple stripes" issue ?</h2>
-      <p> When feeding some analog sources to the combination grab card/dTV, some 
+      <p> When feeding some analog sources to the combination grab card/dScaler, some 
         numerous horizontal colores lines appear on the image.
       <p> See <a href="/images/Mummy_MacrovisionOn.jpg">this picture</a> where 
         macrovision has been added to the video signal. The same video signal 
@@ -382,7 +311,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <p> Other examples of this phenomenon can be seen here ;<br>
         <a href="http://www.avsforum.com/ubb/Forum12/HTML/004317.html">avs:MacroVision 
         side effect</a><br>
-        <a href="http://www.avsforum.com/ubb/Forum12/HTML/004436.html">avs:dTV 
+      <a href="http://www.avsforum.com/ubb/Forum12/HTML/004436.html">avs:dScaler 
         Purple Stripes - is this capture card dependent?</a>
       <p> Some infos from the <a href="http://www.dvddemystified.com/dvdfaq.html">Dvd 
         Faq</a> ;
@@ -397,11 +326,9 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         a dvd player to the computer. Problems on other type of sources have yet 
         to be shown.
       <p>So in common cases, you don't have to worry about this.
-      <p> 
-      <h2>Despite a very powerful system, I've still got some dropped frames ?</h2>
-      <p></p>
+      <h2>Despite having a very powerful system, I still get some dropped frames?</h2>
       <p>Some people experienced some dropped frames (signs of a machine that has 
-      problems keeping up with the workload of dTV) even on powerful systems. 
+      problems keeping up with the workload of dScaler) even on powerful systems. 
       An hypothesis is that some motherboard agp speed issue might be the cause 
       of such behavior.</p>
       <p> JackB reported <i>We looked at his BIOS settings and the only major 
@@ -417,31 +344,30 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         <code>Error calling overlay update. D:/source/deinterlace/dtv/other.c 
         at line 161</code><br>
         We don't have any full explanation of the problem but it happens when 
-        resizing dTV or making it go from fullscreen to window mode. Also the 
+        resizing dScaler or making it go from fullscreen to window mode. Also the 
         color depth, frequency and size of the desktop might be related. The problem 
-        seems to have disappeared with dTV starting from version 2.0.0 
+        seems to have disappeared with dScaler starting from version 2.0.0 
       <p> Some more infos on this issue in <a href="http://www.avsforum.com/ubb/Forum12/HTML/004895.html">this 
         avs topic</a>
       <p> 
       <a name="HELP"></a>
       <h1>How can I help ?</h1>
-      <p> 
       <h2>Testing</h2>
-      <p> More and more people are giving dTV a try. Why wouldn't you ? We'd like 
-        to know about your experience with it. What does (not) work ? What can 
-        be improved, what feature you'd like. Every feedback is useful. 
-      <p> Please have a look, when reporting a problem, to the <a href="/Bugs.htm">bug 
-        list</a>. Report also the hardware you're using, especially video card 
-        and grab card. 
-      <p> 
+      <p>More and more people are giving dScaler a try. Why don't you?<br>
+      We'd like to know about your experience with it. What does (not) work?
+      What can be improved, what features you would like. All feedback is
+      useful.
+      <p>Please report bugs on the <a href="http://www.avsforum.com/ubbcgi/Ultimate.cgi">AV
+      Science Forum</a> after checking (using the search feature) that the
+      problem has not already been reported. Each bug report should include the
+      hardware you're using, especially video card, grab card and processor type
+      and speed.</p>
       <h2>Coding</h2>
-      <p> Any help is welcome. Despite including very complex code, there's a 
+      <p> Any help is welcome. Despite including very complex code, there are a 
         lot of features in it that are simple or that could be easily implemented 
-        without knowing anything about 3:2 pulldown detection.
-      <p> If you've got an idea, or feel like to trying to implement something 
-        that is already in the <a href="/Todo.htm">Todo list</a>, contact the 
-        authors and join the <a href="http://sourceforge.net/mail/?group_id=7420">mailing 
-        list</a>. All relevant infos to get you started are on the <a href="/developers.htm">developers 
+        without knowing anything about 3:2 pulldown detection.<p> If you've got an idea, or feel like to trying to implement something 
+        that is already in the <a href="/Todo.htm">Todo list</a>, join the <a href="http://sourceforge.net/mail/?group_id=7420">mailing 
+        list</a>. All relevant information to get you started are on the <a href="/developers.htm">developers 
         page</a>. 
       <!-- #EndEditable --></td>
   </tr>
