@@ -1049,6 +1049,20 @@ void GetSourceRect(RECT *rect)
 }
 
 
+
+//----------------------------------------------------------------------------
+// Aspect ratio API
+
+char* HorzPosString[3] =
+{
+	"RIGHT", "CENTER", "LEFT"
+};
+
+char* VertPosString[3] =
+{
+	"BOTTOM", "CENTER", "TOP"
+};
+
 BOOL Aspect_Overscan_OnChange(long Overscan)
 {
 	InitialOverscan = Overscan;
@@ -1159,13 +1173,13 @@ SETTING AspectSettings[ASPECT_SETTING_LASTONE] =
 		"ASPECT", "AspectConsistencyTime", NULL,
 	},
 	{
-		"Vert Image Pos", NUMBER, 0, &VerticalPos,
-		VERT_POS_CENTRE, 0, 2, 1, NULL,
+		"Vert Image Pos", ITEMFROMLIST, 0, &VerticalPos,
+		VERT_POS_CENTRE, 0, 2, 1, VertPosString,
 		"ASPECT", "VerticalPos", VertPos_OnChange,
 	},
 	{
-		"Horiz Image Pos", NUMBER, 0, &HorizontalPos,
-		HORZ_POS_CENTRE, 0, 2, 1, NULL,
+		"Horiz Image Pos", ITEMFROMLIST, 0, &HorizontalPos,
+		HORZ_POS_CENTRE, 0, 2, 1, HorzPosString,
 		"ASPECT", "HorizontalPos", HorizPos_OnChange,
 	},
 };

@@ -1768,7 +1768,7 @@ SETTING BT848Settings[BT848_SETTING_LASTONE] =
 	},
 	{
 		"Vert Delay", SLIDER, 0, &VDelay,
-		0, 0, 255, 1, NULL,
+		0, 0, 254, 2, NULL,
 		"Hardware", "VDelay", VDelay_OnChange,
 	},
 };
