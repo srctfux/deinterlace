@@ -43,7 +43,7 @@
 
 // This is the Header for the new UI code
 // This is currently in developement and is not to be used
-// It has only been checked in so that I can work on the 
+// It has only been checked in so that I can work on the
 // crashing problems
 
 typedef enum
@@ -128,10 +128,10 @@ void WritePrivateProfileInt(LPCTSTR lpAppName,  LPCTSTR lpKeyName,  int nValue, 
 #define ADJ_MINIMUM_REPEAT_BEFORE_ACCEL     6      // Minimum number of taps before acceleration begins
 #define ADJ_KEYB_TYPEMATIC_REPEAT_DELAY     200    // Milliseconds threshold for consecutive keypress repeat
 #define ADJ_KEYB_TYPEMATIC_ACCEL_STEP       2000   // Milliseconds between each acceleration of adjustment
-#define ADJ_KEYB_TYPEMATIC_MAX_STEP         5      // Maximum adjustment step at one time
+#define ADJ_KEYB_TYPEMATIC_MAX_STEP         10     // Maximum adjustment step at one time
 #define ADJ_BUTTON_REPRESS_REPEAT_DELAY     400    // Milliseconds threshold for consecutive button repress
-#define ADJ_BUTTON_REPRESS_ACCEL_STEP       500    // Milliseconds between each acceleration of adjustment
-#define ADJ_BUTTON_REPRESS_MAX_STEP         15     // Maximum adjustment step at one time
+#define ADJ_BUTTON_REPRESS_ACCEL_STEP       400    // Milliseconds between each acceleration of adjustment
+#define ADJ_BUTTON_REPRESS_MAX_STEP         30     // Maximum adjustment step at one time
 
 
 #endif
