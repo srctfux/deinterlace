@@ -1177,7 +1177,8 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_SHOW_OSD:
-			OSD_ShowText(hWnd, GetSourceName(Setting_GetValue(BT848_GetSetting(VIDEOSOURCE))), 0);
+//			OSD_ShowText(hWnd, GetSourceName(Setting_GetValue(BT848_GetSetting(VIDEOSOURCE))), 0);
+			OSD_ShowInfosScreen(hWnd, 0);
 			break;
 
 		case IDM_HIDE_OSD:
@@ -1441,13 +1442,13 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
         case OSD_TIMER_ID:
 			OSD_Clear(hWnd);
             break;
-		}
 		//-------------------------------
 		case TIMER_BOUNCE:
 		case TIMER_ORBIT:
 			// MRS 2-20-01 - Resetup the display for bounce and orbiting
 			WorkoutOverlaySize(); // Takes care of everything...
 			break;
+		}
 		break;
 	
 	// support for mouse wheel

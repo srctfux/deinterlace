@@ -454,7 +454,7 @@ END
 ABOUT DIALOGEX 22, 17, 374, 274
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
 CAPTION "About dTV"
-FONT 8, "MS Sans Serif", 0, 0, 0x1
+FONT 8, "MS Sans Serif"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,305,9,58,19,WS_GROUP,WS_EX_CLIENTEDGE
     CTEXT           "dTV Version 2.x",IDC_VERSION,0,3,293,9
@@ -472,15 +472,15 @@ BEGIN
     GROUPBOX        "Authors",IDC_STATIC,6,37,180,100
     CTEXT           "()()  http://deinterlace.sourceforge.net  ()()",
                     IDC_STATIC,0,11,293,10
-    LTEXT           "bttv - Bt848 frame grabber driver Copyright (c) Ralph  Metzler && Marcus Metzler",
+    LTEXT           "bttv - Bt848 frame grabber driver Copyright (c) Ralph Metzler && Marcus Metzler",
                     IDC_STATIC,13,168,347,11
     LTEXT           "I2C Interface Copyright (c) Gerd Knorr",IDC_STATIC,13,
                     182,160,10
     GROUPBOX        "Support",IDC_STATIC,192,37,180,100
     LTEXT           "The best place to get support for dTV is the Home Theater Computers foum at the AV Science Forums.",
                     IDC_STATIC,200,47,166,18
-    LTEXT           "John Adcock\nMark Rejhon\nSteve Grimm\nTom Barry\nMichael Eskin\nMichael Samblanet",
-                    IDC_STATIC,12,52,86,51
+    LTEXT           "John Adcock\nMark Rejhon\nSteve Grimm\nTom Barry\nMichael Eskin\nMichael Samblanet\nLaurent Garnier\nHermes Conrad",
+                    IDC_STATIC,12,52,86,77
     LTEXT           "Please read the FAQ and the appropriate release thread for the version your using before posting here",
                     IDC_STATIC,200,104,166,20
     CTEXT           "http://www.avsforum.com/",IDC_LINK,201,78,162,12,
@@ -1347,7 +1347,7 @@ BEGIN
             VALUE "OriginalFilename", "dTV.exe\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "dTV\0"
-            VALUE "ProductVersion", "2, 2, 0, 0\0"
+            VALUE "ProductVersion", "2.2.0\0"
             VALUE "SpecialBuild", "\0"
         END
     END

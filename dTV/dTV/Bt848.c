@@ -33,6 +33,9 @@
 // 08 Jan 2001   John Adcock           Global Variable Tidy up
 //                                     Got rid of global.h structs.h defines.h
 //
+// 01 Mar 2001   Laurent Garnier       Auto-switch to default video format
+//                                     when switching to tuner video input
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -1387,6 +1390,11 @@ BOOL VideoSource_OnChange(long NewValue)
 	Stop_Capture();
 	VideoSettings_Save();
 	VideoSource = NewValue;
+	// If source is tuner, we switch to default video format
+	if (NewValue == SOURCE_TUNER)
+	{
+		TVFormat = BT848_GetSetting(TVFORMAT)->Default;
+	}
 	VideoSettings_Load();
 	switch(NewValue)
 	{

@@ -704,3 +704,62 @@ BOOL APIENTRY ChipSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 	return (FALSE);
 }
 
+
+LPCSTR GetProductNameAndVersion()
+{
+	DWORD   dwVerInfoSize;		// Size of version information block
+	LPSTR   lpVersion;			// String pointer to 'version' text
+	DWORD   dwVerHnd=0;			// An 'ignored' parameter, always '0'
+	UINT    uVersionLen;		// Current length of full version string
+	WORD    wRootLen;			// length of the 'root' portion of string
+	char    szFullPath[MAX_PATH];	// full path of module
+	static char szResult[256] = "dTV";	// Temporary result string
+	char szGetName[256];
+
+	// Now lets dive in and pull out the version information:
+	GetModuleFileName (hInst, szFullPath, sizeof(szFullPath));
+	dwVerInfoSize = GetFileVersionInfoSize(szFullPath, &dwVerHnd);
+	if (dwVerInfoSize)
+	{
+		LPSTR   lpstrVffInfo;
+		HANDLE  hMem;
+		hMem = GlobalAlloc(GMEM_MOVEABLE, dwVerInfoSize);
+		lpstrVffInfo  = GlobalLock(hMem);
+		GetFileVersionInfo(szFullPath, dwVerHnd, dwVerInfoSize, lpstrVffInfo);
+		// The below 'hex' value looks a little confusing, but
+		// essentially what it is, is the hexidecimal representation
+		// of a couple different values that represent the language
+		// and character set that we are wanting string values for.
+		// 040904E4 is a very common one, because it means:
+		//   US English, Windows MultiLingual characterset
+		// Or to pull it all apart:
+		// 04------        = SUBLANG_ENGLISH_USA
+		// --09----        = LANG_ENGLISH
+		// ----04BO        = Codepage
+		lstrcpy(szGetName, "\\StringFileInfo\\040904B0\\");	 
+		wRootLen = lstrlen(szGetName); // Save this position
+
+		// Set the title of the dialog:
+		lstrcat (szGetName, "ProductName");
+		if(VerQueryValue((LPVOID)lpstrVffInfo,
+			(LPSTR)szGetName,
+			(LPVOID)&lpVersion,
+			(UINT *)&uVersionLen))
+		{
+			lstrcpy(szResult, lpVersion);
+
+			szGetName[wRootLen] = (char)0;
+			lstrcat (szGetName, "ProductVersion");
+
+			if(VerQueryValue((LPVOID)lpstrVffInfo,
+				(LPSTR)szGetName,
+				(LPVOID)&lpVersion,
+				(UINT *)&uVersionLen))
+			{
+				lstrcat(szResult, " Version ");
+				lstrcat(szResult, lpVersion);
+			}
+		}
+	}
+	return szResult;
+}

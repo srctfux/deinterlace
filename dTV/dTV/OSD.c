@@ -33,6 +33,9 @@
 //
 // 25 Feb 2001   Laurent Garnier       Added management of multiple OSD texts
 //
+// 03 Mar 2001   Laurent Garnier       Added functions OSD_ShowInfosScreen
+//                                     and OSD_GetLineYpos
+//
 // NOTICE FROM MARK: This code will probably be rewritten, but keeping 
 // this code neat and architecturally well organized, will maximize code 
 // recyclability.   There is a need for multiple independent OSD elements,
@@ -48,6 +51,15 @@
 #include "AspectRatio.h"
 #include "Other.h"
 #include "Status.h"
+
+#include "bt848.h"
+#include "ProgramList.h"
+#include "Audio.h"
+#include "MixerDev.h"
+#include "OutThreads.h"
+#include "FD_60Hz.h"
+#include "Filter.h"
+#include "Dialogs.h"
 
 
 char szFontName[128] = "Arial";
@@ -355,6 +367,218 @@ void OSD_Redraw(HWND hWnd, HDC hDC)
 			}			
 		}
 	}
+}
+
+//---------------------------------------------------------------------------
+// Calculate vertical position of line in OSD screen
+//    Return value between 0 (top) and 1 (bottom)
+//    Use line number > 0 if reference is top
+//    Use line number < 0 if reference is bottom
+//    dfMargin is a percent of screen height/width and value must be between 0 and 1
+//    dfSize is a percent of screen height and value must be between 0 and 100
+double OSD_GetLineYpos (int nLine, double dfMargin, double dfSize)
+{
+	double	dfY;
+	double	dfH = dfSize / 100;
+
+	// Line number 0 has no sense
+	if (nLine == 0)	return (0);
+
+	if (nLine > 0)
+	{
+		dfY = dfMargin + ((double)nLine - 1) * dfH;
+	}
+	else
+	{
+		dfY = 1 - dfMargin + (double)nLine * dfH;
+	}
+
+	// Line outside screen
+	if ( (dfY < 0) || ((dfY + dfH) > 1) )
+	{
+		dfY = 0;
+	}
+
+	return (dfY);
+}
+
+//---------------------------------------------------------------------------
+// Display multiple informations on scrren
+void OSD_ShowInfosScreen(HWND hWnd, double dfSize)
+{
+	double	dfMargin = 0.05;	// 5% of screen height/width
+	char	szInfo[64];
+	int		nLine;
+
+	OSD_ClearAllTexts();
+
+	if (dfSize == 0)	dfSize = 4;	// 4% of screen height
+
+	// dTV version
+	OSD_AddText(GetProductNameAndVersion(), dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (1, dfMargin, dfSize));
+
+	// Channel
+	nLine = 2;
+	if (Setting_GetValue(BT848_GetSetting(VIDEOSOURCE)) == SOURCE_TUNER)
+	{
+		OSD_AddText(Programm[CurrentProgramm].Name, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine, dfMargin, dfSize));
+	}
+	nLine++;
+
+	// Video input + video format
+	switch (Setting_GetValue(BT848_GetSetting(VIDEOSOURCE)))
+	{
+	case SOURCE_TUNER:
+		strcpy(szInfo, "Video : Tuner ");
+		break;
+	case SOURCE_COMPOSITE:
+		strcpy(szInfo, "Video : Composite ");
+		break;
+	case SOURCE_SVIDEO:
+		strcpy(szInfo, "Video : S-Video ");
+		break;
+	case SOURCE_OTHER1:
+		strcpy(szInfo, "Video : Other 1 ");
+		break;
+	case SOURCE_OTHER2:
+		strcpy(szInfo, "Video : Other 2 ");
+		break;
+	case SOURCE_COMPVIASVIDEO:
+		strcpy(szInfo, "Video : Composite via S-Video ");
+		break;
+	case SOURCE_CCIR656_1:
+		strcpy(szInfo, "Video : CCIR656 1 ");
+		break;
+	case SOURCE_CCIR656_2:
+		strcpy(szInfo, "Video : CCIR656 2 ");
+		break;
+	case SOURCE_CCIR656_3:
+		strcpy(szInfo, "Video : CCIR656 3 ");
+		break;
+	case SOURCE_CCIR656_4:
+		strcpy(szInfo, "Video : CCIR656 4 ");
+		break;
+	default:
+		strcpy(szInfo, "Video : Unknown ");
+		break;
+	}
+	strcat(szInfo, BT848_GetTVFormat()->szDesc);
+	OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+
+	// Audio input + muting
+	switch (AudioSource) {
+	case 0:
+		strcpy(szInfo, "Audio : Tuner");
+		break;
+	case 1:
+		strcpy(szInfo, "Audio : MSP/Radio");
+		break;
+	case 2:
+		strcpy(szInfo, "Audio : External");
+		break;
+	case 3:
+		strcpy(szInfo, "Audio : Internal");
+		break;
+	case 4:
+		strcpy(szInfo, "Audio : Disabled");
+		break;
+	case 5:
+		strcpy(szInfo, "Audio : Stereo");
+		break;
+	default:
+		strcpy(szInfo, "Audio : Unknown");
+		break;
+	}
+	if (System_In_Mute == TRUE)
+	{
+		strcat (szInfo, " - MUTE");
+	}
+	OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+
+	// Pixel width
+	sprintf (szInfo, "Pixel width : %u", Setting_GetValue(BT848_GetSetting(CURRENTX)));
+	OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+
+	// Source ratio
+	sprintf(szInfo, "Source %.3f", (double)Setting_GetValue(Aspect_GetSetting(SOURCE_ASPECT)) / 1000.0);
+
+	if (strlen(szInfo) > 0)
+	{
+		if ( (Setting_GetValue(Aspect_GetSetting(ASPECT_MODE)) == 1)
+		  && (Setting_GetValue(Aspect_GetSetting(SOURCE_ASPECT)) != 1333) )
+		{
+			strcat(szInfo, " Letterboxed");
+		}
+		else if (Setting_GetValue(Aspect_GetSetting(ASPECT_MODE)) == 2)
+		{
+			strcat(szInfo, " Anamorphic");
+		}
+		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+	}
+
+	// Display ratio
+	sprintf(szInfo, "Display %.3f", (double)Setting_GetValue(Aspect_GetSetting(TARGET_ASPECT)) / 1000.0);
+	OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+
+	// Video settings
+	nLine = 2;
+	sprintf (szInfo, "Brightness : %03u", Setting_GetValue(BT848_GetSetting(BRIGHTNESS)));
+	OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+	sprintf (szInfo, "Contrast : %03u", Setting_GetValue(BT848_GetSetting(CONTRAST)));
+	OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+	sprintf (szInfo, "Hue : %03u", Setting_GetValue(BT848_GetSetting(HUE)));
+	OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+	sprintf (szInfo, "Color : %03u", Setting_GetValue(BT848_GetSetting(SATURATION)));
+	OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+	sprintf (szInfo, "Color U : %03u", Setting_GetValue(BT848_GetSetting(SATURATIONU)));
+	OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+	sprintf (szInfo, "Color V : %03u", Setting_GetValue(BT848_GetSetting(SATURATIONV)));
+	OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+
+	// Deinterlace mode
+	nLine = -1;
+	if (Setting_GetValue(FD60_GetSetting(FALLBACKTOVIDEO)))
+	{
+		strcpy(szInfo, "Fallback on Bad Pulldown ON");
+	}
+	else
+	{
+		strcpy(szInfo, "Fallback on Bad Pulldown OFF");
+	}
+	OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine--, dfMargin, dfSize));
+	if (Setting_GetValue(OutThreads_GetSetting(AUTODETECT)))
+	{
+		strcpy(szInfo, "Auto Pulldown Detect ON");
+	}
+	else
+	{
+		strcpy(szInfo, "Auto Pulldown Detect OFF");
+	}
+	OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine--, dfMargin, dfSize));
+	OSD_AddText(DeinterlaceModeName(-1), dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine--, dfMargin, dfSize));
+
+	// Filters
+	nLine = -1;
+	if (Setting_GetValue(Filter_GetSetting(USETEMPORALNOISEFILTER)))
+	{
+		strcpy(szInfo, "Noise Filter ON");
+	}
+	else
+	{
+		strcpy(szInfo, "Noise Filter OFF");
+	}
+	OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine--, dfMargin, dfSize));
+	if (Setting_GetValue(Filter_GetSetting(USEGAMMAFILTER)))
+	{
+		strcpy(szInfo, "Gamma Filter ON");
+	}
+	else
+	{
+		strcpy(szInfo, "Gamma Filter OFF");
+	}
+	OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine--, dfMargin, dfSize));
+
+	OSD_Show(hWnd, FALSE);
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -28,6 +28,9 @@
 //
 // 25 Feb 2001   Laurent Garnier       Added management of multiple OSD texts
 //
+// 03 Mar 2001   Laurent Garnier       Added functions OSD_ShowInfosScreen
+//                                     and OSD_GetLineYpos
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __OSD_H___
@@ -75,5 +78,7 @@ void OSD_ShowTextPersistent(HWND hWnd, LPCTSTR szText, double dfSize);
 void OSD_ShowTextOverride(HWND hWnd, LPCTSTR szText, double dfSize);
 void OSD_Redraw(HWND hWnd, HDC hDC);
 void OSD_Clear(HWND hWnd);
+double OSD_GetLineYpos (int nLine, double dfMargin, double dfSize);
+void OSD_ShowInfosScreen(HWND hWnd, double dfSize);
 
 #endif

@@ -78,8 +78,8 @@ BOOL IsStatusBarVisible();
 #define TIMER_AUTOSAVE      55
 #define TIMER_AUTOSAVE_MS   1500
 
-#define TIMER_BOUNCE        42
-#define TIMER_ORBIT         43
+#define TIMER_BOUNCE        43
+#define TIMER_ORBIT         44
 
 extern HANDLE hInst;
 extern HWND hWnd;
