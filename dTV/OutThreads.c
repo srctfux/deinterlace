@@ -57,13 +57,13 @@ HANDLE OutThread;
 
 ePULLDOWNMODES gPulldownMode = VIDEO_MODE;
 
-long PulldownThresholdLow = -1000;
-long PulldownThresholdHigh = 1000;
+long PulldownThresholdLow = -2500;
+long PulldownThresholdHigh = 2500;
 long PulldownRepeatCount = 5;
 long Threshold32Pulldown = 100;
 BOOL bAutoDetectMode = FALSE;
 
-#define DOLOGGING
+//#define DOLOGGING
 
 void Start_Thread()
 {
