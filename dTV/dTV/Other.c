@@ -130,7 +130,7 @@ void Overlay_Clean()
 
 BOOL Overlay_Update(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL ColorKey)
 {
-	HRESULT ddrval;
+	HRESULT		ddrval;
 	DDOVERLAYFX DDOverlayFX;
 
 	if ((lpDD == NULL) || (lpDDSurface == NULL) || (lpDDOverlay == NULL))
@@ -151,15 +151,25 @@ BOOL Overlay_Update(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL Color
 		return (TRUE);
 	}
 
-	if (! bIsFullScreen)
+	if (! bIsFullScreen) {
 		dwFlags |= DDOVER_KEYDESTOVERRIDE;
+	}
+
 	DDOverlayFX.dckDestColorkey.dwColorSpaceHighValue = Overlay_ColorMatch(lpDDSurface, OverlayColor);
 	DDOverlayFX.dckDestColorkey.dwColorSpaceLowValue = DDOverlayFX.dckDestColorkey.dwColorSpaceHighValue;
 
 	ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, pSrcRect, lpDDSurface, pDestRect, dwFlags, &DDOverlayFX);
 	if (ddrval != DD_OK)
 	{
-		ErrorBox("Error calling Overlay_Update");
+		if ((pDestRect->top < pDestRect->bottom) && (pDestRect->left < pDestRect->right))
+		{
+			// 2000-10-29 Added by Mark Rejhon
+			// Display error message only if rectangle dimensions are positive.
+			// Negative rectangle dimensions are frequently caused by the user
+			// resizing the window smaller than the video size.
+			ErrorBox("Error calling Overlay_Update");
+		}
+		lpDDOverlay = NULL;
 		return (FALSE);
 	}
 
