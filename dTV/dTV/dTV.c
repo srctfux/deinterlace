@@ -127,7 +127,8 @@ char MSPStatus[30] = "";
 int LastFrame;
 
 
-int CurrentX,CurrentY;
+int CurrentX = 720;
+int CurrentY;
 
 unsigned char *pBurstLine[5];
 
@@ -1194,22 +1195,55 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_TYPEFORMAT_4:
 		case IDM_TYPEFORMAT_5:
 		case IDM_TYPEFORMAT_6:
-		case IDM_TYPEFORMAT_7:
-		case IDM_TYPEFORMAT_8:
-		case IDM_TYPEFORMAT_9:
             // Video format (NTSC, PAL, etc)
 			TVTYPE = LOWORD(wParam) - IDM_TYPEFORMAT_0;
-            switch (TVTYPE)
-            {
-            case 0:  strcpy(Text, "PAL");         break;
-            case 1:  strcpy(Text, "NTSC");        break;
-            case 2:  strcpy(Text, "SECAM");       break;
-            case 3:  strcpy(Text, "PAL-M");       break;
-            case 4:  strcpy(Text, "PAL-N");       break;
-            case 5:  strcpy(Text, "NTSC Japan");  break;
-            default: strcpy(Text, "Custom");      break;
-            }
-			ShowText(hWnd, Text);
+			CurrentX = 720;
+			ShowText(hWnd, TVSettings[TVTYPE].szDesc);
+			Stop_Capture();
+			BT848_SetGeoSize();
+			WorkoutOverlaySize();
+			Start_Capture();
+			break;
+
+		case ID_SETTINGS_PIXELWIDTH_768:
+			ShowText(hWnd, "768 Pixels");
+			CurrentX = 768;
+			Stop_Capture();
+			BT848_SetGeoSize();
+			WorkoutOverlaySize();
+			Start_Capture();
+			break;
+
+		case ID_SETTINGS_PIXELWIDTH_720:
+			ShowText(hWnd, "720 Pixels");
+			CurrentX = 720;
+			Stop_Capture();
+			BT848_SetGeoSize();
+			WorkoutOverlaySize();
+			Start_Capture();
+			break;
+
+		case ID_SETTINGS_PIXELWIDTH_640:
+			ShowText(hWnd, "640 Pixels");
+			CurrentX = 640;
+			Stop_Capture();
+			BT848_SetGeoSize();
+			WorkoutOverlaySize();
+			Start_Capture();
+			break;
+
+		case ID_SETTINGS_PIXELWIDTH_384:
+			ShowText(hWnd, "384 Pixels");
+			CurrentX = 384;
+			Stop_Capture();
+			BT848_SetGeoSize();
+			WorkoutOverlaySize();
+			Start_Capture();
+			break;
+
+		case ID_SETTINGS_PIXELWIDTH_320:
+			ShowText(hWnd, "320 Pixels");
+			CurrentX = 320;
 			Stop_Capture();
 			BT848_SetGeoSize();
 			WorkoutOverlaySize();
@@ -1958,6 +1992,12 @@ void SetMenuAnalog()
 	CheckMenuItem(GetMenu(hWnd), IDM_TYPEFORMAT_7, (TVTYPE == 7)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_TYPEFORMAT_8, (TVTYPE == 8)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_TYPEFORMAT_9, (TVTYPE == 9)?MF_CHECKED:MF_UNCHECKED);
+
+	CheckMenuItem(GetMenu(hWnd), ID_SETTINGS_PIXELWIDTH_768, (CurrentX == 768)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), ID_SETTINGS_PIXELWIDTH_720, (CurrentX == 720)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), ID_SETTINGS_PIXELWIDTH_640, (CurrentX == 640)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), ID_SETTINGS_PIXELWIDTH_384, (CurrentX == 384)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), ID_SETTINGS_PIXELWIDTH_320, (CurrentX == 320)?MF_CHECKED:MF_UNCHECKED);
 
 	EnableMenuItem(GetMenu(hWnd), IDM_TUNER, (TVCards[TVTYPE].TunerInput != -1)?MF_ENABLED:MF_GRAYED);
 	if(TVCards[TVTYPE].SVideoInput == -1)

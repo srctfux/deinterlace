@@ -229,14 +229,12 @@ typedef struct TVT
 
 struct TTVSetting
 {
-	WORD wCropWidth;
+	LPCSTR szDesc;
 	WORD wCropHeight;
 	WORD wTotalWidth;
 	BYTE bDelayA;
 	BYTE bDelayB;
 	BYTE bIForm;
-	DWORD dwXsfNum;
-	DWORD dwXsfDen;
 	WORD wHDelayx1;
 	WORD wHActivex1;
 	WORD wVDelay;

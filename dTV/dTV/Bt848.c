@@ -497,7 +497,6 @@ BOOL BT848_SetGeoSize()
 	int hactive, vactive;
 	BYTE crop, vtc, ColourFormat;
 
-	CurrentX = TVSettings[TVTYPE].wCropWidth;
 	CurrentY = TVSettings[TVTYPE].wCropHeight;
 
 	// set the pll on the card if appropriate

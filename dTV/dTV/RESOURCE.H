@@ -148,6 +148,12 @@
 #define IDM_TASPECT_200                 745
 #define IDM_TASPECT_235                 746
 #define IDM_TASPECT_CUSTOM              750
+#define ID_SETTINGS_PIXELWIDTH_768      760
+#define ID_SETTINGS_PIXELWIDTH_720      761
+#define ID_SETTINGS_PIXELWIDTH_640      762
+#define ID_SETTINGS_PIXELWIDTH_320      763
+#define ID_SETTINGS_PIXELWIDTH_384      764
+#define ID_SETTINGS_PIXELWIDTH_CUSTOM   765
 #define IDM_END                         1032
 #define IDM_TUNER                       1089
 #define IDM_EXTERN1                     1090
@@ -717,7 +723,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        155
-#define _APS_NEXT_COMMAND_VALUE         760
+#define _APS_NEXT_COMMAND_VALUE         767
 #define _APS_NEXT_CONTROL_VALUE         1812
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
