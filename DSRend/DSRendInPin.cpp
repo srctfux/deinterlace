@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendInPin.cpp,v 1.8 2002-07-06 16:40:52 tobbej Exp $
+// $Id: DSRendInPin.cpp,v 1.9 2002-07-06 19:18:22 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,11 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.8  2002/07/06 16:40:52  tobbej
+// new field buffering
+// support for field input
+// handle format change in Recive
+//
 // Revision 1.7  2002/06/03 18:22:03  tobbej
 // changed mediatype handling a bit
 //
@@ -516,17 +521,6 @@ HRESULT CDSRendInPin::Receive(IMediaSample *pSample)
 		copyMediaType(&m_mt,pmt);
 		freeMediaType(pmt);
 	}
-
-	//wait for corect time to render the sample
-	///@todo this needs to be moved
-	/*REFERENCE_TIME rtStart;
-	REFERENCE_TIME rtEnd;
-	hr=pSample->GetTime(&rtStart,&rtEnd);
-	if(SUCCEEDED(hr))
-	{
-		hr=m_pFilter->waitForTime(rtStart);
-		//ATLASSERT(SUCCEEDED(hr));
-	}*/
 
 	//render the sample
 	hr=m_pFilter->renderSample(pSample);

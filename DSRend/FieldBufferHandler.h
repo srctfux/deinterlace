@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: FieldBufferHandler.h,v 1.1 2002-07-06 16:38:56 tobbej Exp $
+// $Id: FieldBufferHandler.h,v 1.2 2002-07-06 19:18:22 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1  2002/07/06 16:38:56  tobbej
+// new field buffering
+//
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -93,7 +96,7 @@ public:
 	 * @param count in/out
 	 * @param ppBuffers 
 	 */
-	HRESULT GetFields(DWORD dwTimeOut,long *count,FieldBuffer *ppBuffer,BufferInfo *pBufferInfo);
+	HRESULT GetFields(DWORD dwTimeOut,long *count,FieldBuffer *ppBuffer,BufferInfo *pBufferInfo,REFERENCE_TIME &rtRenderTime);
 
 	/**
 	 * Mark all fields returned by GetFields() as not in use.
@@ -124,7 +127,7 @@ private:
 	{
 	public:
 		CFieldInfo()
-			:pBuffer(NULL),cbSize(0),bInUse(false)
+			:pBuffer(NULL),cbSize(0),bInUse(false),rtRenderTime(-1)
 		{
 		}
 		CComPtr<IMediaSample> pSample;
@@ -132,7 +135,7 @@ private:
 		ULONG cbSize;
 		bool bInUse;
 		BUFFER_FLAGS flags;
-		//REFERENCE_TIME rtRenderTime;
+		REFERENCE_TIME rtRenderTime;
 	};
 	
 	///total number of fields to buffer

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: FieldBufferHandler.cpp,v 1.2 2002-07-06 18:36:58 tobbej Exp $
+// $Id: FieldBufferHandler.cpp,v 1.3 2002-07-06 19:18:22 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.2  2002/07/06 18:36:58  tobbej
+// fixed crashing with aligned_free
+//
 // Revision 1.1  2002/07/06 16:38:56  tobbej
 // new field buffering
 //
@@ -154,14 +157,6 @@ HRESULT CFieldBufferHandler::InsertSample(CComPtr<IMediaSample> pSample)
 		return E_POINTER;
 	}
 	
-	//testing
-	//there is some locking problem
-	/*if(m_bOneFieldPerSample)
-		m_DrawnFields++;
-	else
-		m_DrawnFields+=2;
-	return S_OK;*/
-
 	m_Lock.Lock();
 	//count the field as dropped directly if we dont buffer anything
 	if(m_FieldCount==0)
@@ -177,6 +172,14 @@ HRESULT CFieldBufferHandler::InsertSample(CComPtr<IMediaSample> pSample)
 	{
 		m_Lock.Unlock();
 		return hr;
+	}
+	bool bTimeValid=false;
+	REFERENCE_TIME rtStart=-1;
+	REFERENCE_TIME rtEnd=-1;
+	hr=pSample->GetTime(&rtStart,&rtEnd);
+	if(SUCCEEDED(hr))
+	{
+		bTimeValid=true;
 	}
 	
 	ATLASSERT(!m_bOneFieldPerSample ? m_FieldCount%2==0 : true);
@@ -261,6 +264,14 @@ HRESULT CFieldBufferHandler::InsertSample(CComPtr<IMediaSample> pSample)
 			m_pfnMemcpy(field1.pBuffer+i*LineSize,pSampleBuffer+(2*i)*LineSize,LineSize);
 		}
 		ATLASSERT(field1.bInUse==false);
+
+		//set timestamp when sample shoud be rendered
+		field1.rtRenderTime=-1;
+		if(bTimeValid)
+		{
+			field1.rtRenderTime=rtStart;
+		}
+
 		m_Fields.Add(field1);
 		//signal that a new sample has arrived
 		m_NewSampleEvent.SetEvent();
@@ -327,6 +338,17 @@ HRESULT CFieldBufferHandler::InsertSample(CComPtr<IMediaSample> pSample)
 			m_pfnMemcpy(field2.pBuffer+i*LineSize,pSampleBuffer+(2*i+1)*LineSize,LineSize);
 		}
 		ATLASSERT(field2.bInUse==false);
+		
+		//set timestamp when sample shoud be rendered
+		field2.rtRenderTime=-1;
+		if(bTimeValid)
+		{
+			if(rtEnd!=-1)
+			{
+				field2.rtRenderTime=rtStart+(rtEnd-rtStart)/2;
+			}
+		}
+
 		m_Fields.Add(field2);
 	}
 	else
@@ -413,6 +435,14 @@ HRESULT CFieldBufferHandler::InsertSample(CComPtr<IMediaSample> pSample)
 				}
 			}
 		}
+		
+		//set timestamp when sample shoud be rendered
+		field.rtRenderTime=-1;
+		if(bTimeValid)
+		{
+			field.rtRenderTime=rtStart;
+		}
+
 		ATLASSERT(field.bInUse==false);
 		m_Fields.Add(field);
 	}
@@ -427,7 +457,7 @@ HRESULT CFieldBufferHandler::InsertSample(CComPtr<IMediaSample> pSample)
 	return S_OK;
 }
 
-HRESULT CFieldBufferHandler::GetFields(DWORD dwTimeOut,long *count,FieldBuffer *pBuffers,BufferInfo *pBufferInfo)
+HRESULT CFieldBufferHandler::GetFields(DWORD dwTimeOut,long *count,FieldBuffer *pBuffers,BufferInfo *pBufferInfo,REFERENCE_TIME &rtRenderTime)
 {
 	//ATLTRACE(_T("%s(%d) : CFieldBufferHandler::GetFields\n"),__FILE__,__LINE__);
 	
@@ -546,7 +576,7 @@ HRESULT CFieldBufferHandler::GetFields(DWORD dwTimeOut,long *count,FieldBuffer *
 	m_FieldsFreed.ResetEvent();
 	m_Lock.Unlock();
 
-	///@todo wait for corect rendering time? or maybe let the input pin do that?
+	rtRenderTime=m_Fields[startPos].rtRenderTime;
 
 	return S_OK;
 }

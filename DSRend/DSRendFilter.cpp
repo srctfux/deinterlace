@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: DSRendFilter.cpp,v 1.9 2002-07-06 16:42:09 tobbej Exp $
+// $Id: DSRendFilter.cpp,v 1.10 2002-07-06 19:18:21 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,10 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.9  2002/07/06 16:42:09  tobbej
+// new field buffering
+// changed fps counter
+//
 // Revision 1.8  2002/06/03 18:19:30  tobbej
 // moved CAutoLockCriticalSection
 // removed an assert failiure when running debug version of directx
@@ -497,8 +501,8 @@ STDMETHODIMP CDSRendFilter::GetFields(FieldBuffer *ppFields, long *count,BufferI
 	{
 		return E_POINTER;
 	}
-
-	HRESULT hr=m_FieldBuffer.GetFields(dwTimeout,count,ppFields,pBufferInfo);
+	REFERENCE_TIME rtRenderTime;
+	HRESULT hr=m_FieldBuffer.GetFields(dwTimeout,count,ppFields,pBufferInfo,rtRenderTime);
 	if(FAILED(hr))
 	{
 		if(hr==E_UNEXPECTED)
@@ -537,6 +541,13 @@ STDMETHODIMP CDSRendFilter::GetFields(FieldBuffer *ppFields, long *count,BufferI
 				m_iLastDrawnFrames=iDrawnFrames;
 			}
 		}
+	}
+	
+	//wait for correct time to render
+	if(rtRenderTime!=-1 && m_pRefClk!=NULL)
+	{
+		hr=waitForTime(rtRenderTime);
+		///@todo shoud probably check hr
 	}
 
 	return S_OK;
