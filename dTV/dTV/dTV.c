@@ -1159,6 +1159,17 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_TYPEFORMAT_9:
             // Video format (NTSC, PAL, etc)
 			TVTYPE = LOWORD(wParam) - IDM_TYPEFORMAT_0;
+            switch (TVTYPE)
+            {
+            case 0:  strcpy(Text, "PAL");         break;
+            case 1:  strcpy(Text, "NTSC");        break;
+            case 2:  strcpy(Text, "SECAM");       break;
+            case 3:  strcpy(Text, "PAL-M");       break;
+            case 4:  strcpy(Text, "PAL-N");       break;
+            case 5:  strcpy(Text, "NTSC Japan");  break;
+            default: strcpy(Text, "Custom");      break;
+            }
+			ShowText(hWnd, Text);
 			Stop_Capture();
 			BT848_SetGeoSize();
 			WorkoutOverlaySize();
