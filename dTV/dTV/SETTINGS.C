@@ -308,6 +308,56 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 		case WM_TVCARD_SETVALUE:		
 			Setting_SetValue(TVCard_GetSetting((TVCARD_SETTING)wParam), lParam);
 			break;
+
+		case WM_ASPECT_CHANGEVALUE:
+			Setting_ChangeValue(Aspect_GetSetting((ASPECT_SETTING)wParam), lParam);
+			break;
+		case WM_BT848_CHANGEVALUE:		
+			Setting_ChangeValue(BT848_GetSetting((BT848_SETTING)wParam), lParam);
+			break;
+		case WM_DTV_CHANGEVALUE:		
+			Setting_ChangeValue(dTV_GetSetting((DTV_SETTING)wParam), lParam);
+			break;
+		case WM_OUTHREADS_CHANGEVALUE:
+			Setting_ChangeValue(OutThreads_GetSetting((OUTTHREADS_SETTING)wParam), lParam);
+			break;
+		case WM_OTHER_CHANGEVALUE:		
+			Setting_ChangeValue(Other_GetSetting((OTHER_SETTING)wParam), lParam);
+			break;
+		case WM_FD50_CHANGEVALUE:		
+			Setting_ChangeValue(FD50_GetSetting((FD50_SETTING)wParam), lParam);
+			break;
+		case WM_FD60_CHANGEVALUE:		
+			Setting_ChangeValue(FD60_GetSetting((FD60_SETTING)wParam), lParam);
+			break;
+		case WM_FD_COMMON_CHANGEVALUE:
+			Setting_ChangeValue(FD_Common_GetSetting((FD_COMMON_SETTING)wParam), lParam);
+			break;
+		case WM_DI_ADAPTIVE_CHANGEVALUE:	
+			Setting_ChangeValue(DI_Adaptive_GetSetting((DI_ADAPTIVE_SETTING)wParam), lParam);
+			break;
+		case WM_DI_BOBWEAVE_CHANGEVALUE:	
+			Setting_ChangeValue(DI_BobWeave_GetSetting((DI_BOBWEAVE_SETTING)wParam), lParam);
+			break;
+		case WM_DI_BLENDEDCLIP_CHANGEVALUE:
+			Setting_ChangeValue(DI_BlendedClip_GetSetting((DI_BLENDEDCLIP_SETTING)wParam), lParam);
+			break;
+		case WM_DI_GREEDY_CHANGEVALUE:
+			Setting_ChangeValue(DI_Greedy_GetSetting((DI_GREEDY_SETTING)wParam), lParam);
+			break;
+		case WM_DI_TWOFRAME_CHANGEVALUE:	
+			Setting_ChangeValue(DI_TwoFrame_GetSetting((DI_TWOFRAME_SETTING)wParam), lParam);
+			break;
+		case WM_DEINTERLACE_CHANGEVALUE:	
+			Setting_ChangeValue(Deinterlace_GetSetting((DEINTERLACE_SETTING)wParam), lParam);
+			break;
+		case WM_FLT_TNOISE_CHANGEVALUE:		
+			Setting_ChangeValue(FLT_TNoise_GetSetting((FLT_TNOISE_SETTING)wParam), lParam);
+			break;
+		case WM_TVCARD_CHANGEVALUE:		
+			Setting_ChangeValue(TVCard_GetSetting((TVCARD_SETTING)wParam), lParam);
+			break;
+		
 		default:
 			break;
 	}
@@ -461,6 +511,7 @@ long Setting_GetValue(SETTING* pSetting)
 
 BOOL Setting_SetValue(SETTING* pSetting, long Value)
 {
+	long NewValue;
 	if(pSetting == NULL)
 	{
 		return FALSE;
@@ -469,22 +520,22 @@ BOOL Setting_SetValue(SETTING* pSetting, long Value)
 	switch(pSetting->Type)
 	{
 	case YESNO:
-		*pSetting->pValue = (Value != 0);
+		 NewValue = (Value != 0);
 		break;
 	case ITEMFROMLIST:
 	case SLIDER:
 	case NUMBER:
 		if(Value > pSetting->MaxValue)
 		{
-			*pSetting->pValue = pSetting->MaxValue;
+			NewValue = pSetting->MaxValue;
 		}
 		else if(Value < pSetting->MinValue)
 		{
-			*pSetting->pValue = pSetting->MinValue;
+			NewValue = pSetting->MinValue;
 		}
 		else
 		{
-			*pSetting->pValue = Value;
+			NewValue = Value;
 		}
 		break;
 	default:
@@ -494,7 +545,10 @@ BOOL Setting_SetValue(SETTING* pSetting, long Value)
 	
 	if(pSetting->pfnOnChange != NULL)
 	{
-		return pSetting->pfnOnChange(*pSetting->pValue);
+		BOOL RetVal;
+		*pSetting->pValue = NewValue;
+		RetVal = pSetting->pfnOnChange(NewValue);
+		return RetVal; 
 	}
 	else
 	{
@@ -757,6 +811,53 @@ void Setting_Down(SETTING* pSetting)
     }
 }
 
+void Setting_ChangeValue(SETTING* pSetting, eCHANGEVALUE NewValue)
+{
+	if(pSetting == NULL)
+	{
+		return;
+	}
+	switch(NewValue)
+	{
+	case DISPLAYVALUE:
+		Setting_OSDShow(pSetting, hWnd);
+		break;
+	case INCREMENTVALUE:
+		Setting_Up(pSetting);
+		Setting_OSDShow(pSetting, hWnd);
+		break;
+	case DECREMENTVALUE:
+		Setting_Down(pSetting);
+		Setting_OSDShow(pSetting, hWnd);
+		break;
+	case RESETVALUE:
+		Setting_SetDefault(pSetting);
+		Setting_OSDShow(pSetting, hWnd);
+		break;
+	case TOGGLEBOOL:
+		if(pSetting->Type == YESNO)
+		{
+			Setting_SetValue(pSetting, !Setting_GetValue(pSetting));
+			Setting_OSDShow(pSetting, hWnd);
+		}
+	case INCREMENTVALUE_SILENT:
+		Setting_Up(pSetting);
+		break;
+	case DECREMENTVALUE_SILENT:
+		Setting_Down(pSetting);
+		break;
+	case RESETVALUE_SILENT:
+		Setting_SetDefault(pSetting);
+		break;
+	case TOGGLEBOOL_SILENT:
+		if(pSetting->Type == YESNO)
+		{
+			Setting_SetValue(pSetting, !Setting_GetValue(pSetting));
+		}
+	default:
+		break;
+	}
+}
 
 BOOL APIENTRY UISubMenuProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 {

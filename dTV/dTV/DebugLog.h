@@ -5,5 +5,6 @@ extern char DebugLogFilename[];
 extern boolean DebugLogEnabled;
 
 void LOG(LPCSTR format, ...);
+void LOGD(LPCSTR format, ...);
 
 #endif

@@ -118,7 +118,7 @@ typedef struct TVT
 
 void VBI_Init();
 void VBI_Exit();
-void VBI_DecodeLine(unsigned char *VBI_Buffer, int line);
+void VBI_DecodeLine(unsigned char *VBI_Buffer, int line, BOOL IsOdd);
 void VBI_AGC(BYTE * Buffer, int start, int stop, int step);
 
 extern int VBI_Flags;

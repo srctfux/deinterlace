@@ -103,6 +103,7 @@ void Setting_WriteToIni(SETTING* pSetting);
 void Setting_OSDShow(SETTING* pSetting, HWND hWnd);
 void Setting_Up(SETTING* pSetting);
 void Setting_Down(SETTING* pSetting);
+void Setting_ChangeValue(SETTING* pSetting, eCHANGEVALUE NewValue);
 
 LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lParam);
 

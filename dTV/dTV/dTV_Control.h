@@ -2,6 +2,17 @@
 // dTV_Control.h
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2000 John Adcock.  All rights reserved.
+//
+// This header file is free software; you can redistribute it and/or modify it
+// under the terms of the GNU Library General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or (at your
+// option) any later version.
+//
+// This header file is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Library General Public
+// License for more details.
+//
 /////////////////////////////////////////////////////////////////////////////
 //
 // Notes for writers of external apps
@@ -17,6 +28,21 @@
 //
 // To set settings use the appropriate WM_XXX_SETVALUE
 // e.g. SendMessage(hWndDTV, WM_BT848_SETVALUE, HUE, NewHueValue);
+//
+// To up settings use the appropriate WM_XXX_CHANGEVALUE
+// e.g. SendMessage(hWndDTV, WM_BT848_CHANGEVALUE, HUE, INCREMENTVALUE);
+//
+// To down settings use the appropriate WM_XXX_CHANGEVALUE
+// e.g. SendMessage(hWndDTV, WM_BT848_CHANGEVALUE, HUE, DECREMENTVALUE);
+//
+// To show settings use the appropriate WM_XXX_CHANGEVALUE
+// e.g. SendMessage(hWndDTV, WM_BT848_CHANGEVALUE, HUE, DISPLAYVALUE);
+//
+// To reset settings to default use the appropriate WM_XXX_CHANGEVALUE
+// e.g. SendMessage(hWndDTV, WM_BT848_CHANGEVALUE, HUE, RESETVALUE);
+//
+// To do the above operation without using the OSD use the ????VALUE_SILENT
+// e.g. SendMessage(hWndDTV, WM_BT848_CHANGEVALUE, HUE, INCREMENTVALUE_SILENT);
 //
 // The dTV window handle can be obtained using
 // hWndDTV = FindWindow("dTV", NULL);
@@ -62,6 +88,22 @@
 
 
 /////////////////////////////////////////////////////////////////////////////
+// Constants for WM_????_CHANGEVALUE messages
+/////////////////////////////////////////////////////////////////////////////
+typedef enum
+{
+	DISPLAYVALUE = 0,
+	INCREMENTVALUE,
+	DECREMENTVALUE,
+	RESETVALUE,
+	TOGGLEBOOL,
+	INCREMENTVALUE_SILENT,
+	DECREMENTVALUE_SILENT,
+	RESETVALUE_SILENT,
+	TOGGLEBOOL_SILENT,
+} eCHANGEVALUE;
+
+/////////////////////////////////////////////////////////////////////////////
 // Control settings contained in AspectRatio.c
 /////////////////////////////////////////////////////////////////////////////
 
@@ -85,7 +127,8 @@ typedef enum
 } ASPECT_SETTING;
 
 #define WM_ASPECT_GETVALUE			(WM_USER + 1)
-#define WM_ASPECT_SETVALUE			(WM_USER + 100)
+#define WM_ASPECT_SETVALUE			(WM_USER + 101)
+#define WM_ASPECT_CHANGEVALUE		(WM_USER + 201)
 
 /////////////////////////////////////////////////////////////////////////////
 // Control settings contained in Bt848.c
@@ -123,11 +166,13 @@ typedef enum
 	CUSTOMPIXELWIDTH,
 	VIDEOSOURCE,
 	TVFORMAT,
+	HDELAY,
 	BT848_SETTING_LASTONE,
 } BT848_SETTING;
 
 #define WM_BT848_GETVALUE			(WM_USER + 2)
 #define WM_BT848_SETVALUE			(WM_USER + 102)
+#define WM_BT848_CHANGEVALUE		(WM_USER + 202)
 
 /////////////////////////////////////////////////////////////////////////////
 // Control settings contained in dTV.c
@@ -154,6 +199,7 @@ typedef enum
 
 #define WM_DTV_GETVALUE				(WM_USER + 3)
 #define WM_DTV_SETVALUE				(WM_USER + 103)
+#define WM_DTV_CHANGEVALUE			(WM_USER + 203)
 
 /////////////////////////////////////////////////////////////////////////////
 // Control settings contained in OutThreads.c
@@ -174,6 +220,7 @@ typedef enum
 
 #define WM_OUTHREADS_GETVALUE		(WM_USER + 4)
 #define WM_OUTHREADS_SETVALUE		(WM_USER + 104)
+#define WM_OUTHREADS_CHANGEVALUE	(WM_USER + 204)
 
 /////////////////////////////////////////////////////////////////////////////
 // Control settings contained in Other.c
@@ -188,6 +235,7 @@ typedef enum
 
 #define WM_OTHER_GETVALUE			(WM_USER + 5)
 #define WM_OTHER_SETVALUE			(WM_USER + 105)
+#define WM_OTHER_CHANGEVALUE		(WM_USER + 205)
 
 /////////////////////////////////////////////////////////////////////////////
 // Control settings contained in FD_50Hz.c
@@ -205,6 +253,7 @@ typedef enum
 
 #define WM_FD50_GETVALUE			(WM_USER + 6)
 #define WM_FD50_SETVALUE			(WM_USER + 106)
+#define WM_FD50_CHANGEVALUE			(WM_USER + 206)
 
 /////////////////////////////////////////////////////////////////////////////
 // Control settings contained in FD_50Hz.c
@@ -226,6 +275,7 @@ typedef enum
 
 #define WM_FD60_GETVALUE			(WM_USER + 7)
 #define WM_FD60_SETVALUE			(WM_USER + 107)
+#define WM_FD60_CHANGEVALUE			(WM_USER + 207)
 
 /////////////////////////////////////////////////////////////////////////////
 // Control settings contained in FD_Common.c
@@ -242,6 +292,7 @@ typedef enum
 
 #define WM_FD_COMMON_GETVALUE		(WM_USER + 8)
 #define WM_FD_COMMON_SETVALUE		(WM_USER + 108)
+#define WM_FD_COMMON_CHANGEVALUE	(WM_USER + 208)
 
 /////////////////////////////////////////////////////////////////////////////
 // Control settings contained in DI_Adaptive.c
@@ -261,6 +312,7 @@ typedef enum
 
 #define WM_DI_ADAPTIVE_GETVALUE		(WM_USER + 9)
 #define WM_DI_ADAPTIVE_SETVALUE		(WM_USER + 109)
+#define WM_DI_ADAPTIVE_CHANGEVALUE	(WM_USER + 209)
 
 /////////////////////////////////////////////////////////////////////////////
 // Control settings contained in DI_BobAndWeave.c
@@ -278,6 +330,7 @@ typedef enum
 
 #define WM_DI_BOBWEAVE_GETVALUE		(WM_USER + 10)
 #define WM_DI_BOBWEAVE_SETVALUE		(WM_USER + 110)
+#define WM_DI_BOBWEAVE_CHANGEVALUE	(WM_USER + 210)
 
 /////////////////////////////////////////////////////////////////////////////
 // Control settings contained in DI_BlendedClip.c
@@ -301,8 +354,9 @@ typedef enum
 	DI_BLENDEDCLIP_SETTING_LASTONE,
 } DI_BLENDEDCLIP_SETTING;
 
-#define WM_DI_BLENDEDCLIP_GETVALUE	(WM_USER + 11)
-#define WM_DI_BLENDEDCLIP_SETVALUE	(WM_USER + 111)
+#define WM_DI_BLENDEDCLIP_GETVALUE		(WM_USER + 11)
+#define WM_DI_BLENDEDCLIP_SETVALUE		(WM_USER + 111)
+#define WM_DI_BLENDEDCLIP_CHANGEVALUE	(WM_USER + 211)
 
 /////////////////////////////////////////////////////////////////////////////
 // Control settings contained in DI_TwoFrame.c
@@ -317,6 +371,7 @@ typedef enum
 
 #define WM_DI_TWOFRAME_GETVALUE		(WM_USER + 12)
 #define WM_DI_TWOFRAME_SETVALUE		(WM_USER + 112)
+#define WM_DI_TWOFRAME_CHANGEVALUE	(WM_USER + 212)
 
 /////////////////////////////////////////////////////////////////////////////
 // Control settings contained in Deinterlace.c
@@ -329,6 +384,7 @@ typedef enum
 
 #define WM_DEINTERLACE_GETVALUE		(WM_USER + 13)
 #define WM_DEINTERLACE_SETVALUE		(WM_USER + 113)
+#define WM_DEINTERLACE_CHANGEVALUE	(WM_USER + 213)
 
 /////////////////////////////////////////////////////////////////////////////
 // Control settings contained in FLT_TNoise.c
@@ -344,6 +400,7 @@ typedef enum
 
 #define WM_FLT_TNOISE_GETVALUE		(WM_USER + 14)
 #define WM_FLT_TNOISE_SETVALUE		(WM_USER + 114)
+#define WM_FLT_TNOISE_CHANGEVALUE	(WM_USER + 214)
 
 /////////////////////////////////////////////////////////////////////////////
 // Control settings contained in Greedy.c
@@ -354,8 +411,9 @@ typedef enum
 	GREEDYMAXCOMB = 0,
 	DI_GREEDY_SETTING_LASTONE,
 } DI_GREEDY_SETTING;
-#define WM_DI_GREEDY_GETVALUE	(WM_USER + 15)
-#define WM_DI_GREEDY_SETVALUE	(WM_USER + 115)
+#define WM_DI_GREEDY_GETVALUE		(WM_USER + 15)
+#define WM_DI_GREEDY_SETVALUE		(WM_USER + 115)
+#define WM_DI_GREEDY_CHANGEVALUE	(WM_USER + 215)
 
 /////////////////////////////////////////////////////////////////////////////
 // Control settings contained in TVCards.c
@@ -369,7 +427,8 @@ typedef enum
 	TRADEOFF,
 	TVCARD_SETTING_LASTONE,
 } TVCARD_SETTING;
-#define WM_TVCARD_GETVALUE	(WM_USER + 16)
-#define WM_TVCARD_SETVALUE	(WM_USER + 116)
+#define WM_TVCARD_GETVALUE		(WM_USER + 16)
+#define WM_TVCARD_SETVALUE		(WM_USER + 116)
+#define WM_TVCARD_CHANGEVALUE	(WM_USER + 216)
 
 #endif

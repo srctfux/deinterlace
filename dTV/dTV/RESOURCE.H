@@ -167,6 +167,13 @@
 #define IDM_HELP_KEYBOARD               779
 #define IDM_HELP_GPL                    780
 #define IDM_HELP_README                 781
+#define IDM_HDELAY_MINUS                784
+#define IDM_HDELAY_CURRENT              785
+#define IDM_HDELAY_PLUS                 786
+#define IDM_PIXELWIDTH_MINUS            787
+#define IDM_PIXELWIDTH_PLUS             788
+#define IDM_PIXELWIDTH_CURRENT          789
+#define IDM_JUDDERTERMINATOR            790
 #define IDM_END                         1032
 #define IDM_SOURCE_TUNER                1089
 #define IDM_SOURCE_COMPOSITE            1090
@@ -755,7 +762,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        158
-#define _APS_NEXT_COMMAND_VALUE         783
+#define _APS_NEXT_COMMAND_VALUE         791
 #define _APS_NEXT_CONTROL_VALUE         1875
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

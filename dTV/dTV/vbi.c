@@ -70,7 +70,7 @@ void VBI_Exit()
 	VBI_VT_Exit();
 }
 
-void VBI_DecodeLine(unsigned char *VBI_Buffer, int line)
+void VBI_DecodeLine(unsigned char *VBI_Buffer, int line, BOOL IsOdd)
 {
 	vtstep = (int) ((28.636363 / 5.72725) * FPFAC + 0.5);
 
@@ -87,7 +87,7 @@ void VBI_DecodeLine(unsigned char *VBI_Buffer, int line)
 	// it also appears on PAL videos at line 22
 	// see http://www.wgbh.org/wgbh/pages/captioncenter/cctechfacts4.html
 	// for more infomation
-	if ((VBI_Flags & VBI_CC) && (line == 10 || line == 11 || line == 12))
+	if ((VBI_Flags & VBI_CC) && (line == 11 || line == 10 || line == 12)) 
 	{
 		CC_DecodeLine(VBI_Buffer);
 	}

@@ -661,6 +661,34 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			Setting_OSDShow(BT848_GetSetting(BDELAY), hWnd);
 			break;
 
+		case IDM_HDELAY_PLUS:
+			Setting_Up(BT848_GetSetting(HDELAY));
+            SendMessage(hWnd, WM_COMMAND, IDM_HDELAY_CURRENT, 0);
+			break;
+
+		case IDM_HDELAY_MINUS:
+			Setting_Down(BT848_GetSetting(HDELAY));
+            SendMessage(hWnd, WM_COMMAND, IDM_HDELAY_CURRENT, 0);
+			break;
+
+		case IDM_HDELAY_CURRENT:
+			Setting_OSDShow(BT848_GetSetting(HDELAY), hWnd);
+			break;
+
+		case IDM_PIXELWIDTH_PLUS:
+			Setting_Up(BT848_GetSetting(CURRENTX));
+            SendMessage(hWnd, WM_COMMAND, IDM_PIXELWIDTH_CURRENT, 0);
+			break;
+
+		case IDM_PIXELWIDTH_MINUS:
+			Setting_Down(BT848_GetSetting(CURRENTX));
+            SendMessage(hWnd, WM_COMMAND, IDM_PIXELWIDTH_CURRENT, 0);
+			break;
+
+		case IDM_PIXELWIDTH_CURRENT:
+			Setting_OSDShow(BT848_GetSetting(CURRENTX), hWnd);
+			break;
+
         case IDM_MUTE:
 			if (System_In_Mute == FALSE)
 			{
@@ -1064,6 +1092,13 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case ID_SETTINGS_PIXELWIDTH_CUSTOM:
 			Setting_SetValue(BT848_GetSetting(CURRENTX), 
 				Setting_GetValue(BT848_GetSetting(CUSTOMPIXELWIDTH)));
+			break;
+
+		case IDM_JUDDERTERMINATOR:
+			Stop_Capture();
+			Setting_SetValue(OutThreads_GetSetting(DOACCURATEFLIPS), 
+				!Setting_GetValue(OutThreads_GetSetting(DOACCURATEFLIPS)));
+			Start_Capture();
 			break;
 
 		case IDM_SPACEBAR:

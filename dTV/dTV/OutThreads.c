@@ -400,7 +400,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 
 	if(bIsPAL)
 	{
-		RunningAverageCounterTicks = (double)TimerFrequency.QuadPart / 30.0;
+		RunningAverageCounterTicks = (double)TimerFrequency.QuadPart / 25.0;
 		StartAverageCounterTicks = RunningAverageCounterTicks;
 	}
 	else
@@ -481,6 +481,11 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 								LOG(" Last %f", RecentTicks);
 								LOG(" Running Average %f", RunningAverageCounterTicks);
 							}
+							else
+							{
+								LOG(" Last %f (IGNORED)", RecentTicks);
+								LOG(" Old Running Average %f", RunningAverageCounterTicks);
+							}
 						}
 						// save current value for next time
 						LastFieldTime.QuadPart = CurrentFieldTime.QuadPart;
@@ -528,7 +533,6 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				// to ask for a speed up later on
 				if(DoAccurateFlips)
 				{
-					FlipAdjust = FALSE;
 					if(info.IsOdd)
 					{
 						if((LastEvenFrame + 1) % 5 == CurrentFrame &&
@@ -649,7 +653,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 					}
 					for (nLineTarget = 0; nLineTarget < CurrentVBILines ; nLineTarget++)
 					{
-						VBI_DecodeLine(pVBI + nLineTarget * 2048, nLineTarget);
+						VBI_DecodeLine(pVBI + nLineTarget * 2048, nLineTarget, info.IsOdd);
 					}
 				}
 
@@ -747,11 +751,11 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 							{
 								if(RunningAverageCounterTicks > StartAverageCounterTicks * 0.97)
 								{
-									RunningAverageCounterTicks *= 0.999;
+									//RunningAverageCounterTicks *= 0.999;
 								}
 							}
 							QueryPerformanceCounter(&CurrentFlipTime);
-							if(bMissedFrame == FALSE)
+							if(bMissedFrame == FALSE && FlipAdjust == FALSE)
 							{
 								while(!bStopThread && (CurrentFlipTime.QuadPart - LastFlipTime.QuadPart) < TicksToWait)
 								{
@@ -772,6 +776,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 
 						if(DoAccurateFlips)
 						{
+							FlipAdjust = FALSE;
 							LastFlipTime.QuadPart = CurrentFlipTime.QuadPart;
 						}
 
@@ -908,9 +913,9 @@ void OutThreads_WriteSettingsToIni()
 	}
 }
 
-
 void OutThreads_SetMenu(HMENU hMenu)
 {
 	CheckMenuItem(hMenu, IDM_CAPTURE_PAUSE, bIsPaused?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_AUTODETECT, bAutoDetectMode?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_JUDDERTERMINATOR, DoAccurateFlips?MF_CHECKED:MF_UNCHECKED);
 }

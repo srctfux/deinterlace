@@ -795,6 +795,7 @@ BEGIN
         BEGIN
             MENUITEM "&Automatic Pulldown Detect",  IDM_AUTODETECT
             MENUITEM "&Fall Back to Video on Bad Pulldown", IDM_FALLBACK
+            MENUITEM "&JudderTerminator (tm)",      IDM_JUDDERTERMINATOR
             MENUITEM SEPARATOR
             MENUITEM "&Video Deinterlace (Bob)",    IDM_VIDEO_BOB
             MENUITEM "V&ideo Deinterlace (Weave)",  IDM_VIDEO_WEAVE
@@ -1191,6 +1192,10 @@ BEGIN
     "O",            IDM_OVERSCAN_CURRENT,   VIRTKEY, SHIFT, CONTROL, 
                                                     NOINVERT
     "P",            IDM_CAPTURE_PAUSE,      VIRTKEY, NOINVERT
+    "Q",            IDM_HDELAY_MINUS,       VIRTKEY, NOINVERT
+    "Q",            IDM_HDELAY_PLUS,        VIRTKEY, SHIFT, NOINVERT
+    "Q",            IDM_HDELAY_CURRENT,     VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
     "S",            IDM_STATUSBAR,          VIRTKEY, NOINVERT
     "T",            IDM_CALL_VIDEOTEXTSMALL, VIRTKEY, NOINVERT
     "T",            IDM_CLOSE_VT,           VIRTKEY, CONTROL, NOINVERT
@@ -1248,6 +1253,10 @@ BEGIN
     VK_SUBTRACT,    IDM_VOLUMEMINUS,        VIRTKEY, NOINVERT
     VK_TAB,         IDM_TOGGLE_MENU,        VIRTKEY, NOINVERT
     VK_UP,          IDM_VT_PAGE_UP,         VIRTKEY, NOINVERT
+    "W",            IDM_PIXELWIDTH_MINUS,   VIRTKEY, NOINVERT
+    "W",            IDM_PIXELWIDTH_PLUS,    VIRTKEY, SHIFT, NOINVERT
+    "W",            IDM_PIXELWIDTH_CURRENT, VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
     "X",            IDM_R_BALANCE,          VIRTKEY, NOINVERT
     "X",            IDM_R_BALANCE,          VIRTKEY, SHIFT, NOINVERT
     "Y",            IDM_L_BALANCE,          VIRTKEY, NOINVERT
@@ -1264,8 +1273,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,1,2,0
- PRODUCTVERSION 2,1,2,0
+ FILEVERSION 2,2,0,0
+ PRODUCTVERSION 2,2,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -1283,14 +1292,14 @@ BEGIN
             VALUE "Comments", "John Adcock\0"
             VALUE "CompanyName", "\0"
             VALUE "FileDescription", "dTV\0"
-            VALUE "FileVersion", "2, 1, 2, 0\0"
+            VALUE "FileVersion", "2, 2, 0, 0\0"
             VALUE "InternalName", "dTV\0"
             VALUE "LegalCopyright", "Copyright © 2000, 2001\0"
             VALUE "LegalTrademarks", "This Program is covered by the term of the GNU GPL\0"
             VALUE "OriginalFilename", "dTV.exe\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "dTV\0"
-            VALUE "ProductVersion", "2, 1, 2, 0\0"
+            VALUE "ProductVersion", "2, 2, 0, 0\0"
             VALUE "SpecialBuild", "\0"
         END
     END

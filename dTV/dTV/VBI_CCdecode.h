@@ -29,10 +29,5 @@
 #define __CCDECODE_H___
 
 int CC_DecodeLine(BYTE* vbiline);
-int CC_DecodeBit(BYTE* data, int threshold);
-BOOL CC_IsParityOK(int n);
-int CC_WrapAtWord(char *src, char *dest, char *rem);
-
-#define WRAP_POINT 76
 
 #endif

@@ -45,3 +45,16 @@ LOG(LPCSTR format, ...)
 	fflush(debugLog);
 }
 
+void
+LOGD(LPCSTR format, ...)
+{
+	char szMessage[2048];
+	va_list args;
+
+	va_start(args, format);
+	vsprintf(szMessage, format, args);
+	va_end(args);
+	OutputDebugString(szMessage);
+}
+
+

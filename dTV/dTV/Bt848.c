@@ -174,6 +174,8 @@ int CurrentVBILines = 0;
 
 long VideoSource = SOURCE_COMPOSITE;
 
+int HDelay = 0;
+
 //===========================================================================
 // CCIR656 Digital Input Support
 //
@@ -563,7 +565,7 @@ BOOL BT848_SetGeoSize()
 // MAE 2 Nov 2000 - End of change for Macrovision fix
 	BT848_Registers_OnChange(0);
 
-	hactive = CurrentX;
+	hactive = CurrentX & ~2;
 
 	vtc = BtVertFilter?BT848_VTC_VFILT_2TAPZ:0;		
 	if(CurrentX <= TVFormats[TVFormat].wHActivex1)
@@ -576,7 +578,14 @@ BOOL BT848_SetGeoSize()
 		hscale = 0;
 	}
 	vdelay = TVFormats[TVFormat].wVDelay;
-	hdelay = ((CurrentX * TVFormats[TVFormat].wHDelayx1) / TVFormats[TVFormat].wHActivex1) & 0x3fe;
+	if(HDelay == 0)
+	{
+		hdelay = ((CurrentX * TVFormats[TVFormat].wHDelayx1) / TVFormats[TVFormat].wHActivex1) & 0x3fe;
+	}
+	else
+	{
+		hdelay = ((CurrentX * HDelay) / TVFormats[TVFormat].wHActivex1) & 0x3fe;
+	}
 
 	sr = (TVFormats[TVFormat].wCropHeight * 512) / CurrentY - 512;
 	vscale = (WORD) (0x10000UL - sr) & 0x1fff;
@@ -1403,6 +1412,7 @@ BOOL TVFormat_OnChange(long NewValue)
 BOOL CurrentX_OnChange(long NewValue)
 {
 	CurrentX = NewValue;
+
 	if(CurrentX != 768 &&
 		CurrentX != 720 &&
 		CurrentX != 640 &&
@@ -1418,7 +1428,13 @@ BOOL CurrentX_OnChange(long NewValue)
 	return FALSE;
 }
 
-
+BOOL HDelay_OnChange(long NewValue)
+{
+	Stop_Capture();
+	BT848_SetGeoSize();
+	Start_Capture();
+	return FALSE;
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // Start of Settings related code
@@ -1575,6 +1591,11 @@ SETTING BT848Settings[BT848_SETTING_LASTONE] =
 		"Video Format", NUMBER, 0, &TVFormat,
 		FORMAT_NTSC, 0, FORMAT_LASTONE - 1, 0, NULL,
 		"Hardware", "TVType", TVFormat_OnChange,
+	},
+	{
+		"HDelay", SLIDER, 0, &HDelay,
+		0, 0, 255, 0, NULL,
+		"Hardware", "HDelay", HDelay_OnChange,
 	},
 };
 
