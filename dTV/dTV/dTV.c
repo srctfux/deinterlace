@@ -673,6 +673,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				}
 				ShowText(hWnd,"UNMUTE");
 			}
+			SetMenuAnalog();
 			break;
 
 		case IDM_L_BALANCE:
@@ -767,6 +768,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				bShowCursor = !bShowCursor;
 				ShowCursor(bShowCursor);
 			}
+			SetMenuAnalog();
 			break;
 
 		case IDM_END:
@@ -823,6 +825,14 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_AUDIO_4:
 		case IDM_AUDIO_5:
 			AudioSource = LOWORD(wParam) - IDM_AUDIO_0;
+			switch (LOWORD(AudioSource)) {
+			case 0: ShowText(hWnd, "Audio Input - Tuner");     break;
+			case 1: ShowText(hWnd, "Audio Input - MSP/Radio"); break;
+			case 2: ShowText(hWnd, "Audio Input - External");  break;
+			case 3: ShowText(hWnd, "Audio Input - Internal");  break;
+			case 4: ShowText(hWnd, "Audio Input - Disabled");  break;
+			case 5: ShowText(hWnd, "Audio Input - Stereo");    break;
+			}
 			Stop_Capture();
 			Audio_SetSource(AudioSource);
 			Start_Capture();
@@ -1348,6 +1358,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				break;
 			case SIZE_RESTORED:
 				WorkoutOverlaySize();
+                SetMenuAnalog();
 				break;
 			default:
 				break;
@@ -1867,13 +1878,14 @@ void SetMenuAnalog()
 		EnableMenuItem(GetMenu(hWnd), IDM_EXTERN5, MF_ENABLED);
 	}
 
-	CheckMenuItem(GetMenu(hWnd), IDM_TUNER, (VideoSource == 0)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_TUNER,   (VideoSource == 0)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_EXTERN1, (VideoSource == 1)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_EXTERN2, (VideoSource == 2)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_EXTERN3, (VideoSource == 3)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_EXTERN4, (VideoSource == 4)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_EXTERN5, (VideoSource == 5)?MF_CHECKED:MF_UNCHECKED);
 
+	CheckMenuItem(GetMenu(hWnd), IDM_MUTE,    System_In_Mute?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_AUDIO_0, (AudioSource == 0)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_AUDIO_1, (AudioSource == 1)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_AUDIO_2, (AudioSource == 2)?MF_CHECKED:MF_UNCHECKED);
@@ -1906,9 +1918,10 @@ void SetMenuAnalog()
 	CheckMenuItem(GetMenu(hWnd), IDM_MINOR_CARRIER_6, (MSPMinorMode == 6)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_MINOR_CARRIER_7, (MSPMinorMode == 7)?MF_CHECKED:MF_UNCHECKED);
 
-	CheckMenuItem(GetMenu(hWnd), IDM_STATUSBAR, bDisplayStatusBar?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_ON_TOP, bAlwaysOnTop?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_AUTOSTEREO, AutoStereoSelect?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_TOGGLECURSOR,      bShowCursor?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_STATUSBAR,         bDisplayStatusBar?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_ON_TOP,            bAlwaysOnTop?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_AUTOSTEREO,        AutoStereoSelect?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_SPLASH_ON_STARTUP, bDisplaySplashScreen?MF_CHECKED:MF_UNCHECKED);
 
 	CheckMenuItem(GetMenu(hWnd), IDM_AUTODETECT, bAutoDetectMode?MF_CHECKED:MF_UNCHECKED);

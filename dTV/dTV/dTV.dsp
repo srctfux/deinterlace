@@ -159,6 +159,10 @@ SOURCE=.\MixerDev.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\OSD.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\Other.c
 # End Source File
 # Begin Source File
@@ -252,6 +256,10 @@ SOURCE=.\i2c.h
 # Begin Source File
 
 SOURCE=.\MixerDev.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\OSD.h
 # End Source File
 # Begin Source File
 

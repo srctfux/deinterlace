@@ -613,7 +613,7 @@ END
 ABOUT DIALOGEX 22, 17, 374, 274
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
 CAPTION "About dTV"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,305,9,58,19,WS_GROUP,WS_EX_CLIENTEDGE
     CTEXT           "dTV Version 2.x",IDC_VERSION,0,3,293,9
@@ -1065,12 +1065,13 @@ BEGIN
         END
         POPUP "&Audio Input"
         BEGIN
-            MENUITEM "&Tuner",                      IDM_AUDIO_0
-            MENUITEM "&MSP/Radio",                  IDM_AUDIO_1
-            MENUITEM "&External",                   IDM_AUDIO_2
-            MENUITEM "&Internal",                   IDM_AUDIO_3
-            MENUITEM "M&ute",                       IDM_AUDIO_4
-            MENUITEM "&Stereo",                     IDM_AUDIO_5
+            MENUITEM "&Mute\tM",                    IDM_MUTE
+            MENUITEM "&Tuner\tCtrl+Shift+F1",       IDM_AUDIO_0
+            MENUITEM "MSP/&Radio\tCtrl+Shift+F2",   IDM_AUDIO_1
+            MENUITEM "&External\tCtrl+Shift+F3",    IDM_AUDIO_2
+            MENUITEM "&Internal\tCtrl+Shift+F4",    IDM_AUDIO_3
+            MENUITEM "&Disabled\tCtrl+Shift+F5",    IDM_AUDIO_4
+            MENUITEM "&Stereo\tCtrl+Shift+F6",      IDM_AUDIO_5
         END
         POPUP "Video &Input"
         BEGIN
@@ -1448,19 +1449,33 @@ BEGIN
     "T",            IDM_CALL_VIDEOTEXT,     VIRTKEY, SHIFT, NOINVERT
     VK_ADD,         IDM_VOLUMEPLUS,         VIRTKEY, NOINVERT
     VK_DOWN,        IDM_VT_PAGE_DOWN,       VIRTKEY, NOINVERT
+    VK_END,         IDM_SHOW_OSD,           VIRTKEY, NOINVERT
     VK_ESCAPE,      IDM_END,                VIRTKEY, NOINVERT
     VK_F1,          IDM_TUNER,              VIRTKEY, CONTROL, ALT, NOINVERT
+    VK_F1,          IDM_AUDIO_0,            VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
     VK_F1,          IDM_TYPEFORMAT_0,       VIRTKEY, SHIFT, ALT, NOINVERT
     VK_F2,          IDM_EXTERN1,            VIRTKEY, CONTROL, ALT, NOINVERT
+    VK_F2,          IDM_AUDIO_1,            VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
     VK_F2,          IDM_TYPEFORMAT_1,       VIRTKEY, SHIFT, ALT, NOINVERT
     VK_F3,          IDM_EXTERN2,            VIRTKEY, CONTROL, ALT, NOINVERT
+    VK_F3,          IDM_AUDIO_2,            VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
     VK_F3,          IDM_TYPEFORMAT_2,       VIRTKEY, SHIFT, ALT, NOINVERT
     VK_F4,          IDM_EXTERN5,            VIRTKEY, CONTROL, ALT, NOINVERT
+    VK_F4,          IDM_AUDIO_3,            VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
     VK_F4,          IDM_TYPEFORMAT_3,       VIRTKEY, SHIFT, ALT, NOINVERT
     VK_F5,          IDM_EXTERN3,            VIRTKEY, CONTROL, ALT, NOINVERT
+    VK_F5,          IDM_AUDIO_4,            VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
     VK_F5,          IDM_TYPEFORMAT_4,       VIRTKEY, SHIFT, ALT, NOINVERT
     VK_F6,          IDM_EXTERN4,            VIRTKEY, CONTROL, ALT, NOINVERT
+    VK_F6,          IDM_AUDIO_5,            VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
     VK_F6,          IDM_TYPEFORMAT_5,       VIRTKEY, SHIFT, ALT, NOINVERT
+    VK_HOME,        IDM_CHANNEL_LIST,       VIRTKEY, NOINVERT
     VK_LEFT,        IDM_VT_PAGE_MINUS,      VIRTKEY, NOINVERT
     VK_NEXT,        IDM_CHANNELMINUS,       VIRTKEY, NOINVERT
     VK_PRIOR,       IDM_CHANNELPLUS,        VIRTKEY, NOINVERT
@@ -1477,8 +1492,6 @@ BEGIN
     "Y",            IDM_L_BALANCE,          VIRTKEY, SHIFT, NOINVERT
     "_",            IDM_VOLUMEMINUS,        ASCII,  NOINVERT
     "`",            IDM_SASPECT_COMPUTE,    ASCII,  NOINVERT
-    VK_HOME,        IDM_CHANNEL_LIST,       VIRTKEY, NOINVERT
-    VK_END,         IDM_SHOW_OSD,           VIRTKEY, NOINVERT
 END
 
 
