@@ -244,7 +244,9 @@ void OSD_Redraw(HWND hWnd, HDC hDC)
 			}
 		}
 		if (!hOSDfont) ErrorBox("Failed To Create OSD Font");
-		hOSDfontOutline = CreateFont(nFontsize, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DEFAULT_PITCH | FF_DONTCARE, szCurrentFont);
+		hOSDfontOutline = CreateFont(nFontsize, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, szCurrentFont);
+
+		if (!hOSDfontOutline) hOSDfontOutline = hOSDfont;
 
 		hTmp = SelectObject(hDC, hOSDfontOutline);
 		if (hTmp)
