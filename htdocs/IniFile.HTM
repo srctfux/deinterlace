@@ -878,6 +878,38 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
               is consistent for this many frames, switch back to it.
           </td>
         </tr>
+
+        <tr>
+          <td colspan=3><h3>[NoiseFilter]</h3></td>
+        </tr>
+
+        <tr>
+          <td>UseTemporalNoiseFilter</td>
+          <td align="center">0</td>
+          <td>Controls whether the temporal noise filter is activated when dTV
+            starts up.  0 means it isn't; any other number means it is.</td>
+        </tr>
+
+        <tr>
+          <td>TemporalLuminanceThreshold</td>
+          <td align="center">10</td>
+          <td>Controls how different a pixel's luminance (brightness) has to be
+          from its predecessor in the previous frame before it's considered a
+          change in the actual image rather than just noise.  Valid values are
+          0-255.  Values over 20 tend to produce posterization artifacts that
+          are more distracting than the video noise was.</td>
+        </tr>
+
+        <tr>
+          <td>TemporalChromaThreshold</td>
+          <td align="center">12</td>
+          <td>Controls how different a pixel's chrominance (hue) has to be
+            from its predecessor in the previous frame before it's considered a
+            change in the actual image rather than just noise.  Valid values are
+            0-255.  Values over 25 tend to produce posterization artifacts that
+            are more distracting than the video noise was.</td>
+        </tr>
+
       </table>
       <!-- #EndEditable --></td>
   </tr>
