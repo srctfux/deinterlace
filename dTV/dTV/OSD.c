@@ -134,7 +134,8 @@ void OSD_Clear(HWND hWnd)
 // OSD Redrawing code.  Can be called from a paint event.
 void OSD_Redraw(HWND hWnd, HDC hDC)
 {
-	HFONT		hTmp, hOSDfont;
+	CHAR		szCurrentFont[64];
+	HFONT		hTmp, hOSDfont, hOSDfontOutline;
 	int			nLen, nFontsize;
 	int			nXpos, nYpos;
     int         nXWinSize, nYWinSize;
@@ -157,20 +158,25 @@ void OSD_Redraw(HWND hWnd, HDC hDC)
 		{
 			dwQuality = ANTIALIASED_QUALITY;
 		}
+
+		strcpy(szCurrentFont, szFontName);
 		hOSDfont = CreateFont(nFontsize, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, dwQuality, DEFAULT_PITCH | FF_DONTCARE, szFontName);
 		if (!hOSDfont)
 		{
 			// Fallback to Arial
-			hOSDfont = CreateFont(nFontsize, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, dwQuality, VARIABLE_PITCH | FF_SWISS, "Arial");
+			strcpy(szCurrentFont, "Arial");
+			hOSDfont = CreateFont(nFontsize, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, dwQuality, VARIABLE_PITCH | FF_SWISS, szCurrentFont);
 			if (!hOSDfont)
 			{
 				// Otherwise, fallback to any available font
-				hOSDfont = CreateFont(nFontsize, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, VARIABLE_PITCH | FF_SWISS, "");
+				strcpy(szCurrentFont, "");
+				hOSDfont = CreateFont(nFontsize, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, dwQuality, VARIABLE_PITCH | FF_SWISS, szCurrentFont);
 			}
 		}
 		if (!hOSDfont) ErrorBox("Failed To Create OSD Font");
+		hOSDfontOutline = CreateFont(nFontsize, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DEFAULT_PITCH | FF_DONTCARE, szCurrentFont);
 
-		hTmp = SelectObject(hDC, hOSDfont);
+		hTmp = SelectObject(hDC, hOSDfontOutline);
 		if (hTmp)
 		{
 			GetTextMetrics(hDC, &tmOSDFont);
@@ -239,12 +245,16 @@ void OSD_Redraw(HWND hWnd, HDC hDC)
 			}
 
 			// Draw OSD text
-			SetTextColor(hDC, TextColor);
-			SetBkColor(hDC, OutlineColor);
-			TextOut(hDC, nXpos, nYpos, grOSD.szText, strlen(grOSD.szText));
+			if (SelectObject(hDC, hOSDfont))
+			{
+				SetTextColor(hDC, TextColor);
+				SetBkColor(hDC, OutlineColor);
+				TextOut(hDC, nXpos, nYpos, grOSD.szText, strlen(grOSD.szText));
+			}
 			
 			SelectObject(hDC, hTmp);
 			DeleteObject(hOSDfont);
+			DeleteObject(hOSDfontOutline);
 		}
 	}
 }
