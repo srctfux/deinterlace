@@ -1,3 +1,13 @@
+22/5
+. (JA) Updated Introduction
+. (JA) Updated OS
+. (JA) Updated Alogithms
+. (JA) Added Record video?
+. (JA) Updated capture card
+. (JA) Updated more than one
+. (JA) Updated How can I help
+. (JA) Other adjustments
+
 25/1
 . (JA) Corrected Video deinterlacing modes comments
 . (JA) Corrected OS section
