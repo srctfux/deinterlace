@@ -39,10 +39,8 @@
 #define IDM_CRYPTSTATUS                 382
 #define IDM_UNTERTITEL                  383
 #define IDM_PDC_OUT                     385
-#define IDM_VBI_IC                      386
 #define IDM_VT_OUT                      387
 #define IDM_VPS_OUT                     389
-#define IDM_INTERCAST_SETUP             392
 #define IDM_AUDIO_MIXER                 400
 #define IDM_MUTE                        402
 #define IDM_L_BALANCE                   403

@@ -76,7 +76,8 @@ BOOL                bIsPaused = FALSE;
 HANDLE              OutThread;
 
 // Dynamically updated variables
-ePULLDOWNMODES      gPulldownMode = VIDEO_MODE_BOB;
+ePULLDOWNMODES      gPulldownMode = VIDEO_MODE_2FRAME;
+ePULLDOWNMODES      gPALFilmFallbackMode = VIDEO_MODE_2FRAME;
 int                 CurrentFrame=0;
 DWORD               dwLastFlipTicks = -1;
 DWORD				ModeSwitchTimestamps[MAXMODESWITCHES];
@@ -179,14 +180,6 @@ void Start_Capture()
 	}
 
 	BT848_MaskDataByte(BT848_CAP_CTL, 0, 0x0f);
-
-	// reset intercast settings
-	InterCast.esc = 0;
-	InterCast.done = 0;
-	InterCast.pnum = 0;
-	InterCast.ok = 0;
-	InterCast.datap = 0;
-	InterCast.lastci = 0xff;
 
 	BT848_CreateRiscCode(nFlags);
 	BT848_MaskDataByte(BT848_CAP_CTL, (BYTE) nFlags, (BYTE) 0x0f);
@@ -342,7 +335,6 @@ void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField)
 	static long RepeatCount;
 	static long LastPolarity;
 	static long LastDiff;
-	static ePULLDOWNMODES OldPulldownMode = VIDEO_MODE_BOB;
 
 	// call with CombFactors -1 to reset static variables when we start the thread
 	// each time
@@ -358,7 +350,6 @@ void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField)
 	}
 	if(!DeintMethods[gPulldownMode].bIsFilmMode)
 	{
-		OldPulldownMode = gPulldownMode;
 		if((CombFactor - LastCombFactor) < PulldownThresholdLow && LastDiff > PulldownThresholdLow)
 		{
 			if(LastPolarity == IsOddField)
@@ -428,7 +419,7 @@ void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField)
 		}
 		if(RepeatCount == PulldownRepeatCount - PulldownRepeatCount2)
 		{
-			gPulldownMode = OldPulldownMode;
+			gPulldownMode = gPALFilmFallbackMode;
 			RepeatCount = 0;
 			UpdatePulldownStatus();
 			LOG("Back To Video Mode");
@@ -1037,11 +1028,11 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 					GetSourceRect(&source);
 
 					if (info.IsOdd)
-						info.CompareResult = CompareFields(info.OddLines[1], info.OddLines[0], &source);
+						info.FieldDiff = CompareFields(info.OddLines[1], info.OddLines[0], &source);
 					else
-						info.CompareResult = CompareFields(info.EvenLines[1], info.EvenLines[0], &source);
+						info.FieldDiff = CompareFields(info.EvenLines[1], info.EvenLines[0], &source);
 					
-					LOG(" Frame %d %c CR = %d", CurrentFrame, info.IsOdd ? 'O' : 'E', info.CompareResult);
+					LOG(" Frame %d %c CR = %d", CurrentFrame, info.IsOdd ? 'O' : 'E', info.FieldDiff);
 				}
 				PrevPulldownMode = gPulldownMode;				
 				if(bAutoDetectMode == TRUE && bIsPAL)
@@ -1051,7 +1042,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 
 				if(bAutoDetectMode == TRUE && !bIsPAL)
 				{
-					UpdateNTSCPulldownMode(info.CompareResult, 
+					UpdateNTSCPulldownMode(info.FieldDiff, 
 										   info.IsOdd,
 										   info.EvenLines[0],
 										   info.OddLines[0]);

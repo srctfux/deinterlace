@@ -93,8 +93,9 @@ typedef struct {
 	// cleanliness so we don't have to keep dividing FrameHeight by 2.
 	int FieldHeight;
 
-	// Results of the Field Diff
-	long CompareResult;
+	// Results from the NTSC Field compare
+	long FieldDiff;
+	// Results of the PAL mode deinterlace detect
 	long CombFactor;
 
 } DEINTERLACE_INFO;

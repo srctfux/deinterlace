@@ -46,6 +46,8 @@
 //                                     Cut out all decoding
 //                                     Cut out digital hardware stuff
 //
+// 06 Jan 2001   John Adcock           Addded extra info on overlay error boxed
+// 
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"

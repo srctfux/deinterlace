@@ -160,7 +160,6 @@ extern MIXERLINE *MixerLine;
 extern short nLevelHigh;
 extern short nLevelLow;
 extern struct SOTREC SOTInfoRec;
-extern struct TInterCast InterCast;
 extern struct TLNB LNB;
 extern struct TMixerAccess Mute;
 extern struct TMixerAccess Volume;

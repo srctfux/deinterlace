@@ -120,6 +120,7 @@ void LoadSettingsFromIni()
 	DiffThreshold = GetPrivateProfileInt("Pulldown", "DiffThreshold", DiffThreshold, szIniFile);
 	PulldownSwitchInterval = GetPrivateProfileInt("Pulldown", "PulldownSwitchInterval", PulldownSwitchInterval, szIniFile);
 	PulldownSwitchMax = GetPrivateProfileInt("Pulldown", "PulldownSwitchMax", PulldownSwitchMax, szIniFile);
+
 	StaticImageFieldCount = GetPrivateProfileInt("Pulldown", "StaticImageFieldCount", StaticImageFieldCount, szIniFile);
 	LowMotionFieldCount = GetPrivateProfileInt("Pulldown", "LowMotionFieldCount", LowMotionFieldCount, szIniFile);
 	StaticImageMode = GetPrivateProfileInt("Pulldown", "StaticImageMode", StaticImageMode, szIniFile);
@@ -129,6 +130,7 @@ void LoadSettingsFromIni()
 	// JA 02/01/2001
 	// use SetDeinterlaceFunction so that Half height gets set correctly
 	SetDeinterlaceMode(GetPrivateProfileInt("Deinterlace", "DeinterlaceMode", gPulldownMode, szIniFile));
+	gPALFilmFallbackMode = GetPrivateProfileInt("Deinterlace", "PALFilmFallbackMode", gPALFilmFallbackMode, szIniFile);
 	bAutoDetectMode = (GetPrivateProfileInt("Pulldown", "bAutoDetectMode", bAutoDetectMode, szIniFile) != 0);
 
 	EdgeDetect = GetPrivateProfileInt("Deinterlace", "EdgeDetect", EdgeDetect, szIniFile);

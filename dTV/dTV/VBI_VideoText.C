@@ -41,13 +41,6 @@
 struct TVT VTFrame[800];
 
 int SubPage=0;
-struct TVDatBlockz VDATBlockz[8];
-
-struct TInterCast InterCast;
-
-struct TVDat VDat;
-
-unsigned char vdat[10];
 
 BYTE VBI_vcbuf[25];
 BYTE VBI_vc2buf[25];

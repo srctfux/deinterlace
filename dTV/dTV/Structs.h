@@ -37,25 +37,6 @@
 #ifndef __STRUCTS_H___
 #define __STRUCTS_H___
 
-struct TInterCast
-{
-	unsigned char blocks[28*16];
-	unsigned char data[0x100];
-	unsigned char *fbuf;
-	unsigned int packnum, packtot, packlen, total;
-	int datap, ok, esc, ciok;
-	unsigned char ci,lastci;  /* ci = continuity index */
-	unsigned short dat;
-	unsigned int length;
-	unsigned int done, flength;
-	int pnum;
-	char *name;
-	int fbufSize;
-	char Error[64];
-	char fname[512];
-	unsigned int BytesSoFar;
-};
-
 struct TVDat
 {
 	int Status;
