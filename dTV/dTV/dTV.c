@@ -1154,6 +1154,11 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			Sleep(100);
 			break;
 
+      case IDM_TAKESTREAMSNAP:
+         RequestStreamSnap();
+         break;
+
+
 		case IDM_SHOW_OSD:
 //			OSD_ShowText(hWnd, GetSourceName(Setting_GetValue(BT848_GetSetting(VIDEOSOURCE))), 0);
 			OSD_ShowInfosScreen(hWnd, 0);

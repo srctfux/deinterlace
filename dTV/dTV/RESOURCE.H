@@ -202,7 +202,6 @@
 #define IDM_AUTOHIDE_OSD                815
 #define ID_SETTINGS_FILTERS_FILTERS     816
 #define IDM_AUTOHIDE_CURSOR             817
-#define IDM_CHANNEL_SELECT              1635
 #define IDM_END                         1032
 #define IDM_SOURCE_TUNER                1089
 #define IDM_SOURCE_COMPOSITE            1090
@@ -487,6 +486,7 @@
 #define IDM_MSPSTEREO_3                 1633
 #define IDC_LNBSWITSH22KHZ3             1634
 #define IDM_MSPSTEREO_4                 1634
+#define IDM_CHANNEL_SELECT              1635
 #define IDC_LOF_LOW4                    1635
 #define IDC_LOF_HIGH4                   1636
 #define IDC_LOF_SWITCH4                 1637
@@ -791,6 +791,7 @@
 #define IDC_BYINPUT                     1876
 #define IDC_ALLFORMATS                  1877
 #define IDC_ALLINPUTS                   1878
+#define IDM_TAKESTREAMSNAP              1900
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -798,7 +799,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        158
-#define _APS_NEXT_COMMAND_VALUE         1900
+#define _APS_NEXT_COMMAND_VALUE         1901
 #define _APS_NEXT_CONTROL_VALUE         1879
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

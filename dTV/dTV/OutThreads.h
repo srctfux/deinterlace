@@ -55,6 +55,7 @@ void Reset_Capture();
 void Pause_Capture();
 void UnPause_Capture();
 void Pause_Toggle_Capture();
+void RequestStreamSnap();
 
 void Start_Thread();
 void Stop_Thread();

@@ -87,6 +87,7 @@
 // Thread related variables
 BOOL                bStopThread = FALSE;
 BOOL                bIsPaused = FALSE;
+BOOL                bRequestStreamSnap = FALSE;
 HANDLE              OutThread;
 
 // Dynamically updated variables
@@ -190,6 +191,79 @@ void Pause_Capture()
 void UnPause_Capture()
 {
 	bIsPaused = FALSE;
+}
+
+void RequestStreamSnap()
+{
+   bRequestStreamSnap = TRUE;
+}
+
+
+// save the info structure to a snapshot file
+// these files will make it easier to test 
+// deinterlacing techniques as we can start
+// to exchange the actual data we are each looking
+// at and have the ability to recreate results
+void SaveStreamSnapshot(DEINTERLACE_INFO *info)
+{
+	FILE *file;
+	char name[13];
+   int n = 0;
+   int i = 0;
+   int j;
+	struct stat st;
+
+   while (n < 100)
+	{
+		sprintf(name,"sn%06d.dtv",++n) ;
+		if (stat(name, &st))
+			break;
+	}
+
+   if(n == 100)
+	{
+		ErrorBox("Could not create a file.  You may have too many snapshots already.");
+		return;
+	}
+
+   file = fopen(name,"wb");
+	if (!file)
+	{
+		ErrorBox("Could not open file in SaveStreamSnapshot");
+		return;
+	}
+
+   // just save the info struct
+   // most of the data is pointers which will be useless
+   // to anyone else
+   // but NULLs will be useful in determining how many
+   // fields we have.
+   // The rest will contain all the data we need to use
+   // the data in a test program
+	fwrite(info, sizeof(DEINTERLACE_INFO), 1, file);
+
+   // save all the Odd fields first
+   i = 0;
+   while(i < MAX_FIELD_HISTORY && info->OddLines[i] != NULL)
+   {
+      for(j = 0; j < info->FieldHeight; ++j)
+      {
+      	fwrite(info->OddLines[i][j], info->LineLength, 1, file);
+      }
+      i++;      
+   }
+
+   // then all the even frames
+   i = 0;
+   while(i < MAX_FIELD_HISTORY && info->EvenLines[i] != NULL)
+   {
+      for(j = 0; j < info->FieldHeight; ++j)
+      {
+      	fwrite(info->OddLines[i][j], info->LineLength, 1, file);
+      }
+      i++;      
+   }
+	fclose(file);
 }
 
 void Pause_Toggle_Capture()
@@ -639,8 +713,6 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 					{
 						CompareFields(&info);
 					}
-
-
 				}
 
 				if (Capture_VBI == TRUE)
@@ -830,6 +902,12 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 					StatusBar_ShowText(STATUS_FPS, Text);
 				}
 			}
+
+         // if asked save the current info to a file
+         if(bRequestStreamSnap == TRUE)
+         {
+            SaveStreamSnapshot(&info);
+         }
 
 			// save the last pulldown mode so that we know if its changed
 			PrevDeintMethod = CurrentMethod;
