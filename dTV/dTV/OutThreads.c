@@ -257,7 +257,7 @@ void SaveStreamSnapshot(DEINTERLACE_INFO *info)
 	{
 		for(j = 0; j < info->FieldHeight; ++j)
 		{
-			fwrite(info->OddLines[i][j], info->LineLength, 1, file);
+			fwrite(info->EvenLines[i][j], info->LineLength, 1, file);
 		}
 	i++;      
 	}
