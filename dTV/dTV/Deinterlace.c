@@ -402,10 +402,10 @@ DoNext32Bytes:
 			movq qword ptr[edi+16], mm4
 			movq qword ptr[edi+24], mm5
 
-			// get intensities in mm3 - 4
-			movq mm3, mm1
-			movq mm4, mm2
-			movq mm5, mm3
+			// get intensities in mm3 - 5
+			movq mm3, mm0
+			movq mm4, mm1
+			movq mm5, mm2
 
 			sub edi, OverlayPitch
 
@@ -460,10 +460,10 @@ DoNext32Bytes:
 			movq mm1, qword ptr[ebx+8] 
 			movq mm2, qword ptr[edx+8]
 
-			// get intensities in mm3 - 4
-			movq mm3, mm1
-			movq mm4, mm2
-			movq mm5, mm3
+			// get intensities in mm3 - 5
+			movq mm3, mm0
+			movq mm4, mm1
+			movq mm5, mm2
 
 			pand mm3, YMask
 			pand mm4, YMask
@@ -516,10 +516,10 @@ DoNext32Bytes:
 			movq mm1, qword ptr[ebx+16] 
 			movq mm2, qword ptr[edx+16]
 
-			// get intensities in mm3 - 4
-			movq mm3, mm1
-			movq mm4, mm2
-			movq mm5, mm3
+			// get intensities in mm3 - 5
+			movq mm3, mm0
+			movq mm4, mm1
+			movq mm5, mm2
 
 			pand mm3, YMask
 			pand mm4, YMask
@@ -572,10 +572,10 @@ DoNext32Bytes:
 			movq mm1, qword ptr[ebx+24] 
 			movq mm2, qword ptr[edx+24]
 
-			// get intensities in mm3 - 4
-			movq mm3, mm1
-			movq mm4, mm2
-			movq mm5, mm3
+			// get intensities in mm3 - 5
+			movq mm3, mm0
+			movq mm4, mm1
+			movq mm5, mm2
 
 			pand mm3, YMask
 			pand mm4, YMask
