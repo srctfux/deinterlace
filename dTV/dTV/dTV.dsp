@@ -107,6 +107,14 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;for;f90"
 # Begin Source File
 
+SOURCE=.\AspectDetect.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\AspectGUI.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\AspectRatio.c
 # End Source File
 # Begin Source File
@@ -568,10 +576,6 @@ SOURCE=.\READ_ME_FIRST_NOW.txt
 # End Source File
 # End Target
 # End Project
-# Section dTV : {F08DF954-8592-11D1-B16A-00C0F0283628}
-# 	2:21:DefaultSinkHeaderFile:slider.h
-# 	2:16:DefaultSinkClass:CSlider
-# End Section
 # Section dTV : {F08DF952-8592-11D1-B16A-00C0F0283628}
 # 	2:5:Class:CSlider
 # 	2:10:HeaderFile:slider.h
@@ -581,4 +585,8 @@ SOURCE=.\READ_ME_FIRST_NOW.txt
 # 	2:5:Class:CPicture
 # 	2:10:HeaderFile:picture.h
 # 	2:8:ImplFile:picture.cpp
+# End Section
+# Section dTV : {F08DF954-8592-11D1-B16A-00C0F0283628}
+# 	2:21:DefaultSinkHeaderFile:slider.h
+# 	2:16:DefaultSinkClass:CSlider
 # End Section
