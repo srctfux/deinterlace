@@ -50,6 +50,7 @@ rm -R -f htdocs/palmovie
 rm -R -f htdocs/readme
 rm -R -f htdocs/screenshots
 rm -R -f htdocs/setup
+rm -R -f htdocs/scripts
 
 
 #Check out the htdocs module from the dTV CVS using pserver.
