@@ -335,7 +335,7 @@ BOOL Overlay_Create()
 	}
 
 	Overlay_Clean();
-
+	
 	return (TRUE);
 }
 

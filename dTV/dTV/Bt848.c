@@ -587,7 +587,15 @@ BOOL BT848_SetGeoSize()
 	hactive = CurrentX;
 //	vtc = (hactive < 193) ?	2 : ((hactive < 385) ? 1 : 0);		// TRB 12/15/00  allow vertical filter from ini
 	vtc = BtVertFilter;		
-	hscale = ((TVFormats[TVFormat].wHActivex1 - CurrentX) * 4096UL) / CurrentX;
+	if(CurrentX <= TVFormats[TVFormat].wHActivex1)
+	{
+		hscale = ((TVFormats[TVFormat].wHActivex1 - CurrentX) * 4096UL) / CurrentX;
+	}
+	else
+	{
+		CurrentX = TVFormats[TVFormat].wHActivex1;
+		hscale = 0;
+	}
 	vdelay = TVFormats[TVFormat].wVDelay;
 	hdelay = ((CurrentX * TVFormats[TVFormat].wHDelayx1) / TVFormats[TVFormat].wHActivex1) & 0x3fe;
 
@@ -1576,7 +1584,7 @@ SETTING BT848Settings[BT848_SETTING_LASTONE] =
 	},
 	{
 		"CustomPixelWidth", SLIDER, 0, &CustomPixelWidth,
-		700, 0, 768, 0, NULL,
+		754, 0, 768, 0, NULL,
 		"MainWindow", "CustomPixelWidth", NULL,
 	},
 	{

@@ -598,7 +598,16 @@ const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 		TUNER_PHILIPS_1236D_NTSC_INPUT1
 	},
 	// MAE 5 Dec 2000 End of change
-
+	{
+		"RS BT Card",
+		3, 4, 0, 2, 0xfff,
+		{ 2, 3, 1, 1, 0, 0, 0, 0},
+		{ 13, 14, 11, 7, 0, 0},
+		0,
+		1,1,1,1,0,0,0,1,
+		PLL_28,
+		TUNER_ABSENT
+	},
 };
 
 const AUTODETECT878 AutoDectect878[] =
@@ -819,10 +828,10 @@ void ChangeDefaultsBasedOnHardware()
 		case PAL_I:
 			TVCard_ChangeDefault(BT848_GetSetting(TVFORMAT), FORMAT_PAL_BDGHI);
 			break;
-		case NTSC:
-			TVCard_ChangeDefault(BT848_GetSetting(TVFORMAT), FORMAT_NTSC);
-			break;
 		case SECAM:
+			TVCard_ChangeDefault(BT848_GetSetting(TVFORMAT), FORMAT_SECAM);
+			break;
+		case NTSC:
 		default:
 			TVCard_ChangeDefault(BT848_GetSetting(TVFORMAT), FORMAT_NTSC);
 			break;
@@ -929,6 +938,7 @@ BOOL APIENTRY SelectCardProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 			CardType = SendMessage(GetDlgItem(hDlg, IDC_CARDSSELECT), CB_GETCURSEL, 0, 0);
 			ProcessorSpeed = SendMessage(GetDlgItem(hDlg, IDC_PROCESSOR_SPEED), CB_GETCURSEL, 0, 0);
 			TradeOff = SendMessage(GetDlgItem(hDlg, IDC_TRADEOFF), CB_GETCURSEL, 0, 0);
+			ChangeDefaultsBasedOnHardware();
 			EndDialog(hDlg, TRUE);
 			break;
 		case IDCANCEL:
@@ -1007,6 +1017,7 @@ void TVCard_ReadSettingsFromIni()
 	{
 		Setting_ReadFromIni(&(TVCardSettings[i]));
 	}
+	ChangeDefaultsBasedOnHardware();
 }
 
 void TVCard_WriteSettingsToIni()
@@ -1024,7 +1035,15 @@ void TVCard_SetMenu(HMENU hMenu)
 	EnableMenuItem(hMenu, IDM_CHANNELMINUS, (TunerType != TUNER_ABSENT)?MF_ENABLED:MF_GRAYED);
 	EnableMenuItem(hMenu, IDM_ANALOGSCAN, (TunerType != TUNER_ABSENT)?MF_ENABLED:MF_GRAYED);
 
-	EnableMenuItem(hMenu, IDM_SOURCE_TUNER, (TVCards[CardType].TunerInput != -1)?MF_ENABLED:MF_GRAYED);
+	// don't show the tuner option if there isn't one or it has not been set up
+	if(TVCards[CardType].TunerInput == TUNER_ABSENT || TunerType == TUNER_ABSENT)
+	{
+		EnableMenuItem(hMenu, IDM_SOURCE_TUNER, MF_GRAYED);
+	}
+	else
+	{
+		EnableMenuItem(hMenu, IDM_SOURCE_TUNER, MF_ENABLED);
+	}
 
 	if(TVCards[CardType].SVideoInput == -1)
 	{
@@ -1040,4 +1059,5 @@ void TVCard_SetMenu(HMENU hMenu)
 		EnableMenuItem(hMenu, IDM_SOURCE_OTHER2, (TVCards[CardType].nVideoInputs > 4)?MF_ENABLED:MF_GRAYED);
 		EnableMenuItem(hMenu, IDM_SOURCE_COMPVIASVIDEO, MF_ENABLED);
 	}
+	EnableMenuItem(hMenu, IDM_SOURCE_CCIR656, (CardType == TVCARD_RS_BT)?MF_ENABLED:MF_GRAYED);
 }

@@ -834,9 +834,9 @@ BEGIN
             MENUITEM "&Composite\tCtrl+Alt+F2",     IDM_SOURCE_COMPOSITE
             MENUITEM "&S-Video\tCtrl+Alt+F3",       IDM_SOURCE_SVIDEO
             MENUITEM "Co&mposite via S-Video  \tCtrl+Alt+F4", 
-                                                    IDM_SOURCE_OTHER1
-            MENUITEM "Other - &1\tCtrl+Alt+F5",     IDM_SOURCE_OTHER2
-            MENUITEM "Other - &2\tCtrl+Alt+F6",     IDM_SOURCE_COMPVIASVIDEO
+                                                    IDM_SOURCE_COMPVIASVIDEO
+            MENUITEM "Other - &1\tCtrl+Alt+F5",     IDM_SOURCE_OTHER1
+            MENUITEM "Other - &2\tCtrl+Alt+F6",     IDM_SOURCE_OTHER2
             MENUITEM "Other - CC&IR\tCtrl+Alt+F7",  IDM_SOURCE_CCIR656
         END
         POPUP "Video &Format"

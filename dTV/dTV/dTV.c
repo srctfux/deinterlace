@@ -141,6 +141,7 @@ BOOL IsFullScreen_OnChange(long NewValue);
 BOOL DisplayStatusBar_OnChange(long NewValue);
 void Cursor_SetVisibility(BOOL bVisible);
 const char * GetSourceName(int nVideoSource);
+void MainWndOnDestroy();
 
 
 /****************************************************************************
@@ -184,7 +185,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	}
 
 	wc.style = 0;
-	wc.lpfnWndProc = (WNDPROC) MainWndProc;
+	wc.lpfnWndProc = (WNDPROC) MainWndProcSafe;
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = sizeof(LONG);
 	wc.hInstance = hInstance;
@@ -227,27 +228,23 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	}
 
 	// catch any serious errors during message handling
-	__try
+	while (GetMessage(&msg, NULL, 0, 0))
 	{
-		while (GetMessage(&msg, NULL, 0, 0))
+		if (!TranslateAccelerator(hWnd, hAccel, &msg))
 		{
-			if (!TranslateAccelerator(hWnd, hAccel, &msg))
-			{
-				TranslateMessage(&msg);
-				DispatchMessage(&msg);
-			}
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
 		}
 	}
-	__except (EXCEPTION_EXECUTE_HANDLER) 
-    {
-		ErrorBox("Crashed");
-	}
 
-	ExitDD();
-	// save settings
-	WriteSettingsToIni();
 	return msg.wParam;
 }
+
+LONG APIENTRY MainWndProcSafe(HWND hWnd, UINT message, UINT wParam, LONG lParam)
+{
+	return MainWndProc(hWnd, message, wParam, lParam);
+}
+
 
 /****************************************************************************
 
@@ -288,7 +285,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_SETUPCARD:
 			Stop_Capture();
 			DialogBox(hInst, "SELECTCARD", hWnd, (DLGPROC) SelectCardProc);
-			ChangeDefaultsBasedOnHardware();
 			Card_Init();
 			Tuner_Init();
             Reset_Capture();
@@ -1393,26 +1389,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
 	case WM_QUERYENDSESSION:
 	case WM_DESTROY:
-		Stop_Capture();
-		Audio_SetSource(AUDIOMUX_MUTE);
-		
-		// MAE 8 Dec 2000 Start of change
-		// JA 8 Jan 2001 Changed to use function
-		if (Audio_MSP_IsPresent())
-		{
-			// Mute the MSP decoder
-			Audio_Mute();
-		}
-		// MAE 8 Dec 2000 End of change
-
-		CleanUpMemory();
-
-		if(bIsFullScreen == FALSE)
-		{
-			SaveWindowPos(hWnd);
-		}
-		BT848_Close();
-		StatusBar_Destroy();
+		MainWndOnDestroy();
 		PostQuitMessage(0);
 		break;
 
@@ -1475,10 +1452,6 @@ void MainWndOnInitBT(HWND hWnd)
 			TVCard_FirstTimeSetupHardware(hInst, hWnd);
 		}
 
-		// reset any defaults that are affected by the hardware
-		// selected or tradeoff choices
-		ChangeDefaultsBasedOnHardware();
-
 		WStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
 		if (bAlwaysOnTop == FALSE)
 		{
@@ -1528,8 +1501,24 @@ void MainWndOnInitBT(HWND hWnd)
 			SetTimer(hWnd, TIMER_MSP, TIMER_MSP_MS, NULL);
 		}
 
-        // EAS20001226: Don't clobber what was read in from the ini file.
-		//AudioSource = AUDIOMUX_EXTERNAL;
+		// resume mute status
+		if(System_In_Mute)
+		{
+			if (USE_MIXER == FALSE)
+			{
+				Audio_SetSource(AUDIOMUX_MUTE);
+			}
+			
+			if(USE_MIXER == TRUE)
+			{
+				Mixer_Mute();
+			}
+			
+			if (Audio_MSP_IsPresent())
+			{
+				Audio_Mute();
+			}
+		}
 
 		if(Setting_GetValue(BT848_GetSetting(VIDEOSOURCE)) == SOURCE_TUNER)
 		{
@@ -1679,6 +1668,77 @@ void MainWndOnCreate(HWND hWnd)
 	}
 
 	PostMessage(hWnd, INIT_BT, 0, 0);
+}
+
+// basically we want do make sure everything that needs to be done on exit gets 
+// done even if one of the functions crashes we should just carry on with the rest
+// of the functions
+void MainWndOnDestroy()
+{
+	__try
+	{
+		Stop_Capture();
+	}
+	__except(EXCEPTION_EXECUTE_HANDLER) {;}
+
+	__try
+	{
+		Audio_SetSource(AUDIOMUX_MUTE);
+	}
+	__except(EXCEPTION_EXECUTE_HANDLER) {;}
+	
+	__try
+	{
+		// MAE 8 Dec 2000 Start of change
+		// JA 8 Jan 2001 Changed to use function
+		if (Audio_MSP_IsPresent())
+		{
+			// Mute the MSP decoder
+			Audio_Mute();
+		}
+		// MAE 8 Dec 2000 End of change
+	}
+	__except(EXCEPTION_EXECUTE_HANDLER) {;}
+
+	__try
+	{
+		CleanUpMemory();
+	}
+	__except(EXCEPTION_EXECUTE_HANDLER) {;}
+
+	__try
+	{
+		if(bIsFullScreen == FALSE)
+		{
+			SaveWindowPos(hWnd);
+		}
+	}
+	__except(EXCEPTION_EXECUTE_HANDLER) {;}
+	
+	__try
+	{
+		BT848_Close();
+	}
+	__except(EXCEPTION_EXECUTE_HANDLER) {;}
+
+	__try
+	{
+		StatusBar_Destroy();
+	}
+	__except(EXCEPTION_EXECUTE_HANDLER) {;}
+	
+	__try
+	{
+		ExitDD();
+	}
+	__except(EXCEPTION_EXECUTE_HANDLER) {;}
+	
+	__try
+	{
+		// save settings
+		WriteSettingsToIni();
+	}
+	__except(EXCEPTION_EXECUTE_HANDLER) {;}
 }
 
 //---------------------------------------------------------------------------

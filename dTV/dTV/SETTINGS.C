@@ -95,7 +95,11 @@ void LoadSettingsFromIni()
 	char szKey[128];
 	int i;
 
-	// Read in settings from each source files read method
+	// TVCard setting smust be called first as this modifys some defaults for the
+	// other settings, but we need to be able to override the defaults.
+	TVCard_ReadSettingsFromIni();
+
+	// Read in rest of settings from each source files read method
 	Aspect_ReadSettingsFromIni();
 	BT848_ReadSettingsFromIni();
 	dTV_ReadSettingsFromIni();
@@ -110,7 +114,6 @@ void LoadSettingsFromIni()
 	DI_TwoFrame_ReadSettingsFromIni();
 	Deinterlace_ReadSettingsFromIni();
 	FLT_TNoise_ReadSettingsFromIni();
-	TVCard_ReadSettingsFromIni();
 
 	VBI_Flags = 0;
 	if(GetPrivateProfileInt("VBI", "VT", 0, szIniFile) != 0)
@@ -133,7 +136,8 @@ void LoadSettingsFromIni()
 	CurrentProgramm = GetPrivateProfileInt("Show", "LastProgram", CurrentProgramm, szIniFile);
 
 	AudioSource = GetPrivateProfileInt("Sound", "AudioSource", AudioSource, szIniFile);
-	
+	System_In_Mute = (GetPrivateProfileInt("Sound", "System_In_Mute", System_In_Mute, szIniFile) != 0);
+		
 	bSaveSettings = (GetPrivateProfileInt("Show", "SaveSettings", CountryCode, szIniFile) != 0);
 	CountryCode = GetPrivateProfileInt("Show", "CountryCode", CountryCode, szIniFile);
 
@@ -355,7 +359,8 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("Show", "LastProgram", CurrentProgramm, szIniFile);
 
 	WritePrivateProfileInt("Sound", "AudioSource", AudioSource, szIniFile);
-	
+	WritePrivateProfileInt("Sound", "System_In_Mute", System_In_Mute, szIniFile);	
+
 	WritePrivateProfileInt("Show", "SaveSettings", bSaveSettings, szIniFile);
 	WritePrivateProfileInt("Show", "CountryCode", CountryCode, szIniFile);
 

@@ -47,7 +47,8 @@ void dTV_WriteSettingsToIni();
 
 void SetThreadProcessorAndPriority();
 
-LONG APIENTRY MainWndProc(HWND, UINT, UINT, LONG);
+LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam);
+LONG APIENTRY MainWndProcSafe(HWND hWnd, UINT message, UINT wParam, LONG lParam);
 
 void MainWndOnCreate(HWND hWnd);
 void MainWndOnInitBT(HWND hWnd);
