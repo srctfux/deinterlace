@@ -738,6 +738,7 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Next Channel\tPgUp",         IDM_CHANNELPLUS
         MENUITEM "&Previous Channel\tPgDn",     IDM_CHANNELMINUS
+        MENUITEM "L&ast Channel\tCtrl+Backspace", IDM_CHANNEL_PREVIOUS
     END
     POPUP "&View"
     BEGIN
@@ -947,6 +948,7 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Video&Text",                  IDM_VBI_VT, GRAYED
         MENUITEM "V&PS-Data",                   IDM_VBI_VPS, GRAYED
+        MENUITEM "&WSS-Data",                   IDM_VBI_WSS, GRAYED
         POPUP "&Closed Captions"
         BEGIN
             MENUITEM "CC &Off",                     IDM_CCOFF

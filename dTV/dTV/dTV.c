@@ -916,6 +916,11 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				!Setting_GetValue(VBI_GetSetting(DOVPS)));
 			break;
 
+		case IDM_VBI_WSS:
+			Setting_SetValue(VBI_GetSetting(DOWSS), 
+				!Setting_GetValue(VBI_GetSetting(DOWSS)));
+			break;
+
 		case IDM_CALL_VIDEOTEXTSMALL:
 		case IDM_CALL_VIDEOTEXT:
 			VTState++;

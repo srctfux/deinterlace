@@ -213,8 +213,10 @@ void VBI_SetMenu(HMENU hMenu)
 		EnableMenuItem(hMenu, IDM_VPS_OUT, (DoVPS)?MF_ENABLED:MF_GRAYED);
 		EnableMenuItem(hMenu, IDM_VBI_VT, MF_ENABLED);
 		EnableMenuItem(hMenu, IDM_VBI_VPS, MF_ENABLED);
+		EnableMenuItem(hMenu, IDM_VBI_WSS, MF_ENABLED);
 		CheckMenuItem(hMenu, IDM_VBI_VT, (DoTeletext)?MF_CHECKED:MF_UNCHECKED);
 		CheckMenuItem(hMenu, IDM_VBI_VPS, (DoVPS)?MF_CHECKED:MF_UNCHECKED);
+		CheckMenuItem(hMenu, IDM_VBI_WSS, (DoWSS)?MF_CHECKED:MF_UNCHECKED);
 		for(i = CCMODE_OFF; i <= CCMODE_TEXT4; i++)
 		{
 			EnableMenuItem(hMenu, IDM_CCOFF + i, MF_ENABLED);
@@ -225,6 +227,7 @@ void VBI_SetMenu(HMENU hMenu)
 	{
 		EnableMenuItem(hMenu, IDM_VBI_VT, MF_GRAYED);
 		EnableMenuItem(hMenu, IDM_VBI_VPS, MF_GRAYED);
+		EnableMenuItem(hMenu, IDM_VBI_WSS, MF_GRAYED);
 		EnableMenuItem(hMenu, IDM_CALL_VIDEOTEXTSMALL, MF_GRAYED);
 		EnableMenuItem(hMenu, IDM_CALL_VIDEOTEXT, MF_GRAYED);
 		EnableMenuItem(hMenu, IDM_VT_RESET, MF_GRAYED);
