@@ -39,7 +39,7 @@ RSC=rc.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "..\..\dTV"
+# PROP Output_Dir "Debug"
 # PROP Intermediate_Dir "Debug"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
@@ -48,13 +48,13 @@ RSC=rc.exe
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD BASE RSC /l 0x409 /i "i:\ddk.nt" /d "_DEBUG"
-# ADD RSC /l 0x409 /i "i:\ddk.nt" /d "_DEBUG"
+# ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 int64.lib ntoskrnl.lib hal.lib /nologo /base:"0x10000" /version:4.0 /entry:"DriverEntry" /pdb:none /debug /debugtype:both /machine:IX86 /nodefaultlib /out:"..\bin/dTVdrvNT.sys" /libpath:"l:\ddk.nt\i386\checked" /driver /debug:notmapped,FULL /IGNORE:4001,4037,4039,4065,4078,4087,4089,4096 /MERGE:_PAGE=PAGE /MERGE:_TEXT=.text /SECTION:INIT,d /MERGE:.rdata=.text /FULLBUILD /RELEASE /FORCE:MULTIPLE /OPT:REF /OPTIDATA /align:0x20 /osversion:4.00 /subsystem:native
-# ADD LINK32 ntoskrnl.lib hal.lib ntoskrnl.lib /nologo /base:"0x10000" /version:4.0 /entry:"DriverEntry" /pdb:none /map:"dTVdrvNT.map" /debug /machine:IX86 /nodefaultlib /out:"..\..\dTV/dTVdrvNT.sys" /driver /debug:notmapped,FULL /IGNORE:4001,4037,4039,4065,4078,4087,4089,4096 /MERGE:_PAGE=PAGE /MERGE:_TEXT=.text /SECTION:INIT,d /MERGE:.rdata=.text /FULLBUILD /RELEASE /FORCE:MULTIPLE /OPT:REF /OPTIDATA /align:0x20 /osversion:4.00 /subsystem:native
+# ADD LINK32 int64.lib ntoskrnl.lib hal.lib /nologo /base:"0x10000" /version:4.0 /entry:"DriverEntry" /pdb:none /map:"dTVdrvNT.map" /debug /machine:IX86 /nodefaultlib /out:"..\..\Debug\dTVdrvNT.sys" /driver /debug:notmapped,FULL /IGNORE:4001,4037,4039,4065,4078,4087,4089,4096 /MERGE:_PAGE=PAGE /MERGE:_TEXT=.text /SECTION:INIT,d /MERGE:.rdata=.text /FULLBUILD /RELEASE /FORCE:MULTIPLE /OPT:REF /OPTIDATA /align:0x20 /osversion:4.00 /subsystem:native
 
 !ELSEIF  "$(CFG)" == "dTVdrvNT - Win32 Release"
 
@@ -66,7 +66,7 @@ LINK32=link.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "..\..\dTV"
+# PROP Output_Dir "Release"
 # PROP Intermediate_Dir "Release"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
@@ -75,13 +75,13 @@ LINK32=link.exe
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD BASE RSC /l 0x409 /i "$(BASEDIR)\inc" /i "..\inc" /d "NDEBUG"
-# ADD RSC /l 0x409 /i "$(BASEDIR)\inc" /i "..\inc" /d "NDEBUG"
+# ADD RSC /l 0x409 /i "..\inc" /d "NDEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 int64.lib ntoskrnl.lib hal.lib /nologo /base:"0x10000" /version:4.0 /entry:"DriverEntry" /pdb:none /debug /debugtype:coff /machine:IX86 /nodefaultlib /out:".\i386\free\dTVdrvNT.sys" /libpath:"$(BASEDIR)\lib\i386\free" /driver /debug:notmapped,MINIMAL /IGNORE:4001,4037,4039,4065,4070,4078,4087,4089,4096 /MERGE:_PAGE=PAGE /MERGE:_TEXT=.text /SECTION:INIT,d /MERGE:.rdata=.text /FULLBUILD /RELEASE /FORCE:MULTIPLE /OPT:REF /OPTIDATA /align:0x20 /osversion:4.00 /subsystem:native
-# ADD LINK32 int64.lib ntoskrnl.lib hal.lib /nologo /base:"0x10000" /version:4.0 /entry:"DriverEntry" /pdb:none /debug /debugtype:coff /machine:IX86 /nodefaultlib /out:"..\..\dTV/dTVdrvNT.sys" /libpath:"$(BASEDIR)\lib\i386\free" /driver /debug:notmapped,MINIMAL /IGNORE:4001,4037,4039,4065,4070,4078,4087,4089,4096 /MERGE:_PAGE=PAGE /MERGE:_TEXT=.text /SECTION:INIT,d /MERGE:.rdata=.text /FULLBUILD /RELEASE /FORCE:MULTIPLE /OPT:REF /OPTIDATA /align:0x20 /osversion:4.00 /subsystem:native
+# ADD LINK32 int64.lib ntoskrnl.lib hal.lib /nologo /base:"0x10000" /version:4.0 /entry:"DriverEntry" /pdb:none /debug /debugtype:coff /machine:IX86 /nodefaultlib /out:"..\..\Release\dTVdrvNT.sys" /libpath:"$(BASEDIR)\lib\i386\free" /driver /debug:notmapped,MINIMAL /IGNORE:4001,4037,4039,4065,4070,4078,4087,4089,4096 /MERGE:_PAGE=PAGE /MERGE:_TEXT=.text /SECTION:INIT,d /MERGE:.rdata=.text /FULLBUILD /RELEASE /FORCE:MULTIPLE /OPT:REF /OPTIDATA /align:0x20 /osversion:4.00 /subsystem:native
 
 !ENDIF 
 
@@ -95,22 +95,109 @@ LINK32=link.exe
 # Begin Source File
 
 SOURCE=..\common\DEBUGOUT.CPP
+DEP_CPP_DEBUG=\
+	"..\common\DEBUGOUT.H"\
+	"..\include\basetype.h"\
+	{$(INCLUDE)}"alpharef.h"\
+	{$(INCLUDE)}"basedef.h"\
+	{$(INCLUDE)}"basetsd.h"\
+	{$(INCLUDE)}"bugcodes.h"\
+	{$(INCLUDE)}"guiddef.h"\
+	{$(INCLUDE)}"ia64reg.h"\
+	{$(INCLUDE)}"ntddk.h"\
+	{$(INCLUDE)}"ntdef.h"\
+	{$(INCLUDE)}"ntiologc.h"\
+	{$(INCLUDE)}"ntstatus.h"\
+	{$(INCLUDE)}"vmm.h"\
+	{$(INCLUDE)}"vwin32.h"\
+	
 # End Source File
 # Begin Source File
 
 SOURCE=.\DRVALLOC.CPP
+DEP_CPP_DRVAL=\
+	{$(INCLUDE)}"alpharef.h"\
+	{$(INCLUDE)}"basetsd.h"\
+	{$(INCLUDE)}"bugcodes.h"\
+	{$(INCLUDE)}"guiddef.h"\
+	{$(INCLUDE)}"ia64reg.h"\
+	{$(INCLUDE)}"ntddk.h"\
+	{$(INCLUDE)}"ntdef.h"\
+	{$(INCLUDE)}"ntiologc.h"\
+	{$(INCLUDE)}"ntstatus.h"\
+	
 # End Source File
 # Begin Source File
 
 SOURCE=.\dTVdrvNT.cpp
+DEP_CPP_DTVDR=\
+	"..\common\DEBUGOUT.H"\
+	"..\common\IOCLASS.H"\
+	"..\include\basetype.h"\
+	"..\include\dTVdrv.H"\
+	{$(INCLUDE)}"alpharef.h"\
+	{$(INCLUDE)}"basedef.h"\
+	{$(INCLUDE)}"basetsd.h"\
+	{$(INCLUDE)}"bugcodes.h"\
+	{$(INCLUDE)}"devioctl.h"\
+	{$(INCLUDE)}"guiddef.h"\
+	{$(INCLUDE)}"ia64reg.h"\
+	{$(INCLUDE)}"ntddk.h"\
+	{$(INCLUDE)}"ntdef.h"\
+	{$(INCLUDE)}"ntiologc.h"\
+	{$(INCLUDE)}"ntstatus.h"\
+	{$(INCLUDE)}"vmm.h"\
+	{$(INCLUDE)}"vmmreg.h"\
+	{$(INCLUDE)}"vwin32.h"\
+	
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\IOCLASS.CPP
+DEP_CPP_IOCLA=\
+	"..\common\DEBUGOUT.H"\
+	"..\common\IOCLASS.H"\
+	"..\include\basetype.h"\
+	"..\include\dTVdrv.H"\
+	{$(INCLUDE)}"alpharef.h"\
+	{$(INCLUDE)}"basedef.h"\
+	{$(INCLUDE)}"basetsd.h"\
+	{$(INCLUDE)}"bugcodes.h"\
+	{$(INCLUDE)}"devioctl.h"\
+	{$(INCLUDE)}"guiddef.h"\
+	{$(INCLUDE)}"ia64reg.h"\
+	{$(INCLUDE)}"ntddk.h"\
+	{$(INCLUDE)}"ntdef.h"\
+	{$(INCLUDE)}"ntiologc.h"\
+	{$(INCLUDE)}"ntstatus.h"\
+	{$(INCLUDE)}"vmm.h"\
+	{$(INCLUDE)}"vmmreg.h"\
+	{$(INCLUDE)}"vwin32.h"\
+	
 # End Source File
 # Begin Source File
 
 SOURCE=..\common\PCIENUM.CPP
+DEP_CPP_PCIEN=\
+	"..\common\DEBUGOUT.H"\
+	"..\common\IOCLASS.H"\
+	"..\include\basetype.h"\
+	"..\include\dTVdrv.H"\
+	{$(INCLUDE)}"alpharef.h"\
+	{$(INCLUDE)}"basedef.h"\
+	{$(INCLUDE)}"basetsd.h"\
+	{$(INCLUDE)}"bugcodes.h"\
+	{$(INCLUDE)}"devioctl.h"\
+	{$(INCLUDE)}"guiddef.h"\
+	{$(INCLUDE)}"ia64reg.h"\
+	{$(INCLUDE)}"ntddk.h"\
+	{$(INCLUDE)}"ntdef.h"\
+	{$(INCLUDE)}"ntiologc.h"\
+	{$(INCLUDE)}"ntstatus.h"\
+	{$(INCLUDE)}"vmm.h"\
+	{$(INCLUDE)}"vmmreg.h"\
+	{$(INCLUDE)}"vwin32.h"\
+	
 # End Source File
 # End Group
 # Begin Group "Resource Files"

@@ -193,6 +193,14 @@ NTSTATUS CIOAccessDevice::deviceIOControl(PIRP irp)
 //---------------------------------------------------------------------------
 NTSTATUS CIOAccessDevice::deviceControl(DWORD ioControlCode, PDTVDRVParam ioParam, DWORD* outputBuffer, DWORD* pBytesWritten)
 {
+// 2000-09-11 Added by Mark Rejhon 
+// Eliminates compiler warnings about data type conversion
+#ifdef WIN95
+#define PORTADDRTYPE  USHORT
+#else
+#define PORTADDRTYPE  ULONG
+#endif
+
 	NTSTATUS status;
 
 	status = STATUS_SUCCESS;
@@ -201,30 +209,30 @@ NTSTATUS CIOAccessDevice::deviceControl(DWORD ioControlCode, PDTVDRVParam ioPara
 	switch ( ioControlCode )
 	{
 	case ioctlReadBYTE:
-		osPortReadByte( ioParam->dwAddress, *outputBuffer);
+		osPortReadByte((PORTADDRTYPE)ioParam->dwAddress, *outputBuffer);
 		*pBytesWritten = 1;
 		break;
 
 	case ioctlReadWORD:
-		osPortReadWord( ioParam->dwAddress, *outputBuffer);
+		osPortReadWord((PORTADDRTYPE)ioParam->dwAddress, *outputBuffer);
 		*pBytesWritten = 2;
 		break;
 
 	case ioctlReadDWORD:
-		osPortReadLong( ioParam->dwAddress, *outputBuffer);
+		osPortReadLong((PORTADDRTYPE)ioParam->dwAddress, *outputBuffer);
 		*pBytesWritten = 4;
 		break;
 
 	case ioctlWriteBYTE:
-		osPortWriteByte( ioParam->dwAddress, ioParam->dwValue);
+		osPortWriteByte((PORTADDRTYPE)ioParam->dwAddress, ioParam->dwValue);
 		break;
 
 	case ioctlWriteWORD:
-		osPortWriteWord( ioParam->dwAddress, ioParam->dwValue);
+		osPortWriteWord((PORTADDRTYPE)ioParam->dwAddress, (USHORT) ioParam->dwValue);
 		break;
 
 	case ioctlWriteDWORD:
-		osPortWriteLong( ioParam->dwAddress, ioParam->dwValue);
+		osPortWriteLong((PORTADDRTYPE)ioParam->dwAddress, ioParam->dwValue);
 		break;
 
 	case ioctlGetPCIInfo:

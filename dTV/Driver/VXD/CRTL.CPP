@@ -441,7 +441,7 @@ _ultoa(unsigned long u, char* s, int radix)
 
    p = s;
 
-   for (prevpow=0, pow=1; (u >= pow) && (prevpow < pow);  pow *= radix)
+   for (prevpow=0, pow=1; (u >= (unsigned long) pow) && (prevpow < pow);  pow *= radix)
                 prevpow=pow;
 
         pow = prevpow;

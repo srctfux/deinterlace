@@ -1,6 +1,7 @@
+pushd .
 call %1\bin\setenv.bat %1 free
 echo %BASEDIR%
-cd \source\deinterlace\driver\vxd
+popd
 if "%2" == "debug" set Debug=1
 if not exist Debug md Debug
 if not exist Release md Release

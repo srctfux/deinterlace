@@ -158,7 +158,6 @@ NTSTATUS CIOAccessDevice::pciGetDeviceConfig(DWORD dwBusNumber, DWORD dwSlotNumb
 //---------------------------------------------------------------------------
 NTSTATUS CIOAccessDevice::pciFindDevice(USHORT  vendorID, USHORT  deviceID, DWORD* pdwBusNumber, DWORD* pdwSlotNumber)
 {
-	DEVNODE               devNode;
 	CHAR                  registryKeyPath[128];
 	CHAR                  registrySubkeyPath[128];
 	CHAR                  hardwareID[128];
