@@ -39,8 +39,8 @@ BOOL FilterTemporalNoise_3DNOW(DEINTERLACE_INFO *info)
 BOOL FilterTemporalNoise_MMX(DEINTERLACE_INFO *info)
 #endif
 {
-	short *NewPixel;
-	short *OldPixel;
+	short** NewLines;
+	short** OldLines;
 	int y;
 	int Cycles;
 	__int64 qwNoiseThreshold;
@@ -59,24 +59,30 @@ BOOL FilterTemporalNoise_MMX(DEINTERLACE_INFO *info)
 	qwNoiseThreshold |= (qwNoiseThreshold << 48) | (qwNoiseThreshold << 32) | (qwNoiseThreshold << 16);
 	Cycles = info->LineLength / 8;
 
+	if (info->IsOdd)
+	{
+		NewLines = info->OddLines[0];
+		OldLines = info->OddLines[1];
+	}
+	else
+	{
+		NewLines = info->EvenLines[0];
+		OldLines = info->EvenLines[1];
+	}
+
 	for (y = 0; y < info->FieldHeight; y++)
 	{
-		if (info->IsOdd)
-		{
-			NewPixel = info->OddLines[0][y];
-			OldPixel = info->OddLines[1][y];
-		}
-		else
-		{
-			NewPixel = info->EvenLines[0][y];
-			OldPixel = info->EvenLines[1][y];
-		}
-
 		_asm 
 		{
 			mov ecx, Cycles
-			mov eax, dword ptr[NewPixel]
-			mov ebx, dword ptr[OldPixel]
+         mov ebx, y
+         shl ebx, 2
+         mov edx, NewLines
+         add edx, ebx
+			mov eax, dword ptr[edx]
+         mov edx, OldLines
+         add edx, ebx
+			mov ebx, dword ptr[edx]
 			movq mm5, qwNoiseThreshold		// mm5 = NoiseThreshold
 
 MAINLOOP_LABEL:
