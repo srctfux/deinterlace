@@ -72,7 +72,29 @@ long AutoDetectAspect = 0;
 
 // For aspect autodetect, require the same aspect ratio for this number of
 // frames before zooming in.
-long ZoomInFrameCount = 120;
+long ZoomInFrameCount = 60;
+
+// For aspect autodetect, only zoom in if we've used an equal or greater
+// ratio in the last N seconds, or haven't detected a smaller ratio in the
+// same amount of time.
+long AspectConsistencyTime = 30;
+
+//---------
+// Internal variables used by auto aspect ratio detect code.
+
+// Number of seconds of aspect ratio history to keep.
+#define RATIO_HISTORY_SIZE	300
+
+// Minimum aspect ratio encountered each second for the last several minutes.
+// The 0th element of this is the current second.
+static int min_ratio_found[RATIO_HISTORY_SIZE];
+
+// Maximum aspect ratio we've *used* each second for the last several minutes.
+// The 0th element of this is the current second.
+static int max_ratio_used[RATIO_HISTORY_SIZE];
+
+// Timestamp of the most recent computation of max_aspect_found.
+static int max_ratio_tick_count = 0;
 
 
 RECT destinationRectangle = {0,0,0,0};
@@ -725,11 +747,28 @@ void AdjustAspectRatio(void)
 	static int lastNewRatio = 0;
 	static int newRatioFrameCount = 0;
 	int newRatio;
+	int tick_count = GetTickCount();
+	int i;
+	int newRatioIsBiggest, haveSeenSmallerRatio;
 
 	if (AutoDetectAspect)
 	{
 		newRatio = FindAspectRatio();
-		
+
+		// If we've just crossed a 1-second boundary, scroll the aspect ratio
+		// histories.  If not, update the max ratio found in the current second.
+		if (tick_count / 1000 != max_ratio_tick_count / 1000)
+		{
+			max_ratio_tick_count = tick_count;
+			memmove(&min_ratio_found[1], &min_ratio_found[0], sizeof(min_ratio_found[0]) * (RATIO_HISTORY_SIZE - 1));
+			memmove(&max_ratio_used[1], &max_ratio_used[0], sizeof(max_ratio_used[0]) * (RATIO_HISTORY_SIZE - 1));
+			min_ratio_found[0] = newRatio;
+			max_ratio_used[0] = source_aspect;
+		}
+		else if (newRatio < min_ratio_found[0]) {
+			min_ratio_found[0] = newRatio;
+		}
+
 		// If the new ratio is less than the old one -- that is, if we've just
 		// become less letterboxed -- switch to the new ratio immediately to
 		// avoid cutting the image off.
@@ -737,22 +776,57 @@ void AdjustAspectRatio(void)
 		{
 			LOG("Zooming out to ratio %d", newRatio);
 			source_aspect = newRatio;
+			newRatioFrameCount = 0;
 			WorkoutOverlaySize();
 		}
 		else if (newRatio != source_aspect && newRatio == lastNewRatio)
 		{
-			// Require the same aspect ratio for some number of frames before
-			// zooming in.
-			if (++newRatioFrameCount >= ZoomInFrameCount)
+			// Require the same aspect ratio for some number of frames, or no
+			// bigger aspect ratio found for the last AspectConsistencyTime seconds,
+			// before zooming in.
+			haveSeenSmallerRatio = 0;
+			for (i = 1; i < AspectConsistencyTime; i++)
+				if (newRatio > min_ratio_found[i])
+				{
+					haveSeenSmallerRatio = 1;
+					break;
+				}
+
+			if (! haveSeenSmallerRatio || ++newRatioFrameCount >= ZoomInFrameCount)
 			{
-				LOG("Zooming in to ratio %d", newRatio);
-				source_aspect = newRatio;
-				WorkoutOverlaySize();
+				// If we're looking at aspect ratio histories, the new ratio must be
+				// no bigger than the biggest one we've _used_ in the recent past, or
+				// there must have been no smaller ratio _found_ in the recent past.
+				// That is, don't zoom in more than we've zoomed in recently unless
+				// we'd previously zoomed to the same ratio.  This helps prevent
+				// temporary zooms into letterboxed material during dark scenes, while
+				// allowing the code to quickly switch in and out of zoomed mode when
+				// full-frame commercials come on.
+				if (AspectConsistencyTime > 0)
+				{
+					newRatioIsBiggest = 1;
+					for (i = 1; i < AspectConsistencyTime; i++)
+						if (newRatio <= max_ratio_used[i])
+						{
+							newRatioIsBiggest = 0;
+							break;
+						}
+				}
+
+				if (AspectConsistencyTime <= 0 ||
+					! newRatioIsBiggest ||
+					! haveSeenSmallerRatio)
+				{
+					LOG("Zooming in to ratio %d", newRatio);
+					source_aspect = newRatio;
+					max_ratio_used[0] = newRatio;
+					WorkoutOverlaySize();
+				}
 			}
 		}
 		else
 		{
-			if (lastNewRatio != newRatio)
+			if (lastNewRatio < newRatio)
 				newRatioFrameCount = 0;
 			lastNewRatio = newRatio;
 		}

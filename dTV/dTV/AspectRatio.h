@@ -42,3 +42,4 @@ extern long LuminanceThreshold;
 extern long IgnoreNonBlackPixels;
 extern long ZoomInFrameCount;
 extern long AutoDetectAspect;
+extern long AspectConsistencyTime;
