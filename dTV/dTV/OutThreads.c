@@ -140,7 +140,7 @@ void Stop_Thread()
 	if (OutThread != NULL)
 	{
 		i = 5;
-		SetThreadPriority(OutThread, THREAD_PRIORITY_ABOVE_NORMAL);
+		SetThreadPriority(OutThread, THREAD_PRIORITY_NORMAL);
 		bStopThread = TRUE;
 		while(i-- > 0 && !Thread_Stopped)
 		{
