@@ -61,7 +61,7 @@ int custom_source_aspect = 0;
 int custom_target_aspect = 0;
 
 // Luminance cutoff for a black pixel for letterbox detection.  0-127.
-long LuminanceThreshold = 15;
+long LuminanceThreshold = 25;
 
 // Ignore this many non-black pixels when detecting letterbox.  0 means
 // use a reasonable default.
@@ -765,6 +765,7 @@ int FindAspectRatio(void)
 	// We compute effective width from height using the source-frame aspect ratio, since
 	// this will change depending on whether or not the image is anamorphic.
 	ratio = (int)((imageHeight * 1000) * GetActualSourceFrameAspect() / (imageHeight - border * 2));
+	//LOG("top %d bot %d bord %d rat %d", topBorder, bottomBorder, border, ratio);
 
 	/* Uncomment whenever we stop keeping the surfaces locked.
 	ddrval = IDirectDrawSurface_Unlock(lpDDOverlay, ddsd.lpSurface);
