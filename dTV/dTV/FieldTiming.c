@@ -130,14 +130,9 @@ void Timing_WaitForNextFieldNormal(DEINTERLACE_INFO* pInfo)
 	Diff = (10 + NewPos - OldPos) % 10;
 	if(Diff > 1)
 	{
-		if(NewPos & 1)
-		{
-			pInfo->OddLines[0] = NULL;
-		}
-		else
-		{
-			pInfo->EvenLines[0] = NULL;
-		}
+		// delete all history
+		memset(pInfo->EvenLines, 0, MAX_FIELD_HISTORY * sizeof(short**));
+		memset(pInfo->OddLines, 0, MAX_FIELD_HISTORY * sizeof(short**));
 		pInfo->bMissedFrame = TRUE;
 		nFrame++;
 		LOG(" Dropped Frame");
@@ -187,26 +182,21 @@ void Timing_WaitForNextFieldAccurate(DEINTERLACE_INFO* pInfo)
 	}
 	else if(Diff == 2) 
 	{
-		NewPos = OldPos + 1;
+		NewPos = (OldPos + 1) % 10;
 		FlipAdjust = TRUE;
 		LOG(" Slightly late");
 	}
 	else if(Diff == 3) 
 	{
-		NewPos = OldPos + 1;
+		NewPos = (OldPos + 1) % 10;
 		FlipAdjust = TRUE;
 		LOG(" Very late");
 	}
 	else
 	{
-		if(NewPos & 1)
-		{
-			pInfo->OddLines[0] = NULL;
-		}
-		else
-		{
-			pInfo->EvenLines[0] = NULL;
-		}
+		// delete all history
+		memset(pInfo->EvenLines, 0, 5 * sizeof(short**));
+		memset(pInfo->OddLines, 0, 5 * sizeof(short**));
 		pInfo->bMissedFrame = TRUE;
 		nFrame++;
 		LOG(" Dropped Frame");

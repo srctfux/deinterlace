@@ -518,7 +518,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 						{
 							nHistory = 1;
 						}
-						else if(info.OddLines[0] == NULL)
+						else if(info.OddLines[1] == NULL)
 						{
 							nHistory = 2;
 						}
@@ -537,7 +537,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 						{
 							nHistory = 1;
 						}
-						else if(info.EvenLines[0] == NULL)
+						else if(info.EvenLines[1] == NULL)
 						{
 							nHistory = 2;
 						}
