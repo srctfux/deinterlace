@@ -380,7 +380,7 @@ const TVCARDSETUP TVCards[TVCARD_LASTONE] =
 		{ 0x500, 0, 0x300, 0x900, 0x900, 0},
 		0,
 		1,1,1,1,0,0,0,1,
-		PLL_NONE,
+		PLL_28,
 		TUNER_USER_SETUP
 	},
 	{

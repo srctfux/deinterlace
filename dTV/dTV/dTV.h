@@ -62,7 +62,6 @@ void CleanUpMemory();
 void Overlay_Stop(HWND hWnd);
 void Overlay_Start(HWND hWnd);
 void ShowText(HWND hWnd, LPCTSTR szText);
-void OSD_ShowVideoSource(HWND hWnd, int nVideoSource);
 BOOL IsStatusBarVisible();
 
 #define TIMER_STATUS        1

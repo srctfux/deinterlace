@@ -147,6 +147,9 @@ UINT CpuFeatureFlags;		// TRB 12/20/00 Processor capability flags
 
 BOOL IsFullScreen_OnChange(long NewValue);
 BOOL DisplayStatusBar_OnChange(long NewValue);
+void SwitchToSource(int nInput);
+void Cursor_SetVisibility(BOOL bVisible);
+const char * GetSourceName(int nVideoSource);
 
 
 /****************************************************************************
@@ -632,17 +635,17 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_OVERSCAN_PLUS:
-			Setting_Up(BT848_GetSetting(OVERSCAN));
+			Setting_Up(Aspect_GetSetting(OVERSCAN));
             SendMessage(hWnd, WM_COMMAND, IDM_OVERSCAN_CURRENT, 0);
 			break;
 
 		case IDM_OVERSCAN_MINUS:
-			Setting_Down(BT848_GetSetting(OVERSCAN));
+			Setting_Down(Aspect_GetSetting(OVERSCAN));
             SendMessage(hWnd, WM_COMMAND, IDM_OVERSCAN_CURRENT, 0);
 			break;
 
 		case IDM_OVERSCAN_CURRENT:
-			Setting_OSDShow(BT848_GetSetting(OVERSCAN), hWnd);
+			Setting_OSDShow(Aspect_GetSetting(OVERSCAN), hWnd);
 			break;
 
 		case IDM_BDELAY_PLUS:
@@ -798,7 +801,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			if(bIsFullScreen == FALSE)
 			{
 				bShowCursor = !bShowCursor;
-				ShowCursor(bShowCursor);
+				Cursor_SetVisibility(bShowCursor);
 			}
 			break;
 
@@ -865,6 +868,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_SOURCE_TUNER:
+			SwitchToSource(SOURCE_TUNER);
 			VideoSource = 0;
 			AudioSource = AUDIOMUX_TUNER;
 			Stop_Capture();
@@ -881,67 +885,30 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_SOURCE_COMPOSITE:
+			SwitchToSource(SOURCE_COMPOSITE);
+			break;
+		
 		case IDM_SOURCE_SVIDEO:
+			SwitchToSource(SOURCE_SVIDEO);
+			break;
+
 		case IDM_SOURCE_OTHER1:
+			SwitchToSource(SOURCE_OTHER1);
+			break;
+
 		case IDM_SOURCE_OTHER2:
+			SwitchToSource(SOURCE_OTHER2);
+			break;
+
 		case IDM_SOURCE_COMPVIASVIDEO:
-			VideoSource = SOURCE_TUNER;
-			switch (LOWORD(wParam)) {
-			case IDM_SOURCE_COMPOSITE:      VideoSource = SOURCE_COMPOSITE;      break;
-			case IDM_SOURCE_SVIDEO:         VideoSource = SOURCE_SVIDEO;         break;
-			case IDM_SOURCE_OTHER1:         VideoSource = SOURCE_OTHER1;         break;
-			case IDM_SOURCE_OTHER2:         VideoSource = SOURCE_OTHER2;         break;
-			case IDM_SOURCE_COMPVIASVIDEO:  VideoSource = SOURCE_COMPVIASVIDEO;  break;
-			}
-			OSD_ShowVideoSource(hWnd, VideoSource);
-			sprintf(Text, "Extern %d", VideoSource);
-			StatusBar_ShowText(STATUS_TEXT, Text);
-
-			Stop_Capture();
-			BT848_ResetHardware();
-			BT848_SetGeoSize();
-			WorkoutOverlaySize();
-			BT848_SetVideoSource(VideoSource);
-			AudioSource = AUDIOMUX_EXTERNAL;
-			if(!System_In_Mute)
-			{
-				Audio_SetSource(AudioSource);
-			}
-			Start_Capture();
+			SwitchToSource(SOURCE_COMPVIASVIDEO);
 			break;
 
-        // MAE 13 Dec 2000 for CCIR656 Digital input
+		// MAE 13 Dec 2000 for CCIR656 Digital input
         case IDM_SOURCE_CCIR656:
-		        
-			VideoSource = SOURCE_CCIR656;
-			OSD_ShowVideoSource(hWnd, VideoSource);
-			sprintf(Text, "CCIR656 Digital", VideoSource);
-			StatusBar_ShowText(STATUS_TEXT, Text);
-
-			Stop_Capture();
-			BT848_ResetHardware();
-			BT848_Enable656();
-			WorkoutOverlaySize();
-            AudioSource = AUDIOMUX_EXTERNAL;
-			if(!System_In_Mute)
-			{
-				Audio_SetSource(AudioSource);
-			}
-			Start_Capture();
-/*
-            // FIXME: We really need separate picture settings for each input.
-			// Reset defaults for brightness, contrast, color U and V
-			InitialBrightness = 0;
-			InitialContrast = 0x80;
-			InitialSaturationU = 0x80;
-			InitialSaturationV = 0x80;
-			BT848_SetBrightness(InitialBrightness);
-			BT848_SetContrast(InitialContrast);
-			BT848_SetSaturationU(InitialSaturationU);
-			BT848_SetSaturationV(InitialSaturationV);
-*/
+			SwitchToSource(SOURCE_CCIR656);
 			break;
-
+		        
 		case IDM_HWINFO:
 			DialogBox(hInst, "HWINFO", hWnd, (DLGPROC) ChipSettingProc);
 			break;
@@ -1175,7 +1142,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_SHOW_OSD:
-			OSD_ShowVideoSource(hWnd, VideoSource);
+			OSD_ShowText(hWnd, GetSourceName(VideoSource), 0);
 			break;
 
 		case IDM_HIDE_OSD:
@@ -1309,7 +1276,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		if(bIsFullScreen == FALSE)
 		{
 			bShowCursor = !bShowCursor;
-			ShowCursor(bShowCursor);
+			Cursor_SetVisibility(bShowCursor);
 		}
 		break;
 
@@ -1392,7 +1359,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				if(bIsFullScreen == FALSE)
 				{
 					bIsFullScreen = TRUE;
-					ShowCursor(FALSE);
+					Cursor_SetVisibility(FALSE);
 					WorkoutOverlaySize();
 				}
 				break;
@@ -1484,7 +1451,6 @@ void SaveWindowPos(HWND hWnd)
 //---------------------------------------------------------------------------
 void MainWndOnInitBT(HWND hWnd)
 {
-	char Text[128];
 	int i;
 	BOOL bInitOK = FALSE;
 
@@ -1603,25 +1569,12 @@ void MainWndOnInitBT(HWND hWnd)
         // EAS20001226: Don't clobber what was read in from the ini file.
 		//AudioSource = AUDIOMUX_EXTERNAL;
 
-		switch (VideoSource) {
-		case SOURCE_COMPOSITE:	   sprintf(Text, "Composite");             break;
-		case SOURCE_SVIDEO:        sprintf(Text, "S-Video");               break;
-		case SOURCE_OTHER1:        sprintf(Text, "Other 1");               break;
-		case SOURCE_OTHER2:        sprintf(Text, "Other 2");               break;
-		case SOURCE_COMPVIASVIDEO: sprintf(Text, "Composite via S-Video"); break;
-		case SOURCE_CCIR656:       sprintf(Text, "CCIR656");               break;
-		default:
-            // EAS20001226: Leave AudioInput as it was read in from the ini.
-			//AudioSource = AUDIOMUX_TUNER;
-
-			ChangeChannel(CurrentProgramm);
-			break;
-		}
-
-		if (bDisplayStatusBar == TRUE)
+		if(VideoSource == SOURCE_TUNER)
 		{
-			StatusBar_ShowText(STATUS_KEY, Text);
+			ChangeChannel(CurrentProgramm);
 		}
+
+		StatusBar_ShowText(STATUS_KEY, GetSourceName(VideoSource));
 
         // OK we're ready to go
 		BT848_ResetHardware();
@@ -1757,7 +1710,7 @@ void MainWndOnCreate(HWND hWnd)
 	if(bIsFullScreen == TRUE)
 	{
 		SaveWindowPos(hWnd);
-		ShowCursor(FALSE);
+		Cursor_SetVisibility(FALSE);
 	}
 	else
 	{
@@ -1967,20 +1920,19 @@ void Overlay_Start(HWND hWnd)
     Reset_Capture();
 }
 
-//---------------------------------------------------------------------------
-// Display current channel number, program name and/or current video signal
-void OSD_ShowVideoSource(HWND hWnd, int nVideoSource)
+const char * GetSourceName(int nVideoSource)
 {
 	switch (nVideoSource)
 	{
-	case SOURCE_TUNER:         OSD_ShowText(hWnd,Programm[CurrentProgramm].Name, 0); break;
-	case SOURCE_COMPOSITE:     OSD_ShowText(hWnd,"Composite", 0);                    break;
-	case SOURCE_SVIDEO:        OSD_ShowText(hWnd,"S-Video", 0);                      break;
-	case SOURCE_OTHER1:        OSD_ShowText(hWnd,"Other 1", 0);                      break;
-	case SOURCE_OTHER2:        OSD_ShowText(hWnd,"Other 2", 0);                      break;
-	case SOURCE_COMPVIASVIDEO: OSD_ShowText(hWnd,"Composite via S-Video", 0);        break;
-	case SOURCE_CCIR656:       OSD_ShowText(hWnd,"CCIR656", 0);                      break; // MAE 13 Dec 2000 For CCIR656 input
+	case SOURCE_TUNER:         return Programm[CurrentProgramm].Name; break;
+	case SOURCE_COMPOSITE:     return "Composite"; break;
+	case SOURCE_SVIDEO:        return "S-Video"; break;
+	case SOURCE_OTHER1:        return "Other 1"; break;
+	case SOURCE_OTHER2:        return "Other 2"; break;
+	case SOURCE_COMPVIASVIDEO: return "Composite via S-Video"; break;
+	case SOURCE_CCIR656:       return "CCIR656"; break; // MAE 13 Dec 2000 For CCIR656 input
 	}
+	return "Unknown";
 }
 
 //---------------------------------------------------------------------------
@@ -2053,6 +2005,26 @@ void SetThreadProcessorAndPriority()
 		SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
 }
 
+void Cursor_SetVisibility(BOOL bVisible)
+{
+	if(bVisible)
+	{
+		// the incrememts the cursors internal counter
+		// either this is -1 (cursor not present)
+		// or zero (cursor not visible)
+		// or (greater than zero cursor visible)
+		ShowCursor(TRUE);
+	}
+	else
+	{
+		// Want to make cursor cont zero
+		// for cursor not visible
+		// if cursor not present (-1)
+		// then will just return
+		while(ShowCursor(FALSE) >= 0);
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////
 // On Change Functions for settings
 /////////////////////////////////////////////////////////////////////////////
@@ -2066,7 +2038,7 @@ BOOL IsFullScreen_OnChange(long NewValue)
 		SetWindowPos(hWnd, 0, emstartx, emstarty, emsizex, emsizey, SWP_SHOWWINDOW);
 		if(bShowCursor)
 		{
-			ShowCursor(TRUE);
+			Cursor_SetVisibility(TRUE);
 		}
 		if (bDisplayStatusBar == TRUE)
 		{
@@ -2078,7 +2050,7 @@ BOOL IsFullScreen_OnChange(long NewValue)
 		SaveWindowPos(hWnd);
 		if(bShowCursor)
 		{
-			ShowCursor(FALSE);
+			Cursor_SetVisibility(FALSE);
 		}
 	}
 	WorkoutOverlaySize();
@@ -2120,6 +2092,67 @@ BOOL ShowMenu_OnChange(long NewValue)
 	}
 	return FALSE;
 }
+
+void SwitchToSource(int nInput)
+{
+	VideoSource = nInput;
+	Stop_Capture();
+	OSD_ShowText(hWnd, GetSourceName(VideoSource), 0);
+	StatusBar_ShowText(STATUS_KEY, GetSourceName(VideoSource));
+
+	switch(nInput)
+	{
+	case SOURCE_TUNER:
+		BT848_ResetHardware();
+		BT848_SetGeoSize();
+		WorkoutOverlaySize();
+		AudioSource = AUDIOMUX_TUNER;
+		BT848_SetVideoSource(VideoSource);
+		ChangeChannel(CurrentProgramm);
+		break;
+
+	// MAE 13 Dec 2000 for CCIR656 Digital input
+    case SOURCE_CCIR656:
+		BT848_ResetHardware();
+		BT848_Enable656();
+		WorkoutOverlaySize();
+        AudioSource = AUDIOMUX_EXTERNAL;
+		break;
+/*
+        // FIXME: We really need separate picture settings for each input.
+		// Reset defaults for brightness, contrast, color U and V
+		InitialBrightness = 0;
+		InitialContrast = 0x80;
+		InitialSaturationU = 0x80;
+		InitialSaturationV = 0x80;
+		BT848_SetBrightness(InitialBrightness);
+		BT848_SetContrast(InitialContrast);
+		BT848_SetSaturationU(InitialSaturationU);
+		BT848_SetSaturationV(InitialSaturationV);
+*/
+
+	case SOURCE_COMPOSITE:
+	case SOURCE_SVIDEO:
+	case SOURCE_OTHER1:
+	case SOURCE_OTHER2:
+	case SOURCE_COMPVIASVIDEO:
+		BT848_ResetHardware();
+		BT848_SetGeoSize();
+		WorkoutOverlaySize();
+		BT848_SetVideoSource(VideoSource);
+		AudioSource = AUDIOMUX_EXTERNAL;
+		break;
+	default:
+		break;
+	}
+
+	if(!System_In_Mute)
+	{
+		Audio_SetSource(AudioSource);
+	}
+	Start_Capture();
+}
+
 
 ////////////////////////////////////////////////////////////////////////////
 // Start of Settings related code
