@@ -460,20 +460,123 @@ void ExitDD(void)
 }
 
 #define LIMIT(x) (((x)<0)?0:((x)>255)?255:(x))
+#pragma pack(1)
+
+// A TIFF image-file directory entry.  There are a bunch of
+// these in a TIFF file.
+struct TiffDirEntry {
+	WORD tag;		// Entry type
+	WORD type;		// 1=byte, 2=C string, 3=word, 4=dword (we always use dword)
+	DWORD count;	// Number of units (of type specified by "type") in value
+	DWORD value;
+};
+
+// A TIFF header with some hardwired fields.
+struct TiffHeader {
+	char byteOrder[2];
+	WORD version;
+	DWORD firstDirOffset;
+
+	// TIFF files contain a bunch of extra information, each of which is a
+	// tagged "directory" entry.  The entries must be in ascending numerical
+	// order.
+
+	WORD numDirEntries;
+	struct TiffDirEntry fileType;		// What kind of file this is (tag 255)
+	struct TiffDirEntry width;			// Width of image (tag 256)
+	struct TiffDirEntry height;			// Height of image (tag 257)
+	struct TiffDirEntry bitsPerSample;	// Number of bits per channel per pixel (tag 258)
+	struct TiffDirEntry photometricInterpretation; // What kind of pixel data this is (tag 262)
+	struct TiffDirEntry compression;	// Compression settings (tag 259)
+	struct TiffDirEntry description;	// Image description (tag 270)
+	struct TiffDirEntry make;			// "Scanner" maker, aka dTV's URL (tag 271)
+	struct TiffDirEntry model;			// "Scanner" model, aka dTV version (tag 272)
+	struct TiffDirEntry stripOffset;	// Offset to image data (tag 273)
+	struct TiffDirEntry samplesPerPixel; // Number of color channels (tag 277)
+	struct TiffDirEntry stripByteCounts; // Number of bytes in image data (tag 279)
+	struct TiffDirEntry planarConfiguration; // Are channels interleaved? (tag 284)
+	DWORD nextDirOffset;
+
+	// We store a few strings in the file; include them in the structure so
+	// it's easy to compute their offsets.  Yeah, this wastes a bit of disk
+	// space, but an insignificant percentage of the overall file size.
+	char descriptionText[80];
+	char makeText[40];
+	char modelText[16];
+};
+
+#define STRUCT_OFFSET(s,f)  ((int)(((BYTE *) &(s)->f) - (BYTE *)(s)))
+
 
 //-----------------------------------------------------------------------------
-// Save still image snapshot as PPM format to disk
+// Fill a TIFF directory entry with information.  Type is inferred from value.
+// Not suitable for offsets.
+static void FillTiffDirEntry(struct TiffDirEntry *entry, WORD tag, DWORD value)
+{
+	entry->tag = tag;
+	entry->count = 1;
+	entry->type = 4;
+	entry->value = value;
+}
+
+
+//-----------------------------------------------------------------------------
+// Fill a TIFF header with information about the current image.
+static void FillTiffHeader(struct TiffHeader *head, char *description, char *make, char *model)
+{
+	memset(head, 0, sizeof(struct TiffHeader));
+
+	strcpy(head->byteOrder, "II");		// Intel byte order
+	head->version = 42;					// The initial TIFF version number
+	head->firstDirOffset = STRUCT_OFFSET(head, numDirEntries);
+	head->numDirEntries = 13;
+	head->nextDirOffset = 0;			// No additional directories
+
+	strcpy(head->descriptionText, description);
+	strcpy(head->makeText, make);
+	strcpy(head->modelText, model);
+
+	head->description.tag = 270;
+	head->description.type = 2;
+	head->description.count = strlen(description) + 1;
+	head->description.value = STRUCT_OFFSET(head, descriptionText);
+
+	head->make.tag = 271;
+	head->make.type = 2;
+	head->make.count = strlen(make) + 1;
+	head->make.value = STRUCT_OFFSET(head, makeText);
+
+	head->model.tag = 272;
+	head->model.type = 2;
+	head->model.count = strlen(model) + 1;
+	head->model.value = STRUCT_OFFSET(head, modelText);
+
+	FillTiffDirEntry(&head->fileType, 255, 1);								// Full resolution data
+	FillTiffDirEntry(&head->width, 256, CurrentX);
+	FillTiffDirEntry(&head->height, 257, CurrentY);
+	FillTiffDirEntry(&head->bitsPerSample, 258, 8);							// 8 bits per sample
+	FillTiffDirEntry(&head->compression, 259, 1);							// No compression
+	FillTiffDirEntry(&head->photometricInterpretation, 262, 2);				// RGB image data
+	FillTiffDirEntry(&head->stripOffset, 273, sizeof(struct TiffHeader));	// Image comes after header
+	FillTiffDirEntry(&head->samplesPerPixel, 277, 3);						// RGB = 3 channels/pixel
+	FillTiffDirEntry(&head->stripByteCounts, 279, CurrentX * CurrentY * 3);	// Size of image data
+	FillTiffDirEntry(&head->planarConfiguration, 284, 1);					// RGB bytes are interleaved
+}
+
+//-----------------------------------------------------------------------------
+// Save still image snapshot as TIFF format to disk
 void SaveStill()
 {
 	int y, cr, cb, r, g, b, i, j, n = 0;
-	int minY = 256, maxY = -16;
 	FILE *file;
 	BYTE rgb[3];
 	BYTE* buf;
 	char name[13];
 	struct stat st;
+	struct TiffHeader head;
 	DDSURFACEDESC ddsd;
 	HRESULT ddrval;
+	char description[80];
 
 	if (lpDDOverlay != NULL)
 	{
@@ -489,7 +592,7 @@ void SaveStill()
 
 		while (n < 100)
 		{
-			sprintf(name,"tv%06d.ppm",++n) ;
+			sprintf(name,"tv%06d.tif",++n) ;
 			if (stat(name, &st))
 				break;
 		}
@@ -517,7 +620,11 @@ void SaveStill()
 			}
 			return;
 		}
-		fprintf(file,"P6\n%d %d\n255\n",CurrentX, CurrentY) ;
+
+		sprintf(description, "dTV image, deinterlace mode %s", DeinterlaceModeName(-1));
+		// How do we figure out our version number?!?!
+		FillTiffHeader(&head, description, "http://deinterlace.sourceforge.net/", "dTV version 2.x");
+		fwrite(&head, sizeof(head), 1, file);
 
 		for (i = 0; i < CurrentY; i++ )
 		{
@@ -527,10 +634,6 @@ void SaveStill()
 				cb = buf[1] - 128;
 				cr = buf[3] - 128;
 				y = buf[0] - 16;
-				if (y < minY)
-					minY = y;
-				if (y > maxY)
-					maxY = y;
 
 				r = ( 76284*y + 104595*cr             )>>16;
 				g = ( 76284*y -  53281*cr -  25624*cb )>>16;
@@ -542,11 +645,6 @@ void SaveStill()
 				fwrite(rgb,3,1,file) ;
 
 				y = buf[2] - 16;
-				if (y < minY)
-					minY = y;
-				if (y > maxY)
-					maxY = y;
-
 				r = ( 76284*y + 104595*cr             )>>16;
 				g = ( 76284*y -  53281*cr -  25624*cb )>>16;
 				b = ( 76284*y             + 132252*cb )>>16;
