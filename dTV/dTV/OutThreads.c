@@ -567,7 +567,7 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 			bFallbackToVideo &&							// let the user turn this on and off.
 			ThresholdPulldownMismatch > 0 &&		    // only do video-force check if there's a threshold.
 			FieldDiff >= ThresholdPulldownMismatch &&	// only force video if this field is very different,
-			DoWeWantToFlip(TRUE, OnOddField) &&			// and we would weave it with the previous field,
+			DoWeWantToFlip(OnOddField) &&				// and we would weave it with the previous field,
 			(CombFactor = GetCombFactor(EvenField, OddField)) > ThresholdPulldownComb) // and it'd produce artifacts
 		{
 			SwitchToVideo = TRUE;
@@ -763,25 +763,17 @@ void UpdateNTSCPulldownMode(long FieldDiff,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Flip decisioning for film modes.
 // Returns true if the current field has given us a complete frame.
 // If we're still waiting for another field, returns false.
 ///////////////////////////////////////////////////////////////////////////////
-BOOL DoWeWantToFlip(BOOL bFlipNow, BOOL bIsOddField)
+BOOL DoWeWantToFlip(BOOL bIsOddField)
 {
 	BOOL RetVal;
 	switch(gPulldownMode)
 	{
-	case VIDEO_MODE_WEAVE:       RetVal = TRUE;  break;
-	case VIDEO_MODE_BOB:         RetVal = TRUE;  break;
-	case VIDEO_MODE_2FRAME:      RetVal = TRUE;  break;
-	case SIMPLE_WEAVE:           RetVal = TRUE;  break;
-	case SIMPLE_BOB:        RetVal = TRUE;  break;
-	case BLENDED_CLIP:			 RetVal = BlcWantsToFlip;  break;
-	case BTV_PLUGIN:             RetVal = bFlipNow;  break;
 	case FILM_22_PULLDOWN_ODD:   RetVal = bIsOddField;  break;
 	case FILM_22_PULLDOWN_EVEN:  RetVal = !bIsOddField;  break;
-	case ODD_ONLY:				 RetVal = bIsOddField;  break;
-	case EVEN_ONLY:				 RetVal = !bIsOddField;  break;
 	case FILM_32_PULLDOWN_0:
 		switch(CurrentFrame)
 		{
@@ -900,21 +892,6 @@ void UpdatePulldownStatus()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-void Weave(short** pOddLines, short** pEvenLines, BYTE* lpOverlay)
-{
-	int i;
-
-	for (i = 0; i < CurrentY / 2; i++)
-	{
-		memcpyMMX(lpOverlay, pEvenLines[i], CurrentX * 2);
-		lpOverlay += OverlayPitch;
-
-		memcpyMMX(lpOverlay, pOddLines[i], CurrentX * 2);
-		lpOverlay += OverlayPitch;
-	}
-}
-
 //
 // Add a function to Lock the overlay surface and update some info from it.
 // We always lock and write to the back buffer.
@@ -963,8 +940,9 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 	int LastOddFrame = 0;
 	int CombNum = 0;
 	BOOL bFlipNow = TRUE;
-	BOOL bIsOddField = FALSE;
+	BOOL ForceBob;
 	HRESULT ddrval;
+	DEINTERLACE_INFO info;
 
 	BOOL bIsPAL = TVSettings[TVTYPE].Is25fps;
 	lpCurOverlay = lpOverlayBack;		
@@ -994,6 +972,8 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 	else
 		UpdateNTSCPulldownMode(-1, FALSE, NULL, NULL);
 
+	memset(&info, 0, sizeof(info));
+
 	// display the current pulldown mode
 	UpdatePulldownStatus();
 	
@@ -1003,283 +983,176 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 	dwLastSecondTicks = GetTickCount();
 	while(!bStopThread)
 	{
-		bIsOddField = WaitForNextField(bIsOddField);
+		info.IsOdd = WaitForNextField(info.IsOdd);
 		if(bIsPaused == FALSE)
 		{
-			if(bIsOddField)
+			info.OverlayPitch = OverlayPitch;
+			info.LineLength = CurrentX * 2;
+			info.FrameWidth = CurrentX;
+			info.FrameHeight = CurrentY;
+			info.FieldHeight = CurrentY / 2;
+
+			ForceBob = FALSE;
+			bFlipNow = FALSE;
+
+			if(info.IsOdd)
 			{
-				if(bAutoDetectMode == TRUE)
+				memmove(&info.OddLines[1], &info.OddLines[0], sizeof(info.OddLines) - sizeof(info.OddLines[0]));
+				info.OddLines[0] = ppOddLines[CurrentFrame];
+				LastOddFrame = CurrentFrame;
+
+				// If we skipped the previous field, note the missing field in the deinterlace
+				// info structure and force this field to be bobbed.
+				if (LastEvenFrame != CurrentFrame)
 				{
-					if (bIsPAL)
-					{
-						CombFactor = GetCombFactor(ppEvenLines[CurrentFrame], ppOddLines[CurrentFrame]);
-						UpdatePALPulldownMode(CombFactor, TRUE);
-						LOG(" Frame %d O CF = %d", CurrentFrame, CombFactor);
-					}
+					memmove(&info.EvenLines[1], &info.EvenLines[0], sizeof(info.EvenLines) - sizeof(info.EvenLines[0]));
+					info.EvenLines[0] = NULL;
+					ForceBob = TRUE;
+					nFrame++;
+				}
+			}
+			else
+			{
+				memmove(&info.EvenLines[1], &info.EvenLines[0], sizeof(info.EvenLines) - sizeof(info.EvenLines[0]));
+				info.EvenLines[0] = ppEvenLines[CurrentFrame];
+				LastEvenFrame = CurrentFrame;
+
+				// If we skipped the previous field, note the missing field in the deinterlace
+				// info structure and force this field to be bobbed.
+				if(LastOddFrame != ((CurrentFrame + 4) % 5))
+				{
+					memmove(&info.OddLines[1], &info.OddLines[0], sizeof(info.OddLines) - sizeof(info.OddLines[0]));
+					info.OddLines[0] = NULL;
+					ForceBob = TRUE;
+					nFrame++;
+				}
+			}
+
+			if(bAutoDetectMode == TRUE && ! ForceBob)
+			{
+				if (bIsPAL)
+				{
+					CombFactor = GetCombFactor(info.EvenLines[0], info.OddLines[0]);
+					UpdatePALPulldownMode(CombFactor, TRUE);
+					LOG(" Frame %d O CF = %d", CurrentFrame, CombFactor);
+				}
+				else
+				{
+					RECT source;
+
+					GetSourceRect(&source);
+
+					if (info.IsOdd)
+						CompareResult = CompareFields(info.OddLines[1], info.OddLines[0], &source);
 					else
-					{
-						RECT source;
+						CompareResult = CompareFields(info.EvenLines[1], info.EvenLines[0], &source);
 
-						GetSourceRect(&source);
-						CompareResult = CompareFields(ppOddLines[(CurrentFrame + 4) % 5], ppOddLines[CurrentFrame],
-						                              &source);
-						LOG(" Frame %d O CR = %d", CurrentFrame, CompareResult);
-						UpdateNTSCPulldownMode(CompareResult, 
-											   TRUE,
-											   ppEvenLines[LastEvenFrame],
-											   ppOddLines[CurrentFrame]);
-					}
+					LOG(" Frame %d %c CR = %d", CurrentFrame, info.IsOdd ? 'O' : 'E', CompareResult);
+					UpdateNTSCPulldownMode(CompareResult, 
+										   info.IsOdd,
+										   info.EvenLines[0],
+										   info.OddLines[0]);
 				}
+			}
 
-				if (Capture_VBI == TRUE)
+			if (Capture_VBI == TRUE)
+			{
+				BYTE * pVBI = (LPBYTE) Vbi_dma[CurrentFrame]->dwUser;
+				for (nLineTarget = VBI_lpf; nLineTarget < 2 * VBI_lpf ; nLineTarget++)
 				{
-					BYTE * pVBI = (LPBYTE) Vbi_dma[CurrentFrame]->dwUser;
-					for (nLineTarget = VBI_lpf; nLineTarget < 2 * VBI_lpf ; nLineTarget++)
-					{
-						VBI_DecodeLine(pVBI + nLineTarget * 2048, nLineTarget - VBI_lpf);
-					}
+					VBI_DecodeLine(pVBI + nLineTarget * 2048, nLineTarget - VBI_lpf);
 				}
+			}
 
-				if (!RunningLate)
-				{
-					pDest=LockOverlay();	// Ready to access screen, Lock back buffer berfore accessing
-											// can't do this until after Lock Call
-				}
+			if (!RunningLate)
+			{
+				pDest=LockOverlay();	// Ready to access screen, Lock back buffer berfore accessing
+										// can't do this until after Lock Call
+				info.Overlay = pDest;
+			}
 
-				if (RunningLate)
+
+			if (RunningLate)
+			{
+				// do nothing
+			}
+			// if we have dropped a field then do BOB 
+			else if(ForceBob || gPulldownMode == SIMPLE_BOB)
+				bFlipNow = Bob(&info);
+			else if (gPulldownMode == VIDEO_MODE_2FRAME)
+				bFlipNow = DeinterlaceFieldTwoFrame(&info);
+			else if(gPulldownMode == VIDEO_MODE_WEAVE)
+				bFlipNow = DeinterlaceFieldWeave(&info);
+			else if (gPulldownMode == VIDEO_MODE_BOB)
+				bFlipNow = DeinterlaceFieldBob(&info);
+			else if(gPulldownMode == SIMPLE_WEAVE)
+				bFlipNow = Weave(&info);
+			else if(gPulldownMode == BLENDED_CLIP)
+				bFlipNow = BlendedClipping(&info);
+			else if(gPulldownMode == BTV_PLUGIN)
+			{
+				BYTE* pDestEven[CLEARLINES];
+				BYTE* pDestOdd[CLEARLINES];
+				
+				// set up desination pointers
+				// may need to optimize this later
+				for (i = 0; i < BTV_VER1_HEIGHT; i += 2)
 				{
-					// do nothing
+					pDestEven[i / 2] = pDest;
+					pDest += OverlayPitch;
+					pDestOdd[i / 2] = pDest;
+					pDest += OverlayPitch;
 				}
-				// if we have dropped a field then do BOB 
-				else if(LastEvenFrame != CurrentFrame || gPulldownMode == SIMPLE_BOB)
-				{
-					for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
-					{
-						memcpyBOBMMX(pDest,
-									ppOddLines[CurrentFrame][nLineTarget], 
-									CurrentX * 2);
-						pDest += 2 * OverlayPitch;
-					}
-					bFlipNow = TRUE;
-					if(LastEvenFrame != CurrentFrame)
-					{
-						nFrame++;
-					}
-				}
-				else if(gPulldownMode == VIDEO_MODE_WEAVE)
-				{
-					DeinterlaceFieldWeave(ppOddLines[CurrentFrame], ppEvenLines[LastEvenFrame],
-										  ppOddLines[(CurrentFrame + 4) % 5], lpCurOverlay, TRUE);
-				}
-				else if (gPulldownMode == VIDEO_MODE_BOB)
-				{
-					DeinterlaceFieldBob(ppOddLines[CurrentFrame], ppEvenLines[LastEvenFrame],
-										ppOddLines[(CurrentFrame + 4) % 5], lpCurOverlay, TRUE);
-				}
-				else if (gPulldownMode == VIDEO_MODE_2FRAME)
-				{
-					DeinterlaceFieldTwoFrame(ppOddLines[CurrentFrame],
-											 ppEvenLines[LastEvenFrame],
-											 ppOddLines[(CurrentFrame + 4) % 5],
-											 ppEvenLines[(LastEvenFrame + 4) % 5],
-											 lpCurOverlay,
-											 TRUE);
-				}
-				else if(gPulldownMode == SIMPLE_WEAVE)
-				{
-					Weave(ppOddLines[CurrentFrame], ppEvenLines[LastEvenFrame], lpCurOverlay);
-				}
-				else if(gPulldownMode == BLENDED_CLIP)
-				{
-					BlendedClipping(ppOddLines[CurrentFrame], ppEvenLines[LastEvenFrame], 
-									ppOddLines[(CurrentFrame+4) % 5], lpCurOverlay,
-									TRUE);
-				}
-				else if(gPulldownMode == BTV_PLUGIN)
-				{
-					BYTE* pDestEven[CLEARLINES];
-					BYTE* pDestOdd[CLEARLINES];
-					
-					// set up desination pointers
-					// may need to optimize this later
-					for (i = 0; i < BTV_VER1_HEIGHT; i += 2)
-					{
-						pDestEven[i / 2] = pDest;
-						pDest += OverlayPitch;
-						pDestOdd[i / 2] = pDest;
-						pDest += OverlayPitch;
-					}
-					
-					BTVParams.IsOddField = 1;
-					BTVParams.ppCurrentField = ppOddLines[CurrentFrame];
-					BTVParams.ppLastField = ppEvenLines[LastEvenFrame];
-					BTVParams.ppEvenDest = pDestEven;
-					BTVParams.ppOddDest = pDestOdd;
+				
+				BTVParams.IsOddField = info.IsOdd;
+				BTVParams.ppCurrentField = info.IsOdd ? info.OddLines[0] : info.EvenLines[0];
+				BTVParams.ppLastField = info.IsOdd ? info.EvenLines[0] : info.OddLines[0];
+				BTVParams.ppEvenDest = pDestEven;
+				BTVParams.ppOddDest = pDestOdd;
+
+				if (BTVParams.ppCurrentField != NULL && BTVParams.ppLastField != NULL)
 					bFlipNow = BTVPluginDoField(&BTVParams);
-				}
-				else if (gPulldownMode == ODD_ONLY)
+				else
+					bFlipNow = FALSE;
+			}
+			else if (gPulldownMode == ODD_ONLY)
+			{
+				if (info.IsOdd)
 				{
 					for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
 					{
 						// copy latest field's odd rows to overlay, resulting in a half-height image.
 						memcpyBOBMMX(pDest,
-									ppOddLines[CurrentFrame][nLineTarget],
+									pDest + OverlayPitch,
+									info.OddLines[0][nLineTarget],
 									CurrentX * 2);
 						pDest += OverlayPitch;
 					}
 					bFlipNow = TRUE;
 				}
-				else if (gPulldownMode == EVEN_ONLY)
-				{
-					// Do nothing.
-				}
-				else
-				{
-					// Pulldown mode.  If we have an entire new frame, display it.
-					if (DoWeWantToFlip(TRUE, bIsOddField))
-						Weave(ppOddLines[CurrentFrame], ppEvenLines[LastEvenFrame], pDest);
-				}
-				LastOddFrame = CurrentFrame;
 			}
-			else
+			else if (gPulldownMode == EVEN_ONLY)
 			{
-				if(bAutoDetectMode == TRUE)
-				{
-					if (bIsPAL)
-					{
-						// need to add one to the even lines
-						// so that the top line is between the
-						// top two even lines
-						CombFactor = GetCombFactor(ppEvenLines[CurrentFrame], ppOddLines[(CurrentFrame + 4) % 5]);
-						UpdatePALPulldownMode(CombFactor, FALSE);
-						LOG(" Frame %d E CF = %d", CurrentFrame, CombFactor);
-					}
-					else
-					{
-						RECT source;
-
-						GetSourceRect(&source);
-						CompareResult = CompareFields(ppEvenLines[(CurrentFrame + 4) % 5], ppEvenLines[CurrentFrame],
-														&source);
-						LOG(" Frame %d E CR = %d", CurrentFrame, CompareResult);
-						UpdateNTSCPulldownMode(CompareResult,
-											   FALSE,
-											   ppEvenLines[CurrentFrame],
-											   ppOddLines[LastOddFrame]);
-					}
-				}
-
-				if (Capture_VBI == TRUE)
-				{
-					BYTE * pVBI = (LPBYTE) Vbi_dma[CurrentFrame]->dwUser;
-					for (nLineTarget = 0; nLineTarget < VBI_lpf ; nLineTarget++)
-					{
-						VBI_DecodeLine(pVBI + nLineTarget * 2048, nLineTarget);
-					}
-				}
-
-				if (!RunningLate)
-				{
-					pDest = LockOverlay();	// Ready to access screen, Lock back buffer berfore accessing
-											// can't do this until after Lock Call
-				}
-				
-				if (RunningLate)
-				{
-					// do nothing
-				}
-
-				// if we have dropped a field then do BOB
-				else if(LastOddFrame != ((CurrentFrame + 4) % 5) || gPulldownMode == SIMPLE_BOB)
-				{
-					for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
-					{
-						// copy latest field data to both odd and even rows
-						memcpyBOBMMX(pDest, 
-									ppEvenLines[CurrentFrame][nLineTarget],
-									CurrentX * 2);
-						pDest += 2 * OverlayPitch;
-					}
-					bFlipNow = TRUE;
-					if(LastOddFrame != ((CurrentFrame + 4) % 5))
-					{
-						nFrame++;
-					}
-				}
-				else if(gPulldownMode == VIDEO_MODE_WEAVE)
-				{
-					DeinterlaceFieldWeave(ppOddLines[LastOddFrame], ppEvenLines[CurrentFrame],
-										  ppEvenLines[(CurrentFrame + 4) % 5], lpCurOverlay, FALSE);
-				}
-				else if(gPulldownMode == VIDEO_MODE_BOB)
-				{
-					DeinterlaceFieldBob(ppOddLines[LastOddFrame], ppEvenLines[CurrentFrame],
-										ppEvenLines[(CurrentFrame + 4) % 5], lpCurOverlay, FALSE);
-				}
-				else if (gPulldownMode == VIDEO_MODE_2FRAME)
-				{
-					DeinterlaceFieldTwoFrame(ppOddLines[LastOddFrame],
-						                     ppEvenLines[CurrentFrame],
-											 ppOddLines[(LastOddFrame + 4) % 5],
-											 ppEvenLines[(CurrentFrame + 4) % 5],
-											 lpCurOverlay,
-											 FALSE);
-				}
-				else if(gPulldownMode == SIMPLE_WEAVE)
-				{
-					Weave(ppOddLines[LastOddFrame], ppEvenLines[CurrentFrame], lpCurOverlay);
-				}
-				else if(gPulldownMode == BLENDED_CLIP)
-				{
-					BlendedClipping(ppOddLines[LastOddFrame], ppEvenLines[CurrentFrame],
-									ppEvenLines[(CurrentFrame+4) % 5], lpCurOverlay,
-									FALSE);
-				}
-				else if(gPulldownMode == BTV_PLUGIN)
-				{
-					BYTE* pDestEven[CLEARLINES];
-					BYTE* pDestOdd[CLEARLINES];
-					
-					// set up desination pointers
-					// may need to optimize this later
-					for (i = 0; i < BTV_VER1_HEIGHT; i += 2)
-					{
-						pDestEven[i / 2] = pDest;
-						pDest += OverlayPitch;
-						pDestOdd[i / 2] = pDest;
-						pDest += OverlayPitch;
-					}
-					
-					BTVParams.IsOddField = 1;
-					BTVParams.ppCurrentField = ppOddLines[CurrentFrame];
-					BTVParams.ppLastField = ppEvenLines[LastEvenFrame];
-					BTVParams.ppEvenDest = pDestEven;
-					BTVParams.ppOddDest = pDestOdd;
-					bFlipNow = BTVPluginDoField(&BTVParams);
-				}
-				else if (gPulldownMode == EVEN_ONLY)
+				if (! info.IsOdd)
 				{
 					for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
 					{
 						// copy latest field's even rows to overlay, resulting in a half-height image.
 						memcpyBOBMMX(pDest,
-									ppEvenLines[CurrentFrame][nLineTarget],
+									pDest + OverlayPitch,
+									info.EvenLines[0][nLineTarget],
 									CurrentX * 2);
 						pDest += OverlayPitch;
 					}
 					bFlipNow = TRUE;
 				}
-				else if (gPulldownMode == ODD_ONLY)
-				{
-					// Do nothing.
-				}
-				else
-				{
-					// Pulldown mode.  If we have an entire new frame, display it.
-					if (DoWeWantToFlip(TRUE, bIsOddField))
-						Weave(ppOddLines[LastOddFrame], ppEvenLines[CurrentFrame], pDest);
-				}
-				LastEvenFrame = CurrentFrame;
+			}
+			else
+			{
+				// Film mode.  If we have an entire new frame, display it.
+				bFlipNow = DoWeWantToFlip(info.IsOdd);
+				if (bFlipNow)
+					Weave(&info);
 			}
 
 			AdjustAspectRatio(ppEvenLines[LastEvenFrame], ppOddLines[LastOddFrame]);
@@ -1289,7 +1162,8 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 			{
 				ddrval = IDirectDrawSurface_Unlock(lpDDOverlayBack, lpCurOverlay);
 
-				if(DoWeWantToFlip(bFlipNow, bIsOddField) )
+				LOG("bFlipNow = %d", bFlipNow);
+				if (bFlipNow)
 				{
 					if (Wait_For_Flip)			// user parm
 					{

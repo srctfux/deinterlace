@@ -53,10 +53,9 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter);
 void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField);
 void UpdateNTSCPulldownMode(long FieldDiff, BOOL OnOddField, short **evenField, short **oddField);
 
-BOOL DoWeWantToFlip(BOOL bFlipNow, BOOL bIsOddField);
+BOOL DoWeWantToFlip(BOOL bIsOddField);
 void UpdatePulldownStatus();
 void Deinterlace(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay);
-void Weave(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay);
 BOOL WaitForNextField(BOOL LastField);
 void SetDeinterlaceMode(int mode);
 char *DeinterlaceModeName(int mode);

@@ -146,76 +146,6 @@ EndCopyLoop:
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////
-// memcpyBOBMMX
-// Uses MMX instructions to move memory around to two places
-// does as much as we can in 64 byte chunks
-// using MMX instructions
-// then copies any extra bytes
-// Dest must be the upper of the two lines
-// assumes there will be at least 64 bytes to copy
-/////////////////////////////////////////////////////////////////////////////
-void memcpyBOBMMX(void *Dest, void *Src, size_t nBytes)
-{
-	__asm
-	{
-		mov		esi, dword ptr[Src]
-		mov		edi, dword ptr[Dest]
-		mov     ebx, edi
-		add     ebx, OverlayPitch
-		mov		ecx, nBytes
-		shr     ecx, 6                      // nBytes / 64
-align 8
-CopyLoop:
-		movq	mm0, qword ptr[esi]
-		movq	mm1, qword ptr[esi+8*1]
-		movq	mm2, qword ptr[esi+8*2]
-		movq	mm3, qword ptr[esi+8*3]
-		movq	mm4, qword ptr[esi+8*4]
-		movq	mm5, qword ptr[esi+8*5]
-		movq	mm6, qword ptr[esi+8*6]
-		movq	mm7, qword ptr[esi+8*7]
-		movq	qword ptr[edi], mm0
-		movq	qword ptr[edi+8*1], mm1
-		movq	qword ptr[edi+8*2], mm2
-		movq	qword ptr[edi+8*3], mm3
-		movq	qword ptr[edi+8*4], mm4
-		movq	qword ptr[edi+8*5], mm5
-		movq	qword ptr[edi+8*6], mm6
-		movq	qword ptr[edi+8*7], mm7
-		movq	qword ptr[ebx], mm0
-		movq	qword ptr[ebx+8*1], mm1
-		movq	qword ptr[ebx+8*2], mm2
-		movq	qword ptr[ebx+8*3], mm3
-		movq	qword ptr[ebx+8*4], mm4
-		movq	qword ptr[ebx+8*5], mm5
-		movq	qword ptr[ebx+8*6], mm6
-		movq	qword ptr[ebx+8*7], mm7
-		add		esi, 64
-		add		edi, 64
-		add		ebx, 64
-		dec ecx
-		jne near CopyLoop
-
-		mov		ecx, nBytes
-		and     ecx, 63
-		cmp     ecx, 0
-		je EndCopyLoop
-align 8
-CopyLoop2:
-		mov dl, byte ptr[esi] 
-		mov byte ptr[edi], dl
-		mov byte ptr[ebx], dl
-		inc esi
-		inc edi
-		inc ebx
-		dec ecx
-		jne near CopyLoop2
-EndCopyLoop:
-		emms
-	}
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // GetCombFactor
 //
@@ -248,6 +178,10 @@ long GetCombFactor(short** pLines1, short** pLines2)
 	__int64 qwEdgeDetect;
 	__int64 qwThreshold;
 	const __int64 Mask = 0x7f7f7f7f7f7f7f7f;
+
+	// If one of the fields is missing, treat them as very different.
+	if (pLines1 == NULL || pLines2 == NULL)
+		return 0x7fffffff;
 
 	qwEdgeDetect = EdgeDetect;
 	qwEdgeDetect += (qwEdgeDetect << 48) + (qwEdgeDetect << 32) + (qwEdgeDetect << 16);
@@ -350,6 +284,12 @@ long CompareFields(short** pLines1, short** pLines2, RECT *rect)
 	long ActiveX = rect->right - rect->left;
 	const __int64 YMask    = 0x00ff00ff00ff00ff;
 	__int64 wBitShift    = BitShift;
+
+	// If we skipped a field, treat the new one as maximally different.
+	if (pLines1 == NULL || pLines2 == NULL)
+		return 0x7fffffff;
+	if (rect == NULL)
+		return 0;
 
 	for (Line = rect->top / 2; Line < rect->bottom / 2; ++Line)
 	{

@@ -28,12 +28,7 @@
 #include "globals.h"
 #include "cpu.h"
 
-static void TwoFrameSSE(short** pOddLines,
-					    short** pEvenLines,
-					    short** pPrevOdd,
-					    short** pPrevEven,
-					    BYTE* lpCurOverlay,
-					    BOOL bIsOdd);
+static BOOL TwoFrameSSE(DEINTERLACE_INFO *info);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Deinterlace the latest field, attempting to weave wherever it won't cause
@@ -77,12 +72,7 @@ static void TwoFrameSSE(short** pOddLines,
 // difference of 127, whose square (16129) is safely comparable.
 
 
-void DeinterlaceFieldTwoFrame(short** pOddLines,
-					          short** pEvenLines,
-					          short** pPrevOdd,
-					          short** pPrevEven,
-					          BYTE* lpCurOverlay,
-					          BOOL bIsOdd)
+BOOL DeinterlaceFieldTwoFrame(DEINTERLACE_INFO *info)
 {
 	int Line;
 	short* YVal0;
@@ -94,6 +84,7 @@ void DeinterlaceFieldTwoFrame(short** pOddLines,
 	BYTE* OldSI;
 	BYTE* OldSP;
 	BYTE* Dest;
+	DWORD LineLength = info->LineLength;
 
 	const __int64 YMask    = 0x00ff00ff00ff00ff;
 	const __int64 UVMask    = 0xff00ff00ff00ff00;
@@ -104,10 +95,15 @@ void DeinterlaceFieldTwoFrame(short** pOddLines,
 	__int64 qwBobbedPixels;
 	const __int64 Mask = 0x7f7f7f7f7f7f7f7f;
 
+	if (info->OddLines[0] == NULL || info->OddLines[1] == NULL ||
+		info->EvenLines[0] == NULL || info->EvenLines[1] == NULL)
+	{
+		return FALSE;
+	}
+
 #ifdef USE_SSE
 	if (CpuFeatureFlags & FEATURE_SSE) {
-		TwoFrameSSE(pOddLines, pEvenLines, pPrevOdd, pPrevEven, lpCurOverlay, bIsOdd);
-		return;
+		return TwoFrameSSE(info);
 	}
 #endif
 
@@ -118,38 +114,38 @@ void DeinterlaceFieldTwoFrame(short** pOddLines,
 
 	// copy first even line no matter what, and the first odd line if we're
 	// processing an even field.
-	memcpyMMX(lpCurOverlay, pEvenLines[0], CurrentX * 2);
-	if (! bIsOdd)
-		memcpyMMX(lpCurOverlay + OverlayPitch, pOddLines[0], CurrentX * 2);
+	memcpyMMX(info->Overlay, info->EvenLines[0][0], info->LineLength);
+	if (! info->IsOdd)
+		memcpyMMX(info->Overlay + info->OverlayPitch, info->OddLines[0][0], info->LineLength);
 
-	for (Line = 0; Line < (CurrentY / 2 - 1); ++Line)
+	for (Line = 0; Line < info->FieldHeight - 1; ++Line)
 	{
-		if (bIsOdd)
+		if (info->IsOdd)
 		{
-			YVal0 = pOddLines[Line];
-			YVal1 = pEvenLines[Line + 1];
-			YVal2 = pOddLines[Line + 1];
-			OVal0 = pPrevOdd[Line];
-			OVal1 = pPrevEven[Line + 1];
-			OVal2 = pPrevOdd[Line + 1];
-			Dest = lpCurOverlay + (Line * 2 + 3) * OverlayPitch;
+			YVal0 = info->OddLines[0][Line];
+			YVal1 = info->EvenLines[0][Line + 1];
+			YVal2 = info->OddLines[0][Line + 1];
+			OVal0 = info->OddLines[1][Line];
+			OVal1 = info->EvenLines[1][Line + 1];
+			OVal2 = info->OddLines[1][Line + 1];
+			Dest = info->Overlay + (Line * 2 + 3) * info->OverlayPitch;
 		}
 		else
 		{
-			YVal0 = pEvenLines[Line];
-			YVal1 = pOddLines[Line];
-			YVal2 = pEvenLines[Line + 1];
-			OVal0 = pPrevEven[Line];
-			OVal1 = pPrevOdd[Line];
-			OVal2 = pPrevEven[Line + 1];
-			Dest = lpCurOverlay + (Line * 2 + 2) * OverlayPitch;
+			YVal0 = info->EvenLines[0][Line];
+			YVal1 = info->OddLines[0][Line];
+			YVal2 = info->EvenLines[0][Line + 1];
+			OVal0 = info->EvenLines[1][Line];
+			OVal1 = info->OddLines[1][Line];
+			OVal2 = info->EvenLines[1][Line + 1];
+			Dest = info->Overlay + (Line * 2 + 2) * info->OverlayPitch;
 		}
 
 		// Always use the most recent data verbatim.  By definition it's correct (it'd
 		// be shown on an interlaced display) and our job is to fill in the spaces
 		// between the new lines.
-		memcpyMMX(Dest, YVal2, CurrentX * 2);
-		Dest -= OverlayPitch;
+		memcpyMMX(Dest, YVal2, info->LineLength);
+		Dest -= info->OverlayPitch;
 
 
 		_asm
@@ -162,13 +158,13 @@ void DeinterlaceFieldTwoFrame(short** pOddLines,
 			// Figure out what to do with the scanline above the one we just copied.
 			// See above for a description of the algorithm.
 
-			mov ecx, CurrentX
+			mov ecx, LineLength
 			mov eax, dword ptr [YVal0]		// eax = T1
 			mov ebx, dword ptr [YVal1]		// ebx = M1
 			mov esp, dword ptr [YVal2]		// esp = B1
 			mov edx, dword ptr [OVal0]		// edx = T0
 			mov esi, dword ptr [OVal1]		// esi = M0
-			shr ecx, 2						// there are CurrentX * 2 / 8 qwords
+			shr ecx, 3						// there are LineLength / 8 qwords
 
 align 8
 DoNext8Bytes:
@@ -294,8 +290,14 @@ DoNext8Bytes:
 	}
 
 	// Copy last odd line if we're processing an odd field.
-	if (bIsOdd)
-		memcpyMMX(lpCurOverlay + (CurrentY - 1) * OverlayPitch, pOddLines[CurrentY / 2 - 1], CurrentX * 2);
+	if (info->IsOdd)
+	{
+		memcpyMMX(info->Overlay + (info->FrameHeight - 1) * info->OverlayPitch,
+				  info->OddLines[info->FieldHeight - 1],
+				  info->LineLength);
+	}
+
+	return TRUE;
 }
 
 
@@ -308,12 +310,7 @@ DoNext8Bytes:
 // would be to decouple the inline assembly section from the surrounding
 // logic.
 
-static void TwoFrameSSE(short** pOddLines,
-					    short** pEvenLines,
-					    short** pPrevOdd,
-					    short** pPrevEven,
-					    BYTE* lpCurOverlay,
-					    BOOL bIsOdd)
+static BOOL TwoFrameSSE(DEINTERLACE_INFO *info)
 {
 	int Line;
 	short* YVal0;
@@ -325,6 +322,7 @@ static void TwoFrameSSE(short** pOddLines,
 	BYTE* OldSI;
 	BYTE* OldSP;
 	BYTE* Dest;
+	DWORD LineLength = info->LineLength;
 
 	const __int64 YMask    = 0x00ff00ff00ff00ff;
 	const __int64 UVMask    = 0xff00ff00ff00ff00;
@@ -342,38 +340,38 @@ static void TwoFrameSSE(short** pOddLines,
 
 	// copy first even line no matter what, and the first odd line if we're
 	// processing an even field.
-	memcpyMMX(lpCurOverlay, pEvenLines[0], CurrentX * 2);
-	if (! bIsOdd)
-		memcpyMMX(lpCurOverlay + OverlayPitch, pOddLines[0], CurrentX * 2);
+	memcpyMMX(info->Overlay, info->EvenLines[0][0], info->LineLength);
+	if (! info->IsOdd)
+		memcpyMMX(info->Overlay + info->OverlayPitch, info->OddLines[0][0], info->LineLength);
 
-	for (Line = 0; Line < (CurrentY / 2 - 1); ++Line)
+	for (Line = 0; Line < info->FieldHeight - 1; ++Line)
 	{
-		if (bIsOdd)
+		if (info->IsOdd)
 		{
-			YVal0 = pOddLines[Line];
-			YVal1 = pEvenLines[Line + 1];
-			YVal2 = pOddLines[Line + 1];
-			OVal0 = pPrevOdd[Line];
-			OVal1 = pPrevEven[Line + 1];
-			OVal2 = pPrevOdd[Line + 1];
-			Dest = lpCurOverlay + (Line * 2 + 3) * OverlayPitch;
+			YVal0 = info->OddLines[0][Line];
+			YVal1 = info->EvenLines[0][Line + 1];
+			YVal2 = info->OddLines[0][Line + 1];
+			OVal0 = info->OddLines[1][Line];
+			OVal1 = info->EvenLines[1][Line + 1];
+			OVal2 = info->OddLines[1][Line + 1];
+			Dest = info->Overlay + (Line * 2 + 3) * info->OverlayPitch;
 		}
 		else
 		{
-			YVal0 = pEvenLines[Line];
-			YVal1 = pOddLines[Line];
-			YVal2 = pEvenLines[Line + 1];
-			OVal0 = pPrevEven[Line];
-			OVal1 = pPrevOdd[Line];
-			OVal2 = pPrevEven[Line + 1];
-			Dest = lpCurOverlay + (Line * 2 + 2) * OverlayPitch;
+			YVal0 = info->EvenLines[0][Line];
+			YVal1 = info->OddLines[0][Line];
+			YVal2 = info->EvenLines[0][Line + 1];
+			OVal0 = info->EvenLines[1][Line];
+			OVal1 = info->OddLines[1][Line];
+			OVal2 = info->EvenLines[1][Line + 1];
+			Dest = info->Overlay + (Line * 2 + 2) * info->OverlayPitch;
 		}
 
 		// Always use the most recent data verbatim.  By definition it's correct (it'd
 		// be shown on an interlaced display) and our job is to fill in the spaces
 		// between the new lines.
-		memcpyMMX(Dest, YVal2, CurrentX * 2);
-		Dest -= OverlayPitch;
+		memcpyMMX(Dest, YVal2, info->LineLength);
+		Dest -= info->OverlayPitch;
 
 
 		_asm
@@ -386,13 +384,13 @@ static void TwoFrameSSE(short** pOddLines,
 			// Figure out what to do with the scanline above the one we just copied.
 			// See above for a description of the algorithm.
 
-			mov ecx, CurrentX
+			mov ecx, LineLength
 			mov eax, dword ptr [YVal0]		// eax = T1
 			mov ebx, dword ptr [YVal1]		// ebx = M1
 			mov esp, dword ptr [YVal2]		// esp = B1
 			mov edx, dword ptr [OVal0]		// edx = T0
 			mov esi, dword ptr [OVal1]		// esi = M0
-			shr ecx, 2						// there are CurrentX * 2 / 8 qwords
+			shr ecx, 3						// there are LineLength / 8 qwords
 
 align 8
 DoNext8Bytes:
@@ -492,7 +490,7 @@ DoNext8Bytes:
 			mov edi, dword ptr[Dest]
 
 			// Put the pixels in place.
-			movq qword ptr[edi], mm3
+			movntq qword ptr[edi], mm3
 
 			// Advance to the next set of pixels.
 			add eax, 8
@@ -505,6 +503,7 @@ DoNext8Bytes:
 			dec ecx
 			jne near DoNext8Bytes
 
+			sfence
 			emms
 
 			mov esi, dword ptr[OldSI]
@@ -513,8 +512,14 @@ DoNext8Bytes:
 	}
 
 	// Copy last odd line if we're processing an odd field.
-	if (bIsOdd)
-		memcpyMMX(lpCurOverlay + (CurrentY - 1) * OverlayPitch, pOddLines[CurrentY / 2 - 1], CurrentX * 2);
+	if (info->IsOdd)
+	{
+		memcpyMMX(info->Overlay + (info->FrameHeight - 1) * info->OverlayPitch,
+				  info->OddLines[info->FieldHeight - 1],
+				  info->LineLength);
+	}
+
+	return TRUE;
 }
 
 #endif /* USE_SSE */

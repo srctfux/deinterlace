@@ -39,13 +39,16 @@
 // Deinterlace - area based Vitual Dub Plug-in by
 // Gunnar Thalin
 ///////////////////////////////////////////////////////////////////////////////
-void DeinterlaceFieldBob(short** pOddLines, short** pEvenLines, short** pPrevLines, BYTE* lpCurOverlay, BOOL bIsOdd)
+BOOL DeinterlaceFieldBob(DEINTERLACE_INFO *info)
 {
 	int Line;
 	short* YVal1;
 	short* YVal2;
 	short* YVal3;
 	BYTE* Dest;
+	short **pOddLines = info->OddLines[0];
+	short **pEvenLines = info->EvenLines[0];
+	DWORD LineLength = info->LineLength;
 	
 	const __int64 YMask    = 0x00ff00ff00ff00ff;
 	const __int64 UVMask    = 0xff00ff00ff00ff00;
@@ -54,7 +57,6 @@ void DeinterlaceFieldBob(short** pOddLines, short** pEvenLines, short** pPrevLin
 	__int64 qwThreshold;
 	const __int64 Mask = 0x7f7f7f7f7f7f7f7f;
 
-	pPrevLines = NULL;	// stop the compiler from whining
 	qwEdgeDetect = EdgeDetect;
 	qwEdgeDetect += (qwEdgeDetect << 48) + (qwEdgeDetect << 32) + (qwEdgeDetect << 16);
 	qwThreshold = JaggieThreshold;
@@ -63,25 +65,25 @@ void DeinterlaceFieldBob(short** pOddLines, short** pEvenLines, short** pPrevLin
 
 	// copy first even line no matter what, and the first odd line if we're
 	// processing an odd field.
-	memcpyMMX(lpCurOverlay, pEvenLines[0], CurrentX * 2);
-	if (bIsOdd)
-		memcpyMMX(lpCurOverlay + OverlayPitch, pOddLines[0], CurrentX * 2);
+	memcpyMMX(info->Overlay, pEvenLines[0], LineLength);
+	if (info->IsOdd)
+		memcpyMMX(info->Overlay + info->OverlayPitch, pOddLines[0], LineLength);
 
-	for (Line = 0; Line < (CurrentY / 2 - 1); ++Line)
+	for (Line = 0; Line < info->FieldHeight - 1; ++Line)
 	{
-		if (bIsOdd)
+		if (info->IsOdd)
 		{
 			YVal1 = pOddLines[Line];
 			YVal2 = pEvenLines[Line + 1];
 			YVal3 = pOddLines[Line + 1];
-			Dest = lpCurOverlay + (Line * 2 + 2) * OverlayPitch;
+			Dest = info->Overlay + (Line * 2 + 2) * info->OverlayPitch;
 		}
 		else
 		{
 			YVal1 = pEvenLines[Line];
 			YVal2 = pOddLines[Line];
 			YVal3 = pEvenLines[Line + 1];
-			Dest = lpCurOverlay + (Line * 2 + 1) * OverlayPitch;
+			Dest = info->Overlay + (Line * 2 + 1) * info->OverlayPitch;
 		}
 
 		// For ease of reading, the comments below assume that we're operating on an odd
@@ -93,16 +95,16 @@ void DeinterlaceFieldBob(short** pOddLines, short** pEvenLines, short** pPrevLin
 		// half the time this function is called, those words' meanings will invert.
 
 		// Copy the odd line to the overlay verbatim.
-		memcpyMMX(Dest + OverlayPitch, YVal3, CurrentX * 2);
+		memcpyMMX(Dest + info->OverlayPitch, YVal3, LineLength);
 
 		_asm
 		{
-			mov ecx, CurrentX
+			mov ecx, LineLength
 			mov eax, dword ptr [YVal1]
 			mov ebx, dword ptr [YVal2]
 			mov edx, dword ptr [YVal3]
 			mov edi, dword ptr [Dest]
-			shr ecx, 2       // there are CurrentX * 2 / 8 qwords
+			shr ecx, 3       // there are LineLength / 8 qwords
 
 align 8
 DoNext8Bytes:			
@@ -172,8 +174,14 @@ DoNext8Bytes:
 	}
 
 	// Copy last odd line if we're processing an even field.
-	if (! bIsOdd)
-		memcpyMMX(lpCurOverlay + (CurrentY - 1) * OverlayPitch, pOddLines[CurrentY / 2 - 1], CurrentX * 2);
+	if (! info->IsOdd)
+	{
+		memcpyMMX(info->Overlay + (info->FrameHeight - 1) * info->OverlayPitch,
+				  pOddLines[info->FieldHeight - 1],
+				  LineLength);
+	}
+
+	return TRUE;
 }
 
 
@@ -183,7 +191,7 @@ DoNext8Bytes:
 //
 // The algorithm is described in comments below.
 //
-void DeinterlaceFieldWeave(short** pOddLines, short** pEvenLines, short** pPrevLines, BYTE* lpCurOverlay, BOOL bIsOdd)
+BOOL DeinterlaceFieldWeave(DEINTERLACE_INFO *info)
 {
 	int Line;
 	short* YVal1;
@@ -192,6 +200,8 @@ void DeinterlaceFieldWeave(short** pOddLines, short** pEvenLines, short** pPrevL
 	short* YVal4;
 	BYTE* OldStack;
 	BYTE* Dest;
+	short **pEvenLines, **pOddLines, **pPrevLines;
+	DWORD LineLength = info->LineLength;
 
 	const __int64 YMask    = 0x00ff00ff00ff00ff;
 	const __int64 UVMask    = 0xff00ff00ff00ff00;
@@ -201,6 +211,18 @@ void DeinterlaceFieldWeave(short** pOddLines, short** pEvenLines, short** pPrevL
 	__int64 qwThreshold;
 	const __int64 Mask = 0xfefefefefefefefe;
 
+	// Make sure we have all the data we need.
+	pEvenLines = info->EvenLines[0];
+	pOddLines = info->OddLines[0];
+	if (info->IsOdd)
+		pPrevLines = info->OddLines[1];
+	else
+		pPrevLines = info->EvenLines[1];
+	if (pEvenLines == NULL || pOddLines == NULL || pPrevLines == NULL)
+		return FALSE;
+
+	// Since the code uses MMX to process 4 pixels at a time, we need our constants
+	// to be represented 4 times per quadword.
 	qwSpatialTolerance = SpatialTolerance;
 	qwSpatialTolerance += (qwSpatialTolerance << 48) + (qwSpatialTolerance << 32) + (qwSpatialTolerance << 16);
 	qwTemporalTolerance = TemporalTolerance;
@@ -210,19 +232,19 @@ void DeinterlaceFieldWeave(short** pOddLines, short** pEvenLines, short** pPrevL
 
 	// copy first even line no matter what, and the first odd line if we're
 	// processing an even field.
-	memcpyMMX(lpCurOverlay, pEvenLines[0], CurrentX * 2);
-	if (! bIsOdd)
-		memcpyMMX(lpCurOverlay + OverlayPitch, pOddLines[0], CurrentX * 2);
+	memcpyMMX(info->Overlay, pEvenLines[0], LineLength);
+	if (! info->IsOdd)
+		memcpyMMX(info->Overlay + info->OverlayPitch, pOddLines[0], LineLength);
 
-	for (Line = 0; Line < (CurrentY / 2 - 1); ++Line)
+	for (Line = 0; Line < info->FieldHeight - 1; ++Line)
 	{
-		if (bIsOdd)
+		if (info->IsOdd)
 		{
 			YVal1 = pEvenLines[Line];
 			YVal2 = pOddLines[Line];
 			YVal3 = pEvenLines[Line + 1];
 			YVal4 = pPrevLines[Line];
-			Dest = lpCurOverlay + (Line * 2 + 1) * OverlayPitch;
+			Dest = info->Overlay + (Line * 2 + 1) * info->OverlayPitch;
 		}
 		else
 		{
@@ -230,7 +252,7 @@ void DeinterlaceFieldWeave(short** pOddLines, short** pEvenLines, short** pPrevL
 			YVal2 = pEvenLines[Line + 1];
 			YVal3 = pOddLines[Line + 1];
 			YVal4 = pPrevLines[Line + 1];
-			Dest = lpCurOverlay + (Line * 2 + 2) * OverlayPitch;
+			Dest = info->Overlay + (Line * 2 + 2) * info->OverlayPitch;
 		}
 
 		// For ease of reading, the comments below assume that we're operating on an odd
@@ -244,19 +266,19 @@ void DeinterlaceFieldWeave(short** pOddLines, short** pEvenLines, short** pPrevL
 		// Copy the even scanline below this one to the overlay buffer, since we'll be
 		// adapting the current scanline to the even lines surrounding it.  The scanline
 		// above has already been copied by the previous pass through the loop.
-		memcpyMMX(Dest + OverlayPitch, YVal3, CurrentX * 2);
+		memcpyMMX(Dest + info->OverlayPitch, YVal3, LineLength);
 
 		_asm
 		{
 			mov dword ptr[OldStack], esi
 
-			mov ecx, CurrentX
+			mov ecx, LineLength
 			mov eax, dword ptr [YVal1]
 			mov ebx, dword ptr [YVal2]
 			mov edx, dword ptr [YVal3]
 			mov esi, dword ptr [YVal4]
 			mov edi, dword ptr [Dest]
-			shr ecx, 2       // there are ActiveX * 2 / 8 qwords
+			shr ecx, 3       // there are LineLength / 8 qwords
 
 align 8
 DoNext8Bytes:			
@@ -272,21 +294,11 @@ DoNext8Bytes:
 			pand mm6, YMask
 
 			// Average E1 and E2 for interpolated bobbing.
-#if 0
-			// The following SSE instruction doesn't work on older CPUs, but is faster for
-			// newer ones.  Comment it out until we have CPU type detection.
-			// This is the hex encoding for "pavg mm0,mm2" which VC++'s assembler doesn't
-			// seem to recognize.
-			_emit 0x0F						// mm0 = avg(E1, E2)
-			_emit 0xE0
-			_emit 0xC2
-#else
 			pand mm0, Mask					// mm0 = E1 with lower chroma bit stripped off
 			psrlw mm0, 1					// mm0 = E1 / 2
 			pand mm2, Mask					// mm2 = E2 with lower chroma bit stripped off
 			psrlw mm2, 1					// mm2 = E2 / 2
 			paddb mm0, mm2					// mm2 = (E1 + E2) / 2
-#endif
 
 			// The meat of the work is done here.  We want to see whether this pixel is
 			// close in luminosity to ANY of: its top neighbor, its bottom neighbor,
@@ -354,6 +366,128 @@ DoNext8Bytes:
 	}
 
 	// Copy last odd line if we're processing an odd field.
-	if (bIsOdd)
-		memcpyMMX(lpCurOverlay + (CurrentY - 1) * OverlayPitch, pOddLines[CurrentY / 2 - 1], CurrentX * 2);
+	if (info->IsOdd)
+	{
+		memcpyMMX(info->Overlay + (info->FrameHeight - 1) * info->OverlayPitch,
+				  pOddLines[info->FieldHeight - 1],
+				  LineLength);
+	}
+
+	return TRUE;
+}
+
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Copies memory to two locations using MMX registers for speed.
+void memcpyBOBMMX(void *Dest1, void *Dest2, void *Src, size_t nBytes)
+{
+	__asm
+	{
+		mov		esi, dword ptr[Src]
+		mov		edi, dword ptr[Dest1]
+		mov     ebx, dword ptr[Dest2]
+		mov		ecx, nBytes
+		shr     ecx, 6                      // nBytes / 64
+align 8
+CopyLoop:
+		movq	mm0, qword ptr[esi]
+		movq	mm1, qword ptr[esi+8*1]
+		movq	mm2, qword ptr[esi+8*2]
+		movq	mm3, qword ptr[esi+8*3]
+		movq	mm4, qword ptr[esi+8*4]
+		movq	mm5, qword ptr[esi+8*5]
+		movq	mm6, qword ptr[esi+8*6]
+		movq	mm7, qword ptr[esi+8*7]
+		movq	qword ptr[edi], mm0
+		movq	qword ptr[edi+8*1], mm1
+		movq	qword ptr[edi+8*2], mm2
+		movq	qword ptr[edi+8*3], mm3
+		movq	qword ptr[edi+8*4], mm4
+		movq	qword ptr[edi+8*5], mm5
+		movq	qword ptr[edi+8*6], mm6
+		movq	qword ptr[edi+8*7], mm7
+		movq	qword ptr[ebx], mm0
+		movq	qword ptr[ebx+8*1], mm1
+		movq	qword ptr[ebx+8*2], mm2
+		movq	qword ptr[ebx+8*3], mm3
+		movq	qword ptr[ebx+8*4], mm4
+		movq	qword ptr[ebx+8*5], mm5
+		movq	qword ptr[ebx+8*6], mm6
+		movq	qword ptr[ebx+8*7], mm7
+		add		esi, 64
+		add		edi, 64
+		add		ebx, 64
+		dec ecx
+		jne near CopyLoop
+
+		mov		ecx, nBytes
+		and     ecx, 63
+		cmp     ecx, 0
+		je EndCopyLoop
+align 8
+CopyLoop2:
+		mov dl, byte ptr[esi] 
+		mov byte ptr[edi], dl
+		mov byte ptr[ebx], dl
+		inc esi
+		inc edi
+		inc ebx
+		dec ecx
+		jne near CopyLoop2
+EndCopyLoop:
+		emms
+	}
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Simple Bob.  Copies the most recent field to the overlay, with each scanline
+// copied twice.
+/////////////////////////////////////////////////////////////////////////////
+BOOL Bob(DEINTERLACE_INFO *info)
+{
+	int i;
+	BYTE *lpOverlay = info->Overlay;
+	short **lines;
+
+	if (info->IsOdd)
+		lines = info->OddLines[0];
+	else
+		lines = info->EvenLines[0];
+
+	// No recent data?  We can't do anything.
+	if (lines == NULL)
+		return FALSE;
+
+	for (i = 0; i < info->FieldHeight; i++)
+	{
+		memcpyBOBMMX(lpOverlay, lpOverlay + info->OverlayPitch, lines[i], info->LineLength);
+		lpOverlay += 2 * info->OverlayPitch;
+	}
+
+	return TRUE;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Simple Weave.  Copies alternating scanlines from the most recent fields.
+BOOL Weave(DEINTERLACE_INFO *info)
+{
+	int i;
+	BYTE *lpOverlay = info->Overlay;
+
+	if (info->EvenLines[0] == NULL || info->OddLines[0] == NULL)
+		return FALSE;
+
+	for (i = 0; i < info->FieldHeight; i++)
+	{
+		memcpyMMX(lpOverlay, info->EvenLines[0][i], info->LineLength);
+		lpOverlay += info->OverlayPitch;
+
+		memcpyMMX(lpOverlay, info->OddLines[0][i], info->LineLength);
+		lpOverlay += info->OverlayPitch;
+	}
+
+	return TRUE;
 }

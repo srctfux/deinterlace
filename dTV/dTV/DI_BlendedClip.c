@@ -192,8 +192,7 @@
 	BOOL	BlcWantsToFlip;
 
 
-void BlendedClipping(short** pOddLines, short** pEvenLines, 
-		short** pPrevLines, BYTE* lpCurOverlay, BOOL bIsOdd)
+BOOL BlendedClipping(DEINTERLACE_INFO *info)
 {
 	int Line;
 	int	LoopCtr;
@@ -205,6 +204,10 @@ void BlendedClipping(short** pOddLines, short** pEvenLines,
 	short* LP1;					// ptr to prev Line1
 	short* LP3;					// ptr to prev Line3
 	BYTE* Dest;
+	BYTE *lpCurOverlay = info->Overlay;
+	short **pOddLines = info->OddLines[0];
+	short **pEvenLines = info->EvenLines[0];
+	short **pPrevLines = info->IsOdd ? info->OddLines[1] : info->EvenLines[1];
 	const __int64 YMask		= 0x00ff00ff00ff00ff;	// to keep only luma
 	const __int64 UVMask    = 0xff00ff00ff00ff00;	// to keep only chroma
 	const __int64 ShiftMask = 0xfefffefffefffeff;	// to avoid shifting chroma to luma
@@ -231,6 +234,9 @@ void BlendedClipping(short** pOddLines, short** pEvenLines,
 	// Set up and scale our user parms
 	MotionAvg = 0;
 	CombAvg = 0;
+
+	if (pOddLines == NULL || pEvenLines == NULL || pPrevLines == NULL)
+		return FALSE;
 
 	if (BlcBlendChroma)
 	{
@@ -298,28 +304,28 @@ void BlendedClipping(short** pOddLines, short** pEvenLines,
 	i = BlcPixelCombSense * 257/100;		// scale to range of 0-257
 	PixelCombSense = i << 48 | i << 32 | i << 16 | i;    // only 32 bits?>>>>
 	
-	OddPtr = (bIsOdd) ? 1 : 0;
+	OddPtr = (info->IsOdd) ? 1 : 0;
 	
 // copy first even line no matter what, and the first odd line if we're
 // processing an odd field.
-	memcpyMMX(lpCurOverlay, pEvenLines[0], CurrentX * 2);	// DL0
-	if (bIsOdd)
-		memcpyMMX(lpCurOverlay + OverlayPitch, pOddLines[0], CurrentX * 2);  // DL1
+	memcpyMMX(lpCurOverlay, pEvenLines[0], info->LineLength);	// DL0
+	if (info->IsOdd)
+		memcpyMMX(lpCurOverlay + info->OverlayPitch, pOddLines[0], info->LineLength);  // DL1
 
-	for (Line = 0; Line < (CurrentY / 2 - 1); ++Line)
+	for (Line = 0; Line < (info->FieldHeight - 1); ++Line)
 	{
-		LoopCtr = CurrentX / 4;				// there are ActiveX * 2 / 8 qwords per line
+		LoopCtr = info->LineLength / 8;				// there are LineLength / 8 qwords per line
 		MotionAvgL = 0;
 		CombAvgL = 0;
 
-		if (bIsOdd)
+		if (info->IsOdd)
 		{
 			L1 = pOddLines[Line];		
 			L2 = pEvenLines[Line + 1];	
 			L3 = pOddLines[Line + 1];	
 			LP1 = pPrevLines[Line];			// prev Odd lines
 			LP3 = pPrevLines[Line+1];		
-			Dest = lpCurOverlay + (Line * 2 + 2) * OverlayPitch;	// DL2
+			Dest = lpCurOverlay + (Line * 2 + 2) * info->OverlayPitch;	// DL2
 		}
 		else
 		{
@@ -328,12 +334,12 @@ void BlendedClipping(short** pOddLines, short** pEvenLines,
 			L3 = pEvenLines[Line + 1];   
 			LP1 = pPrevLines[Line];			// prev even lines
 			LP3 = pPrevLines[Line+1];		
-			Dest = lpCurOverlay + (Line * 2 + 1) * OverlayPitch;	// DL1
+			Dest = lpCurOverlay + (Line * 2 + 1) * info->OverlayPitch;	// DL1
 		}
-		memcpyMMX(Dest + OverlayPitch, L3, CurrentX * 2);
+		memcpyMMX(Dest + info->OverlayPitch, L3, info->LineLength);
 
 // For ease of reading, the comments below assume that we're operating on an odd
-// field (i.e., that bIsOdd is true).  The exact same processing is done when we
+// field (i.e., that info->IsOdd is true).  The exact same processing is done when we
 // operate on an even field, but the roles of the odd and even fields are reversed.
 // It's just too cumbersome to explain the algorithm in terms of "the next odd
 // line if we're doing an odd field, or the next even line if we're doing an
@@ -519,8 +525,12 @@ DoNext8Bytes:
 	}
 
 	// Copy last odd line if we're processing an even field.
-	if (! bIsOdd)
-		memcpyMMX(lpCurOverlay + (CurrentY - 1) * OverlayPitch, pOddLines[CurrentY / 2 - 1], CurrentX * 2);
+	if (! info->IsOdd)
+	{
+		memcpyMMX(lpCurOverlay + (info->FrameHeight - 1) * info->OverlayPitch,
+				  pOddLines[info->FieldHeight - 1],
+				  info->LineLength);
+	}
 
 // We will keep moving averages of the Motion and Comb factors.  For extra precision the 
 // values will be kept scaled up by 256.  See comments on rtn header about averages.
@@ -528,7 +538,7 @@ DoNext8Bytes:
 	BlcWantsToFlip = TRUE;			// assume we do 
 
 	W.Wqword = MotionAvg;
-	X = 256 * (W.Wlong[0] + W.Wlong[1]) / ( (CurrentY / 2 - 1) * CurrentX );
+	X = 256 * (W.Wlong[0] + W.Wlong[1]) / ( (info->FieldHeight - 1) * info->FrameWidth );
 
 	// Do we want to skip the frame because motion is too small? Check before updating avg.
 	if (BlcTotalAverageMotion > 0  
@@ -541,7 +551,7 @@ DoNext8Bytes:
 			/ (BlcMotionAvgPeriod + 1);
 
 	W.Wqword = CombAvg;
-	X = 256 * (W.Wlong[0] + W.Wlong[1]) / ( (CurrentY / 2 - 1) * CurrentX );
+	X = 256 * (W.Wlong[0] + W.Wlong[1]) / ( (info->FieldHeight - 1) * info->FrameWidth );
 
 	if (BlcTotalAverageComb > 0       // Skip a very high comb frame?
 			&& (100 * X / BlcTotalAverageComb) > 10 * (100 - BlcHighCombSkip))
@@ -552,5 +562,5 @@ DoNext8Bytes:
 	BlcTotalAverageComb = (BlcTotalAverageComb * (BlcCombAvgPeriod - 1) + 2 * X)
 			/ (BlcCombAvgPeriod + 1);
 
-
+	return BlcWantsToFlip;
 }
