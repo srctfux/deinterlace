@@ -209,7 +209,7 @@ void OSD_Redraw(HWND hWnd, HDC hDC)
 					hBrushOld = SelectObject(hDC, hBrush);
 					if(bOutline)
 					{
-						PatBlt(hDC, nXpos - 1, nYpos - 1, sizeText.cx + 2, sizeText.cy + 2, PATCOPY);
+						PatBlt(hDC, nXpos - 2, nYpos - 2, sizeText.cx + 4, sizeText.cy + 4, PATCOPY);
 					}
 					else
 					{
@@ -228,10 +228,14 @@ void OSD_Redraw(HWND hWnd, HDC hDC)
 			{
 				// Draw OSD outline if required
 				SetTextColor(hDC, OutlineColor);
-				TextOut(hDC, nXpos - 1, nYpos, grOSD.szText, strlen(grOSD.szText));
-				TextOut(hDC, nXpos + 1, nYpos, grOSD.szText, strlen(grOSD.szText));
-				TextOut(hDC, nXpos, nYpos - 1, grOSD.szText, strlen(grOSD.szText));
-				TextOut(hDC, nXpos, nYpos + 1, grOSD.szText, strlen(grOSD.szText));
+				TextOut(hDC, nXpos - 2, nYpos, grOSD.szText, strlen(grOSD.szText));
+				TextOut(hDC, nXpos + 2, nYpos, grOSD.szText, strlen(grOSD.szText));
+				TextOut(hDC, nXpos, nYpos - 2, grOSD.szText, strlen(grOSD.szText));
+				TextOut(hDC, nXpos, nYpos + 2, grOSD.szText, strlen(grOSD.szText));
+				TextOut(hDC, nXpos - 1, nYpos - 1, grOSD.szText, strlen(grOSD.szText));
+				TextOut(hDC, nXpos + 1, nYpos - 1, grOSD.szText, strlen(grOSD.szText));
+				TextOut(hDC, nXpos - 1, nYpos + 1, grOSD.szText, strlen(grOSD.szText));
+				TextOut(hDC, nXpos + 1, nYpos + 1, grOSD.szText, strlen(grOSD.szText));
 			}
 
 			// Draw OSD text

@@ -923,23 +923,6 @@ BEGIN
         MENUITEM "Reset Capture Card",          IDM_RESET
         MENUITEM "Audio-Mi&xer Setup",          IDM_AUDIO_MIXER
     END
-    POPUP "&Datacasting"
-    BEGIN
-        MENUITEM "Capture VBI-&Data",           IDM_VBI
-        MENUITEM SEPARATOR
-        MENUITEM "Video&Text",                  IDM_VBI_VT, GRAYED
-        MENUITEM "V&PS-Data",                   IDM_VBI_VPS, GRAYED
-        MENUITEM "&Closed Captions",            IDM_CLOSEDCAPTION, GRAYED
-        MENUITEM SEPARATOR
-        MENUITEM "&Small VideoText Window",     IDM_CALL_VIDEOTEXTSMALL
-        , GRAYED
-        MENUITEM "&Large VideoText Window",     IDM_CALL_VIDEOTEXT, GRAYED
-        MENUITEM "&Videotext Reset (After switch over Composite)  ", 
-                                                IDM_VT_RESET, GRAYED
-        MENUITEM SEPARATOR
-        MENUITEM "Videotext-Infos",             IDM_VT_OUT, GRAYED
-        MENUITEM "VPS-Infos",                   IDM_VPS_OUT, GRAYED
-    END
     POPUP "Adva&nced"
     BEGIN
         POPUP "Thread &Priorities"
@@ -974,6 +957,23 @@ BEGIN
         MENUITEM "&Licence ...",                IDM_HELP_GPL
         MENUITEM SEPARATOR
         MENUITEM "&About dTV...",               IDM_ABOUT
+    END
+    POPUP "&Datacasting"
+    BEGIN
+        MENUITEM "Capture VBI-&Data",           IDM_VBI
+        MENUITEM SEPARATOR
+        MENUITEM "Video&Text",                  IDM_VBI_VT, GRAYED
+        MENUITEM "V&PS-Data",                   IDM_VBI_VPS, GRAYED
+        MENUITEM "&Closed Captions",            IDM_CLOSEDCAPTION, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "&Small VideoText Window",     IDM_CALL_VIDEOTEXTSMALL
+        , GRAYED
+        MENUITEM "&Large VideoText Window",     IDM_CALL_VIDEOTEXT, GRAYED
+        MENUITEM "&Videotext Reset (After switch over Composite)  ", 
+                                                IDM_VT_RESET, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "Videotext-Infos",             IDM_VT_OUT, GRAYED
+        MENUITEM "VPS-Infos",                   IDM_VPS_OUT, GRAYED
     END
 END
 

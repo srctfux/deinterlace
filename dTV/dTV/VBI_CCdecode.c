@@ -162,6 +162,7 @@ int decode(unsigned char *vbiline)
 	int ClockMax = -1;
 	int ClockPos = -1;
 	int ClockCur;
+	static int LastCode = 0;
     
     for (clk=0; clk<7; clk++)
 	{
@@ -184,9 +185,13 @@ int decode(unsigned char *vbiline)
 		i++;
 	}
 
-	//LOGD("Failed to Detect 7 clocks %d\n", clk);
 	if(ClockMax < 45)
 	{
+		if(LastCode != 0)
+		{
+			LOGD("Nothing found %d\n", ClockMax);
+		}
+		LastCode = 0;
 		return -1;
 	}
 
@@ -194,19 +199,23 @@ int decode(unsigned char *vbiline)
 	if(!decodebit(&vbiline[tmp], 0x90))
 	{
 		// no start bit
+		LastCode = 0;
 		return -1;
 	}
 	tmp += 57;
     for (i = 0; i < 16; i++)
 	{
-		if(decodebit(&vbiline[tmp + i * 57], 0x90))
+		if(decodebit(&vbiline[tmp + i * 57], 0x70))
 		{
 			packedbits |= 1<<i;
 		}
 	}
-    //return packedbits & parityok(packedbits);
-	LOGD("%c%c\n", packedbits & 0x7F, (packedbits>>8) & 0x7F);
-	return packedbits;
+	
+	LastCode = packedbits;
+    return packedbits & parityok(packedbits);
+	//LOGD("%c%c\n", packedbits & 0x7F, (packedbits>>8) & 0x7F);
+	//LastCode = packedbits;
+	//return packedbits;
 } /* decode */
 
 int XDSdecode(int data)
