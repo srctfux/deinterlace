@@ -31,6 +31,7 @@ typedef struct _BlendStruct
 	double	coef1;
 	int		pixel2;
 	double	coef2;
+	int		pixel_UV;
 } BlendStruct;
 
 int PictureWidth = -1;
@@ -84,6 +85,12 @@ void UpdLinearFilterTables(int Width)
 					LinearFilterTab[i][j].coef1 = 0.5;
 					LinearFilterTab[i][j].coef2 = 0.5;
 				}
+				if ((j % 2) == (LinearFilterTab[i][j].pixel1 % 2))
+					LinearFilterTab[i][j].pixel_UV = LinearFilterTab[i][j].pixel1;
+				else if ((j % 2) == (LinearFilterTab[i][j].pixel2 % 2))
+					LinearFilterTab[i][j].pixel_UV = LinearFilterTab[i][j].pixel2;
+				else
+					LinearFilterTab[i][j].pixel_UV = LinearFilterTab[i][j].pixel1 + 1;
 			}
 		}
 	}
@@ -168,10 +175,7 @@ void ApplyLinearFilter(BYTE* pLine, int NewWidth, MEMCPY_FUNC *pCopy)
 			{
 				// Build temporary new line
 				TmpBuf[i*2] = (int)ceil(pLine[LinearFilterTab[NewWidth][i].pixel1*2] * LinearFilterTab[NewWidth][i].coef1 + pLine[LinearFilterTab[NewWidth][i].pixel2*2] * LinearFilterTab[NewWidth][i].coef2 - 0.5);
-				if ((i % 2) == (LinearFilterTab[NewWidth][i].pixel1 % 2))
-					TmpBuf[i*2+1] = pLine[LinearFilterTab[NewWidth][i].pixel1*2+1];
-				else
-					TmpBuf[i*2+1] = pLine[LinearFilterTab[NewWidth][i].pixel2*2+1];
+				TmpBuf[i*2+1] = pLine[LinearFilterTab[NewWidth][i].pixel_UV*2+1];
 			}
 		}
 	}
