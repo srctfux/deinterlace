@@ -30,6 +30,9 @@
 //                                     Cut out all decoding
 //                                     Cut out digital hardware stuff
 //
+// 26 Dec 2000   Eric Schmidt          Made it possible to have whitespace in
+//                                     your channel names in program.txt.
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -310,7 +313,7 @@ void Write_Program_List_ASCII()
 
 void Load_Program_List_ASCII()
 {
-	int i;
+	int i, j, ch;
 	char sbuf[255];
 	FILE *SettingFile;
 
@@ -326,9 +329,23 @@ void Load_Program_List_ASCII()
 
 		while (1)
 		{
-			// Read the name
-			if (fscanf(SettingFile, "%s %s\n", sbuf, Programm[i].Name) == EOF)
-				break;
+			// Read the name (may contain white space)
+            if (fscanf(SettingFile, "%s ", sbuf) == EOF) // Skip past "Name: "
+                break;
+            j = 0;
+            while (1)
+            {
+                if (j == sizeof(sbuf) - 1 || (ch = getc(SettingFile)) == '\n')
+                    break;
+
+                if (ch == EOF)
+                    goto error;
+
+                if (ch != '\r')
+                    sbuf[j++] = (char)ch;
+            }
+            sbuf[j] = '\0';
+            strcpy(Programm[i].Name, sbuf);
 
 			// Read the frequency
 			if (fscanf(SettingFile, "%s %ld\n", sbuf, &Programm[i].freq) == EOF)

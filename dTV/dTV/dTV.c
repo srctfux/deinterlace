@@ -32,6 +32,8 @@
 //
 // 21 Dec 2000   John Adcock           Stopped Timer after ini write
 //
+// 26 Dec 2000   Eric Schmidt          Fixed remember-last-audio-input-at-start.
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -1663,7 +1665,9 @@ void MainWndOnInitBT(HWND hWnd)
 			SetTimer(hWnd, TIMER_MSP, TIMER_MSP_MS, NULL);
 		}
 
-		AudioSource = AUDIOMUX_EXTERNAL;
+        // EAS20001226: Don't clobber what was read in from the ini file.
+		//AudioSource = AUDIOMUX_EXTERNAL;
+
 		switch (VideoSource) {
 		case SOURCE_COMPOSITE:	   sprintf(Text, "Composite");             break;
 		case SOURCE_SVIDEO:        sprintf(Text, "S-Video");               break;
@@ -1671,7 +1675,9 @@ void MainWndOnInitBT(HWND hWnd)
 		case SOURCE_OTHER2:        sprintf(Text, "Other 2");               break;
 		case SOURCE_COMPVIASVIDEO: sprintf(Text, "Composite via S-Video"); break;
 		default:
-			AudioSource = AUDIOMUX_TUNER;
+            // EAS20001226: Leave AudioInput as it was read in from the ini.
+			//AudioSource = AUDIOMUX_TUNER;
+
 			ChangeChannel(CurrentProgramm);
 			break;
 		}

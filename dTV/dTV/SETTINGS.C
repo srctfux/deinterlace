@@ -27,6 +27,8 @@
 //
 // 21 Dec 2000   John Adcock           Added function to setup ini file name
 //
+// 26 Dec 2000   Eric Schmidt          Fixed remember-last-channel-on-startup.
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -498,7 +500,7 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("Hardware", "GPIO_REG_INP", ManuellAudio[7], szIniFile);  
 
 	WritePrivateProfileInt("Show", "CaptureVBI", Capture_VBI, szIniFile);
-	WritePrivateProfileInt("Show", "LastProgram", InitialProg, szIniFile);
+	WritePrivateProfileInt("Show", "LastProgram", CurrentProgramm, szIniFile);
 
 	WritePrivateProfileInt("Sound", "AudioSource", AudioSource, szIniFile);
 	WritePrivateProfileInt("Sound", "DiscEqu", LNB.Diseq, szIniFile);
