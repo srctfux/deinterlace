@@ -42,6 +42,7 @@
 #include "vt.h"
 #include "vbi.h"
 #include "deinterlace.h"
+//#define DOLOGGING
 #include "DebugLog.h"
 #include "vbi.h"
 
@@ -62,8 +63,6 @@ long PulldownThresholdHigh = 2500;
 long PulldownRepeatCount = 5;
 long Threshold32Pulldown = 100;
 BOOL bAutoDetectMode = FALSE;
-
-//#define DOLOGGING
 
 void Start_Thread()
 {
@@ -267,7 +266,7 @@ void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField)
 				if(RepeatCount < PulldownRepeatCount)
 				{
 					RepeatCount++;
-					LogString("Upped RepeatCount %d", RepeatCount);
+					LOG("Upped RepeatCount %d", RepeatCount);
 				}
 				else
 				{
@@ -275,13 +274,13 @@ void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField)
 					{
 						gPulldownMode = FILM_22_PULLDOWN_ODD;
 						UpdatePulldownStatus();
-						LogString("Gone to Odd");
+						LOG("Gone to Odd");
 					}
 					if(IsOddField == FALSE)
 					{
 						gPulldownMode = FILM_22_PULLDOWN_EVEN;
 						UpdatePulldownStatus();
-						LogString("Gone to Even");
+						LOG("Gone to Even");
 					}
 				}
 			}
@@ -289,7 +288,7 @@ void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField)
 			{
 				LastPolarity = IsOddField;
 				RepeatCount = 1;
-				LogString("Reset RepeatCount %d", RepeatCount);
+				LOG("Reset RepeatCount %d", RepeatCount);
 			}
 		}
 	}
@@ -302,7 +301,7 @@ void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField)
 				if(LastDiff > PulldownThresholdLow)
 				{
 					RepeatCount--;
-					LogString("Downed RepeatCount 1 %d", RepeatCount);
+					LOG("Downed RepeatCount 1 %d", RepeatCount);
 				}
 			}
 			else
@@ -310,7 +309,7 @@ void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField)
 				if(RepeatCount < PulldownRepeatCount)
 				{
 					RepeatCount++;
-					LogString("Upped RepeatCount 1 %d", RepeatCount);
+					LOG("Upped RepeatCount 1 %d", RepeatCount);
 				}
 			}
 		}
@@ -319,12 +318,12 @@ void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField)
 			if(gPulldownMode == FILM_22_PULLDOWN_ODD && IsOddField == TRUE)
 			{
 				RepeatCount--;
-				LogString("Downed RepeatCount 2 %d", RepeatCount);
+				LOG("Downed RepeatCount 2 %d", RepeatCount);
 			}
 			if(gPulldownMode == FILM_22_PULLDOWN_EVEN && IsOddField == FALSE)
 			{
 				RepeatCount--;
-				LogString("Downed RepeatCount 2 %d", RepeatCount);
+				LOG("Downed RepeatCount 2 %d", RepeatCount);
 			}
 		}
 		if(RepeatCount == 0)
@@ -332,7 +331,7 @@ void UpdatePALPulldownMode(long CombFactor, BOOL IsOddField)
 			gPulldownMode = VIDEO_MODE;
 			RepeatCount = 0;
 			UpdatePulldownStatus();
-			LogString("Back To Video Mode");
+			LOG("Back To Video Mode");
 			LastPolarity = -1;
 		}
 	}
@@ -736,7 +735,7 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 				{
 					CombFactor = GetCombFactor(ppEvenLines[CurrentFrame], ppOddLines[CurrentFrame]);
 					UpdatePALPulldownMode(CombFactor, TRUE);
-					LogString(" Frame %d O CF = %d", CurrentFrame, CombFactor);
+					LOG(" Frame %d O CF = %d", CurrentFrame, CombFactor);
 				}
 
 				if (Capture_VBI == TRUE)
@@ -817,7 +816,7 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 					// top two even lines
 					CombFactor = GetCombFactor(ppEvenLines[CurrentFrame], ppOddLines[(CurrentFrame + 4) % 5]);
 					UpdatePALPulldownMode(CombFactor, FALSE);
-					LogString(" Frame %d E CF = %d", CurrentFrame, CombFactor);
+					LOG(" Frame %d E CF = %d", CurrentFrame, CombFactor);
 				}
 
 				if (Capture_VBI == TRUE)
@@ -983,7 +982,7 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 				{
 					CompareResult = CompareFields(ppOddLines[(CurrentFrame + 4) % 5], ppOddLines[CurrentFrame]);
 					UpdateNTSCPulldownMode(CompareResult, TRUE);
-					LogString(" Frame %d O CR = %d", CurrentFrame, CompareResult);
+					LOG(" Frame %d O CR = %d", CurrentFrame, CompareResult);
 				}
 
 				if (Capture_VBI == TRUE)
@@ -1061,7 +1060,7 @@ DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter)
 				{
 					CompareResult = CompareFields(ppEvenLines[(CurrentFrame + 4) % 5], ppEvenLines[CurrentFrame]);
 					UpdateNTSCPulldownMode(CompareResult, FALSE);
-					LogString(" Frame %d E CR = %d", CurrentFrame, CompareResult);
+					LOG(" Frame %d E CR = %d", CurrentFrame, CompareResult);
 				}
 
 				if (Capture_VBI == TRUE)

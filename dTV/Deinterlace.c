@@ -334,12 +334,10 @@ void DeinterlaceOdd(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay)
 		_asm
 		{
 			mov ecx, CurrentX
-			mov eax,dword ptr [YVal1]
-			mov ebx,dword ptr [YVal2]
-			mov edx,dword ptr [YVal3]
+			mov eax, dword ptr [YVal1]
+			mov ebx, dword ptr [YVal2]
+			mov edx, dword ptr [YVal3]
 			mov edi, dword ptr [Dest]
-			movq mm7, YMask  
-			movq mm6, qwEdgeDetect
 			shr ecx, 2       // there are ActiveX * 2 / 8 qwords
 
 align 8
@@ -398,7 +396,7 @@ DoNext8Bytes:
 
 			pand mm0, mm6
 
-			paddw mm7, mm0
+			por mm7, mm0
 
 			movq qword ptr[edi], mm7
 	
@@ -444,12 +442,10 @@ void DeinterlaceEven(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay)
 		_asm
 		{
 			mov ecx, CurrentX
-			mov eax,dword ptr [YVal1]
-			mov ebx,dword ptr [YVal2]
-			mov edx,dword ptr [YVal3]
+			mov eax, dword ptr [YVal1]
+			mov ebx, dword ptr [YVal2]
+			mov edx, dword ptr [YVal3]
 			mov edi, dword ptr [Dest]
-			movq mm7, YMask  
-			movq mm6, qwEdgeDetect
 			shr ecx, 2       // there are ActiveX * 2 / 8 qwords
 
 align 8
@@ -460,7 +456,7 @@ DoNext8Bytes:
 			movq mm1, qword ptr[ebx] 
 			movq mm2, qword ptr[edx]
 
-			// copy the odd line to destination
+			// copy the even line to destination
 			movq qword ptr[edi], mm2
 
 			// get intensities in mm3 - 4
@@ -508,7 +504,7 @@ DoNext8Bytes:
 
 			pand mm0, mm6
 
-			paddw mm7, mm0
+			por mm7, mm0
 
 			movq qword ptr[edi], mm7
 	
