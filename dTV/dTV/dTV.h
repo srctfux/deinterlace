@@ -98,4 +98,6 @@ extern int pgsizey;
 extern int pgstartx;
 extern int pgstarty;
 
+extern BOOL bIgnoreMouse;
+
 #endif

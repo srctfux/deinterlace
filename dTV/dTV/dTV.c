@@ -156,6 +156,7 @@ HFONT currFont = NULL;
 UINT CpuFeatureFlags;		// TRB 12/20/00 Processor capability flags
 
 BOOL bInMenuOrDialogBox = FALSE;
+BOOL bIgnoreMouse = FALSE;
 
 BOOL IsFullScreen_OnChange(long NewValue);
 BOOL DisplayStatusBar_OnChange(long NewValue);
@@ -1463,10 +1464,11 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 //		break;
 
 	case WM_NCHITTEST:
-		if (!bInMenuOrDialogBox && bAutoHideCursor)
+		if (!bIgnoreMouse && !bInMenuOrDialogBox && bAutoHideCursor)
 		{
 			Cursor_UpdateVisibility();
 		}
+		bIgnoreMouse = FALSE;
 		break;
 
 	case WM_ENTERMENULOOP:
