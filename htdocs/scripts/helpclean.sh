@@ -1,6 +1,6 @@
 #!/bin/sh 
 
-#dScaler Help Update Script
+#dScaler Help clean Script
 #Dan Schmelzer
 #johnadcock@hotmail.com
 #1/25/2001
@@ -10,10 +10,10 @@
 #cp /home/groups/d/de/deinterlace/htdocs/scripts/helpup.sh
 #   /home/users/firstletterusername/firsttwolettersusername/yourusername/ <Enter>
 #cd /home/users/firstletterofyourusername/firsttwolettersofusername/yourusername/ <Enter>
-#sh helpup.sh <Enter>
+#sh helpclean.sh <Enter>
 
 #Instructions for subsequent runs...
-#sh helpup.sh <Enter>
+#sh helpclean.sh <Enter>
 
 #A note about error messages...
 #This script is noisy and verbose.  Don't worry about the error messages.
@@ -24,8 +24,11 @@
 
 cd /home/groups/d/de/deinterlace/htdocs
 
-rm -R -f htdocs/Help
 rm -R -f htdocs/Help/images
+rm -R -f htdocs/Help
+
+rm -d -f htdocs/Help/images
+rm -d -f htdocs/Help
 
 #Check out the Help files module from the dScaler CVS using pserver.
 #You will need to log in to pserver once; after that, you should be fine, unless the CVS
@@ -38,7 +41,8 @@ cvs -d:pserver:anonymous@cvs1:/cvsroot/deinterlace co -d Help DScaler/Help >/dev
 #can delete the directories and files
 
 cd /home/groups/d/de/deinterlace/htdocs/Help
-chmod 777 -R *
+
+chmod -R 777 *
 chown -R adcockj.deinterlace *
 
 #Joy
