@@ -151,7 +151,8 @@ BOOL Overlay_Update(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL Color
 		return (TRUE);
 	}
 
-	dwFlags |= DDOVER_KEYDESTOVERRIDE;
+	if (! bIsFullScreen)
+		dwFlags |= DDOVER_KEYDESTOVERRIDE;
 	DDOverlayFX.dckDestColorkey.dwColorSpaceHighValue = Overlay_ColorMatch(lpDDSurface, OverlayColor);
 	DDOverlayFX.dckDestColorkey.dwColorSpaceLowValue = DDOverlayFX.dckDestColorkey.dwColorSpaceHighValue;
 
