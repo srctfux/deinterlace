@@ -921,6 +921,95 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
               is consistent for this many frames, switch back to it.
           </td>
         </tr>
+        <tr>
+          <td>Clipping</td>
+          <td align="center">1</td>
+          <td>If turned on (non-zero), the source image is clipped (masked)
+		    to hide any source material outside the expected region.  This
+			is the normal operation mode.  It can be turned off and combined
+			with the image positioning commands to make more space available
+			for captions.</td>
+        </tr>
+        <tr>
+          <td>deferedOverlay</td>
+          <td align="center">0</td>
+          <td>If turned on (non-zero) the overlay on the screen will not be
+		    updated until Windows has painted the black masking bars but
+			before painting the purple overlay color.  Additionally, it
+			imposes a delay for the vertical retrace before painting the 
+			overlay color.  Under normal CPU load, this should eleminate 
+			flashing of purple borders when resizing or bouncing the image.  
+			Flashing may still occur under heavy load.</td>
+        </tr>
+        <tr>
+          <td>Bounce</td>
+          <td align="center">0</td>
+          <td>If turned on (non-zero), the image will bounce within any 
+		    space remaining either beside or above/below the image.  Used to
+			maximize the region being used on a CRT projector to minimize 
+			the risk of burning in one piece of the CRT.</td>
+        </tr>
+        <tr>
+          <td>BouncePeriod</td>
+          <td align="center">1800</td>
+          <td>Time (in seconds) it takes for the image to bounce from the center
+		    to the right/bottom then back to the left/top and back to center.  Default
+			is half an hour.</td>
+        </tr>
+        <tr>
+          <td>BounceTimerPeriod</td>
+          <td align="center">1000</td>
+          <td>Number of miliseconds between overlay updates when bounce mode is
+		    enabled.</td>
+        </tr>
+        <tr>
+          <td>Orbit</td>
+          <td align="center">0</td>
+          <td>If enabled (non-zero) the region of the captured image is bounced
+		    around.  This prevents any individual item on the screen from being
+			constantly displayed in the same location and thus minimizes CRT
+			burn-in risk from small static objects.  The orbit causes the image
+			to move into the overlay region, so you may need a larger overlay setting
+			if you use the orbit option.</td>
+        </tr>
+        <tr>
+          <td>OrbitPeriodX</td>
+          <td align="center">2700</td>
+          <td>Number of seconds for the image to move back and forth across the
+		    entire orbit region in the horizontal.  It is recommended that OrbitPeriodX
+			and OrbitPeriodY use different values to provide wider variation in the
+			orbit positions.  If both values are the same, the image will only diagionally
+			orbit from top-left to bottom-right.</td>
+        </tr>
+        <tr>
+          <td>OrbitPeriodY</td>
+          <td align="center">3600</td>
+          <td>Number of seconds for the image to vertically across the
+		    entire orbit region.  It is recommended that OrbitPeriodX
+			and OrbitPeriodY use different values to provide wider variation in the
+			orbit positions.  If both values are the same, the image will only diagionally
+			orbit from top-left to bottom-right.</td>
+        </tr>
+        <tr>
+          <td>OrbitSize</td>
+          <td align="center">8</td>
+          <td>Number of pixels in the captured material to orbit.</td>
+        </tr>
+        <tr>
+          <td>OrbitTimerPeriod</td>
+          <td align="center">60000</td>
+          <td>Number of miliseconds between updates of the overlay for image orbiting.</td>
+        </tr>
+        <tr>
+          <td>VerticalPos</td>
+          <td align="center">CENTER</td>
+          <td>Vertical position of the image (TOP, CENTER, BOTTOM).</td>
+        </tr>
+        <tr>
+          <td>HorizontalPos</td>
+          <td align="center">CENTER</td>
+          <td>Horizontal position of the image (LEFT, CENTER, RIGHT).</td>
+        </tr>
 
         <tr>
           <td colspan=3><h3>[NoiseFilter]</h3></td>
