@@ -1,471 +1,463 @@
-<html>
-
+<html><!-- #BeginTemplate "/Templates/dtvnormal.dwt" -->
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<title>dTV.ini Settings</title>
+<!-- #BeginEditable "doctitle" --> 
+<title>Untitled Document</title>
+<!-- #EndEditable --> 
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<style type="text/css">
+<!--
+p {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
+.bottommenu {  font-family: Arial, Helvetica, sans-serif; font-size: 8pt; font-style: normal; text-decoration: none}
+h3 {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt; font-style: normal; font-weight: bold}
+h1 {  font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 18pt; font-weight: bold}
+li {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
+h2 {  font-family: Arial, Helvetica, sans-serif; font-size: 14pt; font-weight: bold}
+ol {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
+blockquote {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
+pre {  font-family: "Courier New", Courier, mono; font-size: 9pt}
+ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
+-->
+</style>
 </head>
 
-<body>
-<h1>dTV.ini Settings</h1>
-
-<p>
-<b>Contents:</b>
-<nobr>[<a href="#recommendations">Recommended Settings</a>] -</nobr>
-<nobr>[<a href="#descriptions">Setting Descriptions</a>] -</nobr>
-<nobr>[<a href="#modes">Video Modes</a>]</nobr>
-
-<p>Many features of the program are configurable through the menu system.
-Some advanced settings and functions in beta test will require changes to this
-ini file to work properly. All the settings used by the program are stored
-here and no changes are made to the registry.</p>
-
-<h2 id="recommendations">Recommended Settings</h2>
-
-<p>dTV's default settings are suitable for a mid-to-high-end PC.  If you're
-using a slower machine (under 600MHz) you may want to change some or all of
-the following settings for increased performance.</p>
-
-<pre>
-SleepInterval=0
-HurryWhenLate=1
-LowMotionMode=1
-HighMotionMode=0</pre>
-
-
-<h2 id="descriptions">Setting Descriptions</h2>
-
-<p>
-<table border="1">
-<tr>
-<th>Setting</th>
-<th>Default</th>
-<th>Description</th>
-</tr>
-
-<tr>
-<td colspan=3><h3>[Pulldown]</h3></td>
-</tr>
-
-<tr>
-<td>PulldownThresholdLow</td>
-<td>-2000</td>
-<td>Determines when PAL pulldown detection will
-detect a noticable improvement in combing.&nbsp; Lower values (more negative)
-will make detection require more combing to change.&nbsp; Change this if PAL
-detection is not working for you.</td>
-</tr>
-
-<tr>
-<td>PulldownThresholdHigh</td>
-<td>2000</td>
-<td>Determines when PAL pulldown detection will go
-back from movie mode to video mode.&nbsp; This value copes with certain types of
-video noise, if it is set too low then it will flip back on static movie images,
-if set too high it will remain in movie mode for too long.</td>
-</tr>
-
-<tr>
-<td>PulldownRepeatCount</td>
-<td>4</td>
-<td>This is the number of times the pulldown pattern
-must be detected before switching.</td>
-</tr>
-
-<tr>
-<td>Threshold32Pulldown&nbsp;</td>
-<td>15</td>
-<td>This is the number of pixels per field that
-need to be similar for NTSC movie detection to detect a triplet of fields from
-the same movie frame.&nbsp; Higher values will cope with more video noise but
-will not detect the movies as well.  This value is also used to decide when
-to switch between video deinterlace modes on non-film material.</td>
-</tr>
-
-<tr>
-<td>BitShift</td>
-<td>13</td>
-<td>This is used by the NTSC detection code to limit what
-pixels are the same.&nbsp; This should allow for noise in source.&nbsp; The
-value is applied to the square of the pixel difference with the results
-bitshifted right by this amount.</td>
-</tr>
-
-<tr>
-<td>DiffThreshold</td>
-<td>224</td>
-<td>No longer used</td>
-</tr>
-
-<tr>
-<td>PulldownRepeatCount2</td>
-<td>2</td>
-<td>The number of times an unexpected pattern can
-occur before switching back to video video mode from a film mode.&nbsp;</td>
-</tr>
-
-<tr>
-<td>StaticImageFieldCount</td>
-<td>16</td>
-<td>dTV considers an image to be static if it stays the same (or nearly
-the same, subject to Threshold32Pulldown) for this many fields.  If
-auto pulldown detect is turned on, dTV will switch from LowMotionMode to
-StaticImageMode for as long as the image remains the same.  This
-helps reduce CPU consumption on still images such as DVD menu screens.</td>
-</tr>
-
-<tr>
-<td>LowMotionFieldCount</td>
-<td>4</td>
-<td>NTSC only.  dTV considers an image to be low-motion if its difference
-stays below Threshold32Pulldown for this many fields.  If auto pulldown detect is
-turned on and dTV isn't locked onto a film mode, it will switch from high-motion 
-to low-motion mode.</td>
-</tr>
-
-<tr>
-<td>StaticImageMode</td>
-<td>3</td>
-<td>NTSC only.  Specifies the
-<a href="#modes">video deinterlace mode</a>
-to use for static scenes (see StaticImageFieldCount).</td>
-</tr>
-
-<tr>
-<td>LowMotionMode</td>
-<td>2</td>
-<td>NTSC only.  Specifies the
-<a href="#modes">video deinterlace mode</a>
-to use for low-motion scenes (see LowMotionFieldCount).</td>
-</tr>
-
-<tr>
-<td>HighMotionMode</td>
-<td>2</td>
-<td>NTSC only.  Specifies the
-<a href="#modes">video deinterlace mode</a>
-to use for high-motion scenes (see LowMotionFieldCount).</td>
-</tr>
-
-<tr>
-<td colspan=3>
-<h3>[BTVPlugin]</h3>
-</td>
-</tr>
-
-<tr>
-<td>Name</td>
-<td><i>none</i></td>
-<td>Which bTV plug-in to load, the dll should be in the path or in
-the dTV directory.</td>
-</tr>
-
-<tr>
-<td>Level1</td>
-<td><i>none</i></td>
-<td>Parameter passed to the plug-in</td>
-</tr>
-
-<tr>
-<td>Level2</td>
-<td><i>none</i></td>
-<td>Parameter passed to the plug-in</td>
-</tr>
-
-<tr>
-<td>x</td>
-<td><i>none</i></td>
-<td>Parameter passed to the plug-in</td>
-</tr>
-
-<tr>
-<td>y</td>
-<td><i>none</i></td>
-<td>Parameter passed to the plug-in</td>
-</tr>
-
-<tr>
-<td>UseKey1</td>
-<td><i>none</i></td>
-<td>Parameter passed to the plug-in</td>
-</tr>
-
-<tr>
-<td>UseKey2</td>
-<td><i>none</i></td>
-<td>Parameter passed to the plug-in</td>
-</tr>
-
-<tr>
-<td colspan=3><h3>[Deinterlace]</h3></td>
-</tr>
-
-<tr>
-<td>EdgeDetect</td>
-<td>625</td>
-<td>This values governs the strength of edge detection, use
-higher values if you think that the video deinterlacing is occurring too often.</td>
-</tr>
-
-<tr>
-<td>JaggieThreshold</td>
-<td>73</td>
-<td>This values governs the threshold for fine line
-dtection, use higher values if you get problems with small text</td>
-</tr>
-
-<tr>
-<td>SimilarityThreshold</td>
-<td>180</td>
-<td>How similar to its neighbors a pixel has to be before we'll weave it
-rather than bob over it in video deinterlace mode.  The total similarity
-value is the sum of a pixel's similarity values with its upper neighbor,
-its lower neighbor, and its predecessor.  If the total similarity is greater
-than this threshold, the pixel is rendered as is; otherwise the adjacent
-pixels are averaged together.
-</td>
-</tr>
-
-<tr>
-<td>SpatialTolerance</td>
-<td>600</td>
-<td>How much luminance difference the video deinterlace code will tolerate
-between a pixel and its upper and lower neighbors on
-adjacent scanlines.  Luminance levels range from 0 to 127; the
-square of the difference between luminances is subtracted from this
-tolerance, and if the result is greater than 0, the difference is added
-to the pixel's total similarity value.  For example, a tolerance of 144
-would mean that a difference greater than 12 with a neighbor
-wouldn't count toward a pixel's similarity value, while a difference of 10
-would add 44 to the value.  See also SimilarityThreshold.</td>
-</tr>
-
-<tr>
-<td>TemporalTolerance</td>
-<td>200</td>
-<td>How much luminance difference the video deinterlace code will tolerate
-between a pixel and its predecessor from two fields ago.  The same computation
-described in the SpatialTolerance entry is applied.</td>
-</tr>
-
-<tr>
-<td colspan=3><h3>[ASPECT]</h3></td>
-</tr>
-
-<tr>
-<td>SourceAspect</td>
-<td>0</td>
-<td>The most recent aspect ratio used.  This is the ratio multiplied by
-1000, e.g. a 4:3 ratio is (4 / 3 * 1000) or 1333.  A value of 0 means to
-use the aspect ratio of the source material, either 4:3 or 16:9 depending
-on <tt>aspect_mode</tt>.  This is settable via various menu items in the
-Aspect menu, and may also be modified by the aspect ratio autodetect
-option.</td>
-</tr>
-
-<tr>
-<td>CustomSourceAspect</td>
-<td>0</td>
-<td>Allows you to specify a custom aspect ratio which may be accessed from
-the Aspect menu.  Normally unused.</td>
-</tr>
-
-<tr>
-<td>ScreenAspect</td>
-<td>0</td>
-<td>The aspect ratio of the display screen.  If 0, the screen is assumed
-to have square pixels and its resolution is used as the aspect ratio.
-This is settable via various menu items in the Aspect menu.</td>
-</tr>
-
-<tr>
-<td>CustomScreenAspect</td>
-<td>0</td>
-<td>Allows you to specify a custom screen aspect ratio which may be accessed
-from the Aspect menu.  Normally unused.</td>
-</tr>
-
-<tr>
-<td>Mode</td>
-<td>0</td>
-<td>1 if the source is a 4:3 image (even a letterboxed one), 2 if it's an
-anamorphic 16:9 image, or 0 to stretch the source to the current window size.
-This is settable via various menu items in the Aspect menu.</td>
-</tr>
-
-<tr>
-<td>AutoDetectAspect</td>
-<td>0</td>
-<td>Controls whether the code analyzes each frame to detect the current aspect
-ratio.  This may be toggled using the "Autodetect" Aspect menu option.  If
-deactivated, you can get dTV to detect the aspect ratio of the current frame
-using the "Compute" Aspect menu option.</td>
-</tr>
-
-<tr>
-<td>LuminanceThreshold</td>
-<td>25</td>
-<td>Controls how bright letterbox bars are allowed to get.  Valid values are
-0 through 127.  Any pixel with lower luminance than this is considered black
-by the aspect ratio detection code.  Lowering this value will allow dTV to
-detect letterbox modes on darker scenes, at the cost of increasing the chance
-that video noise in the letterbox bars will be treated as part of the
-picture.  <em>If all your letterboxed material is from a clean signal
-source, you'll probably want to lower this.</em></td>
-</tr>
-
-<tr>
-<td>IgnoreNonBlackPixels</td>
-<td>0</td>
-<td>When detecting aspect ratios, we often want to ignore TV station logos
-that extend into the letterbox area.  This setting controls how many non-black
-pixels (see LuminanceThreshold) must be present on a line before it's no
-longer considered part of a letterbox bar.  A value of 0 means 20% of the
-width of the screen, more than big enough to cover most logos.  <em>If you never
-watch letterboxed material with station logos, e.g. if all your letterboxed
-material is on laserdisc or DVD, set this to 1.</em></td>
-</tr>
-
-<tr>
-<td>AspectConsistencyTime</td>
-<td>15</td>
-<td>This many seconds must pass without a narrower frame appearing before
-the autodetect code will switch to a wide ratio it hasn't seen before.</td>
-</tr>
-
-<tr>
-<td>AspectHistoryTime</td>
-<td>300</td>
-<td>The autodetect module will remember previous aspect ratios it's switched
-to for this many seconds.  Ratios that last for less than a second aren't
-remembered since they're assumed to have been erroneous.</td>
-</tr>
-
-<tr>
-<td>ZoomInFrameCount</td>
-<td>60</td>
-<td>When autodetecting aspect ratios, if a ratio we've used before (within
-the past <tt>AspectHistoryTime</tt> seconds) reappears and is consistent for
-this many frames, switch back to it.</td>
-</tr>
-
-<tr>
-<td colspan=3><h3>[NoiseFilter]</h3></td>
-</tr>
-
-<tr>
-<td>UseTemporalNoiseFilter</td>
-<td>0</td>
-<td>Controls whether the temporal noise filter is activated when dTV
-starts up.  0 means it isn't; any other number means it is.</td>
-</tr>
-
-<tr>
-<td>TemporalLuminanceThreshold</td>
-<td>10</td>
-<td>Controls how different a pixel's luminance (brightness) has to be
-from its predecessor in the previous frame before it's considered a
-change in the actual image rather than just noise.  Valid values are
-0-255.  Values over 20 tend to produce posterization artifacts that
-are more distracting than the video noise was.</td>
-</tr>
-
-<tr>
-<td>TemporalChromaThreshold</td>
-<td>12</td>
-<td>Controls how different a pixel's chrominance (hue) has to be
-from its predecessor in the previous frame before it's considered a
-change in the actual image rather than just noise.  Valid values are
-0-255.  Values over 25 tend to produce posterization artifacts that
-are more distracting than the video noise was.</td>
-</tr>
-
+<body bgcolor="#FFFFFF">
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr> 
+    <td height="1" width="160"><img src="/images/spacer.gif" width="1" height="1"></td>
+    <td height="1" width="342"><img src="/images/spacer.gif" width="1" height="1"></td>
+    <td height="1" width="501"><img src="/images/spacer.gif" width="1" height="1"></td>
+  </tr>
+  <tr> 
+    <td width="160"><img src="images/dtvlogotvthumb.jpg" width="160" height="140" alt="dTV Logo"></td>
+    <td colspan="2" align="right" valign="bottom">
+      <font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><!-- #BeginEditable "Page%20Title" -->dTV.ini 
+      Settings &nbsp;<!-- #EndEditable --></b></font></td>
+  </tr>
+  <tr bgcolor="#FFCC00" align="right"> 
+    <td colspan="3"><img src="/images/yellowspacer.gif" width="100%" height="2"></td>
+  </tr>
+  <tr> 
+    <td colspan="3">&nbsp;</td>
+  </tr>
+  <tr>
+    <td colspan="3"><!-- #BeginEditable "Text" --> 
+      <p>Many features of the program are configurable through the menu system.&nbsp; 
+        Some advanced settings and functions in beta test will require changes 
+        to this ini file to work properly.&nbsp; All the settings used by the 
+        program are stored here and no changes are made to the registry.</p>
+      <p> 
+      <table border="1">
+        <tr> 
+          <th> 
+            <p>Setting</p>
+          </th>
+          <th> 
+            <p>Default</p>
+          </th>
+          <th> 
+            <p>Description</p>
+          </th>
+        </tr>
+        <tr> 
+          <td colspan=3> 
+            <h3>[Pulldown]</h3>
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            <p>PulldownThresholdLow</p>
+          </td>
+          <td> 
+            <p align="center">-2000</p>
+          </td>
+          <td> 
+            <p>Determines when PAL pulldown detection will detect a noticable 
+              improvement in combing.&nbsp; Lower values (more negative) will 
+              make detection require more combing to change.&nbsp; Change this 
+              if PAL detection is not working for you.</p>
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            <p>PulldownThresholdHigh</p>
+          </td>
+          <td> 
+            <p align="center">2000</p>
+          </td>
+          <td> 
+            <p>Determines when PAL pulldown detection will go back from movie 
+              mode to video mode.&nbsp; This value copes with certain types of 
+              video noise, if it is set too low then it will flip back on static 
+              movie images, if set too high it will remain in movie mode for too 
+              long.</p>
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            <p>PulldownRepeatCount</p>
+          </td>
+          <td> 
+            <p align="center">4</p>
+          </td>
+          <td> 
+            <p>This is the number of times the pulldown pattern must be detected 
+              before switching.</p>
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            <p>Threshold32Pulldown&nbsp;</p>
+          </td>
+          <td> 
+            <p align="center">15</p>
+          </td>
+          <td> 
+            <p>This is the number of pixels per field that need to be similar 
+              for NTSC movie detection to detect a triplet of fields from the 
+              same movie frame.&nbsp; Higher values will cope with more video 
+              noise but will not detect the movies as well.</p>
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            <p>BitShift</p>
+          </td>
+          <td> 
+            <p align="center">13</p>
+          </td>
+          <td> 
+            <p>This is used by the NTSC detection code to limit what pixels are 
+              the same.&nbsp; This should allow for noise in source.&nbsp; The 
+              value is applied to the square of the pixel difference with the 
+              results bitshifted right by this amount.</p>
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            <p>DiffThreshold</p>
+          </td>
+          <td> 
+            <p align="center">224</p>
+          </td>
+          <td> 
+            <p>No longer used</p>
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            <p>PulldownRepeatCount2</p>
+          </td>
+          <td> 
+            <p align="center">2</p>
+          </td>
+          <td> 
+            <p>The number of times an unexpected pattern can occur before switching 
+              back to video video mode from a film mode.&nbsp;</p>
+          </td>
+        </tr>
+        <tr> 
+          <td colspan=3> 
+            <h3>[BTVPlugin]</h3>
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            <p>Name</p>
+          </td>
+          <td> 
+            <p align="center"><i>none</i></p>
+          </td>
+          <td> 
+            <p>Which bTV plug-in to load, the dll should be in the path or in 
+              the dTV directory.</p>
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            <p>Level1</p>
+          </td>
+          <td> 
+            <p align="center"><i>none</i></p>
+          </td>
+          <td> 
+            <p>Parameter passed to the plug-in</p>
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            <p>Level2</p>
+          </td>
+          <td> 
+            <p align="center"><i>none</i></p>
+          </td>
+          <td> 
+            <p>Parameter passed to the plug-in</p>
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            <p>x</p>
+          </td>
+          <td> 
+            <p align="center"><i>none</i></p>
+          </td>
+          <td> 
+            <p>Parameter passed to the plug-in</p>
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            <p>y</p>
+          </td>
+          <td> 
+            <p align="center"><i>none</i></p>
+          </td>
+          <td> 
+            <p>Parameter passed to the plug-in</p>
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            <p>UseKey1</p>
+          </td>
+          <td> 
+            <p align="center"><i>none</i></p>
+          </td>
+          <td> 
+            <p>Parameter passed to the plug-in</p>
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            <p>UseKey2</p>
+          </td>
+          <td> 
+            <p align="center"><i>none</i></p>
+          </td>
+          <td> 
+            <p>Parameter passed to the plug-in</p>
+          </td>
+        </tr>
+        <tr> 
+          <td colspan=3> 
+            <h3>[Deinterlace]</h3>
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            <p>EdgeDetect</p>
+          </td>
+          <td> 
+            <p align="center">625</p>
+          </td>
+          <td> 
+            <p>This values governs the strength of edge detection, use higher 
+              values if you think that the video deinterlacing is occurring too 
+              often.</p>
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            <p>JaggieThreshold</p>
+          </td>
+          <td> 
+            <p align="center">73</p>
+          </td>
+          <td> 
+            <p>This values governs the threshold for fine line dtection, use higher 
+              values if you get problems with small text</p>
+          </td>
+        </tr>
+        <tr> 
+          <td colspan=3> 
+            <h3>[ASPECT]</h3>
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            <p>SourceAspect</p>
+          </td>
+          <td> 
+            <p align="center">0</p>
+          </td>
+          <td> 
+            <p>The most recent aspect ratio used. This is the ratio multiplied 
+              by 1000, e.g. a 4:3 ratio is (4 / 3 * 1000) or 1333. A value of 
+              0 means to use the aspect ratio of the source material, either 4:3 
+              or 16:9 depending on <tt>aspect_mode</tt>. This is settable via 
+              various menu items in the Aspect menu, and may also be modified 
+              by the aspect ratio autodetect option.</p>
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            <p>CustomSourceAspect</p>
+          </td>
+          <td> 
+            <p align="center">0</p>
+          </td>
+          <td> 
+            <p>Allows you to specify a custom aspect ratio which may be accessed 
+              from the Aspect menu. Normally unused.</p>
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            <p>ScreenAspect</p>
+          </td>
+          <td> 
+            <p align="center">0</p>
+          </td>
+          <td> 
+            <p>The aspect ratio of the display screen. If 0, the screen is assumed 
+              to have square pixels and its resolution is used as the aspect ratio. 
+              This is settable via various menu items in the Aspect menu.</p>
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            <p>CustomScreenAspect</p>
+          </td>
+          <td> 
+            <p align="center">0</p>
+          </td>
+          <td> 
+            <p>Allows you to specify a custom screen aspect ratio which may be 
+              accessed from the Aspect menu. Normally unused.</p>
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            <p>Mode</p>
+          </td>
+          <td> 
+            <p align="center">0</p>
+          </td>
+          <td> 
+            <p>1 if the source is a 4:3 image (even a letterboxed one), 2 if it's 
+              an anamorphic 16:9 image, or 0 to stretch the source to the current 
+              window size. This is settable via various menu items in the Aspect 
+              menu.</p>
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            <p>AutoDetectAspect</p>
+          </td>
+          <td> 
+            <p align="center">0</p>
+          </td>
+          <td> 
+            <p>Controls whether the code analyzes each frame to detect the current 
+              aspect ratio. This may be toggled using the "Autodetect" Aspect 
+              menu option. If deactivated, you can get dTV to detect the aspect 
+              ratio of the current frame using the "Compute" Aspect menu option.</p>
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            <p>LuminanceThreshold</p>
+          </td>
+          <td> 
+            <p align="center">15</p>
+          </td>
+          <td> 
+            <p>Controls how bright letterbox bars are allowed to get. Valid values 
+              are 0 through 127. Any pixel with lower luminance than this is considered 
+              black by the aspect ratio detection code. Lowering this value will 
+              allow dTV to detect letterbox modes on darker scenes, at the cost 
+              of increasing the chance that video noise in the letterbox bars 
+              will be treated as part of the picture. <em>If all your letterboxed 
+              material is from a clean signal source, you'll probably want to 
+              lower this.</em></p>
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            <p>IgnoreNonBlackPixels</p>
+          </td>
+          <td> 
+            <p align="center">0</p>
+          </td>
+          <td> 
+            <p>When detecting aspect ratios, we often want to ignore TV station 
+              logos that extend into the letterbox area. This setting controls 
+              how many non-black pixels (see LuminanceThreshold) must be present 
+              on a line before it's no longer considered part of a letterbox bar. 
+              A value of 0 means 20% of the width of the screen, more than big 
+              enough to cover most logos. <em>If you never watch letterboxed material 
+              with station logos, e.g. if all your letterboxed material is on 
+              laserdisc or DVD, set this to 1.</em></p>
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            <p>AspectConsistencyTime</p>
+          </td>
+          <td> 
+            <p align="center">15</p>
+          </td>
+          <td> 
+            <p>This many seconds must pass without a narrower frame appearing 
+              before the autodetect code will switch to a wide ratio it hasn't 
+              seen before.</p>
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            <p>AspectHistoryTime</p>
+          </td>
+          <td> 
+            <p align="center">300</p>
+          </td>
+          <td> 
+            <p>The autodetect module will remember previous aspect ratios it's 
+              switched to for this many seconds. Ratios that last for less than 
+              a second aren't remembered since they're assumed to have been erroneous.</p>
+          </td>
+        </tr>
+        <tr> 
+          <td> 
+            <p>ZoomInFrameCount</p>
+          </td>
+          <td> 
+            <p align="center">60</p>
+          </td>
+          <td> 
+            <p>When autodetecting aspect ratios, if a ratio we've used before 
+              (within the past <tt>AspectHistoryTime</tt> seconds) reappears and 
+              is consistent for this many frames, switch back to it.</p>
+          </td>
+        </tr>
+      </table>
+      <!-- #EndEditable --></td>
+  </tr>
+  <tr> 
+    <td colspan="3">&nbsp;</td>
+  </tr>
+  <tr bgcolor="#FFCC00"> 
+    <td colspan="3"> 
+      <div align="center"><img src="/images/yellowspacer.gif" width="100%" height="2"></div>
+    </td>
+  </tr>
+  <tr> 
+    <td colspan="3">&nbsp;</td>
+  </tr>
+  <tr> 
+    <td colspan="3"> 
+      <div align="center"><a class="bottommenu" href="index.php">home</a> | <a href="about.htm" class="bottommenu">about</a>
+        | <a href="Reviews.htm" class="bottommenu">reviews</a> |&nbsp;<a href="screenshots/index.htm" class="bottommenu">screenshots</a>
+        | <a href="downloads.htm" class="bottommenu">download</a> | <a href="Authors.htm" class="bottommenu">authors</a>
+        | <a href="Thanks.htm" class="bottommenu">thanks</a> <br>
+        <a href="setup/index.htm" class="bottommenu">setup</a> | <a href="keyboard.htm" class="bottommenu">keyboard
+        shortcuts </a>| <a href="http://sourceforge.net/mail/?group_id=7420" class="bottommenu">mailing
+        list</a> | <a href="FAQ.htm" class="bottommenu">faq</a> | <a href="developers.htm" class="bottommenu">developers</a>
+        | <a href="Links.htm" class="bottommenu">links</a></div>
+    </td>
+  </tr>
 </table>
-
-<h2 id="modes">Deinterlace Modes</h2>
-
-<p>The following numeric codes correspond to the various deinterlace modes
-supported by dTV.  They are used in the DeinterlaceMode, LowMotionMode,
-HighMotionMode, and StillImageMode settings.
-
-<p>
-<table border="1">
-<tr>
-<th>ID</th>
-<th>Name</th>
-<th>Summary</th>
-</tr>
-
-<tr>
-<td>0</td>
-<td>Video Bob</td>
-<td>Adaptive video deinterlace with a tendency to bob rather than weave.
-Useful for high-motion scenes on slower PCs.</td>
-</tr>
-
-<tr>
-<td>1</td>
-<td>Video Weave</td>
-<td>Adaptive video deinterlace with a tendency to weave rather than bob.
-Useful for low-motion scenes on slower PCs.</td>
-</tr>
-
-<tr>
-<td>2</td>
-<td>Video 2-Frame</td>
-<td>Adaptive video deinterlace that examines more data than Video Bob or
-Video Weave.  Can handle high and low-motion scenes but requires more
-CPU horsepower.</td>
-</tr>
-
-<tr>
-<td>3</td>
-<td>Simple Weave</td>
-<td>Combines each incoming field with the previous one, with no attempt
-to eliminate visible artifacts.  Suitable for static (still) images.</td>
-</tr>
-
-<tr>
-<td>4</td>
-<td>Simple Bob</td>
-<td>Fills the whole screen with each incoming field, effectively cutting
-resolution in half.  Not generally useful, though some sports may look
-acceptable and it uses less CPU time than any of the other modes.</td>
-</tr>
-
-<tr>
-<td>5</td>
-<td>bTV Plugin</td>
-<td>Adaptive deinterlace code from the bTV application, a predecessor of
-dTV.  dTV's built-in deinterlace modes generally do a better job.</td>
-</tr>
-
-<tr>
-<td>6-7</td>
-<td>2:2 Pulldown</td>
-<td>PAL film modes, each film frame corresponding to two video fields
-for a frame rate of 25FPS. Generally you will want to let dTV automatically
-detect these modes rather than setting them by hand.</td>
-</tr>
-
-<tr>
-<td>8-12</td>
-<td>3:2 Pulldown</td>
-<td>NTSC film modes, each pair of film frames corresponding to five video
-fields for a frame rate of 24FPS. Generally you will want to let dTV
-automatically detect these modes rather than setting them by hand.</td>
-</tr>
-
-<tr>
-<td>13-14</td>
-<td>Even/Odd Only</td>
-<td>Ignore the odd or even fields, respectively.  Essentially these are
-bob modes, but they may produce better results on some video cards than
-simple bobbing.  Mostly useful for older videogame systems (PlayStation,
-Nintendo64, etc.) that render games at half resolution.</td>
-</tr>
-
-</table>
-
+<p><a href="http://sourceforge.net"><img src="http://sourceforge.net/sflogo.php?group_id=7420&type=1" width="88" height="31" border="0"
+alt="SourceForge.net" align="right"></a></p>
+<p>&nbsp; </p>
 </body>
-
-</html>
+<!-- #EndTemplate --></html>
