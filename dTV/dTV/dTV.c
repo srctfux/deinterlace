@@ -482,14 +482,9 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_RESET:
-			Stop_Capture();
-			Overlay_Clean();
-			BT848_ResetHardware();
-			BT848_SetGeoSize();
-			WorkoutOverlaySize();
-			Start_Capture();
-			Sleep(100);
-			Audio_SetSource(AudioSource);
+            Reset_Capture();
+	        Sleep(100);
+	        Audio_SetSource(AudioSource);
 			break;
 
 		case IDM_TOGGLE_MENU:
@@ -549,18 +544,16 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			DialogBox(hInst, "ABOUT", hWnd, AboutProc);
 			break;
 
-		case IDM_BRIGHTNESSPLUS:
+		case IDM_BRIGHTNESS_PLUS:
 			if (InitialBrightness < 127) InitialBrightness++;
 			BT848_SetBrightness(InitialBrightness);
-			sprintf(Text, "Brightness %d", InitialBrightness);
-			ShowText(hWnd, Text);
+            SendMessage(hWnd, WM_COMMAND, IDM_BRIGHTNESS_CURRENT, 0);
 			break;
 
-		case IDM_BRIGHTNESSMINUS:
+		case IDM_BRIGHTNESS_MINUS:
 			if (InitialBrightness > -127) InitialBrightness--;
 			BT848_SetBrightness(InitialBrightness);
-			sprintf(Text, "Brightness %d", InitialBrightness);
-			ShowText(hWnd, Text);
+            SendMessage(hWnd, WM_COMMAND, IDM_BRIGHTNESS_CURRENT, 0);
 			break;
 
 		case IDM_BRIGHTNESS_CURRENT:
@@ -568,7 +561,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			ShowText(hWnd, Text);
 			break;
 
-		case IDM_COLORPLUS:
+		case IDM_COLOR_PLUS:
 			if ((InitialSaturationU < 255) && (InitialSaturationV < 255))
 			{
 				InitialSaturationU++;
@@ -576,11 +569,10 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			}
 			BT848_SetSaturationU(InitialSaturationU);
 			BT848_SetSaturationV(InitialSaturationV);
-			sprintf(Text, "Colour U %d V %d", InitialSaturationU, InitialSaturationV);
-			ShowText(hWnd, Text);
+            SendMessage(hWnd, WM_COMMAND, IDM_COLOR_CURRENT, 0);
 			break;
 
-		case IDM_COLORMINUS:
+		case IDM_COLOR_MINUS:
 			if ((InitialSaturationU > 0) && (InitialSaturationV > 0))
 			{
 				InitialSaturationU--;
@@ -588,8 +580,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			}
 			BT848_SetSaturationU(InitialSaturationU);
 			BT848_SetSaturationV(InitialSaturationV);
-			sprintf(Text, "Colour U %d V %d", InitialSaturationU, InitialSaturationV);
-			ShowText(hWnd, Text);
+            SendMessage(hWnd, WM_COMMAND, IDM_COLOR_CURRENT, 0);
 			break;
 
 		case IDM_COLOR_CURRENT:
@@ -597,18 +588,16 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			ShowText(hWnd, Text);
 			break;
 
-		case IDM_HUE_DOWN:
-			if (InitialHue > -127) InitialHue--;
-			BT848_SetHue(InitialHue);
-			sprintf(Text, "Hue %d", InitialHue);
-			ShowText(hWnd, Text);
-			break;
-
-		case IDM_HUE_UP:
+		case IDM_HUE_PLUS:
 			if (InitialHue < 127) InitialHue++;
 			BT848_SetHue(InitialHue);
-			sprintf(Text, "Hue %d", InitialHue);
-			ShowText(hWnd, Text);
+            SendMessage(hWnd, WM_COMMAND, IDM_HUE_CURRENT, 0);
+			break;
+
+		case IDM_HUE_MINUS:
+			if (InitialHue > -127) InitialHue--;
+			BT848_SetHue(InitialHue);
+            SendMessage(hWnd, WM_COMMAND, IDM_HUE_CURRENT, 0);
 			break;
 
 		case IDM_HUE_CURRENT:
@@ -616,18 +605,16 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			ShowText(hWnd, Text);
 			break;
 
-		case IDM_KONTRASTPLUS:
-			if (InitialContrast < 256) InitialContrast++;
+		case IDM_KONTRAST_PLUS:
+			if (InitialContrast < 255) InitialContrast++;
 			BT848_SetContrast(InitialContrast);
-			sprintf(Text, "Contrast %d", InitialContrast);
-			ShowText(hWnd, Text);
+            SendMessage(hWnd, WM_COMMAND, IDM_KONTRAST_CURRENT, 0);
 			break;
 
-		case IDM_KONTRASTMINUS:
+		case IDM_KONTRAST_MINUS:
 			if (InitialContrast > 0) InitialContrast--;
 			BT848_SetContrast(InitialContrast);
-			sprintf(Text, "Contrast %d", InitialContrast);
-			ShowText(hWnd, Text);
+            SendMessage(hWnd, WM_COMMAND, IDM_KONTRAST_CURRENT, 0);
 			break;
 
 		case IDM_KONTRAST_CURRENT:
@@ -641,8 +628,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				InitialOverscan++;
 				WorkoutOverlaySize();
 			}
-			sprintf(Text, "Overscan %d", InitialOverscan);
-			ShowText(hWnd, Text);
+            SendMessage(hWnd, WM_COMMAND, IDM_OVERSCAN_CURRENT, 0);
 			break;
 
 		case IDM_OVERSCAN_MINUS:
@@ -651,8 +637,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				InitialOverscan--;
 				WorkoutOverlaySize();
 			}
-			sprintf(Text, "Overscan %d", InitialOverscan);
-			ShowText(hWnd, Text);
+            SendMessage(hWnd, WM_COMMAND, IDM_OVERSCAN_CURRENT, 0);
 			break;
 
 		case IDM_OVERSCAN_CURRENT:
@@ -660,7 +645,35 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			ShowText(hWnd, Text);
 			break;
 
-		case IDM_MUTE:
+		case IDM_BDELAY_PLUS:
+			if (InitialBDelay < 255) InitialBDelay++;
+    		BT848_SetBDELAY((BYTE)InitialBDelay);
+            SendMessage(hWnd, WM_COMMAND, IDM_BDELAY_CURRENT, 0);
+			break;
+
+		case IDM_BDELAY_MINUS:
+			if (InitialBDelay > 0) 
+            {
+                InitialBDelay--;
+                if (InitialBDelay == 0) 
+                {
+                    Reset_Capture();
+                }
+                else
+                {
+        		    BT848_SetBDELAY((BYTE)InitialBDelay);
+                }
+            }
+            SendMessage(hWnd, WM_COMMAND, IDM_BDELAY_CURRENT, 0);
+			break;
+
+		case IDM_BDELAY_CURRENT:
+            sprintf(Text, "BDelay %d", InitialBDelay);
+            if (InitialBDelay == 0) sprintf(Text, "BDelay AUTO");
+			ShowText(hWnd, Text);
+			break;
+
+        case IDM_MUTE:
 			if (System_In_Mute == FALSE)
 			{
 				System_In_Mute = TRUE;
@@ -2021,13 +2034,7 @@ void Overlay_Stop(HWND hWnd)
 void Overlay_Start(HWND hWnd)
 {
 	Overlay_Create();
-	Overlay_Clean();
-	BT848_ResetHardware();
-	BT848_SetGeoSize();
-	WorkoutOverlaySize();
-	Start_Capture();
-	Sleep(100);
-	Audio_SetSource(AudioSource);
+    Reset_Capture();
 }
 
 //---------------------------------------------------------------------------

@@ -1431,20 +1431,24 @@ BEGIN
     "9",            IDM_TASPECT_CUSTOM,     VIRTKEY, ALT, NOINVERT
     "=",            IDM_VOLUMEPLUS,         ASCII,  NOINVERT
     "A",            IDM_SASPECT_AUTO,       VIRTKEY, NOINVERT
-    "B",            IDM_BRIGHTNESSMINUS,    VIRTKEY, NOINVERT
-    "B",            IDM_BRIGHTNESSPLUS,     VIRTKEY, SHIFT, NOINVERT
+    "B",            IDM_BRIGHTNESS_MINUS,   VIRTKEY, NOINVERT
+    "B",            IDM_BRIGHTNESS_PLUS,    VIRTKEY, SHIFT, NOINVERT
     "B",            IDM_BRIGHTNESS_CURRENT, VIRTKEY, SHIFT, CONTROL, 
                                                     NOINVERT
-    "C",            IDM_COLORMINUS,         VIRTKEY, NOINVERT
-    "C",            IDM_COLORPLUS,          VIRTKEY, SHIFT, NOINVERT
+    "C",            IDM_COLOR_MINUS,        VIRTKEY, NOINVERT
+    "C",            IDM_COLOR_PLUS,         VIRTKEY, SHIFT, NOINVERT
     "C",            IDM_COLOR_CURRENT,      VIRTKEY, SHIFT, CONTROL, 
                                                     NOINVERT
-    "H",            IDM_HUE_DOWN,           VIRTKEY, NOINVERT
-    "H",            IDM_HUE_UP,             VIRTKEY, SHIFT, NOINVERT
+    "D",            IDM_BDELAY_MINUS,       VIRTKEY, NOINVERT
+    "D",            IDM_BDELAY_PLUS,        VIRTKEY, SHIFT, NOINVERT
+    "D",            IDM_BDELAY_CURRENT,     VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "H",            IDM_HUE_MINUS,          VIRTKEY, NOINVERT
+    "H",            IDM_HUE_PLUS,           VIRTKEY, SHIFT, NOINVERT
     "H",            IDM_HUE_CURRENT,        VIRTKEY, SHIFT, CONTROL, 
                                                     NOINVERT
-    "K",            IDM_KONTRASTMINUS,      VIRTKEY, NOINVERT
-    "K",            IDM_KONTRASTPLUS,       VIRTKEY, SHIFT, NOINVERT
+    "K",            IDM_KONTRAST_MINUS,     VIRTKEY, NOINVERT
+    "K",            IDM_KONTRAST_PLUS,      VIRTKEY, SHIFT, NOINVERT
     "K",            IDM_KONTRAST_CURRENT,   VIRTKEY, SHIFT, CONTROL, 
                                                     NOINVERT
     "L",            IDM_TAKESTILL,          VIRTKEY, NOINVERT

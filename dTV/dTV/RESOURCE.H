@@ -46,12 +46,12 @@
 #define IDM_IC_OUT                      388
 #define IDM_VPS_OUT                     389
 #define IDM_INTERCAST_SETUP             392
-#define IDM_COLORPLUS                   394
-#define IDM_COLORMINUS                  395
-#define IDM_BRIGHTNESSPLUS              396
-#define IDM_BRIGHTNESSMINUS             397
-#define IDM_KONTRASTPLUS                398
-#define IDM_KONTRASTMINUS               399
+#define IDM_COLOR_PLUS                  394
+#define IDM_COLOR_MINUS                 395
+#define IDM_BRIGHTNESS_PLUS             396
+#define IDM_BRIGHTNESS_MINUS            397
+#define IDM_KONTRAST_PLUS               398
+#define IDM_KONTRAST_MINUS              399
 #define IDM_AUDIO_MIXER                 400
 #define IDM_MUTE                        402
 #define IDM_L_BALANCE                   403
@@ -75,8 +75,8 @@
 #define IDM_VT_SETUP                    450
 #define IDM_EVENT_INFO                  451
 #define IDM_SPACEBAR                    477
-#define IDM_HUE_UP                      478
-#define IDM_HUE_DOWN                    479
+#define IDM_HUE_PLUS                    478
+#define IDM_HUE_MINUS                   479
 #define IDM_FULL_SCREEN                 480
 #define IDM_CLOSEDCAPTION               482
 #define IDM_SETUPCARD                   483
@@ -142,7 +142,9 @@
 #define IDM_KONTRAST_CURRENT            558
 #define IDM_BRIGHTNESS_CURRENT          559
 #define IDM_OVERSCAN_CURRENT            560
-#define IDM_TESTER                      562
+#define IDM_BDELAY_MINUS                563
+#define IDM_BDELAY_PLUS                 564
+#define IDM_BDELAY_CURRENT              565
 #define IDM_END                         1032
 #define IDM_TUNER                       1089
 #define IDM_EXTERN1                     1090
@@ -710,7 +712,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        155
-#define _APS_NEXT_COMMAND_VALUE         563
+#define _APS_NEXT_COMMAND_VALUE         566
 #define _APS_NEXT_CONTROL_VALUE         1812
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
