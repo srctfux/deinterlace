@@ -19,6 +19,11 @@ Any questions regarding the FAQ should go to me, Yvonus, at yvonus@removethis_bi
 
 --8<----------------
 
+30/08 Yvonus
+. Added the "Troubleshooting>What is the crashlog.txt file ?"
+. Added the "Where can I download DScaler ?" (Attention ; the link is an absolute one to dscaler.org/dl .. just in case the page
+would be mirrored on another site of if provided as a file)
+. Changing the "Who made what ?" by "History of DScaler"
 
 
 30/7 Yvonus
