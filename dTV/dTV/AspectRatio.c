@@ -1077,6 +1077,21 @@ BOOL SourceAspect_OnChange(long NewValue)
 	return FALSE;
 }
 
+BOOL HorizPos_OnChange(long NewValue)
+{
+	HorizontalPos = NewValue;
+	WorkoutOverlaySize();
+	return FALSE;
+}
+
+BOOL VertPos_OnChange(long NewValue)
+{
+	VerticalPos = NewValue;
+	WorkoutOverlaySize();
+	return FALSE;
+}
+
+
 /////////////////////////////////////////////////////////////////////////////
 // Start of Settings related code
 /////////////////////////////////////////////////////////////////////////////
@@ -1090,22 +1105,22 @@ SETTING AspectSettings[ASPECT_SETTING_LASTONE] =
 	},
 	{
 		"Source Aspect", NUMBER, 0, &source_aspect,
-		1333, 0, 4000, 10, NULL,
+		1333, 1000, 3000, 1, NULL,
 		"ASPECT", "SourceAspect", SourceAspect_OnChange,
 	},
 	{
 		"Custom Source Aspect", SLIDER, 0, &custom_source_aspect,
-		0, 0, 4000, 10, NULL,
+		1333, 1000, 3000, 1, NULL,
 		"ASPECT", "CustomSourceAspect", NULL,
 	},
 	{
-		"Target Aspect", NUMBER, 0, &target_aspect,
-		0, 0, 4000, 10, NULL,
+		"Screen Aspect", NUMBER, 0, &target_aspect,
+		1333, 1000, 3000, 1, NULL,
 		"ASPECT", "TargetAspect", TargetAspect_OnChange,
 	},
 	{
-		"Custom Target Aspect", SLIDER, 0, &custom_target_aspect,
-		0, 0, 4000, 10, NULL,
+		"Custom Screen Aspect", SLIDER, 0, &custom_target_aspect,
+		1333, 1000, 3000, 1, NULL,
 		"ASPECT", "CustomTargetAspect", NULL,
 	},
 	{
@@ -1144,14 +1159,14 @@ SETTING AspectSettings[ASPECT_SETTING_LASTONE] =
 		"ASPECT", "AspectConsistencyTime", NULL,
 	},
 	{
-		"Vert Delay", NUMBER, 0, &VerticalPos,
-		VERT_POS_CENTRE, 0, 1, 1, NULL,
-		"ASPECT", "VerticalPos", NULL,
+		"Vert Image Pos", NUMBER, 0, &VerticalPos,
+		VERT_POS_CENTRE, 0, 2, 1, NULL,
+		"ASPECT", "VerticalPos", VertPos_OnChange,
 	},
 	{
-		"Horiz Delay", NUMBER, 0, &HorizontalPos,
-		HORZ_POS_CENTRE, 0, 1, 1, NULL,
-		"ASPECT", "HorizontalPos", NULL,
+		"Horiz Image Pos", NUMBER, 0, &HorizontalPos,
+		HORZ_POS_CENTRE, 0, 2, 1, NULL,
+		"ASPECT", "HorizontalPos", HorizPos_OnChange,
 	},
 };
 

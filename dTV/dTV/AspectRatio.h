@@ -49,18 +49,20 @@ void Aspect_WriteSettingsToIni();
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 
+// The HORIZ_POS and VERT_POS are ordered in reverse
+// because it works better during increment/decrement operations
 typedef enum
 {
-	VERT_POS_CENTRE = 0,
+	VERT_POS_BOTTOM = 0,
+	VERT_POS_CENTRE,
 	VERT_POS_TOP,
-	VERT_POS_BOTTOM,
 } VERT_POS;
 
 typedef enum
 {
-	HORZ_POS_CENTRE = 0,
+	HORZ_POS_RIGHT = 0,
+	HORZ_POS_CENTRE,
 	HORZ_POS_LEFT,
-	HORZ_POS_RIGHT,
 } HORZ_POS;
 
 int     ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID);
