@@ -39,7 +39,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
     <td colspan="3"><img src="images/yellowspacer.gif" width="100%" height="2"></td>
   </tr>
   <tr> 
-    <td colspan="3">Last update: May7th 2001</td>
+    <td colspan="3">Last update: May 22nd 2001</td>
   </tr>
   <tr> 
     <td colspan="3"><!-- #BeginEditable "Text" --> 
@@ -47,63 +47,62 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <h1>Introduction</h1>
       <h2>Where can I find the latest FAQ ?</h2>
       <p> <a href="http://deinterlace.sourceforge.net/FAQ.htm">Here at
-      deinterlace.sourceforge.net/FAQ.htm&nbsp;</a>
+      deinterlace.sourceforge.net/FAQ.htm</a>
       <h2>What is DScaler ?</h2>
       <p> DScaler is a piece of software that grabs analog, interlaced video, and 
-        deinterlaces it to make it a progressive scan feed for use on your computer 
-        monitor or projector and then allows scaling to any resolution.
+        deinterlaces it to make it a progressive scan feed then allows scaling 
+	to any resolution for use on your computer monitor or projector.</p>
       <p> Analog, interlaced video is what devices like VCRs, laserdisc, and
-        game consoles output.
+        game consoles output.</p>
       <h2>What is so special about DScaler ?</h2>
       <p> Unlike most existing software for use with TV cards, DScaler implements 
-        very sophisticated algorithms to deinterlace such sources. Using such 
+        sophisticated deinterlacing algorithms. Using such 
         algorithms makes sure that each kind of video source is handled a different 
         way. It provides the user with a level of image quality unknown to PC owners
-      until now. 
-      <p> Some of those techniques are ;
+        until now. </p>
+      <p> Some of the techniques are:
       <ul>
         <li>video source deinterlacing</li>
         <li>inverse telecine detection: 2:2 (for pal movies) as well as 3:2 (for ntsc movies) pulldown</li>
         <li>Automatic aspect ratio control</li>
         <li>Judder elimination</li>
       </ul>
-      <p> The image quality resulting from those complex operations is high and 
+      The image quality resulting from those complex operations is high and 
         allows some people equipped with data capable projectors to feed them 
         with progressive scan images.
-      <h2>
-      What is dTV?</h2>
+      </p>
+      <h2>What is dTV?</h2>
       <p>dTV is the old name for DScaler, we changed the name as people use DTV
-      to refer to digital television and this was causing confusion.&nbsp; In
+      to refer to digital television and this was causing confusion. In
       the source and on the website you will still see references to dTV but
-      please refer to the program as DScaler from now on. 
+      please refer to the program as DScaler from now on. </p>
       <h2>Who made what ?</h2>
-      <p>See <a href="Authors.htm">DScaler</a> <a href="Authors.htm"> -- Authors</a> for the main contributors
-      and <a href="Thanks.htm">DScaler</a> <a href="Thanks.htm"> -- Thanks</a> for a list of people who have
+      <p>See <a href="Authors.htm"> Authors</a> for the main contributors
+      and <a href="Thanks.htm">Thanks</a> for a list of people who have
       helped make DScaler a success.</p>
       <h2>How much does DScaler cost ?</h2>
       <p> $1000 (plus taxes) :-) Of course not, DScaler is fully free of charge,
-      open-source, 
-        coded under GPL. 
+      open-source, coded under GPL. 
       <h1>General issues</h1>
       <h2>Should I use DScaler to deinterlace the output from my set-top dvd player 
         ?</h2>
-      <p> While it's feasible and works quite fine (see the &quot;DScaler Windvd challenge" 
+      <p> While it's feasible and works quite well (see the &quot;DScaler Windvd challenge&quot; 
         in the <a href="/screenshots.htm">screenshots</a> section), home theatre
-      pc's have shown the best results while using dvd decoding software along 
-        with a dvd-rom and a modern graphic card. However, it's been used quite 
-        often for test purposes (testing of grab quality on a high quality source, 
-        testing pulldown techniques on well encoded sources etc..). 
+        PC's have shown the best results while using dvd decoding software along 
+        with a dvd-rom and a modern graphics card. However, there are people who find
+        things easier to use with DScaler and an external DVD player. 
       <p> Some people have found that DScaler does a better job with non-film DVDs
         (concert videos or DVDs of some television shows, for example) than the
         software players. 
       <h1>Software issues</h1>
       <h2>Which operating system can I use DScaler on ?</h2>
-      <p> Windows 95 ok <i>uses VxD running in ring-0</i><br>
+      <p> Windows 95 ok <i>uses VxD running in ring-0, may need ie 4.0 installed</i><br>
         Windows 98 ok <i>uses VxD running in ring-0</i><br>
-        Windows NT ok <i>uses sys running in ring-0</i><br>
+        Windows NT ?? <i>may require hacked DirectX 5.0</i><br>
         Windows Me ok <i>uses VxD running in ring-0</i><br>
         Windows 2000 ok <i>uses sys running in ring-0</i><br>
-        Linux no<br>
+        Windows XP ok <i>uses sys running in ring-0</i><br>
+        Linux no <i>if you want to do a port contact the mailing list</i><br>
         OS/2 definitely no ;-) 
       <h2>What are all those deinterlace algorithms ?</h2>
       <h3>Video Deinterlace (Bob)</h3>
@@ -237,20 +236,22 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         De-interlace mode for DScaler window sizes up to 848x629 (as determined from
       DScaler.ini) but 7+ DFS for window sizes even 1 pixel above either of these 
         dimensions</i>
-      <p> Bottom line ; no specific requirement for DScaler. Probably works not so 
-        bad on any vga card. However, as of today, GeForce based cards or (dualhead) 
-        Matrox G4x0 are successfully used by a lot of users.
-      <p> 
+      <p>At a minimum the display card must support YUY2 overlays.  All newer cards support this.
+      </p> 
       <a name="BESTCARD"></a>
       <h2>Which capture card can I use ?</h2>
       <p> Almost any card (and that means A LOT) based of former Brooktree (now 
-        Conexant) chips including bt848/878/879. Why those ? They are, for several 
-        years now, the chipsets that are easy to program (there has been A LOT 
+        Conexant) chips including bt848/878/879 will work for video only.
+	Why those ? These chipss are easy to program (there has been A LOT 
         of software based on those) and very cheap. Side effect ; a great number 
-        of manufacturers have (and are still) produced cards based on those chipsets.
+        of manufacturers have (and are still) produced cards based on those chips.
+      <p>
+	Sound from the tuner is not always supported and adding this for a lot of cards is not 
+        a developement priority.
+      </p>
       <p> While we can't claim "this card is the one you need", let's give you 
-        a couple ones that, at least, have been sucessfully used by some users 
-        ;
+        a couple ones that, at least, have been sucessfully used by some users.
+      </p>
       <ul>
         <li>Zoltrix Genie TV <a href="http://www.zoltix.com/products/GenieTVspecs.htm">http://www.zoltix.com/products/GenieTVspecs.htm</a> 
         <li>The WinTV series from Hauppage <a href="http://www.hauppage.com/html/products.htm">http://www.hauppage.com/html/products.htm</a> 
@@ -259,21 +260,21 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       </ul>
       <p>Take a look at the <a href="/card_support.htm">card list</a>. This will 
       never be complete so feel free to drop us an email reporting your experience 
-      with DScaler and your card.&nbsp; Also note that just because a card is on
-      the list does not mean that it will work properly.&nbsp; Some features
+      with DScaler and your card. Also note that just because a card is on
+      the list does not mean that it will work properly. Some features
       especially sound may not work correctly.</p>
       <p> <i>This list is originally based on the linux bttv driver on which the 
         program was originally based.</i>
       <h2>Can I use my existing <whatever> card's video input ?</h2>
       <p> Probably not. DScaler is supporting (see previous question) the Brooktree/Conexant 
         chipset. Supporting others chipsets, while feasable, means some hard work 
-        and some solid knowledges of those chipsets. And <b>unfortunately, no 
+        and some solid knowledge of those chipsets. And <b>unfortunately, no 
         recent vga card with video-in feature includes Brooktree/Conexant chipset</b>. 
-        Gx00, Asus Deluxe etc... are thus not supported at the moment. 
+        Gx00, Asus Deluxe, ATI All-in-Wonder etc... are thus not supported at the moment. 
       <p> If you have some programming knowledge regarding the grab chipsets used 
         in those card, you might want to help us. See the "<a href="#HELP">How 
         can I help</a>" section.
-      <h2>Can I use more than one video input ?</h2>
+      <h2>Can I use more than one video card ?</h2>
       <p> Some "nut" people (he's admitting it himself ;-) who are playing with 
         Picture In Picture a lot have asked if DScaler could drive multiple cards 
         or multiple inputs. A card allowing at worst 4 video inputs is manufactured 
@@ -289,8 +290,6 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <p> 
       <a name="TROUBLE"></a>
       <h1>Troubleshooting</h1>
-      <p> 
-      <a name="PURPLESTRIPES"></a>
       <h2> 
       I have problems with sound?</h2>
       <p>Note that support for sound from cards internal tuners is not a
@@ -298,6 +297,19 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       developers use some kind of external TV tuner and bypass the sound
       issue.&nbsp; Having said that we will be pleased to accept fixes for any
       card but are not in a position to add support for new cards ourselves.
+      <p> 
+      <h2> My picture jumps up and down?<br>
+        I get dropped frames?</h2>
+      <p> Both problems seems to be caused by not having a powerful enough machine 
+        to run everything all at the same time.&nbsp; The things that use up a 
+        lot of CPU time are 2-Frame and Blended Clip deinterlacing and automatic 
+        pulldown detection.&nbsp; Try moving to another pulldown method or switching 
+        off autodetection.&nbsp; The other alternative is to buy a faster PC ;-))</p>
+      <p> There is now a setting in Select Hardware which allows you to tell dTV 
+        how fast your PC is.&nbsp; Try selecting alower speed if you get either 
+        of these problems.</p>
+      <p> 
+      <a name="PURPLESTRIPES"></a>
       <h2>What is this "purple stripes" issue ?</h2>
       <p> When feeding some analog sources to the combination grab card/DScaler, some 
         numerous horizontal colores lines appear on the image.
@@ -347,9 +359,12 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
         resizing DScaler or making it go from fullscreen to window mode. Also the 
         color depth, frequency and size of the desktop might be related. The problem 
         seems to have disappeared with DScaler starting from version 2.0.0 
-      <p> Some more infos on this issue in <a href="http://www.avsforum.com/ubb/Forum12/HTML/004895.html">this 
+      <p> Some more info on this issue in <a href="http://www.avsforum.com/ubb/Forum12/HTML/004895.html">this 
         avs topic</a>
       <p> 
+      <h2>I still have a problem?</h2>
+      <p>See <a href="user_support.htm">Support</a> for how to get support for DScaler. 
+      </p> 
       <a name="HELP"></a>
       <h1>How can I help ?</h1>
       <h2>Testing</h2>
@@ -366,8 +381,8 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <p> Any help is welcome. Despite including very complex code, there are a 
         lot of features in it that are simple or that could be easily implemented 
         without knowing anything about 3:2 pulldown detection.<p> If you've got an idea, or feel like to trying to implement something 
-        that is already in the <a href="/Todo.htm">Todo list</a>, join the <a href="http://sourceforge.net/mail/?group_id=7420">mailing 
-        list</a>. All relevant information to get you started are on the <a href="/developers.htm">developers 
+        that is already in the <a href="http://sourceforge.net/pm/task.php?group_project_id=7174&group_id=7420&func=browse">Tasks list</a>, join the <a href="http://lists.sourceforge.net/lists/listinfo/deinterlace-discuss">mailing 
+        list</a>. All relevant information to get you started are on the <a href="http://deinterlace.sourceforge.net/developers.htm">developers 
         page</a>. 
       <!-- #EndEditable --></td>
   </tr>
