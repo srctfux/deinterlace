@@ -657,7 +657,7 @@ void OSD_ShowInfosScreen(HWND hWnd, double dfSize)
 		// Title
 		OSD_AddText("WSS data decoding", 8, RGB(255,150,150), OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (1, dfMargin, 10));
 
-		nLine = 4;
+		nLine = 3;
 
 		OSD_AddText("Status", dfSize, RGB(150,150,255), OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 
@@ -679,36 +679,17 @@ void OSD_ShowInfosScreen(HWND hWnd, double dfSize)
 		OSD_AddText("Data", dfSize, RGB(150,150,255), OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 
 		// WSS data
-		switch (WSSRatio)
-		{
-		case WSS625_RATIO_133:
-			strcpy (szInfo, "Ratio 1.33");
-			break;
-		case WSS625_RATIO_177_ANAMORPHIC:
-			strcpy (szInfo, "Ratio 1.77 anamorphic");
-			break;
-		case WSS625_RATIO_155:
-			strcpy (szInfo, "Ratio 1.55 full");
-			break;
-		case WSS625_RATIO_155_LETTERBOX_CENTER:
-			strcpy (szInfo, "Ratio 1.55 letterbox (center)");
-			break;
-		case WSS625_RATIO_155_LETTERBOX_TOP:
-			strcpy (szInfo, "Ratio 1.55 letterbox (top)");
-			break;
-		case WSS625_RATIO_177_LETTERBOX_CENTER:
-			strcpy (szInfo, "Ratio : 1.77 letterbox (center)");
-			break;
-		case WSS625_RATIO_177_LETTERBOX_TOP:
-			strcpy (szInfo, "Ratio : 1.77 letterbox (top)");
-			break;
-		case WSS625_RATIO_BIG_LETTERBOX_CENTER:
-			strcpy (szInfo, "Ratio : >1.77 letterbox (center)");
-			break;
-		default:
-			strcpy(szInfo, "Ratio : ???");
-			break;
-		}
+		if (WSSAspectMode == 1)
+			strcpy (szInfo, "Aspect mode : non anamorphic");
+		else if (WSSAspectMode == 2)
+			strcpy (szInfo, "Aspect mode : anamorphic");
+		else
+			strcpy (szInfo, "Aspect mode : undefined");
+		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+		if (WSSAspectRatio > 0)
+			sprintf (szInfo, "Aspect ratio : %.2f", WSSAspectRatio / 1000.0);
+		else
+			strcpy (szInfo, "Aspect ratio : undefined");
 		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 		sprintf (szInfo, "Mode : %s", WSSFilmMode ? "film mode" : "camera mode");		
 		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));

@@ -46,7 +46,8 @@
 #define	WSS525_RATIO_133_LETTERBOX			0x02
 
 // Last WSS data decoded
-extern int	WSSRatio;
+extern int	WSSAspectRatio;
+extern int	WSSAspectMode;
 extern BOOL	WSSFilmMode;
 extern BOOL	WSSColorPlus;
 extern BOOL	WSSHelperSignals;
