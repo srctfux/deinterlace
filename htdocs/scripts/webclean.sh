@@ -44,6 +44,7 @@ cd /home/groups/d/de/deinterlace/
 
 rm -f htdocs/*
 rm -R -f htdocs/CVS
+rm -R -f htdocs/channels
 rm -R -f htdocs/bugs
 rm -R -f htdocs/card-support
 rm -R -f htdocs/dtv-vs-windvd
