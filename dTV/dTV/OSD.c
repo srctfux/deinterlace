@@ -41,12 +41,14 @@
 
 //---------------------------------------------------------------------------
 // Global OSD Information structure
-OSD_INFO  grOSD = {""};
+OSD_INFO    grOSD = {""};
+BOOL        bOverride = FALSE;
 
 //---------------------------------------------------------------------------
 // Display specified OSD text with autohide
 void OSD_ShowText(HWND hWnd, LPCTSTR szText, double dfSize)
 {
+    if (bOverride) return;
 	if (strlen(szText))
 	{
         grOSD.dfSize = dfSize;
@@ -68,6 +70,7 @@ void OSD_ShowText(HWND hWnd, LPCTSTR szText, double dfSize)
 // Stays on screen until a new OSD message replaces current OSD message.
 void OSD_ShowTextPersistent(HWND hWnd, LPCTSTR szText, double dfSize)
 {
+    if (bOverride) return;
 	KillTimer(hWnd, OSD_TIMER_ID);
 	if (strlen(szText))
 	{
@@ -85,10 +88,23 @@ void OSD_ShowTextPersistent(HWND hWnd, LPCTSTR szText, double dfSize)
 }
 
 //---------------------------------------------------------------------------
+// Override all previous OSD text, and force this current OSD text
+// to override all other OSD text showings (done by the above functions).
+// This is useful for external programs to override dTV's own OSD text
+// for its own controls.
+void OSD_ShowTextOverride(HWND hWnd, LPCTSTR szText, double dfSize)
+{
+    bOverride = FALSE;
+    OSD_ShowText(hWnd, szText, dfSize);
+    bOverride = TRUE;
+}
+
+//---------------------------------------------------------------------------
 // Clear currently displayed OSD
 void OSD_Clear(HWND hWnd)
 {
 	KillTimer(hWnd, OSD_TIMER_ID);
+    bOverride = FALSE;
 	lstrcpy(grOSD.szText, "");
 	InvalidateRect(hWnd, NULL, FALSE);
 }

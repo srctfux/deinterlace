@@ -47,5 +47,6 @@ typedef struct OSD_INFO_TAG
 
 void OSD_ShowText(HWND hWnd, LPCTSTR szText, double dfSize);
 void OSD_ShowTextPersistent(HWND hWnd, LPCTSTR szText, double dfSize);
+void OSD_ShowTextOverride(HWND hWnd, LPCTSTR szText, double dfSize);
 void OSD_Redraw(HWND hWnd);
 void OSD_Clear(HWND hWnd);
