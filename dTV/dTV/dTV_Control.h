@@ -113,7 +113,7 @@
 // Messages for the Input Select Menu
 #define IDM_COMPOSITE                   1090
 #define IDM_SVIDEO                      1091
-#define IDM_COMPONENT                   1095
+#define IDM_CCIR656                     1095
 
 // Messages for the Screen Aspect Ratio Menu
 #define IDM_TASPECT_0                   740
