@@ -103,10 +103,8 @@ void UpdateNTSCPulldownMode(DEINTERLACE_INFO *pInfo)
 	static long MATCH_COUNT = 0;
 	static ePULLDOWNMODES OldPulldownMode = VIDEO_MODE_BOB;
 
-	// Call with pInfo->FieldDiff -1 is an initialization call.
+	// Call with pInfo == NULL is an initialization call.
 	// This resets static variables when we start the thread each time.
-	// This probably should be done in an .Initialize() member function
-	// when we port to C++
 	if(pInfo == NULL)
 	{
         MOVIE_VERIFY_CYCLE = 0;

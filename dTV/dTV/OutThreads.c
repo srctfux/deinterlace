@@ -412,6 +412,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 		info.IsOdd = WaitForNextField(info.IsOdd);
 		if(bIsPaused == FALSE)
 		{
+			info.CurrentFrame = CurrentFrame;
 			info.OverlayPitch = OverlayPitch;
 			info.LineLength = CurrentX * 2;
 			info.FrameWidth = CurrentX;
