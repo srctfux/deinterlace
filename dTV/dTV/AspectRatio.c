@@ -1154,7 +1154,7 @@ SETTING AspectSettings[ASPECT_SETTING_LASTONE] =
 	},
 	{
 		"Screen Aspect", NUMBER, 0, &target_aspect,
-		1333, 1000, 3000, 1, 1000,
+		1333, 0, 3000, 1, 1000,
 		NULL,
 		"ASPECT", "TargetAspect", TargetAspect_OnChange,
 	},
