@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "DTVDRV95_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /Zp1 /MT /W3 /Zi /Od /Ob0 /I "..\common" /I "..\include" /D "_VXD_" /D "IS_32" /D DEBLEVEL=1 /D "WIN95" /D "WIN40COMPAT" /D "NDEBUG" /D "DTVDRV95_EXPORTS" /YX /FD /Gs /c
+# ADD CPP /nologo /Zp1 /MT /W3 /Zi /Od /I "..\common" /I "..\include" /D "_VXD_" /D "IS_32" /D DEBLEVEL=1 /D "WIN95" /D "WIN40COMPAT" /D "NDEBUG" /D "DTVDRV95_EXPORTS" /YX /FD /Gs /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /win32
 # SUBTRACT MTL /mktyplib203
@@ -105,6 +105,10 @@ SOURCE=..\COMMON\DEBUGOUT.CPP
 # Begin Source File
 
 SOURCE=.\dTVdrv95.CPP
+# End Source File
+# Begin Source File
+
+SOURCE=.\dTVdrv95.rc
 # End Source File
 # Begin Source File
 
