@@ -50,14 +50,13 @@ extern HMENU hMenu;
 // Use aspect * 1000 (1.66 = 1660, 2.35 = 2350, etc)
 // Use negative values for source_aspect to imply anamorphic sources
 // Note: target_aspect is the aspect ratio of the screen.
-int source_aspect = 0, target_aspect = 0, aspect_mode;
+int source_aspect = 0;
+int target_aspect = 0;
+int aspect_mode = 0;
 
-// Mode 0 = do nothing, 1 = Letterboxed, 2 = 16:9 anamorphic, 3 = Full Frame anamorphic
-//
-// FIXME: Mark Rejhon: We should eventually remove this, since we want
-// to be aspect ratio independent both at the source and destination 
-// in the long term.
-int custom_source_aspect = 0, custom_target_aspect = 0; // Read from INI
+// Mode 0 = do nothing, 1 = Letterboxed, 2 = 16:9 anamorphic
+int custom_source_aspect = 0;
+int custom_target_aspect = 0;
 
 RECT destinationRectangle = {0,0,0,0};
 
@@ -68,31 +67,80 @@ RECT destinationRectangle = {0,0,0,0};
 // Initializing aspect ratio control related checkboxes in menu
 void SetMenuAspectRatio(HWND hWnd)
 {
-	CheckMenuItem(GetMenu(hWnd), IDM_ASPECT_NONE, (aspect_mode == 0)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_ASPECT_LETTERBOX, (aspect_mode == 1)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_ASPECT_ANAMORPHIC_177, (aspect_mode == 2)?MF_CHECKED:MF_UNCHECKED);
-	
-	// We don't need this; the rare anamorphic laserdisc behaves the same way as 
-	// anamorphic DVD.  This extra option confuses the majority of users 
-	// (including advanced users like me), so we'll leave this out, even if
-	// there's some weird laserdiscs out there.
-	//CheckMenuItem(GetMenu(hWnd), IDM_ASPECT_ANAMORPHIC_FULLFRAME, (aspect_mode == 3)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_ASPECT_FULLSCREEN, MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_ASPECT_LETTERBOX,  MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_ASPECT_ANAMORPHIC, MF_UNCHECKED);
 
-	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_0, (source_aspect == 0)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_133, (source_aspect == 1333)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_166, (source_aspect == 1667)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_177, (source_aspect == 1778)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_185, (source_aspect == 1850)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_233, (source_aspect == 2333)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_235, (source_aspect == 2350)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_133, MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_166, MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_178, MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_185, MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_200, MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_235, MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_166A, MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_178A, MF_UNCHECKED); 
+	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_185A, MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_200A, MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_235A, MF_UNCHECKED);
+
+	if (aspect_mode == 1)
+	{
+		switch (source_aspect)
+		{
+		case 1333:
+			CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_133, MF_CHECKED);
+			CheckMenuItem(GetMenu(hWnd), IDM_ASPECT_FULLSCREEN, MF_CHECKED);
+			break;
+		case 1667:
+			CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_166, MF_CHECKED);
+			break;
+		case 1778:
+			CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_178, MF_CHECKED);
+			CheckMenuItem(GetMenu(hWnd), IDM_ASPECT_LETTERBOX, MF_CHECKED);
+			break;
+		case 1850:
+			CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_185, MF_CHECKED);
+			break;
+		case 2000:
+			CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_200, MF_CHECKED);
+			break;
+		case 2350:
+			CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_235, MF_CHECKED);
+			break;
+		}
+	}
+	else if (aspect_mode == 2)
+	{
+		switch (source_aspect)
+		{
+		case 1667:
+			CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_166A, MF_CHECKED);
+			break;
+		case 1778:
+			CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_178A, MF_CHECKED); 
+			CheckMenuItem(GetMenu(hWnd), IDM_ASPECT_ANAMORPHIC, MF_CHECKED); 
+            break;
+		case 1850:
+			CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_185A, MF_CHECKED);
+			break;
+		case 2000:
+			CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_200A, MF_CHECKED);
+			break;
+		case 2350:
+			CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_235A, MF_CHECKED);
+			break;
+		}
+	}
+	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_0,   (source_aspect == 0)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_CUSTOM, (source_aspect && source_aspect == custom_source_aspect)?MF_CHECKED:MF_UNCHECKED);
 
-	CheckMenuItem(GetMenu(hWnd), IDM_TASPECT_0, (target_aspect == 0)?MF_CHECKED:MF_UNCHECKED);
+	// Advanced Aspect Ratio -> Display Aspect Ratio
+	CheckMenuItem(GetMenu(hWnd), IDM_TASPECT_0,   (target_aspect == 0)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_TASPECT_133, (target_aspect == 1333)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_TASPECT_166, (target_aspect == 1667)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_TASPECT_177, (target_aspect == 1778)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_TASPECT_178, (target_aspect == 1778)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_TASPECT_185, (target_aspect == 1850)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_TASPECT_233, (target_aspect == 2333)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hWnd), IDM_TASPECT_200, (target_aspect == 2000)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_TASPECT_235, (target_aspect == 2350)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_TASPECT_CUSTOM, (target_aspect && target_aspect == custom_target_aspect)?MF_CHECKED:MF_UNCHECKED);
 }
@@ -104,48 +152,62 @@ void SetMenuAspectRatio(HWND hWnd)
 int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 {
 	switch (wMenuID) {
-	case IDM_ASPECT_NONE:
+	case IDM_ASPECT_FULLSCREEN:
 	case IDM_ASPECT_LETTERBOX:
-	case IDM_ASPECT_ANAMORPHIC_177:
+	case IDM_ASPECT_ANAMORPHIC:
 	case IDM_SASPECT_0:
 	case IDM_SASPECT_133:
 	case IDM_SASPECT_166:
-	case IDM_SASPECT_177:
+	case IDM_SASPECT_178:
 	case IDM_SASPECT_185:
-	case IDM_SASPECT_233:
+	case IDM_SASPECT_200:
 	case IDM_SASPECT_235:
+	case IDM_SASPECT_166A:
+	case IDM_SASPECT_178A:
+	case IDM_SASPECT_185A:
+	case IDM_SASPECT_200A:
+	case IDM_SASPECT_235A:
 	case IDM_SASPECT_CUSTOM:
 	case IDM_TASPECT_0:
 	case IDM_TASPECT_133:
 	case IDM_TASPECT_166:
-	case IDM_TASPECT_177:
+	case IDM_TASPECT_178:
 	case IDM_TASPECT_185:
-	case IDM_TASPECT_233:
+	case IDM_TASPECT_200:
 	case IDM_TASPECT_235:
 	case IDM_TASPECT_CUSTOM:
 		
 		switch (wMenuID) {
-			case IDM_ASPECT_NONE: aspect_mode = 0; break;
-			case IDM_ASPECT_LETTERBOX: aspect_mode = 1; break;
-			case IDM_ASPECT_ANAMORPHIC_177: aspect_mode = 2; break;
+			// Easily Accessible Aspect Ratios
+			case IDM_ASPECT_FULLSCREEN:  aspect_mode = 1;  source_aspect = 1333;  break;
+			case IDM_ASPECT_LETTERBOX:   aspect_mode = 1;  source_aspect = 1778;  break;
+			case IDM_ASPECT_ANAMORPHIC:  aspect_mode = 2;  source_aspect = 1778;  break;
 
-			case IDM_SASPECT_0: source_aspect = 0; break;
-			case IDM_SASPECT_133: source_aspect = 1333; break;
-			case IDM_SASPECT_166: source_aspect = 1667; break;
-			case IDM_SASPECT_177: source_aspect = 1778; break;
-			case IDM_SASPECT_185: source_aspect = 1850; break;
-			case IDM_SASPECT_233: source_aspect = 2333; break;
-			case IDM_SASPECT_235: source_aspect = 2350; break;
-			case IDM_SASPECT_CUSTOM: source_aspect = custom_source_aspect; break;
+			// Advanced Aspect Ratios
+			case IDM_SASPECT_0:       aspect_mode = 0;  source_aspect = 0;     break;
+			case IDM_SASPECT_133:     aspect_mode = 1;  source_aspect = 1333;  break;
+			case IDM_SASPECT_166:     aspect_mode = 1;  source_aspect = 1667;  break;
+			case IDM_SASPECT_178:     aspect_mode = 1;  source_aspect = 1778;  break;
+			case IDM_SASPECT_185:     aspect_mode = 1;  source_aspect = 1850;  break;
+			case IDM_SASPECT_200:     aspect_mode = 1;  source_aspect = 2000;  break;
+			case IDM_SASPECT_235:     aspect_mode = 1;  source_aspect = 2350;  break;
+			case IDM_SASPECT_166A:    aspect_mode = 2;  source_aspect = 1667;  break;
+			case IDM_SASPECT_178A:    aspect_mode = 2;  source_aspect = 1778;  break;
+			case IDM_SASPECT_185A:    aspect_mode = 2;  source_aspect = 1850;  break;
+			case IDM_SASPECT_200A:    aspect_mode = 2;  source_aspect = 2000;  break;
+			case IDM_SASPECT_235A:    aspect_mode = 2;  source_aspect = 2350;  break;
+			case IDM_SASPECT_CUSTOM:  aspect_mode = 2;  source_aspect = custom_source_aspect;  break;
 
-			case IDM_TASPECT_0: target_aspect = 0; break;
-			case IDM_TASPECT_133: target_aspect = 1330; break;
-			case IDM_TASPECT_166: target_aspect = 1667; break;
-			case IDM_TASPECT_177: target_aspect = 1778; break;
-			case IDM_TASPECT_185: target_aspect = 1850; break;
-			case IDM_TASPECT_233: target_aspect = 2333; break;
-			case IDM_TASPECT_235: target_aspect = 2350; break;
-			case IDM_TASPECT_CUSTOM: target_aspect = custom_target_aspect; break;
+			// Output Display Aspect Ratios
+			case IDM_TASPECT_0:       target_aspect = 0;     break;
+			case IDM_TASPECT_133:     target_aspect = 1330;  break;
+			case IDM_TASPECT_166:     target_aspect = 1667;  break;
+			case IDM_TASPECT_178:     target_aspect = 1778;  break;
+			case IDM_TASPECT_185:     target_aspect = 1850;  break;
+			case IDM_TASPECT_200:     target_aspect = 2000;  break;
+			case IDM_TASPECT_235:     target_aspect = 2350;  break;
+			case IDM_TASPECT_CUSTOM:  target_aspect = custom_target_aspect;  break;
+
 			default:  break;
 		}
 		WorkoutOverlaySize();
@@ -440,6 +502,14 @@ void WorkoutOverlaySize()
 		rOverlayDest.bottom -= rOverlayDest.bottom % DestSizeAlign;
 	}
 
+	// 2000-09-14 Mark Rejhon
+	// This was an attempt to eliminate error messages when window is resized to zero height
+	// Apparently, this attempt doesn't work.
+	if (rOverlayDest.left >= rOverlayDest.right)  rOverlayDest.right = rOverlayDest.left   + 1;
+	if (rOverlayDest.top  >= rOverlayDest.bottom) rOverlayDest.top   = rOverlayDest.bottom + 1;
+	if (rOverlaySrc.left  >= rOverlaySrc.right)   rOverlaySrc.right  = rOverlaySrc.left    + 1;
+	if (rOverlaySrc.top   >= rOverlaySrc.bottom)  rOverlaySrc.top    = rOverlaySrc.bottom  + 1;
+
 	Overlay_Update(&rOverlaySrc, &rOverlayDest, DDOVER_SHOW, TRUE);
 
 	// MRS 9-9-00
@@ -449,7 +519,6 @@ void WorkoutOverlaySize()
 	ScreenToClient(hWnd,((PPOINT)&destinationRectangle));
 	ScreenToClient(hWnd,((PPOINT)&destinationRectangle)+1);
 	InvalidateRect(hWnd,NULL,FALSE);
-	// END MRS
 
 	return;
 }
