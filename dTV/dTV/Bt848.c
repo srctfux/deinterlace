@@ -38,6 +38,8 @@
 //
 // 11 Mar 2001   Laurent Garnier       Added WSS_Line in TTVFORMAT structure
 //
+// 31 Mar 2001   Laurent Garnier       Last used format saved per video input
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -1413,13 +1415,10 @@ BOOL APIENTRY AdvVideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lPa
 BOOL VideoSource_OnChange(long NewValue)
 {
 	Stop_Capture();
+	VideoSettings_SaveTVFormat();
 	VideoSettings_Save();
 	VideoSource = NewValue;
-	// If source is tuner, we switch to default video format
-	if (NewValue == SOURCE_TUNER)
-	{
-		TVFormat = BT848_GetSetting(TVFORMAT)->Default;
-	}
+	VideoSettings_LoadTVFormat();
 	VideoSettings_Load();
 	switch(NewValue)
 	{
@@ -1468,6 +1467,7 @@ BOOL VideoSource_OnChange(long NewValue)
 BOOL TVFormat_OnChange(long NewValue)
 {
 	Stop_Capture();
+	VideoSettings_SaveTVFormat();
 	VideoSettings_Save();
 	TVFormat = NewValue;
 	VideoSettings_Load();

@@ -21,6 +21,8 @@
 //
 // 29 Jan 2001   John Adcock           Original Release
 //
+// 31 Mar 2001   Laurent Garnier       Last used format saved per video input
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __VIDEOSETTINGS_H___
@@ -35,6 +37,8 @@ void VideoSettings_WriteSettingsToIni();
 BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 void VideoSettings_Load();
 void VideoSettings_Save();
+void VideoSettings_LoadTVFormat();
+void VideoSettings_SaveTVFormat();
 void VideoSettings_SaveCurrentToAllInputs();
 void VideoSettings_SaveCurrentToAllFormats();
 void VideoSettings_SetupDefaults();

@@ -26,6 +26,8 @@
 //
 // 29 Jan 2001   John Adcock           Original Release
 //
+// 31 Mar 2001   Laurent Garnier       Last used format saved per video input
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -36,8 +38,10 @@
 
 BOOL bSavePerInput = FALSE;
 BOOL bSavePerFormat = FALSE;
+BOOL bSaveTVFormatPerInput = FALSE;
 
 char szSection[50];
+char szSection2[50];
 
 BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 {
@@ -337,6 +341,38 @@ void VideoSettings_Save()
 	Setting_WriteToIni(Aspect_GetSetting(OVERSCAN));
 }
 
+void SetupSectionTVFormat()
+{
+	int Input = -1;
+	
+	if(bSaveTVFormatPerInput)
+	{
+		Input = Setting_GetValue(BT848_GetSetting(VIDEOSOURCE));
+	}
+
+	if(Input == -1)
+	{
+		Setting_SetSection(BT848_GetSetting(TVFORMAT), "Hardware");
+	}
+	else
+	{
+		sprintf(szSection2, "TVFormatSettings_%d", Input);
+		Setting_SetSection(BT848_GetSetting(TVFORMAT), szSection2);
+	}
+}
+
+void VideoSettings_LoadTVFormat()
+{
+	SetupSectionTVFormat();
+	Setting_ReadFromIni(BT848_GetSetting(TVFORMAT));
+}
+
+void VideoSettings_SaveTVFormat()
+{
+	SetupSectionTVFormat();
+	Setting_WriteToIni(BT848_GetSetting(TVFORMAT));
+}
+
 
 BOOL SavePerInput_OnChange(long NewValue)
 {
@@ -349,6 +385,13 @@ BOOL SavePerFormat_OnChange(long NewValue)
 {
 	bSavePerFormat = NewValue;
 	SetupSectionNames();
+	return FALSE;
+}
+
+BOOL SaveTVFormatPerInput_OnChange(long NewValue)
+{
+	bSaveTVFormatPerInput = NewValue;
+	SetupSectionTVFormat();
 	return FALSE;
 }
 
@@ -369,6 +412,12 @@ SETTING VideoSettingsSettings[VIDEOSETTINGS_SETTING_LASTONE] =
 		 FALSE, 0, 1, 1, 1,
 		 NULL,
 		"VideoSettings", "SavePerFormat", SavePerFormat_OnChange,
+	},
+	{
+		"Save TV Format per input", YESNO, 0, &bSaveTVFormatPerInput,
+		 FALSE, 0, 1, 1, 1,
+		 NULL,
+		"VideoSettings", "SaveTVFormatPerInput", SaveTVFormatPerInput_OnChange,
 	},
 };
 
@@ -392,6 +441,7 @@ void VideoSettings_ReadSettingsFromIni()
 	{
 		Setting_ReadFromIni(&(VideoSettingsSettings[i]));
 	}
+	VideoSettings_LoadTVFormat();
 	VideoSettings_Load();
 }
 
@@ -402,6 +452,7 @@ void VideoSettings_WriteSettingsToIni()
 	{
 		Setting_WriteToIni(&(VideoSettingsSettings[i]));
 	}
+	VideoSettings_SaveTVFormat();
 	VideoSettings_Save();
 }
 
