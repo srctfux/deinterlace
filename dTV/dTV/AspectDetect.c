@@ -103,7 +103,6 @@ void SwitchToRatio(int nMode, int nRatio)
 	    ratio_time[0] = GetTickCount();
 	    aspectSettings.source_aspect = nRatio;
     }
-	bIgnoreMouse = TRUE;
 	WorkoutOverlaySize();
 }
 

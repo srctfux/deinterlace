@@ -351,6 +351,7 @@ void _WorkoutOverlaySize(BOOL allowResize)
 
 void WorkoutOverlaySize()
 {
+	bIgnoreMouse = TRUE;
 	_WorkoutOverlaySize(TRUE);
 }
 
