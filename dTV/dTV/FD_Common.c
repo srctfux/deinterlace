@@ -73,7 +73,7 @@ long DiffThreshold = 224;
 long GetCombFactor(DEINTERLACE_INFO *pInfo)
 {
 	int Line;
-	DWORD LineFactor;
+	WORD LineFactor;
 	long CombFactor = 0;
 	short* YVal1;
 	short* YVal2;
@@ -172,12 +172,19 @@ Next8Bytes:
 			psrlq mm0,32
 			movd ecx, mm0
 			add ecx, eax
-			mov LineFactor, ecx
-			emms
+            mov ax, cx
+            shl ecx, 16
+            add ax, cx
+			mov LineFactor, ax
 		}
-		CombFactor += (LineFactor & 0xFFFF);
-		CombFactor += (LineFactor >> 16);
+		CombFactor += LineFactor;
 	}
+
+    // Clear out MMX registers before we need to do floating point again
+    _asm
+    {
+ 		emms
+    }
 
 	pInfo->CombFactor = CombFactor;
 	LOG(" Frame %d %c CF = %d", pInfo->CurrentFrame, pInfo->IsOdd ? 'O' : 'E', pInfo->CombFactor);
