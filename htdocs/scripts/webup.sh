@@ -64,12 +64,11 @@ cvs -d:pserver:anonymous@cvs1:/cvsroot/deinterlace co htdocs>/dev/null
 #Sometimes the attic gets cluttered with various versions of a file, because of the
 #caps-sensitive nature of *nix and the caps-insensitive nature of Windows.
 #For the life of me, I couldn't get CVS to recognize these two files correctly,
-#so a way of cheating is putting them on a remote site and wgetting them every time
-#you do a web update.  Elegance be damned.
+#These two files are refreshed from the oldbuilds directory
 
-cd /home/groups/d/de/deinterlace/htdocs/distributions
-wget -q http://www.schmelzer.org/dtvupload/dTV18exe.zip
-wget -q http://www.schmelzer.org/dtvupload/dTV18src.zip
+cd /home/groups/d/de/deinterlace/oldbuilds/
+cp dTV18exe.zip /home/groups/d/de/deinterlace/htdocs/distributions
+cp dTV18src.zip /home/groups/d/de/deinterlace/htdocs/distributions
 
 
 #Then change the file permissions so that anyone in the deinterlace administrative group
