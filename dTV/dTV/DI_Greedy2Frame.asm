@@ -126,10 +126,12 @@ MAINLOOP_LABEL:
 		pand   mm5, DwordOne
 		paddd mm4, mm5					
 
+		pcmpgtd mm4, DwordTwo			
+
 		movq mm5, mm4
 // mm4 now is 1 where we want to bob and 0 where we want to weave
-		pand	mm4, mm0				
-		pandn	mm5, mm7				
+		pandn	mm4, mm0				
+		pand	mm5, mm7				
 		por		mm4, mm5				
 
 		// Put the pixels in place.
