@@ -650,4 +650,24 @@ typedef enum
 #define WM_DI_VIDEOWEAVE_SETVALUE		(WM_USER + 123)
 #define WM_DI_VIDEOWEAVE_CHANGEVALUE	(WM_USER + 223)
 
+/////////////////////////////////////////////////////////////////////////////
+// Control settings contained in FLT_LinearCorrection.c
+/////////////////////////////////////////////////////////////////////////////
+
+typedef enum
+{
+	USELINEARCORRFILTER = 0,
+	DOONLYMASKING,
+	MASKTYPE,
+	MASKPARAM1,
+	MASKPARAM2,
+	MASKPARAM3,
+	MASKPARAM4,
+	FLT_LINEAR_CORR_SETTING_LASTONE,
+} FLT_LINEAR_CORR_SETTING;
+
+#define WM_FLT_LINEAR_CORR_GETVALUE		(WM_USER + 24)
+#define WM_FLT_LINEAR_CORR_SETVALUE		(WM_USER + 124)
+#define WM_FLT_LINEAR_CORR_CHANGEVALUE	(WM_USER + 224)
+
 #endif

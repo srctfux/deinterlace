@@ -159,6 +159,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "FLT_LinearCorrection"=..\Plugins\FLT_LinearCorrection\FLT_LinearCorrection.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "FLT_TNoise"=..\Plugins\FLT_TNoise\FLT_TNoise.dsp - Package Owner=<4>
 
 Package=<5>
@@ -283,6 +295,9 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name DI_Adaptive
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name FLT_LinearCorrection
     End Project Dependency
 }}}
 
