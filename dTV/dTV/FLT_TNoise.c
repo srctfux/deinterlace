@@ -101,7 +101,7 @@ SETTING FLT_TNoiseSettings[FLT_TNOISE_SETTING_LASTONE] =
 		"NoiseFilter", "TemporalLuminanceThreshold", NULL,
 	},
 	{
-		"TemporalChromaThreshold", SLIDER, 0, &TemporalChromaThreshold,
+		"Temporal Chroma Threshold", SLIDER, 0, &TemporalChromaThreshold,
 		7, 0, 255, 1, 1,
 		NULL,
 		"NoiseFilter", "TemporalChromaThreshold", NULL,
