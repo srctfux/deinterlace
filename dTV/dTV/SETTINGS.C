@@ -32,6 +32,7 @@
 #include "bTVPlugin.h"
 #include "OutThreads.h"
 #include "deinterlace.h"
+#include "DebugLog.h"
 
 // MRS 9-2-00
 // Added variable in dTV.c to track which aspect mode we are currently in
@@ -124,6 +125,8 @@ void LoadSettingsFromIni(LPSTR Name)
 	GetPrivateProfileString("Files", "VDDir", VD_DIR, VD_DIR, MAX_PATH, szIniFile);
 	GetPrivateProfileString("Files", "VDFilename", "VD-RAW.Dat", VDat.RawName, MAX_PATH, szIniFile);
 	VD_RAW = (GetPrivateProfileInt("Files", "VDRaw", 0, szIniFile) != 0);
+	GetPrivateProfileString("Files", "DebugLogFilename", DebugLogFilename, DebugLogFilename, MAX_PATH, szIniFile);
+	DebugLogEnabled = GetPrivateProfileInt("Files", "DebugLogEnabled", DebugLogEnabled, szIniFile);
 
 	CardType = GetPrivateProfileInt("Hardware", "CardType", TVCARD_UNKNOWN, szIniFile);
 	VideoSource = GetPrivateProfileInt("Hardware", "VideoSource", 1, szIniFile);
@@ -336,6 +339,8 @@ void WriteSettingsToIni()
 	WritePrivateProfileString("Files", "VDDir", VD_DIR, szIniFile);
 	WritePrivateProfileString("Files", "VDFilename", VDat.RawName, szIniFile);
 	WritePrivateProfileInt("Files", "VDRaw", VD_RAW, szIniFile);
+	WritePrivateProfileString("Files", "DebugLogFilename", DebugLogFilename, szIniFile);
+	WritePrivateProfileInt("Files", "DebugLogEnabled", DebugLogEnabled, szIniFile);
 
 	WritePrivateProfileInt("Hardware", "CardType", CardType, szIniFile);
 	WritePrivateProfileInt("Hardware", "VideoSource", VideoSource, szIniFile);

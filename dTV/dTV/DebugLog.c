@@ -6,8 +6,11 @@
 #include <stdio.h>
 #include <time.h>
 #include <sys/timeb.h>
+#include "DebugLog.h"
 
 static FILE *debugLog = NULL;
+char DebugLogFilename[MAX_PATH] = "dtv.txt";
+boolean DebugLogEnabled = FALSE;
 
 void
 LOG(LPCSTR format, ...)
@@ -18,11 +21,14 @@ LOG(LPCSTR format, ...)
 	char stamp[100];
 	va_list args;
 
-	if (debugLog == NULL)
-	debugLog = fopen("dtv.txt", "w");
+	if (DebugLogEnabled == FALSE)
+		return;
 
 	if (debugLog == NULL)
-	return;
+		debugLog = fopen(DebugLogFilename, "w");
+
+	if (debugLog == NULL)
+		return;
 
 	systime = timeGetTime();
 
