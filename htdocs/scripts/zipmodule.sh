@@ -142,6 +142,9 @@ todos *.hhk *.hhc *.rtf
 cd /home/groups/d/de/deinterlace/DScaler/Release
 todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
 todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/Verinc
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
 
 
 cd /home/groups/d/de/deinterlace/
