@@ -60,6 +60,7 @@ BOOL BT848_SetVideoSource(int nInput);
 void BT848_SetDMA(BOOL bState);
 BOOL BT848_IsVideoPresent();
 void BT848_SetGeometryEvenOdd(BOOL bOdd, BYTE bVtc, int wHScale, int wVScale, int wHActive, int wVActive, int wHDelay, int wVDelay, BYTE bCrop);
+void BT848_Restart_RISC_Code();
 
 // General read/write function
 #define BT848_ReadByte(dwOffset) memoryReadBYTE(dwOffset)

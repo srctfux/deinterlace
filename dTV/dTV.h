@@ -46,7 +46,8 @@ void Write_Nit_List();
 void Load_Nit_List();
 BOOL prozess_DatumZeit(int Nummer, unsigned char setting);
 
-void Init_Screen_Struct();
+void WorkoutOverlaySize();
+void Setup_PictureSize();
 void Init_More();
 void More_Even(int pp);
 void More_Odd();

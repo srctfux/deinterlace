@@ -242,6 +242,8 @@ BOOL Overlay_Create()
 		}
 	}
 
+	Overlay_Clean();
+
 	return (TRUE);
 }
 
@@ -376,7 +378,6 @@ BOOL InitDD(HWND hWnd)
 
 	ddrval = IDirectDrawSurface_Lock(lpDDSurface, NULL, &ddsd, DDLOCK_WAIT, NULL);
 	ddrval = IDirectDrawSurface_Unlock(lpDDSurface, ddsd.lpSurface);
-
 	return TRUE;
 }
 

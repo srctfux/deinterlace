@@ -181,6 +181,9 @@ void Start_Capture()
 		BT848_SetDMA(FALSE);
 	}
 
+
+	BT848_Restart_RISC_Code();
+
 	Start_Thread();
 	if (Capture_VBI == TRUE)
 	{
@@ -237,7 +240,11 @@ BOOL WaitForNextField(BOOL LastField)
 	{
 		SetEvent(VBI_Event);
 	}
-
+	if(stat & BT848_INT_FDSR)
+	{
+		BT848_Restart_RISC_Code();
+		CurrentFrame = 0;
+	}
 	return bIsOddField;
 }
 
@@ -667,7 +674,8 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 	int i, j;
 	int nLineTarget;
 	int nFrame = 0;
-	DWORD dwLastCount;
+	DWORD dwLastSecondTicks;
+	DWORD dwLastFlipTicks = 0;
 	BYTE* lpCurOverlay = lpOverlayBack;
 	//long CombFactors[10];
 	short* ppEvenLines[5][CLEARLINES];
@@ -705,7 +713,7 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 	// display the current pulldown mode
 	UpdatePulldownStatus();
 	
-	dwLastCount = GetTickCount();
+	dwLastSecondTicks = GetTickCount();
 
 	while(!bStopThread)
 	{
@@ -877,7 +885,11 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 
 		if(DoWeWantToFlip(bFlipNow, bIsOddField))
 		{
+			// wait for a good time to flip
+			sprintf(Text, "%d\n", GetTickCount() - dwLastFlipTicks);
+			OutputDebugString(Text);
 			IDirectDrawSurface_Flip(lpDDOverlay, lpDDOverlayBack, DDFLIP_WAIT);
+			dwLastFlipTicks = GetTickCount();
 			if(lpCurOverlay == lpOverlay)
 			{
 				lpCurOverlay = lpOverlayBack;
@@ -890,12 +902,12 @@ DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter)
 	
 		if (bDisplayStatusBar == TRUE)
 		{
-			if (dwLastCount + 1000 < GetTickCount())
+			if (dwLastSecondTicks + 1000 < GetTickCount())
 			{
 				sprintf(Text, "%d DF/S", nFrame);
 				SetWindowText(hwndFPSField, Text);
 				nFrame = 0;
-				dwLastCount = GetTickCount();
+				dwLastSecondTicks = GetTickCount();
 			}
 		}
 	}

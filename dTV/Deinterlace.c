@@ -45,7 +45,7 @@ void memcpyMMX(void *Dest, void *Src, size_t nBytes)
 		mov		edi, dword ptr[Dest]
 		mov		ecx, nBytes
 		shr     ecx, 6                      // nBytes / 64
-align 16
+align 8
 CopyLoop:
 		movq	mm0, qword ptr[esi]
 		movq	mm1, qword ptr[esi+8*1]
@@ -70,7 +70,7 @@ CopyLoop:
 		and     ecx, 63
 		cmp     ecx, 0
 		je EndCopyLoop
-align 16
+align 8
 CopyLoop2:
 		mov dl, byte ptr[esi] 
 		mov byte ptr[edi], dl
@@ -102,7 +102,7 @@ void memcpyBOBMMX(void *Dest, void *Src, size_t nBytes)
 		add     ebx, OverlayPitch
 		mov		ecx, nBytes
 		shr     ecx, 6                      // nBytes / 64
-align 16
+align 8
 CopyLoop:
 		movq	mm0, qword ptr[esi]
 		movq	mm1, qword ptr[esi+8*1]
@@ -138,7 +138,7 @@ CopyLoop:
 		and     ecx, 63
 		cmp     ecx, 0
 		je EndCopyLoop
-align 16
+align 8
 CopyLoop2:
 		mov dl, byte ptr[esi] 
 		mov byte ptr[edi], dl
@@ -176,8 +176,7 @@ void VideoDeinterlaceMMX(void *Dest, void *SrcUp, void *SrcSame, void *SrcDown, 
 		mov		edi, dword ptr[Dest]
 		mov		ecx, nBytes
 		shr     ecx, 5                      // nBytes / 32
-
-align 16
+align 8
 CopyLoop:
 		// read in the upper source line data
 		movq  mm0, qword ptr [esi]
@@ -269,7 +268,7 @@ CopyLoop:
 		shr     ecx, 2                      // nBytes / 4
 		cmp     ecx, 0
 		je EndCopyLoop
-align 16
+align 8
 CopyLoop2:
 		// if we do have some left over then
 		// do the same as before but only 4 bytes at a time
@@ -461,7 +460,7 @@ long GetCombFactor(short** pLines1, short** pLines2)
 			shr ecx, 1
 		    movq mm1,qword ptr[YMask]  
 			pxor mm0, mm0    // mm0 = 0
-align 16
+align 8
 Next8Bytes:
 			movq mm5, qword ptr[ebx] 
 			pxor mm3, mm3    // mm3 = 0

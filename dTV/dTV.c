@@ -324,7 +324,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			DialogBox(hInst, "SELECTCARD", hWnd, (DLGPROC) SelectCardProc);
 			Card_Init(CardType);
 			Tuner_Init(TunerType);
-			Init_Screen_Struct();
+			WorkoutOverlaySize();
 			Start_Capture();
 			break;
 
@@ -435,7 +435,8 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_RESET:
 			Stop_Capture();
 			BT848_ResetHardware();
-			Init_Screen_Struct();
+			Overlay_Clean();
+			WorkoutOverlaySize();
 			Start_Capture();
 			Sleep(100);
 			Audio_SetSource(AudioSource);
@@ -443,9 +444,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
 		case IDM_TOGGLE_MENU:
 			Show_Menu = !Show_Menu;
-			Stop_Capture();
-			Init_Screen_Struct();
-			Start_Capture();
+			WorkoutOverlaySize();
 			break;
 
 		case IDM_ABOUT:
@@ -556,9 +555,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			if(InitialOverscan < 127)
 			{
 				InitialOverscan++;
-				Stop_Capture();
-				Init_Screen_Struct();
-				Start_Capture();
+				WorkoutOverlaySize();
 				if (bDisplayStatusBar == TRUE)
 				{
 					sprintf(Text, "Overscan %d", InitialOverscan);
@@ -571,9 +568,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			if(InitialOverscan > 0)
 			{
 				InitialOverscan--;
-				Stop_Capture();
-				Init_Screen_Struct();
-				Start_Capture();
+				WorkoutOverlaySize();
 				if (bDisplayStatusBar == TRUE)
 				{
 					sprintf(Text, "Overscan %d", InitialOverscan);
@@ -850,15 +845,11 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			{
 				if (BeforeVD != 7)
 				{
-					Stop_Capture();
-					Sleep(30);
 					VBI_Flags -= VBI_VD;
 					VideoDat_Exit();
 					VBI_lpf = 19;
 					BT848_MakeVBITable(VBI_lpf);
 					TVTYPE = BeforeVD;
-					Init_Screen_Struct();
-					Start_Capture();
 					break;
 				}
 				VBI_Flags -= VBI_VD;
@@ -868,15 +859,10 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				BeforeVD = TVTYPE;
 				if (TVTYPE != 7)
 				{
-					Stop_Capture();
-					Sleep(30);
-					VideoDat_Init();
 					VBI_Flags += VBI_VD;	// 
 					VBI_lpf = 19;
 					BT848_MakeVBITable(VBI_lpf);
 					TVTYPE = 7;
-					Init_Screen_Struct();
-					Start_Capture();
 					break;
 				}
 				VideoDat_Init();
@@ -955,9 +941,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
 		case IDM_VIDEOSETTINGS:
 			DialogBox(hInst, "VIDEOSETTINGS", hWnd, VideoSettingProc);
-			Stop_Capture();
-			Init_Screen_Struct();
-			Start_Capture();
+			WorkoutOverlaySize();
 			break;
 
 		case IDM_VPS_OUT:
@@ -1014,17 +998,13 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			{
 				KillTimer(hWnd, TIMER_STATUS);
 			}
-			Stop_Capture();
-			Init_Screen_Struct();
-			Start_Capture();
+			WorkoutOverlaySize();
 			SetMenuAnalog();
 			break;
 
 		case IDM_ON_TOP:
 			bAlwaysOnTop = !bAlwaysOnTop;
-			Stop_Capture();
-			Init_Screen_Struct();
-			Start_Capture();
+			WorkoutOverlaySize();
 			SetMenuAnalog();
 			break;
 
@@ -1044,7 +1024,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_TREADPRIOR_4:
 			ThreadClassId = wParam - 1150;
 			Stop_Capture();
-			Init_Screen_Struct();
 			Start_Capture();
 			SetMenuAnalog();
 			break;
@@ -1085,7 +1064,8 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_TYPEFORMAT_9:
 			TVTYPE = wParam - 1120;
 			Stop_Capture();
-			Init_Screen_Struct();
+			Setup_PictureSize();
+			WorkoutOverlaySize();
 			Start_Capture();
 			SetMenuAnalog();
 			break;
@@ -1127,16 +1107,13 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 					ShowCursor(FALSE);
 				}
 			}
-			Stop_Capture();
-			Init_Screen_Struct();
-			Start_Capture();
+			WorkoutOverlaySize();
 			bDoResize = TRUE;
 			break;
 
 		case IDM_TAKESTILL:
 			Stop_Capture();
 			SaveStill();
-			Init_Screen_Struct();
 			Start_Capture();
 			break;
 
@@ -1233,18 +1210,14 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 					{
 						ShowCursor(FALSE);
 					}
-					Stop_Capture();
-					Init_Screen_Struct();
-					Start_Capture();
+					WorkoutOverlaySize();
 				}
 				break;
 			case SIZE_MINIMIZED:
 				Overlay_Update(NULL, NULL, DDOVER_HIDE, FALSE);
 				break;
 			case SIZE_RESTORED:
-				Stop_Capture();
-				Init_Screen_Struct();
-				Start_Capture();
+				WorkoutOverlaySize();
 				break;
 			default:
 				break;
@@ -1256,9 +1229,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		StatusBar_Adjust(hWnd);
 		if (bDoResize == TRUE && !IsIconic(hWnd) && !IsZoomed(hWnd))
 		{
-			Stop_Capture();
-			Init_Screen_Struct();
-			Start_Capture();
+			WorkoutOverlaySize();
 		}
 		break;
 
@@ -1451,7 +1422,8 @@ void MainWndOnInitBT(HWND hWnd)
 			pDisplay[i] = Display_dma[i]->dwUser;
 		}
 
-		Init_Screen_Struct();
+		Setup_PictureSize();
+		WorkoutOverlaySize();
 		Start_Capture();
 		Sleep(100);
 
@@ -1641,117 +1613,6 @@ void MainWndOnCreate(HWND hWnd)
 	}
 
 	PostMessage(hWnd, INIT_BT, 0, 0);
-}
-
-void Init_Screen_Struct()
-{
-	RECT rOverlayDest;
-	RECT rOverlaySrc;
-
-	int DestWidth, DestHeight;
-
-	if(bIsFullScreen == TRUE)
-	{
-		SetWindowLong(hWnd, GWL_STYLE, WS_VISIBLE);
-
-		SetWindowPos(hWnd,
-					HWND_TOPMOST,
-					0,
-					0,
-					GetSystemMetrics(SM_CXSCREEN),
-					GetSystemMetrics(SM_CYSCREEN),
-					SWP_SHOWWINDOW);
-		ShowWindow(hwndStatusBar, SW_HIDE);
-		SetMenu(hWnd, NULL);
-	}
-	else
-	{
-		SetWindowLong(hWnd, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_VISIBLE);
-
-		SetMenu(hWnd, (Show_Menu == TRUE)?hMenu:NULL);
-
-		ShowWindow(hwndStatusBar, bDisplayStatusBar?SW_SHOW:SW_HIDE);
-
-		SetWindowPos(hWnd,bAlwaysOnTop?HWND_TOPMOST:HWND_NOTOPMOST,
-					0,0,0,0,
-					SWP_NOSIZE | SWP_NOMOVE | SWP_SHOWWINDOW);
-	}
-
-	CurrentX = TVSettings[TVTYPE].wCropWidth;
-	CurrentY = TVSettings[TVTYPE].wCropHeight;
-
-	// Do overscan
-	rOverlaySrc.left = InitialOverscan;
-	rOverlaySrc.top  = InitialOverscan;
-	rOverlaySrc.right = CurrentX - InitialOverscan;
-	rOverlaySrc.bottom = CurrentY - InitialOverscan;
-
-	// get main window client area
-	// and convert to screen coordinates
-	GetClientRect(hWnd, &rOverlayDest);
-	ClientToScreen(hWnd, (POINT *) &(rOverlayDest.left));
-	ClientToScreen(hWnd, (POINT *) &(rOverlayDest.right));
-	if (bDisplayStatusBar == TRUE && bIsFullScreen == FALSE)
-	{
-		rOverlayDest.bottom -= 21;
-	}
-
-	// crop the Destination rect so that the
-	// overlay destination region is 
-	// always on the screen
-	// we will also update the source area to reflect this
-	// so that we see the appropriate portion
-	// on the screen
-	// (this should make us compatable with YXY)
-	DestHeight = rOverlayDest.bottom - rOverlayDest.top;
-	DestWidth = rOverlayDest.right - rOverlayDest.left;
-	
-	if (rOverlayDest.left < 0 && DestWidth > 0)
-	{
-		rOverlaySrc.left = (CurrentX * -rOverlayDest.left) / DestWidth;
-		rOverlayDest.left = 0;
-	}
-	if (rOverlayDest.top < 0 && DestHeight > 0)
-	{
-		rOverlaySrc.top = (CurrentY * -rOverlayDest.top) / DestHeight;
-		rOverlayDest.top = 0;
-	}
-	if (rOverlayDest.right >= GetSystemMetrics(SM_CXSCREEN) && DestWidth > 0)
-	{
-		rOverlaySrc.right -= (rOverlayDest.right - GetSystemMetrics(SM_CXSCREEN)) * 
-							CurrentX / DestWidth;
-		rOverlayDest.right = GetSystemMetrics(SM_CXSCREEN);
-	}
-	if (rOverlayDest.bottom >= GetSystemMetrics(SM_CYSCREEN) && DestHeight > 0)
-	{
-		rOverlaySrc.bottom -= (rOverlayDest.bottom - GetSystemMetrics(SM_CYSCREEN)) * 
-							CurrentY / DestHeight;
-		rOverlayDest.bottom = GetSystemMetrics(SM_CYSCREEN);
-	}
-
-	// amke sure that any alignment restrictions are taken care of
-	if(SrcSizeAlign > 1)
-	{
-		rOverlaySrc.left += SrcSizeAlign - rOverlaySrc.left % SrcSizeAlign;
-		rOverlaySrc.top += SrcSizeAlign - rOverlaySrc.top % SrcSizeAlign;
-		rOverlaySrc.right -= rOverlaySrc.right % SrcSizeAlign;
-		rOverlaySrc.bottom -= rOverlaySrc.bottom % SrcSizeAlign;
-	}
-
-	if(DestSizeAlign > 1)
-	{
-		rOverlayDest.left += DestSizeAlign - rOverlayDest.left % DestSizeAlign;
-		rOverlayDest.top += DestSizeAlign - rOverlayDest.top % DestSizeAlign;
-		rOverlayDest.right -= rOverlayDest.right % DestSizeAlign;
-		rOverlayDest.bottom -= rOverlayDest.bottom % DestSizeAlign;
-	}
-
-	Overlay_Update(&rOverlaySrc, &rOverlayDest, DDOVER_SHOW, TRUE);
-
-	Overlay_Clean();
-
-	BT848_SetGeoSize(CurrentX, CurrentY);
-	return;
 }
 
 void SetMenuAnalog()
@@ -1946,4 +1807,116 @@ void ChangeChannel(int NewChannel)
 			}
 		}
 	}
+}
+
+void Setup_PictureSize()
+{
+	CurrentX = TVSettings[TVTYPE].wCropWidth;
+	CurrentY = TVSettings[TVTYPE].wCropHeight;
+	BT848_SetGeoSize(CurrentX, CurrentY);
+}
+
+void WorkoutOverlaySize()
+{
+	RECT rOverlayDest;
+	RECT rOverlaySrc;
+
+	int DestWidth, DestHeight;
+
+	if(bIsFullScreen == TRUE)
+	{
+		SetWindowLong(hWnd, GWL_STYLE, WS_VISIBLE);
+
+		SetWindowPos(hWnd,
+					HWND_TOPMOST,
+					0,
+					0,
+					GetSystemMetrics(SM_CXSCREEN),
+					GetSystemMetrics(SM_CYSCREEN),
+					SWP_SHOWWINDOW);
+		ShowWindow(hwndStatusBar, SW_HIDE);
+		SetMenu(hWnd, NULL);
+	}
+	else
+	{
+		SetWindowLong(hWnd, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_VISIBLE);
+
+		SetMenu(hWnd, (Show_Menu == TRUE)?hMenu:NULL);
+
+		ShowWindow(hwndStatusBar, bDisplayStatusBar?SW_SHOW:SW_HIDE);
+
+		SetWindowPos(hWnd,bAlwaysOnTop?HWND_TOPMOST:HWND_NOTOPMOST,
+					0,0,0,0,
+					SWP_NOSIZE | SWP_NOMOVE | SWP_SHOWWINDOW);
+	}
+
+	// Do overscan
+	rOverlaySrc.left = InitialOverscan;
+	rOverlaySrc.top  = InitialOverscan;
+	rOverlaySrc.right = CurrentX - InitialOverscan;
+	rOverlaySrc.bottom = CurrentY - InitialOverscan;
+
+	// get main window client area
+	// and convert to screen coordinates
+	GetClientRect(hWnd, &rOverlayDest);
+	ClientToScreen(hWnd, (POINT *) &(rOverlayDest.left));
+	ClientToScreen(hWnd, (POINT *) &(rOverlayDest.right));
+	if (bDisplayStatusBar == TRUE && bIsFullScreen == FALSE)
+	{
+		rOverlayDest.bottom -= 21;
+	}
+
+	// crop the Destination rect so that the
+	// overlay destination region is 
+	// always on the screen
+	// we will also update the source area to reflect this
+	// so that we see the appropriate portion
+	// on the screen
+	// (this should make us compatable with YXY)
+	DestHeight = rOverlayDest.bottom - rOverlayDest.top;
+	DestWidth = rOverlayDest.right - rOverlayDest.left;
+	
+	if (rOverlayDest.left < 0 && DestWidth > 0)
+	{
+		rOverlaySrc.left = (CurrentX * -rOverlayDest.left) / DestWidth;
+		rOverlayDest.left = 0;
+	}
+	if (rOverlayDest.top < 0 && DestHeight > 0)
+	{
+		rOverlaySrc.top = (CurrentY * -rOverlayDest.top) / DestHeight;
+		rOverlayDest.top = 0;
+	}
+	if (rOverlayDest.right >= GetSystemMetrics(SM_CXSCREEN) && DestWidth > 0)
+	{
+		rOverlaySrc.right -= (rOverlayDest.right - GetSystemMetrics(SM_CXSCREEN)) * 
+							CurrentX / DestWidth;
+		rOverlayDest.right = GetSystemMetrics(SM_CXSCREEN);
+	}
+	if (rOverlayDest.bottom >= GetSystemMetrics(SM_CYSCREEN) && DestHeight > 0)
+	{
+		rOverlaySrc.bottom -= (rOverlayDest.bottom - GetSystemMetrics(SM_CYSCREEN)) * 
+							CurrentY / DestHeight;
+		rOverlayDest.bottom = GetSystemMetrics(SM_CYSCREEN);
+	}
+
+	// amke sure that any alignment restrictions are taken care of
+	if(SrcSizeAlign > 1)
+	{
+		rOverlaySrc.left += SrcSizeAlign - rOverlaySrc.left % SrcSizeAlign;
+		rOverlaySrc.top += SrcSizeAlign - rOverlaySrc.top % SrcSizeAlign;
+		rOverlaySrc.right -= rOverlaySrc.right % SrcSizeAlign;
+		rOverlaySrc.bottom -= rOverlaySrc.bottom % SrcSizeAlign;
+	}
+
+	if(DestSizeAlign > 1)
+	{
+		rOverlayDest.left += DestSizeAlign - rOverlayDest.left % DestSizeAlign;
+		rOverlayDest.top += DestSizeAlign - rOverlayDest.top % DestSizeAlign;
+		rOverlayDest.right -= rOverlayDest.right % DestSizeAlign;
+		rOverlayDest.bottom -= rOverlayDest.bottom % DestSizeAlign;
+	}
+
+	Overlay_Update(&rOverlaySrc, &rOverlayDest, DDOVER_SHOW, TRUE);
+
+	return;
 }
