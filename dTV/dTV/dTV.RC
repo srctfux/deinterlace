@@ -168,8 +168,9 @@ BEGIN
     CONTROL         "Save Settings by &Input",IDC_BYINPUT,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,166,167,88,9
     PUSHBUTTON      "Save Current to All Formats",IDC_ALLFORMATS,260,153,90,
-                    10
-    PUSHBUTTON      "Save Current to All Inputs",IDC_ALLINPUTS,259,166,91,10
+                    10,WS_DISABLED
+    PUSHBUTTON      "Save Current to All Inputs",IDC_ALLINPUTS,259,166,91,10,
+                    WS_DISABLED
 END
 
 AUDIOEINSTELLUNGEN DIALOG DISCARDABLE  0, 0, 257, 236
