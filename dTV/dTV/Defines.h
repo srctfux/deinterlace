@@ -615,5 +615,6 @@ typedef enum
 #define BTV_VER1_WIDTH 768
 #define BTV_VER1_HEIGHT 576
 
+#define ABS(x) ((x) < 0 ? -(x) : (x))
 
 #endif

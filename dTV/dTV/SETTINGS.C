@@ -275,6 +275,7 @@ void LoadSettingsFromIni(LPSTR Name)
 	IgnoreNonBlackPixels = GetPrivateProfileInt("ASPECT", "IgnoreNonBlackPixels", IgnoreNonBlackPixels, szIniFile);
 	AutoDetectAspect = GetPrivateProfileInt("ASPECT", "AutoDetectAspect", AutoDetectAspect, szIniFile);
 	ZoomInFrameCount = GetPrivateProfileInt("ASPECT", "ZoomInFrameCount", ZoomInFrameCount, szIniFile);
+	AspectHistoryTime = GetPrivateProfileInt("ASPECT", "AspectHistoryTime", AspectHistoryTime, szIniFile);
 	AspectConsistencyTime = GetPrivateProfileInt("ASPECT", "AspectConsistencyTime", AspectConsistencyTime, szIniFile);
 }
 
@@ -478,6 +479,7 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("ASPECT", "IgnoreNonBlackPixels", IgnoreNonBlackPixels, szIniFile);
 	WritePrivateProfileInt("ASPECT", "AutoDetectAspect", AutoDetectAspect, szIniFile);
 	WritePrivateProfileInt("ASPECT", "ZoomInFrameCount", ZoomInFrameCount, szIniFile);
+	WritePrivateProfileInt("ASPECT", "AspectHistoryTime", AspectHistoryTime, szIniFile);
 	WritePrivateProfileInt("ASPECT", "AspectConsistencyTime", AspectConsistencyTime, szIniFile);
 }
 

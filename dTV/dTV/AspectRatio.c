@@ -74,31 +74,68 @@ long AutoDetectAspect = 0;
 // frames before zooming in.
 long ZoomInFrameCount = 60;
 
-// For aspect autodetect, only zoom in if we've used an equal or greater
-// ratio in the last N seconds, or haven't detected a smaller ratio in the
-// same amount of time.
-long AspectConsistencyTime = 30;
+// For aspect autodetect, zoom in quickly if we've used this ratio in the
+// last N seconds.
+long AspectHistoryTime = 300;
+
+// For aspect autodetect, only zoom in if we haven't detected a smaller
+// ratio in some amount of time.
+long AspectConsistencyTime = 15;
+
+// For aspect autodetect, consider two ratios to be equal if they're within
+// this amount of each other.  This is not in pixels, but in aspect*1000
+// units.
+long AspectEqualFudgeFactor = 10;
+
+// Don't remember aspect ratios that lasted less than this many milliseconds.
+long ShortRatioIgnoreMs = 1000;
 
 //---------
 // Internal variables used by auto aspect ratio detect code.
 
 // Number of seconds of aspect ratio history to keep.
-#define RATIO_HISTORY_SIZE	300
+#define RATIO_HISTORY_SECONDS	600
+
+// Number of aspect ratio changes to remember.
+#define RATIO_HISTORY_CHANGES	50
 
 // Minimum aspect ratio encountered each second for the last several minutes.
 // The 0th element of this is the current second.
-static int min_ratio_found[RATIO_HISTORY_SIZE];
+static int min_ratio_found[RATIO_HISTORY_SECONDS];
 
-// Maximum aspect ratio we've *used* each second for the last several minutes.
-// The 0th element of this is the current second.
-static int max_ratio_used[RATIO_HISTORY_SIZE];
+// Timestamp of the most recent computation of min_ratio_found.
+static int min_ratio_tick_count = 0;
 
-// Timestamp of the most recent computation of max_aspect_found.
-static int max_ratio_tick_count = 0;
+// Aspect ratios we've used recently.
+static int ratio_used[RATIO_HISTORY_CHANGES];
 
+// When we switched to each of the ratios in ratio_used[].
+static int ratio_time[RATIO_HISTORY_CHANGES];
 
 RECT destinationRectangle = {0,0,0,0};
 
+
+//----------------------------------------------------------------------------
+// Switch to a new aspect ratio and record it in the ratio history list.
+void SwitchToRatio(int ratio)
+{
+	int now = GetTickCount();
+
+	LOG("Switching to ratio %d", ratio);
+
+	// If the most recent ratio switch just happened, don't remember it since it
+	// was probably a transient ratio due to improperly locking onto a dark scene.
+	if (now - ratio_time[0] > ShortRatioIgnoreMs)
+	{
+		memmove(&ratio_used[1], &ratio_used[0], sizeof(ratio_used[0]) * (RATIO_HISTORY_CHANGES - 1));
+		memmove(&ratio_time[1], &ratio_time[0], sizeof(ratio_time[0]) * (RATIO_HISTORY_CHANGES - 1));
+	}
+
+	ratio_used[0] = ratio;
+	ratio_time[0] = GetTickCount();
+	source_aspect = ratio;
+	WorkoutOverlaySize();
+}
 
 
 //----------------------------------------------------------------------------
@@ -225,29 +262,30 @@ int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 		
 		switch (wMenuID) {
 			// Easily Accessible Aspect Ratios
-			case IDM_ASPECT_FULLSCREEN:  aspect_mode = 1;  source_aspect = 1333;  break;
-			case IDM_ASPECT_LETTERBOX:   aspect_mode = 1;  source_aspect = 1778;  break;
-			case IDM_ASPECT_ANAMORPHIC:  aspect_mode = 2;  source_aspect = 1778;  break;
+			case IDM_ASPECT_FULLSCREEN:  aspect_mode = 1;  SwitchToRatio(1333);  break;
+			case IDM_ASPECT_LETTERBOX:   aspect_mode = 1;  SwitchToRatio(1778);  break;
+			case IDM_ASPECT_ANAMORPHIC:  aspect_mode = 2;  SwitchToRatio(1778);  break;
 
 			// Advanced Aspect Ratios
-			case IDM_SASPECT_0:       aspect_mode = 0;  source_aspect = 0;     break;
-			case IDM_SASPECT_133:     aspect_mode = 1;  source_aspect = 1333;  break;
-			case IDM_SASPECT_166:     aspect_mode = 1;  source_aspect = 1667;  break;
-			case IDM_SASPECT_178:     aspect_mode = 1;  source_aspect = 1778;  break;
-			case IDM_SASPECT_185:     aspect_mode = 1;  source_aspect = 1850;  break;
-			case IDM_SASPECT_200:     aspect_mode = 1;  source_aspect = 2000;  break;
-			case IDM_SASPECT_235:     aspect_mode = 1;  source_aspect = 2350;  break;
-			case IDM_SASPECT_166A:    aspect_mode = 2;  source_aspect = 1667;  break;
-			case IDM_SASPECT_178A:    aspect_mode = 2;  source_aspect = 1778;  break;
-			case IDM_SASPECT_185A:    aspect_mode = 2;  source_aspect = 1850;  break;
-			case IDM_SASPECT_200A:    aspect_mode = 2;  source_aspect = 2000;  break;
-			case IDM_SASPECT_235A:    aspect_mode = 2;  source_aspect = 2350;  break;
-			case IDM_SASPECT_CUSTOM:  aspect_mode = 2;  source_aspect = custom_source_aspect;  break;
-			case IDM_SASPECT_COMPUTE: source_aspect = FindAspectRatio();  break;
+			case IDM_SASPECT_0:       aspect_mode = 0;  SwitchToRatio(0);     break;
+			case IDM_SASPECT_133:     aspect_mode = 1;  SwitchToRatio(1333);  break;
+			case IDM_SASPECT_166:     aspect_mode = 1;  SwitchToRatio(1667);  break;
+			case IDM_SASPECT_178:     aspect_mode = 1;  SwitchToRatio(1778);  break;
+			case IDM_SASPECT_185:     aspect_mode = 1;  SwitchToRatio(1850);  break;
+			case IDM_SASPECT_200:     aspect_mode = 1;  SwitchToRatio(2000);  break;
+			case IDM_SASPECT_235:     aspect_mode = 1;  SwitchToRatio(2350);  break;
+			case IDM_SASPECT_166A:    aspect_mode = 2;  SwitchToRatio(1667);  break;
+			case IDM_SASPECT_178A:    aspect_mode = 2;  SwitchToRatio(1778);  break;
+			case IDM_SASPECT_185A:    aspect_mode = 2;  SwitchToRatio(1850);  break;
+			case IDM_SASPECT_200A:    aspect_mode = 2;  SwitchToRatio(2000);  break;
+			case IDM_SASPECT_235A:    aspect_mode = 2;  SwitchToRatio(2350);  break;
+			case IDM_SASPECT_CUSTOM:  aspect_mode = 2;  SwitchToRatio(custom_source_aspect);  break;
+			case IDM_SASPECT_COMPUTE: SwitchToRatio(FindAspectRatio());  break;
 
 			case IDM_SASPECT_AUTO:
-				source_aspect = FindAspectRatio();
 				AutoDetectAspect = ! AutoDetectAspect;
+				if (AutoDetectAspect)
+					SwitchToRatio(FindAspectRatio());
 				break;
 
 			// Output Display Aspect Ratios
@@ -646,7 +684,7 @@ int FindBottomOfImage(BYTE *Overlay)
 	int ignoreCount = IgnoreNonBlackPixels;
 	int pixelCount;
 	const int BytesBetweenLuminanceValues = 2;	// just for clarity's sake
-	const int SkipPixels = 32;			// check fewer pixels to reduce CPU hit
+	const int SkipPixels = 16;			// check fewer pixels to reduce CPU hit
 
 	if (ignoreCount == 0)
 	{
@@ -748,8 +786,9 @@ void AdjustAspectRatio(void)
 	static int newRatioFrameCount = 0;
 	int newRatio;
 	int tick_count = GetTickCount();
+	int tickCutoff = tick_count - (AspectHistoryTime * 1000);
 	int i;
-	int newRatioIsBiggest, haveSeenSmallerRatio;
+	int haveSeenThisRatio, haveSeenSmallerRatio;
 
 	if (AutoDetectAspect)
 	{
@@ -757,13 +796,11 @@ void AdjustAspectRatio(void)
 
 		// If we've just crossed a 1-second boundary, scroll the aspect ratio
 		// histories.  If not, update the max ratio found in the current second.
-		if (tick_count / 1000 != max_ratio_tick_count / 1000)
+		if (tick_count / 1000 != min_ratio_tick_count / 1000)
 		{
-			max_ratio_tick_count = tick_count;
-			memmove(&min_ratio_found[1], &min_ratio_found[0], sizeof(min_ratio_found[0]) * (RATIO_HISTORY_SIZE - 1));
-			memmove(&max_ratio_used[1], &max_ratio_used[0], sizeof(max_ratio_used[0]) * (RATIO_HISTORY_SIZE - 1));
+			min_ratio_tick_count = tick_count;
+			memmove(&min_ratio_found[1], &min_ratio_found[0], sizeof(min_ratio_found[0]) * (RATIO_HISTORY_SECONDS - 1));
 			min_ratio_found[0] = newRatio;
-			max_ratio_used[0] = source_aspect;
 		}
 		else if (newRatio < min_ratio_found[0]) {
 			min_ratio_found[0] = newRatio;
@@ -774,15 +811,13 @@ void AdjustAspectRatio(void)
 		// avoid cutting the image off.
 		if (newRatio < source_aspect)
 		{
-			LOG("Zooming out to ratio %d", newRatio);
-			source_aspect = newRatio;
+			SwitchToRatio(newRatio);
 			newRatioFrameCount = 0;
-			WorkoutOverlaySize();
 		}
-		else if (newRatio != source_aspect && newRatio == lastNewRatio)
+		else if (ABS(newRatio - source_aspect) > AspectEqualFudgeFactor && newRatio == lastNewRatio)
 		{
 			// Require the same aspect ratio for some number of frames, or no
-			// bigger aspect ratio found for the last AspectConsistencyTime seconds,
+			// narrower aspect ratio found for the last AspectConsistencyTime seconds,
 			// before zooming in.
 			haveSeenSmallerRatio = 0;
 			for (i = 1; i < AspectConsistencyTime; i++)
@@ -795,39 +830,39 @@ void AdjustAspectRatio(void)
 			if (! haveSeenSmallerRatio || ++newRatioFrameCount >= ZoomInFrameCount)
 			{
 				// If we're looking at aspect ratio histories, the new ratio must be
-				// no bigger than the biggest one we've _used_ in the recent past, or
+				// equal (or very close) to one we've _used_ in the recent past, or
 				// there must have been no smaller ratio _found_ in the recent past.
 				// That is, don't zoom in more than we've zoomed in recently unless
 				// we'd previously zoomed to the same ratio.  This helps prevent
 				// temporary zooms into letterboxed material during dark scenes, while
 				// allowing the code to quickly switch in and out of zoomed mode when
 				// full-frame commercials come on.
-				if (AspectConsistencyTime > 0)
+				haveSeenThisRatio = 0;
+				if (AspectHistoryTime > 0)
 				{
-					newRatioIsBiggest = 1;
-					for (i = 1; i < AspectConsistencyTime; i++)
-						if (newRatio <= max_ratio_used[i])
+					for (i = 1; i < RATIO_HISTORY_CHANGES && ratio_time[i] > tickCutoff; i++)
+						if (ABS(newRatio - ratio_used[i]) <= AspectEqualFudgeFactor)
 						{
-							newRatioIsBiggest = 0;
+							haveSeenThisRatio = 1;
 							break;
 						}
 				}
 
 				if (AspectConsistencyTime <= 0 ||
-					! newRatioIsBiggest ||
+					(haveSeenThisRatio && newRatioFrameCount >= ZoomInFrameCount) ||
 					! haveSeenSmallerRatio)
 				{
-					LOG("Zooming in to ratio %d", newRatio);
-					source_aspect = newRatio;
-					max_ratio_used[0] = newRatio;
-					WorkoutOverlaySize();
+					SwitchToRatio(newRatio);
 				}
 			}
 		}
 		else
 		{
+			// If this is a wider ratio than the previous one, require it to stick
+			// around for the full frame count.
 			if (lastNewRatio < newRatio)
 				newRatioFrameCount = 0;
+
 			lastNewRatio = newRatio;
 		}
 	}
