@@ -815,6 +815,7 @@ int FindTopOfImage(short** EvenField, short **OddField)
 	return y;
 }
 
+//----------------------------------------------------------------------------
 int FindBottomOfImage(short** EvenField, short** OddField)
 {
 	int y, x;
