@@ -46,75 +46,59 @@ user and developer feedback as of 10/02/00:</p>
 <p>NOTICE: At least one of these bugs may have been fixed since the date
 indicated above, check the source code or the mailing list to verify.</p>
 
-<ol>
-
-<li>Allow ability to access menu options through right mouse
-click(channel, inputs, aspect ratio, deinterlace, volume,
-etc.)</li>
-
-<li>Store multiple settings files that can be chosen from drop down
-(movies, sports, svideo, cable, etc).</li>
-
-<li>Enhance channel scan code to include HRC cable frequencies,
-ability to truncate channel search (I hate when it scans channels
-70-125 and finds nothing), ability to manually add/delete channels
-and ability to automatically assign standard channel number</li>
-
-<li>Automatic detection of video format, PAL vs NTSC coded
-material</li>
-
-<li>Add hotkeys to all essential functions for those with advanced
-remotes</li>
-
-<li>Double click screen to zoom instead of single click. Use single
-click to drag screen in window mode.</li>
-
-<li>Calibrate Cards to give best set of video adjustments</li>
-
-<li>Investigate the following Color Filtering options:
-<ul>
-<li>Role of SC Loop and AGC and CAGC values on video noise and edge sharpness</li>
-<li>See if it is possible to add CTI (Color Transient Improvement) to dTV's filters? </li>
-<li>Peaking - The Bt879 enables four different peaking levels by programming the PEAK bit and HFILT bits in the SCLOOP register.</li>
-<li>Automatic Chrominance Gain Control - compensates for reduced chrominance and color-burst amplitudes</li>
-<li>Coring - The Bt879 video decoder can perform a coring function, in which it forces all values below a programmed level to be 0. This is useful because the human eye is more sensitive to variations in black images.</li>
-</ul>
-</li>
-
-<li>Support extra tuner and sound chips, including cleanup of tv
-tuner support with integration of latest bttv developments</li>
-
-<li>Easier Configuration, perhaps through a wizard?</li>
-
-<li>Add Full Closed Captioning Support</li>
-
-<li>Check that TeleText works properly and move it to display on
-screen rather than in separate window</li>
-
-<li>Make code base more compatible with borland development
-tools</li>
-
-<li>Ability to launch dtv from shortcut</li>
-
-<li>Sort supported card list in hardware setup menu</li>
-
-<li>Add support for Boeder PC Chatcam: BT848, composite + svideo, no tuner</li>
-
-<li>Improve 3:2 pulldown for poor quality sources...perhaps method to manually increase bitshift</li>
-
-<li>Specific mode for anime: manual selection, not part of
-autodetect
-</li>
-
-<li>Mark Rejhon will probably implement dynamic
-thresholdscapability, including dynamic repeat count - lower mode
-switch latencies for clearer pictures fromDVD and
-LaserDisc.Eventually this could make 3:2 detection eventually MUCH
-more sensitive - maybe even sensitive enough to add code that
-detect and deinterlace random pulldown, especially cartoons and
-time-compressed shows.</li>
-
-</ol>
+      <ol>
+        <li>Allow ability to access menu options through right mouse click(channel, 
+          inputs, aspect ratio, deinterlace, volume, etc.)</li>
+        <li>Store multiple settings files that can be chosen from drop down (movies, 
+          sports, svideo, cable, etc).</li>
+        <li>Enhance channel scan code to to truncate channel search (I hate when 
+          it scans channels 70-125 and finds nothing), ability to manually add/delete 
+          channels and ability to automatically assign standard channel number</li>
+        <li>Per channel video format selection for those in dual-standard countries</li>
+        <li>GUI fine-tuning of channel frequencies</li>
+        <li>Typing channel numbers on keyboard/remote turns to channel (e.g., 
+          typing &quot;48&quot; goes to channel 48)</li>
+        <li>Automatic detection of video format, PAL, SECAM, and NTSC coded material</li>
+        <li>Add hotkeys to all essential functions for those with advanced remotes</li>
+        <li>Double click screen to zoom instead of single click. Use single click 
+          to drag screen in window mode.</li>
+        <li>Calibrate Cards to give best set of video adjustments</li>
+        <li>Investigate the following Color Filtering options: 
+          <ul>
+            <li>Role of SC Loop and AGC and CAGC values on video noise and edge 
+              sharpness</li>
+            <li>See if it is possible to add CTI (Color Transient Improvement) 
+              to dTV's filters? </li>
+            <li>Peaking - The Bt879 enables four different peaking levels by programming 
+              the PEAK bit and HFILT bits in the SCLOOP register.</li>
+            <li>Automatic Chrominance Gain Control - compensates for reduced chrominance 
+              and color-burst amplitudes</li>
+            <li>Coring - The Bt879 video decoder can perform a coring function, 
+              in which it forces all values below a programmed level to be 0. 
+              This is useful because the human eye is more sensitive to variations 
+              in black images.</li>
+          </ul>
+        </li>
+        <li>Support extra tuner and sound chips, including cleanup of tv tuner 
+          support with integration of latest bttv developments</li>
+        <li>Add Full Closed Captioning Support</li>
+        <li>Check that TeleText works properly and move it to display on screen 
+          rather than in separate window</li>
+        <li>Make code base more compatible with borland development tools</li>
+        <li>Ability to launch dtv from shortcut</li>
+        <li>Sort supported card list in hardware setup menu</li>
+        <li>Add support for Boeder PC Chatcam: BT848, composite + svideo, no tuner</li>
+        <li>Improve 3:2 pulldown for poor quality sources...perhaps method to 
+          manually increase bitshift</li>
+        <li>Specific mode for anime: manual selection, not part of autodetect 
+        </li>
+        <li>Mark Rejhon will probably implement dynamic thresholdscapability, 
+          including dynamic repeat count - lower mode switch latencies for clearer 
+          pictures fromDVD and LaserDisc.Eventually this could make 3:2 detection 
+          eventually MUCH more sensitive - maybe even sensitive enough to add 
+          code that detect and deinterlace random pulldown, especially cartoons 
+          and time-compressed shows.</li>
+      </ol>
 
 <p>Remember, dTV will always be a work in progress. We welcome
 feedback at the AVScience Forum and our developer mailing list!</p>
