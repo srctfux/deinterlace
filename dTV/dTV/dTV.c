@@ -482,32 +482,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			ShowText(hWnd, GetDeinterlaceModeName());
 			break;
 
-		case IDM_NOISE_FILTER:
-			if (Setting_GetValue(Filter_GetSetting(-1, USETEMPORALNOISEFILTER)))
-			{
-				ShowText(hWnd, "Noise Filter OFF");
-				Setting_SetValue(Filter_GetSetting(-1, USETEMPORALNOISEFILTER), FALSE);
-			}
-			else
-			{
-				ShowText(hWnd, "Noise Filter ON");
-				Setting_SetValue(Filter_GetSetting(-1, USETEMPORALNOISEFILTER), TRUE);
-			}
-			break;
-
-		case IDM_GAMMA_FILTER:
-			if (Setting_GetValue(Filter_GetSetting(-1, USEGAMMAFILTER)))
-			{
-				ShowText(hWnd, "Gamma Filter OFF");
-				Setting_SetValue(Filter_GetSetting(-1, USEGAMMAFILTER), FALSE);
-			}
-			else
-			{
-				ShowText(hWnd, "Gamma Filter ON");
-				Setting_SetValue(Filter_GetSetting(-1, USEGAMMAFILTER), TRUE);
-			}
-			break;
-
 		case IDM_ABOUT:
 			DialogBox(hInst, "ABOUT", hWnd, AboutProc);
 			break;
@@ -1575,6 +1549,7 @@ void MainWndOnInitBT(HWND hWnd)
 		else
 		{
 			LoadFilterPlugins();
+			LoadPluginsSettingsFromIni();
 		}
 	}
 	

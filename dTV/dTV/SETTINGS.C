@@ -115,9 +115,7 @@ void LoadSettingsFromIni()
 	FD50_ReadSettingsFromIni();
 	FD60_ReadSettingsFromIni();
 	FD_Common_ReadSettingsFromIni();
-	Deinterlace_ReadSettingsFromIni();
 	OSD_ReadSettingsFromIni();
-	Filter_ReadSettingsFromIni();
 	VBI_ReadSettingsFromIni();
 
 	GetPrivateProfileString("Files", "DebugLogFilename", DebugLogFilename, DebugLogFilename, MAX_PATH, szIniFile);
@@ -193,6 +191,12 @@ void LoadSettingsFromIni()
 	}
 }
 
+void LoadPluginsSettingsFromIni()
+{
+	Deinterlace_ReadSettingsFromIni();
+	Filter_ReadSettingsFromIni();
+}
+
 LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 {
 	LONG RetVal = 0;
@@ -224,9 +228,6 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 		case WM_FD_COMMON_GETVALUE:
 			RetVal =  Setting_GetValue(FD_Common_GetSetting((FD_COMMON_SETTING)wParam));
 			break;
-		case WM_DEINTERLACE_GETVALUE:	
-			RetVal = Setting_GetValue(Deinterlace_GetSetting(-1, (DEINTERLACE_SETTING)wParam));
-			break;
 		case WM_TVCARD_GETVALUE:		
 			RetVal = Setting_GetValue(TVCard_GetSetting((TVCARD_SETTING)wParam));
 			break;
@@ -235,9 +236,6 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 			break;
 		case WM_OSD_GETVALUE:		
 			RetVal = Setting_GetValue(OSD_GetSetting((OSD_SETTING)wParam));
-			break;
-		case WM_FILTER_GETVALUE:		
-			RetVal = Setting_GetValue(Filter_GetSetting(-1, (FILTER_SETTING)wParam));
 			break;
 		case WM_VBI_GETVALUE:		
 			RetVal = Setting_GetValue(VBI_GetSetting((VBI_SETTING)wParam));
@@ -267,9 +265,6 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 		case WM_FD_COMMON_SETVALUE:
 			Setting_SetValue(FD_Common_GetSetting((FD_COMMON_SETTING)wParam), lParam);
 			break;
-		case WM_DEINTERLACE_SETVALUE:	
-			Setting_SetValue(Deinterlace_GetSetting(-1, (DEINTERLACE_SETTING)wParam), lParam);
-			break;
 		case WM_TVCARD_SETVALUE:		
 			Setting_SetValue(TVCard_GetSetting((TVCARD_SETTING)wParam), lParam);
 			break;
@@ -278,9 +273,6 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 			break;
 		case WM_OSD_SETVALUE:		
 			Setting_SetValue(OSD_GetSetting((OSD_SETTING)wParam), lParam);
-			break;
-		case WM_FILTER_SETVALUE:		
-			Setting_SetValue(Filter_GetSetting(-1, (FILTER_SETTING)wParam), lParam);
 			break;
 		case WM_VBI_SETVALUE:		
 			Setting_SetValue(VBI_GetSetting((VBI_SETTING)wParam), lParam);
@@ -310,9 +302,6 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 		case WM_FD_COMMON_CHANGEVALUE:
 			Setting_ChangeValue(FD_Common_GetSetting((FD_COMMON_SETTING)wParam), lParam);
 			break;
-		case WM_DEINTERLACE_CHANGEVALUE:	
-			Setting_ChangeValue(Deinterlace_GetSetting(-1, (DEINTERLACE_SETTING)wParam), lParam);
-			break;
 		case WM_TVCARD_CHANGEVALUE:		
 			Setting_ChangeValue(TVCard_GetSetting((TVCARD_SETTING)wParam), lParam);
 			break;
@@ -321,9 +310,6 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 			break;
 		case WM_OSD_CHANGEVALUE:		
 			Setting_ChangeValue(OSD_GetSetting((OSD_SETTING)wParam), lParam);
-			break;
-		case WM_FILTER_CHANGEVALUE:		
-			Setting_ChangeValue(Filter_GetSetting(-1, (FILTER_SETTING)wParam), lParam);
 			break;
 		case WM_VBI_CHANGEVALUE:		
 			Setting_ChangeValue(VBI_GetSetting((VBI_SETTING)wParam), lParam);

@@ -324,7 +324,7 @@ BOOL ProcessDeinterlaceSelection(HWND hWnd, WORD wMenuID)
 	return FALSE;
 }
 
-void LoadPlugin(LPCSTR szFileName)
+void LoadDeintPlugin(LPCSTR szFileName)
 {
 	GETDEINTERLACEPLUGININFO* pfnGetDeinterlacePluginInfo;
 	DEINTERLACE_METHOD* pMethod;
@@ -363,7 +363,7 @@ void UnloadDeinterlacePlugins()
 	NumVideoModes = 0;
 }
 
-int MethodCompare( const void *arg1, const void *arg2 )
+int DeintMethodCompare( const void *arg1, const void *arg2 )
 {
 	DEINTERLACE_METHOD* pMethod1 = *(DEINTERLACE_METHOD**)arg1;
 	DEINTERLACE_METHOD* pMethod2 = *(DEINTERLACE_METHOD**)arg2;
@@ -385,7 +385,10 @@ int MethodCompare( const void *arg1, const void *arg2 )
 void AddUIForDeintPlugin(HMENU hMenu, DEINTERLACE_METHOD* DeintMethod)
 {
 	static MenuId = 6000;
-	DeintMethod->MenuId = MenuId++;
+	if(DeintMethod->MenuId == 0)
+	{
+		DeintMethod->MenuId = MenuId++;
+	}
 	if(DeintMethod->szMenuName != NULL)
 	{
 		AppendMenu(hMenu, MF_STRING | MF_ENABLED, DeintMethod->MenuId, DeintMethod->szMenuName);
@@ -410,7 +413,7 @@ BOOL LoadDeinterlacePlugins()
 		BOOL RetVal = TRUE;
     	while(RetVal != 0)
 		{
-			LoadPlugin(FindFileData.cFileName);
+			LoadDeintPlugin(FindFileData.cFileName);
 			RetVal = FindNextFile(hFindFile, &FindFileData);
 		}
 	}
@@ -419,7 +422,7 @@ BOOL LoadDeinterlacePlugins()
 	// this should prevent confusion in the UI
 	if(NumVideoModes > 1)
 	{
-		qsort((void*) VideoDeintMethods, NumVideoModes, sizeof(DEINTERLACE_METHOD*), MethodCompare);
+		qsort((void*) VideoDeintMethods, NumVideoModes, sizeof(DEINTERLACE_METHOD*), DeintMethodCompare);
 	}
 	if(NumVideoModes > 0)
 	{

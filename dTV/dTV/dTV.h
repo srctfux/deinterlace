@@ -20,7 +20,7 @@
 // Copyright (C) 1999/2000 Espresso (echter_espresso@hotmail.com)
 //
 /////////////////////////////////////////////////////////////////////////////
-// Change Log
+// Change Lo
 //
 // Date          Developer             Changes
 //

@@ -53,6 +53,12 @@ typedef struct
 	FILTERPLUGINSTART* pfnPluginStart;
 	// call this if plugin needs to deallocate anything
 	FILTERPLUGINEXIT* pfnPluginExit;
+	// Used to save the module Handle
+	HMODULE hModule;
+	// number of settings
+	long nSettings;
+	// pointer to start of Settings[nSettings]
+	SETTING* pSettings;
 } FILTER_METHOD;
 
 

@@ -26,6 +26,9 @@
 #include "stdafx.h"
 #include "Filter.h"
 #include "settings.h"
+#include "cpu.h"
+#include "dTV.h"
+#include "OSD.h"
 
 long NumFilters = 0;
 BOOL TNoiseFilterOn;
@@ -63,57 +66,143 @@ void Filter_DoOutput(DEINTERLACE_INFO *pInfo, BOOL HurryUp)
 	}
 }
 
-BOOL LoadFilterPlugins()
+void LoadFilterPlugin(LPCSTR szFileName)
 {
-	return FALSE;
+	GETFILTERPLUGININFO* pfnGetFilterPluginInfo;
+	FILTER_METHOD* pMethod;
+	HMODULE hPlugInMod;
+
+	hPlugInMod = LoadLibrary(szFileName);
+	if(hPlugInMod == NULL)
+	{
+		return;
+	}
+	
+	pfnGetFilterPluginInfo = (GETFILTERPLUGININFO*)GetProcAddress(hPlugInMod, "GetFilterPluginInfo");
+	if(pfnGetFilterPluginInfo == NULL)
+	{
+		return;
+	}
+
+	pMethod = pfnGetFilterPluginInfo(CpuFeatureFlags);
+	if(pMethod != NULL)
+	{
+		Filters[NumFilters] = pMethod;
+		pMethod->hModule = hPlugInMod;
+		if(pMethod->pfnPluginStart != NULL)
+		{
+			pMethod->pfnPluginStart();
+		}
+		NumFilters++;
+	}
 }
 
 void UnloadFilterPlugins()
 {
+	int i;
+	for(i = 0; i < NumFilters; i++)
+	{
+		Filters[i]->pfnPluginExit();
+		FreeLibrary(Filters[i]->hModule);
+		Filters[i] = NULL;
+	}
+	NumFilters = 0;
 }
 
-
-BOOL TNoiseFilter_OnChange(long NewValue)
+void AddUIForFilterPlugin(HMENU hMenu, FILTER_METHOD* FilterMethod)
 {
-	// TODO
-	return FALSE;
+	static MenuId = 7000;
+	if(FilterMethod->MenuId == 0)
+	{
+		FilterMethod->MenuId = MenuId++;
+	}
+	if(FilterMethod->szMenuName != NULL)
+	{
+		AppendMenu(hMenu, MF_STRING | MF_ENABLED, FilterMethod->MenuId, FilterMethod->szMenuName);
+	}
+	else
+	{
+		AppendMenu(hMenu, MF_STRING | MF_ENABLED, FilterMethod->MenuId, FilterMethod->szName);
+	}
 }
 
-BOOL GammaFilter_OnChange(long NewValue)
+BOOL LoadFilterPlugins()
 {
-	// TODO
-	return FALSE;
+	WIN32_FIND_DATA FindFileData;
+	HANDLE hFindFile;
+	int i;
+	HMENU hMenu;
+
+	hFindFile = FindFirstFile("FLT_*.dll", &FindFileData);
+
+	if (hFindFile != INVALID_HANDLE_VALUE)
+	{
+		BOOL RetVal = TRUE;
+    	while(RetVal != 0)
+		{
+			LoadFilterPlugin(FindFileData.cFileName);
+			RetVal = FindNextFile(hFindFile, &FindFileData);
+		}
+	}
+
+	if(NumFilters > 0)
+	{
+		hMenu = GetMenu(hWnd);
+		if(hMenu == NULL) return FALSE;
+		hMenu = GetSubMenu(hMenu, 4);
+		if(hMenu == NULL) return FALSE;
+		hMenu = GetSubMenu(hMenu, 6);
+		if(hMenu == NULL) return FALSE;
+
+		for(i = 0; i < NumFilters; i++)
+		{
+			AddUIForFilterPlugin(hMenu, Filters[i]);
+		}
+		return TRUE;
+	}
+	else
+	{
+		return FALSE;
+	}
 }
 
 BOOL ProcessFilterSelection(HWND hWnd, WORD wMenuID)
 {
+	int i;
+	char szText[256];
+	for(i = 0; i < NumFilters; i++)
+	{
+		if(wMenuID == Filters[i]->MenuId)
+		{
+			Filters[i]->bActive = !Filters[i]->bActive;
+			if(Filters[i]->bActive)
+			{
+				sprintf(szText, "%s ON", Filters[i]->szName);
+			}
+			else
+			{
+				sprintf(szText, "%s OFF", Filters[i]->szName);
+			}
+			OSD_ShowText(hWnd, szText, 0);
+			return TRUE;
+		}
+	}
 	return FALSE;
 }
 
 ////////////////////////////////////////////////////////////////////////////
 // Start of Settings related code
 /////////////////////////////////////////////////////////////////////////////
-SETTING FilterSettings[FILTER_SETTING_LASTONE] =
-{
-	{
-		"Noise Filter", ONOFF, 0, &TNoiseFilterOn,
-		FALSE, 0, 1, 1, 1,
-		NULL,
-		"NoiseFilter", "UseTemporalNoiseFilter", TNoiseFilter_OnChange,
-	},
-	{
-		"Gamma Filter", ONOFF, 0, &GammaFilterOn,
-		FALSE, 0, 1, 1, 1,
-		NULL,
-		"GammaFilter", "UseGammaFilter", GammaFilter_OnChange,
-	},
-};
 
-SETTING* Filter_GetSetting(long nIndex, FILTER_SETTING Setting)
+SETTING* Filter_GetSetting(long nIndex, long Setting)
 {
-	if(Setting > -1 && Setting < FILTER_SETTING_LASTONE)
+	if(nIndex < 0 || nIndex >= NumFilters)
 	{
-		return &(FilterSettings[Setting]);
+		return NULL;
+	}
+	if(Setting > -1 && Setting < Filters[nIndex]->nSettings)
+	{
+		return &(Filters[nIndex]->pSettings[Setting]);
 	}
 	else
 	{
@@ -128,20 +217,26 @@ LONG Filter_HandleSettingsMsg(HWND hWnd, UINT message, UINT wParam, LONG lParam,
 
 void Filter_ReadSettingsFromIni()
 {
-	int i;
-	for(i = 0; i < FILTER_SETTING_LASTONE; i++)
+	int i,j;
+	for(i = 0; i < NumFilters; i++)
 	{
-		Setting_ReadFromIni(&(FilterSettings[i]));
+		for(j = 0; j < Filters[i]->nSettings; j++)
+		{
+			Setting_ReadFromIni(&(Filters[i]->pSettings[j]));
+		}
 	}
 }
 
 
 void Filter_WriteSettingsToIni()
 {
-	int i;
-	for(i = 0; i < FILTER_SETTING_LASTONE; i++)
+	int i,j;
+	for(i = 0; i < NumFilters; i++)
 	{
-		Setting_WriteToIni(&(FilterSettings[i]));
+		for(j = 0; j < Filters[i]->nSettings; j++)
+		{
+			Setting_WriteToIni(&(Filters[i]->pSettings[j]));
+		}
 	}
 }
 

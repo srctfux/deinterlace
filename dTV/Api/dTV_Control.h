@@ -504,19 +504,6 @@ typedef enum
 #define WM_DI_TWOFRAME_CHANGEVALUE	(WM_USER + 212)
 
 /////////////////////////////////////////////////////////////////////////////
-// Control settings contained in Deinterlace.c
-/////////////////////////////////////////////////////////////////////////////
-
-typedef enum
-{
-	DEINTERLACE_SETTING_LASTONE = 0,
-} DEINTERLACE_SETTING;
-
-#define WM_DEINTERLACE_GETVALUE		(WM_USER + 13)
-#define WM_DEINTERLACE_SETVALUE		(WM_USER + 113)
-#define WM_DEINTERLACE_CHANGEVALUE	(WM_USER + 213)
-
-/////////////////////////////////////////////////////////////////////////////
 // Control settings contained in DI_Greedy.c
 /////////////////////////////////////////////////////////////////////////////
 
@@ -537,6 +524,7 @@ typedef enum
 {
 	TEMPORALLUMINANCETHRESHOLD = 0,
 	TEMPORALCHROMATHRESHOLD,
+	USETEMPORALNOISEFILTER,
 	FLT_TNOISE_SETTING_LASTONE,
 } FLT_TNOISE_SETTING;
 
@@ -602,21 +590,6 @@ typedef enum
 #define WM_OSD_CHANGEVALUE	(WM_USER + 218)
 
 /////////////////////////////////////////////////////////////////////////////
-// Control settings contained in Filter.c
-/////////////////////////////////////////////////////////////////////////////
-
-typedef enum
-{
-	USETEMPORALNOISEFILTER = 0,
-	USEGAMMAFILTER,
-	FILTER_SETTING_LASTONE,
-} FILTER_SETTING;
-
-#define WM_FILTER_GETVALUE		(WM_USER + 19)
-#define WM_FILTER_SETVALUE		(WM_USER + 119)
-#define WM_FILTER_CHANGEVALUE	(WM_USER + 219)
-
-/////////////////////////////////////////////////////////////////////////////
 // Control settings contained in FLT_Gamma.c
 /////////////////////////////////////////////////////////////////////////////
 
@@ -624,6 +597,7 @@ typedef enum
 {
 	GAMMAVALUE = 0,
 	USESTOREDTABLE,
+	USEGAMMAFILTER,
 	FLT_GAMMA_SETTING_LASTONE,
 } FLT_GAMMA_SETTING;
 
