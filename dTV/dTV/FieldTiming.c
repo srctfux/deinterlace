@@ -197,8 +197,8 @@ void Timing_WaitForNextFieldAccurate(DEINTERLACE_INFO* pInfo)
 	else
 	{
 		// delete all history
-		memset(pInfo->EvenLines, 0, 5 * sizeof(short**));
-		memset(pInfo->OddLines, 0, 5 * sizeof(short**));
+		memset(pInfo->EvenLines, 0, MAX_FIELD_HISTORY * sizeof(short**));
+		memset(pInfo->OddLines, 0, MAX_FIELD_HISTORY * sizeof(short**));
 		pInfo->bMissedFrame = TRUE;
 		nFrame++;
 		LOG(" Dropped Frame");
