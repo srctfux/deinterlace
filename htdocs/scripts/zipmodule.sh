@@ -1,9 +1,9 @@
 #!/bin/sh 
 
-#dScaler Module Zip Script
+#DScaler Module Zip Script
 #Dan Schmelzer
 #dschmelzer@hotmail.com
-#1/30/2001
+#Updated 8/2/2001
 
 #Why this script is needed...
 #This script is needed to do the nightly module zip when we want to and to put
@@ -30,78 +30,118 @@
 
 #Remove the old module zip from the FTP site
 
-rm -f /home/groups/ftp/pub/deinterlace/dscalermodule.zip
+rm -f /home/groups/d/de/deinterlace/htdocs/downloads/dscalermodule.zip
 
 
-#Do the remaining work from the dTV subdirectory
+#Do the remaining work from the DScaler subdirectory
 
 cd /home/groups/d/de/deinterlace/
 
 
-#Check out the dTV module to temporary space from the dTV CVS using pserver.
+#Check out the DScaler module to temporary space from the DScaler CVS using pserver.
 #You will need to log in to pserver once; after that, you should be fine, unless the CVS
 #server crashes or something like that.  In a half year, I've had to log in a couple of times.
 #See the instructions above for the details on logging in.
 
-cvs -d:pserver:anonymous@cvs1:/cvsroot/deinterlace co dTV>/dev/null
+cvs -d:pserver:anonymous@cvs1:/cvsroot/deinterlace co DScaler>/dev/null
 
 
 
 #todos doesn't have a recursive function, so you have to work with each directory individually.
 
-cd /home/groups/d/de/deinterlace/dTV/dTV
-todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
-cd /home/groups/d/de/deinterlace/dTV/Driver/COMMON
-todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
-cd /home/groups/d/de/deinterlace/dTV/Driver/DLL
-todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
-cd /home/groups/d/de/deinterlace/dTV/Driver/INCLUDE
-todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
-cd /home/groups/d/de/deinterlace/dTV/Driver/SYS
-todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
-cd /home/groups/d/de/deinterlace/dTV/Driver/VXD
-todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
-cd /home/groups/d/de/deinterlace/dTV/Debug
-todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
-cd /home/groups/d/de/deinterlace/dTV/Release
-todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
-cd /home/groups/d/de/deinterlace/dTV/Release/Docs
-todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
-cd /home/groups/d/de/deinterlace/dTV/Plugins/DI_Adaptive
-todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
-cd /home/groups/d/de/deinterlace/dTV/Plugins/DI_BlendedClip
-todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
-cd /home/groups/d/de/deinterlace/dTV/Plugins/DI_Bob
-todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
-cd /home/groups/d/de/deinterlace/dTV/Plugins/DI_EvenOnly
-todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
-cd /home/groups/d/de/deinterlace/dTV/Plugins/DI_Greedy
-todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
-cd /home/groups/d/de/deinterlace/dTV/Plugins/DI_Greedy2Frame
-todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
-cd /home/groups/d/de/deinterlace/dTV/Plugins/DI_OddOnly
-todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
-cd /home/groups/d/de/deinterlace/dTV/Plugins/DI_ScalerBob
-todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
-cd /home/groups/d/de/deinterlace/dTV/Plugins/DI_TwoFrame
-todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
-cd /home/groups/d/de/deinterlace/dTV/Plugins/DI_VideoBob
-todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
-cd /home/groups/d/de/deinterlace/dTV/Plugins/DI_VideoWeave
-todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
-cd /home/groups/d/de/deinterlace/dTV/Plugins/DI_Weave
-todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
-cd /home/groups/d/de/deinterlace/dTV/Plugins/FLT_Gamma
-todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
-cd /home/groups/d/de/deinterlace/dTV/Plugins/FLT_TNoise
-todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
-cd /home/groups/d/de/deinterlace/dTV/Plugins/FLT_LinearCorrection
-todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
-cd /home/groups/d/de/deinterlace/dTV/PlugTest
-todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
-cd /home/groups/d/de/deinterlace/dTV/Api
-todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp
-
+cd /home/groups/d/de/deinterlace/DScaler/API
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/Debug
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/Driver
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/Driver/DSDrv
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/Driver/DSDrv95
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/Driver/DSDrvNT
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/DScaler
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/DScaler/RES
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/DScaler/Help
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/Install
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/Mapconv
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/Plugins/DI_Adaptive
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/Plugins/DI_BlendedClip
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/Plugins/DI_Bob
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/Plugins/DI_EvenOnly
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/Plugins/DI_Greedy
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/Plugins/DI_Greedy2Frame
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/Plugins/DI_GreedyH
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/Plugins/DI_OddOnly
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/Plugins/DI_OldGame
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/Plugins/DI_ScalerBob
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/Plugins/DI_TwoFrame
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/Plugins/DI_VideoBob
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/Plugins/DI_VideoWeave
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/Plugins/DI_Weave
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/Plugins/FLT_Gamma
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/Plugins/FLT_LinearCorrection
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/Plugins/FLT_LogoKill
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/Plugins/FLT_TNoise
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/PlugTest
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
+cd /home/groups/d/de/deinterlace/DScaler/Release
+todos *.c *.h *.asm *.dsp *.dsw *.html *.htm *.txt *.rc *.ini *.cpp *.url *.sln
+todos *.hhk *.hhc *.rtf
 
 
 cd /home/groups/d/de/deinterlace/
@@ -109,7 +149,7 @@ cd /home/groups/d/de/deinterlace/
 
 #Zip up the module
 
-zip -r dscalermodule.zip dTV
+zip -r dscalermodule.zip DScaler
 
 
 #Give the zip file group permissions in case somebody else needs to delete it
@@ -119,19 +159,12 @@ chmod 777 dscalermodule.zip
 
 #Then move it to the site space
 
-mv dscalermodule.zip /home/groups/ftp/pub/deinterlace/
+mv dscalermodule.zip /home/groups/d/de/deinterlace/htdocs/downloads/
 
 
 #Clean up the temporary space
 
-rm -rf dTV
+rm -rf DScaler
 
 
 #Joy
-
-
-
-
-
-
-
