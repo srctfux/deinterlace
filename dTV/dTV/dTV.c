@@ -1195,6 +1195,10 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
             }
 			break;
 
+        case IDM_SAVE_SETTINGS_NOW:
+  			WriteSettingsToIni();
+            break;
+
 		case IDM_OSD_CC_TEXT:
 			{
 				RECT winRect;
@@ -1263,7 +1267,8 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_HELP_README:
 			ShellExecute(hWnd, "open", ".\\Docs\\dTV_Readme.htm", NULL, NULL, SW_SHOWNORMAL);
 			break;
-		default:
+
+        default:
 			// Check whether menu ID is an aspect ratio related item
 			ProcessAspectRatioSelection(hWnd, LOWORD(wParam));
 			break;
@@ -1470,7 +1475,8 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				Overlay_Update(NULL, NULL, DDOVER_HIDE, FALSE);
 				break;
 			case SIZE_RESTORED:
-				WorkoutOverlaySize();
+                InvalidateRect(hWnd, NULL, FALSE);
+                WorkoutOverlaySize();
                 SetMenuAnalog();
 				break;
 			default:
@@ -1671,14 +1677,7 @@ void MainWndOnInitBT(HWND hWnd)
 
         // OK we're ready to go
 		BT848_ResetHardware();
-        if (Setting_GetValue(BT848_GetSetting(VIDEOSOURCE)) >= SOURCE_CCIR656_1)
-        {
-    		BT848_Enable656();
-        }
-        else
-        {
-    		BT848_SetGeoSize();
-        }
+  		BT848_SetGeoSize();
 		WorkoutOverlaySize();
 		
 		SetMenuAnalog();
@@ -1991,6 +1990,7 @@ void Overlay_Stop(HWND hWnd)
 // This is also called during a Resume operation
 void Overlay_Start(HWND hWnd)
 {
+    InvalidateRect(hWnd, NULL, FALSE);
 	Overlay_Create();
     Reset_Capture();
 }
