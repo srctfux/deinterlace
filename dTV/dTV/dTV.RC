@@ -58,7 +58,7 @@ BEGIN
     GROUPBOX        "Video-Subsystem",IDC_STATIC,3,100,195,50
     GROUPBOX        "Processor",IDC_STATIC,3,152,195,33
     LTEXT           "CPU Type",IDC_STATIC,5,166,45,10
-    LTEXT           "",IDC_CPU_TYPE,66,166,125,10
+//    LTEXT           "",IDC_CPU_TYPE,66,166,125,10
 END
 
 CHANNELLIST DIALOG DISCARDABLE  22, 17, 75, 156
@@ -488,7 +488,7 @@ BEGIN
     GROUPBOX        "Authors",IDC_STATIC,6,37,180,100
     LTEXT           "John Adcock\nMark Rejhon\nSteve Grimm\nTom Barry\nMichael Eskin\nMichael Samblanet",
                     IDC_STATIC,11,49,86,69
-    CTEXT           ">>>   http://deinterlace.sourceforge.net   <<<",
+    CTEXT           "()()  http://deinterlace.sourceforge.net  ()()",
                     IDC_STATIC,0,11,293,10
     LTEXT           "bttv - Bt848 frame grabber driver Copyright (c) Ralph  Metzler && Marcus Metzler",
                     IDC_STATIC,13,168,347,11
@@ -909,6 +909,10 @@ BEGIN
             MENUITEM "320",                         ID_SETTINGS_PIXELWIDTH_320
 
         END
+        POPUP "&Filters"
+        BEGIN
+            MENUITEM "Noise Reduction (Temporal)\tN", IDM_NOISE_FILTER
+        END
     END
     POPUP "&Hardware"
     BEGIN
@@ -1223,6 +1227,7 @@ BEGIN
     "L",            IDM_TAKESTILL,          VIRTKEY, NOINVERT
     "M",            IDM_MUTE,               VIRTKEY, NOINVERT
     "M",            IDM_MUTE,               VIRTKEY, SHIFT, NOINVERT
+    "N",            IDM_NOISE_FILTER,       VIRTKEY, NOINVERT
     "O",            IDM_OVERSCAN_MINUS,     VIRTKEY, NOINVERT
     "O",            IDM_OVERSCAN_PLUS,      VIRTKEY, SHIFT, NOINVERT
     "O",            IDM_OVERSCAN_CURRENT,   VIRTKEY, SHIFT, CONTROL, 

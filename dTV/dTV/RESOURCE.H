@@ -546,6 +546,7 @@
 #define IDM_MSPSTEREO_4                 1634
 #define IDM_MUTE                        402
 #define IDM_NEU                         1532
+#define IDM_NOISE_FILTER                768
 #define IDM_ODD_ONLY                    544
 #define IDM_ON_TOP                      309
 #define IDM_OVERLAY_START               591

@@ -69,6 +69,7 @@
 #include "DI_BlendedClip.H"
 #include "FD_60Hz.H"
 #include "FD_50Hz.H"
+#include "FLT_TNoise.h"
 
 
 HWND hWnd = NULL;
@@ -542,6 +543,14 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			{
 				DialogBox(hInst, "BLENDED_CLIP", hWnd, BlendedClipProc);
 			}
+			break;
+
+		case IDM_NOISE_FILTER:
+			UseTemporalNoiseFilter = ! UseTemporalNoiseFilter;
+			if (UseTemporalNoiseFilter)
+				ShowText(hWnd, "Noise Filter ON");
+			else
+				ShowText(hWnd, "Noise Filter OFF");
 			break;
 
 		case IDM_ABOUT:
@@ -1980,7 +1989,6 @@ void SetMenuAnalog()
 	CheckMenuItem(GetMenu(hWnd), IDM_AUTOSTEREO,        AutoStereoSelect?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_SPLASH_ON_STARTUP, bDisplaySplashScreen?MF_CHECKED:MF_UNCHECKED);
 
-
 	CheckMenuItem(GetMenu(hWnd), IDM_AUTODETECT, bAutoDetectMode?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_FALLBACK, bFallbackToVideo?MF_CHECKED:MF_UNCHECKED);
 
@@ -2017,6 +2025,8 @@ void SetMenuAnalog()
 	CheckMenuItem(GetMenu(hWnd), IDM_EVEN_ONLY, (ModeToShow == EVEN_ONLY) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_BLENDED_CLIP, (ModeToShow == BLENDED_CLIP) ?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hWnd), IDM_ADAPTIVE, (ModeToShow == ADAPTIVE) ?MF_CHECKED:MF_UNCHECKED);
+
+	CheckMenuItem(GetMenu(hWnd), IDM_NOISE_FILTER, UseTemporalNoiseFilter ? MF_CHECKED : MF_UNCHECKED);
 
 	SetMenuAspectRatio(hWnd);
 }

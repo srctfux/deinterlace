@@ -77,6 +77,7 @@
 #include "DebugLog.h"
 #include "vbi.h"
 #include "Settings.h"
+#include "FLT_TNoise.h"
 #include "Status.h"
 #include "FD_60Hz.h"
 #include "FD_50Hz.h"
@@ -531,6 +532,8 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				pDest = LockOverlay();	// Ready to access screen, Lock back buffer berfore accessing
 										// can't do this until after Lock Call
 				info.Overlay = pDest;
+
+				NoiseFilter_Temporal(&info);
 			}
 
 			if (RunningLate)

@@ -56,6 +56,7 @@
 #include "deinterlace.h"
 #include "AspectRatio.h"
 #include "DebugLog.h"
+#include "FLT_TNoise.h"
 #include "MixerDev.h"
 #include "dTV.h"
 #include "ProgramList.h"
@@ -176,6 +177,9 @@ void LoadSettingsFromIni()
 	BlcBlendChroma  = GetPrivateProfileInt("Deinterlace", "BlcBlendChroma", BlcBlendChroma , szIniFile);
 	BlcShowControls  = GetPrivateProfileInt("Deinterlace", "BlcShowControls", BlcShowControls , szIniFile);
 
+	TemporalLuminanceThreshold = GetPrivateProfileInt("NoiseFilter", "TemporalLuminanceThreshold", TemporalLuminanceThreshold, szIniFile);
+	TemporalChromaThreshold = GetPrivateProfileInt("NoiseFilter", "TemporalChromaThreshold", TemporalChromaThreshold, szIniFile);
+	UseTemporalNoiseFilter = GetPrivateProfileInt("NoiseFilter", "UseTemporalNoiseFilter", UseTemporalNoiseFilter, szIniFile);
 
 	VBI_Flags = 0;
 	if(GetPrivateProfileInt("VBI", "VT", 0, szIniFile) != 0)
@@ -424,6 +428,10 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("Deinterlace", "BlcUseInterpBob", BlcUseInterpBob , szIniFile);
 	WritePrivateProfileInt("Deinterlace", "BlcBlendChroma", BlcBlendChroma , szIniFile);
 	WritePrivateProfileInt("Deinterlace", "BlcShowControls", BlcShowControls , szIniFile);
+
+	WritePrivateProfileInt("NoiseFilter", "TemporalLuminanceThreshold", TemporalLuminanceThreshold, szIniFile);
+	WritePrivateProfileInt("NoiseFilter", "TemporalChromaThreshold", TemporalChromaThreshold, szIniFile);
+	WritePrivateProfileInt("NoiseFilter", "UseTemporalNoiseFilter", UseTemporalNoiseFilter, szIniFile);
 
 	WritePrivateProfileInt("Show", "StatusBar", bDisplayStatusBar, szIniFile);
 	WritePrivateProfileInt("Show", "Menu", Show_Menu, szIniFile);
