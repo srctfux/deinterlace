@@ -105,7 +105,7 @@ void Start_Thread()
 
 	for (i = 0; i < 5; i++)
 	{
-		pDisplay[i] = Display_dma[i]->dwUser;
+		pDisplay[i] = GetFirstFullPage(Display_dma[i]);
 	}
 
 	// make sure we start with a clean sheet of paper

@@ -100,6 +100,7 @@ void Free_Display_DMA(int NR);
 
 BOOL Alloc_DMA(DWORD dwSize, PMemStruct * dma, int Option);
 void Free_DMA(PMemStruct * dma);
+void* GetFirstFullPage(PMemStruct pMem);
 PHYS GetPhysicalAddress(PMemStruct dma, LPBYTE pLinear, DWORD dwSizeWanted, DWORD * pdwSizeAvailable);
 
 

@@ -1723,7 +1723,7 @@ void MainWndOnInitBT(HWND hWnd)
 
 		for (i = 0; i < 5; i++)
 		{
-			pDisplay[i] = Display_dma[i]->dwUser;
+			pDisplay[i] = GetFirstFullPage(Display_dma[i]);
 		}
 
 		// OK we're ready to go

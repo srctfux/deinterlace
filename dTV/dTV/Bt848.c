@@ -227,7 +227,10 @@ BOOL BT848_MemoryInit(void)
 			ErrorBox("VideoText Memory ( 77 KB ) for DMA not allocated");
 			return (FALSE);
 		}
-		if (!Alloc_DMA(1024 * 576 * 2, &Display_dma[i], 0))
+		// JA 29/12/2000
+		// Allocate some extra memory so that we can skip
+		// start of buffer that is not page aligned
+		if (!Alloc_DMA(1024 * 576 * 2 + 4095, &Display_dma[i], 0))
 		{
 			ErrorBox("Display Memory (1 MB) for DMA not allocated");
 			return (FALSE);
@@ -945,25 +948,13 @@ void MakeVideoTableForDisplay()
 			{
 				return;
 			}
-			if (GotBytesPerLine < BytesPerLine)
-			{
-				DWORD BytesToGet = BytesPerLine - GotBytesPerLine;
-				*((*rp)++) = BT848_RISC_WRITE | BT848_RISC_SOL | GotBytesPerLine;
-				*((*rp)++) = pPhysDisplay;
-				// Assumes lines aren't >8K long!
-				pPhysDisplay = GetPhysicalAddress(Display_dma[nBuffer], pLinDisplay + GotBytesPerLine, BytesToGet, &GotBytesPerLine);
-				if(pPhysDisplay == 0 || BytesToGet > GotBytesPerLine)
-				{
-					return;
-				}
-				*((*rp)++) = BT848_RISC_WRITE | BT848_RISC_EOL | BytesToGet;
-				*((*rp)++) = pPhysDisplay;
-			}
-			else
-			{
-				*((*rp)++) = BT848_RISC_WRITE | BT848_RISC_SOL | BT848_RISC_EOL | BytesPerLine;
-				*((*rp)++) = pPhysDisplay;
-			}
+			// 27/12/2000 JA
+			// pDisplay is now aligned to a page boundary
+			// this means if we increment a half apge at a time
+			// then we always will ahve enough room and will not need
+			// to split the line as before
+			*((*rp)++) = BT848_RISC_WRITE | BT848_RISC_SOL | BT848_RISC_EOL | BytesPerLine;
+			*((*rp)++) = pPhysDisplay;
 			pLinDisplay += 2048;
 		}
 		*(re++) = BT848_RISC_JUMP | ((0xF0) << 16);
@@ -1108,6 +1099,24 @@ PHYS GetPhysicalAddress(PMemStruct pMem, LPBYTE pLinear, DWORD dwSizeWanted, DWO
 	}
 
 	return pRetVal;	
+}
+
+// JA 29/12/2000
+// This function returns the user space address of the first page aligned
+// section of an allocated buffer.
+
+void* GetFirstFullPage(PMemStruct pMem)
+{
+	PPageStruct pPages = (PPageStruct)(pMem + 1);
+	DWORD pRetVal;
+
+	pRetVal = (DWORD)pMem->dwUser;
+
+	if(pPages[0].dwSize != 4096)
+	{
+		pRetVal += pPages[0].dwSize;
+	}
+	return (void*)pRetVal;	
 }
 
 void BT848_MaskDataByte(int Offset, BYTE d, BYTE m)
