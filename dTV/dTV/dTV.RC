@@ -834,6 +834,9 @@ BEGIN
         END
         POPUP "&Zoom"
         BEGIN
+            MENUITEM "Zoom -\tZ",                   IDM_ZOOM_MINUS
+            MENUITEM "Zoom +\tShift+Z",             IDM_ZOOM_PLUS
+            MENUITEM SEPARATOR
             MENUITEM "1x",                          IDM_ZOOM_10
             MENUITEM "1.5x",                        IDM_ZOOM_15
             MENUITEM "2x",                          IDM_ZOOM_20
@@ -1349,6 +1352,8 @@ BEGIN
     "X",            IDM_R_BALANCE,          VIRTKEY, SHIFT, NOINVERT
     "Y",            IDM_L_BALANCE,          VIRTKEY, NOINVERT
     "Y",            IDM_L_BALANCE,          VIRTKEY, SHIFT, NOINVERT
+    "Z",            IDM_ZOOM_MINUS,         VIRTKEY, NOINVERT
+    "Z",            IDM_ZOOM_PLUS,          VIRTKEY, SHIFT, NOINVERT
     "_",            IDM_VOLUMEMINUS,        ASCII,  NOINVERT
     "`",            IDM_SASPECT_COMPUTE,    ASCII,  NOINVERT
 END

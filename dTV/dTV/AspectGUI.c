@@ -183,6 +183,8 @@ void AspectRatio_SetMenu(HMENU hMenu)
 // during aspect ratio control
 BOOL ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 {
+	char Text[32];
+
 	switch (wMenuID) {
 	//------------------------------------------------------------------
 	// Easily Accessible Aspect Ratios
@@ -336,6 +338,35 @@ BOOL ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 
 	//------------------------------------------------------------------
 	// Zoom
+	case IDM_ZOOM_MINUS:
+		aspectSettings.xZoomFactor -= 0.5;
+		if (aspectSettings.xZoomFactor < 1.0)
+			aspectSettings.xZoomFactor = 1.0;
+		aspectSettings.yZoomFactor -= 0.5;
+		if (aspectSettings.yZoomFactor < 1.0)
+			aspectSettings.yZoomFactor = 1.0;
+		if ((aspectSettings.xZoomFactor == 1.0) && (aspectSettings.yZoomFactor == 1.0))
+		{
+			ShowText(hWnd,"Zoom Off");
+		}
+		else
+		{
+			sprintf(Text,"Zoom %.1fx", aspectSettings.xZoomFactor);
+			ShowText(hWnd, Text);
+		}
+		break;
+
+	case IDM_ZOOM_PLUS:
+		aspectSettings.xZoomFactor += 0.5;
+		if (aspectSettings.xZoomFactor > 4.0)
+			aspectSettings.xZoomFactor = 4.0;
+		aspectSettings.yZoomFactor += 0.5;
+		if (aspectSettings.yZoomFactor > 4.0)
+			aspectSettings.yZoomFactor = 4.0;
+		sprintf(Text,"Zoom %.1fx", aspectSettings.xZoomFactor);
+		ShowText(hWnd, Text);
+		break;
+
 	case IDM_ZOOM_10:
 		aspectSettings.xZoomFactor = aspectSettings.yZoomFactor = 1.0;
 		ShowText(hWnd,"Zoom Off");
