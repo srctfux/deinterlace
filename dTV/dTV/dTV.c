@@ -502,6 +502,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		case IDM_SCALER_BOB:
 		case IDM_BLENDED_CLIP:
 		case IDM_ADAPTIVE:
+		case IDM_VIDEO_GREEDY:
 			if(Setting_GetValue(OutThreads_GetSetting(AUTODETECT)))
 			{
 				if(TVSettings[TVTYPE].Is25fps)
@@ -519,6 +520,7 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			}
 			else
 			{
+				
 				SetDeinterlaceMode(LOWORD(wParam) - IDM_VIDEO_BOB);
 			}
 			ShowText(hWnd, DeinterlaceModeName(-1));

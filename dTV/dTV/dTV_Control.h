@@ -339,5 +339,17 @@ typedef enum
 #define WM_FLT_TNOISE_GETVALUE		(WM_USER + 14)
 #define WM_FLT_TNOISE_SETVALUE		(WM_USER + 114)
 
+/////////////////////////////////////////////////////////////////////////////
+// Control settings contained in Greedy.c
+/////////////////////////////////////////////////////////////////////////////
+
+typedef enum
+{
+	GREEDYMAXCOMB = 0,
+	DI_GREEDY_SETTING_LASTONE,
+} DI_GREEDY_SETTING;
+#define WM_DI_GREEDY_GETVALUE	(WM_USER + 15)
+#define WM_DI_GREEDY_SETVALUE	(WM_USER + 115)
+
 
 #endif

@@ -60,6 +60,7 @@ DEINTERLACE_FUNC HalfHeightOddOnly;
 DEINTERLACE_FUNC FilmModePAL;
 DEINTERLACE_FUNC FilmModeNTSC;
 DEINTERLACE_FUNC AdaptiveDeinterlace;
+DEINTERLACE_FUNC GreedyClipping;
 
 DEINTERLACE_METHOD DeintMethods[PULLDOWNMODES_LAST_ONE] =
 {
@@ -97,6 +98,8 @@ DEINTERLACE_METHOD DeintMethods[PULLDOWNMODES_LAST_ONE] =
 	{"Blended Clip", NULL, FALSE, FALSE, BlendedClipping, 50, 60},
 	// ADAPTIVE
 	{"Adaptive", NULL, FALSE, FALSE, AdaptiveDeinterlace, 50, 60},
+	// GREEDY
+	{"Video (Greedy)", NULL, FALSE, FALSE, GreedyClipping, 50, 60},
 };
 
 char* DeintModeNames[PULLDOWNMODES_LAST_ONE];

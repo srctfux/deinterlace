@@ -64,6 +64,7 @@
 #include "DI_BlendedClip.h"
 #include "DI_BobAndWeave.h"
 #include "DI_TwoFrame.h"
+#include "DI_Greedy.h"
 #include "other.h"
 #include "FD_50Hz.h"
 #include "FD_60Hz.h"
@@ -242,6 +243,9 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 		case WM_DI_BLENDEDCLIP_GETVALUE:
 			return Setting_GetValue(DI_BlendedClip_GetSetting((DI_BLENDEDCLIP_SETTING)wParam));
 			break;
+		case WM_DI_GREEDY_GETVALUE:
+			return Setting_GetValue(DI_Greedy_GetSetting((DI_GREEDY_SETTING)wParam));
+			break;
 		case WM_DI_TWOFRAME_GETVALUE:	
 			return Setting_GetValue(DI_TwoFrame_GetSetting((DI_TWOFRAME_SETTING)wParam));
 			break;
@@ -284,6 +288,9 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 			break;
 		case WM_DI_BLENDEDCLIP_SETVALUE:
 			Setting_SetValue(DI_BlendedClip_GetSetting((DI_BLENDEDCLIP_SETTING)wParam), lParam);
+			break;
+		case WM_DI_GREEDY_SETVALUE:
+			Setting_SetValue(DI_Greedy_GetSetting((DI_GREEDY_SETTING)wParam), lParam);
 			break;
 		case WM_DI_TWOFRAME_SETVALUE:	
 			Setting_SetValue(DI_TwoFrame_GetSetting((DI_TWOFRAME_SETTING)wParam), lParam);

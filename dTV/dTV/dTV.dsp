@@ -143,6 +143,10 @@ SOURCE=.\DI_BobAndWeave.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\DI_Greedy.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\DI_HalfHeight.c
 # End Source File
 # Begin Source File
@@ -276,6 +280,10 @@ SOURCE=.\DI_BlendedClip.h
 # Begin Source File
 
 SOURCE=.\DI_BobAndWeave.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\DI_Greedy.h
 # End Source File
 # Begin Source File
 
