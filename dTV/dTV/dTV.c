@@ -1242,16 +1242,16 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
         case IDM_FAST_REPAINT:
 			{
 				RECT winRect;
-				HDC hDC;
+				PAINTSTRUCT sPaint;
 				GetClientRect(hWnd, &winRect);
 				if(bDisplayStatusBar == TRUE)
 				{
 					winRect.bottom -= StatusBar_Height();
 				}
-				hDC = GetDC(hWnd);
-			    PaintColorkey(hWnd, TRUE, hDC, &winRect);
-			    OSD_Redraw(hWnd, hDC);
-				ReleaseDC(hWnd, hDC);
+				BeginPaint(hWnd, &sPaint);
+			    PaintColorkey(hWnd, TRUE, sPaint.hdc, &winRect);
+			    OSD_Redraw(hWnd, sPaint.hdc);
+				EndPaint(hWnd, &sPaint);
 			}
 		    break;
 
@@ -1430,6 +1430,25 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
         case OSD_TIMER_ID:
 			OSD_Clear(hWnd);
             break;
+		}
+		break;
+	
+	// support for mouse wheel
+	// the WM_MOUSEWHEEL message is not defined but this is it's value
+	case WM_MOUSELAST + 1:
+		if ((wParam & (MK_SHIFT | MK_CONTROL)) == 0)
+		{
+			// crack the mouse wheel delta
+			// +ve is forward (away from user)
+			// -ve is backward (towards user)
+			if((short)HIWORD(wParam) > 0)
+			{
+				PostMessage(hWnd, WM_COMMAND, IDM_CHANNELPLUS, 0);
+			}
+			else
+			{
+				PostMessage(hWnd, WM_COMMAND, IDM_CHANNELMINUS, 0);
+			}
 		}
 		break;
 
