@@ -804,6 +804,7 @@ BEGIN
                                                 IDM_WINPOS_BOUNCE
         MENUITEM "Defer Setting Overlay (Experimental)", 
                                                 IDM_ASPECT_DEFER_OVERLAY
+        MENUITEM "Orbiting (Experimental)\tCtrl+O", IDM_WINPOS_ORBIT
     END
     POPUP "&Settings"
     BEGIN
@@ -1231,6 +1232,7 @@ BEGIN
     "N",            IDM_NOISE_FILTER,       VIRTKEY, NOINVERT
     "N",            IDM_NOISE_FILTER,       VIRTKEY, SHIFT, NOINVERT
     "O",            IDM_OVERSCAN_MINUS,     VIRTKEY, NOINVERT
+    "O",            IDM_WINPOS_ORBIT,       VIRTKEY, CONTROL, NOINVERT
     "O",            IDM_OVERSCAN_PLUS,      VIRTKEY, SHIFT, NOINVERT
     "O",            IDM_OVERSCAN_CURRENT,   VIRTKEY, SHIFT, CONTROL, 
                                                     NOINVERT

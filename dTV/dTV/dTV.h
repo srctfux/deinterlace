@@ -35,6 +35,7 @@
 //
 // 20 Feb 2001   Michael Samblanet     Added TIMER_BOUNCE, TIMER_BOUNCE_MS
 // 21 Feb 2001   Michael Samblanet     Removed bounce timer - added as setting
+// 23 Feb 2001   Michael Samblanet     Added TIMER_ORBIT
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -78,6 +79,7 @@ BOOL IsStatusBarVisible();
 #define TIMER_AUTOSAVE_MS   1500
 
 #define TIMER_BOUNCE        42
+#define TIMER_ORBIT         43
 
 extern HANDLE hInst;
 extern HWND hWnd;

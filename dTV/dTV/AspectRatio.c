@@ -54,6 +54,7 @@
 //                                     avoid purple flashing
 //                                     Made bounce timer a ini setting and changed to 1sec default
 //
+// 23 Feb 2001   Michael Samblanet     Added experemental orbiting code
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -177,7 +178,18 @@ time_t bounceStartTime = 0;
 time_t bouncePeriod = 60*30;
 long timerBounceMS = 1000; // # of miliseconds between aspect updates
 
+// Orbit - shifts the source image around on a regular basis
+// Shares the bounceStartTime for calculations
+// PeriodX and PeriodY should be different for ideal results
+BOOL orbitEnabled = FALSE;
+int orbitSize = 8; // # of pixels of variation (both X and Y axis)
+time_t orbitPeriodX = 60; // Time to move across the entire orbit area on X axis (seconds)
+time_t orbitPeriodY = 60; // Time to move across the entire orbit area on Y axis (seconds)
+long timerOrbitMS = 1000; // # of miliseconds between aspect updates for orbiting (miliseconds)
+
+
 BOOL Bounce_OnChange(long NewValue); // Forward declaration to reuse this code...
+BOOL Orbit_OnChange(long NewValue); // Forward declaration to reuse this code...
 
 //----------------------------------------------------------------------------
 // Switch to a new aspect ratio and record it in the ratio history list.
@@ -326,6 +338,7 @@ void AspectRatio_SetMenu(HMENU hMenu)
 
 	CheckMenuItem(hMenu, IDM_SASPECT_CLIP, (aspectImageClipped)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_WINPOS_BOUNCE, (bounceEnabled)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_WINPOS_ORBIT, (orbitEnabled)?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(hMenu, IDM_ASPECT_DEFER_OVERLAY, (deferedSetOverlay)?MF_CHECKED:MF_UNCHECKED);
 }
 
@@ -407,6 +420,11 @@ int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 	case IDM_WINPOS_BOUNCE:
 		Bounce_OnChange(!bounceEnabled);
 		ShowText(hWnd, bounceEnabled ? "Image Bouncing ON" : "Image Bouncing OFF");
+		break;
+
+	case IDM_WINPOS_ORBIT:
+		Orbit_OnChange(!orbitEnabled);
+		ShowText(hWnd, orbitEnabled ? "Orbit ON" : "Orbit OFF");
 		break;
 
 	case IDM_ASPECT_DEFER_OVERLAY:
@@ -675,16 +693,41 @@ void WorkoutOverlaySize()
 	RECT rOverlayDest;
 	RECT rOverlaySrc;
 	RECT previousDest = destinationRectangle; // MRS 2-22-01
+	int overscan = InitialOverscan;
 
 	int DestWidth, DestHeight;
 
 	UpdateWindowState();
 
 	// Do overscan
-	rOverlaySrc.left = InitialOverscan;
-	rOverlaySrc.top  = InitialOverscan;
-	rOverlaySrc.right = CurrentX - InitialOverscan;
-	rOverlaySrc.bottom = CurrentY - InitialOverscan;
+	// Make sure the overscan is big enough for the orbit
+	if (orbitEnabled && overscan*2 < orbitSize) overscan = (orbitSize+1)/2;
+	rOverlaySrc.left = overscan;
+	rOverlaySrc.top  = overscan;
+	rOverlaySrc.right = CurrentX - overscan;
+	rOverlaySrc.bottom = CurrentY - overscan;
+
+	if (orbitEnabled) {
+		int orbitX = 0, orbitY = 0;
+		time_t t = time(NULL);
+		
+		if (bounceStartTime == 0) time(&bounceStartTime);
+		
+		// Figure out how far to move...
+		orbitX = MulDiv((t-bounceStartTime)%orbitPeriodX,orbitSize*2,orbitPeriodX)+orbitSize/2;
+		orbitY = MulDiv((t-bounceStartTime)%orbitPeriodY,orbitSize*2,orbitPeriodY)+orbitSize/2;
+		if (orbitX > orbitSize) orbitX = ABS(2*orbitSize-orbitX);
+		if (orbitY > orbitSize) orbitY = ABS(2*orbitSize-orbitY);
+
+		// Shift image
+		orbitX -= orbitSize/2;
+		orbitY -= orbitSize/2;
+		rOverlaySrc.left += orbitX;
+		rOverlaySrc.right += orbitX;
+		rOverlaySrc.top += orbitY;
+		rOverlaySrc.bottom += orbitY;
+	}
+
 
 	// get main window client area
 	// and convert to screen coordinates
@@ -773,9 +816,8 @@ void WorkoutOverlaySize()
 		// Crop the destination rectangle
 		if (TargetDestAspect > .1)
 		{
-			#define BOUNCE_POS (abs(MulDiv((time(NULL)-bounceStartTime)%bouncePeriod,200,bouncePeriod)+50)*10000l)
+			#define BOUNCE_POS ((MulDiv((time(NULL)-bounceStartTime)%bouncePeriod,200,bouncePeriod)+50)*10000l)
 			if (bounceEnabled && bounceStartTime == 0) time(&bounceStartTime);
-
 
 			if (WindowAspect > TargetDestAspect)
 			{
@@ -788,7 +830,7 @@ void WorkoutOverlaySize()
 					case HORZ_POS_RIGHT: pos = 1000000; break;
 					default: pos = 500000; break;
 				}
-				if (pos > 1000000) pos = 2000000 - pos;
+				if (pos > 1000000) pos = ABS(2000000 - pos);
 				NewWidth = (int) floor((TargetDestAspect*RHEIGHT(rOverlayDest))+.5);
 				rOverlayDest.left += MulDiv(RWIDTH(rOverlayDest)-NewWidth,pos,1000000l);
 				rOverlayDest.right = rOverlayDest.left + NewWidth;
@@ -804,7 +846,7 @@ void WorkoutOverlaySize()
 					case VERT_POS_BOTTOM: pos = 1000000; break;
 					default: pos = 500000; break;
 				}
-				if (pos > 1000000) pos = 2000000 - pos;
+				if (pos > 1000000) pos = ABS(2000000 - pos);
 				NewWidth = (int) floor((RWIDTH(rOverlayDest)/TargetDestAspect)+.5);
 				rOverlayDest.top += MulDiv((RHEIGHT(rOverlayDest) - NewWidth),pos,1000000l);
 				rOverlayDest.bottom = rOverlayDest.top + NewWidth;
@@ -927,21 +969,20 @@ void WorkoutOverlaySize()
 	if (rOverlaySrc.left  >= rOverlaySrc.right)   rOverlaySrc.right   = rOverlaySrc.left  + 1;
 	if (rOverlaySrc.top   >= rOverlaySrc.bottom)  rOverlaySrc.bottom  = rOverlaySrc.top   + 1;
 
+	destinationRectangle = rOverlayDest;
+	destinationRectangleWindow = rOverlayDest; 
 	if (!deferedSetOverlay) // MRS 2-22-01 - Defered overlay set
 		Overlay_Update(&rOverlaySrc, &rOverlayDest, DDOVER_SHOW, TRUE);
 	else overlayNeedsSetting = TRUE;
 
-	// MRS 9-9-00
 	// Save the Overlay Destination and force a repaint 
-	// Moved to after Overlay_Update in hopes of removing purple flashing.
-	destinationRectangle = rOverlayDest;
-	destinationRectangleWindow = rOverlayDest; // MRS 2-22-01
 	sourceRectangle = rOverlaySrc;
 	ScreenToClient(hWnd,((PPOINT)&destinationRectangle));
 	ScreenToClient(hWnd,((PPOINT)&destinationRectangle)+1);
-	//InvalidateRect(hWnd,NULL,FALSE);
-	// MRS 2-22-01 Invalidate just the union of the old region and the new region - no need to invalidate all of the window.
-	{
+
+	// MRS 2-23-01 Only invalidate if we changed something
+	if (memcmp(&previousDest,&destinationRectangle,sizeof(previousDest))) { 
+		// MRS 2-22-01 Invalidate just the union of the old region and the new region - no need to invalidate all of the window.
 		RECT invalidate;
 		UnionRect(&invalidate,&previousDest,&destinationRectangle);
 		InvalidateRect(hWnd,&invalidate,FALSE);
@@ -1315,6 +1356,16 @@ BOOL Bounce_OnChange(long NewValue) {
 	return FALSE;
 }
 
+BOOL Orbit_OnChange(long NewValue) {
+	orbitEnabled = NewValue != 0;
+	if (!orbitEnabled) {
+		KillTimer(hWnd, TIMER_ORBIT);
+	} else {
+	    SetTimer(hWnd, TIMER_ORBIT, timerOrbitMS, NULL);
+	}
+	return FALSE;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // Start of Settings related code
 /////////////////////////////////////////////////////////////////////////////
@@ -1418,7 +1469,7 @@ SETTING AspectSettings[ASPECT_SETTING_LASTONE] =
 		"ASPECT", "Bounce", Bounce_OnChange,
 	},
 	{
-		"Bounce Period", NUMBER, 0, &aspect_mode,
+		"Bounce Period", NUMBER, 0, &bouncePeriod,
 		60*30, 0, 2, 1, 1,
 		NULL,
 		"ASPECT", "BouncePeriod", NULL,
@@ -1435,8 +1486,36 @@ SETTING AspectSettings[ASPECT_SETTING_LASTONE] =
 		NULL,
 		"ASPECT", "BounceTimerPeriod", NULL,
 	},
-
-	
+	{
+		"Orbit", ONOFF, 0, &orbitEnabled,
+		FALSE, 0, 1, 1, 1,
+		NULL,
+		"ASPECT", "Orbit", Orbit_OnChange,
+	},
+	{
+		"Orbit Period X", NUMBER, 0, &orbitPeriodX,
+		60*45, 0, 2, 1, 1,
+		NULL,
+		"ASPECT", "OrbitPeriodX", NULL,
+	},
+	{
+		"Orbit Period Y", NUMBER, 0, &orbitPeriodY,
+		60*60, 0, 2, 1, 1,
+		NULL,
+		"ASPECT", "OrbitPeriodY", NULL,
+	},
+	{
+		"Orbit Size", NUMBER, 0, &orbitSize,
+		8, 0, 2, 1, 1,
+		NULL,
+		"ASPECT", "OrbitSize", NULL,
+	},
+	{
+		"Orbit Timer Period (ms)", NUMBER, 0, &timerOrbitMS,
+		60000, 0, 2, 1, 1,
+		NULL,
+		"ASPECT", "OrbitTimerPeriod", NULL,
+	},
 };
 
 SETTING* Aspect_GetSetting(ASPECT_SETTING Setting)

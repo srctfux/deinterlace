@@ -51,6 +51,10 @@
 //									   Corrected bug in SaveWindowPos - length 
 //									   not set in placement structure
 //
+// 23 Feb 2001   Michael Samblanet     Added orbit timer, Expierementaly removed
+//                                     2 lines from WM_PAINT which should not be
+//                                     needed and may have caused flashing.
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -1440,8 +1444,8 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 		}
 		//-------------------------------
 		case TIMER_BOUNCE:
+		case TIMER_ORBIT:
 			// MRS 2-20-01 - Resetup the display for bounce and orbiting
-			// Happens every 30 seconds if one is enabled.
 			WorkoutOverlaySize(); // Takes care of everything...
 			break;
 		break;
@@ -1537,8 +1541,10 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			PaintColorkey(hWnd, TRUE, sPaint.hdc, &sPaint.rcPaint);
 			OSD_Redraw(hWnd, sPaint.hdc);
 			EndPaint(hWnd, &sPaint);
-            ValidateRect(hWnd, &sPaint.rcPaint);
-			StatusBar_Repaint();
+			// MRS 2-23-01 - Neither of these 2 lines should be needed
+			// Why are they here?  Removed to see if they clear up flashing issues.
+            //ValidateRect(hWnd, &sPaint.rcPaint); 
+			//StatusBar_Repaint(); 
 		}
 		break;
 
