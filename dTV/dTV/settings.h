@@ -49,18 +49,8 @@ typedef enum
 	NOT_PRESENT = 0,
 	YESNO,
 	ITEMFROMLIST,
-	SLIDER_UCHAR,
-	SLIDER_CHAR,
-	SLIDER_UINT,
-	SLIDER_INT,
-	SLIDER_ULONG,
-	SLIDER_LONG,
-	NUMBER_UCHAR,
-	NUMBER_CHAR,
-	NUMBER_UINT,
-	NUMBER_INT,
-	NUMBER_ULONG,
-	NUMBER_LONG,
+	SLIDER,
+	NUMBER,
 	SUBMENU,
 
 } SETTING_TYPE;
@@ -75,13 +65,14 @@ typedef struct
 	char* szDisplayName;
 	SETTING_TYPE Type;
 	BOOL bHasChanged;
-	void* pValue;
+	long* pValue;
 	long Default;
 	long MinValue;
 	long MaxValue;
 	long StepValue;
-	long PrevValue;
 	char** pszList;
+	char* szIniSection;
+	char* szIniEntry;
 	SETTING_ONCHANGE* pfnOnChange;
 } SETTING;
 
@@ -94,6 +85,23 @@ typedef struct
 } UI_SUBMENU;
 
 void DisplayUISubMenuAsDialog(UI_SUBMENU* pSubMenu);
+
+/////////////////////////////////////////////////////////////////////////////
+// Functions to manipulate settings structure
+/////////////////////////////////////////////////////////////////////////////
+long Setting_GetValue(SETTING* pSetting);
+BOOL Setting_SetValue(SETTING* pSetting, long Value);
+void Setting_SetDefault(SETTING* pSetting);
+void Setting_SetupSlider(SETTING* pSetting, HWND hSlider);
+HWND Setting_CreateControl(SETTING* pSetting, HWND hDlg, int* VertPos);
+void Setting_SetControlValue(SETTING* pSetting, HWND hControl);
+BOOL Setting_SetFromControl(SETTING* pSetting, HWND hControl);
+void Setting_ReadFromIni(SETTING* pSetting);
+void Setting_WriteToIni(SETTING* pSetting);
+void Setting_OSDShow(SETTING* pSetting, HWND hWnd);
+void Setting_Up(SETTING* pSetting);
+void Setting_Down(SETTING* pSetting);
+
 
 // End of new UI code header
 

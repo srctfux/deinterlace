@@ -7,6 +7,7 @@
 #define IDDEL                           3
 #define IDSET                           3
 #define IDSTART                         3
+#define IDDEFAULTS                      3
 #define IDNEXT                          4
 #define IDTEST                          4
 #define ID_RECORD                       5

@@ -67,6 +67,7 @@
 #include "FD_Common.h"
 #include "slider.h"
 #include "Splash.h"
+#include "OSD.h"
 
 // MRS 9-2-00
 // Added variable in dTV.c to track which aspect mode we are currently in
@@ -95,6 +96,10 @@ void LoadSettingsFromIni()
 {
 	char szKey[128];
 	int i;
+
+	// Read in settings from each source files read method
+	Aspect_ReadSetttingsFromIni();
+	BT848_ReadSetttingsFromIni();
 
 	emstartx = GetPrivateProfileInt("MainWindow", "StartLeft", 10, szIniFile);
 	emstarty = GetPrivateProfileInt("MainWindow", "StartTop", 10, szIniFile);
@@ -204,12 +209,6 @@ void LoadSettingsFromIni()
 	VideoSource = GetPrivateProfileInt("Hardware", "VideoSource", VideoSource, szIniFile);
 	TunerType = GetPrivateProfileInt("Hardware", "TunerType", TUNER_ABSENT, szIniFile); 
 	TVTYPE = GetPrivateProfileInt("Hardware", "TVType", -1, szIniFile); 
-	InitialHue = GetPrivateProfileInt("Hardware", "InitialHue", InitialHue, szIniFile); 
-	InitialContrast = GetPrivateProfileInt("Hardware", "InitialContrast", InitialContrast, szIniFile); 
-	InitialBrightness = GetPrivateProfileInt("Hardware", "InitialBrightness", InitialBrightness, szIniFile); 
-	InitialSaturationU = GetPrivateProfileInt("Hardware", "InitialSaturationU", InitialSaturationU, szIniFile); 
-	InitialSaturationV = GetPrivateProfileInt("Hardware", "InitialSaturationV", InitialSaturationV, szIniFile); 
-	InitialOverscan = GetPrivateProfileInt("Hardware", "InitialOverscan", InitialOverscan, szIniFile); 
 
 	// MAE 2 Nov 2000 - Start of change for Macrovision fix
 	InitialBDelay = GetPrivateProfileInt("Hardware", "InitialBDelay", InitialBDelay, szIniFile);
@@ -345,6 +344,9 @@ void WriteSettingsToIni()
 	char szKey[128];
 	int i;
 
+	Aspect_WriteSetttingsToIni();
+	BT848_WriteSetttingsToIni();
+
 	WritePrivateProfileInt("MainWindow", "AlwaysOnTop", bAlwaysOnTop, szIniFile);
 	WritePrivateProfileInt("MainWindow", "DisplaySplashScreen", bDisplaySplashScreen, szIniFile);
 	WritePrivateProfileInt("MainWindow", "bIsFullScreen", bIsFullScreen, szIniFile);
@@ -451,12 +453,6 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("Hardware", "VideoSource", VideoSource, szIniFile);
 	WritePrivateProfileInt("Hardware", "TunerType", TunerType, szIniFile); 
 	WritePrivateProfileInt("Hardware", "TVType", TVTYPE, szIniFile); 
-	WritePrivateProfileInt("Hardware", "InitialHue", InitialHue, szIniFile); 
-	WritePrivateProfileInt("Hardware", "InitialContrast", InitialContrast, szIniFile); 
-	WritePrivateProfileInt("Hardware", "InitialBrightness", InitialBrightness, szIniFile); 
-	WritePrivateProfileInt("Hardware", "InitialSaturationU", InitialSaturationU, szIniFile); 
-	WritePrivateProfileInt("Hardware", "InitialSaturationV", InitialSaturationV, szIniFile); 
-	WritePrivateProfileInt("Hardware", "InitialOverscan", InitialOverscan, szIniFile); 
 
 // MAE 2 Nov 2000 - Start of change for Macrovision fix
 	WritePrivateProfileInt("Hardware", "InitialBDelay", InitialBDelay, szIniFile); 
@@ -585,88 +581,45 @@ void SetControlVisibility(HWND hDlg, int ControlID, BOOL IsVisible)
 	}
 }
 
-long GetSettingValue(SETTING* pSetting)
+long Setting_GetValue(SETTING* pSetting)
 {
 	switch(pSetting->Type)
 	{
 	case YESNO:
-		return *(BOOL*) pSetting->pValue;
+		return (BOOL) *pSetting->pValue;
 		break;
 	case ITEMFROMLIST:
-		return *(int*) pSetting->pValue;
-		break;
-	case SLIDER_UCHAR:
-	case NUMBER_UCHAR:
-		return *(UCHAR*) pSetting->pValue;
-		break;
-
-	case SLIDER_CHAR:
-	case NUMBER_CHAR:
-		return *(CHAR*) pSetting->pValue;
-		break;
-
-	case SLIDER_INT:
-	case NUMBER_INT:
-		return *(INT*) pSetting->pValue;
-		break;
-
-	case SLIDER_ULONG:
-	case NUMBER_ULONG:
-		return *(ULONG*) pSetting->pValue;
-		break;
-
-	case SLIDER_UINT:
-	case NUMBER_UINT:
-		return *(UINT*) pSetting->pValue;
-		break;
-
-	case SLIDER_LONG:
-	case NUMBER_LONG:
-		return *(LONG*) pSetting->pValue;
+	case SLIDER:
+	case NUMBER:
+		return *pSetting->pValue;
 		break;
 	default:
 		return 0;
 	}
 }
 
-BOOL SetSettingValue(SETTING* pSetting, long Value)
+BOOL Setting_SetValue(SETTING* pSetting, long Value)
 {
 	switch(pSetting->Type)
 	{
 	case YESNO:
-		*(BOOL*) pSetting->pValue = (BOOL) Value;
+		*pSetting->pValue = (Value != 0);
 		break;
 	case ITEMFROMLIST:
-		*(int*) pSetting->pValue = (int)Value;
-		break;
-	case SLIDER_UCHAR:
-	case NUMBER_UCHAR:
-		*(UCHAR*) pSetting->pValue = (UCHAR)Value;
-		break;
-
-	case SLIDER_CHAR:
-	case NUMBER_CHAR:
-		*(CHAR*) pSetting->pValue = (CHAR)Value;
-		break;
-
-	case SLIDER_INT:
-	case NUMBER_INT:
-		*(INT*) pSetting->pValue = (INT)Value;
-		break;
-
-	case SLIDER_ULONG:
-	case NUMBER_ULONG:
-		*(LONG*) pSetting->pValue = (LONG)Value;
-		break;
-
-	case SLIDER_UINT:
-	case NUMBER_UINT:
-		*(UINT*) pSetting->pValue = (UINT)Value;
-		break;
-
-	case SLIDER_LONG:
-	case NUMBER_LONG:
-		*(LONG*) pSetting->pValue = (LONG)Value;
+	case SLIDER:
+	case NUMBER:
+		if(Value > pSetting->MaxValue)
+		{
+			*pSetting->pValue = pSetting->MaxValue;
+		}
+		else if(Value < pSetting->MinValue)
+		{
+			*pSetting->pValue = pSetting->MinValue;
+		}
+		else
+		{
+			*pSetting->pValue = Value;
+		}
 		break;
 	default:
 		return FALSE;
@@ -683,129 +636,192 @@ BOOL SetSettingValue(SETTING* pSetting, long Value)
 	}
 }
 
-void SetupSlider(HWND hDlg, SETTING** ppSettings, int nControl)
+void Setting_SetDefault(SETTING* pSetting)
 {
-	Slider_SetRangeMax(GetDlgItem(hDlg, IDC_SLIDER1 + nControl), ppSettings[nControl]->MaxValue);
-	Slider_SetRangeMin(GetDlgItem(hDlg, IDC_SLIDER1 + nControl), ppSettings[nControl]->MinValue);
-	Slider_SetPageSize(GetDlgItem(hDlg, IDC_SLIDER1 + nControl), ppSettings[nControl]->StepValue);
-	Slider_SetLineSize(GetDlgItem(hDlg, IDC_SLIDER1 + nControl), 1);
-	Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER1 + nControl), ppSettings[nControl]->Default);
+	Setting_SetValue(pSetting, pSetting->Default);
 }
 
-void SetControlValue(HWND hDlg, SETTING** ppSettings, int nControl)
+void Setting_SetupSlider(SETTING* pSetting, HWND hSlider)
+{
+	Slider_SetRangeMax(hSlider, pSetting->MaxValue);
+	Slider_SetRangeMin(hSlider, pSetting->MinValue);
+	Slider_SetPageSize(hSlider, pSetting->StepValue);
+	Slider_SetLineSize(hSlider, 1);
+	Slider_SetTic(hSlider, pSetting->Default);
+	Setting_SetControlValue(pSetting, hSlider);
+}
+
+void Setting_SetControlValue(SETTING* pSetting, HWND hControl)
 {
 	char szBuffer[15];
 
-	switch(ppSettings[nControl]->Type)
+	switch(pSetting->Type)
 	{
 	case YESNO:
-		Button_SetCheck(GetDlgItem(hDlg, IDC_CHECK1 + nControl), *(BOOL*)ppSettings[nControl]->pValue);
+		Button_SetCheck(hControl, *pSetting->pValue);
 		break;
+
 	case ITEMFROMLIST:
-		ComboBox_SetCurSel(GetDlgItem(hDlg, IDC_COMBO1 + nControl), *(int*) ppSettings[nControl]->pValue);
+		ComboBox_SetCurSel(hControl, *pSetting->pValue);
 		break;
 
-	case SLIDER_UCHAR:
-		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER1 + nControl), *(UCHAR*)ppSettings[nControl]->pValue);
-		break;
-
-	case NUMBER_UCHAR:
-		Edit_SetText(GetDlgItem(hDlg, IDC_TEXT1 + nControl), _itoa(*(UCHAR*)ppSettings[nControl]->pValue, szBuffer, 10));
-		break;
-
-	case SLIDER_CHAR:
-		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER1 + nControl), *(CHAR*)ppSettings[nControl]->pValue);
+	case SLIDER:
+		Slider_SetPos(hControl, *pSetting->pValue);
 		break;
 	
-	case NUMBER_CHAR:
-		Edit_SetText(GetDlgItem(hDlg, IDC_TEXT1 + nControl), _itoa(*(CHAR*)ppSettings[nControl]->pValue, szBuffer, 10));
+	case NUMBER:
+		Edit_SetText(hControl, _itoa(*pSetting->pValue, szBuffer, 10));
 		break;
-
-	case SLIDER_INT:
-		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER1 + nControl), *(INT*)ppSettings[nControl]->pValue);
-		break;
-	
-	case NUMBER_INT:
-		Edit_SetText(GetDlgItem(hDlg, IDC_TEXT1 + nControl), _itoa(*(INT*)ppSettings[nControl]->pValue, szBuffer, 10));
-		break;
-
-	case SLIDER_UINT:
-		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER1 + nControl), *(INT*)ppSettings[nControl]->pValue);
-		break;
-	
-	case NUMBER_UINT:
-		Edit_SetText(GetDlgItem(hDlg, IDC_TEXT1 + nControl), _itoa(*(UINT*)ppSettings[nControl]->pValue, szBuffer, 10));
-		break;
-
-	case SLIDER_ULONG:
-		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER1 + nControl), *(ULONG*)ppSettings[nControl]->pValue);
-		break;
-	
-	case NUMBER_ULONG:
-		Edit_SetText(GetDlgItem(hDlg, IDC_TEXT1 + nControl), _itoa(*(ULONG*)ppSettings[nControl]->pValue, szBuffer, 10));
-		break;
-
-	case SLIDER_LONG:
-		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER1 + nControl), *(LONG*)ppSettings[nControl]->pValue);
-		break;
-	
-	case NUMBER_LONG:
-		Edit_SetText(GetDlgItem(hDlg, IDC_TEXT1 + nControl), _itoa(*(LONG*)ppSettings[nControl]->pValue, szBuffer, 10));
-		break;
-	
 	default:
 		break;
 	}
 }
 
-void SetupControl(HWND hDlg, SETTING** ppSettings, int nControl)
+BOOL Setting_SetFromControl(SETTING* pSetting, HWND hControl)
+{
+	long nValue;
+	char szBuffer[15];
+
+	switch(pSetting->Type)
+	{
+	case YESNO:
+		nValue = (Button_GetCheck(hControl) != 0);
+		break;
+
+	case ITEMFROMLIST:
+		nValue = ComboBox_GetCurSel(hControl);
+		break;
+
+	case SLIDER:
+		nValue = Slider_GetPos(hControl);
+		break;
+	
+	case NUMBER:
+		Edit_GetText(hControl, szBuffer, 15);
+		nValue = atoi(szBuffer);
+		break;
+	default:
+		break;
+	}
+	return Setting_SetValue(pSetting, nValue);
+}
+
+HWND Setting_CreateControl(SETTING* pSetting, HWND hDlg, int* VertPos)
+{
+	HWND hNewControl = NULL;
+	
+	switch(pSetting->Type)
+	{
+	case YESNO:
+		break;
+	case ITEMFROMLIST:
+		break;
+	case SLIDER:
+		break;
+	case NUMBER:
+		break;
+	default:
+		break;
+	}
+	*VertPos += 20;
+	return hNewControl;
+}
+
+void Setting_SetupControl(SETTING* pSetting, HWND hControl)
 {
 	int i;
 
-	if(ppSettings[nControl] == NULL)
-	{
-		SetControlVisibility(hDlg, IDC_STATIC1 + nControl, FALSE);
-		SetControlVisibility(hDlg, IDC_CHECK1 + nControl, FALSE);
-		SetControlVisibility(hDlg, IDC_SLIDER1 + nControl, FALSE);
-		SetControlVisibility(hDlg, IDC_COMBO1 + nControl, FALSE);
-		return;
-	}
-	SetDlgItemText(hDlg, IDC_STATIC1 + nControl, ppSettings[nControl]->szDisplayName);
-
-	SetControlVisibility(hDlg, IDC_CHECK1 + nControl, (ppSettings[nControl]->Type == YESNO));
-	SetControlVisibility(hDlg, IDC_SLIDER1 + nControl, (ppSettings[nControl]->Type >= SLIDER_UCHAR && ppSettings[nControl]->Type <= SLIDER_LONG));
-	SetControlVisibility(hDlg, IDC_COMBO1 + nControl, (ppSettings[nControl]->Type == ITEMFROMLIST));
-	ppSettings[nControl]->PrevValue = GetSettingValue(ppSettings[nControl]);
-	SetControlValue(hDlg, ppSettings, nControl);
-
-	switch(ppSettings[nControl]->Type)
+	switch(pSetting->Type)
 	{
 	case ITEMFROMLIST:
 		i = 0;
-		while(ppSettings[nControl]->pszList[i] != NULL)
+		while(pSetting->pszList[i] != NULL)
 		{
-			ComboBox_InsertString(GetDlgItem(hDlg, IDC_COMBO1 + nControl), nControl, ppSettings[nControl]->pszList[i]);
+			ComboBox_InsertString(hControl, -1, pSetting->pszList[i]);
 		}
 		break;
 
-	case SLIDER_UCHAR:
-	case SLIDER_CHAR:
-	case SLIDER_INT:
-	case SLIDER_ULONG:
-	case SLIDER_UINT:
-	case SLIDER_LONG:
-		SetupSlider(hDlg, ppSettings, nControl);
+	case SLIDER:
+		Setting_SetupSlider(pSetting, hControl);
 		break;
 	default:
 		break;
 	}
-	SetControlValue(hDlg, ppSettings, nControl);
+	Setting_SetControlValue(pSetting, hControl);
 }
+
+void Setting_ReadFromIni(SETTING* pSetting)
+{
+	long nValue;
+	if(pSetting->szIniSection != NULL)
+	{
+		nValue = GetPrivateProfileInt(pSetting->szIniSection, pSetting->szIniEntry, pSetting->MinValue - 100, szIniFile);
+		if(nValue < pSetting->MinValue)
+		{
+			nValue = pSetting->Default;
+		}
+		Setting_SetValue(pSetting, nValue);
+		pSetting->bHasChanged = FALSE;
+	}
+}
+
+void Setting_WriteToIni(SETTING* pSetting)
+{
+	if(pSetting->szIniSection != NULL)
+	{
+		if(pSetting->bHasChanged)
+		{
+			if(pSetting->Default != *pSetting->pValue)
+			{
+				WritePrivateProfileInt(pSetting->szIniSection, pSetting->szIniEntry, *pSetting->pValue, szIniFile);
+			}
+			else
+			{
+				WritePrivateProfileInt(pSetting->szIniSection, pSetting->szIniEntry, pSetting->MinValue - 100, szIniFile);
+			}
+		}
+	}
+}
+
+
+void Setting_OSDShow(SETTING* pSetting, HWND hWnd)
+{
+	char szBuffer[1024] = "Unexpected Display Error";
+
+	switch(pSetting->Type)
+	{
+	case ITEMFROMLIST:
+		sprintf(szBuffer, "%s - %s", pSetting->szDisplayName, pSetting->pszList[*(pSetting->pValue)]);
+		break;
+	case YESNO:
+		sprintf(szBuffer, "%s - %s", pSetting->szDisplayName, *(pSetting->pValue)?"YES":"NO");
+		break;
+	case SLIDER:
+	case NUMBER:
+		sprintf(szBuffer, "%s - %d", pSetting->szDisplayName, *(pSetting->pValue));
+		break;
+	default:
+		break;
+	}
+	OSD_ShowText(hWnd, szBuffer, 0);
+}
+
+void Setting_Up(SETTING* pSetting)
+{
+}
+
+void Setting_Down(SETTING* pSetting)
+{
+}
+
 
 BOOL APIENTRY UISubMenuProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 {
 	static UI_SUBMENU* pSubMenu;
 	int i;
+	HWND Controls[8];
+	long PrevValues[8];
+	int VertPos = 0;
 
 	switch (message)
 	{
@@ -814,12 +830,14 @@ BOOL APIENTRY UISubMenuProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 		SetWindowText(hDlg, pSubMenu->szDisplayName);
 		for(i = 0;i < 8;i++)
 		{
-			SetupControl(hDlg, pSubMenu->Elements, i);
+			Controls[i] = Setting_CreateControl(pSubMenu->Elements[i], hDlg, &VertPos);
+			Setting_SetupControl(pSubMenu->Elements[i], Controls[i]);
+			SetWindowText(GetDlgItem(hDlg, IDC_STATIC1 + i), pSubMenu->Elements[i]->szDisplayName);
+			PrevValues[i] = Setting_GetValue(pSubMenu->Elements[i]);
 		}
 		break;
 
 	case WM_COMMAND:
-	case WM_NOTIFY:
 		switch LOWORD(wParam)
 		{
 		case IDOK:
@@ -830,9 +848,18 @@ BOOL APIENTRY UISubMenuProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 			// revert to old value
 			for(i = 0;i < 8 && pSubMenu->Elements[i] != NULL;i++)
 			{
-				SetSettingValue(pSubMenu->Elements[i], pSubMenu->Elements[i]->PrevValue);
+				Setting_SetValue(pSubMenu->Elements[i], PrevValues[i]);
 			}
 			EndDialog(hDlg, FALSE);
+			break;
+
+		case IDDEFAULTS:
+			// revert to default values
+			for(i = 0;i < 8 && pSubMenu->Elements[i] != NULL;i++)
+			{
+				*pSubMenu->Elements[i]->pValue = pSubMenu->Elements[i]->Default;
+				Setting_SetControlValue(pSubMenu->Elements[i], Controls[i]);
+			}
 			break;
 
 		case IDC_CHECK1:
@@ -843,33 +870,27 @@ BOOL APIENTRY UISubMenuProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 		case IDC_CHECK6:
 		case IDC_CHECK7:
 		case IDC_CHECK8:
+			i = LOWORD(wParam) -  IDC_CHECK1;
+			Setting_SetFromControl(pSubMenu->Elements[i], Controls[i]);
 			break;
-
-		case IDC_SLIDER1:
-		case IDC_SLIDER2:
-		case IDC_SLIDER3:
-		case IDC_SLIDER4:
-		case IDC_SLIDER5:
-		case IDC_SLIDER6:
-		case IDC_SLIDER7:
-		case IDC_SLIDER8:
-			i = LOWORD(wParam) - IDC_SLIDER1;
-			SetSettingValue(pSubMenu->Elements[i], Slider_GetPos(GetDlgItem(hDlg, LOWORD(wParam))));
+		case WM_VSCROLL:
+		case WM_HSCROLL:
+			for(i = 0; i < 8; i++)
+			{
+				if((HWND)lParam == Controls[i])
+				{
+					Setting_SetFromControl(pSubMenu->Elements[i], Controls[i]);
+				}
+			}
 			break;
-
-		case IDC_COMBO1:
-		case IDC_COMBO2:
-		case IDC_COMBO3:
-		case IDC_COMBO4:
-		case IDC_COMBO5:
-		case IDC_COMBO6:
-		case IDC_COMBO7:
-		case IDC_COMBO8:
+		default:
 			break;
 		}
 		break;
+	default:
+		break;
 	}
-	return (FALSE);
+	return FALSE;
 }
 
 void DisplayUISubMenuAsDialog(UI_SUBMENU* pSubMenu)

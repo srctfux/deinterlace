@@ -43,6 +43,7 @@
 #define __BT848_H___
 
 #include "tvcards.h"
+#include "settings.h"
 
 typedef enum
 {
@@ -72,6 +73,23 @@ struct TTVSetting
 	WORD VBILines;
 };
 
+typedef enum
+{
+	BRIGHTNESS = 0,
+	CONTRAST,
+	HUE,
+	SATURATION,
+	SATURATIONU,
+	SATURATIONV,
+	BDELAY,
+	BT848_SETTING_LASTONE,
+} BT848_SETTING;
+
+// Get Hold of the bt848.c file settings
+SETTING* BT848_GetSetting(BT848_SETTING Setting);
+void BT848_ReadSetttingsFromIni();
+void BT848_WriteSetttingsToIni();
+
 // create new type for physical memory
 typedef unsigned long PHYS;
 
@@ -87,15 +105,6 @@ void BT848_SetPLL(PLLFREQ PLL);
 void BT848_CreateRiscCode(int nFlags);
 int BT848_GetRISCPosAsInt();
 BOOL BT848_SetGeoSize();
-BOOL BT848_SetBrightness(int wBrightness);
-BOOL BT848_SetHue(int wHue);
-BOOL BT848_SetContrast(int wContrast);
-BOOL BT848_SetSaturationU(int wData);
-BOOL BT848_SetSaturationV(int wData);
-
-// MAE 3 Nov 2000 Start of Macrovision fix
-BOOL BT848_SetBDELAY(BYTE bBDelay);
-// MAE 3 Nov 2000 End of Macrovision fix
 
 BOOL BT848_SetVideoSource(int nInput);
 void BT848_SetDMA(BOOL bState);
@@ -473,18 +482,11 @@ extern BYTE* pDisplay[5];
 extern BYTE* pVBILines[5];
 
 // MAE 2 Nov 2000 - Start of change for Macrovision fix
-extern int InitialBDelay;
+extern long InitialBDelay;
 // MAE 2 Nov 2000 - End of change for Macrovision fix
 
 extern int TVTYPE;
 extern int VideoSource;
-
-extern int InitialContrast;
-extern int InitialSaturationU;
-extern int InitialSaturationV;
-extern int InitialBrightness;
-extern int InitialHue;
-extern int InitialOverscan;
 
 // 10/19/2000 Mark Rejhon
 // Better NTSC defaults
@@ -493,7 +495,6 @@ extern int InitialOverscan;
 #define DEFAULT_CONTRAST_NTSC 207
 #define DEFAULT_SAT_U_NTSC 254
 #define DEFAULT_SAT_V_NTSC 219
-#define DEFAULT_OVERSCAN 4
 
 // These are the original defaults, likely optimized for PAL (could use refinement).
 //int InitialHue        = 0x00;

@@ -37,7 +37,14 @@
 
 #include "stdafx.h"
 #include "bt848.h"
+// FIXME: Temp so that overscan works
+#include "AspectRatio.h"
+#include "OutThreads.h"
 
+
+/////////////////////////////////////////////////////////////////////////////
+// Private Structures, funtions and data
+/////////////////////////////////////////////////////////////////////////////
 typedef struct BT848_STRUCT
 {
    DWORD dwPhysicalAddress;
@@ -48,6 +55,15 @@ typedef struct BT848_STRUCT
 } BT848_STRUCT;
 
 BT848_STRUCT* hBT8X8 = NULL;
+
+BOOL BT848_Brightness_OnChange(long Brightness);
+BOOL BT848_Hue_OnChange(long Hue);
+BOOL BT848_Contrast_OnChange(long Contrast);
+BOOL BT848_Saturation_OnChange(long Data);
+BOOL BT848_SaturationU_OnChange(long Data);
+BOOL BT848_SaturationV_OnChange(long Data);
+BOOL BT848_BDelay_OnChange(long Data);
+BOOL BT848_Overscan_OnChange(long Data);
 
 PMemStruct Risc_dma;
 PMemStruct Vbi_dma[5];
@@ -68,7 +84,7 @@ BOOL bSaveSettings = FALSE;
 
 // MAE 2 Nov 2000 - Start of change for Macrovision fix
 // If non-zero in .ini file, will override TV table setting
-int	InitialBDelay = 0x00;  // Original hardware default value was 0x5D
+long InitialBDelay = 0x00;  // Original hardware default value was 0x5D
 // MAE 2 Nov 2000 - End of change for Macrovision fix
 
 // MAE, 3 Nov 2000
@@ -119,14 +135,19 @@ int VideoSource = SOURCE_COMPOSITE;
 int InitialHue         = DEFAULT_HUE_NTSC;
 int InitialBrightness  = DEFAULT_BRIGHTNESS_NTSC;
 int InitialContrast    = DEFAULT_CONTRAST_NTSC;
+int InitialSaturation  = (DEFAULT_SAT_U_NTSC + DEFAULT_SAT_V_NTSC / 2);
 int InitialSaturationU = DEFAULT_SAT_U_NTSC;
 int InitialSaturationV = DEFAULT_SAT_V_NTSC;
-int InitialOverscan    = DEFAULT_OVERSCAN;
 
 int CurrentX = 720;
 int CurrentY;
 int CurrentVBILines = 0;
 
+SETTING BT848Settings[BT848_SETTING_LASTONE];
+
+/////////////////////////////////////////////////////////////////////////////
+// Start of "real" code
+/////////////////////////////////////////////////////////////////////////////
 
 const char* BT848_VendorID()
 {
@@ -409,7 +430,7 @@ void BT848_ResetHardware()
 	if (InitialBDelay != 0)
 	{
 		// BDELAY override from .ini file
-		BT848_SetBDELAY((BYTE)InitialBDelay);
+		BT848_BDelay_OnChange(InitialBDelay);
 	}
 // MAE 2 Nov 2000 - End of change for Macrovision fix
 
@@ -425,11 +446,11 @@ void BT848_ResetHardware()
 
 	BT848_SetPLL(0);
 
-	BT848_SetBrightness(InitialBrightness);
-	BT848_SetContrast(InitialContrast);
-	BT848_SetHue(InitialHue);
-	BT848_SetSaturationU(InitialSaturationU);
-	BT848_SetSaturationV(InitialSaturationV);
+	BT848_Brightness_OnChange(InitialBrightness);
+	BT848_Contrast_OnChange(InitialContrast);
+	BT848_Hue_OnChange(InitialHue);
+	BT848_SaturationU_OnChange(InitialSaturationU);
+	BT848_SaturationV_OnChange(InitialSaturationV);
 	BT848_SetVideoSource(VideoSource);
 	BT848_SetGeoSize();
 	BT848_WriteByte(BT848_WC_DOWN, BtWhiteCrushDown);			// TRB 12/00 allow parm
@@ -532,7 +553,7 @@ BOOL BT848_SetGeoSize()
 	if (InitialBDelay != 0)
 	{
 		// BDELAY override from .ini file
-		BT848_SetBDELAY((BYTE)InitialBDelay);
+		BT848_BDelay_OnChange(InitialBDelay);
 	}
 // MAE 2 Nov 2000 - End of change for Macrovision fix
 
@@ -554,58 +575,94 @@ BOOL BT848_SetGeoSize()
 	return TRUE;
 }
 
-BOOL BT848_SetBrightness(int wBrightness)
+BOOL BT848_Brightness_OnChange(long Brightness)
 {
-	BT848_WriteByte(BT848_BRIGHT, (BYTE) (wBrightness & 0xff));
-	return TRUE;
+	BT848_WriteByte(BT848_BRIGHT, (BYTE) (Brightness & 0xff));
+	InitialBrightness = Brightness;
+	return FALSE;
 }
 
-BOOL BT848_SetHue(int wHue)
+BOOL BT848_Hue_OnChange(long Hue)
 {
-	BT848_WriteByte(BT848_HUE, (BYTE) (wHue & 0xff));
-	return TRUE;
+	BT848_WriteByte(BT848_HUE, (BYTE) (Hue & 0xff));
+	InitialHue = Hue;
+	return FALSE;
 }
 
-BOOL BT848_SetContrast(int wContrast)
+BOOL BT848_Contrast_OnChange(long Contrast)
 {
 	BYTE bContHi;
 
-	bContHi = (BYTE) (wContrast >> 6) & 4;
-	BT848_WriteByte(BT848_CONTRAST_LO, (BYTE) (wContrast & 0xff));
+	bContHi = (BYTE) (Contrast >> 6) & 4;
+	BT848_WriteByte(BT848_CONTRAST_LO, (BYTE) (Contrast & 0xff));
 	BT848_MaskDataByte(BT848_E_CONTROL, bContHi, 4);
 	BT848_MaskDataByte(BT848_O_CONTROL, bContHi, 4);
+	InitialContrast = Contrast;
+	return FALSE;
+}
+
+BOOL BT848_Saturation_OnChange(long Sat)
+{
+	long NewSaturationU = InitialSaturationU;
+	long NewSaturationV = InitialSaturationV;
+	long OldSaturation = (InitialSaturationU + InitialSaturationV) / 2;
+	NewSaturationU += Sat - OldSaturation;
+	NewSaturationV += Sat - OldSaturation;
+	BT848_SaturationU_OnChange(NewSaturationU);
+	BT848_SaturationV_OnChange(NewSaturationV);
 	return TRUE;
 }
 
-BOOL BT848_SetSaturationU(int wData)
+
+BOOL BT848_SaturationU_OnChange(long SatU)
 {
 	BYTE bDataHi;
 
-	bDataHi = (BYTE) (wData >> 7) & 2;
-	BT848_WriteByte(BT848_SAT_U_LO, (BYTE) (wData & 0xff));
+	bDataHi = (BYTE) (SatU >> 7) & 2;
+	BT848_WriteByte(BT848_SAT_U_LO, (BYTE) (SatU & 0xff));
 	BT848_MaskDataByte(BT848_E_CONTROL, bDataHi, 2);
 	BT848_MaskDataByte(BT848_O_CONTROL, bDataHi, 2);
+	InitialSaturationU = SatU;
+	InitialSaturation = (InitialSaturationU + InitialSaturationV) / 2;
+	BT848Settings[SATURATION].MinValue = abs(InitialSaturationU - InitialSaturationV) / 2;
+	BT848Settings[SATURATION].MaxValue = 255 - abs(InitialSaturationU - InitialSaturationV) / 2;
 	return TRUE;
 }
 
-BOOL BT848_SetSaturationV(int wData)
+BOOL BT848_SaturationV_OnChange(long SatV)
 {
 	BYTE bDataHi;
 
-	bDataHi = (BYTE) (wData >> 8) & 1;
-	BT848_WriteByte(BT848_SAT_V_LO, (BYTE) (wData & 0xff));
+	bDataHi = (BYTE) (SatV >> 8) & 1;
+	BT848_WriteByte(BT848_SAT_V_LO, (BYTE) (SatV & 0xff));
 	BT848_MaskDataByte(BT848_E_CONTROL, bDataHi, 1);
 	BT848_MaskDataByte(BT848_O_CONTROL, bDataHi, 1);
+	InitialSaturationV = SatV;
+	InitialSaturation = (InitialSaturationU + InitialSaturationV) / 2;
+	BT848Settings[SATURATION].MinValue = abs(InitialSaturationU - InitialSaturationV) / 2;
+	BT848Settings[SATURATION].MaxValue = 255 - abs(InitialSaturationU - InitialSaturationV) / 2;
 	return TRUE;
 }
 
-// MAE 3 Nov 2000 Start of Macrovision fix
-BOOL BT848_SetBDELAY(BYTE bBDelay)
+BOOL BT848_BDelay_OnChange(long BDelay)
 {
-	BT848_WriteByte(BT848_BDELAY, bBDelay);
-	return TRUE;
+	InitialBDelay = BDelay;
+	if (BDelay > 0) 
+    {
+        if (InitialBDelay == 0) 
+        {
+            // We use automatic BDelay if InitialBDelay is 0
+            Reset_Capture();
+			BT848Settings[BDELAY].szDisplayName = "BDelay AUTO";
+        }
+        else
+        {
+			BT848_WriteByte(BT848_BDELAY, (BYTE)BDelay);
+			BT848Settings[BDELAY].szDisplayName = "BDelay";
+        }
+    }
+	return FALSE;
 }
-// MAE 3 Nov 2000 End of Macrovision fix
 
 BOOL BT848_SetVideoSource(int nInput)
 {
@@ -1078,5 +1135,80 @@ BOOL BT848_Enable656()
 	BT848_SetGeometryEvenOdd(TRUE, BT848_VTC_HSFMT_32, hscale, vscale, hactive, vactive, hdelay, vdelay, crop);
 
 	return TRUE;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Start of Settings related code
+/////////////////////////////////////////////////////////////////////////////
+
+SETTING BT848Settings[BT848_SETTING_LASTONE] =
+{
+	{
+		"Brightness", SLIDER, FALSE, &InitialBrightness,
+		DEFAULT_BRIGHTNESS_NTSC, -128, 127, 10, NULL,
+		"Hardware", "InitialBrightness", BT848_Brightness_OnChange,
+
+	},
+	{
+		"Contrast", SLIDER, FALSE, &InitialContrast,
+		DEFAULT_CONTRAST_NTSC, 0, 255, 10, NULL,
+		"Hardware", "InitialContrast", BT848_Contrast_OnChange,
+	},
+	{
+		"Hue", SLIDER, FALSE, &InitialHue,
+		DEFAULT_HUE_NTSC, -128, 127, 10, NULL,
+		"Hardware", "InitialHue", BT848_Hue_OnChange,
+	},
+	{
+		"Saturation", SLIDER, FALSE, &InitialSaturation,
+		(DEFAULT_SAT_V_NTSC + DEFAULT_SAT_U_NTSC) / 2, 0, 255, 10, NULL,
+		NULL, NULL, BT848_Saturation_OnChange,
+	},
+	{
+		"SaturationU", SLIDER, FALSE, &InitialSaturationU,
+		DEFAULT_SAT_U_NTSC, 0, 255, 10, NULL,
+		"Hardware", "InitialSaturationU", BT848_SaturationU_OnChange,
+	},
+	{
+		"SaturationV", SLIDER, FALSE, &InitialSaturationV,
+		DEFAULT_SAT_V_NTSC, 0, 255, 10, NULL,
+		"Hardware", "InitialSaturationV", BT848_SaturationV_OnChange,
+	},
+	{
+		"BDelay", SLIDER, FALSE, &InitialBDelay,
+		0, 0, 255, 10, NULL,
+		"Hardware", "InitialBDelay", BT848_BDelay_OnChange,
+	},
+};
+
+
+SETTING* BT848_GetSetting(BT848_SETTING Setting)
+{
+	if(Setting > -1 && Setting < BT848_SETTING_LASTONE)
+	{
+		return &(BT848Settings[Setting]);
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+void BT848_ReadSetttingsFromIni()
+{
+	int i;
+	for(i = 0; i < BT848_SETTING_LASTONE; i++)
+	{
+		Setting_ReadFromIni(&(BT848Settings[i]));
+	}
+}
+
+void BT848_WriteSetttingsToIni()
+{
+	int i;
+	for(i = 0; i < BT848_SETTING_LASTONE; i++)
+	{
+		Setting_WriteToIni(&(BT848Settings[i]));
+	}
 }
 

@@ -551,155 +551,115 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_BRIGHTNESS_PLUS:
-            AdjustSliderUp(&InitialBrightness, 127);
-            BT848_SetBrightness(InitialBrightness);
+			Setting_Up(BT848_GetSetting(BRIGHTNESS));
             SendMessage(hWnd, WM_COMMAND, IDM_BRIGHTNESS_CURRENT, 0);
 			break;
 
 		case IDM_BRIGHTNESS_MINUS:
-            AdjustSliderDown(&InitialBrightness, -127);
-			BT848_SetBrightness(InitialBrightness);
-            SendMessage(hWnd, WM_COMMAND, IDM_BRIGHTNESS_CURRENT, 0);
+			Setting_Down(BT848_GetSetting(BRIGHTNESS));
+			SendMessage(hWnd, WM_COMMAND, IDM_BRIGHTNESS_CURRENT, 0);
 			break;
 
 		case IDM_BRIGHTNESS_CURRENT:
-			sprintf(Text, "Brightness %d", InitialBrightness);
-			ShowText(hWnd, Text);
+			Setting_OSDShow(BT848_GetSetting(BRIGHTNESS), hWnd);
 			break;
 
 		case IDM_KONTRAST_PLUS:
-            AdjustSliderUp(&InitialContrast, 255);
-			BT848_SetContrast(InitialContrast);
+			Setting_Up(BT848_GetSetting(CONTRAST));
             SendMessage(hWnd, WM_COMMAND, IDM_KONTRAST_CURRENT, 0);
 			break;
 
 		case IDM_KONTRAST_MINUS:
-            AdjustSliderDown(&InitialContrast, 0);
-			BT848_SetContrast(InitialContrast);
+			Setting_Down(BT848_GetSetting(CONTRAST));
             SendMessage(hWnd, WM_COMMAND, IDM_KONTRAST_CURRENT, 0);
 			break;
 
 		case IDM_KONTRAST_CURRENT:
-			sprintf(Text, "Contrast %d", InitialContrast);
-			ShowText(hWnd, Text);
+			Setting_OSDShow(BT848_GetSetting(CONTRAST), hWnd);
 			break;
 
 		case IDM_USATURATION_PLUS:
-            AdjustSliderUp(&InitialSaturationU, 255);
-			BT848_SetSaturationU(InitialSaturationU);
+			Setting_Up(BT848_GetSetting(SATURATIONU));
             SendMessage(hWnd, WM_COMMAND, IDM_USATURATION_CURRENT, 0);
 			break;
 		
         case IDM_USATURATION_MINUS:
-            AdjustSliderDown(&InitialSaturationU, 0);
-			BT848_SetSaturationU(InitialSaturationU);
+			Setting_Down(BT848_GetSetting(SATURATIONU));
             SendMessage(hWnd, WM_COMMAND, IDM_USATURATION_CURRENT, 0);
 			break;
 
         case IDM_USATURATION_CURRENT:
-			sprintf(Text, "U Saturation %d", InitialSaturationU);
-			ShowText(hWnd, Text);
+			Setting_OSDShow(BT848_GetSetting(SATURATIONU), hWnd);
 			break;
 		
         case IDM_VSATURATION_PLUS:
-            AdjustSliderUp(&InitialSaturationV, 255);
-			BT848_SetSaturationV(InitialSaturationV);
+			Setting_Up(BT848_GetSetting(SATURATIONV));
             SendMessage(hWnd, WM_COMMAND, IDM_VSATURATION_CURRENT, 0);
 			break;
 
         case IDM_VSATURATION_MINUS:
-            AdjustSliderDown(&InitialSaturationV, 0);
-			BT848_SetSaturationV(InitialSaturationV);
+			Setting_Down(BT848_GetSetting(SATURATIONU));
             SendMessage(hWnd, WM_COMMAND, IDM_VSATURATION_CURRENT, 0);
 			break;
 
         case IDM_VSATURATION_CURRENT:
-			sprintf(Text, "V Saturation %d", InitialSaturationV);
-			ShowText(hWnd, Text);
+			Setting_OSDShow(BT848_GetSetting(SATURATIONU), hWnd);
 			break;
 
 		case IDM_COLOR_PLUS:
-            AdjustSliderUp(&InitialSaturationU, 255);
-            AdjustSliderUp(&InitialSaturationV, 255);
-			BT848_SetSaturationU(InitialSaturationU);
-			BT848_SetSaturationV(InitialSaturationV);
+			Setting_Up(BT848_GetSetting(SATURATION));
             SendMessage(hWnd, WM_COMMAND, IDM_COLOR_CURRENT, 0);
 			break;
 
 		case IDM_COLOR_MINUS:
-            AdjustSliderDown(&InitialSaturationU, 0);
-            AdjustSliderDown(&InitialSaturationV, 0);
-			BT848_SetSaturationU(InitialSaturationU);
-			BT848_SetSaturationV(InitialSaturationV);
+			Setting_Down(BT848_GetSetting(SATURATION));
             SendMessage(hWnd, WM_COMMAND, IDM_COLOR_CURRENT, 0);
 			break;
 
 		case IDM_COLOR_CURRENT:
-			sprintf(Text, "Colour U %d V %d", InitialSaturationU, InitialSaturationV);
-			ShowText(hWnd, Text);
+			Setting_OSDShow(BT848_GetSetting(SATURATIONU), hWnd);
 			break;
 
 		case IDM_HUE_PLUS:
-            AdjustSliderUp(&InitialHue, 127);
-			BT848_SetHue(InitialHue);
+			Setting_Up(BT848_GetSetting(HUE));
             SendMessage(hWnd, WM_COMMAND, IDM_HUE_CURRENT, 0);
 			break;
 
 		case IDM_HUE_MINUS:
-            AdjustSliderDown(&InitialHue, -127);
-			BT848_SetHue(InitialHue);
+			Setting_Down(BT848_GetSetting(HUE));
             SendMessage(hWnd, WM_COMMAND, IDM_HUE_CURRENT, 0);
 			break;
 
 		case IDM_HUE_CURRENT:
-			sprintf(Text, "Hue %d", InitialHue);
-			ShowText(hWnd, Text);
+			Setting_OSDShow(BT848_GetSetting(HUE), hWnd);
 			break;
 
 		case IDM_OVERSCAN_PLUS:
-            AdjustSliderUp(&InitialOverscan, 127);
-			WorkoutOverlaySize();
+			Setting_Up(BT848_GetSetting(OVERSCAN));
             SendMessage(hWnd, WM_COMMAND, IDM_OVERSCAN_CURRENT, 0);
 			break;
 
 		case IDM_OVERSCAN_MINUS:
-            AdjustSliderDown(&InitialOverscan, 0);
-			WorkoutOverlaySize();
+			Setting_Down(BT848_GetSetting(OVERSCAN));
             SendMessage(hWnd, WM_COMMAND, IDM_OVERSCAN_CURRENT, 0);
 			break;
 
 		case IDM_OVERSCAN_CURRENT:
-			sprintf(Text, "Overscan %d", InitialOverscan);
-			ShowText(hWnd, Text);
+			Setting_OSDShow(BT848_GetSetting(OVERSCAN), hWnd);
 			break;
 
 		case IDM_BDELAY_PLUS:
-            AdjustSliderUp(&InitialBDelay, 255);
-    		BT848_SetBDELAY((BYTE)InitialBDelay);
+			Setting_Up(BT848_GetSetting(BDELAY));
             SendMessage(hWnd, WM_COMMAND, IDM_BDELAY_CURRENT, 0);
 			break;
 
 		case IDM_BDELAY_MINUS:
-			if (InitialBDelay > 0) 
-            {
-                AdjustSliderDown(&InitialBDelay, 0);
-                if (InitialBDelay == 0) 
-                {
-                    // We use automatic BDelay if InitialBDelay is 0
-                    Reset_Capture();
-                }
-                else
-                {
-        		    BT848_SetBDELAY((BYTE)InitialBDelay);
-                }
-            }
+			Setting_Down(BT848_GetSetting(BDELAY));
             SendMessage(hWnd, WM_COMMAND, IDM_BDELAY_CURRENT, 0);
 			break;
 
 		case IDM_BDELAY_CURRENT:
-            sprintf(Text, "BDelay %d", InitialBDelay);
-            if (InitialBDelay == 0) sprintf(Text, "BDelay AUTO");
-			ShowText(hWnd, Text);
+			Setting_OSDShow(BT848_GetSetting(BDELAY), hWnd);
 			break;
 
         case IDM_MUTE:

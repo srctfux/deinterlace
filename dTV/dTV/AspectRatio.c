@@ -143,6 +143,8 @@ HORZ_POS HorizontalPos = HORZ_POS_CENTRE;
 RECT destinationRectangle = {0,0,0,0};
 RECT sourceRectangle = {0,0,0,0};
 
+int InitialOverscan    = 4;
+
 //----------------------------------------------------------------------------
 // Switch to a new aspect ratio and record it in the ratio history list.
 void SwitchToRatio(int nMode, int nRatio)
@@ -1086,4 +1088,56 @@ void AdjustAspectRatio(short** EvenField, short** OddField)
 void GetSourceRect(RECT *rect)
 {
 	memcpy(rect, &sourceRectangle, sizeof(RECT));
+}
+
+
+BOOL Aspect_Overscan_OnChange(long Overscan)
+{
+	InitialOverscan = Overscan;
+	WorkoutOverlaySize();
+	return FALSE;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Start of Settings related code
+/////////////////////////////////////////////////////////////////////////////
+
+SETTING AspectSettings[ASPECT_SETTING_LASTONE] =
+{
+	{
+		"Overscan", SLIDER, FALSE, &InitialOverscan,
+		DEFAULT_OVERSCAN, 0, 150, 10, NULL,
+		"Hardware", "InitialOverscan", Aspect_Overscan_OnChange,
+	},
+};
+
+
+SETTING* Aspect_GetSetting(ASPECT_SETTING Setting)
+{
+	if(Setting > -1 && Setting < ASPECT_SETTING_LASTONE)
+	{
+		return &(AspectSettings[Setting]);
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+void Aspect_ReadSetttingsFromIni()
+{
+	int i;
+	for(i = 0; i < ASPECT_SETTING_LASTONE; i++)
+	{
+		Setting_ReadFromIni(&(AspectSettings[i]));
+	}
+}
+
+void Aspect_WriteSetttingsToIni()
+{
+	int i;
+	for(i = 0; i < ASPECT_SETTING_LASTONE; i++)
+	{
+		Setting_WriteToIni(&(AspectSettings[i]));
+	}
 }

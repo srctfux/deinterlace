@@ -81,25 +81,24 @@ int GetSliderInt(int MouseY, int nMin, int nMax)
 
 BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 {
-	static char THue;
-	static char TBrightness;
-	static int TContrast;
-	static int TSaturationU;
-	static int TSaturationV;
-	static int TOverscan;
-	static int LastSaturation;
-	int j;
+	static long THue;
+	static long TBrightness;
+	static long TContrast;
+	static long TSaturationU;
+	static long TSaturationV;
+	static long TOverscan;
+	static long LastSaturation;
 
 	switch (message)
 	{
 	case WM_INITDIALOG:
 
-		TBrightness = InitialBrightness;
-		TContrast = InitialContrast;
-		THue = InitialHue;
-		TSaturationU = InitialSaturationU;
-		TSaturationV = InitialSaturationV;
-		TOverscan = InitialOverscan;
+		TBrightness = Setting_GetValue(BT848_GetSetting(BRIGHTNESS));
+		TContrast = Setting_GetValue(BT848_GetSetting(CONTRAST));
+		THue = Setting_GetValue(BT848_GetSetting(HUE));
+		TSaturationU = Setting_GetValue(BT848_GetSetting(SATURATIONU));
+		TSaturationV = Setting_GetValue(BT848_GetSetting(SATURATIONV));
+		TOverscan = Setting_GetValue(Aspect_GetSetting(OVERSCAN));
 
 		SetDlgItemInt(hDlg, IDC_D1, TBrightness, TRUE);
 		SetDlgItemInt(hDlg, IDC_D2, TContrast, FALSE);
@@ -110,116 +109,57 @@ BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 		SetDlgItemInt(hDlg, IDC_D6, TSaturationV, FALSE);
 		SetDlgItemInt(hDlg, IDC_D7, TOverscan, FALSE);
 
-		// Setup Bightness Slider
-		Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER1), -128, 127);
-		Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER1), DEFAULT_BRIGHTNESS_NTSC);
-		Slider_SetLineSize(GetDlgItem(hDlg, IDC_SLIDER1), 1);
-		Slider_SetPageSize(GetDlgItem(hDlg, IDC_SLIDER1), 10);
-		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER1),TBrightness);
-
-		// Setup Contrast Slider
-		Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER2), 0, 255);
-		Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER2), DEFAULT_CONTRAST_NTSC);
-		Slider_SetLineSize(GetDlgItem(hDlg, IDC_SLIDER2), 1);
-		Slider_SetPageSize(GetDlgItem(hDlg, IDC_SLIDER2), 10);
-		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER2),TContrast);
-
-		// Setup Hue Slider
-		Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER3), -128, 127);
-		Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER3), DEFAULT_HUE_NTSC);
-		Slider_SetLineSize(GetDlgItem(hDlg, IDC_SLIDER3), 1);
-		Slider_SetPageSize(GetDlgItem(hDlg, IDC_SLIDER3), 10);
-		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER3),THue);
-
-		// Setup Saturation Slider
-		Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER4), abs(TSaturationU - TSaturationV) / 2, 255 - (abs(TSaturationU - TSaturationV) / 2));
-		Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER4), (DEFAULT_SAT_U_NTSC + DEFAULT_SAT_V_NTSC)/2);
-		Slider_SetLineSize(GetDlgItem(hDlg, IDC_SLIDER4), 1);
-		Slider_SetPageSize(GetDlgItem(hDlg, IDC_SLIDER4), 10);
-		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER4),LastSaturation);
-
-		// Setup SaturationU Slider
-		Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER5), 0, 255);
-		Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER5), DEFAULT_SAT_U_NTSC);
-		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER5),TSaturationU);
-		Slider_SetLineSize(GetDlgItem(hDlg, IDC_SLIDER5), 1);
-		Slider_SetPageSize(GetDlgItem(hDlg, IDC_SLIDER5), 10);
-
-		// Setup SaturationU Slider
-		Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER6), 0, 255);
-		Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER6), DEFAULT_SAT_V_NTSC);
-		Slider_SetLineSize(GetDlgItem(hDlg, IDC_SLIDER6), 1);
-		Slider_SetPageSize(GetDlgItem(hDlg, IDC_SLIDER6), 10);
-		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER6),TSaturationV);
-
-		// Setup Overscan Slider
-		if(CurrentX > CurrentY)
-		{
-			Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER7), 0, CurrentY / 2 - 1);
-		}
-		else
-		{
-			Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER7), 0, CurrentX / 2 - 1);
-		}
-		Slider_SetTic(GetDlgItem(hDlg, IDC_SLIDER7), DEFAULT_OVERSCAN);
-		Slider_SetLineSize(GetDlgItem(hDlg, IDC_SLIDER7), 1);
-		Slider_SetPageSize(GetDlgItem(hDlg, IDC_SLIDER7), 10);
-		Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER7),InitialOverscan);
-		break;
+		Setting_SetupSlider(BT848_GetSetting(BRIGHTNESS), GetDlgItem(hDlg, IDC_SLIDER1));
+		Setting_SetupSlider(BT848_GetSetting(CONTRAST), GetDlgItem(hDlg, IDC_SLIDER2));
+		Setting_SetupSlider(BT848_GetSetting(HUE), GetDlgItem(hDlg, IDC_SLIDER3));
+		Setting_SetupSlider(BT848_GetSetting(SATURATION), GetDlgItem(hDlg, IDC_SLIDER4));
+		Setting_SetupSlider(BT848_GetSetting(SATURATIONU), GetDlgItem(hDlg, IDC_SLIDER5));
+		Setting_SetupSlider(BT848_GetSetting(SATURATIONV), GetDlgItem(hDlg, IDC_SLIDER6));
+		Setting_SetupSlider(Aspect_GetSetting(OVERSCAN), GetDlgItem(hDlg, IDC_SLIDER7));
 
 	case WM_COMMAND:
 		switch(LOWORD(wParam))
 		{
 		case IDOK:
-			InitialBrightness = TBrightness;
-			InitialContrast = TContrast;
-			InitialHue = THue;
-			InitialSaturationU = TSaturationU;
-			InitialSaturationV = TSaturationV;
-			WorkoutOverlaySize();
 			EndDialog(hDlg, TRUE);
 			break;
 
 		case IDCANCEL:
-			BT848_SetBrightness(InitialBrightness);
-			BT848_SetContrast(InitialContrast);
-			BT848_SetHue(InitialHue);
-			BT848_SetSaturationU(InitialSaturationU);
-			BT848_SetSaturationV(InitialSaturationV);
-			InitialOverscan = TOverscan;
-			WorkoutOverlaySize();
+			Setting_SetValue(BT848_GetSetting(BRIGHTNESS), TBrightness);
+			Setting_SetValue(BT848_GetSetting(CONTRAST), TContrast);
+			Setting_SetValue(BT848_GetSetting(HUE),THue);
+			Setting_SetValue(BT848_GetSetting(SATURATIONU), TSaturationU);
+			Setting_SetValue(BT848_GetSetting(SATURATIONV), TSaturationV);
+			Setting_SetValue(Aspect_GetSetting(OVERSCAN), TOverscan);
 			EndDialog(hDlg, TRUE);
 			break;
 
 		case IDDEFAULT:
-			TBrightness = DEFAULT_BRIGHTNESS_NTSC;
-			TContrast = DEFAULT_CONTRAST_NTSC;
-			THue = DEFAULT_HUE_NTSC;
-			TSaturationU = DEFAULT_SAT_U_NTSC;
-			TSaturationV = DEFAULT_SAT_V_NTSC;
-			InitialOverscan = DEFAULT_OVERSCAN;
-			LastSaturation = (TSaturationU + TSaturationV) /2;
-			BT848_SetBrightness(TBrightness);
-			BT848_SetContrast(TContrast);
-			BT848_SetHue(THue);
-			BT848_SetSaturationU(TSaturationU);
-			BT848_SetSaturationV(TSaturationV);
-			WorkoutOverlaySize();
-			SetDlgItemInt(hDlg, IDC_D1, TBrightness, TRUE);
-			SetDlgItemInt(hDlg, IDC_D2, TContrast, FALSE);
-			SetDlgItemInt(hDlg, IDC_D3, THue, TRUE);
-			SetDlgItemInt(hDlg, IDC_D4, LastSaturation, FALSE);
-			SetDlgItemInt(hDlg, IDC_D5, TSaturationU, FALSE);
-			SetDlgItemInt(hDlg, IDC_D6, TSaturationV, FALSE);
-			SetDlgItemInt(hDlg, IDC_D7, InitialOverscan, FALSE);
-			Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER4), abs(TSaturationU - TSaturationV) / 2, 255 - abs(TSaturationU - TSaturationV) / 2);
-			Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER1), TBrightness);
-			Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER2), TContrast);
-			Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER3), THue);
-			Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER4), LastSaturation);
-			Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER5), TSaturationU);
-			Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER6), TSaturationV);
-			Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER7), InitialOverscan);
+			Setting_SetDefault(BT848_GetSetting(BRIGHTNESS));
+			Setting_SetDefault(BT848_GetSetting(CONTRAST));
+			Setting_SetDefault(BT848_GetSetting(HUE));
+			Setting_SetDefault(BT848_GetSetting(SATURATIONU));
+			Setting_SetDefault(BT848_GetSetting(SATURATIONV));
+			Setting_SetDefault(Aspect_GetSetting(OVERSCAN));
+			
+			Setting_SetupSlider(BT848_GetSetting(SATURATION), GetDlgItem(hDlg, IDC_SLIDER4));
+			
+			Setting_SetControlValue(BT848_GetSetting(BRIGHTNESS), GetDlgItem(hDlg, IDC_SLIDER1));
+			Setting_SetControlValue(BT848_GetSetting(CONTRAST), GetDlgItem(hDlg, IDC_SLIDER2));
+			Setting_SetControlValue(BT848_GetSetting(HUE), GetDlgItem(hDlg, IDC_SLIDER3));
+			Setting_SetControlValue(BT848_GetSetting(SATURATION), GetDlgItem(hDlg, IDC_SLIDER4));
+			Setting_SetControlValue(BT848_GetSetting(SATURATIONU), GetDlgItem(hDlg, IDC_SLIDER5));
+			Setting_SetControlValue(BT848_GetSetting(SATURATIONV), GetDlgItem(hDlg, IDC_SLIDER6));
+			Setting_SetControlValue(Aspect_GetSetting(OVERSCAN), GetDlgItem(hDlg, IDC_SLIDER7));
+
+			SetDlgItemInt(hDlg, IDC_D1, Setting_GetValue(BT848_GetSetting(BRIGHTNESS)), TRUE);
+			SetDlgItemInt(hDlg, IDC_D2, Setting_GetValue(BT848_GetSetting(CONTRAST)), FALSE);
+			SetDlgItemInt(hDlg, IDC_D3, Setting_GetValue(BT848_GetSetting(HUE)), TRUE);
+			SetDlgItemInt(hDlg, IDC_D4, Setting_GetValue(BT848_GetSetting(SATURATION)), FALSE);
+			SetDlgItemInt(hDlg, IDC_D5, Setting_GetValue(BT848_GetSetting(SATURATIONU)), FALSE);
+			SetDlgItemInt(hDlg, IDC_D6, Setting_GetValue(BT848_GetSetting(SATURATIONV)), FALSE);
+			SetDlgItemInt(hDlg, IDC_D7, Setting_GetValue(Aspect_GetSetting(OVERSCAN)), FALSE);
+			
 			break;
 		default:
 			break;
@@ -229,64 +169,48 @@ BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 	case WM_HSCROLL:
 		if((HWND)lParam == GetDlgItem(hDlg, IDC_SLIDER1))
 		{
-			TBrightness = Slider_GetPos((HWND)lParam);
-			SetDlgItemInt(hDlg, IDC_D1, TBrightness, TRUE);
-			BT848_SetBrightness(TBrightness);
+			Setting_SetFromControl(BT848_GetSetting(BRIGHTNESS), (HWND)lParam);
+			SetDlgItemInt(hDlg, IDC_D1, Setting_GetValue(BT848_GetSetting(BRIGHTNESS)), TRUE);
 		}
 		else if((HWND)lParam == GetDlgItem(hDlg, IDC_SLIDER2))
 		{
-			TContrast = Slider_GetPos((HWND)lParam);
-			SetDlgItemInt(hDlg, IDC_D2, TContrast, TRUE);
-			BT848_SetContrast(TContrast);
+			Setting_SetFromControl(BT848_GetSetting(CONTRAST), (HWND)lParam);
+			SetDlgItemInt(hDlg, IDC_D2, Setting_GetValue(BT848_GetSetting(CONTRAST)), FALSE);
 		}
 		else if((HWND)lParam == GetDlgItem(hDlg, IDC_SLIDER3))
 		{
-			THue = Slider_GetPos((HWND)lParam);
-			SetDlgItemInt(hDlg, IDC_D3, THue, TRUE);
-			BT848_SetHue(THue);
+			Setting_SetFromControl(BT848_GetSetting(HUE), (HWND)lParam);
+			SetDlgItemInt(hDlg, IDC_D3, Setting_GetValue(BT848_GetSetting(HUE)), TRUE);
 		}
 		else if((HWND)lParam == GetDlgItem(hDlg, IDC_SLIDER4))
 		{
-			j = Slider_GetPos((HWND)lParam) - LastSaturation;
-			if(j != 0)
-			{
-				TSaturationU += j;
-				TSaturationV += j;
-				LastSaturation += j;
-				Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER5), TSaturationU);
-				Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER6), TSaturationV);
-				SetDlgItemInt(hDlg, IDC_D4, LastSaturation, FALSE);
-				SetDlgItemInt(hDlg, IDC_D5, TSaturationU, FALSE);
-				SetDlgItemInt(hDlg, IDC_D6, TSaturationV, FALSE);
-				BT848_SetSaturationU(TSaturationU);
-				BT848_SetSaturationV(TSaturationV);
-			}
+			Setting_SetFromControl(BT848_GetSetting(SATURATION), (HWND)lParam);
+			Setting_SetControlValue(BT848_GetSetting(SATURATIONU), GetDlgItem(hDlg, IDC_SLIDER5));
+			Setting_SetControlValue(BT848_GetSetting(SATURATIONV), GetDlgItem(hDlg, IDC_SLIDER6));
+			SetDlgItemInt(hDlg, IDC_D4, Setting_GetValue(BT848_GetSetting(SATURATION)), FALSE);
+			SetDlgItemInt(hDlg, IDC_D5, Setting_GetValue(BT848_GetSetting(SATURATIONU)), FALSE);
+			SetDlgItemInt(hDlg, IDC_D6, Setting_GetValue(BT848_GetSetting(SATURATIONV)), FALSE);
 		}
 		else if((HWND)lParam == GetDlgItem(hDlg, IDC_SLIDER5))
 		{
-			TSaturationU = Slider_GetPos((HWND)lParam);
-			SetDlgItemInt(hDlg, IDC_D5, TSaturationU, TRUE);
-			LastSaturation = (TSaturationU + TSaturationV) / 2;
-			BT848_SetSaturationU(TSaturationU);
-			Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER4), abs(TSaturationU - TSaturationV) / 2, 255 - abs(TSaturationU - TSaturationV) / 2);
-			Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER4),LastSaturation);
-			SetDlgItemInt(hDlg, IDC_D4, LastSaturation, FALSE);
+			Setting_SetFromControl(BT848_GetSetting(SATURATIONU), (HWND)lParam);
+			Setting_SetupSlider(BT848_GetSetting(SATURATION), GetDlgItem(hDlg, IDC_SLIDER4));
+			SetDlgItemInt(hDlg, IDC_D4, Setting_GetValue(BT848_GetSetting(SATURATION)), FALSE);
+			SetDlgItemInt(hDlg, IDC_D5, Setting_GetValue(BT848_GetSetting(SATURATIONU)), FALSE);
+			SetDlgItemInt(hDlg, IDC_D6, Setting_GetValue(BT848_GetSetting(SATURATIONV)), FALSE);
 		}
 		else if((HWND)lParam == GetDlgItem(hDlg, IDC_SLIDER6))
 		{
-			TSaturationV = Slider_GetPos((HWND)lParam);
-			SetDlgItemInt(hDlg, IDC_D6, TSaturationV, TRUE);
-			LastSaturation = (TSaturationU + TSaturationV) / 2;
-			BT848_SetSaturationV(TSaturationV);
-			Slider_SetRange(GetDlgItem(hDlg, IDC_SLIDER4), abs(TSaturationU - TSaturationV) / 2, 255 - abs(TSaturationU - TSaturationV) / 2);
-			Slider_SetPos(GetDlgItem(hDlg, IDC_SLIDER4),LastSaturation);
-			SetDlgItemInt(hDlg, IDC_D4, LastSaturation, FALSE);
+			Setting_SetFromControl(BT848_GetSetting(SATURATIONV), (HWND)lParam);
+			Setting_SetupSlider(BT848_GetSetting(SATURATION), GetDlgItem(hDlg, IDC_SLIDER4));
+			SetDlgItemInt(hDlg, IDC_D4, Setting_GetValue(BT848_GetSetting(SATURATION)), FALSE);
+			SetDlgItemInt(hDlg, IDC_D5, Setting_GetValue(BT848_GetSetting(SATURATIONU)), FALSE);
+			SetDlgItemInt(hDlg, IDC_D6, Setting_GetValue(BT848_GetSetting(SATURATIONV)), FALSE);
 		}
 		else if((HWND)lParam == GetDlgItem(hDlg, IDC_SLIDER7))
 		{
-			InitialOverscan = Slider_GetPos((HWND)lParam);
-			SetDlgItemInt(hDlg, IDC_D7, InitialOverscan, TRUE);
-			WorkoutOverlaySize();
+			Setting_SetFromControl(Aspect_GetSetting(OVERSCAN), (HWND)lParam);
+			SetDlgItemInt(hDlg, IDC_D7, Setting_GetValue(Aspect_GetSetting(OVERSCAN)), FALSE);
 		}
 		break;
 	default:

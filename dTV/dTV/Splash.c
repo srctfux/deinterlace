@@ -66,9 +66,7 @@ void ShowSpashScreen()
 	{
 		SplashWnd = CreateDialog(hInst, "SPLASHBOX", NULL, SplashProc);
 	}
-#ifndef _DEBUG
 	SetWindowPos(SplashWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOCOPYBITS | SWP_NOSIZE);
-#endif
 }
 
 

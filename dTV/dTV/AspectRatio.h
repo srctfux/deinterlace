@@ -34,6 +34,24 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
+#ifndef _ASPECT_H_
+#define _ASPECT_H_ 1
+
+#include "settings.h"
+
+typedef enum
+{
+	OVERSCAN,
+	ASPECT_SETTING_LASTONE,
+} ASPECT_SETTING;
+
+// Get Hold of the AspectRatio.c file settings
+SETTING* Aspect_GetSetting(ASPECT_SETTING Setting);
+void Aspect_ReadSetttingsFromIni();
+void Aspect_WriteSetttingsToIni();
+
+#define DEFAULT_OVERSCAN 4
+
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 
 typedef enum
@@ -68,3 +86,5 @@ extern long AspectConsistencyTime;
 extern long AspectHistoryTime;
 extern VERT_POS VerticalPos;
 extern HORZ_POS HorizontalPos;
+
+#endif
