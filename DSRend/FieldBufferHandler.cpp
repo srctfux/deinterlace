@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: FieldBufferHandler.cpp,v 1.1 2002-07-06 16:38:56 tobbej Exp $
+// $Id: FieldBufferHandler.cpp,v 1.2 2002-07-06 18:36:58 tobbej Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1  2002/07/06 16:38:56  tobbej
+// new field buffering
+//
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -241,7 +244,10 @@ HRESULT CFieldBufferHandler::InsertSample(CComPtr<IMediaSample> pSample)
 			//check if it is posibel to reuse the old buffer
 			if(field1.cbSize<FieldSize)
 			{
-				aligned_free((void*)field1.pBuffer);
+				if(field1.pBuffer!=NULL)
+				{
+					aligned_free((void*)field1.pBuffer);
+				}
 				field1.pSample=NULL;
 				field1.pBuffer=(BYTE*)aligned_malloc(FieldSize,0x10);
 				field1.cbSize=FieldSize;
@@ -305,7 +311,10 @@ HRESULT CFieldBufferHandler::InsertSample(CComPtr<IMediaSample> pSample)
 			//check if it is posibel to reuse the old buffer
 			if(field2.cbSize<FieldSize)
 			{
-				aligned_free((void*)field2.pBuffer);
+				if(field2.pBuffer!=NULL)
+				{
+					aligned_free((void*)field2.pBuffer);
+				}
 				field2.pSample=NULL;
 				field2.pBuffer=(BYTE*)aligned_malloc(FieldSize,0x10);
 				field2.cbSize=FieldSize;
