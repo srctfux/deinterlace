@@ -1,9 +1,37 @@
+/////////////////////////////////////////////////////////////////////////////
+// FLT_TNoise.asm
+/////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2000 Steven Grimm.  All rights reserved.
+/////////////////////////////////////////////////////////////////////////////
+//
+//	This file is subject to the terms of the GNU General Public License as
+//	published by the Free Software Foundation.  A copy of this license is
+//	included with this software distribution in the file COPYING.  If you
+//	do not have a copy, you may obtain a copy by writing to the Free
+//	Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+//
+//	This software is distributed in the hope that it will be useful,
+//	but WITHOUT ANY WARRANTY; without even the implied warranty of
+//	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//	GNU General Public License for more details
+/////////////////////////////////////////////////////////////////////////////
+
 //
 // This is the implementation of the noise filter described in Noise.c.
 // It is broken out into this separate file because most of the logic is
 // the same for the different processor variants, and doing it this way
 // means we only have to maintain one copy of the code.
 //
+
+#ifdef IS_SSE
+#define MAINLOOP_LABEL NoiseLoop_SSE
+#endif
+#ifdef IS_3DNOW
+#define MAINLOOP_LABEL NoiseLoop_3DNow
+#endif
+#ifdef IS_MMX
+#define MAINLOOP_LABEL NoiseLoop_MMX
+#endif
 
 {
 #ifdef IS_MMX
@@ -16,15 +44,7 @@
 		mov ebx, dword ptr[OldPixel]
 		movq mm5, qwNoiseThreshold		// mm5 = NoiseThreshold
 
-#ifdef IS_SSE
-NoiseLoop_SSE:
-#endif
-#ifdef IS_3DNOW
-NoiseLoop_3DNow:
-#endif
-#ifdef IS_MMX
-NoiseLoop_MMX:
-#endif
+MAINLOOP_LABEL:
 
 		movq mm0, qword ptr[eax]		// mm0 = NewPixel
 		movq mm1, qword ptr[ebx]		// mm1 = OldPixel
@@ -80,17 +100,10 @@ NoiseLoop_MMX:
 
 		add eax, 8
 		add ebx, 8
-
-#ifdef IS_SSE
-		loop NoiseLoop_SSE
-#endif
-#ifdef IS_3DNOW
-		loop NoiseLoop_3DNow
-#endif
-#ifdef IS_MMX
-		loop NoiseLoop_MMX
-#endif
+		loop MAINLOOP_LABEL
 
 		emms
 	}
 }
+
+#undef MAINLOOP_LABEL
