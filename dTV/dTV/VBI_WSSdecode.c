@@ -250,7 +250,7 @@ BOOL WSS625_DecodeLine(BYTE* vbiline)
 			break;
 		case WSS625_RATIO_BIG_LETTERBOX_CENTER:
 			WSSAspectMode = AR_NONANAMORPHIC;
-			WSSAspectRatio = 1850;
+			WSSAspectRatio = -1;
 			break;
 		default:
 			WSSAspectMode = -1;
@@ -310,8 +310,12 @@ BOOL WSS525_DecodeLine(BYTE* vbiline)
 
 int WSS_DecodeLine(BYTE* vbiline)
 {
-	int	OldAspectMode = WSSAspectMode;
-	int	OldAspectRatio = WSSAspectRatio;
+	int		OldAspectMode = WSSAspectMode;
+	int		OldAspectRatio = WSSAspectRatio;
+	int		NewAspectMode;
+	int		NewAspectRatio;
+	BOOL	OldDecodeStatus = WSSDecodeOk;
+	BOOL	bSwitch = FALSE;
 
 	switch (BT848_GetTVFormat()->wCropHeight)
 	{
@@ -337,24 +341,36 @@ int WSS_DecodeLine(BYTE* vbiline)
 	else
 	{
 		if ( (WSSAspectMode != -1)
-		  && (WSSAspectRatio != -1)
-		  && (WSSAspectMode != OldAspectMode)
-		  && (WSSAspectRatio != OldAspectRatio) )
+		  && (WSSAspectRatio != -1) )
 		{
-			if ( (WSSAspectMode != aspectSettings.aspect_mode)
-			  || (WSSAspectRatio >= aspectSettings.source_aspect) )
+			if ( (WSSAspectMode != OldAspectMode)
+			  || (WSSAspectRatio != OldAspectRatio) )
 			{
-				SwitchToRatio (WSSAspectMode, WSSAspectRatio);
+				bSwitch = TRUE;
+				NewAspectMode = WSSAspectMode;
+				NewAspectRatio = WSSAspectRatio;
 			}
-//			if ( (WSSAspectMode != aspectSettings.aspect_mode)
-//			  && (WSSAspectRatio >= aspectSettings.source_aspect) )
-//			{
-//				SwitchToRatio (WSSAspectMode, WSSAspectRatio);
-//			}
-//			else if (WSSAspectMode != aspectSettings.aspect_mode)
-//			{
-//				SwitchToRatio (WSSAspectMode, aspectSettings.source_aspect);
-//			}
+			else
+			{
+				NewAspectMode = WSSAspectMode;
+				if (WSSAspectMode != aspectSettings.aspect_mode)
+				{
+					bSwitch = TRUE;
+				}
+				if (WSSAspectRatio > aspectSettings.source_aspect)
+				{
+					bSwitch = TRUE;
+					NewAspectRatio = WSSAspectRatio;
+				}
+				else
+				{
+					NewAspectRatio = aspectSettings.source_aspect;
+				}
+			}
+			if (bSwitch)
+			{
+				SwitchToRatio (NewAspectMode, NewAspectRatio);
+			}
 		}
 		return 0;
 	}

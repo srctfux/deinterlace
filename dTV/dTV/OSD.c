@@ -582,7 +582,7 @@ void OSD_ShowInfosScreen(HWND hWnd, double dfSize)
 			}
 			else if (Setting_GetValue(Aspect_GetSetting(ASPECT_MODE)) == 2)
 			{
-			strcat(szInfo, " Anamorphic");
+				strcat(szInfo, " Anamorphic");
 			}
 			OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_LEFT, dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 		}
@@ -671,68 +671,72 @@ void OSD_ShowInfosScreen(HWND hWnd, double dfSize)
 			OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 		}
 
-		if (WSSNbDecodeOk > 1)
+		if (WSSNbDecodeOk > 0)
 		{
 
-		nLine++;
+			if (WSSDecodeOk)
+			{
+				nLine++;
 
-		OSD_AddText("Data", dfSize, RGB(150,150,255), OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+				OSD_AddText("Data", dfSize, RGB(150,150,255), OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 
-		// WSS data
-		if (WSSAspectMode == 1)
-			strcpy (szInfo, "Aspect mode : non anamorphic");
-		else if (WSSAspectMode == 2)
-			strcpy (szInfo, "Aspect mode : anamorphic");
-		else
-			strcpy (szInfo, "Aspect mode : undefined");
-		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-		if (WSSAspectRatio > 0)
-			sprintf (szInfo, "Aspect ratio : %.2f", WSSAspectRatio / 1000.0);
-		else
-			strcpy (szInfo, "Aspect ratio : undefined");
-		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-		sprintf (szInfo, "Mode : %s", WSSFilmMode ? "film mode" : "camera mode");		
-		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-		sprintf (szInfo, "Color encoding : %s", WSSColorPlus ? "Motion Adaptative ColorPlus" : "normal Pal");
-		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-		sprintf (szInfo, "Helper signals : %s", WSSHelperSignals ? "yes" : "no");		
-		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-		sprintf (szInfo, "Teletext subtitles : %s", WSSTeletextSubtitle ? "yes" : "no");		
-		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-		switch (WSSOpenSubtitles)
-		{
-		case WSS625_SUBTITLE_NO:
-			strcpy (szInfo, "Open subtitles : no");
-			break;
-		case WSS625_SUBTITLE_INSIDE:
-			strcpy (szInfo, "Open subtitles : inside active picture");
-			break;
-		case WSS625_SUBTITLE_OUTSIDE:
-			strcpy (szInfo, "Open subtitles : outside active picture");
-			break;
-		default:
-			strcpy (szInfo, "Open subtitles : ???");
-			break;
-		}
-		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-		sprintf (szInfo, "Surround sound : %s", WSSSurroundSound ? "yes" : "no");		
-		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-		sprintf (szInfo, "Copyright asserted : %s", WSSCopyrightAsserted ? "yes" : "no");		
-		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-		sprintf (szInfo, "Copy protection : %s", WSSCopyProtection ? "yes" : "no");		
-		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+				// WSS data
+				if (WSSAspectRatio > 0)
+				{
+					sprintf (szInfo, "Aspect ratio : %.3f", WSSAspectRatio / 1000.0);
+					if (WSSAspectMode == 1)
+						strcat (szInfo, " Letterboxed");
+					else if (WSSAspectMode == 2)
+						strcat (szInfo, " Anamorphic");
+				}
+				else
+				{
+					strcpy (szInfo, "Aspect ratio : undefined");
+				}
+				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+				sprintf (szInfo, "Mode : %s", WSSFilmMode ? "film mode" : "camera mode");		
+				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+				sprintf (szInfo, "Color encoding : %s", WSSColorPlus ? "Motion Adaptative ColorPlus" : "normal Pal");
+				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+				sprintf (szInfo, "Helper signals : %s", WSSHelperSignals ? "yes" : "no");		
+				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+				sprintf (szInfo, "Teletext subtitles : %s", WSSTeletextSubtitle ? "yes" : "no");		
+				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+				switch (WSSOpenSubtitles)
+				{
+				case WSS625_SUBTITLE_NO:
+					strcpy (szInfo, "Open subtitles : no");
+					break;
+				case WSS625_SUBTITLE_INSIDE:
+					strcpy (szInfo, "Open subtitles : inside active picture");
+					break;
+				case WSS625_SUBTITLE_OUTSIDE:
+					strcpy (szInfo, "Open subtitles : outside active picture");
+					break;
+				default:
+					strcpy (szInfo, "Open subtitles : ???");
+					break;
+				}
+				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+				sprintf (szInfo, "Surround sound : %s", WSSSurroundSound ? "yes" : "no");		
+				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+				sprintf (szInfo, "Copyright asserted : %s", WSSCopyrightAsserted ? "yes" : "no");		
+				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+				sprintf (szInfo, "Copy protection : %s", WSSCopyProtection ? "yes" : "no");		
+				OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+			}
 
-		nLine++;
+			nLine++;
 
-		OSD_AddText("Debug", dfSize, RGB(150,150,255), OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+			OSD_AddText("Debug", dfSize, RGB(150,150,255), OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 
-		// Debug informations
-		sprintf (szInfo, "Average start position : %d", WSSAvgPos);
-		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-		sprintf (szInfo, "Minimum start position : %d", WSSMinPos);
-		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-		sprintf (szInfo, "Maximum start position : %d", WSSMaxPos);
-		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+			// Debug informations
+			sprintf (szInfo, "Average start position : %d", WSSAvgPos);
+			OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+			sprintf (szInfo, "Minimum start position : %d", WSSMinPos);
+			OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
+			sprintf (szInfo, "Maximum start position : %d", WSSMaxPos);
+			OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_CENTER, 0.5, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 		}
 		break;
 
