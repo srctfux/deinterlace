@@ -1289,7 +1289,7 @@ void MakeVideoTableForDisplay()
 	}
 }
 
-void ExitTV(void)
+void ExitDD(void)
 {
 	if (lpDD != NULL)
 	{
@@ -1307,8 +1307,6 @@ void ExitTV(void)
 		IDirectDraw_Release(lpDD);
 		lpDD = NULL;
 	}
-
-	BT8X8_Close();
 }
 
 void Black_Surface()
@@ -1336,6 +1334,25 @@ void Black_Surface()
 		}
 	}
 	ddrval = IDirectDrawSurface_Unlock(lpDDOverlay, ddsd.lpSurface);
+}
+
+void Black_Overlays()
+{
+	BYTE *ScreenPtr;
+	int nLineTarget;
+
+	// blank out front and back buffers
+	for (nLineTarget = 0; nLineTarget < CurrentY / 2; nLineTarget++)
+	{
+		ScreenPtr = lpOverlay + (nLineTarget * 2) * OverlayPitch;
+		memset(ScreenPtr, 0, CurrentX  * 2);
+		ScreenPtr = lpOverlay + (nLineTarget * 2 + 1) * OverlayPitch;
+		memset(ScreenPtr, 0, CurrentX  * 2);
+		ScreenPtr = lpOverlayBack + (nLineTarget * 2) * OverlayPitch;
+		memset(ScreenPtr, 0, CurrentX  * 2);
+		ScreenPtr = lpOverlayBack + (nLineTarget * 2 + 1) * OverlayPitch;
+		memset(ScreenPtr, 0, CurrentX  * 2);
+	}
 }
 
 BOOL OverlayUpdate(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL ColorKey)
@@ -1374,8 +1391,6 @@ BOOL OverlayUpdate(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL ColorK
 		ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, pSrcRect, lpDDSurface, pDestRect, dwFlags, &DDOverlayFX);
 		if (ddrval != DD_OK)
 		{
-			Destroy_Overlay();
-			CreateOverlay(CurrentX, CurrentY);
 			ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, pSrcRect, lpDDSurface, pDestRect, dwFlags, &DDOverlayFX);
 
 			if (ddrval != DD_OK)
@@ -1388,7 +1403,7 @@ BOOL OverlayUpdate(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL ColorK
 	return TRUE;
 }
 
-BOOL CreateOverlay(int x, int y)
+BOOL CreateOverlay()
 {
 	DDSURFACEDESC ddsd;
 	DDPIXELFORMAT PixelFormat;
@@ -1406,16 +1421,18 @@ BOOL CreateOverlay(int x, int y)
 	ddsd.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT | DDSD_BACKBUFFERCOUNT;
 	ddsd.ddsCaps.dwCaps = DDSCAPS_OVERLAY | DDSCAPS_VIDEOMEMORY | DDSCAPS_FLIP | DDSCAPS_COMPLEX;
 
-	ddsd.dwWidth = x;
-	ddsd.dwHeight = y;
+	// create a much bigger surface than we need
+	// this ensures that we can use the bTV plugin 
+	ddsd.dwWidth = BTV_VER1_WIDTH;
+	ddsd.dwHeight = BTV_VER1_HEIGHT;
 	ddsd.dwBackBufferCount = 1;
 
 	ddsd.ddpfPixelFormat = PixelFormat;
 	if (IDirectDraw_CreateSurface(lpDD, &ddsd, &lpDDOverlay, NULL) != DD_OK)
 	{
-		SetWindowText(hwndTextField, "Can't create Overlay Surface");
+		MessageBox(NULL, "Can't create Overlay Surface", "dTV", MB_ICONSTOP | MB_OK);
 		lpDDOverlay = NULL;
-		return (FALSE);
+		return FALSE;
 	}
 	ddrval = IDirectDrawSurface_Lock(lpDDOverlay, NULL, &ddsd, 0, NULL);
 	OverlayPitch = ddsd.lPitch;
@@ -1426,7 +1443,9 @@ BOOL CreateOverlay(int x, int y)
 	ddrval = IDirectDrawSurface_GetAttachedSurface(lpDDOverlay, &caps, &lpDDOverlayBack);
 	if (FAILED(ddrval))
 	{
+		MessageBox(NULL, "Can't create Overlay Back Surface", "dTV", MB_ICONSTOP | MB_OK);
 		lpDDOverlayBack = NULL;
+		return (FALSE);
 	}
 	else
 	{
@@ -1435,114 +1454,55 @@ BOOL CreateOverlay(int x, int y)
 		ddrval = IDirectDrawSurface_Unlock(lpDDOverlayBack, ddsd.lpSurface);
 	}
 
-
 	return (TRUE);
 }
 
-void Destroy_Overlay()
-{
-	if (lpDDOverlay != NULL)
-	{
-		OverlayUpdate(NULL, NULL, DDOVER_HIDE, FALSE);
-		IDirectDrawSurface_Release(lpDDOverlay);
-	}
-	lpDDOverlay = NULL;
-	lpOverlay = NULL;
-	// don't seem to need to release these
-	// could be memory leak though
-	lpDDOverlayBack = NULL;
-	lpOverlayBack = NULL;
-}
-
-BOOL InitTV(HWND hwnd, BOOL Fullscreen, int x, int y)
+BOOL InitDD(HWND hWnd)
 {
 	HRESULT ddrval;
-	LPDIRECTDRAW lpdd;
 	DDCAPS DriverCaps;
 	DDSURFACEDESC ddsd;
 
-	Destroy_Overlay();
-
-	if (lpDD != NULL)
+	if (DirectDrawCreate(NULL, &lpDD, NULL) != DD_OK)
 	{
-		if (lpDDSurface != NULL)
-		{
-			IDirectDrawSurface_Release(lpDDSurface);
-		}
-		lpDDSurface = NULL;
-		IDirectDraw_Release(lpDD);
-		lpDD = NULL;
+		MessageBox(NULL, "DirectDrawCreate failed", "dTV", MB_ICONSTOP | MB_OK);
+		return (FALSE);
 	}
 
-	if (lpDD == NULL)
+	// can we use Overlay ??
+	memset(&DriverCaps, 0x00, sizeof(DriverCaps));
+	DriverCaps.dwSize = sizeof(DriverCaps);
+	ddrval = IDirectDraw_GetCaps(lpDD, &DriverCaps, NULL);
+
+	if (ddrval == DD_OK)
 	{
-		if (DirectDrawCreate(NULL, &lpdd, NULL) != DD_OK)
+		if (DriverCaps.dwCaps & DDCAPS_OVERLAY)
 		{
-			MessageBox(hWnd, "DirectDrawCreate failed", "dTV", MB_ICONSTOP | MB_OK);
-			return (FALSE);
-		}
-		lpDD = lpdd;
-
-		// can we use Overlay ??
-		memset(&DriverCaps, 0x00, sizeof(DriverCaps));
-		DriverCaps.dwSize = sizeof(DriverCaps);
-		ddrval = IDirectDraw_GetCaps(lpDD, &DriverCaps, NULL);
-
-		if (ddrval == DD_OK)
-		{
-			if (DriverCaps.dwCaps & DDCAPS_OVERLAY)
+			if (!(DriverCaps.dwCaps & DDCAPS_OVERLAYSTRETCH))
 			{
-				if (!(DriverCaps.dwCaps & DDCAPS_OVERLAYSTRETCH))
-				{
-					MessageBox(hWnd, "Can't Strech Overlay", "dTV", MB_ICONSTOP | MB_OK);
-					return (FALSE);
-				}
-				
-				if (!(DriverCaps.dwCKeyCaps & DDCKEYCAPS_DESTOVERLAY))
-				{
-					MessageBox(hWnd, "Can't ColorKey Overlay", "dTV", MB_ICONSTOP | MB_OK);
-					return (FALSE);
-				}
+				MessageBox(NULL, "Can't Strech Overlay", "dTV", MB_ICONSTOP | MB_OK);
+				return FALSE;
 			}
-			else
+			
+			if (!(DriverCaps.dwCKeyCaps & DDCKEYCAPS_DESTOVERLAY))
 			{
-				MessageBox(hWnd, "Can't Use Overlay", "dTV", MB_ICONSTOP | MB_OK);
-				return (FALSE);
+				MessageBox(NULL, "Can't ColorKey Overlay", "dTV", MB_ICONSTOP | MB_OK);
+				return FALSE;
 			}
 		}
-
-	}
-	else
-	{
-		lpdd = lpDD;
-	}
-
-	if (Fullscreen)
-	{
-		ddrval = IDirectDraw_SetCooperativeLevel(lpdd, hwnd, DDSCL_ALLOWMODEX | DDSCL_EXCLUSIVE | DDSCL_FULLSCREEN);
-		if (ddrval != DD_OK)
+		else
 		{
-			MessageBox(hWnd, "SetCooperativeLevel failed", "dTV", MB_ICONSTOP | MB_OK);
-			return (FALSE);
-		}
-
-		ddrval = IDirectDraw_SetDisplayMode(lpdd, x, y, 16);
-
-		if (ddrval != DD_OK)
-		{
-			MessageBox(hWnd, "SetDisplayMode failed", "dTV", MB_ICONSTOP | MB_OK);
+			MessageBox(NULL, "Can't Use Overlay", "dTV", MB_ICONSTOP | MB_OK);
 			return (FALSE);
 		}
 	}
-	else
-	{
-		ddrval = IDirectDraw_SetCooperativeLevel(lpdd, hwnd, DDSCL_NORMAL);
 
-		if (ddrval != DD_OK)
-		{
-			MessageBox(hWnd, "SetCooperativeLevel failed", "dTV", MB_ICONSTOP | MB_OK);
-			return (FALSE);
-		}
+	ddrval = IDirectDraw_SetCooperativeLevel(lpDD, hWnd, DDSCL_NORMAL);
+
+	if (ddrval != DD_OK)
+	{
+		MessageBox(NULL, "SetCooperativeLevel failed", "dTV", MB_ICONSTOP | MB_OK);
+		return (FALSE);
 	}
 
 	memset(&ddsd, 0x00, sizeof(ddsd));
@@ -1550,18 +1510,17 @@ BOOL InitTV(HWND hwnd, BOOL Fullscreen, int x, int y)
 	ddsd.dwFlags = DDSD_CAPS;
 	ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
 
-	if (IDirectDraw_CreateSurface(lpdd, &ddsd, &lpDDSurface, NULL) != DD_OK)
+	if (IDirectDraw_CreateSurface(lpDD, &ddsd, &lpDDSurface, NULL) != DD_OK)
 	{
-		MessageBox(hWnd, "Error Creating Primary surface", "dTV", MB_ICONSTOP | MB_OK);
+		MessageBox(NULL, "Error Creating Primary surface", "dTV", MB_ICONSTOP | MB_OK);
 		return (FALSE);
 	}
 
 	ddrval = IDirectDrawSurface_Lock(lpDDSurface, NULL, &ddsd, 0, NULL);
 	ddrval = IDirectDrawSurface_Unlock(lpDDSurface, ddsd.lpSurface);
 
-
 	return TRUE;
-}								/* InitTV */
+}
 
 BOOL Init_Tuner(int TunerNr)
 {

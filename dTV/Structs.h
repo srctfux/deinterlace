@@ -249,6 +249,7 @@ struct TTVSetting
 	WORD wHActivex1;
 	WORD wVDelay;
 	WORD wCropOffset;
+	BOOL Is25fps;
 };
 
 struct TTunerType
@@ -375,6 +376,35 @@ struct fmt_page
 	unsigned int hid;
     struct fmt_char data[25][40];
 };
+
+struct TPulldowmMode
+{
+	int nCount;
+	ePULLDOWNMODES LastGuess;
+	int LastGuessCount;
+};
+
+typedef struct
+{
+	char *szShortName;
+	char *szLongName;
+	long Flags;
+} BTV_V1_PROPS;
+
+typedef struct
+{
+	short **ppCurrentField;
+	short **ppLastField;
+	BYTE **ppEvenDest;
+	BYTE **ppOddDest;
+	int Level1;
+	int Level2;
+	int x;
+	int y;
+	int UseKey1;
+	int UseKey2;
+	int IsOddField;
+} BTV_V1_PARAMS;
 
 #endif
 

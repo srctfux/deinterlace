@@ -187,9 +187,6 @@ extern int emstartx;
 extern int emstarty;
 extern BOOL bAlwaysOnTop;
 
-extern int Res_X;
-extern int Res_Y;
-
 extern int pgsizex;
 extern int pgsizey;
 extern int pgstartx;
@@ -201,10 +198,7 @@ extern int PriorClassId;
 extern int ThreadClassId;
 extern BOOL bDisplayStatusBar;
 
-extern BOOL USE_DX_LOCK;
-
 extern BOOL Show_Menu;
-extern BOOL Toggle_WithOut_Frame;
 extern int AudioSource;
 
 extern int CountryCode;
@@ -217,6 +211,16 @@ extern HBITMAP BirneGruen;
 extern int VBI_lpf;
 
 extern ePULLDOWNMODES gPulldownMode;
+
+extern long PulldownThresholdLow;
+extern long PulldownThresholdHigh;
+extern long PulldownRepeatCount;
+
+extern char szBTVPluginName[MAX_PATH];
+extern BOOL bUseBTVPlugin;
+extern BTV_V1_PARAMS BTVParams;
+
+extern BOOL bIsFullScreen;
 
 #endif
 

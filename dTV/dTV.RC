@@ -709,21 +709,6 @@ BEGIN
     CTEXT           "Balance",TEXT12,260,20,33,10
 END
 
-TOGGLESETTING DIALOG DISCARDABLE  22, 17, 167, 71
-STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
-CAPTION "TV-Mode Setup"
-FONT 8, "MS Sans Serif"
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,5,55,55,15
-    PUSHBUTTON      "Cancel",IDCANCEL,105,55,55,15
-    LTEXT           "(Without edge you can't  resize)",IDC_STATIC,50,41,110,
-                    10
-    CONTROL         "TV-Window (Toggle-Fuction) no edge",IDC_RADIO1,"Button",
-                    BS_AUTORADIOBUTTON,10,25,150,15
-    CONTROL         "TV-Window (Toggle-Function)  with edge",IDC_RADIO2,
-                    "Button",BS_AUTORADIOBUTTON,10,5,150,15
-END
-
 ABOUT DIALOG DISCARDABLE  22, 17, 372, 286
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
 CAPTION "About dTV"
@@ -987,7 +972,44 @@ BEGIN
     BEGIN
         MENUITEM "E&xit\tEsc",                  IDM_ENDE
     END
-    POPUP "&BT8x8"
+    POPUP "&Channels"
+    BEGIN
+        MENUITEM "Channel &Scan",               IDM_ANALOGSCAN
+        MENUITEM "Channel &List",               IDM_KANAL_LISTE
+        MENUITEM SEPARATOR
+        MENUITEM "&Next Channel\tF1",           IDM_CHANNELPLUS
+        MENUITEM "&Previous Channel\tF2",       IDM_CHANNELMINUS
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "Toggle &Menu\tF4",            IDM_TOGGLE_MENU
+        MENUITEM "Toggle Stat&us Bar\tS",       IDM_STATUSBAR
+        MENUITEM "&Full Screen\tF6",            IDM_FULL_SCREEN
+        MENUITEM "&Always on Top",              IDM_ON_TOP
+        MENUITEM "&Pause\tp",                   IDM_CAPTURE_PAUSE
+    END
+    POPUP "&Settings"
+    BEGIN
+        MENUITEM "&Video Adjustments ...",      IDM_VIDEOSETTINGS
+        POPUP "&Video Input"
+        BEGIN
+            MENUITEM "&Tuner",                      IDM_TUNER
+            MENUITEM "&Composite",                  IDM_EXTERN1
+            MENUITEM "&Other",                      IDM_EXTERN2
+            MENUITEM "&S-Video",                    IDM_EXTERN3
+            MENUITEM SEPARATOR
+        END
+        POPUP "Video &Format"
+        BEGIN
+            MENUITEM "&PAL-BDGHI",                  IDM_TYPEFORMAT_0
+            MENUITEM "&NTSC",                       IDM_TYPEFORMAT_1
+            MENUITEM "&SECAM",                      IDM_TYPEFORMAT_2
+            MENUITEM "PAL-&M",                      IDM_TYPEFORMAT_3
+            MENUITEM "PA&L-N",                      IDM_TYPEFORMAT_4
+            MENUITEM "NTSC Japan",                  IDM_TYPEFORMAT_5
+        END
+    END
+    POPUP "&Hardware"
     BEGIN
         POPUP "TV-Card"
         BEGIN
@@ -1002,26 +1024,63 @@ BEGIN
             MENUITEM "Manual Card Setup",           IDM_MANUELL_CARD
             MENUITEM "Don't touch card",            IDM_DONT_TOUCH_CARD
         END
-        POPUP "&Video Input"
+        POPUP "Select &Tuner"
         BEGIN
-            POPUP "&Tuner"
-            BEGIN
-                MENUITEM "&Temic Pal",                  IDM_TUNER_0
-                MENUITEM "Temic Pal &I",                IDM_TUNER_7
-                MENUITEM "Temic &NTSC",                 IDM_TUNER_6
-                MENUITEM "&Philips Pal",                IDM_TUNER_5
-                MENUITEM "P&hilips Pal I",              IDM_TUNER_1
-                MENUITEM "Philips NTS&C",               IDM_TUNER_2
-                MENUITEM "Philips &Secam",              IDM_TUNER_3
-                MENUITEM "&No Tuner (Only SOURCE switch)", IDM_TUNER_4
-                MENUITEM "&Manual Tuner",               IDM_TUNER_8
-            END
-            MENUITEM "Ext. &1",                     IDM_EXTERN1
-            MENUITEM "Ext. &2",                     IDM_EXTERN2
-            MENUITEM "Ext. &3",                     IDM_EXTERN3
+            MENUITEM "&Temic Pal",                  IDM_TUNER_0
+            MENUITEM "Temic Pal &I",                IDM_TUNER_7
+            MENUITEM "Temic &NTSC",                 IDM_TUNER_6
+            MENUITEM "&Philips Pal",                IDM_TUNER_5
+            MENUITEM "P&hilips Pal I",              IDM_TUNER_1
+            MENUITEM "Philips NTS&C",               IDM_TUNER_2
+            MENUITEM "Philips &Secam",              IDM_TUNER_3
+            MENUITEM "&No Tuner (Only SOURCE switch)", IDM_TUNER_4
+            MENUITEM "&Manual Tuner",               IDM_TUNER_8
             MENUITEM SEPARATOR
-            MENUITEM "Tuner-Parameter Manual",      IDM_MANUELL_TUNER
+            MENUITEM "Set Tuner-Parameters Manually", IDM_MANUELL_TUNER
             MENUITEM "Don't touch tuner",           IDM_DONT_TOUCH
+        END
+        MENUITEM "&PLL - Settings ...",         IDM_PLL
+    END
+    POPUP "A&dvanced"
+    BEGIN
+        MENUITEM "IFORM - Parameters",          IDM_IFORM
+        MENUITEM "&Hardware-Info",              IDM_HWINFO
+        POPUP "MSP/Radio"
+        BEGIN
+            MENUITEM "&Tone - Control",             IDM_AUDIOSETTINGS
+            MENUITEM "Tone - Control  &Equalizer",  IDM_AUDIOSETTINGS1
+            MENUITEM SEPARATOR
+            MENUITEM "FM Radio",                    IDM_MSPMODE_2
+            MENUITEM "TV Terrestial FM-mono + FM-stereo ", IDM_MSPMODE_3
+            MENUITEM "TV Sat FM-mono ",             IDM_MSPMODE_4
+            MENUITEM "NICAM B/G, D/K",              IDM_MSPMODE_5
+            MENUITEM "NICAM I",                     IDM_MSPMODE_6
+            MENUITEM SEPARATOR
+            POPUP "Major Carrier"
+            BEGIN
+                MENUITEM "NTSC",                        IDM_MAJOR_CARRIER_0
+                MENUITEM "PAl B/G",                     IDM_MAJOR_CARRIER_1
+                MENUITEM "PAL I",                       IDM_MAJOR_CARRIER_2
+                MENUITEM "PAL D/K + Sat + Secam",       IDM_MAJOR_CARRIER_3
+            END
+            POPUP "Minor Carrier"
+            BEGIN
+                MENUITEM "PAL B/G FM-stereo",           IDM_MINOR_CARRIER_0
+                MENUITEM "PAL B/G NICAM",               IDM_MINOR_CARRIER_1
+                MENUITEM "PAL D/K NICAM",               IDM_MINOR_CARRIER_2
+                MENUITEM "PAL D/K1 FM-Stereo",          IDM_MINOR_CARRIER_3
+                MENUITEM "PAL D/K2 FM-stereo",          IDM_MINOR_CARRIER_4
+                MENUITEM "PAL SAT FM-stereo s/b",       IDM_MINOR_CARRIER_5
+                MENUITEM "PAL SAT FM-stereo s",         IDM_MINOR_CARRIER_6
+                MENUITEM "PAL SAT FM-stereo b",         IDM_MINOR_CARRIER_7
+            END
+            MENUITEM SEPARATOR
+            MENUITEM "Mono",                        IDM_MSPSTEREO_1
+            MENUITEM "Stereo",                      IDM_MSPSTEREO_2
+            MENUITEM "Speech-Channel 1 ",           IDM_MSPSTEREO_3
+            MENUITEM "Speech-Channel",              IDM_MSPSTEREO_4
+            MENUITEM SEPARATOR
+            MENUITEM "Automatic Stereo Adjustment", IDM_AUTOSTEREO
         END
         POPUP "&Audio"
         BEGIN
@@ -1033,128 +1092,32 @@ BEGIN
             MENUITEM "&Audio out",                  IDM_AUDIO_4
             MENUITEM "Audio on",                    IDM_AUDIO_5
         END
-        POPUP "Video &Format"
-        BEGIN
-            POPUP "&Type"
-            BEGIN
-                MENUITEM "&PAL-BDGHI",                  IDM_TYPEFORMAT_0
-                MENUITEM "&NTSC",                       IDM_TYPEFORMAT_1
-                MENUITEM "&SECAM",                      IDM_TYPEFORMAT_2
-                MENUITEM "PAL-&M",                      IDM_TYPEFORMAT_3
-                MENUITEM "PA&L-N",                      IDM_TYPEFORMAT_4
-                MENUITEM "NTSC Japan",                  IDM_TYPEFORMAT_5
-            END
-            POPUP "&Color format"
-            BEGIN
-                MENUITEM "RGB32",                       IDM_COLORFORMAT_0
-                , GRAYED
-                MENUITEM "RGB24",                       IDM_COLORFORMAT_1
-                , GRAYED
-                MENUITEM "RGB16",                       IDM_COLORFORMAT_2
-                MENUITEM "RGB15",                       IDM_COLORFORMAT_3
-                MENUITEM "YUV2",                        IDM_COLORFORMAT_4
-                MENUITEM "BtYUV",                       IDM_COLORFORMAT_5
-                , GRAYED
-                MENUITEM "Y8",                          IDM_COLORFORMAT_6
-                , GRAYED
-                MENUITEM "RGB8",                        IDM_COLORFORMAT_7
-                , GRAYED
-                MENUITEM "YCrCb 422",                   IDM_COLORFORMAT_8
-                MENUITEM "YCrCb 411",                   IDM_COLORFORMAT_9
-                , GRAYED
-                MENUITEM "8x Raw Mode",                 IDM_COLORFORMAT_10
-                , GRAYED
-            END
-        END
+        MENUITEM "Audio-Mi&xer Setup",          IDM_AUDIO_MIXER
         POPUP "&Capture"
         BEGIN
             MENUITEM "&Video",                      IDM_VIDEO
             MENUITEM "VBI-&Data",                   IDM_VBI
-            MENUITEM SEPARATOR
-            MENUITEM "&Pause",                      IDM_CAPTURE_PAUSE
         END
-        POPUP "&Settings"
+        POPUP "Thread &Priorities"
         BEGIN
-            MENUITEM "&Video",                      IDM_VIDEOSETTINGS
-            POPUP "MSP/Radio"
+            POPUP "Program"
             BEGIN
-                MENUITEM "&Tone - Control",             IDM_AUDIOSETTINGS
-                MENUITEM "Tone - Control  &Equalizer",  IDM_AUDIOSETTINGS1
-                MENUITEM SEPARATOR
-                MENUITEM "FM Radio",                    IDM_MSPMODE_2
-                MENUITEM "TV Terrestial FM-mono + FM-stereo ", IDM_MSPMODE_3
-                MENUITEM "TV Sat FM-mono ",             IDM_MSPMODE_4
-                MENUITEM "NICAM B/G, D/K",              IDM_MSPMODE_5
-                MENUITEM "NICAM I",                     IDM_MSPMODE_6
-                MENUITEM SEPARATOR
-                POPUP "Major Carrier"
-                BEGIN
-                    MENUITEM "NTSC",                        IDM_MAJOR_CARRIER_0
-
-                    MENUITEM "PAl B/G",                     IDM_MAJOR_CARRIER_1
-
-                    MENUITEM "PAL I",                       IDM_MAJOR_CARRIER_2
-
-                    MENUITEM "PAL D/K + Sat + Secam",       IDM_MAJOR_CARRIER_3
-
-                END
-                POPUP "Minor Carrier"
-                BEGIN
-                    MENUITEM "PAL B/G FM-stereo",           IDM_MINOR_CARRIER_0
-
-                    MENUITEM "PAL B/G NICAM",               IDM_MINOR_CARRIER_1
-
-                    MENUITEM "PAL D/K NICAM",               IDM_MINOR_CARRIER_2
-
-                    MENUITEM "PAL D/K1 FM-Stereo",          IDM_MINOR_CARRIER_3
-
-                    MENUITEM "PAL D/K2 FM-stereo",          IDM_MINOR_CARRIER_4
-
-                    MENUITEM "PAL SAT FM-stereo s/b",       IDM_MINOR_CARRIER_5
-
-                    MENUITEM "PAL SAT FM-stereo s",         IDM_MINOR_CARRIER_6
-
-                    MENUITEM "PAL SAT FM-stereo b",         IDM_MINOR_CARRIER_7
-
-                END
-                MENUITEM SEPARATOR
-                MENUITEM "Mono",                        IDM_MSPSTEREO_1
-                MENUITEM "Stereo",                      IDM_MSPSTEREO_2
-                MENUITEM "Speech-Channel 1 ",           IDM_MSPSTEREO_3
-                MENUITEM "Speech-Channel",              IDM_MSPSTEREO_4
-                MENUITEM SEPARATOR
-                MENUITEM "Automatic Stereo Adjustment", IDM_AUTOSTEREO
+                MENUITEM "NORMAL_PRIORITY_CLASS",       IDM_PRIORCLASS_0
+                MENUITEM "HIGH_PRIORITY_CLASS",         IDM_PRIORCLASS_1
+                MENUITEM "REALTIME_PRIORITY_CLASS",     IDM_PRIORCLASS_2
+            END
+            POPUP "Decoding and output"
+            BEGIN
+                MENUITEM "THREAD_PRIORITY_BELOW_NORMAL", IDM_TREADPRIOR_0
+                MENUITEM "THREAD_PRIORITY_NORMAL",      IDM_TREADPRIOR_1
+                MENUITEM "THREAD_PRIORITY_ABOVE_NORMAL", IDM_TREADPRIOR_2
+                MENUITEM "THREAD_PRIORITY_HIGHEST",     IDM_TREADPRIOR_3
+                MENUITEM "THREAD_PRIORITY_TIME_CRITICAL", IDM_TREADPRIOR_4
             END
         END
-        MENUITEM SEPARATOR
-        MENUITEM "&PLL - Settings",             IDM_PLL
-        MENUITEM "IFORM - Parameters",          IDM_IFORM
         MENUITEM "BT Reset",                    IDM_RESET
-        MENUITEM "&Hardware-Info",              IDM_HWINFO
     END
-    POPUP "&Channels"
-    BEGIN
-        MENUITEM "Channel &Scan",               IDM_ANALOGSCAN
-        MENUITEM "Channel &List",               IDM_KANAL_LISTE
-        MENUITEM SEPARATOR
-        MENUITEM "&Next Channel\tF1",           IDM_CHANNELPLUS
-        MENUITEM "&Previous Channel\tF2",       IDM_CHANNELMINUS
-    END
-    POPUP "&Output"
-    BEGIN
-        MENUITEM "DirectX : Use &Locking",      IDM_DX_LOCK
-        MENUITEM SEPARATOR
-        MENUITEM "Toggle &Menu\tF4",            IDM_TOGGLE_MENU
-        MENUITEM SEPARATOR
-        MENUITEM "Toggle Stat&us Bar\tS",       IDM_STATUSBAR
-        MENUITEM "&Always on Top",              IDM_ON_TOP
-        MENUITEM SEPARATOR
-        MENUITEM SEPARATOR
-        MENUITEM "Toggle Settings",             IDM_TOGGLE_SETTUNGS
-        MENUITEM SEPARATOR
-        MENUITEM "Audio-Mi&xer Setup",          IDM_AUDIO_MIXER
-    END
-    POPUP "&VideoData"
+    POPUP "Video&Data"
     BEGIN
         MENUITEM "Video&Text",                  IDM_VBI_VT, GRAYED
         MENUITEM "&InterCast",                  IDM_VBI_IC, GRAYED
@@ -1178,23 +1141,6 @@ BEGIN
         MENUITEM "InterCast Setup",             IDM_INTERCAST_SETUP
         MENUITEM "VideoDat Setup",              IDM_VIDEODAT_SETUP
         MENUITEM SEPARATOR
-    END
-    POPUP "&Priority"
-    BEGIN
-        POPUP "Program"
-        BEGIN
-            MENUITEM "NORMAL_PRIORITY_CLASS",       IDM_PRIORCLASS_0
-            MENUITEM "HIGH_PRIORITY_CLASS",         IDM_PRIORCLASS_1
-            MENUITEM "REALTIME_PRIORITY_CLASS",     IDM_PRIORCLASS_2
-        END
-        POPUP "Decoding and output"
-        BEGIN
-            MENUITEM "THREAD_PRIORITY_BELOW_NORMAL", IDM_TREADPRIOR_0
-            MENUITEM "THREAD_PRIORITY_NORMAL",      IDM_TREADPRIOR_1
-            MENUITEM "THREAD_PRIORITY_ABOVE_NORMAL", IDM_TREADPRIOR_2
-            MENUITEM "THREAD_PRIORITY_HIGHEST",     IDM_TREADPRIOR_3
-            MENUITEM "THREAD_PRIORITY_TIME_CRITICAL", IDM_TREADPRIOR_4
-        END
     END
     POPUP "&Help"
     BEGIN
@@ -1337,12 +1283,6 @@ BEGIN
         BOTTOMMARGIN, 138
     END
 
-    "TOGGLESETTING", DIALOG
-    BEGIN
-        RIGHTMARGIN, 160
-        BOTTOMMARGIN, 70
-    END
-
     "ABOUT", DIALOG
     BEGIN
         RIGHTMARGIN, 370
@@ -1404,11 +1344,13 @@ BEGIN
     "B",            IDM_BRIGHTNESSPLUS,     VIRTKEY, SHIFT, NOINVERT
     "C",            IDM_COLORMINUS,         VIRTKEY, NOINVERT
     "C",            IDM_COLORPLUS,          VIRTKEY, SHIFT, NOINVERT
-    "H",            IDM_TOGGLECURSOR,       VIRTKEY, NOINVERT
+    "H",            IDM_HUE_DOWN,           VIRTKEY, NOINVERT
+    "H",            IDM_HUE_UP,             VIRTKEY, SHIFT, NOINVERT
     "K",            IDM_KONTRASTMINUS,      VIRTKEY, NOINVERT
     "K",            IDM_KONTRASTPLUS,       VIRTKEY, SHIFT, NOINVERT
     "M",            IDM_MUTE,               VIRTKEY, NOINVERT
     "M",            IDM_MUTE,               VIRTKEY, SHIFT, NOINVERT
+    "P",            IDM_CAPTURE_PAUSE,      VIRTKEY, NOINVERT
     "S",            IDM_STATUSBAR,          VIRTKEY, NOINVERT
     "T",            IDM_CALL_VIDEOTEXTSMALL, VIRTKEY, NOINVERT
     "T",            IDM_CLOSE_VT,           VIRTKEY, CONTROL, NOINVERT
@@ -1421,6 +1363,8 @@ BEGIN
     VK_F1,          IDM_CHANNELPLUS,        VIRTKEY, NOINVERT
     VK_F2,          IDM_CHANNELMINUS,       VIRTKEY, NOINVERT
     VK_F4,          IDM_TOGGLE_MENU,        VIRTKEY, NOINVERT
+    VK_F5,          IDM_TOGGLECURSOR,       VIRTKEY, NOINVERT
+    VK_F6,          IDM_FULL_SCREEN,        VIRTKEY, NOINVERT
     VK_LEFT,        IDM_VT_PAGE_MINUS,      VIRTKEY, NOINVERT
     VK_RIGHT,       IDM_VT_PAGE_PLUS,       VIRTKEY, NOINVERT
     VK_SPACE,       IDM_SPACEBAR,           VIRTKEY, NOINVERT
@@ -1458,8 +1402,8 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,1
- PRODUCTVERSION 1,0,0,1
+ FILEVERSION 1,0,1,1
+ PRODUCTVERSION 1,0,1,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -1477,14 +1421,14 @@ BEGIN
             VALUE "Comments", "John Adcock\0"
             VALUE "CompanyName", "\0"
             VALUE "FileDescription", "dTV\0"
-            VALUE "FileVersion", "1, 0, 0, 1\0"
+            VALUE "FileVersion", "1, 0, 1, 1\0"
             VALUE "InternalName", "dTV\0"
             VALUE "LegalCopyright", "Copyright © 2000\0"
-            VALUE "LegalTrademarks", "This driver is covered by the term of the GNU GPL\0"
+            VALUE "LegalTrademarks", "This Program is covered by the term of the GNU GPL\0"
             VALUE "OriginalFilename", "dTV.exe\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "dTV\0"
-            VALUE "ProductVersion", "1, 0, 0, 1\0"
+            VALUE "ProductVersion", "1, 0, 1, 1\0"
             VALUE "SpecialBuild", "\0"
         END
     END

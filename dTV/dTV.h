@@ -69,6 +69,7 @@ LONG APIENTRY MainWndProc(HWND, UINT, UINT, LONG);
 
 void MainWndOnCreate(HWND hWnd);
 void MainWndOnInitBT(HWND hWnd);
+void SaveWindowPos(HWND hWnd);
 
 
 #endif

@@ -111,6 +111,10 @@ SOURCE=.\Bt848.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\bTVPlugin.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\Dialogs.c
 # End Source File
 # Begin Source File
@@ -160,6 +164,10 @@ SOURCE=.\vt.c
 # Begin Source File
 
 SOURCE=.\bt848.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\bTVPlugin.h
 # End Source File
 # Begin Source File
 

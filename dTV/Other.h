@@ -41,12 +41,12 @@
 
 BOOL APIENTRY ChipSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 
-void ExitTV(void);
-BOOL InitTV(HWND hwnd, BOOL Fullscreen, int x, int y);
+void ExitDD(void);
+BOOL InitDD(HWND hWnd);
 BOOL OverlayUpdate(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL ColorKey);
-void Destroy_Overlay();
-BOOL CreateOverlay(int x, int y);
+BOOL CreateOverlay();
 void  Black_Surface();
+void Black_Overlays();
 
 BOOL LockMemory(LPVOID pLinear, DWORD dwSize);
 BOOL UnlockMemory(LPVOID pLinear, DWORD dwSize);

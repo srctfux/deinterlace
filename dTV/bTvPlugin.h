@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// OutThreads.h
+// bTVPlugin.h
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2000 John Adcock.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -30,34 +30,21 @@
 //                                     Cut out all decoding
 //                                     Cut out digital hardware stuff
 //
+// 09 Aug 2000   John Adcock           Fixed bug at end of GetCombFactor assember
+//
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef __OUTTHREADS_H___
-#define __OUTTHREADS_H___
+#ifndef _BTVPLUGIN_HEADER_
+#define _BTVPLUGIN_HEADER_
 
 #include "defines.h"
 #include "structs.h"
 #include "globals.h"
 
-void Set_Capture(int nState);
-
-void Start_Thread();
-void Stop_Thread();
-
-void SetupCaptureFlags();
-
-DWORD WINAPI YUVOutThreadPAL(LPVOID lpThreadParameter);
-DWORD WINAPI YUVOutThreadNTSC(LPVOID lpThreadParameter);
-
-void memcpyMMX(void *Dest, void *Src, size_t nBytes);
-long GetCombFactor(short** pLines1, short** pLines2);
-
-void UpdatePALPulldownMode(struct TPulldowmMode* PulldownMode, long* CombFactors);
-void UpdateNTSCPulldownMode(struct TPulldowmMode* PulldownMode, long* CombFactors);
-
-BOOL DoWeWantToFlip();
-void UpdatePulldownStatus();
-void Deinterlace(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay);
-void Weave(short** pOddLines, short** pEvenLines, BYTE* lpCurOverlay);
+BOOL BTVPluginLoad(const char * szPluginName);
+void BTVPluginUnload();
+void BTVPluginConfig(HWND hWnd);
+int BTVPluginGetProps(BTV_V1_PROPS *pProps);
+long BTVPluginDoField(BTV_V1_PARAMS *pParams);
 
 #endif

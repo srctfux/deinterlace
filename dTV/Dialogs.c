@@ -784,37 +784,6 @@ BOOL APIENTRY VTInfoProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 	return (FALSE);
 }
 
-
-BOOL APIENTRY ToggleSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
-{
-
-	switch (message)
-	{
-	case WM_INITDIALOG:
-		if (Toggle_WithOut_Frame == TRUE)
-			CheckDlgButton(hDlg, IDC_RADIO1, TRUE);
-		else
-			CheckDlgButton(hDlg, IDC_RADIO2, TRUE);
-		break;
-
-	case WM_COMMAND:
-		if (LOWORD(wParam) == IDOK)
-		{
-			Toggle_WithOut_Frame = IsDlgButtonChecked(hDlg, IDC_RADIO1);
-			EndDialog(hDlg, TRUE);
-			break;
-		}
-
-		if (LOWORD(wParam) == IDCANCEL)
-		{
-			EndDialog(hDlg, TRUE);
-			break;
-		}
-	}
-
-	return (FALSE);
-}
-
 BOOL APIENTRY VPSInfoProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 {
 

@@ -38,8 +38,6 @@ void LoadSettingsFromIni(LPSTR Name)
 	emstarty = GetPrivateProfileInt("MainWindow", "StartTop", 10, szIniFile);
 	emsizex = GetPrivateProfileInt("MainWindow", "StartWidth", 754, szIniFile);
 	emsizey = GetPrivateProfileInt("MainWindow", "StartHeight", 521, szIniFile);
-	Res_X = GetPrivateProfileInt("MainWindow", "ResX", 0, szIniFile);
-	Res_Y = GetPrivateProfileInt("MainWindow", "ResY", 0, szIniFile);
 	bAlwaysOnTop = (GetPrivateProfileInt("MainWindow", "AlwaysOnTop", 0, szIniFile) != 0);
 
 	pgstartx = GetPrivateProfileInt("ProgList", "StartLeft", -1, szIniFile);
@@ -62,7 +60,10 @@ void LoadSettingsFromIni(LPSTR Name)
 
 	bDisplayStatusBar = (GetPrivateProfileInt("Show", "StatusBar", 0, szIniFile) != 0);
 	Show_Menu = (GetPrivateProfileInt("Show", "Menu", 1, szIniFile) != 0);
-	Toggle_WithOut_Frame = (GetPrivateProfileInt("Show", "NoFrame", 0, szIniFile) != 0);
+
+	PulldownThresholdLow = GetPrivateProfileInt("Pulldown", "PulldownThresholdLow", PulldownThresholdLow, szIniFile);
+	PulldownThresholdHigh = GetPrivateProfileInt("Pulldown", "PulldownThresholdHigh", PulldownThresholdHigh, szIniFile);
+	PulldownRepeatCount = GetPrivateProfileInt("Pulldown", "PulldownRepeatCount", PulldownRepeatCount, szIniFile);
 
 	VBI_Flags = 0;
 	if(GetPrivateProfileInt("VBI", "VT", 0, szIniFile) != 0)
@@ -122,7 +123,6 @@ void LoadSettingsFromIni(LPSTR Name)
 
 	INIT_PLL = GetPrivateProfileInt("Hardware", "Init_PLL", 0, szIniFile);  
 	
-	USE_DX_LOCK = (GetPrivateProfileInt("Show", "UseDXLocking", 0, szIniFile) != 0);  
 	USETUNER = (GetPrivateProfileInt("Show", "UseTuner", 1, szIniFile) != 0);  
 	USECARD = (GetPrivateProfileInt("Show", "UseCard", 1, szIniFile) != 0);  
 	Capture_Video = (GetPrivateProfileInt("Show", "CaptureVideo", 1, szIniFile) != 0);  
@@ -230,6 +230,16 @@ void LoadSettingsFromIni(LPSTR Name)
 			MixerLoad[i].MixerValues.Kanal4 = GetPrivateProfileInt(szKey, "Channel4", 0, szIniFile);
 		}
 	}
+
+	GetPrivateProfileString("BTVPlugin", "Name", "bDeinterlace.dll", szBTVPluginName, MAX_PATH, szIniFile);
+	BTVParams.Level1 = GetPrivateProfileInt("BTVPlugin", "Level1", BTVParams.Level1, szIniFile);
+	BTVParams.Level2 = GetPrivateProfileInt("BTVPlugin", "Level2", BTVParams.Level2, szIniFile);
+	BTVParams.x = GetPrivateProfileInt("BTVPlugin", "x", BTVParams.x, szIniFile);
+	BTVParams.y = GetPrivateProfileInt("BTVPlugin", "y", BTVParams.y, szIniFile);
+	BTVParams.UseKey1 = GetPrivateProfileInt("BTVPlugin", "UseKey1", BTVParams.UseKey1, szIniFile);
+	BTVParams.UseKey2 = GetPrivateProfileInt("BTVPlugin", "UseKey2", BTVParams.UseKey2, szIniFile);
+
+	bIsFullScreen = (GetPrivateProfileInt("MainWindow", "bIsFullScreen", bIsFullScreen, szIniFile) != 0);
 }
 
 void WriteSettingsToIni()
@@ -241,12 +251,14 @@ void WriteSettingsToIni()
 	GetCurrentDirectory(MAX_PATH, szIniFile);
 	strcat(szIniFile, "\\dTV.ini");
 
-	WritePrivateProfileInt("MainWindow", "StartLeft", emstartx, szIniFile);
-	WritePrivateProfileInt("MainWindow", "StartTop", emstarty, szIniFile);
-	WritePrivateProfileInt("MainWindow", "StartWidth", emsizex, szIniFile);
-	WritePrivateProfileInt("MainWindow", "StartHeight", emsizey, szIniFile);
-	WritePrivateProfileInt("MainWindow", "ResX", Res_X, szIniFile);
-	WritePrivateProfileInt("MainWindow", "ResY", Res_Y, szIniFile);
+	WritePrivateProfileInt("MainWindow", "bIsFullScreen", bIsFullScreen, szIniFile);
+	if(!bIsFullScreen)
+	{
+		WritePrivateProfileInt("MainWindow", "StartLeft", emstartx, szIniFile);
+		WritePrivateProfileInt("MainWindow", "StartTop", emstarty, szIniFile);
+		WritePrivateProfileInt("MainWindow", "StartWidth", emsizex, szIniFile);
+		WritePrivateProfileInt("MainWindow", "StartHeight", emsizey, szIniFile);
+	}
 	WritePrivateProfileInt("MainWindow", "AlwaysOnTop", bAlwaysOnTop, szIniFile);
 
 	WritePrivateProfileInt("ProgList", "StartLeft", pgstartx, szIniFile);
@@ -267,9 +279,12 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("Threads", "VBIProcessor", VBIProzessor, szIniFile);
 	WritePrivateProfileInt("Threads", "DecodeProcessor", AusgabeProzessor, szIniFile);
 
+	WritePrivateProfileInt("Pulldown", "PulldownThresholdLow", PulldownThresholdLow, szIniFile);
+	WritePrivateProfileInt("Pulldown", "PulldownThresholdHigh", PulldownThresholdHigh, szIniFile);
+	WritePrivateProfileInt("Pulldown", "PulldownRepeatCount", PulldownRepeatCount, szIniFile);
+
 	WritePrivateProfileInt("Show", "StatusBar", bDisplayStatusBar, szIniFile);
 	WritePrivateProfileInt("Show", "Menu", Show_Menu, szIniFile);
-	WritePrivateProfileInt("Show", "NoFrame", Toggle_WithOut_Frame, szIniFile);
 
 	WritePrivateProfileInt("VBI", "VT", VBI_Flags & VBI_VT, szIniFile);
 	WritePrivateProfileInt("VBI", "IC", VBI_Flags & VBI_IC, szIniFile);
@@ -313,7 +328,6 @@ void WriteSettingsToIni()
 
 	WritePrivateProfileInt("Hardware", "Init_PLL", INIT_PLL, szIniFile);  
 	
-	WritePrivateProfileInt("Show", "UseDXLocking", USE_DX_LOCK, szIniFile);
 	WritePrivateProfileInt("Show", "UseTuner", USETUNER, szIniFile); 
 	WritePrivateProfileInt("Show", "UseCard", USECARD, szIniFile);
 	WritePrivateProfileInt("Show", "CaptureVideo", Capture_Video, szIniFile);
@@ -409,6 +423,14 @@ void WriteSettingsToIni()
 			WritePrivateProfileInt(szKey, "Channel4", MixerLoad[i].MixerValues.Kanal4, szIniFile);
 		}
 	}
+
+	WritePrivateProfileString("BTVPlugin", "Name", szBTVPluginName, szIniFile);
+	WritePrivateProfileInt("BTVPlugin", "Level1", BTVParams.Level1, szIniFile);
+	WritePrivateProfileInt("BTVPlugin", "Level2", BTVParams.Level2, szIniFile);
+	WritePrivateProfileInt("BTVPlugin", "x", BTVParams.x, szIniFile);
+	WritePrivateProfileInt("BTVPlugin", "y", BTVParams.y, szIniFile);
+	WritePrivateProfileInt("BTVPlugin", "UseKey1", BTVParams.UseKey1, szIniFile);
+	WritePrivateProfileInt("BTVPlugin", "UseKey2", BTVParams.UseKey2, szIniFile);
 }
 
 void WritePrivateProfileInt(LPCTSTR lpAppName,  LPCTSTR lpKeyName,  int nValue, LPCTSTR lpFileName)

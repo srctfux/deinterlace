@@ -68,32 +68,31 @@ struct TTVSetting TVSettings[10] =
 {
 	/* PAL-BDGHI */
 	{ 768, 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_BDGHI|BT848_IFORM_XT1),
-	    944, 768, 186, 922, 0x20, 0 },
+	    944, 768, 186, 922, 0x20, 0, TRUE },
 	/* NTSC Square Pixel */ 
 	{ 640, 480,  910, 0x68, 0x5d, (BT848_IFORM_NTSC|BT848_IFORM_XT0),
-	    780, 640, 135, 754, 0x1a, 0},
+	    780, 640, 135, 754, 0x1a, 0, FALSE},
 	/* SECAM */
 	{ 922, 576, 1135, 0x7f, 0xa0, (BT848_IFORM_SECAM|BT848_IFORM_XT1),
-	    1135, 922, 186, 922, 0x20, 0 },
+	    1135, 922, 186, 922, 0x20, 0, TRUE},
 	/* PAL-M */
 	{ 754, 480,  910, 0x70, 0x5d, (BT848_IFORM_PAL_M|BT848_IFORM_XT0),
-	    910, 754, 135, 754, 0x1a, 0},
+	    910, 754, 135, 754, 0x1a, 0, FALSE},
 	/* PAL-N */
 	{ 922, 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_N|BT848_IFORM_XT1),
-	    1135, 922, 186, 922, 0x20, 0 },
+	    1135, 922, 186, 922, 0x20, 0, TRUE},
 	/* NTSC Japan*/
 	{ 754, 480,  910, 0x70, 0x5d, (BT848_IFORM_NTSC_JAP|BT848_IFORM_XT0),
-	    910, 754, 135, 754, 0x1a, 0},
+	    910, 754, 135, 754, 0x1a, 0, FALSE},
 	/* PAL Full Pixel */
 	{ 922, 576, 1135, 0x7f, 0x72, (BT848_IFORM_PAL_BDGHI|BT848_IFORM_XT1),
-	    1135, 922, 186, 922, 0x20, 0 },
-	/* PAL CCIR601 */
+	    1135, 922, 186, 922, 0x20, 0 , TRUE},
 	/* NTSC Full Pixel */
 	{ 754, 480,  910, 0x70, 0x5d, (BT848_IFORM_NTSC|BT848_IFORM_XT0),
-	    910, 754, 135, 754, 0x1a, 0},
+	    910, 754, 135, 754, 0x1a, 0, FALSE},
 	/* NTSC CCIR601 */ 
 	{ 720, 480,  910, 0x68, 0x5d, (BT848_IFORM_NTSC|BT848_IFORM_XT0),
-	    858, 720, 135, 754, 0x1a, 0},
+	    858, 720, 135, 754, 0x1a, 0, FALSE},
 };
 
 
@@ -210,11 +209,8 @@ BOOL Has_MSP=FALSE;
 
 BOOL Capture_Video = TRUE;
 BOOL Capture_VBI = TRUE;
-BOOL USE_DX_LOCK = FALSE;
 
 LPDIRECTDRAW lpDD = NULL;
-
-BOOL Toggle_WithOut_Frame = FALSE;
 
 int VBI_Flags=3;
 
@@ -232,3 +228,28 @@ unsigned short UTPages[12];
 unsigned short UTCount=0;
 
 ePULLDOWNMODES gPulldownMode = VIDEO_MODE;
+
+long PulldownThresholdLow = 100;
+long PulldownThresholdHigh = 7000;
+long PulldownRepeatCount = 5;
+
+char szBTVPluginName[MAX_PATH];
+
+BOOL bUseBTVPlugin = FALSE;
+
+BTV_V1_PARAMS BTVParams = 
+{
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	0,
+	0,
+	0,
+	0,
+	1,
+	0,
+	0,
+};
+
+BOOL bIsFullScreen = FALSE;

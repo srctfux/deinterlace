@@ -41,6 +41,7 @@
 #include "ProgramList.h"
 #include "Dialogs.h"
 #include "OutThreads.h"
+#include "bTVPlugin.h"
 
 HWND hwndStatusBar;
 HWND hwndTextField;
@@ -105,7 +106,6 @@ int LastFrame;
 
 
 int CurrentX,CurrentY;
-int Res_X,Res_Y;
 
 unsigned char *pBurstLine[5];
 
@@ -181,9 +181,14 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	}
 
 	SplashWnd = CreateDialog(hInst, "SPLASHBOX", NULL, SplashProc);
+#ifndef _DEBUG
 	SetWindowPos(SplashWnd, HWND_TOPMOST, 10, 10, 20, 20, SWP_NOMOVE | SWP_NOCOPYBITS | SWP_NOSIZE);
+#endif
 
 	LoadSettingsFromIni();
+
+	// try to load up bTV plugin
+	bUseBTVPlugin = BTVPluginLoad(szBTVPluginName);
 
 	if (strlen(IC_BASE_DIR) > 0)
 	{
@@ -280,8 +285,13 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	DeleteObject(VTCharSetSmall);
 	DeleteObject(BirneRot);
 	DeleteObject(BirneGruen);
+	
+	// unload any bTV plugin loaded
+	BTVPluginUnload();
 
-	return (msg.wParam);
+	ExitDD();
+
+	return msg.wParam;
 }
 
 /****************************************************************************
@@ -311,7 +321,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 	char Text1[128];
 	int i, j, k;
 	static BOOL Capture_Pause = FALSE;
-	RECT rScreen;
 
 	switch (message)
 	{
@@ -515,31 +524,8 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			break;
 
 		case IDM_TOGGLE_MENU:
-			Stop_Thread();
+			Show_Menu = !Show_Menu;
 			Set_Capture(4);
-			if (Show_Menu == TRUE)
-			{
-				Show_Menu = FALSE;
-				bDisplayStatusBar = FALSE;
-				ShowWindow(hwndStatusBar, SW_HIDE);
-				KillTimer(hWnd, 1);
-
-				WStyle = GetWindowLong(hWnd, GWL_STYLE);
-				if (Toggle_WithOut_Frame == TRUE)
-					SetWindowLong(hWnd, GWL_STYLE, WS_VISIBLE);
-				else
-					SetWindowLong(hWnd, GWL_STYLE, WS_VISIBLE | WS_THICKFRAME);
-				SetMenu(hWnd, NULL);
-			}
-			else
-			{
-				Show_Menu = TRUE;
-				bDisplayStatusBar = TRUE;
-				ShowWindow(hwndStatusBar, SW_SHOW);
-				SetTimer(hWnd, 1, 2500, NULL);
-				SetWindowLong(hWnd, GWL_STYLE, WStyle);
-				SetMenu(hWnd, hMenu);
-			}
 			Init_Screen_Struct();
 			Set_Capture(5);
 			return (TRUE);
@@ -607,6 +593,28 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 					SetWindowText(hwndTextField, Text);
 				SetSaturationU(InitialSaturationU);
 				SetSaturationV(InitialSaturationV);
+			}
+			break;
+
+		case IDM_HUE_DOWN:
+			if ((InitialHue > -127))
+			{
+				InitialHue--;
+				sprintf(Text, "Hue %d", InitialHue);
+				if (bDisplayStatusBar == TRUE)
+					SetWindowText(hwndTextField, Text);
+				SetHue(InitialHue);
+			}
+			break;
+
+		case IDM_HUE_UP:
+			if ((InitialHue < 127))
+			{
+				InitialHue++;
+				sprintf(Text, "Hue %d", InitialHue);
+				if (bDisplayStatusBar == TRUE)
+					SetWindowText(hwndTextField, Text);
+				SetHue(InitialHue);
 			}
 			break;
 
@@ -1040,10 +1048,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			DialogBox(hInst, "ICSETUP", hWnd, ICSettingProc);
 			break;
 
-		case IDM_TOGGLE_SETTUNGS:
-			DialogBox(hInst, "TOGGLESETTING", hWnd, ToggleSettingProc);
-			break;
-
 		case IDM_CALL_VIDEOTEXTSMALL:
 			VTLarge = FALSE;
 			VThWnd = CreateDialog(hInst, "VIDEOTEXTSMALL", NULL, VideoTextProc);
@@ -1128,8 +1132,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			else
 			{
 				Capture_VBI = FALSE;
-				Stop_Thread();
-				Stop_VBI();
 				Set_Capture(4);
 				EnableMenuItem(GetMenu(hWnd), IDM_VBI_VT, MF_GRAYED);
 				EnableMenuItem(GetMenu(hWnd), IDM_VBI_IC, MF_GRAYED);
@@ -1170,32 +1172,12 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			DialogBox(hInst, "MIXERSETUP", hWnd, MixerSetupProc);
 			break;
 
-		case IDM_DX_LOCK:
-			Stop_Thread();
-			Set_Capture(4);
-			if (USE_DX_LOCK == TRUE)
-			{
-				USE_DX_LOCK = FALSE;
-				CheckMenuItem(GetMenu(hWnd), IDM_DX_LOCK, MF_UNCHECKED);
-			}
-			else
-			{
-				USE_DX_LOCK = TRUE;
-				CheckMenuItem(GetMenu(hWnd), IDM_DX_LOCK, MF_CHECKED);
-			}
-			Init_Screen_Struct();
-			Set_Capture(5);
-			break;
-
 		case IDM_STATUSBAR:
 			if (bDisplayStatusBar == TRUE)
 			{
-				Stop_Thread();
 
 				bDisplayStatusBar = FALSE;
-				Stop_Thread();
 				KillTimer(hWnd, 1);
-
 				CheckMenuItem(GetMenu(hWnd), IDM_STATUSBAR, MF_UNCHECKED);
 				Set_Capture(4);
 				ShowWindow(hwndStatusBar, SW_HIDE);
@@ -1204,7 +1186,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 				break;
 			}
 			bDisplayStatusBar = TRUE;
-			Stop_Thread();
 			SetTimer(hWnd, 1, 2000, NULL);
 			CheckMenuItem(GetMenu(hWnd), IDM_STATUSBAR, MF_CHECKED);
 			Set_Capture(4);
@@ -1213,27 +1194,10 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			Set_Capture(5);
 
 			break;
-		case IDM_ON_TOP:
-			Stop_Thread();
-			Set_Capture(4);
-			WStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
-			if (bAlwaysOnTop)
-			{
-				WStyle = WStyle ^ 8;
-				i = SetWindowLong(hWnd, GWL_EXSTYLE, WStyle);
-				bAlwaysOnTop = FALSE;
-				SetWindowPos(hWnd, HWND_NOTOPMOST, 10, 10, 20, 20, SWP_NOMOVE | SWP_NOCOPYBITS | SWP_NOSIZE);
-				CheckMenuItem(GetMenu(hWnd), IDM_ON_TOP, MF_UNCHECKED);
-			}
-			else
-			{
-				WStyle = WStyle | 8;
-				i = SetWindowLong(hWnd, GWL_EXSTYLE, WStyle);
-				bAlwaysOnTop = TRUE;
-				CheckMenuItem(GetMenu(hWnd), IDM_ON_TOP, MF_CHECKED);
-				SetWindowPos(hWnd, HWND_TOPMOST, 10, 10, 20, 20, SWP_NOMOVE | SWP_NOCOPYBITS | SWP_NOSIZE);
 
-			}
+		case IDM_ON_TOP:
+			bAlwaysOnTop = !bAlwaysOnTop;
+			Set_Capture(4);
 			Init_Screen_Struct();
 			Set_Capture(5);
 
@@ -1345,31 +1309,38 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			Set_Capture(5);
 			break;
 
-		case IDM_COLORFORMAT_0:
-		case IDM_COLORFORMAT_1:
-		case IDM_COLORFORMAT_2:
-		case IDM_COLORFORMAT_3:
-		case IDM_COLORFORMAT_4:
-		case IDM_COLORFORMAT_5:
-		case IDM_COLORFORMAT_6:
-		case IDM_COLORFORMAT_7:
-		case IDM_COLORFORMAT_8:
-		case IDM_COLORFORMAT_9:
-		case IDM_COLORFORMAT_10:
-			CheckMenuItem(GetMenu(hWnd), ColourFormat + 1130, MF_UNCHECKED);
-			ColourFormat = wParam - 1130;
-			Set_Capture(4);
-			SetColourFormat(ColourFormat);
-			Set_Capture(5);
-			CheckMenuItem(GetMenu(hWnd), ColourFormat + 1130, MF_CHECKED);
-			break;
 		case IDM_SPACEBAR:
 			gPulldownMode++;
-			if(gPulldownMode == LAST_ONE)
+			if(gPulldownMode == PULLDOWNMODES_LAST_ONE)
 			{
 				gPulldownMode = VIDEO_MODE;
 			}
 			UpdatePulldownStatus();
+			break;
+		case IDM_FULL_SCREEN:
+			bDoResize = FALSE;
+			bIsFullScreen = !bIsFullScreen;
+			if(bIsFullScreen == FALSE)
+			{
+				ShowCursor(CShowCursor);
+
+				SetWindowPos(hWnd, 0, emstartx, emstarty, emsizex, emsizey, SWP_SHOWWINDOW);
+				ShowWindow(hwndStatusBar, SW_SHOW);
+				SetMenu(hWnd, hMenu);
+				SetTimer(hWnd, 1, 2500, NULL);
+			}
+			else
+			{
+				ShowCursor(FALSE);
+				SaveWindowPos(hWnd);
+				ShowWindow(hwndStatusBar, SW_HIDE);
+				SetMenu(hWnd, NULL);
+				KillTimer(hWnd, 1);
+			}
+			Set_Capture(4);
+			Init_Screen_Struct();
+			Set_Capture(5);
+			bDoResize = TRUE;
 			break;
 		}
 		break;
@@ -1482,32 +1453,18 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 
 	case WM_SIZE:
 	case WM_MOVE:
-		GetWindowRect(hWnd, &rScreen);
-		// oly recreate overlay if the window has actually moved
-		if ((emstarty != rScreen.top) || 
-			(emsizey != (rScreen.bottom - rScreen.top)) || 
-			(emstartx != rScreen.left) || 
-			(emsizex != (rScreen.right - rScreen.left)))
+		AdjustStatusBar(hWnd);
+		if (bDoResize == TRUE)
 		{
-			AdjustStatusBar(hWnd);
-			if (bDoResize == TRUE)
+			if (CurrentCapture != 0)
 			{
-				Stop_Thread();
-				if (CurrentCapture != 0)
-				{
-					Set_Capture(4);
-					Init_Screen_Struct();
-					Set_Capture(5);
-				}
-				else
-				{
-					Init_Screen_Struct();
-				}
-			
-				emstarty = rScreen.top;
-				emsizey = rScreen.bottom - rScreen.top; 
-				emstartx = rScreen.left;
-				emsizex = rScreen.right - rScreen.left;
+				Set_Capture(4);
+				Init_Screen_Struct();
+				Set_Capture(5);
+			}
+			else
+			{
+				Init_Screen_Struct();
 			}
 		}
 		break;
@@ -1571,13 +1528,29 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			free(VTScreen[i]);
 		}
 
-		ExitTV();
+		if(bIsFullScreen == FALSE)
+		{
+			SaveWindowPos(hWnd);
+		}
+
+		BT8X8_Close();
 
 		PostQuitMessage(0);
 		return (TRUE);
 	}
 
 	return (DefWindowProc(hWnd, message, wParam, lParam));
+}
+
+void SaveWindowPos(HWND hWnd)
+{
+	RECT rScreen;
+	GetWindowRect(hWnd, &rScreen);
+	emstarty = rScreen.top;
+	emsizey = rScreen.bottom - rScreen.top; 
+	emstartx = rScreen.left;
+	emsizex = rScreen.right - rScreen.left;
+
 }
 
 void MainWndOnInitBT(HWND hWnd)
@@ -1595,6 +1568,20 @@ void MainWndOnInitBT(HWND hWnd)
 			bHardwareFound = TRUE;
 		}
 	}
+
+	// see if we can open all the overlays we need
+	if(InitDD(hWnd) == FALSE)
+	{
+		bHardwareFound = FALSE;
+	}
+	else
+	{
+		if(CreateOverlay() == FALSE)
+		{
+			bHardwareFound = FALSE;
+		}
+	}
+		
 
 	if (bHardwareFound)
 	{
@@ -1640,7 +1627,7 @@ void MainWndOnInitBT(HWND hWnd)
 	{
 		WStyle = WStyle ^ 8;
 		i = SetWindowLong(hWnd, GWL_EXSTYLE, WStyle);
-		SetWindowPos(hWnd, HWND_NOTOPMOST, 10, 10, 20, 20, SWP_NOMOVE | SWP_NOCOPYBITS | SWP_NOSIZE);
+		SetWindowPos(hWnd, HWND_NOTOPMOST, 10, 10, 20, 20, SWP_NOMOVE | SWP_NOCOPYBITS | SWP_NOSIZE | SWP_SHOWWINDOW);
 		CheckMenuItem(GetMenu(hWnd), IDM_ON_TOP, MF_UNCHECKED);
 	}
 	else
@@ -1648,7 +1635,7 @@ void MainWndOnInitBT(HWND hWnd)
 		WStyle = WStyle | 8;
 		i = SetWindowLong(hWnd, GWL_EXSTYLE, WStyle);
 		CheckMenuItem(GetMenu(hWnd), IDM_ON_TOP, MF_CHECKED);
-		SetWindowPos(hWnd, HWND_TOPMOST, 10, 10, 20, 20, SWP_NOMOVE | SWP_NOCOPYBITS | SWP_NOSIZE);
+		SetWindowPos(hWnd, HWND_TOPMOST, 10, 10, 20, 20, SWP_NOMOVE | SWP_NOCOPYBITS | SWP_NOSIZE | SWP_SHOWWINDOW);
 	}
 
 	if (bHardwareFound)
@@ -1721,7 +1708,6 @@ void MainWndOnInitBT(HWND hWnd)
 		SetDlgItemText(SplashWnd, IDC_TEXT3, "Suitable");
 		SetDlgItemText(SplashWnd, IDC_TEXT4, "Hardware");
 		SetDlgItemText(SplashWnd, IDC_TEXT5, "");
-		ExitTV();
 		Sleep(5000);
 		PostMessage(hWnd, WM_DESTROY, 0, 0);
 		return;
@@ -1744,11 +1730,8 @@ void MainWndOnInitBT(HWND hWnd)
 		Stop_Thread();
 		DestroyMenu(hMenu);
 		hMenu = LoadMenu(hInst, "ANALOGMENU");
-		if (Show_Menu == TRUE)
-			SetMenu(hWnd, hMenu);
 		DestroyAcceleratorTable(hAccel);
 		hAccel = LoadAccelerators(hInst, "ANALOGACCEL");
-		SetMenuAnalog();
 		bDoResize = TRUE;
 		for (i = 0; i < 5; i++)
 		{
@@ -1777,7 +1760,6 @@ void MainWndOnCreate(HWND hWnd)
 	SetDlgItemText(SplashWnd, IDC_TEXT3, "");
 	SetDlgItemText(SplashWnd, IDC_TEXT4, "");
 	SetDlgItemText(SplashWnd, IDC_TEXT5, "");
-	SetMenu(hWnd, hMenu);
 	Sleep(100);
 	
 	SetDlgItemText(SplashWnd, IDC_TEXT2, "InterCast");
@@ -1926,10 +1908,6 @@ void MainWndOnCreate(HWND hWnd)
 	SetDlgItemText(SplashWnd, IDC_TEXT5, "");
 	Sleep(200);
 
-	InitTV(hWnd, FALSE, 768, 576);
-
-	if (USE_DX_LOCK == TRUE)
-		CheckMenuItem(GetMenu(hWnd), IDM_DX_LOCK, MF_CHECKED);
 	if (VBI_Flags & VBI_VT)
 	{
 		CheckMenuItem(GetMenu(hWnd), IDM_VBI_VT, MF_CHECKED);
@@ -1999,91 +1977,6 @@ void MainWndOnCreate(HWND hWnd)
 	PostMessage(hWnd, INIT_BT, 0, 0);
 }
 
-// delete if below one works
-void Init_Screen_StructOld()
-{
-	RECT rRect;
-	RECT rSrcRect;
-	RECT rScreen;
-
-	int MaxX, MaxY;
-
-	GetClientRect(hWnd, &rScreen);
-	ClientToScreen(hWnd, (POINT *) & rScreen.left);
-	ClientToScreen(hWnd, (POINT *) & rScreen.right);
-
-	if (rScreen.left < 0)
-		rScreen.left = 0;
-	if (rScreen.top < 0)
-		rScreen.top = 0;
-	if (rScreen.right > GetSystemMetrics(SM_CXSCREEN))
-		rScreen.right = GetSystemMetrics(SM_CXSCREEN);
-	if (rScreen.bottom > GetSystemMetrics(SM_CYSCREEN))
-		rScreen.bottom = GetSystemMetrics(SM_CYSCREEN);
-
-	Destroy_Overlay();
-
-	CurrentX = (rScreen.right - rScreen.left);
-	CurrentY = (rScreen.bottom - rScreen.top);
-	// Make sure CurrentX is even
-	CurrentX = (CurrentX / 2) * 2;
-
-	if (bDisplayStatusBar == TRUE)
-		CurrentY -= 21;
-
-	if (CurrentY <= 10)
-		CurrentY = 10;
-	if (CurrentX <= 10)
-		CurrentX = 10;
-
-	MaxY = CurrentY;
-	if (MaxY > 1024)
-		MaxY = 1024;
-	MaxX = CurrentX;
-
-	if (CurrentX > TVSettings[TVTYPE].wCropWidth)
-		CurrentX = TVSettings[TVTYPE].wCropWidth;
-	if (CurrentY > TVSettings[TVTYPE].wCropHeight)
-		CurrentY = TVSettings[TVTYPE].wCropHeight;
-
-	if (CurrentX > 768)
-		CurrentX = 768;
-
-
-	if (MaxX < CurrentX)
-		CreateOverlay(MaxX, MaxY);
-	else
-		CreateOverlay(CurrentX, MaxY);
-
-	GetClientRect(hWnd, &rRect);
-	ClientToScreen(hWnd, (POINT *) & rRect.left);
-	ClientToScreen(hWnd, (POINT *) & rRect.right);
-	if (bDisplayStatusBar == TRUE)
-		rRect.bottom -= 21;
-
-	if (rRect.left < 0)
-		rRect.left = 0;
-	if (rRect.top < 0)
-		rRect.top = 0;
-	if (rRect.right > GetSystemMetrics(SM_CXSCREEN))
-		rRect.right = GetSystemMetrics(SM_CXSCREEN);
-	if (rRect.bottom > GetSystemMetrics(SM_CYSCREEN))
-		rRect.bottom = GetSystemMetrics(SM_CYSCREEN);
-
-	rSrcRect.left = 0;
-	rSrcRect.top = 0;
-	rSrcRect.right = CurrentX;
-	rSrcRect.bottom = CurrentY;
-
-	OverlayUpdate(&rSrcRect, &rRect, DDOVER_SHOW, TRUE);
-
-	Black_Surface();
-
-	if (bHardwareFound)
-		SetGeoSize(CurrentX, CurrentY);
-	return;
-}
-
 void Init_Screen_Struct()
 {
 	RECT rOverlayDest;
@@ -2091,26 +1984,58 @@ void Init_Screen_Struct()
 
 	int DestWidth, DestHeight;
 
-	Destroy_Overlay();
+	if(bIsFullScreen == TRUE)
+	{
+		SetWindowLong(hWnd, GWL_STYLE, WS_VISIBLE);
+
+		SetWindowPos(hWnd,
+					HWND_TOPMOST,
+					0,
+					0,
+					GetSystemMetrics(SM_CXSCREEN),
+					GetSystemMetrics(SM_CYSCREEN),
+					SWP_SHOWWINDOW);
+		ShowWindow(hwndStatusBar, SW_HIDE);
+	}
+	else
+	{
+		SetWindowLong(hWnd, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_VISIBLE);
+
+		if (Show_Menu == TRUE)
+		{
+			KillTimer(hWnd, 1);
+			SetMenu(hWnd, NULL);
+		}
+		else
+		{
+			SetTimer(hWnd, 1, 2500, NULL);
+			SetMenu(hWnd, hMenu);
+			SetMenuAnalog();
+		}
+		
+		ShowWindow(hwndStatusBar, bDisplayStatusBar?SW_SHOW:SW_HIDE);
+
+		SetWindowPos(hWnd,bAlwaysOnTop?HWND_TOPMOST:HWND_NOTOPMOST,
+					0,0,0,0,
+					SWP_NOSIZE | SWP_NOMOVE | SWP_SHOWWINDOW);
+	}
 
 	CurrentX = TVSettings[TVTYPE].wCropWidth;
 	CurrentY = TVSettings[TVTYPE].wCropHeight;
 
-	CreateOverlay(CurrentX, CurrentY);
-
 	// to start off with we will display the whole
 	// input area
-	rOverlaySrc.left = 0;
-	rOverlaySrc.top = 0;
-	rOverlaySrc.right = CurrentX;
-	rOverlaySrc.bottom = CurrentY;
+	rOverlaySrc.left = 2;
+	rOverlaySrc.top = 2;
+	rOverlaySrc.right = CurrentX - 2;
+	rOverlaySrc.bottom = CurrentY - 2;
 
 	// get main window client area
 	// and convert to screen coordinates
 	GetClientRect(hWnd, &rOverlayDest);
 	ClientToScreen(hWnd, (POINT *) &(rOverlayDest.left));
 	ClientToScreen(hWnd, (POINT *) &(rOverlayDest.right));
-	if (bDisplayStatusBar == TRUE)
+	if (bDisplayStatusBar == TRUE && bIsFullScreen == FALSE)
 	{
 		rOverlayDest.bottom -= 21;
 	}
@@ -2164,8 +2089,6 @@ void SetMenuAnalog()
 	CheckMenuItem(GetMenu(hWnd), ThreadClassId + 1150, MF_CHECKED);
 	CheckMenuItem(GetMenu(hWnd), PriorClassId + 1160, MF_CHECKED);
 
-	if (USE_DX_LOCK == TRUE)
-		CheckMenuItem(GetMenu(hWnd), IDM_DX_LOCK, MF_CHECKED);
 	if (VBI_Flags & VBI_VT)
 	{
 		CheckMenuItem(GetMenu(hWnd), IDM_VBI_VT, MF_CHECKED);
@@ -2243,31 +2166,5 @@ void SetMenuAnalog()
 		EnableMenuItem(GetMenu(hWnd), IDM_VBI_VD, MF_ENABLED);
 		EnableMenuItem(GetMenu(hWnd), IDM_VBI_VPS, MF_ENABLED);
 	}
-}
-
-void Set_Mode_Analog(void)
-{
-	int i;
-
-	bDoResize = FALSE;
-	Set_Capture(4);
-	Stop_Thread();
-	KillTimer(hWnd, 22);
-	DestroyMenu(hMenu);
-	hMenu = LoadMenu(hInst, "ANALOGMENU");
-	if (Show_Menu == TRUE)
-		SetMenu(hWnd, hMenu);
-	SetMenuAnalog();
-	DestroyAcceleratorTable(hAccel);
-	hAccel = LoadAccelerators(hInst, "ANALOGACCEL");
-	for (i = 0; i < 5; i++)
-	{
-		pDisplay[i] = Display_dma[i]->dwUser;
-	}
-	Init_Screen_Struct();
-	bDoResize = TRUE;
-	Set_Capture(5);
-	Sleep(100);
-	SetAudioSource(AudioSource);
 }
 

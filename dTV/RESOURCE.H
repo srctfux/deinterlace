@@ -38,7 +38,6 @@
 #define IDM_DONT_TOUCH_CARD             304
 #define IDM_ON_TOP                      309
 #define IDM_AUTOSTEREO                  345
-#define IDM_DX_LOCK                     348
 #define IDM_AUDIOSETTINGS1              350
 #define IDM_VOLUMEPLUS                  374
 #define IDM_VOLUMEMINUS                 375
@@ -63,7 +62,6 @@
 #define IDM_MUTE                        402
 #define IDM_L_BALANCE                   403
 #define IDM_R_BALANCE                   404
-#define IDM_TOGGLE_SETTUNGS             405
 #define IDM_TOGGLECURSOR                407
 #define IDM_ABOUT                       410
 #define IDM_KEYSET                      412
@@ -87,6 +85,9 @@
 #define IDM_VT_SETUP                    450
 #define IDM_EVENT_INFO                  451
 #define IDM_SPACEBAR                    477
+#define IDM_HUE_UP                      478
+#define IDM_HUE_DOWN                    479
+#define IDM_FULL_SCREEN                 480
 #define IDM_ENDE                        1032
 #define IDM_KARTE0                      1080
 #define IDM_KARTE1                      1081
@@ -95,6 +96,7 @@
 #define IDM_KARTE4                      1084
 #define IDM_KARTE5                      1085
 #define IDM_KARTE6                      1086
+#define IDM_TUNER                       1089
 #define IDM_EXTERN1                     1090
 #define IDM_EXTERN2                     1091
 #define IDM_EXTERN3                     1092
@@ -123,17 +125,6 @@
 #define IDM_TYPEFORMAT_7                1127
 #define IDM_TYPEFORMAT_8                1128
 #define IDM_TYPEFORMAT_9                1129
-#define IDM_COLORFORMAT_0               1130
-#define IDM_COLORFORMAT_1               1131
-#define IDM_COLORFORMAT_2               1132
-#define IDM_COLORFORMAT_3               1133
-#define IDM_COLORFORMAT_4               1134
-#define IDM_COLORFORMAT_5               1135
-#define IDM_COLORFORMAT_6               1136
-#define IDM_COLORFORMAT_7               1137
-#define IDM_COLORFORMAT_8               1138
-#define IDM_COLORFORMAT_9               1139
-#define IDM_COLORFORMAT_10              1140
 #define IDM_TREADPRIOR_0                1150
 #define IDM_TREADPRIOR_1                1151
 #define IDM_TREADPRIOR_2                1152
@@ -642,7 +633,7 @@
 #define _APS_NO_MFC                     1
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        152
-#define _APS_NEXT_COMMAND_VALUE         478
+#define _APS_NEXT_COMMAND_VALUE         482
 #define _APS_NEXT_CONTROL_VALUE         1771
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
