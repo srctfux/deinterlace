@@ -482,28 +482,16 @@ SOURCE=..\Release\Docs\Thanks_MultiDec.txt
 SOURCE=.\Todo.htm
 # End Source File
 # End Group
-# Begin Group "Assembler Files"
-
-# PROP Default_Filter "*.asm"
-# Begin Source File
-
-SOURCE=.\DI_Greedy2Frame.asm
-# End Source File
-# Begin Source File
-
-SOURCE=.\DI_TwoFrame.asm
-# End Source File
-# Begin Source File
-
-SOURCE=.\FLT_TNoise.asm
-# End Source File
-# End Group
 # Begin Source File
 
 SOURCE=.\READ_ME_FIRST_NOW.txt
 # End Source File
 # End Target
 # End Project
+# Section dTV : {F08DF954-8592-11D1-B16A-00C0F0283628}
+# 	2:21:DefaultSinkHeaderFile:slider.h
+# 	2:16:DefaultSinkClass:CSlider
+# End Section
 # Section dTV : {F08DF952-8592-11D1-B16A-00C0F0283628}
 # 	2:5:Class:CSlider
 # 	2:10:HeaderFile:slider.h
@@ -513,8 +501,4 @@ SOURCE=.\READ_ME_FIRST_NOW.txt
 # 	2:5:Class:CPicture
 # 	2:10:HeaderFile:picture.h
 # 	2:8:ImplFile:picture.cpp
-# End Section
-# Section dTV : {F08DF954-8592-11D1-B16A-00C0F0283628}
-# 	2:21:DefaultSinkHeaderFile:slider.h
-# 	2:16:DefaultSinkClass:CSlider
 # End Section

@@ -322,6 +322,10 @@ BOOL ProcessDeinterlaceSelection(HWND hWnd, WORD wMenuID)
 		{
 			SetVideoDeinterlaceMode(i);
 			OSD_ShowText(hWnd, GetDeinterlaceModeName(), 0);
+			if(!bIsFilmMode && VideoDeintMethods[i]->pfnPluginStart != NULL)
+			{
+				VideoDeintMethods[i]->pfnPluginStart();
+			}
 			return TRUE;
 		}
 	}
