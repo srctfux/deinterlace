@@ -89,7 +89,7 @@ NTSTATUS CIOAccessDevice::pciFindDevice(USHORT vendorID, USHORT deviceID, DWORD*
 				// Read the complete 256 bytes of configuration information
 				//
 
-				if ( HalGetBusData(PCIConfiguration,
+				if (HalGetBusData(PCIConfiguration,
 									 busNumber,
 									 slotNumber.u.AsULONG,
 									 &pciData,

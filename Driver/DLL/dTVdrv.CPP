@@ -53,7 +53,7 @@ public:
 	void writePortL(DWORD dwAddress, DWORD dwValue);
 	DWORD allocMemory(DWORD dwLength, DWORD dwFlags, PMemStruct* ppMemStruct);
 	DWORD freeMemory(PMemStruct pMemStruct);
-	DWORD pciGetHardwareResources(DWORD dwVendorID, DWORD  dwDeviceID, PDWORD pdwMemoryAddress, PDWORD pdwMemoryLength, PDWORD pdwIrqNumber);
+	DWORD pciGetHardwareResources(DWORD dwVendorID, DWORD  dwDeviceID, PDWORD pdwMemoryAddress, PDWORD pdwMemoryLength, PDWORD pdwSubSystemId);
 	DWORD memoryMap(DWORD dwAddress, DWORD dwLength);
 	void memoryUnmap(DWORD dwAddress, DWORD dwLength);
 	void memoryWriteDWORD(DWORD dwAddress, DWORD dwValue);
@@ -212,13 +212,13 @@ DWORD WINAPI pciGetHardwareResources(DWORD   dwVendorID,
 										DWORD dwDeviceID,
 										PDWORD pdwMemoryAddress,
 										PDWORD pdwMemoryLength,
-										PDWORD pdwIrqNumber)
+										PDWORD pdwSubSystemId)
 {
 	return dTVDriver.pciGetHardwareResources(dwVendorID,
 												dwDeviceID,
 												pdwMemoryAddress,
 												pdwMemoryLength,
-												pdwIrqNumber);
+												pdwSubSystemId);
 }
 
 //---------------------------------------------------------------------------
@@ -551,7 +551,7 @@ DWORD CdTVDriver::pciGetHardwareResources(DWORD dwVendorID,
 											DWORD dwDeviceID,
 											PDWORD pdwMemoryAddress,
 											PDWORD pdwMemoryLength,
-											PDWORD pdwIrqNumber)
+											PDWORD pdwSubSystemId)
 {
 	PCI_COMMON_CONFIG pciConfig;
 	TDTVDRVParam hwParam;
@@ -580,17 +580,17 @@ DWORD CdTVDriver::pciGetHardwareResources(DWORD dwVendorID,
 		// For our current project this is enough (I hope so)
 		//
 
-		*pdwMemoryAddress  = pciConfig.u.type0.BaseAddresses[0] & 0xFFFFFFF0;
-		*pdwMemoryLength   = 0x1000;
-		*pdwIrqNumber      = pciConfig.u.type0.InterruptLine;
+		*pdwMemoryAddress = pciConfig.u.type0.BaseAddresses[0] & 0xFFFFFFF0;
+		*pdwMemoryLength = 0x1000;
+		*pdwSubSystemId = (pciConfig.u.type0.SubSystemID << 16) + pciConfig.u.type0.SubVendorID;
 	}
 	else
 	{
 		debugOut(dbTrace,"pciGetHardewareResource for %X %X failed",dwVendorID,dwDeviceID);
 
-		*pdwMemoryAddress  = 0;
-		*pdwMemoryLength   = 0;
-		*pdwIrqNumber      = 0;
+		*pdwMemoryAddress = 0;
+		*pdwMemoryLength = 0;
+		*pdwSubSystemId = 0;
 	}
 
 	return dwStatus;

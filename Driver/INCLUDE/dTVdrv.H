@@ -241,7 +241,7 @@ DWORD WINAPI pciGetHardwareResources(DWORD   dwVendorID,
                                       DWORD   dwDeviceID,
                                       PDWORD  pdwMemoryAddress,
                                       PDWORD  pdwMemoryLength,
-                                      PDWORD  pdwIrqNumber);
+                                      PDWORD  pdwSubSystemId);
 
 DWORD WINAPI memoryMap(DWORD dwAddress, DWORD dwLength);
 void WINAPI memoryUnmap(DWORD dwAddress, DWORD dwLength);
@@ -261,7 +261,7 @@ typedef DWORD (WINAPI * PPCIGetHardwareResources)(DWORD   dwVendorID,
                                                   DWORD   dwDeviceID,
                                                   PDWORD  pdwMemoryAddress,
                                                   PDWORD  pdwMemoryLength,
-                                                  PDWORD  pdwIrqNumber);
+                                                  PDWORD  pdwSubSystemId);
 
 typedef DWORD (WINAPI * PMemoryAlloc)(DWORD  dwLength,
                                         DWORD  dwFlags,
