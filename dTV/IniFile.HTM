@@ -35,15 +35,14 @@ need to be similar for NTSC movie detection to detect a triplet of fields from
 the smae movie frame.&nbsp; Higher values will cope with more video noise but
 will not detect the movies as well.</p>
 
-<p><b>BitShift </b>Not currently used</p>
-
-<p><b>DiffThreshold </b>This is used by the NTSC detection code to limit what
+<p><b>BitShift </b>This is used by the NTSC detection code to limit what
 pixels are the same.&nbsp; This should allow for noise in source.&nbsp; The
-value is applied to the square of the pixel difference.&nbsp; The default value
-of 224 means that any two pixels which are different by less than 15 will be
-considered equal for the purposes of pair detection.</p>
+value is applied to the square of the pixel difference with the results
+bitshifted right by this amount.</p>
 
-<p><b>PulldownRepeatCount2 </b>The number of times an unxexpected pattern can
+<p><b>DiffThreshold </b>.Not Used</p>
+
+<p><b>PulldownRepeatCount2 </b>The number of times an unexpected pattern can
 occur before switching back to video video mode from a film mode.&nbsp;</p>
 
 <h3>[BTVPlugin]</h3>

@@ -62,7 +62,7 @@ long PulldownThresholdLow = -2000;
 long PulldownThresholdHigh = 2000;
 long PulldownRepeatCount = 4;
 long PulldownRepeatCount2 = 2;
-long Threshold32Pulldown = 5000;
+long Threshold32Pulldown = 15;
 BOOL bAutoDetectMode = TRUE;
 DWORD dwLastFlipTicks = -1;
 
