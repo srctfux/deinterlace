@@ -471,6 +471,14 @@ struct TiffDirEntry {
 	DWORD value;
 };
 
+// Field data types.
+enum TiffDataType {
+	Byte = 1,
+	String = 2,
+	Short = 3,
+	Long = 4
+};
+
 // A TIFF header with some hardwired fields.
 struct TiffHeader {
 	char byteOrder[2];
@@ -482,18 +490,19 @@ struct TiffHeader {
 	// order.
 
 	WORD numDirEntries;
-	struct TiffDirEntry fileType;		// What kind of file this is (tag 255)
+	struct TiffDirEntry fileType;		// What kind of file this is (tag 254)
 	struct TiffDirEntry width;			// Width of image (tag 256)
 	struct TiffDirEntry height;			// Height of image (tag 257)
 	struct TiffDirEntry bitsPerSample;	// Number of bits per channel per pixel (tag 258)
-	struct TiffDirEntry photometricInterpretation; // What kind of pixel data this is (tag 262)
 	struct TiffDirEntry compression;	// Compression settings (tag 259)
+	struct TiffDirEntry photometricInterpretation; // What kind of pixel data this is (tag 262)
 	struct TiffDirEntry description;	// Image description (tag 270)
 	struct TiffDirEntry make;			// "Scanner" maker, aka dTV's URL (tag 271)
 	struct TiffDirEntry model;			// "Scanner" model, aka dTV version (tag 272)
 	struct TiffDirEntry stripOffset;	// Offset to image data (tag 273)
 	struct TiffDirEntry samplesPerPixel; // Number of color channels (tag 277)
-	struct TiffDirEntry stripByteCounts; // Number of bytes in image data (tag 279)
+	struct TiffDirEntry rowsPerStrip;	// Number of rows in a strip (tag 278)
+	struct TiffDirEntry stripByteCounts; // Number of bytes per strip (tag 279)
 	struct TiffDirEntry planarConfiguration; // Are channels interleaved? (tag 284)
 	DWORD nextDirOffset;
 
@@ -503,20 +512,39 @@ struct TiffHeader {
 	char descriptionText[80];
 	char makeText[40];
 	char modelText[16];
+	WORD bitCounts[3];
 };
 
 #define STRUCT_OFFSET(s,f)  ((int)(((BYTE *) &(s)->f) - (BYTE *)(s)))
 
 
 //-----------------------------------------------------------------------------
-// Fill a TIFF directory entry with information.  Type is inferred from value.
-// Not suitable for offsets.
-static void FillTiffDirEntry(struct TiffDirEntry *entry, WORD tag, DWORD value)
+// Fill a TIFF directory entry with information.
+static void FillTiffDirEntry(struct TiffDirEntry *entry, WORD tag, DWORD value, enum TiffDataType type)
 {
+	BYTE bValue;
+	WORD wValue;
+
 	entry->tag = tag;
 	entry->count = 1;
-	entry->type = 4;
-	entry->value = value;
+	entry->type = (int) type;
+
+	switch (type) {
+	case Byte:
+		bValue = (BYTE) value;
+		memcpy(&entry->value, &bValue, 1);
+		break;
+
+	case Short:
+		wValue = (WORD) value;
+		memcpy(&entry->value, &wValue, 2);
+		break;
+
+	case String:	// in which case it's a file offset
+	case Long:
+		entry->value = value;
+		break;
+	}
 }
 
 
@@ -527,14 +555,15 @@ static void FillTiffHeader(struct TiffHeader *head, char *description, char *mak
 	memset(head, 0, sizeof(struct TiffHeader));
 
 	strcpy(head->byteOrder, "II");		// Intel byte order
-	head->version = 42;					// The initial TIFF version number
+	head->version = 42;					// We're TIFF 5.0 compliant, but the version field is unused
 	head->firstDirOffset = STRUCT_OFFSET(head, numDirEntries);
-	head->numDirEntries = 13;
+	head->numDirEntries = 14;
 	head->nextDirOffset = 0;			// No additional directories
 
 	strcpy(head->descriptionText, description);
 	strcpy(head->makeText, make);
 	strcpy(head->modelText, model);
+	head->bitCounts[0] = head->bitCounts[1] = head->bitCounts[2] = 8;
 
 	head->description.tag = 270;
 	head->description.type = 2;
@@ -550,17 +579,22 @@ static void FillTiffHeader(struct TiffHeader *head, char *description, char *mak
 	head->model.type = 2;
 	head->model.count = strlen(model) + 1;
 	head->model.value = STRUCT_OFFSET(head, modelText);
+	
+	head->bitsPerSample.tag = 258;
+	head->bitsPerSample.type = Short;
+	head->bitsPerSample.count = 3;
+	head->bitsPerSample.value = STRUCT_OFFSET(head, bitCounts);
 
-	FillTiffDirEntry(&head->fileType, 255, 1);								// Full resolution data
-	FillTiffDirEntry(&head->width, 256, CurrentX);
-	FillTiffDirEntry(&head->height, 257, CurrentY);
-	FillTiffDirEntry(&head->bitsPerSample, 258, 8);							// 8 bits per sample
-	FillTiffDirEntry(&head->compression, 259, 1);							// No compression
-	FillTiffDirEntry(&head->photometricInterpretation, 262, 2);				// RGB image data
-	FillTiffDirEntry(&head->stripOffset, 273, sizeof(struct TiffHeader));	// Image comes after header
-	FillTiffDirEntry(&head->samplesPerPixel, 277, 3);						// RGB = 3 channels/pixel
-	FillTiffDirEntry(&head->stripByteCounts, 279, CurrentX * CurrentY * 3);	// Size of image data
-	FillTiffDirEntry(&head->planarConfiguration, 284, 1);					// RGB bytes are interleaved
+	FillTiffDirEntry(&head->fileType, 254, 0, Long);						// Just the image, no thumbnails
+	FillTiffDirEntry(&head->width, 256, CurrentX, Short);
+	FillTiffDirEntry(&head->height, 257, CurrentY, Short);
+	FillTiffDirEntry(&head->compression, 259, 1, Short);					// No compression
+	FillTiffDirEntry(&head->photometricInterpretation, 262, 2, Short);		// RGB image data
+	FillTiffDirEntry(&head->stripOffset, 273, sizeof(struct TiffHeader), Long);	// Image comes after header
+	FillTiffDirEntry(&head->samplesPerPixel, 277, 3, Short);				// RGB = 3 channels/pixel
+	FillTiffDirEntry(&head->rowsPerStrip, 278, CurrentY, Short);			// Whole image is one strip
+	FillTiffDirEntry(&head->stripByteCounts, 279, CurrentX * CurrentY * 3, Long);	// Size of image data
+	FillTiffDirEntry(&head->planarConfiguration, 284, 1, Short);			// RGB bytes are interleaved
 }
 
 //-----------------------------------------------------------------------------
