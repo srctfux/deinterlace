@@ -27,14 +27,13 @@ p {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt; font-style: nor
       <p>&nbsp;<a href="/about.htm" class="bland">About</a><br>
         &nbsp;<a href="/Reviews.htm" class="bland">Reviews</a><br>
         &nbsp;<a href="/screenshots.htm" class="bland">Screenshots</a><br>
-        &nbsp;<a href="/News.htm" class="bland">News</a><br>
-        &nbsp;<a href="/downloads.htm" class="bland">Download</a><br>
+        &nbsp;<a href="/downloads.htm" class="bland">News & Download</a><br>
         &nbsp;<a href="/Authors.htm" class="bland">Authors</a><br>
         <a href="/Thanks.htm" class="bland">&nbsp;Thanks</a> </p>
     </td>
-    <td rowspan="3" height="90%" bordercolor="#999900" align="center" valign="middle"><img src="/images/dtvlogotv.gif" width="275" height="240" alt="dTV Marquee"></td>
+    <td rowspan="3" height="90%" bordercolor="#999900" align="center" valign="middle"><img src="images/dtvlogotv.gif" width="275" height="240" alt="dTV Marquee"></td>
     <td width="33%" height="30%" valign="top"> 
-      <div align="right"><font size="1"><a href="/developers.htm"><img src="/images/developers.jpg" width="177" height="160" border="0"></a></font> 
+      <div align="right"><font size="1"><a href="/developers.htm"><img src="images/developers.jpg" width="177" height="160" border="0"></a></font> 
       </div>
     </td>
   </tr>

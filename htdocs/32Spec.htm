@@ -28,7 +28,7 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
     <td height="1" width="501"><img src="/images/spacer.gif" width="1" height="1"></td>
   </tr>
   <tr> 
-    <td width="160"><img src="/images/dtvlogotvthumb.jpg" width="160" height="140" alt="dTV Logo"></td>
+    <td width="160"><img src="images/dtvlogotvthumb.jpg" width="160" height="140" alt="dTV Logo"></td>
     <td colspan="2" align="right" valign="bottom">
       <font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><!-- #BeginEditable "Page%20Title" -->Mark 
       Rejhon's&nbsp;<br>
@@ -56,7 +56,128 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <p>
       <blockquote>
         <hr>
-        <pre>set MAX_MISMATCH = 12<br>set MAX_VERIFY_CYCLES = 2<br>set MISMATCH_COUNT = 0<br>set MOVIE_FIELD_CYCLE = 0<br>set MOVIE_VERIFY_CYCLE = 0<br>set MODE = VIDEO<br>set FRAMES_PER_SECOND = 60<br>LOOP<br>  <br>  IF new field has now arrived on TV card<br>    //<br>    // Automatic detection code starts here<br>    // Compares a pair of even fields or a pair of odd fields.<br>    //<br>    GRAB new current field (add to queue of fields)<br>    COMPARE two fields: current field and two fields ago.<br>    IF fields DO NOT match THEN<br>    <br>        IF MISMATCH_COUNT does not exceed MAX_MISMATCH<br>            increment MISMATCH_COUNT by 1<br>            //<br>            // MISMATCH_COUNT is the number of consecutive pairs<br>            // of fields that do not match.<br>        ELSE<br>            set MODE = VIDEO<br>            set MOVIE_VERIFY_CYCLE = 0<br>            set MOVIE_FIELD_CYCLE = 0<br>            //<br>            // There has been no duplicate fields lately.<br>            // It's probably video source.<br>            //<br>            // MAX_MISMATCH should be a reasonably high value so<br>            // that we do not have an oversensitive hair-trigger<br>            // in switching to video source everytime there is<br>            // video noise or a single spurious field added/dropped<br>            // during a movie causing mis-synchronization problems. <br>        ENDIF<br>    <br>    ELSE IF fields match THEN<br><br>        // It's either a stationary image OR a duplicate field in a movie<br>        IF MISMATCH_COUNT is 4<br>            //<br>            // 3:2 pulldown is a cycle of 5 fields where there is only<br>            // one duplicate field pair, and 4 mismatching pairs.<br>            // We need to continue detection for at least 2 cycles<br>            // to be very certain that it is actually 3:2 pulldown<br>            // This would mean a latency of 10 fields.<br>            //<br>            IF MOVIE_VERIFY_CYCLE equals or exceeds MAX_VERIFY_CYCLES<br>                // <br>                // This executes regardless whether we've just entered or <br>                // if we're *already* in 3:2 pulldown.  Either way, we are<br>                // currently now (re)synchronized to 3:2 pulldown and that<br>                // we've now detected the duplicate field.<br>                //<br>                set MODE = MOVIE<br>                set MOVIE_FIELD_CYCLE = 0<br>            ELSE<br>                increment MOVIE_VERIFY_CYCLE by 1<br>            ENDIF<br>            <br>        ELSE MISMATCH_COUNT not equal to 4<br>            //<br>            // If execution point hits here, it is probably just <br>            // stationary video.  That would produce lots of duplicate<br>            // field pairs.  We can't determine whether it's video or<br>            // movie source.  Therefore, we want to keep doing the <br>            // current algorithm from a prior detection.  Therefore, <br>            // don't modify any variables EXCEPT the MISMATCH_COUNT <br>            // variable which will be reset to 0 below.<br>            // Also, occasionally we'll hit here during synchronization<br>            // problems during a movie, such as a spurious field added<br>            // or dropped.  Reset MISMATCH_COUNT to 0 below and let<br>            // detection cycle happen again in order to re-synchronize.<br>            // Keep the MODE variable the way it currently is.<br>        ENDIF<br>        <br>        set MISMATCH_COUNT = 0<br>    ENDIF<br>    <br>    // Now, process the images depending on present mode<br>    IF MODE is MOVIE<br>        // You could replace below with movie source deinterlacer plugin<br>        //<br>        set FRAMES_PER_SECOND = 24<br>        BEGIN movie-source deinterlacer<br>            IF MOVIE_FIELD_CYCLE equals 2 or MOVIE_FIELD_CYCLE equals 4<br>                 Weave current field with previous field<br>                 Add resulting field to OUTPUT queue <br>            ELSE<br>                 // Do nothing here.<br>                 // Do not add frame to OUTPUT queue.<br>                 // During MOVIE_FIELD_CYCLE 0 and 3, the current and<br>                 // previous fields come from different movie frames.<br>                 // During MOVIE_FIELD_CYCLE 1, the current and previous<br>                 // fields identical movie frame as MOVIE_FIELD_CYCLE 2.<br>                 // Therefore, we skip these cycle values.<br>            ENDIF<br>            <br>            // Looping counter that goes from 0, 1, 2, 3, 4 and back to 0<br>            increment MOVIE_FIELD_CYCLE by 1<br>            IF MOVIE_FIELD_CYCLE equals 5 THEN<br>                set MOVIE_FIELD_CYCLE = 0<br>            ENDIF<br>        END <br>                <br>    ELSEIF MODE is VIDEO<br>        // You could replace below with video source deinterlacer plugin<br>        //<br>        set FRAMES_PER_SECOND = 60<br>        BEGIN video-source deinterlacer<br>            Apply video source deinterlace algorithm<br>            Add resulting field to OUTPUT queue <br>        END<br>    ENDIF<br>  ENDIF<br>  /<br>  // You can put video output code here for the OUTPUT queue of frames.<br>  // You can optionally synchronize to the output refresh this way.<br>ENDLOOP<br></pre>
+        <pre>set MAX_MISMATCH = 12
+set MAX_VERIFY_CYCLES = 2
+set MISMATCH_COUNT = 0
+set MOVIE_FIELD_CYCLE = 0
+set MOVIE_VERIFY_CYCLE = 0
+set MODE = VIDEO
+set FRAMES_PER_SECOND = 60
+LOOP
+  
+  IF new field has now arrived on TV card
+    //
+    // Automatic detection code starts here
+    // Compares a pair of even fields or a pair of odd fields.
+    //
+    GRAB new current field (add to queue of fields)
+    COMPARE two fields: current field and two fields ago.
+    IF fields DO NOT match THEN
+    
+        IF MISMATCH_COUNT does not exceed MAX_MISMATCH
+            increment MISMATCH_COUNT by 1
+            //
+            // MISMATCH_COUNT is the number of consecutive pairs
+            // of fields that do not match.
+        ELSE
+            set MODE = VIDEO
+            set MOVIE_VERIFY_CYCLE = 0
+            set MOVIE_FIELD_CYCLE = 0
+            //
+            // There has been no duplicate fields lately.
+            // It's probably video source.
+            //
+            // MAX_MISMATCH should be a reasonably high value so
+            // that we do not have an oversensitive hair-trigger
+            // in switching to video source everytime there is
+            // video noise or a single spurious field added/dropped
+            // during a movie causing mis-synchronization problems. 
+        ENDIF
+    
+    ELSE IF fields match THEN
+
+        // It's either a stationary image OR a duplicate field in a movie
+        IF MISMATCH_COUNT is 4
+            //
+            // 3:2 pulldown is a cycle of 5 fields where there is only
+            // one duplicate field pair, and 4 mismatching pairs.
+            // We need to continue detection for at least 2 cycles
+            // to be very certain that it is actually 3:2 pulldown
+            // This would mean a latency of 10 fields.
+            //
+            IF MOVIE_VERIFY_CYCLE equals or exceeds MAX_VERIFY_CYCLES
+                // 
+                // This executes regardless whether we've just entered or 
+                // if we're *already* in 3:2 pulldown.  Either way, we are
+                // currently now (re)synchronized to 3:2 pulldown and that
+                // we've now detected the duplicate field.
+                //
+                set MODE = MOVIE
+                set MOVIE_FIELD_CYCLE = 0
+            ELSE
+                increment MOVIE_VERIFY_CYCLE by 1
+            ENDIF
+            
+        ELSE MISMATCH_COUNT not equal to 4
+            //
+            // If execution point hits here, it is probably just 
+            // stationary video.  That would produce lots of duplicate
+            // field pairs.  We can't determine whether it's video or
+            // movie source.  Therefore, we want to keep doing the 
+            // current algorithm from a prior detection.  Therefore, 
+            // don't modify any variables EXCEPT the MISMATCH_COUNT 
+            // variable which will be reset to 0 below.
+            // Also, occasionally we'll hit here during synchronization
+            // problems during a movie, such as a spurious field added
+            // or dropped.  Reset MISMATCH_COUNT to 0 below and let
+            // detection cycle happen again in order to re-synchronize.
+            // Keep the MODE variable the way it currently is.
+        ENDIF
+        
+        set MISMATCH_COUNT = 0
+    ENDIF
+    
+    // Now, process the images depending on present mode
+    IF MODE is MOVIE
+        // You could replace below with movie source deinterlacer plugin
+        //
+        set FRAMES_PER_SECOND = 24
+        BEGIN movie-source deinterlacer
+            IF MOVIE_FIELD_CYCLE equals 2 or MOVIE_FIELD_CYCLE equals 4
+                 Weave current field with previous field
+                 Add resulting field to OUTPUT queue 
+            ELSE
+                 // Do nothing here.
+                 // Do not add frame to OUTPUT queue.
+                 // During MOVIE_FIELD_CYCLE 0 and 3, the current and
+                 // previous fields come from different movie frames.
+                 // During MOVIE_FIELD_CYCLE 1, the current and previous
+                 // fields identical movie frame as MOVIE_FIELD_CYCLE 2.
+                 // Therefore, we skip these cycle values.
+            ENDIF
+            
+            // Looping counter that goes from 0, 1, 2, 3, 4 and back to 0
+            increment MOVIE_FIELD_CYCLE by 1
+            IF MOVIE_FIELD_CYCLE equals 5 THEN
+                set MOVIE_FIELD_CYCLE = 0
+            ENDIF
+        END 
+                
+    ELSEIF MODE is VIDEO
+        // You could replace below with video source deinterlacer plugin
+        //
+        set FRAMES_PER_SECOND = 60
+        BEGIN video-source deinterlacer
+            Apply video source deinterlace algorithm
+            Add resulting field to OUTPUT queue 
+        END
+    ENDIF
+  ENDIF
+  /
+  // You can put video output code here for the OUTPUT queue of frames.
+  // You can optionally synchronize to the output refresh this way.
+ENDLOOP
+</pre>
         <hr>
       </blockquote>
       <p>&nbsp;</p>
@@ -148,7 +269,61 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
       <p>
       <blockquote>
 <hr>
-        <pre><br>set MAX_MISMATCH = 12<br>set MAX_VERIFY_CYCLES = 2<br>set MISMATCH_COUNT = 0<br>set MOVIE_FIELD_CYCLE = 0<br>set MOVIE_VERIFY_CYCLE = 0<br>set MODE = VIDEO<br>set FRAMES_PER_SECOND = 60<br>LOOP<br>  IF new field has now arrived on TV card<br>    GRAB new current field (add to queue of fields)<br>    COMPARE two fields: current field and two fields ago.<br>    IF fields DO NOT match THEN<br>        IF MISMATCH_COUNT does not exceed MAX_MISMATCH<br>            increment MISMATCH_COUNT by 1<br>        ELSE<br>            set MODE = VIDEO<br>            set MOVIE_VERIFY_CYCLE = 0<br>            set MOVIE_FIELD_CYCLE = 0<br>        ENDIF<br>    ELSE IF fields match THEN<br>        IF MISMATCH_COUNT is 4<br>            IF MOVIE_VERIFY_CYCLE equals or exceeds MAX_VERIFY_CYCLES<br>                set MODE = MOVIE<br>                set MOVIE_FIELD_CYCLE = 0<br>            ELSE<br>                increment MOVIE_VERIFY_CYCLE by 1<br>            ENDIF<br>        ELSE MISMATCH_COUNT not equal to 4<br>        ENDIF<br>        set MISMATCH_COUNT = 0<br>    ENDIF<br>    <br>    IF MODE is MOVIE<br>        set FRAMES_PER_SECOND = 24<br>        BEGIN movie-source deinterlacer<br>            IF MOVIE_FIELD_CYCLE equals 2 or MOVIE_FIELD_CYCLE equals 4<br>                 Weave current field with previous field<br>                 Add resulting field to OUTPUT queue <br>            ENDIF<br>            increment MOVIE_FIELD_CYCLE by 1<br>            IF MOVIE_FIELD_CYCLE equals 5 THEN<br>                set MOVIE_FIELD_CYCLE = 0<br>            ENDIF<br>        END <br>    ELSEIF MODE is VIDEO<br>        set FRAMES_PER_SECOND = 60<br>        BEGIN video-source deinterlacer<br>            Apply video source deinterlace algorithm<br>            Add resulting field to OUTPUT queue <br>        END<br>    ENDIF<br>  ENDIF<br>ENDLOOP<br></pre>
+        <pre>
+set MAX_MISMATCH = 12
+set MAX_VERIFY_CYCLES = 2
+set MISMATCH_COUNT = 0
+set MOVIE_FIELD_CYCLE = 0
+set MOVIE_VERIFY_CYCLE = 0
+set MODE = VIDEO
+set FRAMES_PER_SECOND = 60
+LOOP
+  IF new field has now arrived on TV card
+    GRAB new current field (add to queue of fields)
+    COMPARE two fields: current field and two fields ago.
+    IF fields DO NOT match THEN
+        IF MISMATCH_COUNT does not exceed MAX_MISMATCH
+            increment MISMATCH_COUNT by 1
+        ELSE
+            set MODE = VIDEO
+            set MOVIE_VERIFY_CYCLE = 0
+            set MOVIE_FIELD_CYCLE = 0
+        ENDIF
+    ELSE IF fields match THEN
+        IF MISMATCH_COUNT is 4
+            IF MOVIE_VERIFY_CYCLE equals or exceeds MAX_VERIFY_CYCLES
+                set MODE = MOVIE
+                set MOVIE_FIELD_CYCLE = 0
+            ELSE
+                increment MOVIE_VERIFY_CYCLE by 1
+            ENDIF
+        ELSE MISMATCH_COUNT not equal to 4
+        ENDIF
+        set MISMATCH_COUNT = 0
+    ENDIF
+    
+    IF MODE is MOVIE
+        set FRAMES_PER_SECOND = 24
+        BEGIN movie-source deinterlacer
+            IF MOVIE_FIELD_CYCLE equals 2 or MOVIE_FIELD_CYCLE equals 4
+                 Weave current field with previous field
+                 Add resulting field to OUTPUT queue 
+            ENDIF
+            increment MOVIE_FIELD_CYCLE by 1
+            IF MOVIE_FIELD_CYCLE equals 5 THEN
+                set MOVIE_FIELD_CYCLE = 0
+            ENDIF
+        END 
+    ELSEIF MODE is VIDEO
+        set FRAMES_PER_SECOND = 60
+        BEGIN video-source deinterlacer
+            Apply video source deinterlace algorithm
+            Add resulting field to OUTPUT queue 
+        END
+    ENDIF
+  ENDIF
+ENDLOOP
+</pre>
         <hr>
       </blockquote>
       <h3>(c) Mark Rejhon 2000</h3>
@@ -167,15 +342,14 @@ ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
   </tr>
   <tr> 
     <td colspan="3"> 
-      <div align="center"><a href="/" class="bottommenu">home</a> | <a href="/about.htm" class="bottommenu">about</a> 
-        | <a href="/Reviews.htm" class="bottommenu">reviews</a> |&nbsp;<a href="/screenshots.htm" class="bottommenu">screenshots</a> 
-        | <a href="/News.htm" class="bottommenu">news</a> | <a href="/Thanks.htm" class="bottommenu"></a><a href="/downloads.htm" class="bottommenu">download</a> 
-        | <a href="/Reviews.htm" class="bottommenu"></a><a href="/Authors.htm" class="bottommenu">authors</a> 
-        | <a href="/Thanks.htm" class="bottommenu">thanks</a> <br>
-        <a href="/installation.htm" class="bottommenu">setup</a> | <a href="/keyboard.htm" class="bottommenu">keyboard 
-        shortcuts </a> | <a href="http://sourceforge.net/mail/?group_id=7420" class="bottommenu">mailing 
-        list</a> | <a href="/FAQ.htm" class="bottommenu">faq</a> | <a href="/developers.htm" class="bottommenu">developers</a> 
-        | <a href="/Links.htm" class="bottommenu">links</a></div>
+      <div align="center"><a class="bottommenu" href="index.php">home</a> | <a href="about.htm" class="bottommenu">about</a>
+        | <a href="Reviews.htm" class="bottommenu">reviews</a> |&nbsp;<a href="screenshots/index.htm" class="bottommenu">screenshots</a>
+        | <a href="downloads.htm" class="bottommenu">download</a> | <a href="Authors.htm" class="bottommenu">authors</a>
+        | <a href="Thanks.htm" class="bottommenu">thanks</a> <br>
+        <a href="setup/index.htm" class="bottommenu">setup</a> | <a href="keyboard.htm" class="bottommenu">keyboard
+        shortcuts </a>| <a href="http://sourceforge.net/mail/?group_id=7420" class="bottommenu">mailing
+        list</a> | <a href="FAQ.htm" class="bottommenu">faq</a> | <a href="developers.htm" class="bottommenu">developers</a>
+        | <a href="Links.htm" class="bottommenu">links</a></div>
     </td>
   </tr>
 </table>
