@@ -302,7 +302,7 @@ NTSTATUS CIOAccessDevice::deviceControl(DWORD ioControlCode, PDTVDRVParam ioPara
 			DWORD Address = ioParam->dwAddress + dwMemoryBase;
 			osMemoryReadWORD( Address, *outputBuffer);
 			*pBytesWritten = 2;
-			debugOut(dbTrace,"memory %X read %X",ioParam->dwAddress, *outputBuffer);
+			debugOut(dbTrace,"memory %X read %X",ioParam->dwAddress, (DWORD)*outputBuffer);
 		}
 		break;
 
@@ -321,7 +321,7 @@ NTSTATUS CIOAccessDevice::deviceControl(DWORD ioControlCode, PDTVDRVParam ioPara
 			DWORD Address = ioParam->dwAddress + dwMemoryBase;
 			osMemoryReadBYTE( Address, *outputBuffer);
 			*pBytesWritten = 1;
-			debugOut(dbTrace,"memory %X read %X",ioParam->dwAddress, *outputBuffer);
+			debugOut(dbTrace,"memory %X read %X",ioParam->dwAddress, (DWORD)*outputBuffer);
 		}
 		break;
 
