@@ -455,13 +455,48 @@ BOOL Bob(DEINTERLACE_INFO *info)
 	int i;
 	BYTE *lpOverlay = info->Overlay;
 	short **lines;
-
+ 
+// If field is odd we will offset it down 1 line to avoid jitter  TRB 1/21/01
+#if TRUE		// use this and leave the old code in below for a/b compare
 	if (info->IsOdd)
+	{
 		lines = info->OddLines[0];
-	else
-		lines = info->EvenLines[0];
+		// No recent data?  We can't do anything.
+		if (lines == NULL)
+			return FALSE;
 
-	// No recent data?  We can't do anything.
+		memcpyMMX(lpOverlay, lines[0], info->LineLength);	// extra copy of first line
+		lpOverlay += info->OverlayPitch;					// and offset out output ptr
+		for (i = 0; i < info->FieldHeight - 1; i++)
+		{
+			memcpyBOBMMX(lpOverlay, lpOverlay + info->OverlayPitch,
+				lines[i], info->LineLength);
+			lpOverlay += 2 * info->OverlayPitch;
+		}
+		memcpyMMX(lpOverlay, lines[i], info->LineLength);	// only 1 copy of last line
+	}	
+	else
+	{
+		lines = info->EvenLines[0];
+		if (lines == NULL)
+				return FALSE;
+		for (i = 0; i < info->FieldHeight; i++)
+		{
+			memcpyBOBMMX(lpOverlay, lpOverlay + info->OverlayPitch,
+				lines[i], info->LineLength);
+			lpOverlay += 2 * info->OverlayPitch;
+		}
+	}
+#else
+	// leave old code in for now for a/b compare
+	if (info->IsOdd)
+	{
+		lines = info->OddLines[0];
+	}
+	else
+	{
+		lines = info->EvenLines[0];
+	}
 	if (lines == NULL)
 		return FALSE;
 
@@ -470,6 +505,8 @@ BOOL Bob(DEINTERLACE_INFO *info)
 		memcpyBOBMMX(lpOverlay, lpOverlay + info->OverlayPitch, lines[i], info->LineLength);
 		lpOverlay += 2 * info->OverlayPitch;
 	}
+#endif
+
 
 	return TRUE;
 }
