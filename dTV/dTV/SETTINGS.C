@@ -60,7 +60,10 @@
 #include "MixerDev.h"
 #include "dTV.h"
 #include "ProgramList.h"
+#include "DI_Adaptive.h"
 #include "DI_BlendedClip.h"
+#include "DI_BobAndWeave.h"
+#include "DI_TwoFrame.h"
 #include "other.h"
 #include "FD_50Hz.h"
 #include "FD_60Hz.h"
@@ -68,13 +71,6 @@
 #include "slider.h"
 #include "Splash.h"
 #include "OSD.h"
-
-// MRS 9-2-00
-// Added variable in dTV.c to track which aspect mode we are currently in
-// Use aspect * 1000 (1.66 = 1660, 2.35 = 2350, etc)
-// Declared in DTV.C
-extern int source_aspect, target_aspect, aspect_mode, custom_source_aspect, custom_target_aspect;
-// END MRS 9-2-00
 
 char szIniFile[MAX_PATH] = "dTV.ini";
 
@@ -98,95 +94,20 @@ void LoadSettingsFromIni()
 	int i;
 
 	// Read in settings from each source files read method
-	Aspect_ReadSetttingsFromIni();
-	BT848_ReadSetttingsFromIni();
-
-	emstartx = GetPrivateProfileInt("MainWindow", "StartLeft", 10, szIniFile);
-	emstarty = GetPrivateProfileInt("MainWindow", "StartTop", 10, szIniFile);
-	emsizex = GetPrivateProfileInt("MainWindow", "StartWidth", 754, szIniFile);
-	emsizey = GetPrivateProfileInt("MainWindow", "StartHeight", 521, szIniFile);
-
-	bAlwaysOnTop = (GetPrivateProfileInt("MainWindow", "AlwaysOnTop", bAlwaysOnTop, szIniFile) != 0);
-	bDisplaySplashScreen = (GetPrivateProfileInt("MainWindow", "DisplaySplashScreen", bDisplaySplashScreen, szIniFile) != 0);
-	bIsFullScreen = (GetPrivateProfileInt("MainWindow", "bIsFullScreen", bIsFullScreen, szIniFile) != 0);
-
-	// 2000-10-30 Added by Mark Rejhon
-	// This is for situations where it is desirable for dTV to always start up in full screen
-	// even if dTV was exited during windowed mode on the last time
-	if (GetPrivateProfileInt("MainWindow", "AlwaysForceFullScreen", 0, szIniFile) != 0)
-	{
-		bIsFullScreen = TRUE;
-	}
-
-	PriorClassId = GetPrivateProfileInt("Threads", "ProcessPriority", PriorClassId, szIniFile);
-	ThreadClassId = GetPrivateProfileInt("Threads", "ThreadPriority", ThreadClassId, szIniFile);
-	MainProcessor = GetPrivateProfileInt("Threads", "WindowProcessor", MainProcessor, szIniFile);
-	DecodeProcessor = GetPrivateProfileInt("Threads", "DecodeProcessor", DecodeProcessor, szIniFile);
-
-	// Added new performance related parms to Threads group - TRB 10/28/00
-	Hurry_When_Late = (GetPrivateProfileInt("Threads", "Hurry_When_Late", Hurry_When_Late, szIniFile) != 0);
-	Wait_For_Flip = (GetPrivateProfileInt("Threads", "Wait_For_Flip", Wait_For_Flip, szIniFile) != 0);
-	DoAccurateFlips = (GetPrivateProfileInt("Threads", "DoAccurateFlips", DoAccurateFlips, szIniFile) != 0);
-	Sleep_Interval = GetPrivateProfileInt("Threads", "Sleep_Interval", Sleep_Interval, szIniFile);
-
-    // Mark Rejhon 01/01/01 - New Overlay section and OverlayColor setting
-	Back_Buffers = GetPrivateProfileInt("Overlay", "Back_Buffers", Back_Buffers, szIniFile);
-	OverlayColor = GetPrivateProfileInt("Overlay", "OverlayColor", OverlayColor, szIniFile);
-
-	bDisplayStatusBar = (GetPrivateProfileInt("Show", "StatusBar", bDisplayStatusBar, szIniFile) != 0);
-	Show_Menu = (GetPrivateProfileInt("Show", "Menu", Show_Menu, szIniFile) != 0);
-
-	PulldownThresholdLow = GetPrivateProfileInt("Pulldown", "PulldownThresholdLow", PulldownThresholdLow, szIniFile);
-	PulldownThresholdHigh = GetPrivateProfileInt("Pulldown", "PulldownThresholdHigh", PulldownThresholdHigh, szIniFile);
-	PulldownRepeatCount = GetPrivateProfileInt("Pulldown", "PulldownRepeatCount", PulldownRepeatCount, szIniFile);
-	PulldownRepeatCount2 = GetPrivateProfileInt("Pulldown", "PulldownRepeatCount2", PulldownRepeatCount2, szIniFile);
-	Threshold32Pulldown  = GetPrivateProfileInt("Pulldown", "Threshold32Pulldown", Threshold32Pulldown, szIniFile);
-	ThresholdPulldownMismatch  = GetPrivateProfileInt("Pulldown", "ThresholdPulldownMismatch", ThresholdPulldownMismatch, szIniFile);
-	ThresholdPulldownComb  = GetPrivateProfileInt("Pulldown", "ThresholdPulldownComb", ThresholdPulldownComb, szIniFile);
-	bFallbackToVideo = (GetPrivateProfileInt("Pulldown", "bFallbackToVideo", bFallbackToVideo, szIniFile) != 0);
-	BitShift = GetPrivateProfileInt("Pulldown", "BitShift", BitShift, szIniFile);
-	DiffThreshold = GetPrivateProfileInt("Pulldown", "DiffThreshold", DiffThreshold, szIniFile);
-	PulldownSwitchInterval = GetPrivateProfileInt("Pulldown", "PulldownSwitchInterval", PulldownSwitchInterval, szIniFile);
-	PulldownSwitchMax = GetPrivateProfileInt("Pulldown", "PulldownSwitchMax", PulldownSwitchMax, szIniFile);
-
-	StaticImageFieldCount = GetPrivateProfileInt("Pulldown", "StaticImageFieldCount", StaticImageFieldCount, szIniFile);
-	LowMotionFieldCount = GetPrivateProfileInt("Pulldown", "LowMotionFieldCount", LowMotionFieldCount, szIniFile);
-	StaticImageMode = GetPrivateProfileInt("Pulldown", "StaticImageMode", StaticImageMode, szIniFile);
-	LowMotionMode = GetPrivateProfileInt("Pulldown", "LowMotionMode", LowMotionMode, szIniFile);
-	HighMotionMode = GetPrivateProfileInt("Pulldown", "HighMotionMode", HighMotionMode, szIniFile);
-
-	// JA 02/01/2001
-	// use SetDeinterlaceFunction so that Half height gets set correctly
-	SetDeinterlaceMode(GetPrivateProfileInt("Deinterlace", "DeinterlaceMode", gPulldownMode, szIniFile));
-	// JA added film fallback modes
-	gPALFilmFallbackMode = GetPrivateProfileInt("Deinterlace", "PALFilmFallbackMode", gPALFilmFallbackMode, szIniFile);
-	gNTSCFilmFallbackMode = GetPrivateProfileInt("Deinterlace", "NTSCFilmFallbackMode", gNTSCFilmFallbackMode, szIniFile);
-	bAutoDetectMode = (GetPrivateProfileInt("Pulldown", "bAutoDetectMode", bAutoDetectMode, szIniFile) != 0);
-
-	EdgeDetect = GetPrivateProfileInt("Deinterlace", "EdgeDetect", EdgeDetect, szIniFile);
-	JaggieThreshold = GetPrivateProfileInt("Deinterlace", "JaggieThreshold", JaggieThreshold, szIniFile);
-	SpatialTolerance = GetPrivateProfileInt("Deinterlace", "SpatialTolerance", SpatialTolerance, szIniFile);
-	TemporalTolerance = GetPrivateProfileInt("Deinterlace", "TemporalTolerance", TemporalTolerance, szIniFile);
-	SimilarityThreshold = GetPrivateProfileInt("Deinterlace", "SimilarityThreshold", SimilarityThreshold, szIniFile);
-	
-// Deinterlace settings for Blended Clip only
-	BlcMinimumClip  = GetPrivateProfileInt("Deinterlace", "BlcMinimumClip", BlcMinimumClip , szIniFile);
-	BlcPixelMotionSense = GetPrivateProfileInt("Deinterlace", "BlcPixelMotionSense", BlcPixelMotionSense  , szIniFile);
-	BlcRecentMotionSense  = GetPrivateProfileInt("Deinterlace", "BlcRecentMotionSense", BlcRecentMotionSense , szIniFile);
-	BlcMotionAvgPeriod  = GetPrivateProfileInt("Deinterlace", "BlcMotionAvgPeriod", BlcMotionAvgPeriod , szIniFile);
-	BlcPixelCombSense  = GetPrivateProfileInt("Deinterlace", "BlcPixelCombSense", BlcPixelCombSense , szIniFile);
-	BlcRecentCombSense  = GetPrivateProfileInt("Deinterlace", "BlcRecentCombSense", BlcRecentCombSense  , szIniFile);
-	BlcCombAvgPeriod  = GetPrivateProfileInt("Deinterlace", "BlcCombAvgPeriod", BlcCombAvgPeriod , szIniFile);
-	BlcHighCombSkip  = GetPrivateProfileInt("Deinterlace", "BlcHighCombSkip", BlcHighCombSkip , szIniFile);
-	BlcLowMotionSkip  = GetPrivateProfileInt("Deinterlace", "BlcLowMotionSkip", BlcLowMotionSkip , szIniFile);
-	BlcVerticalSmoothing  = GetPrivateProfileInt("Deinterlace", "BlcVerticalSmoothing", BlcVerticalSmoothing , szIniFile);
-	BlcUseInterpBob = GetPrivateProfileInt("Deinterlace", "BlcUseInterpBob", BlcUseInterpBob , szIniFile);
-	BlcBlendChroma  = GetPrivateProfileInt("Deinterlace", "BlcBlendChroma", BlcBlendChroma , szIniFile);
-	BlcShowControls  = GetPrivateProfileInt("Deinterlace", "BlcShowControls", BlcShowControls , szIniFile);
-
-	TemporalLuminanceThreshold = GetPrivateProfileInt("NoiseFilter", "TemporalLuminanceThreshold", TemporalLuminanceThreshold, szIniFile);
-	TemporalChromaThreshold = GetPrivateProfileInt("NoiseFilter", "TemporalChromaThreshold", TemporalChromaThreshold, szIniFile);
-	UseTemporalNoiseFilter = GetPrivateProfileInt("NoiseFilter", "UseTemporalNoiseFilter", UseTemporalNoiseFilter, szIniFile);
+	Aspect_ReadSettingsFromIni();
+	BT848_ReadSettingsFromIni();
+	dTV_ReadSettingsFromIni();
+	OutThreads_ReadSettingsFromIni();
+	Other_ReadSettingsFromIni();
+	FD50_ReadSettingsFromIni();
+	FD60_ReadSettingsFromIni();
+	FD_Common_ReadSettingsFromIni();
+	DI_Adaptive_ReadSettingsFromIni();
+	DI_BobWeave_ReadSettingsFromIni();
+	DI_BlendedClip_ReadSettingsFromIni();
+	DI_TwoFrame_ReadSettingsFromIni();
+	Deinterlace_ReadSettingsFromIni();
+	FLT_TNoise_ReadSettingsFromIni();
 
 	VBI_Flags = 0;
 	if(GetPrivateProfileInt("VBI", "VT", 0, szIniFile) != 0)
@@ -209,44 +130,6 @@ void LoadSettingsFromIni()
 	VideoSource = GetPrivateProfileInt("Hardware", "VideoSource", VideoSource, szIniFile);
 	TunerType = GetPrivateProfileInt("Hardware", "TunerType", TUNER_ABSENT, szIniFile); 
 	TVTYPE = GetPrivateProfileInt("Hardware", "TVType", -1, szIniFile); 
-
-	// MAE 2 Nov 2000 - Start of change for Macrovision fix
-	InitialBDelay = GetPrivateProfileInt("Hardware", "InitialBDelay", InitialBDelay, szIniFile);
-	// MAE 2 Nov 2000 - End of change for Macrovision fix
-
-	// TRB 1218/00 - Add some Adv Video Settings to ini file
-	BtAgcDisable = 
-		GetPrivateProfileInt("Hardware", "BtAgcDisable", BtAgcDisable >> 4, szIniFile) << 4;
-	BtCrush = GetPrivateProfileInt("Hardware", "BtCrush", BtCrush, szIniFile);
-	BtEvenChromaAGC = 
-		GetPrivateProfileInt("Hardware", "BtEvenChromaAGC", BtEvenChromaAGC >> 6, szIniFile) << 6;
-	BtOddChromaAGC = 
-		GetPrivateProfileInt("Hardware", "BtOddChromaAGC", BtOddChromaAGC >> 6, szIniFile) << 6;
-	BtEvenLumaPeak = 
-		GetPrivateProfileInt("Hardware", "BtEvenLumaPeak", BtEvenLumaPeak >> 7, szIniFile) << 7;
-	BtOddLumaPeak = 
-		GetPrivateProfileInt("Hardware", "BtOddLumaPeak", BtOddLumaPeak >> 7, szIniFile) << 7;
-	BtFullLumaRange = 
-		GetPrivateProfileInt("Hardware", "BtFullLumaRange", BtFullLumaRange >> 7, szIniFile) << 7;
-	BtEvenLumaDec = 
-		GetPrivateProfileInt("Hardware", "BtEvenLumaDec", BtEvenLumaDec >> 5, szIniFile) << 5;
-	BtOddLumaDec = 
-		GetPrivateProfileInt("Hardware", "BtOddLumaDec", BtOddLumaDec >> 5, szIniFile) << 5;
-	BtEvenComb = 
-		GetPrivateProfileInt("Hardware", "BtEvenComb", BtEvenComb >> 6, szIniFile) << 6;
-	BtOddComb = 
-		GetPrivateProfileInt("Hardware", "BtOddComb", BtOddComb >> 6, szIniFile) << 6;
-	BtColorBars = 
-		GetPrivateProfileInt("Hardware", "BtColorBars", BtColorBars >> 6, szIniFile) << 6;
-	BtGammaCorrection = 
-		GetPrivateProfileInt("Hardware", "BtGammaCorrection", BtGammaCorrection >> 4, szIniFile) << 4;
-	BtCoring = GetPrivateProfileInt("Hardware", "BtCoring", BtCoring >> 5, szIniFile) << 5;
-	BtHorFilter =
-		GetPrivateProfileInt("Hardware", "BtHorFilter", BtHorFilter >> 3, szIniFile) << 3;
-	BtVertFilter = GetPrivateProfileInt("Hardware", "BtVertFilter", BtVertFilter, szIniFile);
-	BtColorKill = GetPrivateProfileInt("Hardware", "BtColorKill", BtColorKill >> 5, szIniFile) << 5;
-	BtWhiteCrushUp = GetPrivateProfileInt("Hardware", "BtWhiteCrushUp", BtWhiteCrushUp, szIniFile);
-	BtWhiteCrushDown = GetPrivateProfileInt("Hardware", "BtWhiteCrushDown", BtWhiteCrushDown, szIniFile);
 
 	Capture_VBI = (GetPrivateProfileInt("Show", "CaptureVBI", Capture_VBI, szIniFile) != 0);  
 	CurrentProgramm = GetPrivateProfileInt("Show", "LastProgram", CurrentProgramm, szIniFile);
@@ -320,23 +203,6 @@ void LoadSettingsFromIni()
 			MixerLoad[i].MixerValues.Kanal4 = GetPrivateProfileInt(szKey, "Channel4", 0, szIniFile);
 		}
 	}
-
-	// MRS 9/2/00
-	// Load Aspect Mode from INI- using strings would be more elegant long-term
-	source_aspect = GetPrivateProfileInt("ASPECT", "SourceAspect", source_aspect, szIniFile);
-	custom_source_aspect = GetPrivateProfileInt("ASPECT", "CustomSourceAspect", custom_source_aspect, szIniFile);
-	target_aspect = GetPrivateProfileInt("ASPECT", "ScreenAspect", target_aspect, szIniFile);
-	custom_target_aspect = GetPrivateProfileInt("ASPECT", "CustomScreenAspect", custom_target_aspect, szIniFile);
-	aspect_mode = GetPrivateProfileInt("ASPECT", "Mode", aspect_mode, szIniFile);
-	// END MRS 9/2/00
-	LuminanceThreshold = GetPrivateProfileInt("ASPECT", "LuminanceThreshold", LuminanceThreshold, szIniFile);
-	IgnoreNonBlackPixels = GetPrivateProfileInt("ASPECT", "IgnoreNonBlackPixels", IgnoreNonBlackPixels, szIniFile);
-	AutoDetectAspect = GetPrivateProfileInt("ASPECT", "AutoDetectAspect", AutoDetectAspect, szIniFile);
-	ZoomInFrameCount = GetPrivateProfileInt("ASPECT", "ZoomInFrameCount", ZoomInFrameCount, szIniFile);
-	AspectHistoryTime = GetPrivateProfileInt("ASPECT", "AspectHistoryTime", AspectHistoryTime, szIniFile);
-	AspectConsistencyTime = GetPrivateProfileInt("ASPECT", "AspectConsistencyTime", AspectConsistencyTime, szIniFile);
-	VerticalPos = GetPrivateProfileInt("ASPECT", "VerticalPos", VerticalPos, szIniFile);
-	HorizontalPos = GetPrivateProfileInt("ASPECT", "HorizontalPos", HorizontalPos, szIniFile);
 }
 
 void WriteSettingsToIni()
@@ -344,103 +210,20 @@ void WriteSettingsToIni()
 	char szKey[128];
 	int i;
 
-	Aspect_WriteSetttingsToIni();
-	BT848_WriteSetttingsToIni();
-
-	WritePrivateProfileInt("MainWindow", "AlwaysOnTop", bAlwaysOnTop, szIniFile);
-	WritePrivateProfileInt("MainWindow", "DisplaySplashScreen", bDisplaySplashScreen, szIniFile);
-	WritePrivateProfileInt("MainWindow", "bIsFullScreen", bIsFullScreen, szIniFile);
-	if(!bIsFullScreen)
-	{
-		WritePrivateProfileInt("MainWindow", "StartLeft", emstartx, szIniFile);
-		WritePrivateProfileInt("MainWindow", "StartTop", emstarty, szIniFile);
-		WritePrivateProfileInt("MainWindow", "StartWidth", emsizex, szIniFile);
-		WritePrivateProfileInt("MainWindow", "StartHeight", emsizey, szIniFile);
-	}
-
-	WritePrivateProfileInt("Threads", "ProcessPriority", PriorClassId, szIniFile);
-	WritePrivateProfileInt("Threads", "ThreadPriority", ThreadClassId, szIniFile);
-	WritePrivateProfileInt("Threads", "WindowProcessor", MainProcessor, szIniFile);
-	WritePrivateProfileInt("Threads", "DecodeProcessor", DecodeProcessor, szIniFile);
-
-	// Added new performance related parms to Threads group - TRB 10/28/00
-	WritePrivateProfileInt("Threads", "Hurry_When_Late", Hurry_When_Late, szIniFile);
-	WritePrivateProfileInt("Threads", "Wait_For_Flip", Wait_For_Flip, szIniFile);
-	WritePrivateProfileInt("Threads", "DoAccurateFlips", DoAccurateFlips, szIniFile);
-	WritePrivateProfileInt("Threads", "Sleep_Interval", Sleep_Interval, szIniFile);
-
-    // Mark Rejhon 01/01/01 - New Overlay section and OverlayColor setting
-	WritePrivateProfileInt("Overlay", "Back_Buffers", Back_Buffers, szIniFile);
-	WritePrivateProfileInt("Overlay", "OverlayColor", OverlayColor, szIniFile);
-	
-	WritePrivateProfileInt("Pulldown", "PulldownThresholdLow", PulldownThresholdLow, szIniFile);
-	WritePrivateProfileInt("Pulldown", "PulldownThresholdHigh", PulldownThresholdHigh, szIniFile);
-	WritePrivateProfileInt("Pulldown", "PulldownRepeatCount", PulldownRepeatCount, szIniFile);
-	WritePrivateProfileInt("Pulldown", "PulldownRepeatCount2", PulldownRepeatCount2, szIniFile);
-	WritePrivateProfileInt("Pulldown", "Threshold32Pulldown", Threshold32Pulldown, szIniFile);
-	WritePrivateProfileInt("Pulldown", "ThresholdPulldownMismatch", ThresholdPulldownMismatch, szIniFile);
-	WritePrivateProfileInt("Pulldown", "ThresholdPulldownComb", ThresholdPulldownComb, szIniFile);
-	WritePrivateProfileInt("Pulldown", "bAutoDetectMode", bAutoDetectMode, szIniFile);
-	WritePrivateProfileInt("Pulldown", "bFallbackToVideo", bFallbackToVideo, szIniFile);
-	WritePrivateProfileInt("Pulldown", "BitShift", BitShift, szIniFile);
-	WritePrivateProfileInt("Pulldown", "DiffThreshold", DiffThreshold, szIniFile);
-	WritePrivateProfileInt("Pulldown", "PulldownSwitchInterval", PulldownSwitchInterval, szIniFile);
-	WritePrivateProfileInt("Pulldown", "PulldownSwitchMax", PulldownSwitchMax, szIniFile);
-	WritePrivateProfileInt("Pulldown", "StaticImageFieldCount", StaticImageFieldCount, szIniFile);
-	WritePrivateProfileInt("Pulldown", "LowMotionFieldCount", LowMotionFieldCount, szIniFile);
-	WritePrivateProfileInt("Pulldown", "StaticImageMode", StaticImageMode, szIniFile);
-	WritePrivateProfileInt("Pulldown", "LowMotionMode", LowMotionMode, szIniFile);
-	WritePrivateProfileInt("Pulldown", "HighMotionMode", HighMotionMode, szIniFile);
-
-	// JA 07/01/2001
-	// if we are in autodect mode we don't want to save the current film mode
-	// so save the current fallback mode instead.
-	if(bAutoDetectMode && DeintMethods[gPulldownMode].bIsFilmMode)
-	{
-		if(TVSettings[TVTYPE].Is25fps)
-		{
-			WritePrivateProfileInt("Deinterlace", "DeinterlaceMode", gPALFilmFallbackMode, szIniFile);
-		}
-		else
-		{
-			WritePrivateProfileInt("Deinterlace", "DeinterlaceMode", gNTSCFilmFallbackMode, szIniFile);
-		}
-	}
-	else
-	{
-		WritePrivateProfileInt("Deinterlace", "DeinterlaceMode", gPulldownMode, szIniFile);
-	}
-	// JA added film fallback modes
-	WritePrivateProfileInt("Deinterlace", "PALFilmFallbackMode", gPALFilmFallbackMode, szIniFile);
-	WritePrivateProfileInt("Deinterlace", "NTSCFilmFallbackMode", gNTSCFilmFallbackMode, szIniFile);
-
-	WritePrivateProfileInt("Deinterlace", "EdgeDetect", EdgeDetect, szIniFile);
-	WritePrivateProfileInt("Deinterlace", "JaggieThreshold", JaggieThreshold, szIniFile);
-	WritePrivateProfileInt("Deinterlace", "SpatialTolerance", SpatialTolerance, szIniFile);
-	WritePrivateProfileInt("Deinterlace", "TemporalTolerance", TemporalTolerance, szIniFile);
-	WritePrivateProfileInt("Deinterlace", "SimilarityThreshold", SimilarityThreshold, szIniFile);
-
-// Deinterlace settings for Blended Clip only
-	WritePrivateProfileInt("Deinterlace", "BlcMinimumClip", BlcMinimumClip , szIniFile);
-	WritePrivateProfileInt("Deinterlace", "BlcPixelMotionSense", BlcPixelMotionSense  , szIniFile);
-	WritePrivateProfileInt("Deinterlace", "BlcRecentMotionSense", BlcRecentMotionSense , szIniFile);
-	WritePrivateProfileInt("Deinterlace", "BlcMotionAvgPeriod", BlcMotionAvgPeriod , szIniFile);
-	WritePrivateProfileInt("Deinterlace", "BlcPixelCombSense", BlcPixelCombSense , szIniFile);
-	WritePrivateProfileInt("Deinterlace", "BlcRecentCombSense", BlcRecentCombSense  , szIniFile);
-	WritePrivateProfileInt("Deinterlace", "BlcCombAvgPeriod", BlcCombAvgPeriod , szIniFile);
-	WritePrivateProfileInt("Deinterlace", "BlcHighCombSkip", BlcHighCombSkip , szIniFile);
-	WritePrivateProfileInt("Deinterlace", "BlcLowMotionSkip", BlcLowMotionSkip , szIniFile);
-	WritePrivateProfileInt("Deinterlace", "BlcVerticalSmoothing", BlcVerticalSmoothing , szIniFile);
-	WritePrivateProfileInt("Deinterlace", "BlcUseInterpBob", BlcUseInterpBob , szIniFile);
-	WritePrivateProfileInt("Deinterlace", "BlcBlendChroma", BlcBlendChroma , szIniFile);
-	WritePrivateProfileInt("Deinterlace", "BlcShowControls", BlcShowControls , szIniFile);
-
-	WritePrivateProfileInt("NoiseFilter", "TemporalLuminanceThreshold", TemporalLuminanceThreshold, szIniFile);
-	WritePrivateProfileInt("NoiseFilter", "TemporalChromaThreshold", TemporalChromaThreshold, szIniFile);
-	WritePrivateProfileInt("NoiseFilter", "UseTemporalNoiseFilter", UseTemporalNoiseFilter, szIniFile);
-
-	WritePrivateProfileInt("Show", "StatusBar", bDisplayStatusBar, szIniFile);
-	WritePrivateProfileInt("Show", "Menu", Show_Menu, szIniFile);
+	Aspect_WriteSettingsToIni();
+	BT848_WriteSettingsToIni();
+	dTV_WriteSettingsToIni();
+	OutThreads_WriteSettingsToIni();
+	Other_WriteSettingsToIni();
+	FD50_WriteSettingsToIni();
+	FD60_WriteSettingsToIni();
+	FD_Common_WriteSettingsToIni();
+	DI_Adaptive_WriteSettingsToIni();
+	DI_BobWeave_WriteSettingsToIni();
+	DI_BlendedClip_WriteSettingsToIni();
+	DI_TwoFrame_WriteSettingsToIni();
+	Deinterlace_WriteSettingsToIni();
+	FLT_TNoise_WriteSettingsToIni();
 
 	WritePrivateProfileInt("VBI", "VT", VBI_Flags & VBI_VT, szIniFile);
 	WritePrivateProfileInt("VBI", "VPS", VBI_Flags & VBI_VPS, szIniFile);
@@ -453,31 +236,6 @@ void WriteSettingsToIni()
 	WritePrivateProfileInt("Hardware", "VideoSource", VideoSource, szIniFile);
 	WritePrivateProfileInt("Hardware", "TunerType", TunerType, szIniFile); 
 	WritePrivateProfileInt("Hardware", "TVType", TVTYPE, szIniFile); 
-
-// MAE 2 Nov 2000 - Start of change for Macrovision fix
-	WritePrivateProfileInt("Hardware", "InitialBDelay", InitialBDelay, szIniFile); 
-// MAE 2 Nov 2000 - End of change for Macrovision fix
-
-// TRB 1218/00 - Add some Adv Video Settings to ini file
-	WritePrivateProfileInt("Hardware", "BtAgcDisable", BtAgcDisable >> 4, szIniFile);
-	WritePrivateProfileInt("Hardware", "BtCrush", BtCrush, szIniFile);
-	WritePrivateProfileInt("Hardware", "BtEvenChromaAGC", BtEvenChromaAGC >> 6, szIniFile);
-	WritePrivateProfileInt("Hardware", "BtOddChromaAGC", BtOddChromaAGC >> 6, szIniFile);
-	WritePrivateProfileInt("Hardware", "BtEvenLumaPeak", BtEvenLumaPeak >> 7, szIniFile);
-	WritePrivateProfileInt("Hardware", "BtOddLumaPeak", BtOddLumaPeak >> 7, szIniFile);
-	WritePrivateProfileInt("Hardware", "BtFullLumaRange", BtFullLumaRange >> 7, szIniFile);
-	WritePrivateProfileInt("Hardware", "BtEvenLumaDec", BtEvenLumaDec >> 5, szIniFile);
-	WritePrivateProfileInt("Hardware", "BtOddLumaDec", BtOddLumaDec >> 5, szIniFile);
-	WritePrivateProfileInt("Hardware", "BtEvenComb", BtEvenComb >> 6, szIniFile);
-	WritePrivateProfileInt("Hardware", "BtOddComb", BtOddComb >> 6, szIniFile);
-	WritePrivateProfileInt("Hardware", "BtColorBars", BtColorBars >> 6, szIniFile);
-	WritePrivateProfileInt("Hardware", "BtGammaCorrection", BtGammaCorrection >> 4, szIniFile);
-	WritePrivateProfileInt("Hardware", "BtCoring", BtCoring >> 5, szIniFile);
-	WritePrivateProfileInt("Hardware", "BtHorFilter", BtHorFilter >> 3, szIniFile);
-	WritePrivateProfileInt("Hardware", "BtVertFilter", BtVertFilter, szIniFile);
-	WritePrivateProfileInt("Hardware", "BtColorKill", BtColorKill >> 5, szIniFile);
-	WritePrivateProfileInt("Hardware", "BtWhiteCrushUp", BtWhiteCrushUp, szIniFile);
-	WritePrivateProfileInt("Hardware", "BtWhiteCrushDown", BtWhiteCrushDown, szIniFile);
 
 	WritePrivateProfileInt("Show", "CaptureVBI", Capture_VBI, szIniFile);
 	WritePrivateProfileInt("Show", "LastProgram", CurrentProgramm, szIniFile);
@@ -541,21 +299,6 @@ void WriteSettingsToIni()
 			WritePrivateProfileInt(szKey, "Channel4", MixerLoad[i].MixerValues.Kanal4, szIniFile);
 		}
 	}
-
-	// MRS 9/2/00
-	// Save Aspect Mode from INI- using strings would be more elegant long-term
-	WritePrivateProfileInt("ASPECT", "SourceAspect", source_aspect, szIniFile);
-	WritePrivateProfileInt("ASPECT", "ScreenAspect", target_aspect, szIniFile);
-	WritePrivateProfileInt("ASPECT", "Mode", aspect_mode, szIniFile);
-	// END MRS 9/2/00
-	WritePrivateProfileInt("ASPECT", "LuminanceThreshold", LuminanceThreshold, szIniFile);
-	WritePrivateProfileInt("ASPECT", "IgnoreNonBlackPixels", IgnoreNonBlackPixels, szIniFile);
-	WritePrivateProfileInt("ASPECT", "AutoDetectAspect", AutoDetectAspect, szIniFile);
-	WritePrivateProfileInt("ASPECT", "ZoomInFrameCount", ZoomInFrameCount, szIniFile);
-	WritePrivateProfileInt("ASPECT", "AspectHistoryTime", AspectHistoryTime, szIniFile);
-	WritePrivateProfileInt("ASPECT", "AspectConsistencyTime", AspectConsistencyTime, szIniFile);
-	WritePrivateProfileInt("ASPECT", "VerticalPos", VerticalPos, szIniFile);
-	WritePrivateProfileInt("ASPECT", "HorizontalPos", HorizontalPos, szIniFile);
 }
 
 void WritePrivateProfileInt(LPCTSTR lpAppName,  LPCTSTR lpKeyName,  int nValue, LPCTSTR lpFileName)
@@ -753,6 +496,7 @@ void Setting_SetupControl(SETTING* pSetting, HWND hControl)
 void Setting_ReadFromIni(SETTING* pSetting)
 {
 	long nValue;
+
 	if(pSetting->szIniSection != NULL)
 	{
 		nValue = GetPrivateProfileInt(pSetting->szIniSection, pSetting->szIniEntry, pSetting->MinValue - 100, szIniFile);
@@ -761,7 +505,7 @@ void Setting_ReadFromIni(SETTING* pSetting)
 			nValue = pSetting->Default;
 		}
 		Setting_SetValue(pSetting, nValue);
-		pSetting->bHasChanged = FALSE;
+		pSetting->OriginalValue = *pSetting->pValue;
 	}
 }
 
@@ -769,7 +513,7 @@ void Setting_WriteToIni(SETTING* pSetting)
 {
 	if(pSetting->szIniSection != NULL)
 	{
-		if(pSetting->bHasChanged)
+		if(pSetting->OriginalValue != *pSetting->pValue)
 		{
 			if(pSetting->Default != *pSetting->pValue)
 			{
@@ -782,7 +526,6 @@ void Setting_WriteToIni(SETTING* pSetting)
 		}
 	}
 }
-
 
 void Setting_OSDShow(SETTING* pSetting, HWND hWnd)
 {
@@ -805,13 +548,90 @@ void Setting_OSDShow(SETTING* pSetting, HWND hWnd)
 	}
 	OSD_ShowText(hWnd, szBuffer, 0);
 }
+//---------------------------------------------------------------------------
+// This function allows for accelerated slider adjustments
+// For example, adjusting Contrast or Brightness faster the longer 
+// you hold down the adjustment key.
+int GetCurrentAdjustmentStepCount()
+{
+    static DWORD        dwLastTick = 0;
+    static DWORD        dwFirstTick = 0;
+    static DWORD        dwTaps = 0;
+    DWORD               dwTick;
+    DWORD               dwElapsedSinceLastCall;
+    DWORD               dwElapsedSinceFirstTick;
+    int                 nStepCount;
+
+    dwTick = GetTickCount();
+    dwElapsedSinceLastCall = dwTick - dwLastTick;
+    dwElapsedSinceFirstTick = dwTick - dwFirstTick;
+
+    if ((dwTaps < ADJ_MINIMUM_REPEAT_BEFORE_ACCEL) &&
+        (dwElapsedSinceLastCall < ADJ_BUTTON_REPRESS_REPEAT_DELAY))
+    {
+        // Ensure that the button or keypress is repeated or tapped
+        // a minimum number of times before acceleration begins
+        dwFirstTick = dwTick;
+        nStepCount = 1;
+    }
+    if (dwElapsedSinceLastCall < ADJ_KEYB_TYPEMATIC_REPEAT_DELAY)
+    {
+        // This occurs if the end-user is holding down a keyboard key.
+        // The longer the time has elapsed since the keyboard key has
+        // been held down, the bigger the adjustment steps become, up to a maximum.
+        nStepCount = 1 + (dwElapsedSinceFirstTick / ADJ_KEYB_TYPEMATIC_ACCEL_STEP);
+        if (nStepCount > ADJ_KEYB_TYPEMATIC_MAX_STEP)
+        {
+            nStepCount = ADJ_KEYB_TYPEMATIC_MAX_STEP;
+        }
+    }
+    else if (dwElapsedSinceLastCall < ADJ_BUTTON_REPRESS_REPEAT_DELAY)
+    {
+        // This occurs if the end-user is tapping a button repeatedly
+        // such as on a handheld remote control, when a universal remote
+        // is programmed with a keypress.  Most remotes cannot repeat 
+        // a keypress automatically, so the end user must tap the key.
+        // The longer the time has elapsed since the first button press,
+        // the bigger the adjustment steps become, up to a maximum.
+        nStepCount = 1 + (dwElapsedSinceFirstTick / ADJ_BUTTON_REPRESS_ACCEL_STEP);
+        if (nStepCount > ADJ_BUTTON_REPRESS_MAX_STEP)
+        {
+            nStepCount = ADJ_BUTTON_REPRESS_MAX_STEP;
+        }
+    }
+    else
+    {
+        // The keypress or button press is no longer consecutive, 
+        // so reset adjustment step.
+        dwFirstTick = dwTick;
+        nStepCount = 1;
+        dwTaps = 0;
+    }
+    dwTaps++;
+    dwLastTick = dwTick;
+    return nStepCount;
+}
 
 void Setting_Up(SETTING* pSetting)
 {
+    int nStep = 0;
+
+    if (*pSetting->pValue < pSetting->MaxValue)
+    {
+        nStep = GetCurrentAdjustmentStepCount();
+		Setting_SetValue(pSetting, *pSetting->pValue + nStep);
+    }
 }
 
 void Setting_Down(SETTING* pSetting)
 {
+    int nStep = 0;
+
+    if (*pSetting->pValue > pSetting->MinValue)
+    {
+        nStep = GetCurrentAdjustmentStepCount();
+		Setting_SetValue(pSetting, *pSetting->pValue - nStep);
+    }
 }
 
 

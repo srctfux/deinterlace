@@ -267,7 +267,19 @@ SOURCE=.\Deinterlace.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\DI_Adaptive.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\DI_BlendedClip.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\DI_BobAndWeave.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\DI_TwoFrame.h
 # End Source File
 # Begin Source File
 

@@ -82,6 +82,7 @@
 #include "FD_60Hz.h"
 #include "FD_50Hz.h"
 #include "FD_Common.h"
+#include "DI_BobAndWeave.h"
 
 // Thread related variables
 BOOL                bStopThread = FALSE;
@@ -91,7 +92,7 @@ HANDLE              OutThread;
 // Dynamically updated variables
 ePULLDOWNMODES      gPulldownMode = VIDEO_MODE_2FRAME;
 int                 CurrentFrame=0;
-DWORD               dwLastFlipTicks = -1;
+BOOL                bAutoDetectMode = TRUE;
 
 
 // TRB 10/28/00 changes, parms, and new fields for sync problem fixes
@@ -106,7 +107,6 @@ BOOL bIsOddField = FALSE;
 
 // FIXME: should be able to get of this variable
 long OverlayPitch = 0;
-
 
 ///////////////////////////////////////////////////////////////////////////////
 void Start_Thread()
@@ -167,6 +167,28 @@ void Stop_Thread()
 	}
 }
 
+void Pause_Capture()
+{
+	bIsPaused = TRUE;
+}
+
+void UnPause_Capture()
+{
+	bIsPaused = FALSE;
+}
+
+void Pause_Toggle_Capture()
+{
+	if(bIsPaused)
+	{
+		UnPause_Capture();
+	}
+	else
+	{
+		Pause_Capture();
+	}
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 void Start_Capture()
 {
@@ -181,6 +203,9 @@ void Start_Capture()
 	BT848_CreateRiscCode(nFlags);
 	BT848_MaskDataByte(BT848_CAP_CTL, (BYTE) nFlags, (BYTE) 0x0f);
 	BT848_SetDMA(TRUE);
+
+	// ame sure half heigt modes are set correctly
+	SetDeinterlaceMode(gPulldownMode);
 
 	Start_Thread();
 }
@@ -255,27 +280,6 @@ BOOL WaitForNextField(BOOL LastField)
 	}
 
 	return bIsOddField;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-void SetupProcessorAndThread()
-{
-	DWORD rc;
-	int ProcessorMask;
-
-	ProcessorMask = 1 << (DecodeProcessor);
-	rc = SetThreadAffinityMask(GetCurrentThread(), ProcessorMask);
-	
-	if (ThreadClassId == 0)
-		SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_BELOW_NORMAL);
-	else if (ThreadClassId == 1)
-		SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
-	else if (ThreadClassId == 2)
-		SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
-	else if (ThreadClassId == 3)
-		SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
-	else if (ThreadClassId == 4)
-		SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -378,7 +382,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 	}
 
 	// Sets processor Affinity and Thread priority according to menu selection
-	SetupProcessorAndThread();
+	SetThreadProcessorAndPriority();
 
 	// Set up 5 sets of pointers to the start of odd and even lines
 	for (j = 0; j < 5; j++)
@@ -589,17 +593,9 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 						FlipFlag |= (info.IsOdd)?DDFLIP_ODD:DDFLIP_EVEN;
 					}
 					FlipResult = IDirectDrawSurface_Flip(lpDDOverlay, NULL, FlipFlag); 
-					LOG(" Flip ms (%dms)", timeGetTime() % 1000);
+
+					// save the time of the last flip
 					FlipTicks = GetTickCount();
-					if (dwLastFlipTicks > -1 && FlipTicks - dwLastFlipTicks > (1000 / 23))
-					{
-						// We should always be running at 24fps or greater.  Check for
-						// 23fps instead to allow some wiggle room, but if more than
-						// 1/23 of a second has passed since the last flip, something's
-						// screwy.
-						LOG(" Long time since last flip (%dms)", dwLastFlipTicks - FlipTicks);
-					}
-					dwLastFlipTicks = FlipTicks;
 				}
 			}
 		}
@@ -607,7 +603,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 		// save the last pulldown mode so that we know if its changed
 		PrevPulldownMode = gPulldownMode;
 
-		if (bDisplayStatusBar == TRUE)
+		if (IsStatusBarVisible())
 		{
 			if (dwLastSecondTicks + 1000 < GetTickCount())
 			{
@@ -620,6 +616,96 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 	}
 
 	BT848_SetDMA(FALSE);
+
+	// if we are in autodect mode we don't want to remember the current film mode
+	// so return to the current fallback mode instead.
+	if(bAutoDetectMode && DeintMethods[gPulldownMode].bIsFilmMode)
+	{
+		if(TVSettings[TVTYPE].Is25fps)
+		{
+			gPulldownMode = Setting_GetValue(FD50_GetSetting(PALFILMFALLBACKMODE));
+		}
+		else
+		{
+			gPulldownMode = Setting_GetValue(FD60_GetSetting(NTSCFILMFALLBACKMODE));
+		}
+	}
+
 	ExitThread(0);
 	return 0;
+}
+
+////////////////////////////////////////////////////////////////////////////
+// Start of Settings related code
+/////////////////////////////////////////////////////////////////////////////
+SETTING OutThreadsSettings[OUTTHREADS_SETTING_LASTONE] =
+{
+	{
+		"Hurry When Late", YESNO, 0, &Hurry_When_Late,
+		FALSE, 0, 1, 0, NULL,
+		"Threads", "Hurry_When_Late", NULL,
+	},
+	{
+		"Wait For Flip", YESNO, 0, &Wait_For_Flip,
+		TRUE, 0, 1, 0, NULL,
+		"Threads", "Wait_For_Flip", NULL,
+	},
+	{
+		"Do Accurate Flips", YESNO, 0, &DoAccurateFlips,
+		TRUE, 0, 1, 0, NULL,
+		"Threads", "DoAccurateFlips", NULL,
+	},
+	{
+		"Sleep Interval", SLIDER, 0, &Sleep_Interval,
+		0, 0, 100, 0, NULL,
+		"Threads", "Sleep_Interval", NULL,
+	},
+	{
+		"Auto Detect Mode", YESNO, 0, &bAutoDetectMode,
+		TRUE, 0, 1, 0, NULL,
+		"Pulldown", "bAutoDetectMode", NULL,
+	},
+	{
+		"Pulldown Mode", ITEMFROMLIST, 0, &gPulldownMode,
+		VIDEO_MODE_2FRAME, 0, PULLDOWNMODES_LAST_ONE - 1, 1, DeintModeNames,
+		"Deinterlace", "DeinterlaceMode", NULL,
+	},
+
+};
+
+SETTING* OutThreads_GetSetting(OUTTHREADS_SETTING Setting)
+{
+	if(Setting > -1 && Setting < OUTTHREADS_SETTING_LASTONE)
+	{
+		return &(OutThreadsSettings[Setting]);
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+void OutThreads_ReadSettingsFromIni()
+{
+	int i;
+	for(i = 0; i < OUTTHREADS_SETTING_LASTONE; i++)
+	{
+		Setting_ReadFromIni(&(OutThreadsSettings[i]));
+	}
+}
+
+void OutThreads_WriteSettingsToIni()
+{
+	int i;
+	for(i = 0; i < OUTTHREADS_SETTING_LASTONE; i++)
+	{
+		Setting_WriteToIni(&(OutThreadsSettings[i]));
+	}
+}
+
+
+void OutThreads_SetMenu(HMENU hMenu)
+{
+	CheckMenuItem(hMenu, IDM_CAPTURE_PAUSE, bIsPaused?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_AUTODETECT, bAutoDetectMode?MF_CHECKED:MF_UNCHECKED);
 }

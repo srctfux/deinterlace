@@ -42,13 +42,26 @@
 typedef enum
 {
 	OVERSCAN,
+	SOURCE_ASPECT,
+	CUSTOM_SOURCE_ASPECT,
+	TARGET_ASPECT,
+	CUSTOM_TARGET_ASPECT,
+	ASPECT_MODE,
+	LUMINANCETHRESHOLD,
+	IGNORENONBLACKPIXELS,
+	AUTODETECTASPECT,
+	ZOOMINFRAMECOUNT,
+	ASPECTHISTORYTIME,
+	ASPECTCONSISTENCYTIME,
+	VERTICALPOS,
+	HORIZONTALPOS,
 	ASPECT_SETTING_LASTONE,
 } ASPECT_SETTING;
 
 // Get Hold of the AspectRatio.c file settings
 SETTING* Aspect_GetSetting(ASPECT_SETTING Setting);
-void Aspect_ReadSetttingsFromIni();
-void Aspect_WriteSetttingsToIni();
+void Aspect_ReadSettingsFromIni();
+void Aspect_WriteSettingsToIni();
 
 #define DEFAULT_OVERSCAN 4
 
@@ -69,22 +82,12 @@ typedef enum
 } HORZ_POS;
 
 int     ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID);
-void    SetMenuAspectRatio(HWND hWnd);
-void    UpdateWindowState();
+void    AspectRatio_SetMenu(HMENU hMenu);
 void    WorkoutOverlaySize();
 void    PaintColorkey(HWND hWnd, BOOL bEnable);
 int		FindAspectRatio(short** EvenField, short** OddField);
 void	AdjustAspectRatio(short** EvenField, short** OddField);
 void	SetHalfHeight(int IsHalfHeight);
 void	GetSourceRect(RECT *rect);
-
-extern long LuminanceThreshold;
-extern long IgnoreNonBlackPixels;
-extern long ZoomInFrameCount;
-extern long AutoDetectAspect;
-extern long AspectConsistencyTime;
-extern long AspectHistoryTime;
-extern VERT_POS VerticalPos;
-extern HORZ_POS HorizontalPos;
 
 #endif

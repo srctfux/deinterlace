@@ -26,6 +26,10 @@
 #include "stdafx.h"
 #include "deinterlace.h"
 #include "cpu.h"
+#include "DI_TwoFrame.h"
+
+long TwoFrameTemporalTolerance = 300;
+long TwoFrameSpatialTolerance = 600;
 
 static BOOL TwoFrameSSE(DEINTERLACE_INFO *info);
 
@@ -100,9 +104,9 @@ BOOL DeinterlaceFieldTwoFrame(DEINTERLACE_INFO *info)
 		return FALSE;
 	}
 
-	qwSpatialTolerance = SpatialTolerance / 4;		// divide by 4 because of squaring behavior, see below
+	qwSpatialTolerance = TwoFrameSpatialTolerance / 4;		// divide by 4 because of squaring behavior, see below
 	qwSpatialTolerance += (qwSpatialTolerance << 48) + (qwSpatialTolerance << 32) + (qwSpatialTolerance << 16);
-	qwTemporalTolerance = TemporalTolerance / 4;
+	qwTemporalTolerance = TwoFrameTemporalTolerance / 4;
 	qwTemporalTolerance += (qwTemporalTolerance << 48) + (qwTemporalTolerance << 32) + (qwTemporalTolerance << 16);
 
 	// copy first even line no matter what, and the first odd line if we're
@@ -172,3 +176,49 @@ BOOL DeinterlaceFieldTwoFrame(DEINTERLACE_INFO *info)
 	return TRUE;
 }
 
+////////////////////////////////////////////////////////////////////////////
+// Start of Settings related code
+/////////////////////////////////////////////////////////////////////////////
+SETTING DI_TwoFrameSettings[DI_TWOFRAME_SETTING_LASTONE] =
+{
+	{
+		"2 Frame Spatial Tolerance", SLIDER, 0, &TwoFrameSpatialTolerance,
+		600, 0, 5000, 50, NULL,
+		"Deinterlace", "TwoFrameSpatialTolerance", NULL,
+	},
+	{
+		"2 Frame Temporal Tolerance", SLIDER, 0, &TwoFrameTemporalTolerance,
+		300, 0, 5000, 50, NULL,
+		"Deinterlace", "TwoFrameTemporalTolerance", NULL,
+	},
+};
+
+SETTING* DI_TwoFrame_GetSetting(DI_TWOFRAME_SETTING Setting)
+{
+	if(Setting > -1 && Setting < DI_TWOFRAME_SETTING_LASTONE)
+	{
+		return &(DI_TwoFrameSettings[Setting]);
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+void DI_TwoFrame_ReadSettingsFromIni()
+{
+	int i;
+	for(i = 0; i < DI_TWOFRAME_SETTING_LASTONE; i++)
+	{
+		Setting_ReadFromIni(&(DI_TwoFrameSettings[i]));
+	}
+}
+
+void DI_TwoFrame_WriteSettingsToIni()
+{
+	int i;
+	for(i = 0; i < DI_TWOFRAME_SETTING_LASTONE; i++)
+	{
+		Setting_WriteToIni(&(DI_TwoFrameSettings[i]));
+	}
+}

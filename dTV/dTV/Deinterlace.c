@@ -44,14 +44,22 @@
 #include "cpu.h"
 #include "bt848.h"
 #include "dTV.h"
+#include "OutThreads.h"
+#include "FD_50Hz.h"
+#include "FD_60Hz.h"
 
-long BitShift = 13;
-long EdgeDetect = 625;
-long JaggieThreshold = 73;
-long DiffThreshold = 224;
-long TemporalTolerance = 300;
-long SpatialTolerance = 600;
-long SimilarityThreshold = 25;
+DEINTERLACE_FUNC Bob;
+DEINTERLACE_FUNC Weave;
+DEINTERLACE_FUNC DeinterlaceFieldWeave;
+DEINTERLACE_FUNC DeinterlaceFieldBob;
+DEINTERLACE_FUNC DeinterlaceFieldTwoFrame;
+DEINTERLACE_FUNC BlendedClipping;
+DEINTERLACE_FUNC HalfHeightBoth;
+DEINTERLACE_FUNC HalfHeightEvenOnly;
+DEINTERLACE_FUNC HalfHeightOddOnly;
+DEINTERLACE_FUNC FilmModePAL;
+DEINTERLACE_FUNC FilmModeNTSC;
+DEINTERLACE_FUNC AdaptiveDeinterlace;
 
 DEINTERLACE_METHOD DeintMethods[PULLDOWNMODES_LAST_ONE] =
 {
@@ -90,6 +98,8 @@ DEINTERLACE_METHOD DeintMethods[PULLDOWNMODES_LAST_ONE] =
 	// ADAPTIVE
 	{"Adaptive", NULL, FALSE, FALSE, AdaptiveDeinterlace, 50, 60},
 };
+
+char* DeintModeNames[PULLDOWNMODES_LAST_ONE];
 
 /////////////////////////////////////////////////////////////////////////////
 // memcpyMMX
@@ -198,5 +208,66 @@ EndCopyLoopSSE:
 		emms
 	}
 }
-
 #endif
+
+////////////////////////////////////////////////////////////////////////////
+// Start of Settings related code
+// there are no settings at the moment but here is a good place to set
+// up the DeintModeNames array used where modes are to be selected
+/////////////////////////////////////////////////////////////////////////////
+SETTING* Deinterlace_GetSetting(DEINTERLACE_SETTING Setting)
+{
+	return NULL;
+}
+
+void Deinterlace_ReadSettingsFromIni()
+{
+	int i;
+	for(i = 0; i < PULLDOWNMODES_LAST_ONE; i++)
+	{
+		DeintModeNames[i] = DeintMethods[i].szName;
+	}
+}
+
+void Deinterlace_WriteSettingsToIni()
+{
+}
+
+void Deinterlace_SetMenu(HMENU hMenu)
+{
+	ePULLDOWNMODES ModeToShow;
+
+	if(Setting_GetValue(OutThreads_GetSetting(AUTODETECT)))
+	{
+		if(TVSettings[TVTYPE].Is25fps)
+		{
+			ModeToShow = Setting_GetValue(FD50_GetSetting(PALFILMFALLBACKMODE));
+		}
+		else
+		{
+			ModeToShow = Setting_GetValue(FD60_GetSetting(NTSCFILMFALLBACKMODE));
+		}
+	}
+	else
+	{
+		ModeToShow = gPulldownMode;
+	}
+
+	CheckMenuItem(hMenu, IDM_VIDEO_BOB, (ModeToShow == VIDEO_MODE_BOB) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_VIDEO_WEAVE, (ModeToShow == VIDEO_MODE_WEAVE) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_VIDEO_2FRAME, (ModeToShow == VIDEO_MODE_2FRAME) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_WEAVE, (ModeToShow == SIMPLE_WEAVE) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_BOB, (ModeToShow == SIMPLE_BOB) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_SCALER_BOB, (ModeToShow == SCALER_BOB) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_22PULLODD, (ModeToShow == FILM_22_PULLDOWN_ODD) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_22PULLEVEN, (ModeToShow == FILM_22_PULLDOWN_EVEN) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_32PULL1, (ModeToShow == FILM_32_PULLDOWN_0) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_32PULL2, (ModeToShow == FILM_32_PULLDOWN_1) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_32PULL3, (ModeToShow == FILM_32_PULLDOWN_2) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_32PULL4, (ModeToShow == FILM_32_PULLDOWN_3) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_32PULL5, (ModeToShow == FILM_32_PULLDOWN_4) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_ODD_ONLY, (ModeToShow == ODD_ONLY) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_EVEN_ONLY, (ModeToShow == EVEN_ONLY) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_BLENDED_CLIP, (ModeToShow == BLENDED_CLIP) ?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_ADAPTIVE, (ModeToShow == ADAPTIVE) ?MF_CHECKED:MF_UNCHECKED);
+}

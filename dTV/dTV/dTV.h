@@ -38,15 +38,43 @@
 #ifndef __DTV_H___
 #define __DTV_H___
 
+#include "settings.h"
+
+typedef enum
+{
+	STARTLEFT = 0,
+	STARTTOP,
+	STARTWIDTH,
+	STARTHEIGHT,
+	ALWAYSONTOP,
+	DISPLAYSPLASHSCREEN,
+	ISFULLSCREEN,
+	FORCEFULLSCREEN,
+	SHOWSTATUSBAR,
+	SHOWMENU,
+	WINDOWPROCESSOR,
+	THREADPROCESSOR,
+	WINDOWPRIORITY,
+	THREADPRIORITY,
+	DTV_SETTING_LASTONE,
+} DTV_SETTING;
+
+// Get Hold of the dTV.c file settings
+SETTING* dTV_GetSetting(DTV_SETTING Setting);
+void dTV_ReadSettingsFromIni();
+void dTV_WriteSettingsToIni();
+
+
 void ChangeChannel(int NewChannel);
 
-void SetupProcessorAndThread();
+void SetThreadProcessorAndPriority();
 
 LONG APIENTRY MainWndProc(HWND, UINT, UINT, LONG);
 
 void MainWndOnCreate(HWND hWnd);
 void MainWndOnInitBT(HWND hWnd);
 void SaveWindowPos(HWND hWnd);
+void UpdateWindowState();
 void SetMenuAnalog();
 void CleanUpMemory();
 
@@ -54,10 +82,7 @@ void Overlay_Stop(HWND hWnd);
 void Overlay_Start(HWND hWnd);
 void ShowText(HWND hWnd, LPCTSTR szText);
 void OSD_ShowVideoSource(HWND hWnd, int nVideoSource);
-
-int GetCurrentAdjustmentStepCount();
-int AdjustSliderUp(int * pnValue, int nUpper);
-int AdjustSliderDown(int * pnValue, int nLower);
+BOOL IsStatusBarVisible();
 
 #define TIMER_STATUS        1
 #define TIMER_STATUS_MS     2000
@@ -74,28 +99,12 @@ int AdjustSliderDown(int * pnValue, int nLower);
 extern HANDLE hInst;
 extern HWND hWnd;
 
-extern int DecodeProcessor;
-extern int MainProcessor;
-
 extern int CurrentProgramm;
-
-extern int emsizex;
-extern int emsizey;
-extern int emstartx;
-extern int emstarty;
 
 extern int pgsizex;
 extern int pgsizey;
 extern int pgstartx;
 extern int pgstarty;
-
-extern BOOL bAlwaysOnTop;
-extern BOOL bIsFullScreen;
-extern BOOL bDisplayStatusBar;
-extern BOOL Show_Menu;
-
-extern int PriorClassId;
-extern int ThreadClassId;
 
 extern int AudioSource;
 

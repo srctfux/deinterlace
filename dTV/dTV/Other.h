@@ -38,6 +38,20 @@
 #ifndef __OTHER_H___
 #define __OTHER_H___
 
+#include "settings.h"
+
+typedef enum
+{
+	BACKBUFFERS = 0,
+	OVERLAYCOLOR,
+	OTHER_SETTING_LASTONE,
+} OTHER_SETTING;
+
+// Get Hold of the Other.c file settings
+SETTING* Other_GetSetting(OTHER_SETTING Setting);
+void Other_ReadSettingsFromIni();
+void Other_WriteSettingsToIni();
+
 #define DTV_MAX_WIDTH 768
 #define DTV_MAX_HEIGHT 576
 
@@ -49,17 +63,13 @@ BOOL Overlay_Create();
 void Overlay_Clean();
 BOOL Overlay_Destroy();
 DWORD Overlay_ColorMatch(LPDIRECTDRAWSURFACE pdds, COLORREF rgb);
+COLORREF Overlay_GetColor();
 void SaveStill();
 
 extern DWORD DestSizeAlign;
 extern DWORD SrcSizeAlign;
-extern COLORREF OverlayColor;
 
 extern LPDIRECTDRAWSURFACE lpDDOverlay;
 extern LPDIRECTDRAWSURFACE lpDDOverlayBack;
-
-extern int	Back_Buffers;			// " , nuber of video back buffers
-extern COLORREF OverlayColor;
-
 
 #endif

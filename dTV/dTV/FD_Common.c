@@ -48,54 +48,11 @@
 
 // Settings
 // Default values which can be overwritten by the INI file
-long PulldownRepeatCount = 4;
-long PulldownRepeatCount2 = 2;
+long BitShift = 13;
+long CombEdgeDetect = 625;
+long CombJaggieThreshold = 73;
+long DiffThreshold = 224;
 
-long PulldownSwitchMax = 4;
-long PulldownSwitchInterval = 3000;
-
-// Module wide declarations
-DWORD ModeSwitchTimestamps[MAXMODESWITCHES];
-
-///////////////////////////////////////////////////////////////////////////////
-// ResetModeSwitches
-//
-// Resets the memory used by TrackModeSwitches
-///////////////////////////////////////////////////////////////////////////////
-void ResetModeSwitches()
-{
-	memset(&ModeSwitchTimestamps[0], 0, sizeof(ModeSwitchTimestamps));
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// TrackModeSwitches
-//
-// Called whenever we switch to a new film mode.  Keeps track of the frequency
-// of mode switches; if we switch too often, we want to drop down to video
-// mode since it means we're having trouble locking onto a particular film
-// mode.
-//
-// The settings PulldownSwitchInterval and PulldownSwitchMax control the
-// sensitivity of this algorithm.  To trigger video mode there need to be
-// PulldownSwitchMax mode switches in PulldownSwitchInterval milliseconds.
-///////////////////////////////////////////////////////////////////////////////
-BOOL TrackModeSwitches()
-{
-	static DWORD ModeSwitchTimestamps[MAXMODESWITCHES];
-	// Scroll the list of timestamps.  Most recent is first in the list.
-	memmove(&ModeSwitchTimestamps[1], &ModeSwitchTimestamps[0], sizeof(ModeSwitchTimestamps) - sizeof(DWORD));
-	ModeSwitchTimestamps[0] = GetTickCount();
-	
-	if (PulldownSwitchMax > 1 && PulldownSwitchInterval > 0 &&	// if the user wants to track switches
-		ModeSwitchTimestamps[PulldownSwitchMax - 1] > 0)		// and there have been enough of them
-	{
-		int ticks = ModeSwitchTimestamps[0] - ModeSwitchTimestamps[PulldownSwitchMax - 1];
-		if (ticks <= PulldownSwitchInterval)
-			return TRUE;
-	}
-
-	return FALSE;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // GetCombFactor
@@ -138,9 +95,9 @@ long GetCombFactor(DEINTERLACE_INFO *pInfo)
 	if (pInfo->OddLines[0] == NULL || pInfo->EvenLines[0] == NULL)
 		return 0x7fffffff;
 
-	qwEdgeDetect = EdgeDetect;
+	qwEdgeDetect = CombEdgeDetect;
 	qwEdgeDetect += (qwEdgeDetect << 48) + (qwEdgeDetect << 32) + (qwEdgeDetect << 16);
-	qwThreshold = JaggieThreshold;
+	qwThreshold = CombJaggieThreshold;
 	qwThreshold += (qwThreshold << 48) + (qwThreshold << 32) + (qwThreshold << 16);
 
 	for (Line = pInfo->SourceRect.top / 2; Line < pInfo->SourceRect.bottom / 2 - 1; ++Line)
@@ -318,4 +275,65 @@ Next8Bytes:
 	pInfo->FieldDiff = DiffFactor;
 	LOG(" Frame %d %c FD = %d", pInfo->CurrentFrame, pInfo->IsOdd ? 'O' : 'E', pInfo->FieldDiff);
 	return DiffFactor;
+}
+
+////////////////////////////////////////////////////////////////////////////
+// Start of Settings related code
+/////////////////////////////////////////////////////////////////////////////
+SETTING FD_CommonSettings[FD_COMMON_SETTING_LASTONE] =
+{
+	{
+		"Bit Shift", SLIDER, 0, &BitShift,
+		13, 0, 15, 2, NULL,
+		"Pulldown", "BitShift", NULL,
+
+	},
+	{
+		"Comb Edge Detect", SLIDER, 0, &CombEdgeDetect,
+		625, 0, 10000, 50, NULL,
+		"Pulldown", "EdgeDetect", NULL,
+
+	},
+	{
+		"Comb Jaggie Threshold", SLIDER, 0, &CombJaggieThreshold,
+		73, 0, 5000, 50, NULL,
+		"Pulldown", "JaggieThreshold", NULL,
+
+	},
+	{
+		"DiffThreshold", SLIDER, 0, &DiffThreshold,
+		224, 0, 5000, 50, NULL,
+		"Pulldown", "DiffThreshold", NULL,
+
+	},
+};
+
+SETTING* FD_Common_GetSetting(FD_COMMON_SETTING Setting)
+{
+	if(Setting > -1 && Setting < FD_COMMON_SETTING_LASTONE)
+	{
+		return &(FD_CommonSettings[Setting]);
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+void FD_Common_ReadSettingsFromIni()
+{
+	int i;
+	for(i = 0; i < FD_COMMON_SETTING_LASTONE; i++)
+	{
+		Setting_ReadFromIni(&(FD_CommonSettings[i]));
+	}
+}
+
+void FD_Common_WriteSettingsToIni()
+{
+	int i;
+	for(i = 0; i < FD_COMMON_SETTING_LASTONE; i++)
+	{
+		Setting_WriteToIni(&(FD_CommonSettings[i]));
+	}
 }

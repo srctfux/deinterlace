@@ -64,7 +64,7 @@ typedef struct
 {
 	char* szDisplayName;
 	SETTING_TYPE Type;
-	BOOL bHasChanged;
+	long OriginalValue;
 	long* pValue;
 	long Default;
 	long MinValue;
@@ -112,5 +112,20 @@ void WritePrivateProfileInt(LPCTSTR lpAppName,  LPCTSTR lpKeyName,  int nValue, 
 DWORD GetRefreshRate();
 
 #define INIFILE "dTV.ini"
+
+//---------------------------------------------------------------------------
+// 2000-12-19 Added by Mark Rejhon
+// These are constants for the GetCurrentAdjustmentStepCount()
+// function.  This is a feature to allow accelerated slider adjustments
+// For example, adjusting Contrast or Brightness faster the longer you
+// hold down the adjustment key.
+#define ADJ_MINIMUM_REPEAT_BEFORE_ACCEL     6      // Minimum number of taps before acceleration begins
+#define ADJ_KEYB_TYPEMATIC_REPEAT_DELAY     200    // Milliseconds threshold for consecutive keypress repeat
+#define ADJ_KEYB_TYPEMATIC_ACCEL_STEP       2000   // Milliseconds between each acceleration of adjustment
+#define ADJ_KEYB_TYPEMATIC_MAX_STEP         5      // Maximum adjustment step at one time
+#define ADJ_BUTTON_REPRESS_REPEAT_DELAY     400    // Milliseconds threshold for consecutive button repress
+#define ADJ_BUTTON_REPRESS_ACCEL_STEP       500    // Milliseconds between each acceleration of adjustment
+#define ADJ_BUTTON_REPRESS_MAX_STEP         15     // Maximum adjustment step at one time
+
 
 #endif

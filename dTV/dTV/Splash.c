@@ -34,7 +34,6 @@
 #define DOLOGGING
 #include "DebugLog.h"
 
-BOOL bDisplaySplashScreen = TRUE;
 HWND SplashWnd = NULL;
 
 BOOL APIENTRY SplashProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
@@ -62,23 +61,20 @@ BOOL APIENTRY SplashProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 
 void ShowSpashScreen()
 {
-	if (bDisplaySplashScreen)
-	{
-		SplashWnd = CreateDialog(hInst, "SPLASHBOX", NULL, SplashProc);
-	}
+	SplashWnd = CreateDialog(hInst, "SPLASHBOX", NULL, SplashProc);
 	SetWindowPos(SplashWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOCOPYBITS | SWP_NOSIZE);
 }
 
 
-void AddSplashTextLine(const char* szText, int Pause)
+void AddSplashTextLine(const char* szText)
 {
-	if(bDisplaySplashScreen)
+	if(SplashWnd)
 	{
 		int nItem;
 		nItem = ListBox_AddString(GetDlgItem(SplashWnd, IDC_LIST1), szText);
 		ListBox_SetCurSel(GetDlgItem(SplashWnd, IDC_LIST1), nItem);
 		InvalidateRect(GetDlgItem(SplashWnd, IDC_LIST1), NULL, TRUE);
-		Sleep(Pause);
+		Sleep(20);
 	}
 	LOG(szText);
 }

@@ -32,12 +32,17 @@
 #include "Status.h"
 #include "FD_60Hz.h"
 #include "FD_Common.h"
+#include "DI_Adaptive.h"
+#include "DI_BobAndWeave.h"
 
 long				StaticImageFieldCount = 100;
 long				LowMotionFieldCount = 4;
 ePULLDOWNMODES		StaticImageMode = SIMPLE_WEAVE;
 ePULLDOWNMODES		LowMotionMode = VIDEO_MODE_2FRAME;
 ePULLDOWNMODES		HighMotionMode = VIDEO_MODE_2FRAME;
+long				AdaptiveThres32Pulldown = 15;
+long				AdaptiveThresPulldownMismatch = 900;
+
 
 static ePULLDOWNMODES CurrentMode = PULLDOWNMODES_LAST_ONE;		// Will use HighMotionMode after ini file is read
 
@@ -102,14 +107,14 @@ BOOL AdaptiveDeinterlace(DEINTERLACE_INFO *info)
 	// so reset the match count and switch back
 	// to either low or high motion
 	CompareFields(info);
-    if(info->FieldDiff > Threshold32Pulldown)
+    if(info->FieldDiff > AdaptiveThres32Pulldown)
 	{
 		MATCH_COUNT = 0;
 
 		// If we're in still mode, it might be okay to drop to
 		// low-motion mode.
 		if (CurrentMode == StaticImageMode &&
-			info->FieldDiff < ThresholdPulldownMismatch)
+			info->FieldDiff < AdaptiveThresPulldownMismatch)
 		{
 			LOG(" Match count 0, switching to low-motion");
 			UpdateAdaptiveMode(LowMotionMode);
@@ -140,3 +145,74 @@ BOOL AdaptiveDeinterlace(DEINTERLACE_INFO *info)
 	return DeintMethods[CurrentMode].pfnAlgorithm(info);
 }
 
+////////////////////////////////////////////////////////////////////////////
+// Start of Settings related code
+/////////////////////////////////////////////////////////////////////////////
+SETTING DI_AdaptiveSettings[DI_ADAPTIVE_SETTING_LASTONE] =
+{
+	{
+		"Low Motion Field Count", SLIDER, 0, &LowMotionFieldCount,
+		4, 1, 1000, 50, NULL,
+		"Pulldown", "LowMotionFieldCount", NULL,
+	},
+	{
+		"Static Image Field Count", SLIDER, 0, &StaticImageFieldCount,
+		100, 1, 1000, 50, NULL,
+		"Pulldown", "StaticImageFieldCount", NULL,
+	},
+	{
+		"Static Image Mode", ITEMFROMLIST, 0, &StaticImageMode,
+		SIMPLE_WEAVE, 0, PULLDOWNMODES_LAST_ONE - 1, 1, DeintModeNames,
+		"Pulldown", "StaticImageMode", NULL,
+	},
+	{
+		"Low Motion Mode", ITEMFROMLIST, 0, &LowMotionMode,
+		VIDEO_MODE_2FRAME, 0, PULLDOWNMODES_LAST_ONE - 1, 1, DeintModeNames,
+		"Pulldown", "LowMotionMode", NULL,
+	},
+	{
+		"High Motion Mode", ITEMFROMLIST, 0, &HighMotionMode,
+		VIDEO_MODE_2FRAME, 0, PULLDOWNMODES_LAST_ONE - 1, 1, DeintModeNames,
+		"Pulldown", "HighMotionMode", NULL,
+	},
+	{
+		"Adaptive Threshold 3:2 Pulldown", SLIDER, 0, &AdaptiveThres32Pulldown,
+		15, 1, 5000, 10, NULL,
+		"Pulldown", "AdaptiveThres32Pulldown", NULL,
+	},
+	{
+		"Adaptive Threshold 3:2 Pulldown Mismatch", SLIDER, 0, &AdaptiveThresPulldownMismatch,
+		900, 1, 10000, 100, NULL,
+		"Pulldown", "AdaptiveThresPulldownMismatch", NULL,
+	},
+};
+
+SETTING* DI_Adaptive_GetSetting(DI_ADAPTIVE_SETTING Setting)
+{
+	if(Setting > -1 && Setting < DI_ADAPTIVE_SETTING_LASTONE)
+	{
+		return &(DI_AdaptiveSettings[Setting]);
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+void DI_Adaptive_ReadSettingsFromIni()
+{
+	int i;
+	for(i = 0; i < DI_ADAPTIVE_SETTING_LASTONE; i++)
+	{
+		Setting_ReadFromIni(&(DI_AdaptiveSettings[i]));
+	}
+}
+
+void DI_Adaptive_WriteSettingsToIni()
+{
+	int i;
+	for(i = 0; i < DI_ADAPTIVE_SETTING_LASTONE; i++)
+	{
+		Setting_WriteToIni(&(DI_AdaptiveSettings[i]));
+	}
+}

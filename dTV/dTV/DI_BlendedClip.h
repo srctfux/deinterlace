@@ -27,27 +27,31 @@
 #ifndef __BLENDEDCLIP_H___
 #define __BLENDEDCLIP_H___
 
-BOOL APIENTRY BlendedClipProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
+#include "settings.h"
 
-// Add some global fields for Blended Clip Deinterlace - Tom Barry 11/05/00
-// These should be treated as part of that, if it ever becomes a class.
-extern	int		BlcMinimumClip;
-extern	UINT	BlcPixelMotionSense;
-extern	int		BlcRecentMotionSense;
-extern	UINT	BlcMotionAvgPeriod;
-extern	UINT	BlcPixelCombSense;
-extern	UINT	BlcRecentCombSense;
-extern	UINT	BlcCombAvgPeriod;
-extern	UINT	BlcHighCombSkip;
-extern	UINT	BlcLowMotionSkip;
-extern  BOOL	BlcUseInterpBob;
-extern  BOOL	BlcBlendChroma;
-extern  BOOL	BlcWantsToFlip;
-extern  UINT	BlcAverageMotions[5][2];
-extern  UINT	BlcTotalAverageMotion;
-extern  UINT	BlcAverageCombs[5][2];
-extern  UINT	BlcTotalAverageComb;
-extern  BOOL	BlcShowControls;
-extern  UINT	BlcVerticalSmoothing;
+typedef enum
+{
+	BLCMINIMUMCLIP = 0,
+	BLCPIXELMOTIONSENSE,
+	BLCRECENTMOTIONSENSE,
+	BLCMOTIONAVGPERIOD,
+	BLCPIXELCOMBSENSE,
+	BLCRECENTCOMBSENSE,
+	BLCCOMBAVGPERIOD,
+	BLCHIGHCOMBSKIP,
+	BLCLOWMOTIONSKIP,
+	BLCVERTICALSMOOTHING,
+	BLCUSEINTERPBOB,
+	BLCBLENDCHROMA,
+	BLCSHOWCONTROLS,
+	DI_BLENDEDCLIP_SETTING_LASTONE,
+} DI_BLENDEDCLIP_SETTING;
+
+// Get Hold of the DI_Adaptive.c file settings
+SETTING* DI_BlendedClip_GetSetting(DI_BLENDEDCLIP_SETTING Setting);
+void DI_BlendedClip_ReadSettingsFromIni();
+void DI_BlendedClip_WriteSettingsToIni();
+
+void BlendedClip_ShowDlg(HINSTANCE hInst, HWND hWnd);
 
 #endif

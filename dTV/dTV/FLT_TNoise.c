@@ -21,9 +21,9 @@
 #include "cpu.h"
 #include "FLT_TNoise.h"
 
+BOOL UseTemporalNoiseFilter = FALSE;
 long TemporalLuminanceThreshold = 10;	// Pixel luminance differences below this are considered noise.
 long TemporalChromaThreshold = 12;		// Pixel chroma differences below this are considered noise.
-BOOL UseTemporalNoiseFilter = FALSE;
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -91,4 +91,62 @@ BOOL NoiseFilter_Temporal(DEINTERLACE_INFO *info)
 	}
 
 	return TRUE;
+}
+
+////////////////////////////////////////////////////////////////////////////
+// Start of Settings related code
+/////////////////////////////////////////////////////////////////////////////
+SETTING FLT_TNoiseSettings[FLT_TNOISE_SETTING_LASTONE] =
+{
+	{
+		"Use Temporal Noise Filter", YESNO, 0, &UseTemporalNoiseFilter,
+		FALSE, 0, 1, 0, NULL,
+		"NoiseFilter", "UseTemporalNoiseFilter", NULL,
+	},
+	{
+		"Temporal Luminance Threshold", SLIDER, 0, &TemporalLuminanceThreshold,
+		10, 0, 255, 10, NULL,
+		"NoiseFilter", "TemporalLuminanceThreshold", NULL,
+	},
+	{
+		"TemporalChromaThreshold", SLIDER, 0, &TemporalChromaThreshold,
+		12, 0, 255, 10, NULL,
+		"NoiseFilter", "TemporalChromaThreshold", NULL,
+	},
+};
+
+SETTING* FLT_TNoise_GetSetting(FLT_TNOISE_SETTING Setting)
+{
+	if(Setting > -1 && Setting < FLT_TNOISE_SETTING_LASTONE)
+	{
+		return &(FLT_TNoiseSettings[Setting]);
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+void FLT_TNoise_ReadSettingsFromIni()
+{
+	int i;
+	for(i = 0; i < FLT_TNOISE_SETTING_LASTONE; i++)
+	{
+		Setting_ReadFromIni(&(FLT_TNoiseSettings[i]));
+	}
+}
+
+void FLT_TNoise_WriteSettingsToIni()
+{
+	int i;
+	for(i = 0; i < FLT_TNOISE_SETTING_LASTONE; i++)
+	{
+		Setting_WriteToIni(&(FLT_TNoiseSettings[i]));
+	}
+}
+
+
+void FLT_TNoise_SetMenu(HMENU hMenu)
+{
+	CheckMenuItem(hMenu, IDM_NOISE_FILTER, UseTemporalNoiseFilter ? MF_CHECKED : MF_UNCHECKED);
 }

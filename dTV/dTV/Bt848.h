@@ -82,13 +82,32 @@ typedef enum
 	SATURATIONU,
 	SATURATIONV,
 	BDELAY,
+	BTAGCDISABLE,
+	BTCRUSH,
+	BTEVENCHROMAAGC,
+	BTODDCHROMAAGC,
+	BTEVENLUMAPEAK,
+	BTODDLUMAPEAK,
+	BTFULLLUMARANGE,
+	BTEVENLUMADEC,
+	BTODDLUMADEC,
+	BTEVENCOMB,
+	BTODDCOMB,
+	BTCOLORBARS,
+	BTGAMMACORRECTION,
+	BTCORING,
+	BTHORFILTER,
+	BTVERTFILTER,
+	BTCOLORKILL,
+	BTWHITECRUSHUP,
+	BTWHITECRUSHDOWN,
 	BT848_SETTING_LASTONE,
 } BT848_SETTING;
 
 // Get Hold of the bt848.c file settings
 SETTING* BT848_GetSetting(BT848_SETTING Setting);
-void BT848_ReadSetttingsFromIni();
-void BT848_WriteSetttingsToIni();
+void BT848_ReadSettingsFromIni();
+void BT848_WriteSettingsToIni();
 
 // create new type for physical memory
 typedef unsigned long PHYS;
@@ -111,6 +130,8 @@ void BT848_SetDMA(BOOL bState);
 BOOL BT848_IsVideoPresent();
 void BT848_SetGeometryEvenOdd(BOOL bOdd, BYTE bVtc, int wHScale, int wVScale, int wHActive, int wVActive, int wHDelay, int wVDelay, BYTE bCrop);
 void BT848_Restart_RISC_Code();
+
+BOOL APIENTRY AdvVideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 
 // General read/write function
 #define BT848_ReadByte(dwOffset) memoryReadBYTE(dwOffset)
@@ -481,10 +502,6 @@ extern BOOL bSaveSettings;
 extern BYTE* pDisplay[5];
 extern BYTE* pVBILines[5];
 
-// MAE 2 Nov 2000 - Start of change for Macrovision fix
-extern long InitialBDelay;
-// MAE 2 Nov 2000 - End of change for Macrovision fix
-
 extern int TVTYPE;
 extern int VideoSource;
 
@@ -509,27 +526,5 @@ extern int CurrentY;
 extern int CurrentVBILines;
 
 extern struct TTVSetting TVSettings[];
-
-// Add some global fields for Adv Video Flags - Tom Barry 12/15/00
-extern  BYTE	BtAgcDisable;
-extern  BYTE	BtCrush;
-extern  BYTE	BtEvenChromaAGC;
-extern  BYTE	BtOddChromaAGC;
-extern  BYTE	BtEvenLumaPeak;
-extern  BYTE	BtOddLumaPeak;
-extern  BYTE	BtFullLumaRange;
-extern  BYTE	BtEvenLumaDec;
-extern  BYTE	BtOddLumaDec;
-extern  BYTE	BtEvenComb;
-extern  BYTE	BtOddComb;
-extern  BYTE	BtColorBars;
-extern  BYTE	BtGammaCorrection;
-extern	BYTE    BtCoring;
-extern  BYTE    BtHorFilter;
-extern	BYTE    BtVertFilter;
-extern	BYTE    BtColorKill;
-extern	BYTE    BtWhiteCrushUp;
-extern	BYTE    BtWhiteCrushDown;
-
 
 #endif

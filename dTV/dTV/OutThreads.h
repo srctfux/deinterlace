@@ -40,11 +40,32 @@
 #ifndef __OUTTHREADS_H___
 #define __OUTTHREADS_H___
 
+#include "settings.h"
 #include "deinterlace.h"
+
+typedef enum
+{
+	HURRYWHENLATE = 0,
+	WAITFORFLIP,
+	DOACCURATEFLIPS,
+	SLEEPINTERVAL,
+	AUTODETECT,
+	PULLDOWNMODE,
+	OUTTHREADS_SETTING_LASTONE,
+} OUTTHREADS_SETTING;
+
+// Get Hold of the OutThreads.c file settings
+SETTING* OutThreads_GetSetting(OUTTHREADS_SETTING Setting);
+void OutThreads_ReadSettingsFromIni();
+void OutThreads_WriteSettingsToIni();
+void OutThreads_SetMenu(HMENU hMenu);
 
 void Start_Capture();
 void Stop_Capture();
 void Reset_Capture();
+void Pause_Capture();
+void UnPause_Capture();
+void Pause_Toggle_Capture();
 
 void Start_Thread();
 void Stop_Thread();
@@ -60,17 +81,5 @@ char *DeinterlaceModeName(int mode);
 BYTE * LockOverlay();		// Lock overlay, returns ptr to buffer
 
 extern ePULLDOWNMODES gPulldownMode;
-extern ePULLDOWNMODES StaticImageMode;
-extern ePULLDOWNMODES LowMotionMode;
-extern ePULLDOWNMODES HighMotionMode;
-
-
-extern BOOL bIsPaused;
-
-extern DWORD dwLastFlipTicks;
-extern BOOL	Wait_For_Flip;          // User parm, default=TRUE
-extern BOOL	DoAccurateFlips;        // User parm, default=TRUE
-extern BOOL	Hurry_When_Late;        // " , default=FALSE, skip processing if behind
-extern long	Sleep_Interval;         // " , default=0, how long to wait for BT chip
 
 #endif

@@ -27,15 +27,26 @@
 #ifndef __FD_50HZ_H___
 #define __FD_50HZ_H___
 
+#include "settings.h"
 #include "deinterlace.h"
+
+typedef enum
+{
+	PULLDOWNTHRESHHOLDLOW = 0,
+	PULLDOWNTHRESHHOLDHIGH,
+	PALFILMFALLBACKMODE,
+	PALFILMREPEATCOUNT,
+	PALFILMREPEATCOUNT2,
+	FD50_SETTING_LASTONE,
+} FD50_SETTING;
+
+// Get Hold of the FD_50Hz.c file settings
+SETTING* FD50_GetSetting(FD50_SETTING Setting);
+void FD50_ReadSettingsFromIni();
+void FD50_WriteSettingsToIni();
 
 void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo);
 BOOL DoWeWantToFlipPAL(DEINTERLACE_INFO *pInfo);
 BOOL FilmModePAL(DEINTERLACE_INFO *pInfo);
-
-extern ePULLDOWNMODES gPALFilmFallbackMode;
-extern long PulldownThresholdLow;
-extern long PulldownThresholdHigh;
-
 
 #endif

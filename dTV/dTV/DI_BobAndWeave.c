@@ -26,7 +26,14 @@
 
 #include "stdafx.h"
 #include "deinterlace.h"
+#include "DI_BobAndWeave.h"
 #include "cpu.h"
+
+long EdgeDetect = 625;
+long JaggieThreshold = 73;
+long TemporalTolerance = 300;
+long SpatialTolerance = 600;
+long SimilarityThreshold = 25;
 
 void memcpyBOBMMX(void *Dest1, void *Dest2, void *Src, size_t nBytes);
 
@@ -491,4 +498,66 @@ BOOL Weave(DEINTERLACE_INFO *info)
 	}
 
 	return TRUE;
+}
+
+////////////////////////////////////////////////////////////////////////////
+// Start of Settings related code
+/////////////////////////////////////////////////////////////////////////////
+SETTING DI_BobWeaveSettings[DI_BOBWEAVE_SETTING_LASTONE] =
+{
+	{
+		"Weae Edge Detect", SLIDER, 0, &EdgeDetect,
+		625, 0, 10000, 50, NULL,
+		"Deinterlace", "EdgeDetect", NULL,
+	},
+	{
+		"Weave Jaggie Threshold", SLIDER, 0, &JaggieThreshold,
+		73, 0, 5000, 50, NULL,
+		"Deinterlace", "JaggieThreshold", NULL,
+	},
+	{
+		"Temporal Tolerance", SLIDER, 0, &TemporalTolerance,
+		300, 0, 5000, 50, NULL,
+		"Deinterlace", "TemporalTolerance", NULL,
+	},
+	{
+		"Spatial Tolerance", SLIDER, 0, &SpatialTolerance,
+		600, 0, 5000, 50, NULL,
+		"Deinterlace", "SpatialTolerance", NULL,
+	},
+	{
+		"Similarity Threshold", SLIDER, 0, &SimilarityThreshold,
+		25, 0, 255, 10, NULL,
+		"Deinterlace", "SimilarityThreshold", NULL,
+	},
+};
+
+SETTING* DI_BobWeave_GetSetting(DI_BOBWEAVE_SETTING Setting)
+{
+	if(Setting > -1 && Setting < DI_BOBWEAVE_SETTING_LASTONE)
+	{
+		return &(DI_BobWeaveSettings[Setting]);
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+void DI_BobWeave_ReadSettingsFromIni()
+{
+	int i;
+	for(i = 0; i < DI_BOBWEAVE_SETTING_LASTONE; i++)
+	{
+		Setting_ReadFromIni(&(DI_BobWeaveSettings[i]));
+	}
+}
+
+void DI_BobWeave_WriteSettingsToIni()
+{
+	int i;
+	for(i = 0; i < DI_BOBWEAVE_SETTING_LASTONE; i++)
+	{
+		Setting_WriteToIni(&(DI_BobWeaveSettings[i]));
+	}
 }

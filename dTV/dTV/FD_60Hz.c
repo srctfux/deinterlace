@@ -46,19 +46,63 @@
 #include "FD_Common.h"
 #define DOLOGGING
 #include "DebugLog.h"
+#include "DI_BobAndWeave.h"
 
 // Settings
 // Default values which can be overwritten by the INI file
-ePULLDOWNMODES      gNTSCFilmFallbackMode = ADAPTIVE;
-long                Threshold32Pulldown = 15;
-long                ThresholdPulldownMismatch = 900;
-long                ThresholdPulldownComb = 150;
-BOOL                bAutoDetectMode = TRUE;
-BOOL                bFallbackToVideo = TRUE;
+ePULLDOWNMODES gNTSCFilmFallbackMode = ADAPTIVE;
+long Threshold32Pulldown = 15;
+long ThresholdPulldownMismatch = 900;
+long ThresholdPulldownComb = 150;
+BOOL bFallbackToVideo = TRUE;
+long PulldownRepeatCount = 4;
+long PulldownRepeatCount2 = 2;
+long PulldownSwitchMax = 4;
+long PulldownSwitchInterval = 3000;
 
 // Module wide declarations
-long				NextPulldownRepeatCount = 0;    // for temporary increases of PullDownRepeatCount
+long NextPulldownRepeatCount = 0;    // for temporary increases of PullDownRepeatCount
+DWORD ModeSwitchTimestamps[MAXMODESWITCHES];
 
+///////////////////////////////////////////////////////////////////////////////
+// ResetModeSwitches
+//
+// Resets the memory used by TrackModeSwitches
+///////////////////////////////////////////////////////////////////////////////
+void ResetModeSwitches()
+{
+	memset(&ModeSwitchTimestamps[0], 0, sizeof(ModeSwitchTimestamps));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// TrackModeSwitches
+//
+// Called whenever we switch to a new film mode.  Keeps track of the frequency
+// of mode switches; if we switch too often, we want to drop down to video
+// mode since it means we're having trouble locking onto a particular film
+// mode.
+//
+// The settings PulldownSwitchInterval and PulldownSwitchMax control the
+// sensitivity of this algorithm.  To trigger video mode there need to be
+// PulldownSwitchMax mode switches in PulldownSwitchInterval milliseconds.
+///////////////////////////////////////////////////////////////////////////////
+BOOL TrackModeSwitches()
+{
+	static DWORD ModeSwitchTimestamps[MAXMODESWITCHES];
+	// Scroll the list of timestamps.  Most recent is first in the list.
+	memmove(&ModeSwitchTimestamps[1], &ModeSwitchTimestamps[0], sizeof(ModeSwitchTimestamps) - sizeof(DWORD));
+	ModeSwitchTimestamps[0] = GetTickCount();
+	
+	if (PulldownSwitchMax > 1 && PulldownSwitchInterval > 0 &&	// if the user wants to track switches
+		ModeSwitchTimestamps[PulldownSwitchMax - 1] > 0)		// and there have been enough of them
+	{
+		int ticks = ModeSwitchTimestamps[0] - ModeSwitchTimestamps[PulldownSwitchMax - 1];
+		if (ticks <= PulldownSwitchInterval)
+			return TRUE;
+	}
+
+	return FALSE;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // UpdateNTSCPulldownMode
@@ -111,7 +155,6 @@ void UpdateNTSCPulldownMode(DEINTERLACE_INFO *pInfo)
 		MISMATCH_COUNT = 0;
 		MATCH_COUNT = 0;
 		UpdatePulldownStatus();
-		dwLastFlipTicks = -1;
 		ResetModeSwitches();
 		return;
 	}
@@ -391,4 +434,94 @@ BOOL DoWeWantToFlipNTSC(DEINTERLACE_INFO *pInfo)
 		break;
 	}
 	return RetVal;
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+// Start of Settings related code
+/////////////////////////////////////////////////////////////////////////////
+SETTING FD60Settings[FD60_SETTING_LASTONE] =
+{
+	{
+		"NTSC Film Fallback Mode", ITEMFROMLIST, 0, &gNTSCFilmFallbackMode,
+		ADAPTIVE, 0, PULLDOWNMODES_LAST_ONE - 1, 1, DeintModeNames,
+		"Pulldown", "NTSCFilmFallbackMode", NULL,
+	},
+	{
+		"NTSC Pulldown Repeat Count In", SLIDER, 0, &PulldownRepeatCount,
+		4, 1, 10, 1, NULL,
+		"Pulldown", "PulldownRepeatCount", NULL,
+	},
+	{
+		"NTSC Pulldown Repeat Count Out", SLIDER, 0, &PulldownRepeatCount2,
+		2, 1, 10, 1, NULL,
+		"Pulldown", "PulldownRepeatCount2", NULL,
+	},
+	{
+		"Threshold 3:2 Pulldown", SLIDER, 0, &Threshold32Pulldown,
+		15, 1, 5000, 10, NULL,
+		"Pulldown", "Threshold32Pulldown", NULL,
+	},
+	{
+		"Threshold 3:2 Pulldown Mismatch", SLIDER, 0, &ThresholdPulldownMismatch,
+		900, 1, 10000, 100, NULL,
+		"Pulldown", "ThresholdPulldownMismatch", NULL,
+	},
+	{
+		"Threshold 3:2 Pulldown Comb", SLIDER, 0, &ThresholdPulldownComb,
+		150, 1, 5000, 50, NULL,
+		"Pulldown", "ThresholdPulldownComb", NULL,
+	},
+	{
+		"Fallback To Video", YESNO, 0, &bFallbackToVideo,
+		TRUE, 0, 1, 0, NULL,
+		"Pulldown", "bFallbackToVideo", NULL,
+	},
+	{
+		"Pulldown Switch Interval", SLIDER, 0, &PulldownSwitchInterval,
+		3000, 0, 10000, 1000, NULL,
+		"Pulldown", "PulldownSwitchInterval", NULL,
+
+	},
+	{
+		"Pulldown Switch Max", SLIDER, 0, &PulldownSwitchMax,
+		4, 0, 100, 10, NULL,
+		"Pulldown", "PulldownSwitchMax", NULL,
+
+	},
+};
+
+SETTING* FD60_GetSetting(FD60_SETTING Setting)
+{
+	if(Setting > -1 && Setting < FD60_SETTING_LASTONE)
+	{
+		return &(FD60Settings[Setting]);
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+void FD60_ReadSettingsFromIni()
+{
+	int i;
+	for(i = 0; i < FD60_SETTING_LASTONE; i++)
+	{
+		Setting_ReadFromIni(&(FD60Settings[i]));
+	}
+}
+
+void FD60_WriteSettingsToIni()
+{
+	int i;
+	for(i = 0; i < FD60_SETTING_LASTONE; i++)
+	{
+		Setting_WriteToIni(&(FD60Settings[i]));
+	}
+}
+
+void FD60_SetMenu(HMENU hMenu)
+{
+	CheckMenuItem(hMenu, IDM_FALLBACK, bFallbackToVideo?MF_CHECKED:MF_UNCHECKED);
 }

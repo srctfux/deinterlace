@@ -34,6 +34,21 @@
 #ifndef __DEINTERLACE_H___
 #define __DEINTERLACE_H___
 
+#include "settings.h"
+
+typedef enum
+{
+	DEINTERLACE_SETTING_LASTONE = 0,
+} DEINTERLACE_SETTING;
+
+// Get Hold of the Deinterlace.c file settings
+SETTING* Deinterlace_GetSetting(DEINTERLACE_SETTING Setting);
+void Deinterlace_ReadSettingsFromIni();
+void Deinterlace_WriteSettingsToIni();
+void Deinterlace_SetMenu(HMENU hMenu);
+
+
+
 // Deinterlace modes.  Since these modes are referred to by number in the
 // INI file, it's desirable to keep the numbers consistent between releases.
 // Otherwise users will end up in the wrong modes when they upgrade.  If
@@ -135,32 +150,12 @@ typedef struct
 
 extern DEINTERLACE_METHOD DeintMethods[PULLDOWNMODES_LAST_ONE];
 
-DEINTERLACE_FUNC Bob;
-DEINTERLACE_FUNC Weave;
-DEINTERLACE_FUNC DeinterlaceFieldWeave;
-DEINTERLACE_FUNC DeinterlaceFieldBob;
-DEINTERLACE_FUNC DeinterlaceFieldTwoFrame;
-DEINTERLACE_FUNC BlendedClipping;
-DEINTERLACE_FUNC HalfHeightBoth;
-DEINTERLACE_FUNC HalfHeightEvenOnly;
-DEINTERLACE_FUNC HalfHeightOddOnly;
-DEINTERLACE_FUNC FilmModePAL;
-DEINTERLACE_FUNC FilmModeNTSC;
-DEINTERLACE_FUNC AdaptiveDeinterlace;
-
-
 void memcpyMMX(void *Dest, void *Src, size_t nBytes);
 
 #ifdef USE_SSE
 void memcpySSE(void *Dest, void *Src, size_t nBytes);
 #endif
 
-extern long BitShift;
-extern long EdgeDetect;
-extern long JaggieThreshold;
-extern long DiffThreshold;
-extern long SpatialTolerance;
-extern long TemporalTolerance;
-extern long SimilarityThreshold;
+extern char* DeintModeNames[PULLDOWNMODES_LAST_ONE];
 
 #endif

@@ -88,7 +88,7 @@ long LuminanceThreshold = 30;
 long IgnoreNonBlackPixels = 0;
 
 // Nonzero to continuously scan for aspect ratio changes.
-long AutoDetectAspect = 0;
+BOOL AutoDetectAspect = FALSE;
 
 // For aspect autodetect, require the same aspect ratio for this number of
 // frames before zooming in.
@@ -189,52 +189,52 @@ void SetHalfHeight(int IsHalfHeight)
 //----------------------------------------------------------------------------
 // MENU INITIALIZATION:
 // Initializing aspect ratio control related checkboxes in menu
-void SetMenuAspectRatio(HWND hWnd)
+void AspectRatio_SetMenu(HMENU hMenu)
 {
-	CheckMenuItem(GetMenu(hWnd), IDM_ASPECT_FULLSCREEN, MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_ASPECT_LETTERBOX,  MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_ASPECT_ANAMORPHIC, MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_ASPECT_FULLSCREEN, MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_ASPECT_LETTERBOX,  MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_ASPECT_ANAMORPHIC, MF_UNCHECKED);
 
-	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_133, MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_166, MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_178, MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_185, MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_200, MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_235, MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_166A, MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_178A, MF_UNCHECKED); 
-	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_185A, MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_200A, MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_235A, MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_AUTO_TOGGLE, MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_SASPECT_133, MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_SASPECT_166, MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_SASPECT_178, MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_SASPECT_185, MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_SASPECT_200, MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_SASPECT_235, MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_SASPECT_166A, MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_SASPECT_178A, MF_UNCHECKED); 
+	CheckMenuItem(hMenu, IDM_SASPECT_185A, MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_SASPECT_200A, MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_SASPECT_235A, MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_SASPECT_AUTO_TOGGLE, MF_UNCHECKED);
 
 	if (AutoDetectAspect)
 	{
-		CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_AUTO_TOGGLE, MF_CHECKED);
+		CheckMenuItem(hMenu, IDM_SASPECT_AUTO_TOGGLE, MF_CHECKED);
 	}
 	else if (aspect_mode == 1)
 	{
 		switch (source_aspect)
 		{
 		case 1333:
-			CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_133, MF_CHECKED);
-			CheckMenuItem(GetMenu(hWnd), IDM_ASPECT_FULLSCREEN, MF_CHECKED);
+			CheckMenuItem(hMenu, IDM_SASPECT_133, MF_CHECKED);
+			CheckMenuItem(hMenu, IDM_ASPECT_FULLSCREEN, MF_CHECKED);
 			break;
 		case 1667:
-			CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_166, MF_CHECKED);
+			CheckMenuItem(hMenu, IDM_SASPECT_166, MF_CHECKED);
 			break;
 		case 1778:
-			CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_178, MF_CHECKED);
-			CheckMenuItem(GetMenu(hWnd), IDM_ASPECT_LETTERBOX, MF_CHECKED);
+			CheckMenuItem(hMenu, IDM_SASPECT_178, MF_CHECKED);
+			CheckMenuItem(hMenu, IDM_ASPECT_LETTERBOX, MF_CHECKED);
 			break;
 		case 1850:
-			CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_185, MF_CHECKED);
+			CheckMenuItem(hMenu, IDM_SASPECT_185, MF_CHECKED);
 			break;
 		case 2000:
-			CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_200, MF_CHECKED);
+			CheckMenuItem(hMenu, IDM_SASPECT_200, MF_CHECKED);
 			break;
 		case 2350:
-			CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_235, MF_CHECKED);
+			CheckMenuItem(hMenu, IDM_SASPECT_235, MF_CHECKED);
 			break;
 		}
 	}
@@ -243,43 +243,43 @@ void SetMenuAspectRatio(HWND hWnd)
 		switch (source_aspect)
 		{
 		case 1667:
-			CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_166A, MF_CHECKED);
+			CheckMenuItem(hMenu, IDM_SASPECT_166A, MF_CHECKED);
 			break;
 		case 1778:
-			CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_178A, MF_CHECKED); 
-			CheckMenuItem(GetMenu(hWnd), IDM_ASPECT_ANAMORPHIC, MF_CHECKED); 
+			CheckMenuItem(hMenu, IDM_SASPECT_178A, MF_CHECKED); 
+			CheckMenuItem(hMenu, IDM_ASPECT_ANAMORPHIC, MF_CHECKED); 
             break;
 		case 1850:
-			CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_185A, MF_CHECKED);
+			CheckMenuItem(hMenu, IDM_SASPECT_185A, MF_CHECKED);
 			break;
 		case 2000:
-			CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_200A, MF_CHECKED);
+			CheckMenuItem(hMenu, IDM_SASPECT_200A, MF_CHECKED);
 			break;
 		case 2350:
-			CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_235A, MF_CHECKED);
+			CheckMenuItem(hMenu, IDM_SASPECT_235A, MF_CHECKED);
 			break;
 		}
 	}
-	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_0,   (source_aspect == 0)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_SASPECT_CUSTOM, (source_aspect && source_aspect == custom_source_aspect)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_SASPECT_0,   (source_aspect == 0)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_SASPECT_CUSTOM, (source_aspect && source_aspect == custom_source_aspect)?MF_CHECKED:MF_UNCHECKED);
 
 	// Advanced Aspect Ratio -> Display Aspect Ratio
-	CheckMenuItem(GetMenu(hWnd), IDM_TASPECT_0,   (target_aspect == 0)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_TASPECT_133, (target_aspect == 1333)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_TASPECT_166, (target_aspect == 1667)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_TASPECT_178, (target_aspect == 1778)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_TASPECT_185, (target_aspect == 1850)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_TASPECT_200, (target_aspect == 2000)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_TASPECT_235, (target_aspect == 2350)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_TASPECT_CUSTOM, (target_aspect && target_aspect == custom_target_aspect)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_TASPECT_0,   (target_aspect == 0)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_TASPECT_133, (target_aspect == 1333)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_TASPECT_166, (target_aspect == 1667)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_TASPECT_178, (target_aspect == 1778)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_TASPECT_185, (target_aspect == 1850)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_TASPECT_200, (target_aspect == 2000)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_TASPECT_235, (target_aspect == 2350)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_TASPECT_CUSTOM, (target_aspect && target_aspect == custom_target_aspect)?MF_CHECKED:MF_UNCHECKED);
 
-	CheckMenuItem(GetMenu(hWnd), IDM_WINPOS_VERT_CENTRE, (VerticalPos == VERT_POS_CENTRE)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_WINPOS_VERT_TOP, (VerticalPos == VERT_POS_TOP)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_WINPOS_VERT_BOTTOM, (VerticalPos == VERT_POS_BOTTOM)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_WINPOS_VERT_CENTRE, (VerticalPos == VERT_POS_CENTRE)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_WINPOS_VERT_TOP, (VerticalPos == VERT_POS_TOP)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_WINPOS_VERT_BOTTOM, (VerticalPos == VERT_POS_BOTTOM)?MF_CHECKED:MF_UNCHECKED);
 
-	CheckMenuItem(GetMenu(hWnd), IDM_WINPOS_HORZ_CENTRE, (HorizontalPos == HORZ_POS_CENTRE)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_WINPOS_HORZ_LEFT, (HorizontalPos == HORZ_POS_LEFT)?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(GetMenu(hWnd), IDM_WINPOS_HORZ_RIGHT, (HorizontalPos == HORZ_POS_RIGHT)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_WINPOS_HORZ_CENTRE, (HorizontalPos == HORZ_POS_CENTRE)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_WINPOS_HORZ_LEFT, (HorizontalPos == HORZ_POS_LEFT)?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(hMenu, IDM_WINPOS_HORZ_RIGHT, (HorizontalPos == HORZ_POS_RIGHT)?MF_CHECKED:MF_UNCHECKED);
 }
 
 //----------------------------------------------------------------------------
@@ -464,7 +464,7 @@ int ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID)
 	}
 
     WorkoutOverlaySize();
-	SetMenuAspectRatio(hWnd);
+	AspectRatio_SetMenu(GetMenu(hWnd));
 
 	// Yes, we processed the menu selection.
 	return 1;
@@ -483,7 +483,7 @@ void PaintColorkey(HWND hWnd, BOOL bEnable)
 
 	if (bEnable && OverlayActive())
 	{
-		overlay = CreateSolidBrush(GetNearestColor(sPaint.hdc, OverlayColor));
+		overlay = CreateSolidBrush(GetNearestColor(sPaint.hdc, Overlay_GetColor()));
 	}
 	else
 	{
@@ -561,42 +561,6 @@ double GetActualSourceFrameAspect()
 	}
 }
 
-//----------------------------------------------------------------------------
-// Updates the window position/window state and enable/disable titlebar 
-// as necessary.  This function should be globally used for everytime 
-// you want to update the window everytime you have enabled/disabled the 
-// statusbar, menus, full screen state, etc.
-//
-// This allows for more cosmetic handling - including the ability to 
-// startup directly to maximized without any intermediate cosmetic
-// glitches during startup.
-//
-void UpdateWindowState()
-{
-	if(bIsFullScreen == TRUE)
-	{
-		SetWindowLong(hWnd, GWL_STYLE, WS_VISIBLE);
-		SetMenu(hWnd, NULL);
-		StatusBar_ShowWindow(FALSE);
-		SetWindowPos(hWnd,
-					HWND_TOPMOST,
-					0,
-					0,
-					GetSystemMetrics(SM_CXSCREEN),
-					GetSystemMetrics(SM_CYSCREEN),
-					SWP_SHOWWINDOW);
-	}
-	else
-	{
-		SetWindowLong(hWnd, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_VISIBLE);
-		SetMenu(hWnd, (Show_Menu == TRUE)?hMenu:NULL);
-		StatusBar_ShowWindow(bDisplayStatusBar);
-		SetWindowPos(hWnd,bAlwaysOnTop?HWND_TOPMOST:HWND_NOTOPMOST,
-					0,0,0,0,
-					SWP_NOSIZE | SWP_NOMOVE | SWP_SHOWWINDOW);
-	}
-}
-
 
 //----------------------------------------------------------------------------
 // Calculate size and position coordinates for video overlay
@@ -621,7 +585,7 @@ void WorkoutOverlaySize()
 	GetClientRect(hWnd, &rOverlayDest);
 	ClientToScreen(hWnd, (POINT *) &(rOverlayDest.left));
 	ClientToScreen(hWnd, (POINT *) &(rOverlayDest.right));
-	if (bDisplayStatusBar == TRUE && bIsFullScreen == FALSE)
+	if (IsStatusBarVisible())
 	{
 		rOverlayDest.bottom -= 21;
 	}
@@ -1098,6 +1062,12 @@ BOOL Aspect_Overscan_OnChange(long Overscan)
 	return FALSE;
 }
 
+BOOL Aspect_OnChange(long IgnoreCompletely)
+{
+	WorkoutOverlaySize();
+	return FALSE;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // Start of Settings related code
 /////////////////////////////////////////////////////////////////////////////
@@ -1105,12 +1075,76 @@ BOOL Aspect_Overscan_OnChange(long Overscan)
 SETTING AspectSettings[ASPECT_SETTING_LASTONE] =
 {
 	{
-		"Overscan", SLIDER, FALSE, &InitialOverscan,
+		"Overscan", SLIDER, 0, &InitialOverscan,
 		DEFAULT_OVERSCAN, 0, 150, 10, NULL,
 		"Hardware", "InitialOverscan", Aspect_Overscan_OnChange,
 	},
+	{
+		"Source Aspect", NUMBER, 0, &source_aspect,
+		0, 0, 4000, 100, NULL,
+		"ASPECT", "SourceAspect", Aspect_OnChange,
+	},
+	{
+		"Custom Source Aspect", SLIDER, 0, &custom_source_aspect,
+		0, 0, 4000, 100, NULL,
+		"ASPECT", "CustomSourceAspect", Aspect_OnChange,
+	},
+	{
+		"Target Aspect", NUMBER, 0, &target_aspect,
+		0, 0, 4000, 100, NULL,
+		"ASPECT", "TargetAspect", Aspect_OnChange,
+	},
+	{
+		"Custom Target Aspect", SLIDER, 0, &custom_target_aspect,
+		0, 0, 4000, 100, NULL,
+		"ASPECT", "CustomTargetAspect", Aspect_OnChange,
+	},
+	{
+		"Aspect Mode", NUMBER, 0, &aspect_mode,
+		0, 0, 2, 1, NULL,
+		"ASPECT", "Mode", Aspect_OnChange,
+	},
+	{
+		"Luminance Threshold", SLIDER, 0, &LuminanceThreshold,
+		30, 0, 2000, 10, NULL,
+		"ASPECT", "LuminanceThreshold", NULL,
+	},
+	{
+		"Ignore Non-Black Pixels", SLIDER, 0, &IgnoreNonBlackPixels,
+		0, 0, 2000, 10, NULL,
+		"ASPECT", "IgnoreNonBlackPixels", NULL,
+	},
+	{
+		"Auto Detect Aspect", YESNO, 0, &AutoDetectAspect,
+		FALSE, 0, 1, 0, NULL,
+		"ASPECT", "AutoDetectAspect", NULL,
+	},
+	{
+		"Zoom In Frame Count", SLIDER, 0, &ZoomInFrameCount,
+		60, 0, 1000, 10, NULL,
+		"ASPECT", "ZoomInFrameCount", NULL,
+	},
+	{
+		"Aspect History Time", SLIDER, 0, &AspectHistoryTime,
+		300, 0, 3000, 100, NULL,
+		"ASPECT", "AspectHistoryTime", NULL,
+	},
+	{
+		"AspectConsistencyTime", SLIDER, 0, &AspectConsistencyTime,
+		15, 0, 300, 10, NULL,
+		"ASPECT", "AspectConsistencyTime", NULL,
+	},
+	{
+		"Vertical Pos", NUMBER, 0, &VerticalPos,
+		VERT_POS_CENTRE, 0, 1, 1, NULL,
+		"ASPECT", "VerticalPos", NULL,
+	},
+	{
+		"Horizontal Pos", NUMBER, 0, &HorizontalPos,
+		HORZ_POS_CENTRE, 0, 1, 1, NULL,
+		"ASPECT", "HorizontalPos", NULL,
+	},
 };
-
 
 SETTING* Aspect_GetSetting(ASPECT_SETTING Setting)
 {
@@ -1124,7 +1158,7 @@ SETTING* Aspect_GetSetting(ASPECT_SETTING Setting)
 	}
 }
 
-void Aspect_ReadSetttingsFromIni()
+void Aspect_ReadSettingsFromIni()
 {
 	int i;
 	for(i = 0; i < ASPECT_SETTING_LASTONE; i++)
@@ -1133,7 +1167,7 @@ void Aspect_ReadSetttingsFromIni()
 	}
 }
 
-void Aspect_WriteSetttingsToIni()
+void Aspect_WriteSettingsToIni()
 {
 	int i;
 	for(i = 0; i < ASPECT_SETTING_LASTONE; i++)

@@ -38,11 +38,14 @@
 #include "FD_Common.h"
 #define DOLOGGING
 #include "DebugLog.h"
+#include "DI_BobAndWeave.h"
 
-ePULLDOWNMODES      gPALFilmFallbackMode = VIDEO_MODE_2FRAME;
+ePULLDOWNMODES gPALFilmFallbackMode = VIDEO_MODE_2FRAME;
 // Default values which can be overwritten by the INI file
-long                PulldownThresholdLow = -2000;
-long                PulldownThresholdHigh = 2000;
+long PulldownThresholdLow = -1500;
+long PulldownThresholdHigh = 200;
+long PALPulldownRepeatCount = 3;
+long PALPulldownRepeatCount2 = 1;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -67,7 +70,6 @@ void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 		LastPolarity = -1;
 		LastDiff = 0;
 		UpdatePulldownStatus();
-		dwLastFlipTicks = -1;
 		ResetModeSwitches();
 		StartFilmTicks = 0;
 		return;
@@ -80,7 +82,7 @@ void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 		{
 			if(LastPolarity == pInfo->IsOdd)
 			{
-				if(RepeatCount < PulldownRepeatCount)
+				if(RepeatCount < PALPulldownRepeatCount)
 				{
 					if(RepeatCount == 0)
 					{
@@ -140,13 +142,14 @@ void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 			}
 			else
 			{
-				if(RepeatCount < PulldownRepeatCount)
+				if(RepeatCount < PALPulldownRepeatCount)
 				{
 					RepeatCount++;
 					LOG("Upped RepeatCount 1 %d", RepeatCount);
 				}
 			}
 		}
+		
 		if((pInfo->CombFactor - LastCombFactor) > PulldownThresholdHigh && LastDiff > PulldownThresholdLow)
 		{
 			if(gPulldownMode == FILM_22_PULLDOWN_ODD && pInfo->IsOdd == TRUE)
@@ -160,13 +163,15 @@ void UpdatePALPulldownMode(DEINTERLACE_INFO *pInfo)
 				LOG("Downed RepeatCount 2 %d", RepeatCount);
 			}
 		}
-		if(RepeatCount == PulldownRepeatCount - PulldownRepeatCount2)
+		// FIXME: Should have a different parameter here
+		if(RepeatCount <= (PALPulldownRepeatCount - PALPulldownRepeatCount2))
 		{
 			gPulldownMode = gPALFilmFallbackMode;
-			RepeatCount = 0;
 			UpdatePulldownStatus();
 			LOG("Back To Video Mode");
-			LastPolarity = -1;
+			RepeatCount = PALPulldownRepeatCount - 1;
+			LastPolarity = !pInfo->IsOdd;
+			StartFilmTicks = GetTickCount();
 		}
 	}
 
@@ -203,3 +208,66 @@ BOOL DoWeWantToFlipPAL(DEINTERLACE_INFO *pInfo)
 	}
 	return RetVal;
 }
+
+////////////////////////////////////////////////////////////////////////////
+// Start of Settings related code
+/////////////////////////////////////////////////////////////////////////////
+SETTING FD50Settings[FD50_SETTING_LASTONE] =
+{
+	{
+		"Pulldown Threshold Low", SLIDER, 0, &PulldownThresholdLow,
+		-1500, -5000, -1, 100, NULL,
+		"Pulldown", "PulldownThresholdLow", NULL,
+	},
+	{
+		"Pulldown Threshold High", SLIDER, 0, &PulldownThresholdHigh,
+		200, 1, 5000, 100, NULL,
+		"Pulldown", "PulldownThresholdHigh", NULL,
+	},
+	{
+		"PAL Film Fallback Mode", ITEMFROMLIST, 0, &gPALFilmFallbackMode,
+		VIDEO_MODE_2FRAME, 0, PULLDOWNMODES_LAST_ONE - 1, 1, DeintModeNames,
+		"Pulldown", "PALFilmFallbackMode", NULL,
+	},
+	{
+		"PAL Pulldown Repeat Count In", SLIDER, 0, &PALPulldownRepeatCount,
+		3, 1, 10, 1, NULL,
+		"Pulldown", "PALPulldownRepeatCount", NULL,
+	},
+	{
+		"PAL Pulldown Repeat Count Out", SLIDER, 0, &PALPulldownRepeatCount2,
+		1, 1, 10, 1, NULL,
+		"Pulldown", "PALPulldownRepeatCount2", NULL,
+	},
+};
+
+SETTING* FD50_GetSetting(FD50_SETTING Setting)
+{
+	if(Setting > -1 && Setting < FD50_SETTING_LASTONE)
+	{
+		return &(FD50Settings[Setting]);
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+void FD50_ReadSettingsFromIni()
+{
+	int i;
+	for(i = 0; i < FD50_SETTING_LASTONE; i++)
+	{
+		Setting_ReadFromIni(&(FD50Settings[i]));
+	}
+}
+
+void FD50_WriteSettingsToIni()
+{
+	int i;
+	for(i = 0; i < FD50_SETTING_LASTONE; i++)
+	{
+		Setting_WriteToIni(&(FD50Settings[i]));
+	}
+}
+

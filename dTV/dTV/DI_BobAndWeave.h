@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
-// FD_Common.h
+// DI_BobAndWeave.h
 /////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2000 John Adcock.  All rights reserved.
+// Copyright (c) 2000 John adcock, Mark Rejhon, Steve Grimm.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
 //
 //	This file is subject to the terms of the GNU General Public License as
@@ -15,43 +15,38 @@
 //	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //	GNU General Public License for more details
 /////////////////////////////////////////////////////////////////////////////
-//
 // Change Log
 //
 // Date          Developer             Changes
 //
-// 09 Jan 2001   John Adcock           Split into new file
+// 14 Jan 2001   John Adcock           Split into new file
+//                                     as part of global Variable Tidy up
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef __FD_COMMON_H___
-#define __FD_COMMON_H___
+#ifndef __BOBANDWEAVE_H___
+#define __BOBANDWEAVE_H___
 
 #include "settings.h"
-#include "deinterlace.h"
 
 typedef enum
 {
-	BITSHIFT = 0,
-	EDGEDETECT,
-	JAGGIETHRESHOLD,
-	DIFFTHRESHOLD,
-	FD_COMMON_SETTING_LASTONE,
-} FD_COMMON_SETTING;
+	WEAVEEDGEDETECT = 0,
+	WEAVEJAGGIETHRESHOLD,
+	TEMPORALTOLERANCE,
+	SPATIALTOLERANCE,
+	SIMILARITYTHRESHOLD,
+	DI_BOBWEAVE_SETTING_LASTONE,
+} DI_BOBWEAVE_SETTING;
 
-// Get Hold of the FD_50Hz.c file settings
-SETTING* FD_Common_GetSetting(FD_COMMON_SETTING Setting);
-void FD_Common_ReadSettingsFromIni();
-void FD_Common_WriteSettingsToIni();
+// Get Hold of the  DI_BobAndWeave.c file settings
+SETTING* DI_BobWeave_GetSetting(DI_BOBWEAVE_SETTING Setting);
+void DI_BobWeave_ReadSettingsFromIni();
+void DI_BobWeave_WriteSettingsToIni();
 
-#define MAXMODESWITCHES 50	// Maximum number of switches to track in TrackModeSwitches()
+BOOL Bob(DEINTERLACE_INFO *info);
+BOOL Weave(DEINTERLACE_INFO *info);
 
-void ResetModeSwitches();
-BOOL TrackModeSwitches();
 
-BOOL DoWeWantToFlip(BOOL bIsOddField);
-
-long GetCombFactor(DEINTERLACE_INFO *pInfo);
-long CompareFields(DEINTERLACE_INFO *pInfo);
 
 #endif

@@ -27,22 +27,33 @@
 #ifndef __FD_60HZ_H___
 #define __FD_60HZ_H___
 
+#include "settings.h"
 #include "deinterlace.h"
+
+typedef enum
+{
+	NTSCFILMFALLBACKMODE = 0,
+	NTSCPULLDOWNREPEATCOUNT,
+	NTSCPULLDOWNREPEATCOUNT2,
+	THRESHOLD32PULLDOWN,
+	THRESHOLDPULLDOWNMISMATCH,
+	THRESHOLDPULLDOWNCOMB,
+	FALLBACKTOVIDEO,
+	PULLDOWNSWITCHINTERVAL,
+	PULLDOWNSWITCHMAX,
+	FD60_SETTING_LASTONE,
+} FD60_SETTING;
+
+// Get Hold of the FD_50Hz.c file settings
+SETTING* FD60_GetSetting(FD60_SETTING Setting);
+void FD60_ReadSettingsFromIni();
+void FD60_WriteSettingsToIni();
+void FD60_SetMenu(HMENU hMenu);
 
 #define MAXMODESWITCHES 50	// Maximum number of switches to track in TrackModeSwitches()
 
 void UpdateNTSCPulldownMode(DEINTERLACE_INFO *pInfo);
 BOOL DoWeWantToFlipNTSC(DEINTERLACE_INFO *pInfo);
 BOOL FilmModeNTSC(DEINTERLACE_INFO *info);
-
-extern ePULLDOWNMODES gNTSCFilmFallbackMode;
-
-extern long Threshold32Pulldown;
-extern long ThresholdPulldownMismatch;
-extern long ThresholdPulldownComb;
-extern long LowMotionFieldCount;
-extern long StaticImageFieldCount;
-extern BOOL bAutoDetectMode;
-extern BOOL bFallbackToVideo;
 
 #endif

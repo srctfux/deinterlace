@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
-// FD_Common.h
+// DI_Adaptive.h
 /////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2000 John Adcock.  All rights reserved.
+// Copyright (c) 2000 Mark Rejhon, Steve Grimm.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
 //
 //	This file is subject to the terms of the GNU General Public License as
@@ -15,43 +15,35 @@
 //	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //	GNU General Public License for more details
 /////////////////////////////////////////////////////////////////////////////
-//
 // Change Log
 //
 // Date          Developer             Changes
 //
-// 09 Jan 2001   John Adcock           Split into new file
+// 14 Jan 2001   John Adcock           Split into new file
+//                                     as part of global Variable Tidy up
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef __FD_COMMON_H___
-#define __FD_COMMON_H___
+#ifndef __ADAPTIVE_H___
+#define __ADAPTIVE_H___
 
 #include "settings.h"
-#include "deinterlace.h"
 
 typedef enum
 {
-	BITSHIFT = 0,
-	EDGEDETECT,
-	JAGGIETHRESHOLD,
-	DIFFTHRESHOLD,
-	FD_COMMON_SETTING_LASTONE,
-} FD_COMMON_SETTING;
+	LOWMOTIONFIELDCOUNT = 0,
+	STATICIMAGEFIELDCOUNT,
+	STATICIMAGEMODE,
+	LOWMOTIONMODE,
+	HIGHMOTIONMODE,
+	ADAPTIVETHRESH32PULLDOWN,
+	ADAPTIVETHRESHMISMATCH,
+	DI_ADAPTIVE_SETTING_LASTONE,
+} DI_ADAPTIVE_SETTING;
 
-// Get Hold of the FD_50Hz.c file settings
-SETTING* FD_Common_GetSetting(FD_COMMON_SETTING Setting);
-void FD_Common_ReadSettingsFromIni();
-void FD_Common_WriteSettingsToIni();
-
-#define MAXMODESWITCHES 50	// Maximum number of switches to track in TrackModeSwitches()
-
-void ResetModeSwitches();
-BOOL TrackModeSwitches();
-
-BOOL DoWeWantToFlip(BOOL bIsOddField);
-
-long GetCombFactor(DEINTERLACE_INFO *pInfo);
-long CompareFields(DEINTERLACE_INFO *pInfo);
+// Get Hold of the DI_Adaptive.c file settings
+SETTING* DI_Adaptive_GetSetting(DI_ADAPTIVE_SETTING Setting);
+void DI_Adaptive_ReadSettingsFromIni();
+void DI_Adaptive_WriteSettingsToIni();
 
 #endif

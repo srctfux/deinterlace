@@ -27,9 +27,6 @@
 #define __SPLASH_H___
 
 void ShowSpashScreen();
-void AddSplashTextLine(const char* szText, int Pause);
-
-
-extern BOOL bDisplaySplashScreen;
+void AddSplashTextLine(const char* szText);
 
 #endif

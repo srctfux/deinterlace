@@ -392,6 +392,11 @@ BOOL Overlay_Destroy()
 	return FALSE;
 }
 
+COLORREF Overlay_GetColor()
+{
+	return OverlayColor;
+}
+
 //-----------------------------------------------------------------------------
 // Initialize DirectDraw
 BOOL InitDD(HWND hWnd)
@@ -728,4 +733,53 @@ void SaveStill()
 		}
 	}
 	return;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Start of Settings related code
+/////////////////////////////////////////////////////////////////////////////
+
+SETTING OtherSettings[OTHER_SETTING_LASTONE] =
+{
+	{
+		"Back Buffers", NUMBER, 0, &Back_Buffers,
+		2, 2, 3, 0, NULL,
+		"Overlay", "Back_Buffers", NULL,
+	},
+	{
+		"Overlay Color", NUMBER, 0, &OverlayColor,
+		RGB(255,0,255), 0, RGB(255,255,255), 0, NULL,
+		"Overlay", "OverlayColor", NULL,
+	},
+};
+
+
+SETTING* Other_GetSetting(OTHER_SETTING Setting)
+{
+	if(Setting > -1 && Setting < OTHER_SETTING_LASTONE)
+	{
+		return &(OtherSettings[Setting]);
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+void Other_ReadSettingsFromIni()
+{
+	int i;
+	for(i = 0; i < OTHER_SETTING_LASTONE; i++)
+	{
+		Setting_ReadFromIni(&(OtherSettings[i]));
+	}
+}
+
+void Other_WriteSettingsToIni()
+{
+	int i;
+	for(i = 0; i < OTHER_SETTING_LASTONE; i++)
+	{
+		Setting_WriteToIni(&(OtherSettings[i]));
+	}
 }
