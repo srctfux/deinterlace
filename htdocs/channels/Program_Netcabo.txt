@@ -1,0 +1,216 @@
+Name: RTP 1
+Freq2: 2804
+Chan: 20
+Active: 1
+Name: RTP 2
+Freq2: 3028
+Chan: 22
+Active: 1
+Name: SIC
+Freq2: 3140
+Chan: 23
+Active: 1
+Name: TVI
+Freq2: 3364
+Chan: 25
+Active: 1
+Name: NTV
+Freq2: 1796
+Chan: 11
+Active: 1
+Name: SIC Noticias
+Freq2: 2244
+Chan: 15
+Active: 1
+Name: SIC Mulher
+Freq2: 3476
+Chan: 0
+Active: 1
+Name: SIC Radical
+Freq2: 7668
+Chan: 60
+Active: 1
+Name: SIC Gold
+Freq2: 8820
+Chan: 0
+Active: 1
+Name: GNTt
+Freq2: 2356
+Chan: 0
+Active: 1
+Name: Hollywood
+Freq2: 3588
+Chan: 0
+Active: 1
+Name: Euronews
+Freq2: 2580
+Chan: 18
+Active: 1
+Name: Eurosport
+Freq2: 3812
+Chan: 0
+Active: 1
+Name: História
+Freq2: 4036
+Chan: 31
+Active: 1
+Name: Odisseia
+Freq2: 10356
+Chan: 81
+Active: 1
+Name: National Geographic
+Freq2: 9844
+Chan: 77
+Active: 1
+Name: BBC World
+Freq2: 10740
+Chan: 84
+Active: 1
+Name: BBC Prime
+Freq2: 10996
+Chan: 86
+Active: 1
+Name: NBC/CNBC
+Freq2: 8436
+Chan: 66
+Active: 1
+Name: RTP África
+Freq2: 4372
+Chan: 34
+Active: 1
+Name: 43
+Freq2: 6132
+Chan: 0
+Active: 1
+Name: ???
+Freq2: 11124
+Chan: 0
+Active: 1
+Name: Cartoon Network/TCM
+Freq2: 2468
+Chan: 17
+Active: 1
+Name: Panda
+Freq2: 11636
+Chan: 91
+Active: 1
+Name: Disney
+Freq2: 2692
+Chan: 19
+Active: 1
+Name: MTV
+Freq2: 3924
+Chan: 30
+Active: 1
+Name: VH1
+Freq2: 4708
+Chan: 37
+Active: 1
+Name: Sol Musica
+Freq2: 10612
+Chan: 83
+Active: 1
+Name: MCM
+Freq2: 11764
+Chan: 92
+Active: 1
+Name: Canal 21
+Freq2: 3700
+Chan: 28
+Active: 1
+Name: Sky news
+Freq2: 4484
+Chan: 35
+Active: 1
+Name: CNN
+Freq2: 4596
+Chan: 36
+Active: 1
+Name: Motors
+Freq2: 6516
+Chan: 0
+Active: 1
+Name: M6
+Freq2: 5492
+Chan: 43
+Active: 1
+Name: TV 5
+Freq2: 4148
+Chan: 32
+Active: 1
+Name: FashionTV
+Freq2: 8180
+Chan: 64
+Active: 1
+Name: People+Arts
+Freq2: 10228
+Chan: 80
+Active: 1
+Name: TV Canção Nova
+Freq2: 2132
+Chan: 14
+Active: 1
+Name: RTL
+Freq2: 5364
+Chan: 42
+Active: 1
+Name: Viver/Intimo
+Freq2: 4260
+Chan: 33
+Active: 1
+Name: Sportv
+Freq2: 2020
+Chan: 13
+Active: 1
+Name: TVEi
+Freq2: 6260
+Chan: 0
+Active: 1
+Name: Rai Uno
+Freq2: 5876
+Chan: 46
+Active: 1
+Name: Gigashop
+Freq2: 10868
+Chan: 0
+Active: 1
+Name: TV Galiza
+Freq2: 6004
+Chan: 47
+Active: 1
+Name: Parlamento/Gigashop
+Freq2: 7796
+Chan: 0
+Active: 1
+Name: Mezzo
+Freq2: 8052
+Chan: 63
+Active: 1
+Name: Tele Medicina
+Freq2: 11252
+Chan: 0
+Active: 1
+Name: Bloomberg
+Freq2: 6644
+Chan: 52
+Active: 1
+Name: France 5/Arte
+Freq2: 6388
+Chan: 50
+Active: 1
+Name: Playboy
+Freq2: 6900
+Chan: 54
+Active: 1
+Name: SexyHOT
+Freq2: 6772
+Chan: 53
+Active: 1
+Name: Telecine Gallery
+Freq2: 1908
+Chan: 12
+Active: 1
+Name: Telecine Premium
+Freq2: 7028
+Chan: 55
+Active: 1

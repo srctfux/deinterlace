@@ -1,0 +1,117 @@
+Name: Nederland 1
+Freq: 216000
+Chan: 2
+Active: 1
+Name: Nederland 2
+Freq: 184000
+Chan: 3
+Active: 1
+Form: 0
+Name: Nederland 3
+Freq: 192000
+Chan: 4
+Active: 1
+Name: RTL 4
+Freq: 720000
+Chan: 5
+Active: 1
+Name: RTL 5
+Freq: 728000
+Chan: 6
+Active: 1
+Name: Yorin
+Freq: 736000
+Chan: 7
+Active: 1
+Name: NET 5
+Freq: 784000
+Chan: 8
+Active: 1
+Name: SBS 6
+Freq: 792000
+Chan: 9
+Active: 1
+Name: V8
+Freq: 672000
+Chan: 10
+Active: 1
+Name: BBC 1
+Freq: 272000
+Chan: 12
+Active: 1
+Name: BBC 2
+Freq: 280000
+Chan: 13
+Active: 1
+Name: BRT 1
+Freq: 200000
+Chan: 14
+Active: 1
+Name: BRT 2
+Freq: 208000
+Chan: 15
+Active: 1
+Name: Duitsland 1 ARD
+Freq: 224000
+Chan: 16
+Active: 1
+Name: Duitsland 2 ZDF
+Freq: 816000
+Chan: 22
+Active: 1
+Name: Duitsland 3 NDR
+Freq: 240000
+Chan: 17
+Active: 1
+Name: CNN International
+Freq: 232000
+Chan: 18
+Active: 1
+Name: Mercurius TV
+Freq: 256000
+Chan: 19
+Active: 1
+Name: Nieuws TV
+Freq: 616000
+Chan: 20
+Active: 1
+Name: Omroep Friesland
+Freq: 264000
+Chan: 21
+Active: 1
+Name: TMF
+Freq: 568000
+Chan: 23
+Active: 1
+Name: MTV
+Freq: 536000
+Chan: 11
+Active: 1
+Name: The Box
+Freq: 752000
+Chan: 24
+Active: 1
+Name: National Geographic
+Freq: 544000
+Chan: 25
+Active: 1
+Name: The Discovery Channel
+Freq: 800000
+Chan: 26
+Active: 1
+Name: TV 5
+Freq: 288000
+Chan: 27
+Active: 1
+Name: Canal Plus Rood
+Freq: 384000
+Chan: 29
+Active: 1
+Name: Canal Plus Blauw
+Freq: 392000
+Chan: 30
+Active: 1
+Name: UPC Infokanaal
+Freq: 176000
+Chan: 28
+Active: 1

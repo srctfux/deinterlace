@@ -1,0 +1,295 @@
+Name: TV 1
+Freq: 224450
+Chan: 1
+Active: 1
+Form: 20
+Name: ABC (Channel 2)
+Freq: 175637
+Chan: 2
+Active: 1
+Form: 20
+Name: Movie One
+Freq: 259450
+Chan: 3
+Active: 1
+Form: 20
+Name: Movie Extra
+Freq: 266637
+Chan: 4
+Active: 1
+Form: 20
+Name: Movie Greats
+Freq: 280325
+Chan: 5
+Active: 1
+Form: 20
+Name: TCM
+Freq: 252450
+Chan: 6
+Active: 1
+Form: 20
+Name: Channel 7
+Freq: 168325
+Chan: 7
+Active: 1
+Form: 20
+Name: Fox 8
+Freq: 154325
+Chan: 8
+Active: 1
+Form: 20
+Name: Channel 9
+Freq: 287512
+Chan: 9
+Active: 1
+Form: 20
+Name: Channel 10
+Freq: 394325
+Chan: 10
+Active: 1
+Form: 20
+Name: Fox Sports One
+Freq: 457012
+Chan: 11
+Active: 1
+Form: 20
+Name: Fox Sports Two
+Freq: 338575
+Chan: 12
+Active: 1
+Form: 20
+Name: ESPN
+Freq: 216637
+Chan: 13
+Active: 1
+Form: 20
+Name: Fox Footy
+Freq: 124200
+Chan: 14
+Active: 1
+Form: 20
+Name: Fox Footy Extra
+Freq: 231450
+Chan: 15
+Active: 1
+Form: 20
+Name: National Geographic
+Freq: 478200
+Chan: 16
+Active: 1
+Form: 20
+Name: Adventure 1
+Freq: 464387
+Chan: 17
+Active: 1
+Form: 20
+Name: Odyssey
+Freq: 443325
+Chan: 18
+Active: 1
+Form: 20
+Name: Discovery
+Freq: 352325
+Chan: 19
+Active: 1
+Form: 20
+Name: Animal Planet
+Freq: 449950
+Chan: 20
+Active: 1
+Form: 20
+Name: History Channel
+Freq: 499075
+Chan: 21
+Active: 1
+Form: 20
+Name: Comedy Channel
+Freq: 534259
+Chan: 22
+Active: 1
+Form: 20
+Name: MTV
+Freq: 189574
+Chan: 23
+Active: 1
+Form: 20
+Name: [V]
+Freq: 110325
+Chan: 24
+Active: 1
+Form: 20
+Name: MusicMax
+Freq: 117512
+Chan: 25
+Active: 1
+Form: 20
+Name: Ovation
+Freq: 408325
+Chan: 26
+Active: 1
+Form: 20
+Name: UK TV
+Freq: 366325
+Chan: 27
+Active: 1
+Form: 20
+Name: Lifestyle Channel
+Freq: 359325
+Chan: 28
+Active: 1
+Form: 20
+Name: Arena
+Freq: 294575
+Chan: 29
+Active: 1
+Form: 20
+Name: fX
+Freq: 147325
+Chan: 30
+Active: 1
+Form: 20
+Name: Showtime
+Freq: 520011
+Chan: 31
+Active: 1
+Form: 20
+Name: Showtime 2
+Freq: 380325
+Chan: 32
+Active: 1
+Form: 20
+Name: Encore
+Freq: 506012
+Chan: 33
+Active: 1
+Form: 20
+Name: Fox Kids / Fox Classics
+Freq: 492137
+Chan: 34
+Active: 1
+Form: 20
+Name: Nickelodeon
+Freq: 513325
+Chan: 35
+Active: 1
+Form: 20
+Name: Disney
+Freq: 317325
+Chan: 36
+Active: 1
+Form: 20
+Name: Cartoon Network
+Freq: 245450
+Chan: 37
+Active: 1
+Form: 20
+Name: ABC Kids / Fly Channel
+Freq: 380575
+Chan: 38
+Active: 1
+Form: 20
+Name: Sky News
+Freq: 161325
+Chan: 39
+Active: 1
+Form: 20
+Name: CNN
+Freq: 310325
+Chan: 40
+Active: 1
+Form: 20
+Name: BBC World
+Freq: 485325
+Chan: 41
+Active: 1
+Form: 20
+Name: CNBC Australia
+Freq: 345325
+Chan: 42
+Active: 1
+Form: 20
+Name: CNN fn
+Freq: 238575
+Chan: 43
+Active: 1
+Form: 20
+Name: SKY Racing
+Freq: 436325
+Chan: 44
+Active: 1
+Form: 20
+Name: Main Event
+Freq: 401074
+Chan: 45
+Active: 1
+Form: 20
+Name: SBS
+Freq: 138325
+Chan: 46
+Active: 1
+Form: 20
+Name: SBS World News
+Freq: 527011
+Chan: 47
+Active: 1
+Form: 20
+Name: World Movies
+Freq: 429325
+Chan: 48
+Active: 1
+Form: 20
+Name: Expo (Shopping)
+Freq: 471075
+Chan: 49
+Active: 1
+Form: 20
+Name: TVSN (Shopping)
+Freq: 303512
+Chan: 50
+Active: 1
+Form: 20
+Name: Australian Christian Channel
+Freq: 387325
+Chan: 51
+Active: 1
+Form: 20
+Name: LBC Lebanese
+Freq: 324325
+Chan: 52
+Active: 1
+Form: 20
+Name: ART Arabic
+Freq: 373325
+Chan: 53
+Active: 1
+Form: 20
+Name: Al Jazeera
+Freq: 182512
+Chan: 54
+Active: 1
+Form: 20
+Name: Antenna Greek
+Freq: 422325
+Chan: 55
+Active: 1
+Form: 20
+Name: RAI International Italian
+Freq: 415325
+Chan: 56
+Active: 1
+Form: 20
+Name: Adult Channel
+Freq: 273012
+Chan: 57
+Active: 1
+Form: 20
+Name: Foxtel Weather
+Freq: 196512
+Chan: 58
+Active: 1
+Form: 20
+Name: Optus Program Guide
+Freq: 209450
+Chan: 59
+Active: 1
+Form: 20

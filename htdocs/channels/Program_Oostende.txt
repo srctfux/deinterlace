@@ -1,0 +1,180 @@
+Name: VRT 1
+Freq: 203250
+Chan: 7
+Active: 1
+Form: 0
+Name: Canvas
+Freq: 189250
+Chan: 5
+Active: 1
+Form: 0
+Name: VTM
+Freq: 182250
+Chan: 4
+Active: 1
+Form: 0
+Name: NED.1
+Freq: 55000
+Chan: 34
+Active: 1
+Form: 0
+Name: NED.2
+Freq: 62125
+Chan: 34
+Active: 1
+Form: 0
+Name: NED.3
+Freq: 196250
+Chan: 6
+Active: 1
+Form: 0
+Name: BBC 1
+Freq: 142125
+Chan: 6
+Active: 1
+Form: 20
+Name: BBC 2
+Freq: 231250
+Chan: 11
+Active: 1
+Form: 0
+Name: ITV 1
+Freq: 294250
+Chan: 20
+Active: 1
+Form: 20
+Name: JIM TV
+Freq: 165750
+Chan: 34
+Active: 1
+Form: 20
+Name: RTBF 1
+Freq: 217250
+Chan: 9
+Active: 1
+Form: 0
+Name: RTBF 2
+Freq: 259250
+Chan: 15
+Active: 1
+Form: 20
+Name: RTL TVI
+Freq: 175062
+Chan: 34
+Active: 1
+Form: 20
+Name: FR 2
+Freq: 273125
+Chan: 13
+Active: 1
+Form: 0
+Name: FR 3
+Freq: 133250
+Chan: 5
+Active: 1
+Form: 20
+Name: MTV
+Freq: 266250
+Chan: 16
+Active: 1
+Form: 20
+Name: ARD
+Freq: 149937
+Chan: 34
+Active: 1
+Form: 20
+Name: ZDF
+Freq: 158000
+Chan: 34
+Active: 1
+Form: 20
+Name: Focus
+Freq: 287250
+Chan: 19
+Active: 1
+Form: 20
+Name: Mozaïek
+Freq: 224250
+Chan: 10
+Active: 1
+Form: 0
+Name: KA 2
+Freq: 238250
+Chan: 12
+Active: 1
+Form: 20
+Name: VT4
+Freq: 252250
+Chan: 14
+Active: 1
+Form: 20
+Name: CNN
+Freq: 245250
+Chan: 13
+Active: 1
+Form: 20
+Name: TVE
+Freq: 280250
+Chan: 18
+Active: 1
+Form: 20
+Name: Nat. Geo
+Freq: 210250
+Chan: 8
+Active: 1
+Form: 0
+Name: TMF
+Freq: 69125
+Chan: 34
+Active: 1
+Form: 20
+Name: Liberty TV
+Freq: 311250
+Chan: 22
+Active: 1
+Form: 20
+Name: Kanaal Z
+Freq: 303250
+Chan: 21
+Active: 1
+Form: 20
+Name: CNBC Europe
+Freq: 399250
+Chan: 33
+Active: 1
+Form: 20
+Name: BBC World / Arte
+Freq: 48062
+Chan: 34
+Active: 1
+Form: 20
+Name: Vitaya
+Freq: 76187
+Chan: 34
+Active: 1
+Form: 20
+Name: Cartoon Network/TCM
+Freq: 447250
+Chan: 0
+Active: 1
+Form: 20
+Name: Canal+ Blauw
+Freq: 327250
+Chan: 24
+Active: 1
+Form: 20
+Name: Canal+ Rood
+Freq: 343562
+Chan: 0
+Active: 1
+Form: 20
+Name: Hallmark
+Freq: 335250
+Chan: 25
+Active: 1
+Form: 20
+Name: Tellsell
+Freq: 319250
+Chan: 23
+Active: 1
+Form: 20

@@ -1,0 +1,178 @@
+Name: BBC ONE
+Freq: 238250
+Chan: 29
+Active: 1
+Name: BBC TWO
+Freq: 252250
+Chan: 31
+Active: 1
+Name: CNN International
+Freq: 83250
+Chan: 7
+Active: 1
+Name: CNBC Europe
+Freq: 311250
+Chan: 39
+Active: 1
+Name: Eurosport Int.
+Freq: 367250
+Chan: 0
+Active: 1
+Name: RAI UNO
+Freq: 245250
+Chan: 30
+Active: 1
+Name: BRTN 1
+Freq: 189250
+Chan: 22
+Active: 1
+Name: Ketnet/Canvas
+Freq: 55250
+Chan: 3
+Active: 1
+Name: Ka 2
+Freq: 76250
+Chan: 6
+Active: 1
+Name: VTM
+Freq: 133250
+Chan: 14
+Active: 1
+Name: VT4
+Freq: 335250
+Chan: 42
+Active: 1
+Name: Ned 1
+Freq: 48250
+Chan: 1
+Active: 1
+Name: Ned 2
+Freq: 266250
+Chan: 33
+Active: 1
+Name: Ned 3
+Freq: 407250
+Chan: 51
+Active: 1
+Name: RTBF 1
+Freq: 62250
+Chan: 4
+Active: 1
+Name: RTBF 2
+Freq: 182250
+Chan: 21
+Active: 1
+Name: AB3
+Freq: 359250
+Chan: 52
+Active: 1
+Name: AB4
+Freq: 147250
+Chan: 52
+Active: 1
+Name: MTV France
+Freq: 319250
+Chan: 40
+Active: 1
+Name: MCM
+Freq: 168250
+Chan: 19
+Active: 1
+Name: EuroNews - FR/EN
+Freq: 303250
+Chan: 38
+Active: 1
+Name: TF 1
+Freq: 175250
+Chan: 20
+Active: 1
+Name: France 2
+Freq: 203250
+Chan: 24
+Active: 1
+Name: France 3
+Freq: 327250
+Chan: 41
+Active: 1
+Name: TV5 Europe
+Freq: 231250
+Chan: 28
+Active: 1
+Name: ARTE - FR
+Freq: 273250
+Chan: 34
+Active: 1
+Form: 0
+Name: RTL-TVI
+Freq: 280250
+Chan: 35
+Active: 1
+Name: Club RTL
+Freq: 217250
+Chan: 26
+Active: 1
+Name: ZTV - FR/NL
+Freq: 447250
+Chan: 56
+Active: 1
+Name: ARD
+Freq: 154250
+Chan: 17
+Active: 1
+Name: ZDF
+Freq: 140250
+Chan: 15
+Active: 1
+Name: TVE
+Freq: 287250
+Chan: 36
+Active: 1
+Name: RTP I
+Freq: 351250
+Chan: 44
+Active: 1
+Name: ERT Sat
+Freq: 399250
+Chan: 50
+Active: 1
+Name: RTM 1
+Freq: 391250
+Chan: 0
+Active: 1
+Name: TRT Int.
+Freq: 375250
+Chan: 0
+Active: 1
+Name: TV Brussel
+Freq: 161250
+Chan: 18
+Active: 1
+Name: Tele Bruxelles
+Freq: 259250
+Chan: 32
+Active: 1
+Name: libertytv.com
+Freq: 415000
+Chan: 0
+Active: 1
+Name: Brutele Boxes
+Freq: 210250
+Chan: 25
+Active: 1
+Name: Brutele Info
+Freq: 196250
+Chan: 23
+Active: 1
+Name: Canal + FR
+Freq: 294250
+Chan: 37
+Active: 1
+Name: RTL-TVI - Bad Picture
+Freq: 224250
+Chan: 27
+Active: 1
+Name: France 3 - Bad Picture
+Freq: 69250
+Chan: 5
+Active: 1
+

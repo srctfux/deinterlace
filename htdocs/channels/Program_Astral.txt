@@ -1,0 +1,215 @@
+Name: H B O
+Freq: 239000
+Chan: 0
+Active: 1
+Form: 0
+Name: Pro Tv
+Freq: 189000
+Chan: 0
+Active: 1
+Form: 0
+Name: Antena 1
+Freq: 182000
+Chan: 0
+Active: 1
+Form: 0
+Name: Prima
+Freq: 210000
+Chan: 0
+Active: 1
+Form: 0
+Name: TVR 1
+Freq: 196000
+Chan: 0
+Active: 1
+Form: 0
+Name: TVR 2
+Freq: 203000
+Chan: 0
+Active: 1
+Form: 0
+Name: B1
+Freq: 217000
+Chan: 0
+Active: 1
+Form: 0
+Name: Tele 7 abc
+Freq: 161000
+Chan: 0
+Active: 1
+Form: 0
+Name: Acasa
+Freq: 224000
+Chan: 0
+Active: 1
+Form: 0
+Name: Hallmark
+Freq: 259000
+Chan: 0
+Active: 1
+Form: 0
+Name: Atomic
+Freq: 126000
+Chan: 0
+Active: 1
+Form: 0
+Name: MTV
+Freq: 266000
+Chan: 0
+Active: 1
+Form: 0
+Name: VH-1
+Freq: 293812
+Chan: 0
+Active: 1
+Form: 0
+Name: Eurosport
+Freq: 140000
+Chan: 0
+Active: 1
+Form: 0
+Name: National Geographic
+Freq: 273000
+Chan: 0
+Active: 1
+Form: 0
+Name: Animal Planet
+Freq: 280000
+Chan: 0
+Active: 1
+Form: 0
+Name: Discovery channel
+Freq: 133000
+Chan: 0
+Active: 1
+Form: 0
+Name: Discovery Civilizations
+Freq: 623000
+Chan: 0
+Active: 1
+Form: 0
+Name: Discovery Science
+Freq: 631000
+Chan: 0
+Active: 1
+Form: 0
+Name: Discovery Travel
+Freq: 647000
+Chan: 0
+Active: 1
+Form: 0
+Name: Extreme
+Freq: 615000
+Chan: 0
+Active: 1
+Form: 0
+Name: Motoare & Futai
+Freq: 655000
+Chan: 0
+Active: 1
+Form: 0
+Name: TVR International
+Freq: 535000
+Chan: 0
+Active: 1
+Form: 0
+Name: Astral
+Freq: 147000
+Chan: 0
+Active: 1
+Form: 0
+Name: BBC / Fox
+Freq: 252000
+Chan: 0
+Active: 1
+Form: 0
+Name: Realitatea Tv
+Freq: 287000
+Chan: 0
+Active: 1
+Form: 0
+Name: Euronews
+Freq: 154000
+Chan: 0
+Active: 1
+Form: 0
+Name: Cartoon
+Freq: 302625
+Chan: 0
+Active: 1
+Form: 0
+Name: Minimax
+Freq: 335000
+Chan: 0
+Active: 1
+Form: 0
+Name: Romantica
+Freq: 112000
+Chan: 0
+Active: 1
+Form: 0
+Name: Rai 1
+Freq: 119000
+Chan: 0
+Active: 1
+Form: 0
+Name: TV 5
+Freq: 168000
+Chan: 0
+Active: 1
+Form: 0
+Name: PAX
+Freq: 175000
+Chan: 0
+Active: 1
+Form: 0
+Name: Reality Tv
+Freq: 310687
+Chan: 0
+Active: 1
+Form: 0
+Name: TVR Cultural
+Freq: 318687
+Chan: 0
+Active: 1
+Form: 0
+Name: Mezzo
+Freq: 326812
+Chan: 0
+Active: 1
+Form: 0
+Name: TVRM
+Freq: 342625
+Chan: 0
+Active: 1
+Form: 0
+Name: CNN
+Freq: 350562
+Chan: 0
+Active: 1
+Form: 0
+Name: Pro 7
+Freq: 358500
+Chan: 0
+Active: 1
+Form: 0
+Name: TVE
+Freq: 366750
+Chan: 0
+Active: 1
+Form: 0
+Name: Duna
+Freq: 471000
+Chan: 0
+Active: 1
+Form: 0
+Name: Etno
+Freq: 479000
+Chan: 0
+Active: 1
+Form: 0
+Name: M 6
+Freq: 487000
+Chan: 0
+Active: 1
+Form: 0

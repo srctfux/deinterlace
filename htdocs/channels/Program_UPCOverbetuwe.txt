@@ -1,0 +1,115 @@
+Name: Nederland 1
+Freq2: 3248
+Chan: 1
+Active: 1
+Form: 0
+Name: Nederland 2
+Freq2: 3024
+Chan: 1
+Active: 1
+Form: 0
+Name: Nederland 3
+Freq2: 3472
+Chan: 1
+Active: 1
+Form: 0
+Name: Belgie 1
+Freq2: 8184
+Chan: 1
+Active: 1
+Form: 0
+Name: Belgie 2
+Freq2: 3692
+Chan: 1
+Active: 1
+Form: 0
+Name: BBC 1
+Freq2: 8828
+Chan: 1
+Active: 1
+Form: 0
+Name: BBC 2
+Freq2: 9088
+Chan: 1
+Active: 1
+Form: 0
+Name: CNN
+Freq2: 13166
+Chan: 1
+Active: 1
+Form: 0
+Name: RTL 4
+Freq2: 10584
+Chan: 1
+Active: 1
+Form: 0
+Name: RTL 5
+Freq2: 8636
+Chan: 1
+Active: 1
+Form: 0
+Name: Net 5
+Freq2: 12397
+Chan: 1
+Active: 1
+Form: 0
+Name: Yorin
+Freq2: 2912
+Chan: 1
+Active: 1
+Form: 0
+Name: SBS 6
+Freq2: 11348
+Chan: 1
+Active: 1
+Form: 0
+Name: TV Gelderland
+Freq2: 3136
+Chan: 1
+Active: 1
+Form: 0
+Name: Discovery channel
+Freq2: 11895
+Chan: 1
+Active: 1
+Form: 0
+Name: Eurosport
+Freq2: 11502
+Chan: 1
+Active: 1
+Form: 0
+Name: TMF
+Freq2: 12991
+Chan: 1
+Active: 1
+Form: 0
+Name: TV5
+Freq2: 7792
+Chan: 1
+Active: 1
+Form: 0
+Name: ARD
+Freq2: 765
+Chan: 0
+Active: 1
+Form: 0
+Name: ZDF
+Freq2: 2800
+Chan: 10
+Active: 1
+Form: 0
+Name: WDR
+Freq2: 7536
+Chan: 1
+Active: 1
+Form: 0
+Name: Markit TV
+Freq2: 1004
+Chan: 0
+Active: 1
+Form: 0
+Name: Service kanaal
+Freq2: 877
+Chan: 0
+Active: 1
+Form: 0

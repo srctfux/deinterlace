@@ -1,0 +1,224 @@
+Name: ORF 1
+Freq2: 2015
+Chan: 4
+Active: 1
+Name: RAI UNO
+Freq2: 2130
+Chan: 5
+Active: 1
+Name: ORF 2
+Freq2: 2241
+Chan: 6
+Active: 1
+Name: POP TV
+Freq2: 2355
+Chan: 7
+Active: 1
+Name: ZAGREB 1
+Freq2: 2465
+Chan: 8
+Active: 1
+Name: BK TV
+Freq2: 2580
+Chan: 9
+Active: 1
+Name: TELEMACH
+Freq2: 2689
+Chan: 10
+Active: 1
+Name: HALLMARK
+Freq2: 3697
+Chan: 11
+Active: 1
+Name: CNN
+Freq2: 3809
+Chan: 12
+Active: 1
+Name: MTV
+Freq2: 3924
+Chan: 13
+Active: 1
+Name: NAT.GEOGRAFIC
+Freq2: 4033
+Chan: 14
+Active: 1
+Name: RTL
+Freq2: 4148
+Chan: 15
+Active: 1
+Name: CARTOON NETWORK
+Freq2: 4255
+Chan: 16
+Active: 1
+Name: DISCOVERY
+Freq2: 4367
+Chan: 17
+Active: 1
+Name: HRT 3
+Freq2: 4484
+Chan: 18
+Active: 1
+Name: HRT 2
+Freq2: 4591
+Chan: 19
+Active: 1
+Name: EUROSPORT
+Freq2: 4708
+Chan: 20
+Active: 1
+Name: DSF
+Freq2: 4852
+Chan: 21
+Active: 1
+Name: SAT 1
+Freq2: 4980
+Chan: 22
+Active: 1
+Name: RTL 2
+Freq2: 5108
+Chan: 23
+Active: 1
+Name: ROMANTICA
+Freq2: 5236
+Chan: 24
+Active: 1
+Name: TV ESPANIA
+Freq2: 5364
+Chan: 25
+Active: 1
+Name: TV 5
+Freq2: 5489
+Chan: 26
+Active: 1
+Name: BBC PRIME
+Freq2: 5620
+Chan: 27
+Active: 1
+Name: BBC WORLD
+Freq2: 5748
+Chan: 28
+Active: 1
+Name: PRO 7
+Freq2: 5876
+Chan: 29
+Active: 1
+Name: VIVA 1
+Freq2: 6004
+Chan: 30
+Active: 1
+Name: REALITY TV
+Freq2: 6260
+Chan: 32
+Active: 1
+Name: RAI DUE
+Freq2: 6388
+Chan: 33
+Active: 1
+Name: VOX
+Freq2: 6516
+Chan: 34
+Active: 1
+Name: POP TV
+Freq2: 3474
+Chan: 12
+Active: 1
+Name: SKY NEWS
+Freq2: 8052
+Chan: 17
+Active: 1
+Name: KOSOVA
+Freq2: 8180
+Chan: 18
+Active: 1
+Name: ANIMAL PLANET
+Freq2: 8308
+Chan: 19
+Active: 1
+Name: ARD 1
+Freq2: 8436
+Chan: 20
+Active: 1
+Name: CRNA GORA
+Freq2: 8564
+Chan: 21
+Active: 1
+Name: CHARLI TV
+Freq2: 8692
+Chan: 22
+Active: 1
+Name: TRAVEL
+Freq2: 8948
+Chan: 24
+Active: 1
+Name: KABEL 1
+Freq2: 9716
+Chan: 25
+Active: 1
+Name: SUPER RTL
+Freq2: 9844
+Chan: 26
+Active: 1
+Name: ZDF
+Freq2: 10100
+Chan: 28
+Active: 1
+Name: VH 1
+Freq2: 10228
+Chan: 29
+Active: 1
+Name: SRBIJA
+Freq2: 10356
+Chan: 30
+Active: 1
+Name: VIVA 2
+Freq2: 10484
+Chan: 31
+Active: 1
+Name: 3 SAT
+Freq2: 10612
+Chan: 32
+Active: 1
+Name: DEMO
+Freq2: 2804
+Chan: 20
+Active: 1
+Name: KOPER
+Freq2: 2911
+Chan: 21
+Active: 1
+Name: LJUBLJANA 1
+Freq2: 3024
+Chan: 22
+Active: 1
+Name: PAPRIKA
+Freq2: 3140
+Chan: 23
+Active: 1
+Name: LJUBLJANA 2
+Freq2: 3250
+Chan: 24
+Active: 1
+Name: A KANAL
+Freq2: 3358
+Chan: 25
+Active: 1
+Name: POP TV
+Freq2: 3472
+Chan: 26
+Active: 1
+Name: TV3
+Freq2: 3581
+Chan: 27
+Active: 1
+Name: CANALE 5
+Freq2: 9076
+Chan: 71
+Active: 1
+Name: PINK PLUS
+Freq2: 7924
+Chan: 62
+Active: 1
+Name: MAKEDONIJA
+Freq2: 9204
+Chan: 72
+Active: 1

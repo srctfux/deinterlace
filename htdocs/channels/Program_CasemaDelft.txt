@@ -1,0 +1,191 @@
+Name: Nederland 1 
+Freq2: 3252
+Chan: 1
+Active: 1
+Form: 0
+Name: Nederland 2 
+Freq2: 3476
+Chan: 1
+Active: 1
+Form: 0
+Name: Nederland 3 
+Freq2: 3028
+Chan: 1
+Active: 1
+Form: 0
+Name: RTL 4 
+Freq2: 8436
+Chan: 1
+Active: 1
+Form: 0
+Name: RTL 5 
+Freq2: 12916
+Chan: 1
+Active: 1
+Form: 0
+Name: SBS 6 
+Freq2: 8820
+Chan: 1
+Active: 1
+Form: 0
+Name: Yorin 
+Freq2: 7540
+Chan: 1
+Active: 1
+Form: 0
+Name: V 8 / Fox Kids 
+Freq2: 12692
+Chan: 1
+Active: 1
+Form: 0
+Name: Net 5 
+Freq2: 10900
+Chan: 1
+Active: 1
+Form: 0
+Name: KinderNet / Veronica 
+Freq2: 13124
+Chan: 1
+Active: 1
+Form: 0
+Name: Casema Service Kanaal 
+Freq2: 2804
+Chan: 1
+Active: 1
+Form: 0
+Name: TV West 
+Freq2: 3364
+Chan: 1
+Active: 1
+Form: 0
+Name: InfoThuis 
+Freq2: 9332
+Chan: 1
+Active: 1
+Form: 0
+Name: Belgie VRT TV 1 
+Freq2: 3588
+Chan: 1
+Active: 1
+Form: 0
+Name: Belgie KETNET/Canvas 
+Freq2: 3700
+Chan: 1
+Active: 1
+Form: 0
+Name: Engeland BBC 1 
+Freq2: 7748
+Chan: 1
+Active: 1
+Form: 0
+Name: Engeland BBC 2 
+Freq2: 7924
+Chan: 1
+Active: 1
+Form: 0
+Name: Duitsland 1 (ARD) 
+Freq2: 3140
+Chan: 1
+Active: 1
+Form: 0
+Name: Duitsland 2 (ZDF) 
+Freq2: 2580
+Chan: 1
+Active: 1
+Form: 0
+Name: Discovery Channel 
+Freq2: 12228
+Chan: 1
+Active: 1
+Form: 0
+Name: National Geographic Ch. 
+Freq2: 13300
+Chan: 1
+Active: 1
+Form: 0
+Name: Animal Planet 
+Freq2: 12020
+Chan: 1
+Active: 1
+Form: 0
+Name: Arte 
+Freq2: 11508
+Chan: 1
+Active: 1
+Form: 0
+Name: Eurosport 
+Freq2: 10436
+Chan: 1
+Active: 1
+Form: 0
+Name: MTV Europe 
+Freq2: 11332
+Chan: 1
+Active: 1
+Form: 0
+Name: The Music Factory 
+Freq2: 11124
+Chan: 1
+Active: 1
+Form: 0
+Name: The BOX 
+Freq2: 11796
+Chan: 1
+Active: 1
+Form: 0
+Name: CNN International 
+Freq2: 12404
+Chan: 1
+Active: 1
+Form: 0
+Name: BBC World 
+Freq2: 13588
+Chan: 1
+Active: 1
+Form: 0
+Name: Etalagekanaal 
+Freq2: 2916
+Chan: 1
+Active: 1
+Form: 0
+Name: TV 5 
+Freq2: 2692
+Chan: 1
+Active: 1
+Form: 0
+Name: RAI Uno 
+Freq2: 8644
+Chan: 1
+Active: 1
+Form: 0
+Name: TRT International 
+Freq2: 10228
+Chan: 1
+Active: 1
+Form: 0
+Name: TVE Internacional 
+Freq2: 10612
+Chan: 1
+Active: 1
+Form: 0
+Name: Uitgangskanaal Video 
+Freq2: 9076
+Chan: 1
+Active: 1
+Form: 0
+Name: Casema Digitale TV 
+Freq2: 9972
+Chan: 1
+Active: 1
+Form: 0
+Name: Canal+ Rood 
+Freq2: 4084
+Chan: 1
+Active: 1
+Form: 0
+Name: Canal+ Blauw 
+Freq2: 4340
+Chan: 1
+Active: 1
+Form: 0
+ 

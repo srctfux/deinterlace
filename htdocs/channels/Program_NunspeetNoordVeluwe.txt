@@ -1,0 +1,116 @@
+Name: Ned 1
+Freq2: 3456
+Chan: 2
+Active: 1
+Name: Ned 2
+Freq2: 2944
+Chan: 2
+Active: 1
+Name: Ned 3
+Freq2: 3072
+Chan: 2
+Active: 1
+Name: RTL 4
+Freq2: 11520
+Chan: 2
+Active: 1
+Name: RTL 5
+Freq2: 11648
+Chan: 2
+Active: 1
+Name: SBS 6
+Freq2: 12672
+Chan: 2
+Active: 1
+Name: Yorin
+Freq2: 11776
+Chan: 2
+Active: 1
+Name: V8
+Freq2: 10752
+Chan: 2
+Active: 1
+Name: Net5
+Freq2: 12544
+Chan: 2
+Active: 1
+Name: Veronica
+Freq2: 8448
+Chan: 2
+Active: 1
+Name: Nunspeet
+Freq2: 4096
+Chan: 2
+Active: 1
+Name: TV Gelderland
+Freq2: 4224
+Chan: 2
+Active: 1
+Name: UPC info
+Freq2: 2816
+Chan: 2
+Active: 1
+Name: Lokaal+
+Freq2: 9856
+Chan: 2
+Active: 1
+Name: Belgie 1
+Freq2: 3200
+Chan: 2
+Active: 1
+Name: Belgie 2
+Freq2: 3328
+Chan: 2
+Active: 1
+Name: BBC 1
+Freq2: 4352
+Chan: 2
+Active: 1
+Name: BBC 2
+Freq2: 4480
+Chan: 2
+Active: 1
+Name: ARD 1
+Freq2: 3584
+Chan: 2
+Active: 1
+Name: WDR 3
+Freq2: 3840
+Chan: 2
+Active: 1
+Name: CNN
+Freq2: 12032
+Chan: 2
+Active: 1
+Name: Discovery
+Freq2: 12800
+Chan: 2
+Active: 1
+Name: Eurosport
+Freq2: 13056
+Chan: 2
+Active: 1
+Name: National Geographic
+Freq2: 8576
+Chan: 2
+Active: 1
+Name: MTV
+Freq2: 12288
+Chan: 2
+Active: 1
+Name: TMF
+Freq2: 9088
+Chan: 2
+Active: 1
+Name: C1
+Freq2: 6144
+Chan: 2
+Active: 1
+Name: C2
+Freq2: 6272
+Chan: 2
+Active: 1
+Name: Video uitgang
+Freq2: 9344
+Chan: 2
+Active: 1

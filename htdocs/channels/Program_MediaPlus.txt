@@ -1,0 +1,309 @@
+Name: 1 - Pink
+Freq: 196250
+Chan: 23
+Active: 1
+Form: 4
+Name: 2 - BK telecom
+Freq: 217250
+Chan: 26
+Active: 1
+Form: 4
+Name: 3 - Kanal 9
+Freq: 287250
+Chan: 36
+Active: 1
+Form: 4
+Name: 4 - Politika
+Freq: 168250
+Chan: 19
+Active: 1
+Form: 4
+Name: 5 - Maraton
+Freq: 471250
+Chan: 59
+Active: 1
+Form: 4
+Name: 6 - Jesenjin
+Freq: 126250
+Chan: 13
+Active: 1
+Form: 4
+Name: 7 - Kosava
+Freq: 273250
+Chan: 34
+Active: 1
+Form: 4
+Name: 8 - Melos
+Freq: 367250
+Chan: 46
+Active: 1
+Form: 4
+Name: 9 - Most
+Freq: 559250
+Chan: 70
+Active: 1
+Form: 4
+Name: 10 - Apolo
+Freq: 259250
+Chan: 32
+Active: 1
+Form: 4
+Name: 11 - B92
+Freq: 551250
+Chan: 69
+Active: 1
+Form: 4
+Name: 12 - Sava
+Freq: 383250
+Chan: 48
+Active: 1
+Form: 4
+Name: 13 - Duga
+Freq: 415250
+Chan: 52
+Active: 1
+Form: 4
+Name: 14 - RT Delta
+Freq: 399250
+Chan: 50
+Active: 1
+Form: 4
+Name: 15 - Santos
+Freq: 375250
+Chan: 47
+Active: 1
+Form: 4
+Name: 16 - Panonija
+Freq: 133250
+Chan: 14
+Active: 1
+Form: 4
+Name: 17 - S.O.S.
+Freq: 527250
+Chan: 66
+Active: 1
+Form: 4
+Name: 18 - studio B
+Freq: 479250
+Chan: 60
+Active: 1
+Form: 4
+Name: 19 - Art
+Freq: 511250
+Chan: 64
+Active: 1
+Form: 4
+Name: 20 - OBN
+Freq: 535250
+Chan: 67
+Active: 1
+Form: 4
+Name: 21 - RT NS 1
+Freq: 175250
+Chan: 20
+Active: 1
+Form: 4
+Name: 22 - RT NS 2
+Freq: 182250
+Chan: 21
+Active: 1
+Form: 4
+Name: 23 - RTS 1
+Freq: 224250
+Chan: 27
+Active: 1
+Form: 4
+Name: 24 - RTS 2
+Freq: 147250
+Chan: 16
+Active: 1
+Name: 25 - RTS 3K
+Freq: 154250
+Chan: 17
+Active: 1
+Form: 4
+Name: 26 - RTCG
+Freq: 189250
+Chan: 22
+Active: 1
+Form: 4
+Name: 27 - HRT 1
+Freq: 238250
+Chan: 29
+Active: 1
+Form: 4
+Name: 28 - HRT 2
+Freq: 112250
+Chan: 11
+Active: 1
+Form: 4
+Name: 29 - HRT 3
+Freq: 231250
+Chan: 28
+Active: 1
+Form: 4
+Name: 30 - Info24
+Freq: 543250
+Chan: 68
+Active: 1
+Form: 4
+Name: 31 - D Kanal
+Freq: 623250
+Chan: 78
+Active: 1
+Form: 4
+Name: 32 - Cartoon Network\TCM
+Freq: 119250
+Chan: 12
+Active: 1
+Form: 4
+Name: 33 - EuroNews
+Freq: 294250
+Chan: 37
+Active: 1
+Form: 4
+Name: 34 - CNN
+Freq: 447250
+Chan: 56
+Active: 1
+Form: 4
+Name: 35 - BBC
+Freq: 519250
+Chan: 65
+Active: 1
+Form: 4
+Name: 36 - Discovery
+Freq: 252250
+Chan: 31
+Active: 1
+Form: 4
+Name: 37 - BBC Prime
+Freq: 487250
+Chan: 61
+Active: 1
+Form: 4
+Name: 38 - National Geographic
+Freq: 495250
+Chan: 62
+Active: 1
+Form: 4
+Name: 39 - Animal Planet
+Freq: 245250
+Chan: 30
+Active: 1
+Form: 4
+Name: 40 - travel
+Freq: 359250
+Chan: 45
+Active: 1
+Form: 4
+Name: 41 - Motors tv
+Freq: 391250
+Chan: 49
+Active: 1
+Form: 4
+Name: 42 - eXtreme
+Freq: 567250
+Chan: 71
+Active: 1
+Form: 4
+Name: 43 - Hallmark
+Freq: 140250
+Chan: 15
+Active: 1
+Form: 4
+Name: 44 - TCM
+Freq: 423250
+Chan: 53
+Active: 1
+Form: 4
+Name: 45 - RTL\Fox Kids
+Freq: 319250
+Chan: 40
+Active: 1
+Form: 4
+Name: 46 - pro7
+Freq: 335250
+Chan: 42
+Active: 1
+Form: 4
+Name: 47 - SAT 1
+Freq: 351250
+Chan: 44
+Active: 1
+Form: 4
+Name: 48 - DSF
+Freq: 266250
+Chan: 33
+Active: 1
+Form: 4
+Name: 49 - MTV
+Freq: 439250
+Chan: 55
+Active: 1
+Form: 4
+Name: 50 - MTV 2
+Freq: 431250
+Chan: 54
+Active: 1
+Form: 4
+Name: 51 - VH1
+Freq: 503250
+Chan: 63
+Active: 1
+Form: 4
+Name: 52 - enter
+Freq: 615250
+Chan: 77
+Active: 1
+Form: 4
+Name: 53 - CLASSIC  FM TV
+Freq: 303250
+Chan: 38
+Active: 1
+Form: 4
+Name: 54 - ftv
+Freq: 280250
+Chan: 35
+Active: 1
+Form: 4
+Name: 55 - EuroSport
+Freq: 203250
+Chan: 24
+Active: 1
+Form: 4
+Name: 56 - EuroSportNews
+Freq: 407250
+Chan: 51
+Active: 1
+Form: 4
+Name: 57 - Rai Uno
+Freq: 343250
+Chan: 43
+Active: 1
+Form: 4
+Name: 58- TV5
+Freq: 327250
+Chan: 41
+Active: 1
+Form: 4
+Name: 59 - tve
+Freq: 575250
+Chan: 72
+Active: 1
+Form: 4
+Name: 60 - m2
+Freq: 311250
+Chan: 39
+Active: 1
+Form: 4
+Name: 61 - Duna
+Freq: 161250
+Chan: 18
+Active: 1
+Form: 4
+Name: 62 - Media Plus
+Freq: 210250
+Chan: 25
+Active: 1
+Form: 4

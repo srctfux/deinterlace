@@ -1,0 +1,220 @@
+Name: RTS 1
+Freq: 175250
+Chan: 21
+Active: 1
+Name: RTS 2
+Freq: 195624
+Chan: 21
+Active: 1
+Name: RTS 3
+Freq: 188687
+Chan: 21
+Active: 1
+Name: Studio B
+Freq: 224125
+Chan: 21
+Active: 1
+Name: Pink
+Freq: 203250
+Chan: 21
+Active: 1
+Name: BK
+Freq: 210125
+Chan: 21
+Active: 1
+Name: Palma
+Freq: 470687
+Chan: 21
+Active: 1
+Name: Politika
+Freq: 217187
+Chan: 21
+Active: 1
+Name: YU Info
+Freq: 495062
+Chan: 21
+Active: 1
+Name: TV NS 1
+Freq: 237812
+Chan: 21
+Active: 1
+Name: Art
+Freq: 231375
+Chan: 21
+Active: 1
+Name: B 92
+Freq: 486687
+Chan: 21
+Active: 1
+Name: Kosava
+Freq: 168125
+Chan: 21
+Active: 1
+Name: Stankom
+Freq: 518812
+Chan: 21
+Active: 1
+Name: Ritam
+Freq: 252187
+Chan: 21
+Active: 1
+Name: Metropolis
+Freq: 542812
+Chan: 21
+Active: 1
+Name: I.B.C.
+Freq: 534750
+Chan: 21
+Active: 1
+Name: Happy TV
+Freq: 244562
+Chan: 21
+Active: 1
+Name: Kanal D
+Freq: 510750
+Chan: 21
+Active: 1
+Name: SOS
+Freq: 502500
+Chan: 21
+Active: 1
+Name: HRT 1
+Freq: 606750
+Chan: 21
+Active: 1
+Name: HRT 3
+Freq: 293812
+Chan: 21
+Active: 1
+Name: OBN
+Freq: 622687
+Chan: 21
+Active: 1
+Name: RT CG
+Freq: 630812
+Chan: 21
+Active: 1
+Name: TV Pancevo
+Freq: 718500
+Chan: 21
+Active: 1
+Name: fan
+Freq: 750625
+Chan: 21
+Active: 1
+Name: KDS
+Freq: 558687
+Chan: 21
+Active: 1
+Name: BBC Prime
+Freq: 687000
+Chan: 21
+Active: 1
+Name: TCM
+Freq: 854000
+Chan: 21
+Active: 1
+Name: Hallmark
+Freq: 334937
+Chan: 21
+Active: 1
+Name: Discovery
+Freq: 133187
+Chan: 21
+Active: 1
+Name: N. Geographic
+Freq: 639062
+Chan: 21
+Active: 1
+Name: Animal Planet
+Freq: 654375
+Chan: 21
+Active: 1
+Name: Travel
+Freq: 318437
+Chan: 21
+Active: 1
+Name: Spice
+Freq: 743000
+Chan: 21
+Active: 1
+Name: Tv e
+Freq: 326562
+Chan: 21
+Active: 1
+Name: Fashion TV
+Freq: 670625
+Chan: 21
+Active: 1
+Name: Cartoon Network
+Freq: 146875
+Chan: 21
+Active: 1
+Name: Fox Kids
+Freq: 702500
+Chan: 21
+Active: 1
+Name: Rai Uno
+Freq: 258812
+Chan: 21
+Active: 1
+Name: Rai Due
+Freq: 286875
+Chan: 21
+Active: 1
+Name: Rai Sport
+Freq: 272687
+Chan: 21
+Active: 1
+Name: Euro Sport
+Freq: 678625
+Chan: 21
+Active: 1
+Name: Euro Sport News
+Freq: 694374
+Chan: 21
+Active: 1
+Name: Motors
+Freq: 280124
+Chan: 21
+Active: 1
+Name: DSF
+Freq: 798312
+Chan: 21
+Active: 1
+Name: RTL
+Freq: 374687
+Chan: 21
+Active: 1
+Name: TV 5
+Freq: 342687
+Chan: 21
+Active: 1
+Name: MTV
+Freq: 119187
+Chan: 21
+Active: 1
+Name: VH 1
+Freq: 350500
+Chan: 21
+Active: 1
+Name: VIVA
+Freq: 302500
+Chan: 21
+Active: 1
+Name: CNN
+Freq: 154062
+Chan: 21
+Active: 1
+Name: BBC World
+Freq: 358875
+Chan: 21
+Active: 1
+Name: Euro News
+Freq: 265875
+Chan: 21
+Active: 1
+Name: Sky News
+Freq: 126062
+Chan: 21
+Active: 1

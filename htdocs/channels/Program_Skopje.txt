@@ -1,0 +1,60 @@
+Name: MTV 1
+Freq2: 3252
+Chan: 24
+Active: 1
+Name: MTV 2
+Freq2: 8180
+Chan: 64
+Active: 1
+Name: MTV 3
+Freq2: 9460
+Chan: 74
+Active: 1
+Name: Kanal 4
+Freq2: 8820
+Chan: 69
+Active: 1
+Name: Kanal 5
+Freq2: 11252
+Chan: 88
+Active: 1
+Name: A1
+Freq2: 10868
+Chan: 85
+Active: 1
+Name: Sitel
+Freq2: 12148
+Chan: 95
+Active: 1
+Name: Telma
+Freq2: 10356
+Chan: 81
+Active: 1
+Name: SkyNET
+Freq2: 12660
+Chan: 99
+Active: 1
+Name: Alfa
+Freq2: 12916
+Chan: 101
+Active: 1
+Name: MTM
+Freq2: 8436
+Chan: 66
+Active: 1
+Name: BTR
+Freq2: 7540
+Chan: 59
+Active: 1
+Name: Shutel
+Freq2: 12404
+Chan: 97
+Active: 1
+Name: Amazon / Edo / Krt
+Freq2: 13168
+Chan: 103
+Active: 1
+Name: MS
+Freq2: 11888
+Chan: 93
+Active: 1

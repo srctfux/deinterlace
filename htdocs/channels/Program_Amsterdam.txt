@@ -1,0 +1,175 @@
+Name: Channel 1
+Freq: 216000
+Chan: 6
+Active: 1
+Form: 0
+Name: Channel 2
+Freq: 184000
+Chan: 14
+Active: 1
+Form: 0
+Name: Channel 3
+Freq: 192000
+Chan: 16
+Active: 1
+Form: 0
+Name: Channel 4
+Freq: 224000
+Chan: 26
+Active: 1
+Form: 0
+Name: Channel 5
+Freq: 232000
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 6
+Freq: 280000
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 7
+Freq: 240000
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 8
+Freq: 672000
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 9
+Freq: 272000
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 10
+Freq: 256000
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 11
+Freq: 512000
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 12
+Freq: 264000
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 13
+Freq: 176000
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 14
+Freq: 200000
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 15
+Freq: 208000
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 16
+Freq: 784000
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 17
+Freq: 792000
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 18
+Freq: 720000
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 19
+Freq: 728000
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 20
+Freq: 752000
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 21
+Freq: 736000
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 22
+Freq: 248000
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 23
+Freq: 528000
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 24
+Freq: 768000
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 25
+Freq: 544000
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 26
+Freq: 288000
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 27
+Freq: 560000
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 28
+Freq: 568000
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 29
+Freq: 632000
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 30
+Freq: 656000
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 31
+Freq: 520000
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 32
+Freq: 536000
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 33
+Freq: 394750
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 34
+Freq: 607250
+Chan: 30
+Active: 1
+Form: 0
+Name: Channel 35
+Freq: 584000
+Chan: 30
+Active: 1
+Form: 0

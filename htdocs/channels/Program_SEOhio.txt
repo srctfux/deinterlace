@@ -1,0 +1,124 @@
+Name: WOUB PBS Athens
+Freq2: 884
+Chan: 2
+Active: 1
+Name: WSAZ NBC Huntington
+Freq2: 980
+Chan: 3
+Active: 1
+Name: WTAP NBC Parkersburg
+Freq2: 1076
+Chan: 4
+Active: 1
+Name: Trinity Broadcasting Network
+Freq2: 1236
+Chan: 5
+Active: 1
+Name: WHIZ NBC Zanesville
+Freq2: 1332
+Chan: 6
+Active: 1
+Name: WTRF CBS Wheeling
+Freq2: 2804
+Chan: 7
+Active: 1
+Name: WCHS ABC Charleston
+Freq2: 2900
+Chan: 8
+Active: 1
+Name: TBS
+Freq2: 2996
+Chan: 9
+Active: 1
+Name: WBNS CBS Columbus
+Freq2: 3092
+Chan: 10
+Active: 1
+Name: WVAH FOX Hurricane
+Freq2: 3188
+Chan: 11
+Active: 1
+Name: WGN Chicago
+Freq2: 3380
+Chan: 13
+Active: 1
+Name: The Learning Channel
+Freq2: 2036
+Chan: 15
+Active: 1
+Name: Bravo
+Freq2: 2132
+Chan: 16
+Active: 1
+Name: A&E
+Freq2: 2228
+Chan: 17
+Active: 1
+Name: TNN
+Freq2: 2324
+Chan: 18
+Active: 1
+Name: ABC Family Channel
+Freq2: 2420
+Chan: 19
+Active: 1
+Name: Disney
+Freq2: 2516
+Chan: 20
+Active: 1
+Name: AMC
+Freq2: 3476
+Chan: 23
+Active: 1
+Name: USA Network
+Freq2: 3572
+Chan: 24
+Active: 1
+Name: CNN-Headline News
+Freq2: 3668
+Chan: 25
+Active: 1
+Name: The Discovery Channel
+Freq2: 3764
+Chan: 26
+Active: 1
+Name: ESPN
+Freq2: 3860
+Chan: 27
+Active: 1
+Name: Lifetime
+Freq2: 3956
+Chan: 28
+Active: 1
+Name: TNT
+Freq2: 4052
+Chan: 29
+Active: 1
+Name: CNN
+Freq2: 4148
+Chan: 30
+Active: 1
+Name: Nickelodeon
+Freq2: 4244
+Chan: 31
+Active: 1
+Name: SCI-FI
+Freq2: 4340
+Chan: 32
+Active: 1
+Name: CMT
+Freq2: 4436
+Chan: 33
+Active: 1
+Name: Home Shopping Network
+Freq2: 4532
+Chan: 34
+Active: 1
+Name: E! Entertainment
+Freq2: 4628
+Chan: 35
+Active: 1
+Name: FOX News
+Freq2: 4724
+Chan: 36
+Active: 1
