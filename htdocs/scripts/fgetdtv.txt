@@ -1,0 +1,41 @@
+#FTP Get dTV Source Zip Script
+#Dan Schmelzer
+#dschmelzer@hotmail.com
+#January 31, 2000
+
+#This file is the DOS FTP script to grab the dTV nightly source zip from
+#the dTV anonymous FTP site on Sourceforge.
+
+#Execute this file by using the command from the batch file or command line:
+#'ftp -A -s:fgetdtv.txt deinterlace.sourceforge.net <Enter>'
+
+#Because of this explanatory text, ftp will throw a lot of errors, but
+#disregard them.
+
+
+#---Start Here
+
+
+#Change to binary for the zip file
+
+binary
+
+
+#ftp deinterlace.sourceforge.net maps to the absolute path /home/ftp/
+#on the Sourceforge servers.  The project files are found, however,
+#at /home/ftp/pub/deinterlace, so do our work from there.
+
+cd pub/deinterlace
+
+
+#Grab the nightly source zip from the server
+
+get dtvmodule.zip
+
+
+#Logout from the server
+
+quit
+
+
+#Joy
