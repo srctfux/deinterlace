@@ -212,6 +212,26 @@ BOOL Overlay_Update(LPRECT pSrcRect, LPRECT pDestRect, DWORD dwFlags, BOOL Color
 		{
 			return FALSE;
 		}
+		// we get unsupported error here for mpact2 cards
+		// so cope with this by not trying to update
+		// the color key value and just hoping it works
+		// with the existing one (black used to work)
+		if(ddrval == DDERR_UNSUPPORTED)
+		{
+			DDCOLORKEY ColorKey;
+
+			LOG(" Got unsupported error from Overlay Update");
+			ddrval = IDirectDrawSurface_GetColorKey(lpDDOverlay, DDCKEY_DESTOVERLAY, &ColorKey);
+			if(SUCCEEDED(ddrval))
+			{
+				OverlayColor = ColorKey.dwColorSpaceHighValue;
+				LOG(" Reset overlay color to %x", OverlayColor);
+			}
+			dwFlags &= ~DDOVER_KEYDESTOVERRIDE;
+			memset(&DDOverlayFX, 0x00, sizeof(DDOverlayFX));
+			DDOverlayFX.dwSize = sizeof(DDOverlayFX);
+			ddrval = IDirectDrawSurface_UpdateOverlay(lpDDOverlay, pSrcRect, lpDDSurface, pDestRect, dwFlags, &DDOverlayFX);
+		}
 		if (FAILED(ddrval))
 		{
 			if ((pDestRect->top < pDestRect->bottom) && (pDestRect->left < pDestRect->right))

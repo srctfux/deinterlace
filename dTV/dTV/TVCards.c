@@ -1072,16 +1072,7 @@ void TVCard_SetMenu(HMENU hMenu)
 	EnableMenuItem(hMenu, IDM_CHANNELPLUS, (TunerType != TUNER_ABSENT)?MF_ENABLED:MF_GRAYED);
 	EnableMenuItem(hMenu, IDM_CHANNELMINUS, (TunerType != TUNER_ABSENT)?MF_ENABLED:MF_GRAYED);
 	EnableMenuItem(hMenu, IDM_ANALOGSCAN, (TunerType != TUNER_ABSENT)?MF_ENABLED:MF_GRAYED);
-
-	// don't show the tuner option if there isn't one or it has not been set up
-	if(TVCards[CardType].TunerInput == TUNER_ABSENT || TunerType == TUNER_ABSENT)
-	{
-		EnableMenuItem(hMenu, IDM_SOURCE_TUNER, MF_GRAYED);
-	}
-	else
-	{
-		EnableMenuItem(hMenu, IDM_SOURCE_TUNER, MF_ENABLED);
-	}
+	EnableMenuItem(hMenu, IDM_SOURCE_TUNER, (TunerType != TUNER_ABSENT)?MF_ENABLED:MF_GRAYED);
 
 	if(TVCards[CardType].SVideoInput == -1)
 	{

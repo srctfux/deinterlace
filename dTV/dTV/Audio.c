@@ -44,7 +44,7 @@ char MSPStatus[40] = "";
 char MSPVersion[16] = "";
 BOOL MSPToneControl = FALSE;
 
-int InitialVolume = 800;
+int InitialVolume = 1000;
 char InitialBalance = 0x00;
 char InitialLoudness = 0x00;
 char InitialBass = 0x00;
