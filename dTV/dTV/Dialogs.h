@@ -30,34 +30,30 @@
 //                                     Cut out all decoding
 //                                     Cut out digital hardware stuff
 //
+// 08 Jan 2001   John Adcock           Global Variable Tidy up
+//                                     Got rid of global.h structs.h defines.h
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __DIALOGS_H___
 #define __DIALOGS_H___
-
-#include "defines.h"
-#include "structs.h"
-#include "globals.h"
 
 BOOL APIENTRY VideoTextProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 BOOL APIENTRY VideoTextUnterTitelProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 BOOL APIENTRY SplashProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 BOOL APIENTRY AdvVideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
-BOOL APIENTRY BlendedClipProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 BOOL APIENTRY VTInfoProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 BOOL APIENTRY VPSInfoProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 BOOL APIENTRY AudioSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 BOOL APIENTRY AudioSettingProc1(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 BOOL APIENTRY AboutProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
-VOID APIENTRY DrawEntireItem(HWND hDlg, LPDRAWITEMSTRUCT lpdis, INT Typ);
 BOOL APIENTRY PLLSettingProc(HWND hDlg,UINT message,UINT wParam,LONG lParam);
 BOOL APIENTRY ChipSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 BOOL APIENTRY SelectCardProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
+void SetHorSliderInt(HWND hDlgItem, int yPos, int Value, int nMin, int nMax);
+int GetHorSliderInt(int MouseX, int nMin, int nMax);
+
 
 #endif
-
-#include "defines.h"
-#include "structs.h"
-#include "globals.h"
 

@@ -30,14 +30,69 @@
 //                                     Cut out all decoding
 //                                     Cut out digital hardware stuff
 //
+// 08 Jan 2001   John Adcock           Global Variable Tidy up
+//                                     Got rid of global.h structs.h defines.h
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __MIXERDEV_H___
 #define __MIXERDEV_H___
 
-#include "defines.h"
-#include "structs.h"
-#include "globals.h"
+#define MAXKANAELE 4
+
+struct TMixerAccess
+{
+    int SoundSystem;
+    int Destination;
+    int Connection;
+    int Control;
+};
+
+struct TMixerValues
+{
+    int Kanal1;
+    int Kanal2;
+    int Kanal3;
+    int Kanal4;
+};
+
+
+struct TMixerLoad
+{
+	struct TMixerAccess MixerAccess;
+	struct TMixerValues MixerValues;
+};
+
+struct TMixerControls
+{
+	int ControlsCount;
+	MIXERCONTROL          *MixerControl;
+	MIXERCONTROLDETAILS   *MixerDetail;
+};
+
+struct TMixerConnections
+{
+	int ConnectionsCount;
+	MIXERLINE *MixerConnections;
+	struct TMixerControls *To_Control;
+};
+
+struct TMixerLines
+{
+	int LinesCount;
+	MIXERLINE *MixerLine;
+	struct TMixerConnections *To_Connection;
+};
+
+struct TSoundSystem
+{
+	int DeviceCount;
+	MIXERCAPS *MixerDev;
+	struct TMixerLines *To_Lines;
+};
+
+
+
 
 MMRESULT Set_Control_Values(MIXERCONTROLDETAILS * Setting, int Device);
 MMRESULT Get_Control_Values(MIXERCONTROLDETAILS * Setting, int Device);

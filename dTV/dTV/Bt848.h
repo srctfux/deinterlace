@@ -34,6 +34,9 @@
 //
 // 08 Jan 2001   John Adcock           Added C++ like access for strings
 //
+// 08 Jan 2001   John Adcock           Global Variable Tidy up
+//                                     Got rid of global.h structs.h defines.h
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __BT848_H___
@@ -463,6 +466,8 @@ void BT848_SaveSettings(LPCSTR szFileName);
 #define BT848_VTC_HSFMT_32       		0x80
 #define BT848_VTC_HSFMT_16       		0xC0
 
+#define VBI_SPL 2044
+
 extern BOOL bSaveSettings;
 extern BYTE* pDisplay[5];
 extern BYTE* pVBILines[5];
@@ -486,5 +491,27 @@ extern int CurrentY;
 extern int CurrentVBILines;
 
 extern struct TTVSetting TVSettings[];
+
+// Add some global fields for Adv Video Flags - Tom Barry 12/15/00
+extern  BYTE	BtAgcDisable;
+extern  BYTE	BtCrush;
+extern  BYTE	BtEvenChromaAGC;
+extern  BYTE	BtOddChromaAGC;
+extern  BYTE	BtEvenLumaPeak;
+extern  BYTE	BtOddLumaPeak;
+extern  BYTE	BtFullLumaRange;
+extern  BYTE	BtEvenLumaDec;
+extern  BYTE	BtOddLumaDec;
+extern  BYTE	BtEvenComb;
+extern  BYTE	BtOddComb;
+extern  BYTE	BtColorBars;
+extern  BYTE	BtGammaCorrection;
+extern	BYTE    BtCoring;
+extern  BYTE    BtHorFilter;
+extern	BYTE    BtVertFilter;
+extern	BYTE    BtColorKill;
+extern	BYTE    BtWhiteCrushUp;
+extern	BYTE    BtWhiteCrushDown;
+
 
 #endif

@@ -406,7 +406,6 @@
 #define IDC_STATIC6                     1825
 #define IDC_STATIC7                     1826
 #define IDC_STATIC8                     1827
-#define IDC_TESTZEILEN                  1531
 #define IDC_TEXT                        1529
 #define IDC_TEXT1                       1540
 #define IDC_TEXT2                       1543
@@ -626,7 +625,6 @@
 #define IDM_TYPEFORMAT_8                1128
 #define IDM_TYPEFORMAT_9                1129
 #define IDM_UHF                         1595
-#define IDM_UNTERTITEL                  383
 #define IDM_USATURATION_CURRENT         611
 #define IDM_USATURATION_MINUS           610
 #define IDM_USATURATION_PLUS            609

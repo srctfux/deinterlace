@@ -38,6 +38,12 @@
 //                                     so that we don't ever restart in film mode
 //                                     when we're doing autodetect  
 //
+// 08 Jan 2001   John Adcock           Global Variable Tidy up
+//                                     Got rid of global.h structs.h defines.h
+//
+// 08 Jan 2001   John Adcock           Made all ini file reads use initial values
+//                                     of variables rather than hardcoded values here
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -53,6 +59,8 @@
 #include "MixerDev.h"
 #include "dTV.h"
 #include "ProgramList.h"
+#include "DI_BlendedClip.h"
+#include "other.h"
 
 // MRS 9-2-00
 // Added variable in dTV.c to track which aspect mode we are currently in
@@ -99,10 +107,10 @@ void LoadSettingsFromIni()
 		bIsFullScreen = TRUE;
 	}
 
-	PriorClassId = GetPrivateProfileInt("Threads", "ProcessPriority", 0, szIniFile);
-	ThreadClassId = GetPrivateProfileInt("Threads", "ThreadPriority", 1, szIniFile);
-	MainProcessor = GetPrivateProfileInt("Threads", "WindowProcessor", 0, szIniFile);
-	DecodeProcessor = GetPrivateProfileInt("Threads", "DecodeProcessor", 0, szIniFile);
+	PriorClassId = GetPrivateProfileInt("Threads", "ProcessPriority", PriorClassId, szIniFile);
+	ThreadClassId = GetPrivateProfileInt("Threads", "ThreadPriority", ThreadClassId, szIniFile);
+	MainProcessor = GetPrivateProfileInt("Threads", "WindowProcessor", MainProcessor, szIniFile);
+	DecodeProcessor = GetPrivateProfileInt("Threads", "DecodeProcessor", DecodeProcessor, szIniFile);
 
 	// Added new performance related parms to Threads group - TRB 10/28/00
 	Hurry_When_Late = (GetPrivateProfileInt("Threads", "Hurry_When_Late", Hurry_When_Late, szIniFile) != 0);
@@ -232,13 +240,13 @@ void LoadSettingsFromIni()
 	BtWhiteCrushUp = GetPrivateProfileInt("Hardware", "BtWhiteCrushUp", BtWhiteCrushUp, szIniFile);
 	BtWhiteCrushDown = GetPrivateProfileInt("Hardware", "BtWhiteCrushDown", BtWhiteCrushDown, szIniFile);
 
-	Capture_VBI = (GetPrivateProfileInt("Show", "CaptureVBI", 0, szIniFile) != 0);  
-	CurrentProgramm = GetPrivateProfileInt("Show", "LastProgram", 0, szIniFile);
+	Capture_VBI = (GetPrivateProfileInt("Show", "CaptureVBI", Capture_VBI, szIniFile) != 0);  
+	CurrentProgramm = GetPrivateProfileInt("Show", "LastProgram", CurrentProgramm, szIniFile);
 
 	AudioSource = GetPrivateProfileInt("Sound", "AudioSource", AudioSource, szIniFile);
 	
-	bSaveSettings = (GetPrivateProfileInt("Show", "SaveSettings", 1, szIniFile) != 0);
-	CountryCode = GetPrivateProfileInt("Show", "CountryCode", 1, szIniFile);
+	bSaveSettings = (GetPrivateProfileInt("Show", "SaveSettings", CountryCode, szIniFile) != 0);
+	CountryCode = GetPrivateProfileInt("Show", "CountryCode", CountryCode, szIniFile);
 
 	for(i = 0; i < 9; i++)
 	{
@@ -246,18 +254,18 @@ void LoadSettingsFromIni()
 		VTColourTable[i] = GetPrivateProfileInt("VT", szKey, VTColourTable[i], szIniFile);
 	}
 	
-	MSPMode = GetPrivateProfileInt("MSP", "MSPMode", 3, szIniFile);	
-	MSPMajorMode = GetPrivateProfileInt("MSP", "MSPMajorMode", 0, szIniFile);	
-	MSPMinorMode = GetPrivateProfileInt("MSP", "MSPMinorMode", 0, szIniFile);	
-	MSPStereo = GetPrivateProfileInt("MSP", "MSPStereo", 0, szIniFile);	
-	AutoStereoSelect = (GetPrivateProfileInt("MSP", "MSPAutoStereo", 1, szIniFile) != 0);	
-	InitialVolume = GetPrivateProfileInt("MSP", "Volume", 1000, szIniFile);	
-	InitialSpatial = GetPrivateProfileInt("MSP", "Spatial", 0, szIniFile);	
-	InitialLoudness = GetPrivateProfileInt("MSP", "Loudness", 0, szIniFile);	
-	InitialBass = GetPrivateProfileInt("MSP", "Bass", 0, szIniFile);	
-	InitialTreble = GetPrivateProfileInt("MSP", "Treble", 0, szIniFile);	
-	InitialBalance = GetPrivateProfileInt("MSP", "Balance", 0, szIniFile);	
-	InitialSuperBass = (GetPrivateProfileInt("MSP", "SuperBass", 0, szIniFile) != 0);	
+	MSPMode = GetPrivateProfileInt("MSP", "MSPMode", MSPMode, szIniFile);	
+	MSPMajorMode = GetPrivateProfileInt("MSP", "MSPMajorMode", MSPMajorMode, szIniFile);	
+	MSPMinorMode = GetPrivateProfileInt("MSP", "MSPMinorMode", MSPMinorMode, szIniFile);	
+	MSPStereo = GetPrivateProfileInt("MSP", "MSPStereo", MSPStereo, szIniFile);	
+	AutoStereoSelect = (GetPrivateProfileInt("MSP", "MSPAutoStereo", AutoStereoSelect, szIniFile) != 0);	
+	InitialVolume = GetPrivateProfileInt("MSP", "Volume", InitialVolume, szIniFile);	
+	InitialSpatial = GetPrivateProfileInt("MSP", "Spatial", InitialSpatial, szIniFile);	
+	InitialLoudness = GetPrivateProfileInt("MSP", "Loudness", InitialLoudness, szIniFile);	
+	InitialBass = GetPrivateProfileInt("MSP", "Bass", InitialBass, szIniFile);	
+	InitialTreble = GetPrivateProfileInt("MSP", "Treble", InitialTreble, szIniFile);	
+	InitialBalance = GetPrivateProfileInt("MSP", "Balance", InitialBalance, szIniFile);	
+	InitialSuperBass = (GetPrivateProfileInt("MSP", "SuperBass", InitialSuperBass, szIniFile) != 0);	
 
 	for(i = 0; i < 5; i++)
 	{
@@ -265,19 +273,19 @@ void LoadSettingsFromIni()
 		InitialEqualizer[i] = GetPrivateProfileInt("MSP", szKey, 0, szIniFile);
 	}
 
-	USE_MIXER = (GetPrivateProfileInt("Mixer", "UseMixer", 0, szIniFile) != 0);	
-	MIXER_LINKER_KANAL = GetPrivateProfileInt("Mixer", "VolLeftChannel", -1, szIniFile);
-	MIXER_RECHTER_KANAL = GetPrivateProfileInt("Mixer", "VolRightChannel", -1, szIniFile); 
+	USE_MIXER = (GetPrivateProfileInt("Mixer", "UseMixer", USE_MIXER, szIniFile) != 0);	
+	MIXER_LINKER_KANAL = GetPrivateProfileInt("Mixer", "VolLeftChannel", MIXER_LINKER_KANAL, szIniFile);
+	MIXER_RECHTER_KANAL = GetPrivateProfileInt("Mixer", "VolRightChannel", MIXER_RECHTER_KANAL, szIniFile); 
 
-	Volume.SoundSystem = GetPrivateProfileInt("Mixer", "VolumeSoundSystem", -1, szIniFile);
-	Volume.Destination = GetPrivateProfileInt("Mixer", "VolumeDestination", 0, szIniFile);
-	Volume.Connection = GetPrivateProfileInt("Mixer", "VolumeConnection", 0, szIniFile);
-	Volume.Control = GetPrivateProfileInt("Mixer", "VolumeControl", 0, szIniFile);
+	Volume.SoundSystem = GetPrivateProfileInt("Mixer", "VolumeSoundSystem", Volume.SoundSystem, szIniFile);
+	Volume.Destination = GetPrivateProfileInt("Mixer", "VolumeDestination", Volume.Destination, szIniFile);
+	Volume.Connection = GetPrivateProfileInt("Mixer", "VolumeConnection", Volume.Connection, szIniFile);
+	Volume.Control = GetPrivateProfileInt("Mixer", "VolumeControl", Volume.Control, szIniFile);
 
-	Mute.SoundSystem = GetPrivateProfileInt("Mixer", "MuteSoundSystem", -1, szIniFile);
-	Mute.Destination = GetPrivateProfileInt("Mixer", "MuteDestination", 0, szIniFile);
-	Mute.Connection = GetPrivateProfileInt("Mixer", "MuteConnection", 0, szIniFile);
-	Mute.Control = GetPrivateProfileInt("Mixer", "MuteControl", 0, szIniFile);
+	Mute.SoundSystem = GetPrivateProfileInt("Mixer", "MuteSoundSystem", Mute.SoundSystem, szIniFile);
+	Mute.Destination = GetPrivateProfileInt("Mixer", "MuteDestination", Mute.Destination, szIniFile);
+	Mute.Connection = GetPrivateProfileInt("Mixer", "MuteConnection", Mute.Connection, szIniFile);
+	Mute.Control = GetPrivateProfileInt("Mixer", "MuteControl", Mute.Control, szIniFile);
 
 	for(i = 0; i < 64; i++)
 	{
@@ -307,11 +315,11 @@ void LoadSettingsFromIni()
 
 	// MRS 9/2/00
 	// Load Aspect Mode from INI- using strings would be more elegant long-term
-	source_aspect = GetPrivateProfileInt("ASPECT", "SourceAspect", 0, szIniFile);
-	custom_source_aspect = GetPrivateProfileInt("ASPECT", "CustomSourceAspect", 0, szIniFile);
-	target_aspect = GetPrivateProfileInt("ASPECT", "ScreenAspect", 0, szIniFile);
-	custom_target_aspect = GetPrivateProfileInt("ASPECT", "CustomScreenAspect", 0, szIniFile);
-	aspect_mode = GetPrivateProfileInt("ASPECT", "Mode", 0, szIniFile);
+	source_aspect = GetPrivateProfileInt("ASPECT", "SourceAspect", source_aspect, szIniFile);
+	custom_source_aspect = GetPrivateProfileInt("ASPECT", "CustomSourceAspect", custom_source_aspect, szIniFile);
+	target_aspect = GetPrivateProfileInt("ASPECT", "ScreenAspect", target_aspect, szIniFile);
+	custom_target_aspect = GetPrivateProfileInt("ASPECT", "CustomScreenAspect", custom_target_aspect, szIniFile);
+	aspect_mode = GetPrivateProfileInt("ASPECT", "Mode", aspect_mode, szIniFile);
 	// END MRS 9/2/00
 	LuminanceThreshold = GetPrivateProfileInt("ASPECT", "LuminanceThreshold", LuminanceThreshold, szIniFile);
 	IgnoreNonBlackPixels = GetPrivateProfileInt("ASPECT", "IgnoreNonBlackPixels", IgnoreNonBlackPixels, szIniFile);

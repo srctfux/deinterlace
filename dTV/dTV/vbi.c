@@ -32,6 +32,9 @@
 //
 // 02 Jan 2001   John Adcock           Started VBI Clean Up
 //
+// 08 Jan 2001   John Adcock           Global Variable Tidy up
+//                                     Got rid of global.h structs.h defines.h
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -39,6 +42,8 @@
 #include "bt848.h"
 #include "VBI_VideoText.h"
 #include "VBI_CCdecode.h"
+
+int VBI_Flags = VBI_VT | VBI_VPS | VBI_CC;
 
 BOOL bStopVBI;
 HANDLE VBIThread;

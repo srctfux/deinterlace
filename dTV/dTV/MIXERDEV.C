@@ -30,6 +30,9 @@
 //                                     Cut out all decoding
 //                                     Cut out digital hardware stuff
 //
+// 08 Jan 2001   John Adcock           Global Variable Tidy up
+//                                     Got rid of global.h structs.h defines.h
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"

@@ -30,14 +30,16 @@
 //                                     Cut out all decoding
 //                                     Cut out digital hardware stuff
 //
+// 08 Jan 2001   John Adcock           Global Variable Tidy up
+//                                     Got rid of global.h structs.h defines.h
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __OTHER_H___
 #define __OTHER_H___
 
-#include "defines.h"
-#include "structs.h"
-#include "globals.h"
+#define DTV_MAX_WIDTH 768
+#define DTV_MAX_HEIGHT 576
 
 void ExitDD(void);
 BOOL InitDD(HWND hWnd);
@@ -55,5 +57,9 @@ extern COLORREF OverlayColor;
 
 extern LPDIRECTDRAWSURFACE lpDDOverlay;
 extern LPDIRECTDRAWSURFACE lpDDOverlayBack;
+
+extern int	Back_Buffers;			// " , nuber of video back buffers
+extern COLORREF OverlayColor;
+
 
 #endif

@@ -30,14 +30,91 @@
 //                                     Cut out all decoding
 //                                     Cut out digital hardware stuff
 //
+// 08 Jan 2001   John Adcock           Global Variable Tidy up
+//                                     Got rid of global.h structs.h defines.h
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __VBI_H___
 #define __VBI_H___
 
-#include "defines.h"
-#include "structs.h"
-#include "globals.h"
+#define MAXVTDIALOG 8
+
+#define VBI_VT  1
+#define VBI_VPS 2
+#define VBI_CC  32
+
+#define FPSHIFT 16
+#define FPFAC (1<<FPSHIFT)
+
+
+typedef struct TVTDialog
+{
+	HWND Dialog;
+	int  Page;
+	int  SubPage;
+	int  FramePos;
+	BOOL Large;
+	BOOL PageChange;
+	unsigned char AsciiBuffer[26][40];
+};
+
+struct TPacket30
+{
+	// Type 0 data
+
+	struct
+	{
+		unsigned nMag:3;
+		unsigned nPage:8;
+		unsigned:5; // Unused
+		WORD nSubcode;
+	} HomePage;
+	WORD NetId;
+	struct
+	{
+		char Offset;
+		DWORD JulianDay;
+		BYTE Hour;
+		BYTE Min;
+		BYTE Sec;
+	} UTC;
+	char Unknown[5];
+	char Identifier[21];
+
+	// Type 2 data
+
+	struct
+	{
+		unsigned LCI:2;
+		unsigned LUF:1;
+		unsigned PRF:1;
+		unsigned PCS:2;
+		unsigned MI:1;
+		unsigned day:5;
+		unsigned month:4;
+		unsigned hour:5;
+		unsigned minute:6;
+		unsigned:5;
+		WORD CNI;
+		WORD PTY;
+	} PDC;
+};
+
+typedef struct TVTPage
+{
+	WORD wCtrl;
+	BOOL Fill;
+	BYTE Frame[25][40];
+    BYTE LineUpdate[25];
+	BYTE bUpdated;
+};
+
+typedef struct TVT
+{
+    unsigned short SubCount;
+	struct TVTPage *SubPage;
+};
 
 void VBI_Init();
 void VBI_Exit();

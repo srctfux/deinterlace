@@ -56,6 +56,9 @@
 //                                     Added gNTSCFilmFallbackMode setting
 //                                     Fixed PAL detection bug
 //
+// 08 Jan 2001   John Adcock           Global Variable Tidy up
+//                                     Got rid of global.h structs.h defines.h
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -824,8 +827,8 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 	int nFrame = 0;
 	DWORD dwLastSecondTicks;
 	long FlipTicks;
-	short* ppEvenLines[5][CLEARLINES];
-	short* ppOddLines[5][CLEARLINES];
+	short* ppEvenLines[5][DTV_MAX_HEIGHT / 2];
+	short* ppOddLines[5][DTV_MAX_HEIGHT / 2];
 	BYTE* pDest;
 	int LastEvenFrame = 0;
 	int LastOddFrame = 0;

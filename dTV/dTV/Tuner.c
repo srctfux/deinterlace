@@ -21,6 +21,9 @@
 //
 // 11 Aug 2000   John Adcock           Moved Tuner Functions in here
 //
+// 08 Jan 2001   John Adcock           Global Variable Tidy up
+//                                     Got rid of global.h structs.h defines.h
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"

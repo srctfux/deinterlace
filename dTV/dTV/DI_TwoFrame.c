@@ -25,7 +25,6 @@
 
 #include "stdafx.h"
 #include "deinterlace.h"
-#include "globals.h"
 #include "cpu.h"
 
 static BOOL TwoFrameSSE(DEINTERLACE_INFO *info);

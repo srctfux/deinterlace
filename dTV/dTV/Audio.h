@@ -26,6 +26,9 @@
 //
 // 11 Aug 2000   John Adcock           Moved Audio_ Function in here
 //
+// 08 Jan 2001   John Adcock           Global Variable Tidy up
+//                                     Got rid of global.h structs.h defines.h
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __AUDIO_H___

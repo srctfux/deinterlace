@@ -33,6 +33,9 @@
 // 26 Dec 2000   Eric Schmidt          Made it possible to have whitespace in
 //                                     your channel names in program.txt.
 //
+// 08 Jan 2001   John Adcock           Global Variable Tidy up
+//                                     Got rid of global.h structs.h defines.h
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -51,7 +54,7 @@ HWND ProgList;
 
 struct TProgramm Programm[MAXPROGS+1];
 
-int CountryCode=0;
+int CountryCode = 1;
 
 BOOL APIENTRY ProgramListProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 {
@@ -60,8 +63,6 @@ BOOL APIENTRY ProgramListProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 	RECT ptrtoWndPos;
 	static int currX, currY;
 	int fwKeys = wParam;		// key flags
-	static HCURSOR hSaveCursor = NULL;
-	static HCURSOR hsizex;
 	static int distance = -9999;
 	static int sPos;
 	static int EndPos;
@@ -70,18 +71,9 @@ BOOL APIENTRY ProgramListProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 	switch (message)
 	{
 	case WM_INITDIALOG:
-		hsizex = LoadCursor(hInst, "Csizex");
-
 		ProgList = CreateWindow("LISTBOX", NULL, WS_BORDER | WS_CHILD | WS_VISIBLE |
-								// LBS_NOINTEGRALHEIGHT |
 								  LBS_NOTIFY |
-								// LBS_HASSTRINGS |
-								// LBS_OWNERDRAWVARIABLE |
 								  WS_VSCROLL, 
-							  // | WS_HSCROLL,
-								//    WS_HSCROLL |
-								//    LBS_SORT ,
-								//     LBS_DISABLENOSCROLL ,
 								0, 0, 0, 0, hDlg, NULL, hInst, NULL);
 
 		SetCapture(hDlg);
@@ -355,6 +347,8 @@ BOOL APIENTRY AnalogScanProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 {
 	char line[80];
 	char Text[128];
+	static HBITMAP RedBulb;
+	static HBITMAP GreenBulb;
 
 	int i, j;
 	
@@ -384,6 +378,9 @@ BOOL APIENTRY AnalogScanProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 		}
 		SendMessage(GetDlgItem(hDlg, IDC_COMBO1), CB_SETCURSEL, CountryCode, 0);
 		Load_Country_Specific_Settings(CountryCode);
+
+		RedBulb = LoadBitmap(hInst, "REDBULB");
+		GreenBulb = LoadBitmap(hInst, "GREENBULB");
 
 		return (TRUE);
 
@@ -592,16 +589,18 @@ BOOL APIENTRY AnalogScanProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 
 		if (LOWORD(wParam) == IDOK)
 		{
-			//Write_Program_List();
 			Write_Program_List_ASCII();
+			DeleteObject(RedBulb);
+			DeleteObject(GreenBulb);
 			EndDialog(hDlg, TRUE);
 		}
 
 		if (LOWORD(wParam) == IDCANCEL)
 		{
 			STOP = TRUE;
-			//Load_Program_List();
 			Load_Program_List_ASCII();
+			DeleteObject(RedBulb);
+			DeleteObject(GreenBulb);
 			EndDialog(hDlg, TRUE);
 		}
 		break;

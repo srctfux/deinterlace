@@ -167,10 +167,6 @@ SOURCE=.\ErrorBox.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\globals.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\i2c.c
 # End Source File
 # Begin Source File
@@ -247,11 +243,11 @@ SOURCE=.\DebugLog.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\defines.h
+SOURCE=.\Deinterlace.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\Deinterlace.h
+SOURCE=.\DI_BlendedClip.h
 # End Source File
 # Begin Source File
 
@@ -264,10 +260,6 @@ SOURCE=.\dTV.H
 # Begin Source File
 
 SOURCE=.\ErrorBox.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\globals.h
 # End Source File
 # Begin Source File
 
@@ -308,10 +300,6 @@ SOURCE=.\status.h
 # Begin Source File
 
 SOURCE=.\stdafx.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\structs.h
 # End Source File
 # Begin Source File
 

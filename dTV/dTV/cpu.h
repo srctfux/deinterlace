@@ -12,6 +12,14 @@
 //	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //	GNU General Public License for more details
 ///////////////////////////////////////////////////////////////////////////////
+// Change Log
+//
+// Date          Developer             Changes
+//
+// 08 Jan 2001   John Adcock           Global Variable Tidy up
+//                                     Got rid of global.h structs.h defines.h
+//
+/////////////////////////////////////////////////////////////////////////////
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -24,7 +32,7 @@
 //
 // Note that compiling the code to use a processor-specific feature is safe even
 // if your PC doesn't have the feature in question; dTV detects processor types
-// at startup and sets flags in the global "CpuFeatureFlags" (see defines.h for
+// at startup and sets flags in the global "CpuFeatureFlags" (see cpu.h for
 // the list of flags) which the code uses to determine whether or not to use
 // each feature.
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,6 +62,7 @@
 #define USE_3DNOW	1		// Use AMD 3DNow! extensions
 #define USE_SSE2	1		// Use Intel SSE version 2 (Pentium 4 and above)
 
-UINT get_feature_flags(void);
+void  CPU_SetupFeatureFlag(void);
+extern UINT CpuFeatureFlags;		// TRB 12/20/00 Processor capability flags
 
 #endif /* __CPU_H__ */

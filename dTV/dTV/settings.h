@@ -39,10 +39,6 @@
 #ifndef __SETTINGS_H___
 #define __SETTINGS_H___
 
-#include "defines.h"
-#include "structs.h"
-#include "globals.h"
-
 // This is the Header for the new UI code
 // This is currently in developement and is not to be used
 // It has only been checked in so that I can work on the 

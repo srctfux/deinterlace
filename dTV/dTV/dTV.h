@@ -30,31 +30,15 @@
 //                                     Cut out all decoding
 //                                     Cut out digital hardware stuff
 //
+// 08 Jan 2001   John Adcock           Global Variable Tidy up
+//                                     Got rid of global.h structs.h defines.h
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __DTV_H___
 #define __DTV_H___
 
-#include "defines.h"
-#include "structs.h"
-#include "globals.h"
-
-
-/// Neu
-
-void Write_Nit_List();
-void Load_Nit_List();
-BOOL prozess_DatumZeit(int Nummer, unsigned char setting);
-
-void WorkoutOverlaySize();
-void Init_More();
-void More_Even(int pp);
-void More_Odd();
 void ChangeChannel(int NewChannel);
-
-VOID APIENTRY HandleFocusState(HWND hDlg, LPDRAWITEMSTRUCT lpdis);
-
-BOOL APIENTRY ToggleSettingProc(HWND hDlg,UINT message,UINT wParam,LONG lParam);
 
 void SetupProcessorAndThread();
 

@@ -21,12 +21,16 @@
 //
 // 11 Aug 2000   John Adcock           Moved Audio Functions in here
 //
+// 08 Jan 2001   John Adcock           Global Variable Tidy up
+//                                     Got rid of global.h structs.h defines.h
+//
+// 08 Jan 2001   John Adcock           Maybe fixed crashing bug
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "i2c.h"
 #include "audio.h"
-#include "globals.h"
 #include "tvcards.h"
 #include "Status.h"
 
@@ -136,14 +140,14 @@ int carrier_detect[8] = {
 	 MSP_CARRIER(7.38),      //7.38  PAL SAT FM-stereo b
 };
 
-int MSPMode;
+int MSPMode = 3;
 int MSPStereo = VIDEO_SOUND_STEREO; // MAE 8 Dec 2000 Added default
 int MSPNewStereo;
 int MSPAutoDetectValue;
 BOOL MSPNicam;
 int MSPMajorMode = 0; // MAE 8 Dec 2000 Added default
 int MSPMinorMode = 0; // MAE 8 Dec 2000 Added default
-BOOL AutoStereoSelect=FALSE; // MAE 8 Dec 2000 Changed default
+BOOL AutoStereoSelect = FALSE; // MAE 8 Dec 2000 Changed default
 
 // MAE Added 8 Dec 200 
 BOOL Audio_Mute(void)
@@ -227,7 +231,13 @@ BOOL Audio_MSP_Init(BYTE DWrite, BYTE DRead)
 	Audio_MSP_Version();
 	Sleep(4);
 
-	if (MSP_init_data[MSPMajorMode].autodetect)
+	// JA 20010108 Think this is right
+	// MSP_init_data is indexed by MSPMode
+	// elsewhere in the code
+	// at the moment we go into the autodetect code
+	// all the time, could be the cause of the crashes
+	// was if (MSP_init_data[MSPMajorMode].autodetect)
+	if (MSP_init_data[MSPMode].autodetect)
 	{
 		WriteDem(0x20,0x0001); // Autodetect source
 	}
@@ -656,7 +666,6 @@ void Audio_MSP_Print_Mode()
 		strcpy(Text, "No MSP Audio Device");
 	else
 	{
-
 		switch (MSPMode)
 		{
 		case 0:
@@ -749,6 +758,8 @@ void Audio_MSP_Watch_Mode()
 {
 	int val;
 	int newstereo = MSPStereo;
+	
+	if(!Has_MSP) return;
 
 	Sleep(2);
 	switch (MSPMode)

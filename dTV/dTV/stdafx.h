@@ -19,3 +19,4 @@
 #include "resource.h"
 #include "ErrorBox.h"
 #include "dTVdrv.h"
+#include "COMMCTRL.H"

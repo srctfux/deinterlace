@@ -35,6 +35,9 @@
 // 09 Sep 2000   Michael Samblanet     Aspect ratio code contributed 
 //                                     to dTV project
 //
+// 08 Jan 2001   John Adcock           Global Variable Tidy up
+//                                     Got rid of global.h structs.h defines.h
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"

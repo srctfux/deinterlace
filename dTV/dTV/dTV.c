@@ -44,6 +44,9 @@
 //                                     Changed display and handling of
 //                                     change deinterlacing method
 //
+// 08 Jan 2001   John Adcock           Global Variable Tidy up
+//                                     Got rid of global.h structs.h defines.h
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -63,7 +66,7 @@
 #include "tuner.h"
 #include "status.h"
 #include "vbi.h"
-#include "COMMCTRL.H"
+#include "DI_BlendedClip.H"
 
 
 HWND hWnd = NULL;
@@ -84,13 +87,17 @@ HWND SplashWnd = NULL;
 #define ADJ_BUTTON_REPRESS_ACCEL_STEP       500    // Milliseconds between each acceleration of adjustment
 #define ADJ_BUTTON_REPRESS_MAX_STEP         15     // Maximum adjustment step at one time
 
+// Used to call MainWndOnInitBT
+#define INIT_BT 1800
+
+
 BOOL bDoResize = FALSE;
 
-int CurrentProgramm;
+int CurrentProgramm = 0;
 
 HWND VThWnd;
 
-int PriorClassId;
+int PriorClassId = 0;
 int ThreadClassId = 1;
 
 SYSTEM_INFO SysInfo;
@@ -101,10 +108,6 @@ unsigned int srate;
 
 int MoveXDist=-1;
 int MoveYDist=-1;
-
-
-HBITMAP             RedBulb;
-HBITMAP             GreenBulb;
 
 long WStyle;
 
@@ -120,8 +123,6 @@ int FORMAT_MASK = 0x0F;
 int PalFormat = 0;
 
 BOOL  BlackSet[288];
-
-LOGFONT lf = {16,0,0,0,400,0,0,0,0,0,0,0,0,"MS Sans Serif"};
 
 int BeforeVD=0;
 
@@ -145,9 +146,13 @@ int pgstarty = -1;
 BOOL bAlwaysOnTop = FALSE;
 BOOL bDisplaySplashScreen = TRUE;
 BOOL bDisplayStatusBar = TRUE;
+BOOL bIsFullScreen = FALSE;
 
 int AudioSource = AUDIOMUX_MUTE;
 
+HFONT currFont = NULL;
+
+UINT CpuFeatureFlags;		// TRB 12/20/00 Processor capability flags
 
 /****************************************************************************
 
@@ -160,12 +165,11 @@ int AudioSource = AUDIOMUX_MUTE;
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	WNDCLASS wc;
-	HINSTANCE statusbar;
 	MSG msg;
 	HWND hPrevWindow;
 
 	hInst = hInstance;
-	CpuFeatureFlags = get_feature_flags();
+	CPU_SetupFeatureFlag();
 	// if we are already runninmg then start up old version
 	hPrevWindow = FindWindow((LPCTSTR) "dTV", (LPCTSTR) "dTV");
 	if (hPrevWindow != NULL)
@@ -216,17 +220,12 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	if (!hWnd) return FALSE;
 	if (!bIsFullScreen) SetWindowPos(hWnd, 0, emstartx, emstarty, emsizex, emsizey, SWP_SHOWWINDOW);
 
-	statusbar = hInst;
-	if (!StatusBar_Init(statusbar)) return FALSE;
+	if (!StatusBar_Init()) return FALSE;
 
 	if (bDisplayStatusBar == FALSE)
 	{
 		StatusBar_ShowWindow(FALSE);
 	}
-
-	RedBulb = LoadBitmap(hInst, "REDBULB");
-	GreenBulb = LoadBitmap(hInst, "GREENBULB");
-	currFont = CreateFontIndirect(&lf);
 
 	// 2000-10-31 Added by Mark Rejhon
 	// Now show the window, directly to maximized or windowed right away.
@@ -248,10 +247,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 			DispatchMessage(&msg);
 		}
 	}
-
-	DeleteObject(currFont);
-	DeleteObject(RedBulb);
-	DeleteObject(GreenBulb);
 
 	ExitDD();
 	// save settings
@@ -1020,12 +1015,6 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			{
 				VBI_Flags += VBI_VPS;
 			}
-			break;
-
-		case IDM_UNTERTITEL:
-			VThWnd = CreateDialog(hInst, "VIDEOTEXTUNTERTITEL", NULL, VideoTextUnterTitelProc);
-			if (bAlwaysOnTop == TRUE)
-				SetWindowPos(VThWnd, HWND_TOPMOST, 10, 10, 20, 20, SWP_NOMOVE | SWP_NOCOPYBITS | SWP_NOSIZE);
 			break;
 
 		case IDM_CALL_VIDEOTEXTSMALL:
@@ -1861,7 +1850,6 @@ void SetMenuAnalog()
 	CheckMenuItem(GetMenu(hWnd), ThreadClassId + 1150, MF_CHECKED);
 	CheckMenuItem(GetMenu(hWnd), PriorClassId + 1160, MF_CHECKED);
 
-	EnableMenuItem(GetMenu(hWnd), IDM_UNTERTITEL, MF_GRAYED);
 	EnableMenuItem(GetMenu(hWnd), IDM_PDC_OUT, MF_GRAYED);
 	EnableMenuItem(GetMenu(hWnd), IDM_VT_OUT, MF_GRAYED);
 	EnableMenuItem(GetMenu(hWnd), IDM_VPS_OUT, MF_GRAYED);
@@ -1873,7 +1861,6 @@ void SetMenuAnalog()
 		EnableMenuItem(GetMenu(hWnd), IDM_CALL_VIDEOTEXTSMALL, (VBI_Flags & VBI_VT)?MF_ENABLED:MF_GRAYED);
 		EnableMenuItem(GetMenu(hWnd), IDM_CALL_VIDEOTEXT, (VBI_Flags & VBI_VT)?MF_ENABLED:MF_GRAYED);
 		EnableMenuItem(GetMenu(hWnd), IDM_VT_RESET, (VBI_Flags & VBI_VT)?MF_ENABLED:MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_UNTERTITEL, (VBI_Flags & VBI_VT)?MF_ENABLED:MF_GRAYED);
 		EnableMenuItem(GetMenu(hWnd), IDM_VT_OUT, (VBI_Flags & VBI_VT)?MF_ENABLED:MF_GRAYED);
 		EnableMenuItem(GetMenu(hWnd), IDM_VPS_OUT, (VBI_Flags & VBI_VPS)?MF_ENABLED:MF_GRAYED);
 		EnableMenuItem(GetMenu(hWnd), IDM_VBI_VT, MF_ENABLED);
@@ -1890,7 +1877,6 @@ void SetMenuAnalog()
 		EnableMenuItem(GetMenu(hWnd), IDM_CALL_VIDEOTEXTSMALL, MF_GRAYED);
 		EnableMenuItem(GetMenu(hWnd), IDM_CALL_VIDEOTEXT, MF_GRAYED);
 		EnableMenuItem(GetMenu(hWnd), IDM_VT_RESET, MF_GRAYED);
-		EnableMenuItem(GetMenu(hWnd), IDM_UNTERTITEL, MF_GRAYED);
 		EnableMenuItem(GetMenu(hWnd), IDM_VT_OUT, MF_GRAYED);
 		EnableMenuItem(GetMenu(hWnd), IDM_VPS_OUT, MF_GRAYED);
 		EnableMenuItem(GetMenu(hWnd), IDM_CLOSEDCAPTION, MF_GRAYED);

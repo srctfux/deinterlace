@@ -26,6 +26,9 @@
 //
 // 11 Aug 2000   John Adcock           Reorganised code
 //
+// 08 Jan 2001   John Adcock           Global Variable Tidy up
+//                                     Got rid of global.h structs.h defines.h
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __STATUS_H___
@@ -40,10 +43,10 @@ typedef enum
 	STATUS_AUDIO,
 } eSTATUSBAR_BOX;
 
-BOOL StatusBar_Init(HANDLE);
-BOOL StatusBar_Adjust(HWND);
-HWND StatusBar_AddField(HANDLE, int, int, int, BOOL);
-void StatusBar_Destroy(void);
+BOOL StatusBar_Init();
+BOOL StatusBar_Adjust(HWND hwnd);
+HWND StatusBar_AddField(int iId, int iMin, int iMax, BOOL bNewGroup);
+void StatusBar_Destroy();
 void StatusBar_ShowText(eSTATUSBAR_BOX Field, LPCTSTR  szText);
 void StatusBar_ShowWindow(BOOL bShow);
 

@@ -33,13 +33,16 @@
 //                                     Changed GetCombFactor to work on a primary
 //                                     and secondary set of fields.
 //
+// 08 Jan 2001   John Adcock           Global Variable Tidy up
+//                                     Got rid of global.h structs.h defines.h
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "deinterlace.h"
-#include "globals.h"
 #include "cpu.h"
 #include "bt848.h"
+#include "dTV.h"
 
 long BitShift = 13;
 long EdgeDetect = 625;

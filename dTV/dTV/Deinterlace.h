@@ -26,6 +26,9 @@
 //
 // 07 Jan 2001   John Adcock           Added Adaptive deinterlacing method
 //
+// 08 Jan 2001   John Adcock           Global Variable Tidy up
+//                                     Got rid of global.h structs.h defines.h
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __DEINTERLACE_H___

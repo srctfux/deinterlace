@@ -12,7 +12,14 @@
 //	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //	GNU General Public License for more details
 ///////////////////////////////////////////////////////////////////////////////
-
+// Change Log
+//
+// Date          Developer             Changes
+//
+// 08 Jan 2001   John Adcock           Global Variable Tidy up
+//                                     Got rid of global.h structs.h defines.h
+//
+///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
 // This file contains #define directives that control compilation of CPU-specific
@@ -24,7 +31,7 @@
 //
 // Note that compiling the code to use a processor-specific feature is safe even
 // if your PC doesn't have the feature in question; dTV detects processor types
-// at startup and sets flags in the global "CpuFeatureFlags" (see defines.h for
+// at startup and sets flags in the global "CpuFeatureFlags" (see cpu.h for
 // the list of flags) which the code uses to determine whether or not to use
 // each feature.
 ///////////////////////////////////////////////////////////////////////////////
@@ -62,12 +69,13 @@
 #define CPUID_EXT_AMD_3DNOWEXT 0x40000000
 #define CPUID_EXT_AMD_MMXEXT   0x00400000
 
+
+UINT CpuFeatureFlags = 0;
 //---------------------------------------------------------------------------
 // Get features of our CPU - modified from sample code from AMD & Intel
 
-UINT get_feature_flags(void)
+void CPU_SetupFeatureFlag(void)
 {
-   UINT result    = 0;
    UINT signature = 0;
 	char vendor[13]        = "UnknownVendr";  /* Needs to be exactly 12 chars */
 
@@ -89,10 +97,10 @@ UINT get_feature_flags(void)
 	}
 
 	__except (EXCEPTION_EXECUTE_HANDLER) {
-		return (0);
+		return;
 	}
 	
-	result |= FEATURE_CPUID;
+	CpuFeatureFlags |= FEATURE_CPUID;
 
 	_asm {
          // Step 2: Check if CPUID supports function 1 (signature/std features)
@@ -103,7 +111,7 @@ UINT get_feature_flags(void)
          mov     dword ptr [vendor+8], ecx     //   string
          test    eax, eax                      // largest standard function==0?
          jz      $no_standard_features         // yes, no standard features func
-         or      [result], FEATURE_STD_FEATURES// does have standard features
+         or      [CpuFeatureFlags], FEATURE_STD_FEATURES// does have standard features
 
          // Step 3: Get standard feature flags and signature
          mov     eax, 1                        // CPUID function #1 
@@ -117,7 +125,7 @@ UINT get_feature_flags(void)
          neg     ecx                           // supports TSC ? CY : NC
          sbb     ecx, ecx                      // supports TSC ? 0xffffffff:0
          and     ecx, FEATURE_TSC              // supports TSC ? FEATURE_TSC:0
-         or      [result], ecx                 // merge into feature flags
+         or      [CpuFeatureFlags], ecx                 // merge into feature flags
 
          // Check for MMX support
          mov     ecx, CPUID_STD_MMX            // bit 23 indicates MMX support
@@ -125,7 +133,7 @@ UINT get_feature_flags(void)
          neg     ecx                           // supports MMX ? CY : NC
          sbb     ecx, ecx                      // supports MMX ? 0xffffffff:0  
          and     ecx, FEATURE_MMX              // supports MMX ? FEATURE_MMX:0
-         or      [result], ecx                 // merge into feature flags
+         or      [CpuFeatureFlags], ecx                 // merge into feature flags
 
          // Check for CMOV support
          mov     ecx, CPUID_STD_CMOV           // bit 15 indicates CMOV support
@@ -133,7 +141,7 @@ UINT get_feature_flags(void)
          neg     ecx                           // supports CMOV ? CY : NC
          sbb     ecx, ecx                      // supports CMOV ? 0xffffffff:0
          and     ecx, FEATURE_CMOV             // supports CMOV ? FEATURE_CMOV:0
-         or      [result], ecx                 // merge into feature flags
+         or      [CpuFeatureFlags], ecx                 // merge into feature flags
          
          // Check support for P6-style MTRRs
          mov     ecx, CPUID_STD_MTRR           // bit 12 indicates MTRR support
@@ -141,7 +149,7 @@ UINT get_feature_flags(void)
          neg     ecx                           // supports MTRR ? CY : NC
          sbb     ecx, ecx                      // supports MTRR ? 0xffffffff:0
          and     ecx, FEATURE_P6_MTRR          // supports MTRR ? FEATURE_MTRR:0
-         or      [result], ecx                 // merge into feature flags
+         or      [CpuFeatureFlags], ecx                 // merge into feature flags
 
          // Check for initial SSE support. There can still be partial SSE
          // support. Step 9 will check for partial support.
@@ -151,7 +159,7 @@ UINT get_feature_flags(void)
          sbb     ecx, ecx                      // supports SSE ? 0xffffffff:0
          and     ecx, (FEATURE_MMXEXT+FEATURE_SSEFP+FEATURE_SSE) // supports SSE ? 
                                                // FEATURE_MMXEXT+FEATURE_SSEFP:0
-         or      [result], ecx                 // merge into feature flags
+         or      [CpuFeatureFlags], ecx                 // merge into feature flags
 
          // Check for SSE2 support. (TRB - Was not part of sample code)
          mov     ecx, CPUID_STD_SSE2            // bit 26 indicates SSE2 support
@@ -160,14 +168,14 @@ UINT get_feature_flags(void)
          sbb     ecx, ecx                      // supports SSE2 ? 0xffffffff:0
          and     ecx, (FEATURE_SSE2)           // supports SSE2 ? 
                                                // FEATURE_SSE2:0
-         or      [result], ecx                 // merge into feature flags
+         or      [CpuFeatureFlags], ecx                 // merge into feature flags
 
          // Step 5: Check for CPUID extended functions
          mov     eax, 0x80000000               // extended function 0x80000000
          cpuid                                 // largest extended function
          cmp     eax, 0x80000000               // no function > 0x80000000 ?
          jbe     $no_extended_features         // yes, no extended feature flags
-         or      [result], FEATURE_EXT_FEATURES// does have ext. feature flags
+         or      [CpuFeatureFlags], FEATURE_EXT_FEATURES// does have ext. feature flags
 
          // Step 6: Get extended feature flags 
          mov     eax, 0x80000001               // CPUID ext. function 0x80000001
@@ -180,7 +188,7 @@ UINT get_feature_flags(void)
          neg     ecx                           // supports 3DNow! ? CY : NC
          sbb     ecx, ecx                      // supports 3DNow! ? 0xffffffff:0
          and     ecx, FEATURE_3DNOW            // support 3DNow!?FEATURE_3DNOW:0
-         or      [result], ecx                 // merge into feature flags
+         or      [CpuFeatureFlags], ecx                 // merge into feature flags
 
          // Step 8: Determine CPU vendor
          lea     esi, vendorAMD                // AMD's vendor string
@@ -196,9 +204,9 @@ UINT get_feature_flags(void)
          neg     ecx                           // 3DNow! ext ? CY : NC
          sbb     ecx, ecx                      // 3DNow! ext ? 0xffffffff : 0
          and     ecx, FEATURE_3DNOWEXT         // 3DNow! ext?FEATURE_3DNOWEXT:0
-         or      [result], ecx                 // merge into feature flags
+         or      [CpuFeatureFlags], ecx                 // merge into feature flags
 
-         test    [result], FEATURE_MMXEXT      // determined SSE MMX support?
+         test    [CpuFeatureFlags], FEATURE_MMXEXT      // determined SSE MMX support?
          jnz     $has_mmxext                   // yes, don't need to check again
 
          // Check support for AMD's multimedia instruction set additions 
@@ -208,7 +216,7 @@ UINT get_feature_flags(void)
          neg     ecx                           // MMX ext? CY : NC
          sbb     ecx, ecx                      // MMX ext? 0xffffffff : 0
          and     ecx, FEATURE_MMXEXT           // MMX ext ? FEATURE_MMXEXT:0
-         or      [result], ecx                 // merge into feature flags
+         or      [CpuFeatureFlags], ecx                 // merge into feature flags
         
 $has_mmxext:
 
@@ -225,7 +233,7 @@ $has_mmxext:
 					// (CPU<AMD Athlon) ? 0xffffffff:0
          and     ecx, FEATURE_K6_MTRR 	// (CPU>=AMD-K6-2/CXT)&& 
 					// (CPU<AMD Athlon) ? FEATURE_K6_MTRR:0
-         or      [result], ecx 		// merge into feature flags
+         or      [CpuFeatureFlags], ecx 		// merge into feature flags
 
          jmp     $all_done 		// desired features determined
 
@@ -235,6 +243,4 @@ $no_extended_features:
 $no_standard_features:
 $all_done:
    }
-
-   return (result);
 }

@@ -65,36 +65,6 @@ CAPTION "Channel List"
 FONT 8, "MS Sans Serif"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK2,50,20,40,14,WS_GROUP
-    LTEXT           "",IDC_MOVE1,8,0,20,20,SS_SUNKEN | WS_BORDER | NOT 
-                    WS_GROUP
-    LTEXT           "",IDC_MOVE2,28,0,20,20,SS_SUNKEN | WS_BORDER | NOT 
-                    WS_GROUP
-    LTEXT           "",IDC_MOVE3,48,0,20,20,SS_SUNKEN | WS_BORDER | NOT 
-                    WS_GROUP
-    LTEXT           "",IDC_MOVE4,66,0,20,20,SS_SUNKEN | WS_BORDER | NOT 
-                    WS_GROUP
-    LTEXT           "",IDC_MOVE5,86,0,20,20,SS_SUNKEN | WS_BORDER | NOT 
-                    WS_GROUP
-    LTEXT           "",IDC_MOVE6,106,0,20,20,SS_SUNKEN | WS_BORDER | NOT 
-                    WS_GROUP
-    LTEXT           "",IDC_MOVE7,126,0,20,20,SS_SUNKEN | WS_BORDER | NOT 
-                    WS_GROUP
-    LTEXT           "",IDC_MOVE8,146,0,20,20,SS_SUNKEN | WS_BORDER | NOT 
-                    WS_GROUP
-    LTEXT           "",IDC_MOVE9,166,0,20,20,SS_SUNKEN | WS_BORDER | NOT 
-                    WS_GROUP
-    LTEXT           "",IDC_MOVE10,184,0,20,20,SS_SUNKEN | WS_BORDER | NOT 
-                    WS_GROUP
-    LTEXT           "",IDC_MOVE11,204,0,20,20,SS_SUNKEN | WS_BORDER | NOT 
-                    WS_GROUP
-    LTEXT           "",IDC_MOVE12,224,0,20,20,SS_SUNKEN | WS_BORDER | NOT 
-                    WS_GROUP
-    LTEXT           "",IDC_MOVE13,244,0,20,20,SS_SUNKEN | WS_BORDER | NOT 
-                    WS_GROUP
-    LTEXT           "",IDC_MOVE14,264,0,20,20,SS_SUNKEN | WS_BORDER | NOT 
-                    WS_GROUP
-    LTEXT           "",IDC_MOVE15,284,0,20,20,SS_SUNKEN | WS_BORDER | NOT 
-                    WS_GROUP
 END
 
 VIDEOTEXT DIALOG DISCARDABLE  22, 17, 417, 330
@@ -700,21 +670,21 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,7,202,32,14
     PUSHBUTTON      "Cancel",IDCANCEL,47,202,32,14
     CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_VISIBLE | WS_TABSTOP,200,20,170,18
+                    TBS_NOTICKS | WS_TABSTOP,200,20,170,18
     CONTROL         "Slider1",IDC_SLIDER2,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_VISIBLE | WS_TABSTOP,200,40,170,18
+                    TBS_NOTICKS | WS_TABSTOP,200,40,170,18
     CONTROL         "Slider1",IDC_SLIDER3,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_VISIBLE | WS_TABSTOP,200,60,170,18
+                    TBS_NOTICKS | WS_TABSTOP,200,60,170,18
     CONTROL         "Slider1",IDC_SLIDER4,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_VISIBLE | WS_TABSTOP,200,80,170,18
+                    TBS_NOTICKS | WS_TABSTOP,200,80,170,18
     CONTROL         "Slider1",IDC_SLIDER5,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_VISIBLE | WS_TABSTOP,200,100,170,18
+                    TBS_NOTICKS | WS_TABSTOP,200,100,170,18
     CONTROL         "Slider1",IDC_SLIDER6,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_VISIBLE | WS_TABSTOP,200,120,170,18
+                    TBS_NOTICKS | WS_TABSTOP,200,120,170,18
     CONTROL         "Slider1",IDC_SLIDER7,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_VISIBLE | WS_TABSTOP,200,140,170,18
+                    TBS_NOTICKS | WS_TABSTOP,200,140,170,18
     CONTROL         "Slider1",IDC_SLIDER8,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_VISIBLE | WS_TABSTOP,200,160,170,18
+                    TBS_NOTICKS | WS_TABSTOP,200,160,170,18
     LTEXT           "Static",IDC_STATIC1,10,20,186,10
     LTEXT           "Static",IDC_STATIC2,10,40,186,10
     LTEXT           "Static",IDC_STATIC3,10,60,186,10
@@ -993,7 +963,6 @@ BEGIN
         MENUITEM "&Small VideoText Window",     IDM_CALL_VIDEOTEXTSMALL
         , GRAYED
         MENUITEM "&Large VideoText Window",     IDM_CALL_VIDEOTEXT, GRAYED
-        MENUITEM "Special &sub-titles",         IDM_UNTERTITEL, GRAYED
         MENUITEM "&Videotext Reset (After switch over Composite)  ", 
                                                 IDM_VT_RESET, GRAYED
         MENUITEM SEPARATOR

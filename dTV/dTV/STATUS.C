@@ -30,6 +30,9 @@
 //                                     Cut out all decoding
 //                                     Cut out digital hardware stuff
 //
+// 08 Jan 2001   John Adcock           Global Variable Tidy up
+//                                     Got rid of global.h structs.h defines.h
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -76,7 +79,7 @@ HWND hwndAudioField;
 #define ID_FPSFIELD        ID_STATUSBAR+4
 #define ID_AUDIOFIELD      ID_STATUSBAR+5
 
-BOOL StatusBar_Init(HANDLE hInstance)
+BOOL StatusBar_Init()
 {
 	WNDCLASS wndclass;
 
@@ -86,7 +89,7 @@ BOOL StatusBar_Init(HANDLE hInstance)
 	wndclass.lpfnWndProc = (WNDPROC) StatusProc;
 	wndclass.cbClsExtra = 0;
 	wndclass.cbWndExtra = 0;
-	wndclass.hInstance = hInstance;
+	wndclass.hInstance = hInst;
 	wndclass.hIcon = NULL;
 	wndclass.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wndclass.hbrBackground = hbrBtnFace;
@@ -100,7 +103,7 @@ BOOL StatusBar_Init(HANDLE hInstance)
 	wndclass.lpfnWndProc = (WNDPROC) StatusFieldProc;
 	wndclass.cbClsExtra = 0;
 	wndclass.cbWndExtra = 0;
-	wndclass.hInstance = hInstance;
+	wndclass.hInstance = hInst;
 	wndclass.hIcon = NULL;
 	wndclass.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wndclass.hbrBackground = hbrBtnFace;
@@ -120,11 +123,11 @@ BOOL StatusBar_Init(HANDLE hInstance)
 		return FALSE;
 	}
 	
-	hwndTextField = StatusBar_AddField(hwndStatusBar, ID_TEXTFIELD, 110, 0, FALSE);
-	hwndAudioField = StatusBar_AddField(hwndStatusBar, ID_AUDIOFIELD, 110, 0, FALSE);
-	hwndPalField = StatusBar_AddField(hwndStatusBar, ID_CODEFIELD, 110, 0, FALSE);
-	hwndKeyField = StatusBar_AddField(hwndStatusBar, ID_KENNUNGFFIELD, 90, 50, FALSE);
-	hwndFPSField = StatusBar_AddField(hwndStatusBar, ID_FPSFIELD, 45, 45, TRUE);
+	hwndTextField = StatusBar_AddField(ID_TEXTFIELD, 110, 0, FALSE);
+	hwndAudioField = StatusBar_AddField(ID_AUDIOFIELD, 110, 0, FALSE);
+	hwndPalField = StatusBar_AddField(ID_CODEFIELD, 110, 0, FALSE);
+	hwndKeyField = StatusBar_AddField(ID_KENNUNGFFIELD, 90, 50, FALSE);
+	hwndFPSField = StatusBar_AddField(ID_FPSFIELD, 45, 45, TRUE);
 
 	StatusBar_Adjust(hWnd);
 
@@ -168,7 +171,7 @@ BOOL StatusBar_Adjust(HWND hwnd)
 	return TRUE;
 }
 
-HWND StatusBar_AddField(HANDLE hInst, int iId, int iMin, int iMax, BOOL bNewGroup)
+HWND StatusBar_AddField(int iId, int iMin, int iMax, BOOL bNewGroup)
 {
 	LONG lStyle;
 

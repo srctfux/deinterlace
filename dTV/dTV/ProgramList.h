@@ -30,14 +30,15 @@
 //                                     Cut out all decoding
 //                                     Cut out digital hardware stuff
 //
+// 08 Jan 2001   John Adcock           Global Variable Tidy up
+//                                     Got rid of global.h structs.h defines.h
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __PROGRAMLIST_H___
 #define __PROGRAMLIST_H___
 
-#include "defines.h"
-#include "structs.h"
-#include "globals.h"
+#define MAXPROGS 4096
 
 struct PIDFilters
 {
@@ -91,8 +92,6 @@ void Load_Program_List_ASCII();
 
 BOOL APIENTRY ProgramListProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 BOOL APIENTRY ChannelNumberProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
-VOID APIENTRY HandleFocusStateChannelList(HWND hDlg, LPDRAWITEMSTRUCT lpdis);
-VOID APIENTRY DrawEntireItemChannelList(HWND hDlg, LPDRAWITEMSTRUCT lpdis, INT Typ);
 BOOL APIENTRY AnalogScanProc(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 
 #define MAXPROGS 4096

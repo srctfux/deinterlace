@@ -32,15 +32,18 @@
 //
 // 07 Jan 2001   John Adcock           Added gNTSCFilmFallbackMode setting
 //
+// 08 Jan 2001   John Adcock           Global Variable Tidy up
+//                                     Got rid of global.h structs.h defines.h
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __OUTTHREADS_H___
 #define __OUTTHREADS_H___
 
-#include "defines.h"
-#include "structs.h"
-#include "globals.h"
 #include "deinterlace.h"
+
+#define MAXMODESWITCHES 50	// Maximum number of switches to track in TrackModeSwitches()
+
 
 void Start_Capture();
 void Stop_Capture();
@@ -87,5 +90,10 @@ extern long StaticImageFieldCount;
 extern BOOL bAutoDetectMode;
 extern BOOL bFallbackToVideo;
 extern BOOL bIsPaused;
+
+extern BOOL	Wait_For_Flip;          // User parm, default=TRUE
+extern BOOL	DoAccurateFlips;        // User parm, default=TRUE
+extern BOOL	Hurry_When_Late;        // " , default=FALSE, skip processing if behind
+extern long	Sleep_Interval;         // " , default=0, how long to wait for BT chip
 
 #endif

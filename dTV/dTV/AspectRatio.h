@@ -29,7 +29,12 @@
 // 12 Sep 2000   Mark Rejhon           Centralized aspect ratio code
 //                                     into separate module
 //
+// 08 Jan 2001   John Adcock           Global Variable Tidy up
+//                                     Got rid of global.h structs.h defines.h
+//
 /////////////////////////////////////////////////////////////////////////////
+
+#define ABS(x) ((x) < 0 ? -(x) : (x))
 
 int     ProcessAspectRatioSelection(HWND hWnd, WORD wMenuID);
 void    SetMenuAspectRatio(HWND hWnd);

@@ -30,11 +30,13 @@
 //
 // 08 Jan 2001   John Adcock           Added C++ like access for strings
 //
+// 08 Jan 2001   John Adcock           Global Variable Tidy up
+//                                     Got rid of global.h structs.h defines.h
+//
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "bt848.h"
-#include "globals.h"
 
 typedef struct BT848_STRUCT
 {

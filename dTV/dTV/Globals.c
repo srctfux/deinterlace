@@ -32,24 +32,12 @@
 //
 // 02 Jan 2001   John Adcock           Added VBI Lines to TVSettings
 //
-// 08 Jan 2001   John Adcock           Started Global Variable Tidy up
+// 08 Jan 2001   John Adcock           Global Variable Tidy up
+//                                     Got rid of global.h structs.h defines.h
 //
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "globals.h"
 #include "Audio.h"
 #include "bt848.h"
-
-HANDLE Bt848Device=NULL;
-
-int TVFormat;
-
-int VBI_Flags=3;
-
-HFONT currFont = NULL;
-
-BOOL bIsFullScreen = FALSE;
-
-UINT CpuFeatureFlags;		// TRB 12/20/00 Processor capability flags
 
