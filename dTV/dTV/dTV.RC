@@ -533,7 +533,7 @@ BEGIN
     LTEXT           "Card",IDC_STATIC,14,58,34,9
     LTEXT           "Tuner",IDC_STATIC,14,80,38,9
     COMBOBOX        IDC_CARDSSELECT,73,57,178,190,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
     COMBOBOX        IDC_TUNERSELECT,73,80,178,190,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
     LTEXT           "Use this dialog to select the card closest to your card type.\nSome tuners are autodetected and will be selected here.  Otherwise you must try and find out what tuner you have.",
