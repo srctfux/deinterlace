@@ -415,7 +415,6 @@ void UpdateWindowState()
 {
 	if(bIsFullScreen == TRUE)
 	{
-		ShowWindow(hWnd, SW_HIDE);
 		SetWindowLong(hWnd, GWL_STYLE, WS_VISIBLE);
 		SetMenu(hWnd, NULL);
 		ShowWindow(hwndStatusBar, SW_HIDE);
