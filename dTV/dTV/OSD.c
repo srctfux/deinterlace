@@ -740,30 +740,18 @@ void OSD_RefreshInfosScreen(HWND hWnd, double dfSize, int ShowType)
 
 		sprintf (szInfo, "Number : %ld", nTotalDropFields);
 		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-		if (nDropFieldsLastSec == -1)
-		{
-			strcpy (szInfo, "Last second : ?");
-		}
-		else
-		{
-			sprintf (szInfo, "Last second : %ld", nDropFieldsLastSec);
-		}
+		sprintf (szInfo, "Last second : %d", (int)ceil(nDropFieldsLastSec - 0.5));
+//		sprintf (szInfo, "Last second : %.1f", nDropFieldsLastSec);
 		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-		sprintf (szInfo, "Average / s : %d", (int)ceil((double)nTotalDropFields * 1000 / (double)nSecTicks - 0.5));
+		sprintf (szInfo, "Average / s : %.1f", (double)nTotalDropFields * 1000 / (double)nSecTicks);
 		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 
 		OSD_AddText("Used fields", dfSize, OSD_COLOR_SECTION, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 
-		if (nUsedFieldsLastSec == -1)
-		{
-			strcpy (szInfo, "Last second : ?");
-		}
-		else
-		{
-			sprintf (szInfo, "Last second : %ld", nUsedFieldsLastSec);
-		}
+		sprintf (szInfo, "Last second : %d", (int)ceil(nUsedFieldsLastSec - 0.5));
+//		sprintf (szInfo, "Last second : %.1f", nUsedFieldsLastSec);
 		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
-		sprintf (szInfo, "Average / s : %d", (int)ceil((double)nTotalUsedFields * 1000 / (double)nSecTicks - 0.5));
+		sprintf (szInfo, "Average / s : %.1f", (double)nTotalUsedFields * 1000 / (double)nSecTicks);
 		OSD_AddText(szInfo, dfSize, 0, OSD_XPOS_RIGHT, 1 - dfMargin, OSD_GetLineYpos (nLine++, dfMargin, dfSize));
 
 		nLine = 3;

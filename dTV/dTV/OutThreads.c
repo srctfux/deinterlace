@@ -111,9 +111,9 @@ long OverlayPitch = 0;
 
 // Statistics
 long nTotalDropFields = 0;
-long nDropFieldsLastSec = -1;
+double nDropFieldsLastSec = 0;
 long nTotalUsedFields = 0;
-long nUsedFieldsLastSec = -1;
+double nUsedFieldsLastSec = 0;
 long nSecTicks = 0;
 long nInitialTicks = -1;
 long nLastTicks = 0;
@@ -652,20 +652,12 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 			}
 			
 			CurrentTickCount = GetTickCount();
-			if (dwLastSecondTicks + 1000 < CurrentTickCount)
+			if (dwLastSecondTicks + 1000 <= CurrentTickCount)
 			{
 				nTotalDropFields += Timing_GetDroppedFields();
 				nTotalUsedFields += Timing_GetUsedFields();
-				if ((CurrentTickCount - dwLastSecondTicks) < 1050)
-				{
-					nDropFieldsLastSec = Timing_GetDroppedFields();
-					nUsedFieldsLastSec = Timing_GetUsedFields();
-				}
-				else
-				{
-					nDropFieldsLastSec = -1;
-					nUsedFieldsLastSec = -1;
-				}
+				nDropFieldsLastSec = Timing_GetDroppedFields() * 1000 / (double)(CurrentTickCount - dwLastSecondTicks);
+				nUsedFieldsLastSec = Timing_GetUsedFields() * 1000 / (double)(CurrentTickCount - dwLastSecondTicks);
 				Timing_ResetDroppedFields();
 				Timing_ResetUsedFields();
 				nSecTicks += CurrentTickCount - dwLastSecondTicks;
@@ -674,14 +666,7 @@ DWORD WINAPI YUVOutThread(LPVOID lpThreadParameter)
 				nLastTicks = CurrentTickCount;
 				if (IsStatusBarVisible())
 				{
-					if (nDropFieldsLastSec == -1)
-					{
-						strcpy(Text, "DF/S");
-					}
-					else
-					{
-						sprintf(Text, "%d DF/S", nDropFieldsLastSec);
-					}
+					sprintf(Text, "%d DF/S", (int)ceil(nDropFieldsLastSec - 0.5));
 					
 					//TJ 010508: this will cause YUVOutThread thread to stop
 					//responding if main thread is not processing messages

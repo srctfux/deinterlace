@@ -69,9 +69,9 @@ BYTE * LockOverlay();		// Lock overlay, returns ptr to buffer
 
 // Statistics
 extern long	nTotalDropFields;
-extern long	nDropFieldsLastSec;
+extern double	nDropFieldsLastSec;
 extern long	nTotalUsedFields;
-extern long	nUsedFieldsLastSec;
+extern double	nUsedFieldsLastSec;
 extern long nSecTicks;
 extern long nInitialTicks;
 extern long nLastTicks;

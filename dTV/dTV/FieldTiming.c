@@ -320,7 +320,7 @@ void Timing_WaitForTimeToFlip(DEINTERLACE_INFO* pInfo, DEINTERLACE_METHOD* Curre
 	FlipAdjust = FALSE;
 }
 
-long Timing_GetDroppedFields()
+int Timing_GetDroppedFields()
 {
 	return nDroppedFields;
 }
@@ -330,7 +330,7 @@ void Timing_ResetDroppedFields()
 	nDroppedFields = 0;
 }
 
-long Timing_GetUsedFields()
+int Timing_GetUsedFields()
 {
 	return nUsedFields;
 }
