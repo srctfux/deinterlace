@@ -649,8 +649,7 @@ DWORD CdTVDriver::dTVdrvStartDriver(void)
 		//
 		// Its time to open the device
 		//
-//		strcpy(szDriverPath,pszDriverName);     // <-- was this way
-		strcat(szDriverPath,pszDriverName);		// <-- should it be this?
+		strcpy(szDriverPath,pszDriverName);
 
 		dwResult = open(szDriverPath);
 		if (  dwResult )
