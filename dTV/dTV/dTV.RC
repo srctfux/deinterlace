@@ -30,7 +30,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 HWINFO DIALOG DISCARDABLE  22, 17, 201, 206
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
-CAPTION "dTV Hardware Information"
+CAPTION "dScaler Hardware Information"
 FONT 8, "MS Sans Serif"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,68,187,65,14,WS_GROUP
@@ -73,7 +73,7 @@ END
 VIDEOTEXT DIALOG DISCARDABLE  22, 17, 417, 330
 STYLE DS_MODALFRAME | DS_SETFOREGROUND | DS_3DLOOK | WS_VISIBLE | WS_CAPTION | 
     WS_SYSMENU
-CAPTION "dTV Videotext"
+CAPTION "dScaler Videotext"
 FONT 8, "MS Sans Serif"
 BEGIN
     GROUPBOX        "",-1,4,25,406,285
@@ -103,7 +103,7 @@ END
 VIDEOTEXTSMALL DIALOG DISCARDABLE  22, 17, 277, 236
 STYLE DS_MODALFRAME | DS_SETFOREGROUND | DS_3DLOOK | WS_VISIBLE | WS_CAPTION | 
     WS_SYSMENU
-CAPTION "dTV Videotext"
+CAPTION "dScaler Videotext"
 FONT 8, "MS Sans Serif"
 BEGIN
     GROUPBOX        "",-1,4,25,271,192
@@ -267,7 +267,7 @@ END
 VIDEOTEXTUNTERTITEL DIALOG DISCARDABLE  22, 17, 236, 222
 STYLE DS_SYSMODAL | DS_SETFOREGROUND | DS_3DLOOK | WS_VISIBLE | WS_CAPTION | 
     WS_SYSMENU | WS_THICKFRAME
-CAPTION "dTV Sub-titles"
+CAPTION "dScaler Sub-titles"
 FONT 8, "MS Sans Serif"
 BEGIN
     EDITTEXT        IDC_EDIT1,31,7,17,12,ES_NUMBER
@@ -278,7 +278,7 @@ END
 VTSTATUS DIALOG DISCARDABLE  22, 17, 237, 135
 STYLE DS_MODALFRAME | DS_SETFOREGROUND | DS_3DLOOK | WS_VISIBLE | WS_CAPTION | 
     WS_SYSMENU
-CAPTION "dTV Videotext Info"
+CAPTION "dScaler Videotext Info"
 FONT 8, "MS Sans Serif"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,100,120,50,15
@@ -322,7 +322,7 @@ END
 VPSSTATUS DIALOG DISCARDABLE  22, 17, 187, 66
 STYLE DS_MODALFRAME | DS_SETFOREGROUND | DS_3DLOOK | WS_VISIBLE | WS_CAPTION | 
     WS_SYSMENU
-CAPTION "dTV VPS Info"
+CAPTION "dScaler VPS Info"
 FONT 8, "MS Sans Serif"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,70,50,50,15
@@ -335,7 +335,7 @@ END
 
 MIXERSETTINGS DIALOG DISCARDABLE  22, 17, 402, 266
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
-CAPTION "dTV Mixer Setup"
+CAPTION "dScaler Mixer Setup"
 FONT 8, "MS Sans Serif"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,340,250,55,15
@@ -412,7 +412,7 @@ END
 
 MIXERSETUP DIALOG DISCARDABLE  22, 17, 307, 181
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
-CAPTION "dTV Mixer Setup"
+CAPTION "dScaler Mixer Setup"
 FONT 8, "MS Sans Serif"
 BEGIN
     LTEXT           "Audio-Device",IDC_STATIC,5,30,45,10
@@ -453,11 +453,11 @@ END
 
 ABOUT DIALOGEX 22, 17, 374, 274
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
-CAPTION "About dTV"
+CAPTION "About dScaler"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,305,9,58,19,WS_GROUP,WS_EX_CLIENTEDGE
-    CTEXT           "dTV Version 2.x",IDC_VERSION,0,3,293,9
+    CTEXT           "dScaler Version 2.x",IDC_VERSION,0,3,293,9
     CTEXT           "Copyright (C) 2000, 2001 John Adcock",IDC_STATIC,0,24,
                     293,10
     GROUPBOX        "Based On",IDC_STATIC,6,144,364,56
@@ -477,7 +477,7 @@ BEGIN
     LTEXT           "I2C Interface Copyright (c) Gerd Knorr",IDC_STATIC,13,
                     182,160,10
     GROUPBOX        "Support",IDC_STATIC,192,37,180,100
-    LTEXT           "The best place to get support for dTV is the Home Theater Computers foum at the AV Science Forums.",
+    LTEXT           "The best place to get support for dScaler is the Home Theater Computers foum at the AV Science Forums.",
                     IDC_STATIC,200,47,166,18
     LTEXT           "John Adcock\nMark Rejhon\nSteve Grimm\nTom Barry\nMichael Eskin\nMichael Samblanet\nLaurent Garnier\nHermes Conrad",
                     IDC_STATIC,12,52,86,77
@@ -510,7 +510,7 @@ END
 
 LISTFELDSETUP DIALOG DISCARDABLE  22, 17, 196, 63
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
-CAPTION "dTV Listen-Parameter"
+CAPTION "dScaler Listen-Parameter"
 FONT 8, "MS Sans Serif"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,4,44,48,15
@@ -540,7 +540,7 @@ BEGIN
                     IDC_STATIC,7,7,286,25
     LTEXT           "The easiest way is by looking at the documenation that came with the card otherwise you will have to see if there is any marking oin the silver tuner box on the card.",
                     IDC_STATIC,7,34,286,22
-    LTEXT           "In order for dTV to give the best results it needs to know how powerful your machine is.  Please select the nearest speed range to your machine.  If in doubt use the lower setting.",
+    LTEXT           "In order for dScaler to give the best results it needs to know how powerful your machine is.  Please select the nearest speed range to your machine.  If in doubt use the lower setting.",
                     IDC_STATIC,7,101,277,26
     LTEXT           "For lower spec machines there is a tradeoff between picture quality and frame rate.  Choose the option below that best matches your preferences.",
                     IDC_STATIC,7,151,286,17
@@ -588,76 +588,6 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_TABSTOP,106,91,83,10
     CONTROL         "Vertical Filter",IDC_VERT_FILTER,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,12,103,83,10
-END
-
-BLENDED_CLIP DIALOG DISCARDABLE  0, 0, 173, 292
-STYLE DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
-CAPTION "Blended Clip DeInterlace Controls"
-FONT 8, "MS Sans Serif"
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,131,50,38,14
-    PUSHBUTTON      "Cancel",IDCANCEL,131,30,38,14
-    PUSHBUTTON      "Default",IDC_DEFAULT,131,12,38,14
-    LTEXT           "Minimum Clip or Bob",IDC_STATIC,2,9,96,9
-    CONTROL         "SLIDER1",IDC_STATIC,"Static",SS_BITMAP | SS_SUNKEN | 
-                    WS_BORDER | WS_TABSTOP,2,18,17,15
-    PUSHBUTTON      "",IDC_MIN_CLIP,18,22,6,8,WS_DISABLED
-    RTEXT           "0",IDC_MIN_CLIP_V,102,9,21,10,SS_NOPREFIX | NOT 
-                    WS_GROUP
-    LTEXT           "Pixel Movement Sensitivity",IDC_STATIC,2,39,96,9
-    CONTROL         "SLIDER1",IDC_STATIC,"Static",SS_BITMAP | SS_SUNKEN | 
-                    WS_BORDER | WS_TABSTOP,2,49,17,15
-    PUSHBUTTON      "",IDC_PIXEL_MOV,18,52,6,8,WS_DISABLED
-    RTEXT           "0",IDC_PIXEL_MOV_V,102,39,21,9,SS_NOPREFIX | NOT 
-                    WS_GROUP
-    LTEXT           "Recent Avg. Motion Sense.",IDC_STATIC,2,70,96,9
-    CONTROL         "SLIDER1",IDC_STATIC,"Static",SS_BITMAP | SS_SUNKEN | 
-                    WS_BORDER | WS_TABSTOP,2,80,17,15
-    PUSHBUTTON      "",IDC_AVG_MOV,19,83,6,8,WS_DISABLED
-    RTEXT           "0",IDC_AVG_MOV_V,102,70,21,10,SS_NOPREFIX | NOT 
-                    WS_GROUP
-    LTEXT           "Motion Averaging Period",IDC_STATIC,2,100,96,9
-    CONTROL         "SLIDER1",IDC_STATIC,"Static",SS_BITMAP | SS_SUNKEN | 
-                    WS_BORDER | WS_TABSTOP,2,111,17,15
-    PUSHBUTTON      "",IDC_MOV_PERIOD,19,114,6,8,WS_DISABLED
-    RTEXT           "0",IDC_MOV_PERIOD_V,102,100,21,10,SS_NOPREFIX | NOT 
-                    WS_GROUP
-    LTEXT           "Pixel Comb Sensitivity",IDC_STATIC,2,132,96,9
-    CONTROL         "SLIDER1",IDC_STATIC,"Static",SS_BITMAP | SS_SUNKEN | 
-                    WS_BORDER | WS_TABSTOP,2,142,17,15
-    PUSHBUTTON      "",IDC_PIXEL_COMB,19,145,6,8,WS_DISABLED
-    RTEXT           "0",IDC_PIXEL_COMB_V,102,132,21,10,SS_NOPREFIX | NOT 
-                    WS_GROUP
-    LTEXT           "Recent Avg. Comb Sense.",IDC_STATIC,2,163,96,9
-    CONTROL         "SLIDER1",IDC_STATIC,"Static",SS_BITMAP | SS_SUNKEN | 
-                    WS_BORDER | WS_TABSTOP,2,173,17,15
-    PUSHBUTTON      "",IDC_AVG_COMB,18,177,6,8,WS_DISABLED
-    RTEXT           "0",IDC_AVG_COMB_V,102,163,21,9,SS_NOPREFIX | NOT 
-                    WS_GROUP
-    LTEXT           "Comb Averaging Period",IDC_STATIC,2,195,96,9
-    CONTROL         "SLIDER1",IDC_STATIC,"Static",SS_BITMAP | SS_SUNKEN | 
-                    WS_BORDER | WS_TABSTOP,2,204,17,15
-    PUSHBUTTON      "",IDC_COMB_PERIOD,19,207,6,8,WS_DISABLED
-    RTEXT           "0",IDC_COMB_PERIOD_V,102,195,21,9,SS_NOPREFIX | NOT 
-                    WS_GROUP
-    LTEXT           "Skip HIGH Comb Frames",IDC_STATIC,2,225,96,9
-    CONTROL         "SLIDER1",IDC_STATIC,"Static",SS_BITMAP | SS_SUNKEN | 
-                    WS_BORDER | WS_TABSTOP,2,235,17,15
-    PUSHBUTTON      "",IDC_COMB_SKIP,19,238,6,8,WS_DISABLED
-    RTEXT           "0",IDC_COMB_SKIP_V,102,225,21,9,SS_NOPREFIX | NOT 
-                    WS_GROUP
-    LTEXT           "Skip LOW Motion Frames",IDC_STATIC,2,256,96,9
-    CONTROL         "SLIDER1",IDC_STATIC,"Static",SS_BITMAP | SS_SUNKEN | 
-                    WS_BORDER | WS_TABSTOP,2,266,17,15
-    PUSHBUTTON      "",IDC_MOTION_SKIP,19,268,6,8,WS_DISABLED
-    RTEXT           "0",IDC_MOTION_SKIP_V,102,256,21,9,SS_NOPREFIX | NOT 
-                    WS_GROUP
-    CONTROL         "Use BOB instead of CLIP",IDC_USE_INTERP_BOB,"Button",
-                    BS_AUTOCHECKBOX | BS_LEFTTEXT | BS_TOP | BS_MULTILINE | 
-                    WS_TABSTOP,129,98,38,40
-    CONTROL         "Blend Chroma Values  ",IDC_BLEND_CHROMA,"Button",
-                    BS_AUTOCHECKBOX | BS_LEFTTEXT | BS_TOP | BS_MULTILINE | 
-                    WS_TABSTOP,129,163,38,40
 END
 
 UI_SUB_MENU DIALOG DISCARDABLE  0, 0, 375, 193
@@ -831,6 +761,7 @@ BEGIN
             MENUITEM "Defer Setting Overlay",       IDM_ASPECT_DEFER_OVERLAY
             MENUITEM "Orbiting\tCtrl+O",            IDM_WINPOS_ORBIT
             MENUITEM "Auto-Size Window",            IDM_WINPOS_AUTOSIZE
+            , GRAYED
         END
         POPUP "&Zoom"
         BEGIN
@@ -1024,13 +955,13 @@ BEGIN
     POPUP "&Help"
     BEGIN
         MENUITEM "&Read Me ...\tF1",            IDM_HELP_README
-        MENUITEM "dTV &Home Page ...",          IDM_HELP_HOMEPAGE
+        MENUITEM "dScaler &Home Page ...",      IDM_HELP_HOMEPAGE
         MENUITEM "&FAQ ...",                    IDM_HELP_FAQ
         MENUITEM "&Support ...",                IDM_HELP_SUPPORT
         MENUITEM "&Keyboard ...",               IDM_HELP_KEYBOARD
         MENUITEM "&Licence ...",                IDM_HELP_GPL
         MENUITEM SEPARATOR
-        MENUITEM "&About dTV...",               IDM_ABOUT
+        MENUITEM "&About dScaler...",           IDM_ABOUT
     END
 END
 
@@ -1180,14 +1111,6 @@ BEGIN
         RIGHTMARGIN, 201
         TOPMARGIN, 7
         BOTTOMMARGIN, 119
-    END
-
-    "BLENDED_CLIP", DIALOG
-    BEGIN
-        LEFTMARGIN, 2
-        RIGHTMARGIN, 171
-        BOTTOMMARGIN, 286
-        HORZGUIDE, 4
     END
 
     "UI_SUB_MENU", DIALOG
@@ -1384,15 +1307,15 @@ BEGIN
         BEGIN
             VALUE "Comments", "John Adcock\0"
             VALUE "CompanyName", "\0"
-            VALUE "FileDescription", "dTV\0"
-            VALUE "FileVersion", "2, 2, 0, 0\0"
-            VALUE "InternalName", "dTV\0"
+            VALUE "FileDescription", "dScaler\0"
+            VALUE "FileVersion", "2, 3, 0, 0\0"
+            VALUE "InternalName", "dScaler\0"
             VALUE "LegalCopyright", "Copyright © 2000, 2001\0"
             VALUE "LegalTrademarks", "This Program is covered by the term of the GNU GPL\0"
-            VALUE "OriginalFilename", "dTV.exe\0"
+            VALUE "OriginalFilename", "dScaler.exe\0"
             VALUE "PrivateBuild", "\0"
-            VALUE "ProductName", "dTV\0"
-            VALUE "ProductVersion", "2.2.0\0"
+            VALUE "ProductName", "dScaler\0"
+            VALUE "ProductVersion", "2.3.0\0"
             VALUE "SpecialBuild", "\0"
         END
     END

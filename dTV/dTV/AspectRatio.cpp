@@ -236,7 +236,7 @@ void _WorkoutOverlaySize(BOOL allowResize)
 
 	// If we're in half-height mode, squish the source rectangle accordingly.  This
 	// allows the overlay hardware to do our bobbing for us.
-	if (HalfHeight)	{ ar.rOriginalOverlaySrc.top /= 2; ar.rOriginalOverlaySrc.bottom /= 2; }
+	if (HalfHeight)	{ ar.rCurrentOverlaySrc.top /= 2; ar.rCurrentOverlaySrc.bottom /= 2; }
 
 	// Save the settings....
 		aspectSettings.sourceRectangle = ar.rCurrentOverlaySrc;

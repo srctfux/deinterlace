@@ -183,7 +183,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	hInst = hInstance;
 	CPU_SetupFeatureFlag();
 	// if we are already runninmg then start up old version
-	hPrevWindow = FindWindow((LPCTSTR) "dTV", (LPCTSTR) "dTV");
+	hPrevWindow = FindWindow((LPCTSTR) DSCALER_APPNAME, NULL);
 	if (hPrevWindow != NULL)
 	{
 		SetFocus(hPrevWindow);
@@ -215,7 +215,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wc.hbrBackground = CreateSolidBrush(0);
 	wc.lpszMenuName = NULL;
-	wc.lpszClassName = "dTV";
+	wc.lpszClassName = DSCALER_APPNAME;
 
 	if (!RegisterClass(&wc))
 	{
@@ -310,7 +310,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	// let UpdateWindowState() handle initialization of windowed dTV instead.
 
 
-	hWnd = CreateWindow("dTV", "dTV", WS_POPUP, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), NULL, NULL, hInstance, NULL);
+	hWnd = CreateWindow(DSCALER_APPNAME, DSCALER_APPNAME, WS_POPUP, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), NULL, NULL, hInstance, NULL);
 	if (!hWnd) return FALSE;
 	if (!bIsFullScreen) SetWindowPos(hWnd, 0, emstartx, emstarty, emsizex, emsizey, SWP_SHOWWINDOW);
 

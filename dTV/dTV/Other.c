@@ -360,7 +360,7 @@ BOOL Overlay_Create()
 						 "that many back buffers before, you may need\n"
 						 "to reboot.  Otherwise try lowering your screen\n"
 						 "resolution or color depth, or try setting\n"
-						 "Back_Buffers=-1 in dTV.ini to allow dTV to\n"
+						 "Back_Buffers=-1 in dScaler.ini to allow dScaler to\n"
 						 "decide how many back buffers it can allocate.",
 					Back_Buffers);
 			RealErrorBox(msg);
@@ -373,7 +373,7 @@ BOOL Overlay_Create()
 		switch (ddrval) {
 		case DDERR_NOOVERLAYHW:
 			RealErrorBox("Your video card doesn't appear to support\n"
-				     "overlays, which dTV requires.");
+				     "overlays, which dScaler requires.");
 			return (FALSE);
 
 			// Any other interesting error codes?
@@ -829,9 +829,9 @@ void SaveStill()
 			return;
 		}
 
-		sprintf(description, "dTV image, deinterlace mode %s", GetDeinterlaceModeName());
+		sprintf(description, "dScaler image, deinterlace mode %s", GetDeinterlaceModeName());
 		// How do we figure out our version number?!?!
-		FillTiffHeader(&head, description, "http://deinterlace.sourceforge.net/", "dTV version 2.x");
+		FillTiffHeader(&head, description, "http://deinterlace.sourceforge.net/", "dScaler version 2.x");
 		fwrite(&head, sizeof(head), 1, file);
 
 		for (i = 0; i < CurrentY; i++ )

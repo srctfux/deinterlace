@@ -713,7 +713,7 @@ LPCSTR GetProductNameAndVersion()
 	UINT    uVersionLen;		// Current length of full version string
 	WORD    wRootLen;			// length of the 'root' portion of string
 	char    szFullPath[MAX_PATH];	// full path of module
-	static char szResult[256] = "dTV";	// Temporary result string
+	static char szResult[256] = DSCALER_APPNAME;	// Temporary result string
 	char szGetName[256];
 
 	// Now lets dive in and pull out the version information:

@@ -72,8 +72,6 @@ void LoadPluginsSettingsFromIni();
 void WriteSettingsToIni();
 void WritePrivateProfileInt(LPCTSTR lpAppName,  LPCTSTR lpKeyName,  int nValue, LPCTSTR lpFileName);
 
-#define INIFILE "dTV.ini"
-
 //---------------------------------------------------------------------------
 // 2000-12-19 Added by Mark Rejhon
 // These are constants for the GetCurrentAdjustmentStepCount()

@@ -44,7 +44,7 @@
 // e.g. SendMessage(hWndDTV, WM_BT848_CHANGEVALUE, HUE, INCREMENTVALUE_SILENT);
 //
 // The dTV window handle can be obtained using
-// hWndDTV = FindWindow("dTV", NULL);
+// hWndDTV = FindWindow(DSCALER_APPNAME, NULL);
 //
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -69,6 +69,8 @@
 
 #ifndef __DTV_CONTROL_H___
 #define __DTV_CONTROL_H___
+
+#define DSCALER_APPNAME "dScaler"
 
 /////////////////////////////////////////////////////////////////////////////
 // Control Messages passed using WM_COMMAND
@@ -249,6 +251,8 @@ typedef enum
 	ORBITSIZE,
 	ORBITTIMERPERIOD,
 	AUTOSIZEWINDOW,
+	aaaa1,
+	bbbbb1,
 	ASPECT_SETTING_LASTONE,
 } ASPECT_SETTING;
 

@@ -70,14 +70,14 @@
 #include "VideoSettings.h"
 #include "Filter.h"
 
-char szIniFile[MAX_PATH] = "dTV.ini";
+char szIniFile[MAX_PATH] = "dScaler.ini";
 
 void SetIniFileForSettings(LPSTR Name)
 {
 	GetCurrentDirectory(MAX_PATH, szIniFile);
 	if (*Name == 0)			// add parm TRB 12/00
 	{
-		strcat(szIniFile, "\\dTV.ini");
+		strcat(szIniFile, "\\dScaler.ini");
 	}
 	else
 	{
