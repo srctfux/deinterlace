@@ -37,7 +37,7 @@
 BOOL bSavePerInput = FALSE;
 BOOL bSavePerFormat = FALSE;
 
-char szSection[30];
+char szSection[50];
 
 BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 {
@@ -84,8 +84,10 @@ BOOL APIENTRY VideoSettingProc(HWND hDlg, UINT message, UINT wParam, LONG lParam
 		switch(LOWORD(wParam))
 		{
 		case IDOK:
+			VideoSettings_Save();
 			bSavePerFormat = Button_GetCheck(GetDlgItem(hDlg, IDC_BYFORMAT)) == BST_CHECKED;
 			bSavePerInput = Button_GetCheck(GetDlgItem(hDlg, IDC_BYINPUT)) == BST_CHECKED;
+			VideoSettings_SetupDefaults();
 			VideoSettings_Save();
 			EndDialog(hDlg, TRUE);
 			break;
@@ -201,12 +203,10 @@ void VideoSettings_SaveCurrentToAllFormats()
 
 void VideoSettings_SetupDefaults()
 {
-	BT848_GetSetting(BDELAY)->Default = 0;
-	BT848_GetSetting(HDELAY)->Default = 0;
-
 	switch(Setting_GetValue(BT848_GetSetting(TVFORMAT)))
 	{
 	case FORMAT_NTSC:
+	case FORMAT_NTSC_J:
 		BT848_GetSetting(BRIGHTNESS)->Default = DEFAULT_BRIGHTNESS_NTSC;
 		BT848_GetSetting(CONTRAST)->Default = DEFAULT_CONTRAST_NTSC;
 		BT848_GetSetting(HUE)->Default = DEFAULT_HUE_NTSC;
@@ -216,6 +216,10 @@ void VideoSettings_SetupDefaults()
 		Aspect_GetSetting(OVERSCAN)->Default = DEFAULT_OVERSCAN_NTSC;
 		break;
 	case FORMAT_PAL_BDGHI:
+	case FORMAT_PAL_N:
+	case FORMAT_PAL60:
+	case FORMAT_SECAM:
+	case FORMAT_PAL_M:
 		BT848_GetSetting(BRIGHTNESS)->Default = DEFAULT_BRIGHTNESS_PAL;
 		BT848_GetSetting(CONTRAST)->Default = DEFAULT_CONTRAST_PAL;
 		BT848_GetSetting(HUE)->Default = DEFAULT_HUE_PAL;
@@ -224,16 +228,32 @@ void VideoSettings_SetupDefaults()
 		BT848_GetSetting(SATURATIONV)->Default = DEFAULT_SAT_V_PAL;
 		Aspect_GetSetting(OVERSCAN)->Default = DEFAULT_OVERSCAN_PAL;
 		break;
-	default:
-		BT848_GetSetting(BRIGHTNESS)->Default = 0;
-		BT848_GetSetting(CONTRAST)->Default = 0x80;
-		BT848_GetSetting(HUE)->Default = 0;
-		BT848_GetSetting(SATURATION)->Default = 0x80;
-		BT848_GetSetting(SATURATIONU)->Default = 0x80;
-		BT848_GetSetting(SATURATIONV)->Default = 0x80;
-		Aspect_GetSetting(OVERSCAN)->Default = 4;
-		break;
 	}
+
+	if(bSavePerFormat)
+	{
+		BT848_GetSetting(BDELAY)->Default = BT848_GetTVFormat()->bDelayB;
+		BT848_GetSetting(HDELAY)->Default = BT848_GetTVFormat()->wHDelayx1;
+		BT848_GetSetting(VDELAY)->Default = BT848_GetTVFormat()->wVDelay;
+		
+		// we probably came in here with the defaults
+		// reset to actual values so that key commands work
+		// properly
+		if(Setting_GetValue(BT848_GetSetting(BDELAY)) == 0)
+			Setting_SetDefault(BT848_GetSetting(BDELAY));
+		if(Setting_GetValue(BT848_GetSetting(HDELAY)) == 0)
+			Setting_SetDefault(BT848_GetSetting(HDELAY));
+		if(Setting_GetValue(BT848_GetSetting(VDELAY)) == 0)
+			Setting_SetDefault(BT848_GetSetting(VDELAY));
+	}
+	else
+	{
+		BT848_GetSetting(BDELAY)->Default = 0;
+		BT848_GetSetting(HDELAY)->Default = 0;
+		BT848_GetSetting(VDELAY)->Default = 0;
+	}
+
+	BT848_GetSetting(CURRENTX)->Default = 720;
 	
 	switch(Setting_GetValue(BT848_GetSetting(VIDEOSOURCE)))
 	{
@@ -274,6 +294,8 @@ void SetupSectionNames()
 		Setting_SetSection(BT848_GetSetting(SATURATIONV), "Hardware");
 		Setting_SetSection(BT848_GetSetting(BDELAY), "Hardware");
 		Setting_SetSection(BT848_GetSetting(HDELAY), "Hardware");
+		Setting_SetSection(BT848_GetSetting(VDELAY), "Hardware");
+		Setting_SetSection(BT848_GetSetting(CURRENTX), "MainWindow");
 		Setting_SetSection(Aspect_GetSetting(OVERSCAN), "Hardware");
 	}
 	else
@@ -286,6 +308,8 @@ void SetupSectionNames()
 		Setting_SetSection(BT848_GetSetting(SATURATIONV), szSection);
 		Setting_SetSection(BT848_GetSetting(BDELAY), szSection);
 		Setting_SetSection(BT848_GetSetting(HDELAY), szSection);
+		Setting_SetSection(BT848_GetSetting(VDELAY), szSection);
+		Setting_SetSection(BT848_GetSetting(CURRENTX), szSection);
 		Setting_SetSection(Aspect_GetSetting(OVERSCAN), szSection);
 	}
 }
@@ -301,6 +325,8 @@ void VideoSettings_Load()
 	Setting_ReadFromIni(BT848_GetSetting(SATURATIONV));
 	Setting_ReadFromIni(BT848_GetSetting(BDELAY));
 	Setting_ReadFromIni(BT848_GetSetting(HDELAY));
+	Setting_ReadFromIni(BT848_GetSetting(VDELAY));
+	Setting_ReadFromIni(BT848_GetSetting(CURRENTX));
 	Setting_ReadFromIni(Aspect_GetSetting(OVERSCAN));
 	Setting_SetValue(BT848_GetSetting(SATURATION),
 		(Setting_GetValue(BT848_GetSetting(SATURATIONU)) + 
@@ -317,6 +343,8 @@ void VideoSettings_Save()
 	Setting_WriteToIni(BT848_GetSetting(SATURATIONV));
 	Setting_WriteToIni(BT848_GetSetting(BDELAY));
 	Setting_WriteToIni(BT848_GetSetting(HDELAY));
+	Setting_WriteToIni(BT848_GetSetting(VDELAY));
+	Setting_WriteToIni(BT848_GetSetting(CURRENTX));
 	Setting_WriteToIni(Aspect_GetSetting(OVERSCAN));
 }
 

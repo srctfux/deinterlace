@@ -91,6 +91,11 @@ void SetIniFileForSettings(LPSTR Name)
 	}
 }
 
+LPCSTR GetIniFileForSettings()
+{
+	return szIniFile;
+}
+
 void LoadSettingsFromIni()
 {
 	char szKey[128];
@@ -116,6 +121,7 @@ void LoadSettingsFromIni()
 	Deinterlace_ReadSettingsFromIni();
 	FLT_TNoise_ReadSettingsFromIni();
 	VideoSettings_ReadSettingsFromIni();
+	OSD_ReadSettingsFromIni();
 
 	VBI_Flags = 0;
 	if(GetPrivateProfileInt("VBI", "VT", 0, szIniFile) != 0)
@@ -264,6 +270,9 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 		case WM_VIDEOSETTINGS_GETVALUE:		
 			return Setting_GetValue(VideoSettings_GetSetting((VIDEOSETTINGS_SETTING)wParam));
 			break;
+		case WM_OSD_GETVALUE:		
+			return Setting_GetValue(OSD_GetSetting((OSD_SETTING)wParam));
+			break;
 
 		case WM_ASPECT_SETVALUE:
 			Setting_SetValue(Aspect_GetSetting((ASPECT_SETTING)wParam), lParam);
@@ -315,6 +324,9 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 			break;
 		case WM_VIDEOSETTINGS_SETVALUE:		
 			Setting_SetValue(VideoSettings_GetSetting((VIDEOSETTINGS_SETTING)wParam), lParam);
+			break;
+		case WM_OSD_SETVALUE:		
+			Setting_SetValue(OSD_GetSetting((OSD_SETTING)wParam), lParam);
 			break;
 
 		case WM_ASPECT_CHANGEVALUE:
@@ -368,6 +380,9 @@ LONG Settings_HandleSettingMsgs(HWND hWnd, UINT message, UINT wParam, LONG lPara
 		case WM_VIDEOSETTINGS_CHANGEVALUE:		
 			Setting_ChangeValue(VideoSettings_GetSetting((VIDEOSETTINGS_SETTING)wParam), lParam);
 			break;
+		case WM_OSD_CHANGEVALUE:		
+			Setting_ChangeValue(OSD_GetSetting((OSD_SETTING)wParam), lParam);
+			break;
 		
 		default:
 			break;
@@ -409,6 +424,7 @@ void WriteSettingsToIni()
 	FLT_TNoise_WriteSettingsToIni();
 	TVCard_WriteSettingsToIni();
 	VideoSettings_WriteSettingsToIni();
+	OSD_WriteSettingsToIni();
 
 	WritePrivateProfileInt("VBI", "VT", VBI_Flags & VBI_VT, szIniFile);
 	WritePrivateProfileInt("VBI", "VPS", VBI_Flags & VBI_VPS, szIniFile);

@@ -1181,6 +1181,10 @@ BEGIN
     "D",            IDM_BDELAY_PLUS,        VIRTKEY, SHIFT, NOINVERT
     "D",            IDM_BDELAY_CURRENT,     VIRTKEY, SHIFT, CONTROL, 
                                                     NOINVERT
+    "E",            IDM_VDELAY_MINUS,       VIRTKEY, NOINVERT
+    "E",            IDM_VDELAY_PLUS,        VIRTKEY, SHIFT, NOINVERT
+    "E",            IDM_VDELAY_CURRENT,     VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
     "H",            IDM_HUE_MINUS,          VIRTKEY, NOINVERT
     "H",            IDM_HUE_PLUS,           VIRTKEY, SHIFT, NOINVERT
     "H",            IDM_HUE_CURRENT,        VIRTKEY, SHIFT, CONTROL, 

@@ -497,7 +497,7 @@ extern BYTE* pVBILines[5];
 
 // These are the original defaults, likely optimized for PAL (could use refinement).
 #define DEFAULT_HUE_PAL 0
-#define DEFAULT_BRIGHTNESS_PAL 0
+#define DEFAULT_BRIGHTNESS_PAL 30
 #define DEFAULT_CONTRAST_PAL 0xd8
 #define DEFAULT_SAT_U_PAL 0xfe
 #define DEFAULT_SAT_V_PAL 0xb4

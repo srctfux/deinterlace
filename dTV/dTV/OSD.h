@@ -26,12 +26,17 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-// MAE 8 Nov 2000
-// Added defines for on-screen display timer
-#define OSD_FONT				"Arial"
-#define	OSD_COLOR_OUTLINE		RGB(0,0,0)
-#define OSD_COLOR_FILL			RGB(0,255,0)
-#define OSD_DEFAULT_SIZE_PERC   10
+#ifndef __OSD_H___
+#define __OSD_H___
+
+#include "settings.h"
+
+// Get Hold of the OSD.c file settings
+SETTING* OSD_GetSetting(OSD_SETTING Setting);
+void OSD_ReadSettingsFromIni();
+void OSD_WriteSettingsToIni();
+void OSD_SetMenu(HMENU hMenu);
+
 
 // Make sure that the timer ID does not conflict with those in DTV.H
 #define OSD_TIMER_ID			42
@@ -50,3 +55,5 @@ void OSD_ShowTextPersistent(HWND hWnd, LPCTSTR szText, double dfSize);
 void OSD_ShowTextOverride(HWND hWnd, LPCTSTR szText, double dfSize);
 void OSD_Redraw(HWND hWnd, HDC hDC);
 void OSD_Clear(HWND hWnd);
+
+#endif

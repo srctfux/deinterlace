@@ -167,6 +167,7 @@ typedef enum
 	VIDEOSOURCE,
 	TVFORMAT,
 	HDELAY,
+	VDELAY,
 	BT848_SETTING_LASTONE,
 } BT848_SETTING;
 
@@ -444,5 +445,30 @@ typedef enum
 #define WM_VIDEOSETTINGS_GETVALUE		(WM_USER + 17)
 #define WM_VIDEOSETTINGS_SETVALUE		(WM_USER + 117)
 #define WM_VIDEOSETTINGS_CHANGEVALUE	(WM_USER + 217)
+
+/////////////////////////////////////////////////////////////////////////////
+// Control settings contained in OSD.c
+/////////////////////////////////////////////////////////////////////////////
+typedef enum
+{
+	OSDB_TRANSPARENT = 0,
+	OSDB_BLOCK,
+	OSDB_SHADED,
+	OSDBACK_LASTONE,
+} eOSDBackground;
+
+typedef enum
+{
+	OSD_OUTLINECOLOR,
+	OSD_TEXTCOLOR,
+	OSD_PERCENTAGESIZE,
+	OSD_ANTIALIAS,
+	OSD_BACKGROUND,
+	OSD_OUTLINE,
+	OSD_SETTING_LASTONE,
+} OSD_SETTING;
+#define WM_OSD_GETVALUE		(WM_USER + 18)
+#define WM_OSD_SETVALUE		(WM_USER + 118)
+#define WM_OSD_CHANGEVALUE	(WM_USER + 218)
 
 #endif

@@ -676,6 +676,20 @@ LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam)
 			Setting_OSDShow(BT848_GetSetting(HDELAY), hWnd);
 			break;
 
+		case IDM_VDELAY_PLUS:
+			Setting_Up(BT848_GetSetting(VDELAY));
+            SendMessage(hWnd, WM_COMMAND, IDM_VDELAY_CURRENT, 0);
+			break;
+
+		case IDM_VDELAY_MINUS:
+			Setting_Down(BT848_GetSetting(VDELAY));
+            SendMessage(hWnd, WM_COMMAND, IDM_VDELAY_CURRENT, 0);
+			break;
+
+		case IDM_VDELAY_CURRENT:
+			Setting_OSDShow(BT848_GetSetting(VDELAY), hWnd);
+			break;
+
 		case IDM_PIXELWIDTH_PLUS:
 			Setting_Up(BT848_GetSetting(CURRENTX));
             SendMessage(hWnd, WM_COMMAND, IDM_PIXELWIDTH_CURRENT, 0);

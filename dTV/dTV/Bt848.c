@@ -177,6 +177,7 @@ int CurrentVBILines = 0;
 long VideoSource = SOURCE_COMPOSITE;
 
 int HDelay = 0;
+int VDelay = 0;
 
 //===========================================================================
 // CCIR656 Digital Input Support
@@ -580,7 +581,14 @@ BOOL BT848_SetGeoSize()
 		CurrentX = TVFormats[TVFormat].wHActivex1;
 		hscale = 0;
 	}
-	vdelay = TVFormats[TVFormat].wVDelay;
+	if(VDelay == 0)
+	{
+		vdelay = TVFormats[TVFormat].wVDelay;
+	}
+	else
+	{
+		vdelay = VDelay;
+	}
 	if(HDelay == 0)
 	{
 		hdelay = ((CurrentX * TVFormats[TVFormat].wHDelayx1) / TVFormats[TVFormat].wHActivex1) & 0x3fe;
@@ -1430,6 +1438,16 @@ BOOL CurrentX_OnChange(long NewValue)
 
 BOOL HDelay_OnChange(long NewValue)
 {
+	HDelay = NewValue;
+	Stop_Capture();
+	BT848_SetGeoSize();
+	Start_Capture();
+	return FALSE;
+}
+
+BOOL VDelay_OnChange(long NewValue)
+{
+	VDelay = NewValue;
 	Stop_Capture();
 	BT848_SetGeoSize();
 	Start_Capture();
@@ -1715,6 +1733,11 @@ SETTING BT848Settings[BT848_SETTING_LASTONE] =
 		"Horizontal Pos", SLIDER, 0, &HDelay,
 		0, 0, 255, 0, NULL,
 		"Hardware", "HDelay", HDelay_OnChange,
+	},
+	{
+		"Vertical Pos", SLIDER, 0, &VDelay,
+		0, 0, 255, 0, NULL,
+		"Hardware", "VDelay", VDelay_OnChange,
 	},
 };
 
