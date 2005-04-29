@@ -16,8 +16,8 @@ ol {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
 blockquote {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
 pre {  font-family: "Courier New", Courier, mono; font-size: 9pt}
 ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
-td   {font:8pt/12pt verdana,arial,helvetica,sans-serif;color:#666666;}
-tbl {font:8pt/12pt verdana,arial,helvetica,sans-serif; border:1px solid #E3E3E3;}
+.cell {font:8pt/12pt verdana,arial,helvetica,sans-serif}
+.table {font:8pt/12pt verdana,arial,helvetica,sans-serif; border:1px solid #E3E3E3;}
 
 -->
 </style>
@@ -51,16 +51,16 @@ tbl {font:8pt/12pt verdana,arial,helvetica,sans-serif; border:1px solid #E3E3E3;
         card is not natively supported by DScaler 4, you may still be able to 
         use DScaler's WDM driver support, as described above.
       <p><br>
-      <table width="600" border="0" cellspacing="0" cellpadding="0" align="left" class="tbl">
+      <table width="600" cellspacing="0" cellpadding="2" align="left" class="table">
         <tr> 
-          <td width="400"><img src="../images/spacer.gif" width="400" height="1"></td>
-          <td width="200" height="1"><img src="../images/spacer.gif" width="200" height="1"></td>
-        </tr>
-        <tr>
           <td width="400" bgcolor="#DDDDDD"><b>Card Name</b></td>
           <td width="200" bgcolor="#DDDDDD"><b>Chipset</b></td>
         </tr>
-        -Automated Insert-
+        <tr> 
+          <td>Card Name</td>
+          <td>Chipset</td>
+        </tr>
+        -Automated Insert- 
       </table>
 <!-- #EndEditable --> 
 </td>
