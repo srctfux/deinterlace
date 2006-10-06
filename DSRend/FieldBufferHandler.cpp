@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: FieldBufferHandler.cpp,v 1.6 2002-08-01 20:30:27 tobbej Exp $
+// $Id: FieldBufferHandler.cpp,v 1.7 2006-10-06 13:38:01 adcockj Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.6  2002/08/01 20:30:27  tobbej
+// corected problem with even/odd flag for frame input
+//
 // Revision 1.5  2002/07/29 17:51:40  tobbej
 // added vertical mirror.
 // fixed field ordering and even/odd flags, seems like it is working
@@ -265,7 +268,7 @@ HRESULT CFieldBufferHandler::InsertSample(CComPtr<IMediaSample> pSample)
 		//split the field
 		if(m_bNeedConv)
 		{
-			m_ColorConv.Convert(field1.GetBufferSetSize(FieldSize),pSampleBuffer,CColorConverter::COVERSION_FORMAT::CNV_EVEN,bVertMirror);
+			m_ColorConv.Convert(field1.GetBufferSetSize(FieldSize),pSampleBuffer,CColorConverter::CNV_EVEN,bVertMirror);
 			field1.flags=(bVertMirror ? !m_bSwapFields : m_bSwapFields) ? BUFFER_FLAGS_FIELD_ODD : BUFFER_FLAGS_FIELD_EVEN;
 		}
 		else
@@ -330,7 +333,7 @@ HRESULT CFieldBufferHandler::InsertSample(CComPtr<IMediaSample> pSample)
 		//split the field
 		if(m_bNeedConv)
 		{
-			m_ColorConv.Convert(field2.GetBufferSetSize(FieldSize),pSampleBuffer,CColorConverter::COVERSION_FORMAT::CNV_ODD,bVertMirror);
+			m_ColorConv.Convert(field2.GetBufferSetSize(FieldSize),pSampleBuffer,CColorConverter::CNV_ODD,bVertMirror);
 			field2.flags= (bVertMirror ? !m_bSwapFields : m_bSwapFields) ? BUFFER_FLAGS_FIELD_EVEN : BUFFER_FLAGS_FIELD_ODD;
 		}
 		else
@@ -382,7 +385,7 @@ HRESULT CFieldBufferHandler::InsertSample(CComPtr<IMediaSample> pSample)
 			//copy IMediaSample to a new buffer
 			if(m_bNeedConv)
 			{
-				m_ColorConv.Convert(field.GetBufferSetSize(sampleSize),pSampleBuffer,CColorConverter::COVERSION_FORMAT::CNV_ALL,m_bVertMirror);
+				m_ColorConv.Convert(field.GetBufferSetSize(sampleSize),pSampleBuffer,CColorConverter::CNV_ALL,m_bVertMirror);
 			}
 			else if(m_bVertMirror)
 			{
@@ -492,8 +495,9 @@ HRESULT CFieldBufferHandler::GetFields(DWORD dwTimeOut,long *count,FieldBuffer *
 	}
 	
 	int startPos=0;
+    int i;
 	//find newest field marked as in use
-	for(int i=m_Fields.GetSize()-1;i>=0;i--)
+	for(i=m_Fields.GetSize()-1;i>=0;i--)
 	{
 		if(m_Fields[i].bInUse)
 			break;
