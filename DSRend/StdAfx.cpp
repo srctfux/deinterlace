@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: StdAfx.cpp,v 1.1.1.1 2002-02-03 10:52:53 tobbej Exp $
+// $Id: StdAfx.cpp,v 1.2 2007-02-19 19:08:08 robmuller Exp $
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2002 Torbjörn Jansson.  All rights reserved.
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@
 // CVS Log
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1.1.1  2002/02/03 10:52:53  tobbej
+// First import of new direct show renderer filter
+//
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -37,7 +40,4 @@
 
 #ifdef _ATL_STATIC_REGISTRY
 #include <statreg.h>
-#include <statreg.cpp>
 #endif
-
-#include <atlimpl.cpp>
