@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="DSRend"
 	ProjectGUID="{67222DDF-A530-4584-8270-6DCC9F781BFD}"
+	RootNamespace="DSRend"
 	Keyword="AtlProj"
 	>
 	<Platforms>
@@ -208,9 +209,11 @@
 		</Configuration>
 		<Configuration
 			Name="Debug_Express|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="2"
+			UseOfATL="0"
+			CharacterSet="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -226,21 +229,36 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
+				TypeLibraryName="$(InputDir)/$(ProjectName).tlb"
+				HeaderFileName="$(InputName).h"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				Optimization="0"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
+				WarningLevel="3"
+				DebugInformationFormat="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="odbc32.lib odbccp32.lib strmiids.lib version.lib"
+				OutputFile="..\DScaler\Debug/DSRend.dll"
+				ModuleDefinitionFile=".\DSRend.def"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -825,7 +843,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Assembling"
-						CommandLine="ml /c /Zd /coff /nologo /Fo$(IntDir)\$(InputName).obj $(InputPath)"
+						CommandLine="ml /c /Zd /coff /nologo /Fo$(IntDir)\$(InputName).obj $(InputPath)&#x0D;&#x0A;"
 						Outputs="$(IntDir)\$(InputName).obj"
 					/>
 				</FileConfiguration>
