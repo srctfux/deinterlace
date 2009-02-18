@@ -6,10 +6,13 @@
 #4/Oct/2001
 
 #Instructions for initial run...
-#cvs -d:pserver:anonymous@cvs1:/cvsroot/deinterlace login <Enter> (See below for discussion)
-#cp /home/groups/d/de/deinterlace/htdocs/scripts/webclean.sh
-#   /home/users/firstletterusername/firsttwolettersusername/yourusername/ <Enter>
-#cd /home/users/firstletterofyourusername/firsttwolettersofusername/yourusername/ <Enter>
+#svn checkout https://deinterlace.svn.sourceforge.net/svnroot/deinterlace/trunk/htdocs/scripts ~/scripts
+#cd ~/scripts <Enter>
+#sh webclean.sh <Enter>
+
+#Instructions for subsequent runs...
+#cd ~/scripts <Enter>
+#svn update <Enter>
 #sh webclean.sh <Enter>
 
 #Instructions for subsequent runs...
@@ -44,6 +47,7 @@ cd /home/groups/d/de/deinterlace/
 
 rm -f htdocs/*
 rm -R -f htdocs/CVS
+rm -R -f htdocs/.svn
 rm -R -f htdocs/channels
 rm -R -f htdocs/bugs
 rm -R -f htdocs/card-support
@@ -61,6 +65,7 @@ rm -R -f htdocs/setup
 rm -R -f htdocs/Templates
 
 rm -d -f htdocs/CVS
+rm -d -f htdocs/.svn
 rm -d -f htdocs/bugs
 rm -d -f htdocs/card-support
 rm -d -f htdocs/dtv-vs-windvd
@@ -81,7 +86,7 @@ rm -d -f htdocs/Templates
 #server crashes or something like that.  In a half year, I've had to log in a couple of times.
 #See the instructions above for the details on logging in.
 
-cvs -d:pserver:anonymous@cvs1:/cvsroot/deinterlace co htdocs>/dev/null
+svn checkout https://deinterlace.svn.sourceforge.net/svnroot/deinterlace/trunk/htdocs htdocs >/dev/null
 
 #Then change the file permissions so that anyone in the deinterlace administrative group
 #can delete the directories and files
