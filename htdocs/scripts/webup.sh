@@ -1,25 +1,32 @@
 #!/bin/sh 
 
-#dScaler Site Update Script
+#DScaler Site Update Script
 #Dan Schmelzer
-#dschmelzer@hotmail.com
-#1/25/2001
+#dschmelzer@gmail.com
+#2/18/2008
 
 #Instructions for running
-#cd ~/scripts <Enter>
-#svn update <Enter>
-#sh webup.sh <Enter>
 
-#Do the work from the dScaler htdocs subdirectory
+#copy this script onto your personal shell space on Sourceforge
+#then type
+#sh helpup.sh <Enter>
+
+#Then check out htdocs directory from SVN.  Only needs to be run once, when
+#htdocs directory is blank.
+
+#cd /home/groups/d/de/deinterlace/
+#svn co https://deinterlace.svn.sourceforge.net/svnroot/deinterlace/trunk/htdocs
+
+#Note re Sourceforge permissions...
+#All of the files in htdocs will be assigned to you as the user.  If somebody
+#in the group has already populated the htdocs directory from SVN, but you
+#want to update the web directory yourself, then you will have to ask them
+#to delete all of the files in the htdocs directory assigned to them.
+#Likewise, if you have populated the htdocs directory from SVN, others will
+#not be able to update the web directory.  This is a long-standing permissions
+#issue with Sourceforge.
+
+#After the first run, merely have SVN update the already checked out directory
 
 cd /home/groups/d/de/deinterlace/htdocs
-
 svn update
-
-#Then change the file permissions so that anyone in the deinterlace administrative group
-#can delete the directories and files
-
-chmod -R 771 *
-chown -R adcockj.deinterlace *
-
-#Joy
