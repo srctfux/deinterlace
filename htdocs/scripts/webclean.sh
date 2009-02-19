@@ -1,12 +1,15 @@
 #!/bin/sh 
 
-#dScaler Site Clean Script
+#DScaler Site Clean Script
 #John Adcock
 #john@adcock8.freeserve.co.uk
 #4/Oct/2001
 
+#This script deletes the web site.
+#Must be run from your personal Sourceforge directory
+
 #Instructions for initial run...
-#svn checkout https://deinterlace.svn.sourceforge.net/svnroot/deinterlace/trunk/htdocs/scripts ~/scripts
+#svn co https://deinterlace.svn.sourceforge.net/svnroot/deinterlace/trunk/htdocs/scripts ~/scripts
 #cd ~/scripts <Enter>
 #sh webclean.sh <Enter>
 
@@ -15,35 +18,16 @@
 #svn update <Enter>
 #sh webclean.sh <Enter>
 
-#Instructions for subsequent runs...
-#sh webclean.sh <Enter>
-
 #A note about permissions and the cron...
 #You will need to give the cron adequate permissions to run the script, if you
 #schedule it in crontab.
 
-#A note about error messages...
-#This script is noisy and verbose.  Don't worry about the error messages.
-
-
 #===Getting down to business===
 
 
-#Do the work from the dScaler subdirectory
+#Do the work from the DScaler subdirectory
 
 cd /home/groups/d/de/deinterlace/
-
-
-#Delete the previous live site.
-#Make sure you add add'l htdocs subdirectories to this list, if you add them to CVS.
-#But DON'T delete the htdocs/webalizer directory, since that is not in the CVS.
-#If you delete it, then you will have to reconstruct it from the logs, an extremely
-#laborious process.
-
-#Note 5/13/2001: Sourceforge no longer exposes the log files for Webalizer.  Old
-#statistics are still kept on dScaler's webalizer page, but are no longer updating.
-#One of these days, Sourceforge will install a complete web site stats package
-#and we will again have accurate usage info, etc.
 
 rm -f htdocs/*
 rm -R -f htdocs/CVS
@@ -80,20 +64,3 @@ rm -d -f htdocs/screenshots
 rm -d -f htdocs/scripts
 rm -d -f htdocs/setup
 rm -d -f htdocs/Templates
-
-#Check out the htdocs module from the dScaler CVS using pserver.
-#You will need to log in to pserver once; after that, you should be fine, unless the CVS
-#server crashes or something like that.  In a half year, I've had to log in a couple of times.
-#See the instructions above for the details on logging in.
-
-svn checkout https://deinterlace.svn.sourceforge.net/svnroot/deinterlace/trunk/htdocs htdocs >/dev/null
-
-#Then change the file permissions so that anyone in the deinterlace administrative group
-#can delete the directories and files
-
-cd /home/groups/d/de/deinterlace/htdocs/
-
-chmod -R 777 *
-chown -R adcockj.deinterlace *
-
-#Joy
