@@ -47,6 +47,9 @@ rm -R -f htdocs/screenshots
 rm -R -f htdocs/scripts
 rm -R -f htdocs/setup
 rm -R -f htdocs/Templates
+rm -R -f htdocs/Help
+rm -R -f htdocs/distributions
+rm -R -f htdocs/filter
 
 rm -d -f htdocs/CVS
 rm -d -f htdocs/.svn
@@ -64,3 +67,6 @@ rm -d -f htdocs/screenshots
 rm -d -f htdocs/scripts
 rm -d -f htdocs/setup
 rm -d -f htdocs/Templates
+rm -d -f htdocs/Help
+rm -d -f htdocs/distributions
+rm -d -f htdocs/filter
