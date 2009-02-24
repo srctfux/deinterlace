@@ -1,100 +1,150 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN">
-<html>
+<!-- JohnAd: website design based on Nautica 2.2 Liquid 
+     by  mejobloggs from www.studio7designs.com 
+                 licensed under creative commons see
+                 http://creativecommons.org/licenses/by/3.0/us/
+                 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>DScaler - TV &amp; Video Deinterlacer</title>
-<meta http-equiv="Content-Type" content=
-"text/html; charset=iso-8859-1">
-<style type="text/css">
-<!--
-p {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt; font-style: normal; color: #666600; text-decoration: none}
-.bland {  text-decoration: none; font-family: Arial, Helvetica, sans-serif; font-size: 10pt; color: #222233}
--->
-</style>
+  <meta name="generator" content=
+  "HTML Tidy for Windows (vers 7 December 2008), see www.w3.org" />
+  <!-- #BeginEditable "doctitle" -->
+
+  <title>DScaler - Home</title><!-- #EndEditable "doctitle"-->
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="keywords" content="deinterlace TV Video" />
+  <link rel="stylesheet" type="text/css" href="./style.css" />
 </head>
-<body bgcolor="#FFFFFF" vlink="#CC0000">
 
+<body>
+  <div id="menu-top">
+    <ul>
+      <li><a href="./index.php" title=
+      "HomeNews"><span>Home/News</span></a></li>
 
-<table width="97%" border="0" cellspacing="0" cellpadding="0"
-height="97%" align="center">
-<tr bgcolor="#FFFFFF">
-<td height="3%"> </td>
-<td height="3%"> </td>
-    <td height="3%" align="right" valign="middle"><font color=
-"#000000" face="Verdana, Arial, Helvetica, sans-serif" size="2"><b>P R O C E S 
-      S O R </b></font> </td>
-</tr>
+      <li><a href="./dscaler4.htm" title="DScaler 4"><span>TV
+      Viewer</span></a></li>
 
-<tr bgcolor="#FFCC00">
-<td height="2" colspan="3"><img alt="bar" src="images/yellowspacer.gif"
-width="100%" height="2" border="0"></td>
-</tr>
+      <li><a href="./dscaler5.htm" title="DScaler 5"><span>Media
+      Decoders</span></a></li>
 
-<tr>
-<td width="33%" valign="top" height="30%">
-<p>
- <a href="about.htm" class="bland">What is DScaler?</a><br>
- <a href="downloads.htm" class="bland">DScaler 4 News &amp; Download</a><br>
- <a href="user_support.htm" class="bland">User Support</a><br>
- <a href="docs.htm" class="bland">Documentation</a><br>
- <a href="donate.htm" class="bland">Donations</a><br>
- <a href="dscaler5.htm" class="bland">DScaler 5 News &amp; Download</a><br>
-</td>
-<td rowspan="3" height="90%" bordercolor="#999900" align="center"
-valign="middle"><img src="images/dscalerlogobig.jpg" alt=
-"DScaler Marquee"></td>
-<td width="33%" height="30%" valign="top">
-<div align="right"><a href="/developers.htm"><font size="1"><img
-alt="developers" src="images/developers.jpg" width="177" height="160" border=
-"0"></font></a></div>
-</td>
-</tr>
+      <li><a href="./oldstuff.htm" title="Old Stuff"><span>Old
+      Stuff</span></a></li>
 
-<tr align="center" valign="middle">
-<td height="30%"> </td>
-<td height="30%"> </td>
-</tr>
+      <li><a href="./donate.htm" title="Donate"><span>Donate</span></a></li>
 
-<tr>
-<td width="33%" height="30%"></td>
-<td width="33%" valign="bottom" height="30%"><br>
-      <p align="right"><a href="channels/index.htm" class=
-"bland">Channel Setup Catalogue</a><br>
-        <a href="contact.htm" class="bland">Contact the team</a><br>
-        <a href="developers.htm" class="bland">Developers</a><br>
-        <a href="http://sourceforge.net/projects/deinterlace/" class=
-"bland">SourceForge.net Project Page</a><br>
-        <a href="Links.htm" class="bland">Links</a></p>
-      </td>
-</tr>
+      <li><a href="./user_support.htm" title=
+      "Support"><span>Support</span></a></li>
 
-<tr bgcolor="#FFCC00">
-<td align="left" height="2" valign="middle" colspan="3"><img alt="bar" src=
-"images/yellowspacer.gif" width="100%" height="2"></td>
-</tr>
+      <li><a href="./developers.htm" title=
+      "Developers"><span>Developers</span></a></li>
+    </ul>
+  </div><!--menu-top-->
+  <!-- mejobloggs: sorry about all these wrappers. It is a lot of structural markup .
+                If you know how to do this with less structural markup, contact my throught my
+                OWD user page: http://www.openwebdesign.org/userinfo.phtml?user=mejobloggs -->
 
-<tr>
-<td align="left" height="2" valign="middle" colspan="3"> </td>
-</tr>
+  <div id="wrapper-header">
+    <div id="header">
+      <div id="wrapper-header2">
+        <div id="wrapper-header3">
+          <h1><!-- #BeginEditable "Page%20Title" -->DScaler Home &amp; News 
+          <!-- #EndEditable "Page%20Title"--></h1>
+        </div><!--wrapper-header3-->
+      </div><!--wrapper-header2-->
+    </div><!--header-->
+  </div><!--wrapper-header-->
 
-<tr bgcolor="#FFFFFF">
-    <td align="left" height="3%" valign="middle"><font face=
-"Verdana, Arial, Helvetica, sans-serif" size="2" color="#000000"><b> V I D E O 
-      &amp; T V</b></font></td>
-<td height="3%"> </td>
-<td height="3%" align="right">
-<p>
-<a href="http://sourceforge.net/donate/index.php?group_id=7420">
- <img src="http://images.sourceforge.net/images/project-support.jpg" 
- width="88" height="32" border="0" alt="Support This Project" /> 
-</a> 
-<a href="http://sourceforge.net">
- <img src="http://sourceforge.net/sflogo.php?group_id=7420&type=1" 
- width="88" height="31" border="0" alt="SourceForge.net" />
-</a>
-</p>
-</td>
-</tr>
-</table>
+  <div id="wrapper-content">
+    <div id="wrapper-menu-page">
+      <div id="menu-page">
+        <!-- #BeginEditable "PageNav" -->
+
+        <h3>Get DScaler TV Application</h3>
+
+        <ul>
+          <li><a href=
+          "http://prdownloads.sourceforge.net/deinterlace/DScaler4115.exe">Stable
+          (4.1.15)</a></li>
+
+          <li><a href=
+          "http://prdownloads.sourceforge.net/deinterlace/DScaler4117.exe">Experimental
+          (4.1.17)</a></li>
+        </ul>
+
+        <h3>Get Media Decoders</h3>
+
+        <ul>
+          <li><a href=
+          "http://prdownloads.sourceforge.net/deinterlace/DScaler5008.exe">Experimental
+          (5.0.0.8)</a></li>
+        </ul><!-- #EndEditable "PageNav"-->
+
+        <p><a href=
+        "http://sourceforge.net/donate/index.php?group_id=7420"><img src=
+        "http://images.sourceforge.net/images/project-support.jpg" width="88"
+        height="32" border="0" alt="Support This Project" /></a></p>
+
+        <p><a href="http://sourceforge.net"><img src=
+        "http://sourceforge.net/sflogo.php?group_id=7420&amp;type=1" width="88"
+        height="31" border="0" alt="SourceForge.net" /></a></p>
+      </div><!--menu-page-->
+    </div><!--wrapper-menu-page-->
+
+    <div id="content">
+      <!-- #BeginEditable "Text" -->
+
+      <h1>What is DScaler?</h1>
+
+      <p>The DScaler project is an ongoing attempt to get the best video
+      quality possible from a Windows PC. At the moment the project has two
+      main strands.</p>
+
+      <ul>
+        <li><a href="./dscaler4.htm">TV Viewing Application (DScaler
+        4)</a></li>
+
+        <li><a href="./dscaler5.htm">Media decoders (DScaler 5)</a></li>
+      </ul>
+
+      <p>These are explained in more detail on their own pages. There is also
+      some <a href="./olderstuff.htm">older work</a>.</p>
+
+      <h1>News</h1>
+
+      <p><b>24th Feb 2009</b> Updated the website.</p>
+
+      <p><b>20th Feb 2009</b> Migrated project source from CVS to SVN.</p>
+      <!-- #EndEditable "Text"-->
+    </div><!--content-->
+  </div><!--wrapper-content-->
+
+  <div id="wrapper-footer">
+    <div id="footer">
+      <a href="http://www.studio7designs.com">Web Design by
+      Studio7designs.com</a> | copyright 2009 The DScaler Project Team
+    </div>
+  </div><!--wrapper-footer-->
+  <!-- Piwik -->
+  <script type="text/javascript">
+//<![CDATA[
+        var pkBaseURL = (("https:" == document.location.protocol) ? "https://apps.sourceforge.net/piwik/deinterlace/" : "http://apps.sourceforge.net/piwik/deinterlace/");
+        document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+  //]]>
+  </script><script type="text/javascript">
+//<![CDATA[
+        piwik_action_name = '';
+        piwik_idsite = 1;
+        piwik_url = pkBaseURL + "piwik.php";
+        piwik_log(piwik_action_name, piwik_idsite, piwik_url);
+  //]]>
+  </script><object>
+    <noscript>
+    <p><img src=
+    "http://apps.sourceforge.net/piwik/deinterlace/piwik.php?idsite=1" alt=
+    "piwik" /></p></noscript>
+  </object> <!-- End Piwik Tag -->
 </body>
 </html>
-

@@ -1,9 +1,7 @@
 
 ************* This is the DScaler FAQ log 
 
-
-
-It contains, and kept in cvs repository, all updates made to the *MASTER ENGLISH VERSION* off the FAQ.
+It contains, and kept in svn repository, all updates made to the *MASTER ENGLISH VERSION* off the FAQ.
 
 Every translated version should be upated according to, AND ONLY FROM, this log and the english FAQ.
 
@@ -18,6 +16,10 @@ Any questions regarding the FAQ should go to me, Yvonus. Use AVSForum to contact
 
 
 --8<----------------
+
+24/2/09 John Adcock
+. Applied new style to FAQ
+. Converted all language FAQs to utf-8
 
 15/9 Yvonus
 . removed the individual algorithms description, linking to the Help file now (no need to translate any more)

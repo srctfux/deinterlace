@@ -1,62 +1,102 @@
-<html><!-- #BeginTemplate "/Templates/dtvnormal.dwt" -->
+<!-- JohnAd: website design based on Nautica 2.2 Liquid 
+     by  mejobloggs from www.studio7designs.com 
+                 licensed under creative commons see
+                 http://creativecommons.org/licenses/by/3.0/us/
+                 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<!-- #BeginEditable "doctitle" --> 
-<title>DScaler - Mark Rejhon's 3:2 Pulldown Algorithm</title>
-<!-- #EndEditable --> 
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<style type="text/css">
-<!--
-p {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
-.bottommenu {  font-family: Arial, Helvetica, sans-serif; font-size: 8pt; font-style: normal; text-decoration: none}
-h3 {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt; font-style: normal; font-weight: bold}
-h1 {  font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 18pt; font-weight: bold}
-li {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
-h2 {  font-family: Arial, Helvetica, sans-serif; font-size: 14pt; font-weight: bold}
-ol {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
-blockquote {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
-pre {  font-family: "Courier New", Courier, mono; font-size: 9pt}
-ul {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt}
--->
-</style>
+  <meta name="generator" content=
+  "HTML Tidy for Windows (vers 7 December 2008), see www.w3.org" />
+  <!-- #BeginEditable "doctitle" -->
+
+  <title>DScaler - Mark Rejhon's 3:2 Pulldown Algorithm</title>
+  <!-- #EndEditable "doctitle"-->
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="keywords" content="deinterlace TV Video" />
+  <link rel="stylesheet" type="text/css" href="./style.css" />
 </head>
 
-<body bgcolor="#FFFFFF">
-<table width="100%" border="0" cellspacing="0" cellpadding="0">
-  <tr> 
-    <td height="1" width="160"><img src="images/spacer.gif" width="1" height="1"></td>
-    <td height="1" width="342"><img src="images/spacer.gif" width="1" height="1"></td>
-    <td height="1" width="501"><img src="images/spacer.gif" width="1" height="1"></td>
-  </tr>
-  <tr> 
-    <td width="160"><img src="images/dscalerlogo.jpg" alt="DScaler logo"></td>
-    <td colspan="2" align="right" valign="bottom">
-      <font face="Verdana, Arial, Helvetica, sans-serif" size="5"><b><!-- #BeginEditable "Page%20Title" -->Mark 
-      Rejhon's&nbsp;<br>
-      3:2 Pulldown Algorithm&nbsp;<!-- #EndEditable --></b></font></td>
-  </tr>
-  <tr bgcolor="#FFCC00" align="right"> 
-    <td colspan="3"><img src="images/yellowspacer.gif" width="100%" height="2"></td>
-  </tr>
-  <tr> 
-    <td colspan="3">&nbsp;</td>
-  </tr>
-  <tr>
-    <td colspan="3"><!-- #BeginEditable "Text" --> <FONT SIZE="2" FACE="Verdana, Arial"> 
-      <p>Quoted from Mark's original suggestion, posted on the <a href="http://www.avsforum.com/">AVScience 
-        Home Theater Forum</a>.</p>
-      <p> Here's a simplified pseudocode implementation of <A HREF="http://www.avsforum.com/ubb/Forum12/HTML/000071.html" TARGET=_blank>my 
-        3:2 pulldown detection algorithm</A>. You might even easily be able to 
-        implement this into DScaler. Almost all of us really don't care about 2:2 
-        pulldown at all as I only see this happening only 0.1 to 0.5% of the time 
-        on NTSC television. Without further ado, here you go!</p>
-      <h3><br>
-      </h3>
-      </FONT>
+<body>
+  <div id="menu-top">
+    <ul>
+      <li><a href="./index.php" title=
+      "HomeNews"><span>Home/News</span></a></li>
+
+      <li><a href="./dscaler4.htm" title="DScaler 4"><span>TV
+      Viewer</span></a></li>
+
+      <li><a href="./dscaler5.htm" title="DScaler 5"><span>Media
+      Decoders</span></a></li>
+
+      <li><a href="./oldstuff.htm" title="Old Stuff"><span>Old
+      Stuff</span></a></li>
+
+      <li><a href="./donate.htm" title="Donate"><span>Donate</span></a></li>
+
+      <li><a href="./user_support.htm" title=
+      "Support"><span>Support</span></a></li>
+
+      <li><a href="./developers.htm" title=
+      "Developers"><span>Developers</span></a></li>
+    </ul>
+  </div><!--menu-top-->
+  <!-- mejobloggs: sorry about all these wrappers. It is a lot of structural markup .
+                If you know how to do this with less structural markup, contact my throught my
+                OWD user page: http://www.openwebdesign.org/userinfo.phtml?user=mejobloggs -->
+
+  <div id="wrapper-header">
+    <div id="header">
+      <div id="wrapper-header2">
+        <div id="wrapper-header3">
+          <h1><!-- #BeginEditable "Page%20Title" -->Mark Rejhon's&nbsp;<br />
+          3:2 Pulldown Algorithm&nbsp;<!-- #EndEditable "Page%20Title"--></h1>
+        </div><!--wrapper-header3-->
+      </div><!--wrapper-header2-->
+    </div><!--header-->
+  </div><!--wrapper-header-->
+
+  <div id="wrapper-content">
+    <div id="wrapper-menu-page">
+      <div id="menu-page">
+        <!-- #BeginEditable "PageNav" --><!-- #EndEditable "PageNav"-->
+
+        <p><a href=
+        "http://sourceforge.net/donate/index.php?group_id=7420"><img src=
+        "http://images.sourceforge.net/images/project-support.jpg" width="88"
+        height="32" border="0" alt="Support This Project" /></a></p>
+
+        <p><a href="http://sourceforge.net"><img src=
+        "http://sourceforge.net/sflogo.php?group_id=7420&amp;type=1" width="88"
+        height="31" border="0" alt="SourceForge.net" /></a></p>
+      </div><!--menu-page-->
+    </div><!--wrapper-menu-page-->
+
+    <div id="content">
+      <!-- #BeginEditable "Text" -->
+
+      <p><font size="2" face="Verdana, Arial">Quoted from Mark's original
+      suggestion, posted on the <a href="http://www.avsforum.com/">AVScience
+      Home Theater Forum</a>.</font></p>
+
+      <p><font size="2" face="Verdana, Arial">Here's a simplified pseudocode
+      implementation of <a href=
+      "http://www.avsforum.com/ubb/Forum12/HTML/000071.html" target="_blank">my
+      3:2 pulldown detection algorithm</a>. You might even easily be able to
+      implement this into DScaler. Almost all of us really don't care about 2:2
+      pulldown at all as I only see this happening only 0.1 to 0.5% of the time
+      on NTSC television. Without further ado, here you go!</font></p>
+
+      <h3><font size="2" face="Verdana, Arial"><br /></font></h3>
+
       <p><b>START PSUEDOCODE FOR AUTOMATIC 3:2 PULLDOWN DETECTION</b></p>
-      <p>
+
       <blockquote>
-        <hr>
-        <pre>set MAX_MISMATCH = 12
+        <hr />
+        <pre>
+set MAX_MISMATCH = 12
 set MAX_VERIFY_CYCLES = 2
 set MISMATCH_COUNT = 0
 set MOVIE_FIELD_CYCLE = 0
@@ -178,97 +218,115 @@ LOOP
   // You can optionally synchronize to the output refresh this way.
 ENDLOOP
 </pre>
-        <hr>
+        <hr />
       </blockquote>
+
       <p>&nbsp;</p>
+
       <p><b>EXAMPLE SEQUENCE OF FRAMES FROM 3:2 PULLDOWN</b></p>
-      <p>Field 00: Movie frame 1<br>
-        Field 01: Movie frame 1<br>
-        Field 02: Movie frame 1<br>
-        Field 03: Movie frame 2<br>
-        Field 04: Movie frame 2<br>
-        Field 05: Movie frame 3<br>
-        Field 06: Movie frame 3<br>
-        Field 07: Movie frame 3<br>
-        Field 08: Movie frame 4<br>
-        Field 09: Movie frame 4<br>
-        Field 10: Movie frame 5<br>
-        Field 11: Movie frame 5<br>
-        Field 12: Movie frame 5<br>
-        Field 13: Movie frame 6<br>
-        Field 14: Movie frame 6</p>
-      <p>Field 02 and 00 is MATCH --- MOVIE_FIELD_CYCLE = 0<br>
-        Field 03 and 01 is mismatch - MOVIE_FIELD_CYCLE = 1<br>
-        Field 04 and 02 is mismatch - MOVIE_FIELD_CYCLE = 2<br>
-        Field 05 and 03 is mismatch - MOVIE_FIELD_CYCLE = 3<br>
-        Field 06 and 04 is mismatch - MOVIE_FIELD_CYCLE = 4<br>
-        Field 07 and 05 is MATCH --- MOVIE_FIELD_CYCLE = 0<br>
-        Field 08 and 06 is mismatch - MOVIE_FIELD_CYCLE = 1<br>
-        Field 09 and 07 is mismatch - MOVIE_FIELD_CYCLE = 2<br>
-        Field 10 and 08 is mismatch - MOVIE_FIELD_CYCLE = 3<br>
-        Field 11 and 09 is mismatch - MOVIE_FIELD_CYCLE = 4<br>
-        Field 12 and 10 is MATCH --- MOVIE_FIELD_CYCLE = 0<br>
-        Field 13 and 11 is mismatch - MOVIE_FIELD_CYCLE = 1<br>
-        Field 14 and 12 is mismatch - MOVIE_FIELD_CYCLE = 2</p>
+
+      <p>Field 00: Movie frame 1<br />
+      Field 01: Movie frame 1<br />
+      Field 02: Movie frame 1<br />
+      Field 03: Movie frame 2<br />
+      Field 04: Movie frame 2<br />
+      Field 05: Movie frame 3<br />
+      Field 06: Movie frame 3<br />
+      Field 07: Movie frame 3<br />
+      Field 08: Movie frame 4<br />
+      Field 09: Movie frame 4<br />
+      Field 10: Movie frame 5<br />
+      Field 11: Movie frame 5<br />
+      Field 12: Movie frame 5<br />
+      Field 13: Movie frame 6<br />
+      Field 14: Movie frame 6</p>
+
+      <p>Field 02 and 00 is MATCH --- MOVIE_FIELD_CYCLE = 0<br />
+      Field 03 and 01 is mismatch - MOVIE_FIELD_CYCLE = 1<br />
+      Field 04 and 02 is mismatch - MOVIE_FIELD_CYCLE = 2<br />
+      Field 05 and 03 is mismatch - MOVIE_FIELD_CYCLE = 3<br />
+      Field 06 and 04 is mismatch - MOVIE_FIELD_CYCLE = 4<br />
+      Field 07 and 05 is MATCH --- MOVIE_FIELD_CYCLE = 0<br />
+      Field 08 and 06 is mismatch - MOVIE_FIELD_CYCLE = 1<br />
+      Field 09 and 07 is mismatch - MOVIE_FIELD_CYCLE = 2<br />
+      Field 10 and 08 is mismatch - MOVIE_FIELD_CYCLE = 3<br />
+      Field 11 and 09 is mismatch - MOVIE_FIELD_CYCLE = 4<br />
+      Field 12 and 10 is MATCH --- MOVIE_FIELD_CYCLE = 0<br />
+      Field 13 and 11 is mismatch - MOVIE_FIELD_CYCLE = 1<br />
+      Field 14 and 12 is mismatch - MOVIE_FIELD_CYCLE = 2</p>
+
       <p>&nbsp;</p>
+
       <p><b>OPTIONAL: BETTER SYNCHRONIZATION TO MONITOR REFRESH</b></p>
-      <p>It is desirable to make the output refresh independent of the input refresh 
-        for better synchronization. During 3/2 pulldown material, it is very desirable 
-        to synchronize to the monitor refresh instead of the input TV signal refresh. 
-        During watching in normal TV viewers, 3/2 pulldown is doubled to 6/4 pulldown 
-        when the refresh rate is doubled to 120 Hz. It would be very nice to have 
-        something closer to 5/5 pulldown when watching movie material instead 
-        of 6/4 pulldown.</p>
-      <p>In the pseudocode above in the last section,<br>
-        There are 24 frames per second in OUTPUT queue in MOVIE mode<br>
-        There are 60 frames per second in OUTPUT queue in VIDEO mode</p>
-      <p>You can synchronize the OUTPUT queue of fields to the monitor refresh, 
-        based on the value in the FRAMES_PER_SECOND variable. By keeping a small 
-        output buffer of frames (of about 2 or so frames) you can keep the pipeline 
-        of output frames flowing smoothly and synchronized much better to the 
-        computer monitor.</p>
-      <p>Also, since the computer clock is accurate, this can help "stabilize" 
-        unstable NTSC refresh such as those from a VCR which can sometimes have 
-        slightly-varying refresh rates (fluctuating randomly as low as 59Hz all 
-        the way up to 61Hz although usually by smaller increments). This can interact 
-        badly with a consistent computer refresh. Regular TV sets have a very 
-        slight amount of "give" that allows it to compensate for very minor fluctuations 
-        in refresh rate, but computer monitors won't compensate.</p>
-      <p>It can also smooth out jerkiness problems caused by fluctuating CPU usage 
-        on a frame-by-frame basis, since deinterlacing one pair of frames might 
-        take longer than deinterlacing a different pair of frames (using certain 
-        video source deinterlacing algorithms).</p>
-      <p>There is also the problem of compensating for drift when the output framerate 
-        is decoupled from the refresh of the input signal. There are two good 
-        possible ways of getting around this drift problem:</p>
-      <p>(1) AVOID displaying the output frame if there is less than 2 frames 
-        in the OUTPUT queue, and ACCELERATE displaying of the next frame if the 
-        number of frames in the OUTPUT queue exceeds a predetermined value such 
-        as 4. That way, you always keep 2, 3 or 4 frames buffered at all times 
-        for maximum fluidity. (You could experiment, and set the minimum to 1 
-        and maximum to 3, to find out which produces the best fluidity at the 
-        minimum possible buffering. Too much buffering will cause audio to be 
-        noticeably lagged behind the video)</p>
-      <p>(2) Synchronize to a clock that's generated from the TV tuner card, instead 
-        of using the computer's clock. For example, increment an integer clock 
-        counter by 1 everytime a field arrives from the TV card. This clock would 
-        be incremented about 59.94 times per second for most NTSC signals. Keep 
-        an eye on the computer's clock everytime you increment the integer clock 
-        by 60 - to calculate the exact amount of time it takes for 60 fields to 
-        hit the TV tuner card. Do this continously every second. Divide this value 
-        by 24 to compute the amount of time there should be between frames, during 
-        MOVIE mode, during the next second. (If you prefer, you could use 5 second 
-        cycles instead of 1 second cycles, or keep a "rolling average" every field 
-        based on the previous X number of fields).</p>
+
+      <p>It is desirable to make the output refresh independent of the input
+      refresh for better synchronization. During 3/2 pulldown material, it is
+      very desirable to synchronize to the monitor refresh instead of the input
+      TV signal refresh. During watching in normal TV viewers, 3/2 pulldown is
+      doubled to 6/4 pulldown when the refresh rate is doubled to 120 Hz. It
+      would be very nice to have something closer to 5/5 pulldown when watching
+      movie material instead of 6/4 pulldown.</p>
+
+      <p>In the pseudocode above in the last section,<br />
+      There are 24 frames per second in OUTPUT queue in MOVIE mode<br />
+      There are 60 frames per second in OUTPUT queue in VIDEO mode</p>
+
+      <p>You can synchronize the OUTPUT queue of fields to the monitor refresh,
+      based on the value in the FRAMES_PER_SECOND variable. By keeping a small
+      output buffer of frames (of about 2 or so frames) you can keep the
+      pipeline of output frames flowing smoothly and synchronized much better
+      to the computer monitor.</p>
+
+      <p>Also, since the computer clock is accurate, this can help "stabilize"
+      unstable NTSC refresh such as those from a VCR which can sometimes have
+      slightly-varying refresh rates (fluctuating randomly as low as 59Hz all
+      the way up to 61Hz although usually by smaller increments). This can
+      interact badly with a consistent computer refresh. Regular TV sets have a
+      very slight amount of "give" that allows it to compensate for very minor
+      fluctuations in refresh rate, but computer monitors won't compensate.</p>
+
+      <p>It can also smooth out jerkiness problems caused by fluctuating CPU
+      usage on a frame-by-frame basis, since deinterlacing one pair of frames
+      might take longer than deinterlacing a different pair of frames (using
+      certain video source deinterlacing algorithms).</p>
+
+      <p>There is also the problem of compensating for drift when the output
+      framerate is decoupled from the refresh of the input signal. There are
+      two good possible ways of getting around this drift problem:</p>
+
+      <p>(1) AVOID displaying the output frame if there is less than 2 frames
+      in the OUTPUT queue, and ACCELERATE displaying of the next frame if the
+      number of frames in the OUTPUT queue exceeds a predetermined value such
+      as 4. That way, you always keep 2, 3 or 4 frames buffered at all times
+      for maximum fluidity. (You could experiment, and set the minimum to 1 and
+      maximum to 3, to find out which produces the best fluidity at the minimum
+      possible buffering. Too much buffering will cause audio to be noticeably
+      lagged behind the video)</p>
+
+      <p>(2) Synchronize to a clock that's generated from the TV tuner card,
+      instead of using the computer's clock. For example, increment an integer
+      clock counter by 1 everytime a field arrives from the TV card. This clock
+      would be incremented about 59.94 times per second for most NTSC signals.
+      Keep an eye on the computer's clock everytime you increment the integer
+      clock by 60 - to calculate the exact amount of time it takes for 60
+      fields to hit the TV tuner card. Do this continously every second. Divide
+      this value by 24 to compute the amount of time there should be between
+      frames, during MOVIE mode, during the next second. (If you prefer, you
+      could use 5 second cycles instead of 1 second cycles, or keep a "rolling
+      average" every field based on the previous X number of fields).</p>
+
       <p>&nbsp;</p>
+
       <p><b>APPENDIX: PSEUDOCODE WITHOUT COMMENTS</b></p>
-      <p>For determining the amount of "code bulk", this is how small the pseudocode 
-        is, when I remove my comments from the above pseudocode. Look at how small 
-        the pseudocode is - since you already have the routines written in DScaler, 
-        look at how simple it is to implement automatic 3:2 pulldown deinterlacing!</p>
-      <p>
+
+      <p>For determining the amount of "code bulk", this is how small the
+      pseudocode is, when I remove my comments from the above pseudocode. Look
+      at how small the pseudocode is - since you already have the routines
+      written in DScaler, look at how simple it is to implement automatic 3:2
+      pulldown deinterlacing!</p>
+
       <blockquote>
-<hr>
+        <hr />
         <pre>
 set MAX_MISMATCH = 12
 set MAX_VERIFY_CYCLES = 2
@@ -324,52 +382,37 @@ LOOP
   ENDIF
 ENDLOOP
 </pre>
-        <hr>
+        <hr />
       </blockquote>
-      <h3>(c) Mark Rejhon 2000</h3>
-<!-- #EndEditable --> 
-</td>
-</tr>
-<tr>
-<td colspan="3"> 
-</td>
-</tr>
-<tr bgcolor="#FFCC00">
-<td colspan="3">
-<div align="center"><img src="images/yellowspacer.gif" width=
-"100%" height="2"></div>
-</td>
-</tr>
-<tr>
-<td colspan="3"> </td>
-</tr>
-<tr>
-<td>
-</td>
-<td align="center">
-<a href="index.php" class="bottommenu">home</a>&nbsp;|&nbsp;<a href="about.htm" 
-class="bottommenu">about</a>&nbsp;|&nbsp;<a href="docs.htm" 
-class="bottommenu">documentation</a>&nbsp;|&nbsp;<a href="downloads.htm" 
-class="bottommenu">DScaler&nbsp;4</a>&nbsp;|&nbsp;<a href="Authors.htm" 
-class="bottommenu">authors</a><br><a href="Thanks.htm" 
-class="bottommenu">thanks</a>&nbsp;|&nbsp;<a href="user_support.htm" 
-class="bottommenu">user&nbsp;support</a>&nbsp;|&nbsp;<a href="donate.htm" 
-class="bottommenu">donate</a>&nbsp;|&nbsp;<a href="developers.htm" 
-class="bottommenu">developers</a>&nbsp;|&nbsp;<a href="Links.htm" 
-class="bottommenu">links</a>
-</td>
-<td align="right">
-<p>
-<a href="http://sourceforge.net/donate/index.php?group_id=7420">
- <img src="http://images.sourceforge.net/images/project-support.jpg" 
- width="88" height="32" border="0" alt="Support This Project" /> 
-</a><a href="http://sourceforge.net"><img src=
-"http://sourceforge.net/sflogo.php?group_id=7420&type=1" width=
-"88" height="31" border="0" alt="SourceForge.net" />
-</a></p>
-</td>
-</tr>
-</table>
-</body><!-- #EndTemplate -->
 
+      <h3>(c) Mark Rejhon 2000</h3><!-- #EndEditable "Text"-->
+    </div><!--content-->
+  </div><!--wrapper-content-->
+
+  <div id="wrapper-footer">
+    <div id="footer">
+      <a href="http://www.studio7designs.com">Web Design by
+      Studio7designs.com</a> | copyright 2009 The DScaler Project Team
+    </div>
+  </div><!--wrapper-footer-->
+  <!-- Piwik -->
+  <script type="text/javascript">
+//<![CDATA[
+        var pkBaseURL = (("https:" == document.location.protocol) ? "https://apps.sourceforge.net/piwik/deinterlace/" : "http://apps.sourceforge.net/piwik/deinterlace/");
+        document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+  //]]>
+  </script><script type="text/javascript">
+//<![CDATA[
+        piwik_action_name = '';
+        piwik_idsite = 1;
+        piwik_url = pkBaseURL + "piwik.php";
+        piwik_log(piwik_action_name, piwik_idsite, piwik_url);
+  //]]>
+  </script><object>
+    <noscript>
+    <p><img src=
+    "http://apps.sourceforge.net/piwik/deinterlace/piwik.php?idsite=1" alt=
+    "piwik" /></p></noscript>
+  </object> <!-- End Piwik Tag -->
+</body>
 </html>
