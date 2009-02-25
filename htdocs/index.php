@@ -16,6 +16,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="keywords" content="deinterlace TV Video" />
   <link rel="stylesheet" type="text/css" href="./style.css" />
+	<meta name="verify-v1" content="N+vGF1iKYVKd/CP5tngyJlANWOXlA40K9bbWJHLI1mI=" />
 </head>
 
 <body>
