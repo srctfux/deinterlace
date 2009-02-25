@@ -3,7 +3,7 @@
 body {
 	font-family: trebuchet ms, verdana, arial, tahoma;
 	font-size: 90%;
-	color: #888;
+	color: #555;
 	background-color: white;
 	line-height: 180%;
 	margin: 0;
@@ -13,7 +13,7 @@ body {
 
 /* Set the page width here */
 #menu-top, #header, #wrapper-content, #wrapper-footer {
-	width: 85%;
+	width: 94%;
 	margin: 0 auto;
 	text-align: left;
 }
@@ -61,7 +61,7 @@ body {
 
 #wrapper-header {	background: transparent url('images/bg.png') top center repeat-x; }
 
-#header { background: #eee url('images/banner.png') no-repeat center top; }
+#header { background: white url('images/banner.png') no-repeat center top; }
 
 
 #wrapper-header2 { background: transparent url('images/bg02-blue-left.png') top left no-repeat; }
@@ -73,7 +73,7 @@ body {
 	padding: 0;
 	height: 192px;
 	line-height: 3em;
-	color: #ccc;
+	color: #444;
 	font-size: 130%;
 }
 
@@ -129,7 +129,7 @@ body {
 	letter-spacing: 0.15em;
 }
 
-#menu-page a:link, #menu-page a:visited { color: #888; }
+#menu-page a:link, #menu-page a:visited { color: #555; }
 #menu-page a:hover { color: #5b8fbe; }
 
 #wrapper-footer {
@@ -149,4 +149,4 @@ h2 { font-size: 110%; }
 h3 { font-size: 100%; }
 
 a:link, a:visited { color: #5b8fbe; text-decoration: none; }
-a:hover{ color: #666; text-decoration: none; }
+a:hover{ color: #555; text-decoration: none; }
