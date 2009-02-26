@@ -19,19 +19,6 @@
 ; Refinements made by Mark Rejhon and Steve Grimm
 ;
 ;////////////////////////////////////////////////////////////////////////////
-; Change Log
-;
-; Date          Developer             Changes
-;
-; 01 Jun 2001   John Adcock           Split out into new file
-;
-;////////////////////////////////////////////////////////////////////////////
-; CVS Log
-;
-; $Log: not supported by cvs2svn $
-;
-;////////////////////////////////////////////////////////////////////////////
-
 
     .386p
     .mmx
@@ -93,7 +80,7 @@ Memcpy_Loop:
     rep movsb
 
 Memcpy_End:
-	emms
+    emms
     pop esi
     pop edi
     ret 

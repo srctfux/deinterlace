@@ -15,36 +15,6 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details
 /////////////////////////////////////////////////////////////////////////////
-// Change Log
-//
-// Date          Developer             Changes
-//
-//
-/////////////////////////////////////////////////////////////////////////////
-// CVS Log
-//
-// $Log: not supported by cvs2svn $
-// Revision 1.6  2002/08/01 20:28:21  tobbej
-// implemented IQualProp::get_AvgSyncOffset counter
-//
-// Revision 1.5  2002/07/29 17:51:40  tobbej
-// added vertical mirror.
-// fixed field ordering and even/odd flags, seems like it is working
-//
-// Revision 1.4  2002/07/15 18:20:56  tobbej
-// new settings
-//
-// Revision 1.3  2002/07/06 16:44:48  tobbej
-// new field buffering
-//
-// Revision 1.2  2002/04/16 15:38:27  tobbej
-// added support for waiting for next field in last recived frame
-//
-// Revision 1.1.1.1  2002/02/03 10:52:53  tobbej
-// First import of new direct show renderer filter
-//
-//
-/////////////////////////////////////////////////////////////////////////////
 
 /**
  * @file DSRend.idl IDL source for DSRend.dll.

@@ -15,20 +15,6 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details
 /////////////////////////////////////////////////////////////////////////////
-// Change Log
-//
-// Date          Developer             Changes
-//
-//
-/////////////////////////////////////////////////////////////////////////////
-// CVS Log
-//
-// $Log: not supported by cvs2svn $
-// Revision 1.1.1.1  2002/02/03 10:52:53  tobbej
-// First import of new direct show renderer filter
-//
-//
-/////////////////////////////////////////////////////////////////////////////
 
 /**
  * @file StdAfx.cpp source file that includes just the standard includes.

@@ -15,23 +15,6 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details
 /////////////////////////////////////////////////////////////////////////////
-// Change Log
-//
-// Date          Developer             Changes
-//
-//
-/////////////////////////////////////////////////////////////////////////////
-// CVS Log
-//
-// $Log: not supported by cvs2svn $
-// Revision 1.2  2002/07/06 16:44:48  tobbej
-// new field buffering
-//
-// Revision 1.1.1.1  2002/02/03 10:52:53  tobbej
-// First import of new direct show renderer filter
-//
-//
-/////////////////////////////////////////////////////////////////////////////
 
 /**
  * @file StdAfx.h include file for standard system include files,
@@ -59,9 +42,9 @@
 
 //hmm... why does _ATL_DEBUG_INTERFACES create problems with the input pin?
 //looks like _QIThunk is deleted when it shoud not, why?
-////#define _ATL_DEBUG_INTERFACES	//reference count debuging
+////#define _ATL_DEBUG_INTERFACES    //reference count debuging
 //#define ATL_TRACE_LEVEL 2
-//#define _ATL_DEBUG_QI			//queryinterface debugging
+//#define _ATL_DEBUG_QI            //queryinterface debugging
 #endif
 
 #include <atlbase.h>
@@ -72,11 +55,11 @@ extern CComModule _Module;
 #include <atlctl.h>
 
 //DShow stuff
-#include <strmif.h>		//if you get IAMFilterMiscFlags is undefined, you are using the wrong version of strmif.h (the one that comes with vc, not directx sdk)
+#include <strmif.h>        //if you get IAMFilterMiscFlags is undefined, you are using the wrong version of strmif.h (the one that comes with vc, not directx sdk)
 #include <amvideo.h>
 #include <uuids.h>
 #include <vfwmsgs.h>
-#include <evcode.h>		//event codes
+#include <evcode.h>        //event codes
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.

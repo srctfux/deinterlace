@@ -15,24 +15,6 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details
 /////////////////////////////////////////////////////////////////////////////
-// Change Log
-//
-// Date          Developer             Changes
-//
-//
-/////////////////////////////////////////////////////////////////////////////
-// CVS Log
-//
-// $Log: not supported by cvs2svn $
-// Revision 1.2  2002/07/29 17:51:40  tobbej
-// added vertical mirror.
-// fixed field ordering and even/odd flags, seems like it is working
-//
-// Revision 1.1  2002/07/15 18:18:12  tobbej
-// support for rgb24 input
-//
-//
-/////////////////////////////////////////////////////////////////////////////
 
 /**
  * @file ColorConverter.cpp implementation of the CColorConverter class.
@@ -59,117 +41,117 @@ CColorConverter::~CColorConverter()
 
 bool CColorConverter::CanCovert(const AM_MEDIA_TYPE *mt)
 {
-	if(mt->majortype==MEDIATYPE_Video)
-	{
-		if(mt->subtype==MEDIASUBTYPE_RGB24)
-		{
-			return true;
-		}
-	}
-	return false;
+    if(mt->majortype==MEDIATYPE_Video)
+    {
+        if(mt->subtype==MEDIASUBTYPE_RGB24)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool CColorConverter::SetFormat(const AM_MEDIA_TYPE *mt)
 {
-	if(mt==NULL)
-	{
-		m_pfnConv=NULL;
-		m_width=0;
-		m_height=0;
-		m_bitcount=0;
-		return true;
-	}
+    if(mt==NULL)
+    {
+        m_pfnConv=NULL;
+        m_width=0;
+        m_height=0;
+        m_bitcount=0;
+        return true;
+    }
 
-	if(mt->majortype==MEDIATYPE_Video)
-	{
-		if(mt->formattype==FORMAT_VideoInfo && mt->cbFormat>0)
-		{
-			VIDEOINFOHEADER *vh=(VIDEOINFOHEADER *)mt->pbFormat;
-			m_width=vh->bmiHeader.biWidth;
-			
-			m_height=abs(vh->bmiHeader.biHeight);
-			m_bitcount=vh->bmiHeader.biBitCount;
-		}
-		else if(mt->formattype==FORMAT_VideoInfo2 && mt->cbFormat>0)
-		{
-			VIDEOINFOHEADER2 *vh2=(VIDEOINFOHEADER2 *)mt->pbFormat;
-			m_width=vh2->bmiHeader.biWidth;
-			
-			m_height=abs(vh2->bmiHeader.biHeight);
-			m_bitcount=vh2->bmiHeader.biBitCount;
-		}
-		else
-		{
-			return false;
-		}
+    if(mt->majortype==MEDIATYPE_Video)
+    {
+        if(mt->formattype==FORMAT_VideoInfo && mt->cbFormat>0)
+        {
+            VIDEOINFOHEADER *vh=(VIDEOINFOHEADER *)mt->pbFormat;
+            m_width=vh->bmiHeader.biWidth;
+            
+            m_height=abs(vh->bmiHeader.biHeight);
+            m_bitcount=vh->bmiHeader.biBitCount;
+        }
+        else if(mt->formattype==FORMAT_VideoInfo2 && mt->cbFormat>0)
+        {
+            VIDEOINFOHEADER2 *vh2=(VIDEOINFOHEADER2 *)mt->pbFormat;
+            m_width=vh2->bmiHeader.biWidth;
+            
+            m_height=abs(vh2->bmiHeader.biHeight);
+            m_bitcount=vh2->bmiHeader.biBitCount;
+        }
+        else
+        {
+            return false;
+        }
 
-		if(mt->subtype==MEDIASUBTYPE_RGB24)
-		{
-			if(CpuFeatureFlags&(FEATURE_SSE | FEATURE_MMXEXT))
-			{
-				m_pfnConv=P3_RGBtoYUV;
-			}
-			else
-			{
-				m_pfnConv=C_RGBtoYUV;
-			}
-			//m_bNeedVertMirror= m_height<0 ? false : true;
-			m_bNeedVertMirror=true;
-			return true;
-		}
-	}
-	return false;
+        if(mt->subtype==MEDIASUBTYPE_RGB24)
+        {
+            if(CpuFeatureFlags&(FEATURE_SSE | FEATURE_MMXEXT))
+            {
+                m_pfnConv=P3_RGBtoYUV;
+            }
+            else
+            {
+                m_pfnConv=C_RGBtoYUV;
+            }
+            //m_bNeedVertMirror= m_height<0 ? false : true;
+            m_bNeedVertMirror=true;
+            return true;
+        }
+    }
+    return false;
 }
 
 bool CColorConverter::Convert(BYTE *dst,BYTE *src,COVERSION_FORMAT cnv,bool &bVertMirror)
 {
-	if(m_pfnConv==NULL)
-	{
-		return false;
-	}
-	
-	long SrcLineSize=m_width*m_bitcount/8;
-	long DstLineSize=m_width*2;
-	bool bVMirror=bVertMirror ? !m_bNeedVertMirror : m_bNeedVertMirror;
+    if(m_pfnConv==NULL)
+    {
+        return false;
+    }
+    
+    long SrcLineSize=m_width*m_bitcount/8;
+    long DstLineSize=m_width*2;
+    bool bVMirror=bVertMirror ? !m_bNeedVertMirror : m_bNeedVertMirror;
 
-	switch(cnv)
-	{
-	case CNV_ALL:
-		{
-			for(long i=0;i<m_height;i++)
-			{
-				long offset=bVMirror ? (m_height-1-i)*SrcLineSize : i*SrcLineSize;
-				ATLASSERT(offset>=0);
-				m_pfnConv((short*)(dst+i*DstLineSize),src+offset,m_width);
-			}
-			break;
-		}
-	case CNV_EVEN:
-		{
-			for(long i=0;i<m_height/2;i++)
-			{
-				//if doing vert mirror, use the odd line instead
-				long offset=bVMirror ? (m_height-1-(2*i+1))*SrcLineSize : (2*i)*SrcLineSize;
-				ATLASSERT(offset>=0);
-				m_pfnConv((short*)(dst+i*DstLineSize),src+offset,m_width);
-			}
-			break;
-		}
-	case CNV_ODD:
-		{
-			for(long i=0;i<m_height/2;i++)
-			{
-				long offset=bVMirror ? (m_height-1-(2*i))*SrcLineSize : (2*i+1)*SrcLineSize;
-				ATLASSERT(offset>=0);
-				m_pfnConv((short*)(dst+i*DstLineSize),src+offset,m_width);
-			}
-			break;
-		}
-	default:
-		return false;
-	}
-	bVertMirror=bVMirror;
-	return true;
+    switch(cnv)
+    {
+    case CNV_ALL:
+        {
+            for(long i=0;i<m_height;i++)
+            {
+                long offset=bVMirror ? (m_height-1-i)*SrcLineSize : i*SrcLineSize;
+                ATLASSERT(offset>=0);
+                m_pfnConv((short*)(dst+i*DstLineSize),src+offset,m_width);
+            }
+            break;
+        }
+    case CNV_EVEN:
+        {
+            for(long i=0;i<m_height/2;i++)
+            {
+                //if doing vert mirror, use the odd line instead
+                long offset=bVMirror ? (m_height-1-(2*i+1))*SrcLineSize : (2*i)*SrcLineSize;
+                ATLASSERT(offset>=0);
+                m_pfnConv((short*)(dst+i*DstLineSize),src+offset,m_width);
+            }
+            break;
+        }
+    case CNV_ODD:
+        {
+            for(long i=0;i<m_height/2;i++)
+            {
+                long offset=bVMirror ? (m_height-1-(2*i))*SrcLineSize : (2*i+1)*SrcLineSize;
+                ATLASSERT(offset>=0);
+                m_pfnConv((short*)(dst+i*DstLineSize),src+offset,m_width);
+            }
+            break;
+        }
+    default:
+        return false;
+    }
+    bVertMirror=bVMirror;
+    return true;
 }
 
 /*
@@ -182,11 +164,11 @@ bool CColorConverter::Convert(BYTE *dst,BYTE *src,COVERSION_FORMAT cnv,bool &bVe
   If we go with these, we should recalculate the inverse for the other mmx func.
 
   Y = 0.299 R + 0.587 G + 0.114 B
-  U =-0.146 R - 0.288 G + 0.434 B			
+  U =-0.146 R - 0.288 G + 0.434 B            
   V = 0.617 R - 0.517 G - 0.100 G
 
   Y = [(9798 R + 19235G + 3736 B) / 32768]
-  U = [(-4784 R - 9437 G + 4221 B) / 32768] + 128	
+  U = [(-4784 R - 9437 G + 4221 B) / 32768] + 128    
   V = [(20218R - 16941G - 3277 B) / 32768] + 128
 
 */

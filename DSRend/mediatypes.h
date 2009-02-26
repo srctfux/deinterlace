@@ -15,17 +15,6 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details
 /////////////////////////////////////////////////////////////////////////////
-// Change Log
-//
-// Date          Developer             Changes
-//
-//
-/////////////////////////////////////////////////////////////////////////////
-// CVS Log
-//
-// $Log: not supported by cvs2svn $
-//
-/////////////////////////////////////////////////////////////////////////////
 
 /**
  * @file mediatypes.h AM_MEDIA_TYPE related stuff.
@@ -48,9 +37,9 @@
 class CopyMT
 {
 public:
-	static HRESULT copy(AM_MEDIA_TYPE** p1, AM_MEDIA_TYPE** p2);
-	static void init(AM_MEDIA_TYPE** p);
-	static void destroy(AM_MEDIA_TYPE** p);
+    static HRESULT copy(AM_MEDIA_TYPE** p1, AM_MEDIA_TYPE** p2);
+    static void init(AM_MEDIA_TYPE** p);
+    static void destroy(AM_MEDIA_TYPE** p);
 };
 
 /** 

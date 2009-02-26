@@ -15,20 +15,6 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details
 /////////////////////////////////////////////////////////////////////////////
-// Change Log
-//
-// Date          Developer             Changes
-//
-//
-/////////////////////////////////////////////////////////////////////////////
-// CVS Log
-//
-// $Log: not supported by cvs2svn $
-// Revision 1.1.1.1  2002/02/03 10:52:53  tobbej
-// First import of new direct show renderer filter
-//
-//
-/////////////////////////////////////////////////////////////////////////////
 
 /**
  * @file Event.cpp implementation of the CEvent class.
@@ -43,31 +29,31 @@
 
 CEvent::CEvent(BOOL bManualReset,BOOL bInitialState,LPCTSTR lpszName)
 {
-	m_hEvent=CreateEvent(NULL,bManualReset,bInitialState,lpszName);
-	ATLASSERT(m_hEvent!=NULL);
+    m_hEvent=CreateEvent(NULL,bManualReset,bInitialState,lpszName);
+    ATLASSERT(m_hEvent!=NULL);
 }
 
 CEvent::~CEvent()
 {
-	CloseHandle(m_hEvent);
+    CloseHandle(m_hEvent);
 }
 
 BOOL CEvent::SetEvent()
 {
-	return ::SetEvent(m_hEvent);
+    return ::SetEvent(m_hEvent);
 }
 
 BOOL CEvent::ResetEvent()
 {
-	return ::ResetEvent(m_hEvent);
+    return ::ResetEvent(m_hEvent);
 }
 
 bool CEvent::Wait(DWORD dwMilliseconds)
 {
-	return (WaitForSingleObject(m_hEvent,dwMilliseconds)==WAIT_OBJECT_0);
+    return (WaitForSingleObject(m_hEvent,dwMilliseconds)==WAIT_OBJECT_0);
 }
 
 bool  CEvent::Check()
 {
-	return Wait(0);
+    return Wait(0);
 }

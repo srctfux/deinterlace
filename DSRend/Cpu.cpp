@@ -12,28 +12,6 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details
 ///////////////////////////////////////////////////////////////////////////////
-// Change Log
-//
-// Date          Developer             Changes
-//
-// 08 Jan 2001   John Adcock           Global Variable Tidy up
-//                                     Got rid of global.h structs.h defines.h
-//
-///////////////////////////////////////////////////////////////////////////////
-// CVS Log
-//
-// $Log: not supported by cvs2svn $
-// Revision 1.5  2001/07/27 16:11:32  adcockj
-// Added support for new Crash dialog
-//
-// Revision 1.4  2001/07/13 16:14:55  adcockj
-// Changed lots of variables to match Coding standards
-//
-// Revision 1.3  2001/07/12 16:16:39  adcockj
-// Added CVS Id and Log
-//
-//
-//////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
 // This file contains #define directives that control compilation of CPU-specific

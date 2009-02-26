@@ -15,20 +15,6 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details
 /////////////////////////////////////////////////////////////////////////////
-// Change Log
-//
-// Date          Developer             Changes
-//
-//
-/////////////////////////////////////////////////////////////////////////////
-// CVS Log
-//
-// $Log: not supported by cvs2svn $
-// Revision 1.1.1.1  2002/02/03 10:52:53  tobbej
-// First import of new direct show renderer filter
-//
-//
-/////////////////////////////////////////////////////////////////////////////
 
 /**
  * @file Event.h: interface for the CEvent class.
@@ -48,26 +34,26 @@
 class CEvent
 {
 public:
-	CEvent(BOOL bManualReset=FALSE,BOOL bInitialState=FALSE,LPCTSTR lpszName=NULL);
-	virtual ~CEvent();
-	
-	/// sets the event to signaled state
-	BOOL SetEvent();
-	/// sets the event to unsignaled state
-	BOOL ResetEvent();
-	/// @return true if event was signaled before timeout
-	bool Wait(DWORD dwMilliseconds);
-	bool Check();
-	
-	/// @return handle to win32 event object
-	HANDLE GetHandle(){return m_hEvent;}
+    CEvent(BOOL bManualReset=FALSE,BOOL bInitialState=FALSE,LPCTSTR lpszName=NULL);
+    virtual ~CEvent();
+    
+    /// sets the event to signaled state
+    BOOL SetEvent();
+    /// sets the event to unsignaled state
+    BOOL ResetEvent();
+    /// @return true if event was signaled before timeout
+    bool Wait(DWORD dwMilliseconds);
+    bool Check();
+    
+    /// @return handle to win32 event object
+    HANDLE GetHandle(){return m_hEvent;}
 
 private:
-	CEvent(const CEvent &refEvent);
+    CEvent(const CEvent &refEvent);
     CEvent &operator=(const CEvent &refEvent);
 
-	///handle to event
-	HANDLE m_hEvent;
+    ///handle to event
+    HANDLE m_hEvent;
 };
 
 #endif // !defined(AFX_EVENT_H__F3EE92CB_5ED0_4B79_9A68_03C761B533A6__INCLUDED_)

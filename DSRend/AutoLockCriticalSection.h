@@ -15,16 +15,6 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details
 /////////////////////////////////////////////////////////////////////////////
-// Change Log
-//
-// Date          Developer             Changes
-//
-//
-/////////////////////////////////////////////////////////////////////////////
-// CVS Log
-//
-// $Log: not supported by cvs2svn $
-/////////////////////////////////////////////////////////////////////////////
 
 /**
  * @file AutoLockCriticalSection.h interface for the CAutoLockCriticalSection class.
@@ -43,12 +33,12 @@
 class CAutoLockCriticalSection
 {
 public:
-	CAutoLockCriticalSection(CComAutoCriticalSection *pLock);
-	~CAutoLockCriticalSection();
+    CAutoLockCriticalSection(CComAutoCriticalSection *pLock);
+    ~CAutoLockCriticalSection();
 
 private:
-	///the critical section
-	CComAutoCriticalSection *m_pLock;
+    ///the critical section
+    CComAutoCriticalSection *m_pLock;
 };
 
 #endif // !defined(AFX_AUTOLOCKCRITICALSECTION_H__810D87A4_1887_4204_BE10_E1CC17682B54__INCLUDED_)

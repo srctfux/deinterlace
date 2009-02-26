@@ -15,23 +15,6 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details
 /////////////////////////////////////////////////////////////////////////////
-// Change Log
-//
-// Date          Developer             Changes
-//
-//
-/////////////////////////////////////////////////////////////////////////////
-// CVS Log
-//
-// $Log: not supported by cvs2svn $
-// Revision 1.2  2002/05/11 12:26:37  tobbej
-// fixed bug that caused the same mediatype to be freed multiple times
-//
-// Revision 1.1.1.1  2002/02/03 10:52:53  tobbej
-// First import of new direct show renderer filter
-//
-//
-/////////////////////////////////////////////////////////////////////////////
 
 /**
  * @file mediatypes.cpp
@@ -42,81 +25,81 @@
 
 HRESULT CopyMT::copy(AM_MEDIA_TYPE** p1, AM_MEDIA_TYPE** p2)
 {
-	ATLTRACE(_T("%s(%d) : CopyMT::copy\n"),__FILE__,__LINE__);
-	ATLASSERT(p1!=NULL && *p2!=NULL);
-	
-	//init p1, this might leak some memory, but acording to the documentation
-	//p1 shoud already have been initialized via init function, but that is not always true.
-	init(p1);
-	if(!copyMediaType(*p1,*p2))
-	{
-		return E_FAIL;
-	}
+    ATLTRACE(_T("%s(%d) : CopyMT::copy\n"),__FILE__,__LINE__);
+    ATLASSERT(p1!=NULL && *p2!=NULL);
+    
+    //init p1, this might leak some memory, but acording to the documentation
+    //p1 shoud already have been initialized via init function, but that is not always true.
+    init(p1);
+    if(!copyMediaType(*p1,*p2))
+    {
+        return E_FAIL;
+    }
 
-	return S_OK;
+    return S_OK;
 }
 
 void CopyMT::init(AM_MEDIA_TYPE** p)
 {
-	ATLTRACE(_T("%s(%d) : CopyMT::init\n"),__FILE__,__LINE__);
-	ATLASSERT(p!=NULL);
+    ATLTRACE(_T("%s(%d) : CopyMT::init\n"),__FILE__,__LINE__);
+    ATLASSERT(p!=NULL);
 
-	*p=(AM_MEDIA_TYPE*)CoTaskMemAlloc(sizeof(AM_MEDIA_TYPE));
-	memset(*p,0,sizeof(AM_MEDIA_TYPE));
-	(*p)->lSampleSize=1;
-	(*p)->bFixedSizeSamples=TRUE;
+    *p=(AM_MEDIA_TYPE*)CoTaskMemAlloc(sizeof(AM_MEDIA_TYPE));
+    memset(*p,0,sizeof(AM_MEDIA_TYPE));
+    (*p)->lSampleSize=1;
+    (*p)->bFixedSizeSamples=TRUE;
 }
 
 void CopyMT::destroy(AM_MEDIA_TYPE** p)
 {
-	ATLTRACE(_T("%s(%d) : CopyMT::destroy\n"),__FILE__,__LINE__);
-	ATLASSERT(*p!=NULL);
+    ATLTRACE(_T("%s(%d) : CopyMT::destroy\n"),__FILE__,__LINE__);
+    ATLASSERT(*p!=NULL);
 
-	freeMediaType(*p);
-	CoTaskMemFree(*p);
+    freeMediaType(*p);
+    CoTaskMemFree(*p);
 }
 
 bool copyMediaType(AM_MEDIA_TYPE *pDest,const AM_MEDIA_TYPE *pSource)
 {
-	//ATLTRACE(_T("%s(%d) : copyMediaType\n"),__FILE__,__LINE__);
-	ATLASSERT(pDest!=NULL && pSource!=NULL);
-	
-	//dealocate format block of the destination mediatype
-	//freeMediaType(pDest);
-	
-	*pDest=*pSource;
+    //ATLTRACE(_T("%s(%d) : copyMediaType\n"),__FILE__,__LINE__);
+    ATLASSERT(pDest!=NULL && pSource!=NULL);
+    
+    //dealocate format block of the destination mediatype
+    //freeMediaType(pDest);
+    
+    *pDest=*pSource;
 
-	//is there any format block?
-	if(pSource->cbFormat!=0)
-	{
-		pDest->pbFormat=(BYTE*)CoTaskMemAlloc(pSource->cbFormat);
-		if(pDest->pbFormat==NULL)
-		{
-			pDest->cbFormat=0;
-			return false;
-		}
-		memcpy(pDest->pbFormat,pSource->pbFormat,pSource->cbFormat);
-	}
-	//addref the IUnknown pointer if any
-	if(pDest->pUnk!=NULL)
-		pDest->pUnk->AddRef();
-	return true;
+    //is there any format block?
+    if(pSource->cbFormat!=0)
+    {
+        pDest->pbFormat=(BYTE*)CoTaskMemAlloc(pSource->cbFormat);
+        if(pDest->pbFormat==NULL)
+        {
+            pDest->cbFormat=0;
+            return false;
+        }
+        memcpy(pDest->pbFormat,pSource->pbFormat,pSource->cbFormat);
+    }
+    //addref the IUnknown pointer if any
+    if(pDest->pUnk!=NULL)
+        pDest->pUnk->AddRef();
+    return true;
 }
 
 void freeMediaType(AM_MEDIA_TYPE *pmt)
 {
-	//ATLTRACE(_T("%s(%d) : freeMediaType\n"),__FILE__,__LINE__);
-	ATLASSERT(pmt!=NULL);
-	
-	if(pmt->cbFormat!=0 && pmt->pbFormat!=NULL)
-	{
-		CoTaskMemFree(pmt->pbFormat);
-		pmt->pbFormat=NULL;
-		pmt->cbFormat=NULL;
-	}
-	if(pmt->pUnk!=NULL)
-	{
-		pmt->pUnk->Release();
-		pmt->pUnk=NULL;
-	}
+    //ATLTRACE(_T("%s(%d) : freeMediaType\n"),__FILE__,__LINE__);
+    ATLASSERT(pmt!=NULL);
+    
+    if(pmt->cbFormat!=0 && pmt->pbFormat!=NULL)
+    {
+        CoTaskMemFree(pmt->pbFormat);
+        pmt->pbFormat=NULL;
+        pmt->cbFormat=NULL;
+    }
+    if(pmt->pUnk!=NULL)
+    {
+        pmt->pUnk->Release();
+        pmt->pUnk=NULL;
+    }
 }

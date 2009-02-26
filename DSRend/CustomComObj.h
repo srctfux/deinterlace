@@ -15,20 +15,6 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details
 /////////////////////////////////////////////////////////////////////////////
-// Change Log
-//
-// Date          Developer             Changes
-//
-//
-/////////////////////////////////////////////////////////////////////////////
-// CVS Log
-//
-// $Log: not supported by cvs2svn $
-// Revision 1.1.1.1  2002/02/03 10:52:53  tobbej
-// First import of new direct show renderer filter
-//
-//
-/////////////////////////////////////////////////////////////////////////////
 
 /**
  * @file CustomComObj.h Declaration of the CCustomComObject
@@ -44,37 +30,37 @@ template<typename base,typename paramType>
 class CCustomComObject : public base
 {
 public:
-	CCustomComObject(paramType pFilter)
-		:base(pFilter)
-	{
-		_Module.Lock();
-	}
+    CCustomComObject(paramType pFilter)
+        :base(pFilter)
+    {
+        _Module.Lock();
+    }
 
-	~CCustomComObject()
-	{
-		FinalRelease();
+    ~CCustomComObject()
+    {
+        FinalRelease();
 #ifdef _ATL_DEBUG_INTERFACES
-		_Module.DeleteNonAddRefThunk(_GetRawUnknown());
+        _Module.DeleteNonAddRefThunk(_GetRawUnknown());
 #endif
-		_Module.Unlock();
-	}
-	
-	ULONG STDMETHODCALLTYPE AddRef()
-	{
-		ULONG ref=InternalAddRef();
-		//ATLTRACE(_T("AddRef count=%d\n"),ref);
-		return ref;
-	}
+        _Module.Unlock();
+    }
+    
+    ULONG STDMETHODCALLTYPE AddRef()
+    {
+        ULONG ref=InternalAddRef();
+        //ATLTRACE(_T("AddRef count=%d\n"),ref);
+        return ref;
+    }
 
-	ULONG STDMETHODCALLTYPE Release()
-	{
-		ULONG ref=InternalRelease();
-		//ATLTRACE(_T("Release count=%d\n"),ref);
-		return ref;
-	}
-	
-	STDMETHOD(QueryInterface)(REFIID iid, void ** ppvObject)
-	{
-		return _InternalQueryInterface(iid, ppvObject);
-	}
+    ULONG STDMETHODCALLTYPE Release()
+    {
+        ULONG ref=InternalRelease();
+        //ATLTRACE(_T("Release count=%d\n"),ref);
+        return ref;
+    }
+    
+    STDMETHOD(QueryInterface)(REFIID iid, void ** ppvObject)
+    {
+        return _InternalQueryInterface(iid, ppvObject);
+    }
 };

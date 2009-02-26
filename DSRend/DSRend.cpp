@@ -15,26 +15,6 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details
 /////////////////////////////////////////////////////////////////////////////
-// Change Log
-//
-// Date          Developer             Changes
-//
-//
-/////////////////////////////////////////////////////////////////////////////
-// CVS Log
-//
-// $Log: not supported by cvs2svn $
-// Revision 1.3  2002/07/15 18:21:09  tobbej
-// new settings
-//
-// Revision 1.2  2002/07/06 16:43:01  tobbej
-// new field buffering
-//
-// Revision 1.1.1.1  2002/02/03 10:52:53  tobbej
-// First import of new direct show renderer filter
-//
-//
-/////////////////////////////////////////////////////////////////////////////
 
 /**
  * @file DSRend.cpp Implementation of DLL Exports.
@@ -77,7 +57,7 @@ BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID /*lpReserved*/)
     {
         _Module.Init(ObjectMap, hInstance, &LIBID_DSRENDLib);
         DisableThreadLibraryCalls(hInstance);
-		CPU_SetupFeatureFlag();
+        CPU_SetupFeatureFlag();
     }
     else if (dwReason == DLL_PROCESS_DETACH)
         _Module.Term();
@@ -100,57 +80,57 @@ STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID* ppv)
 /// DllRegisterServer - Adds entries to the system registry
 STDAPI DllRegisterServer(void)
 {
-	REGPINTYPES regPinTypes =
-	{
-		&MEDIATYPE_Video,
-		&MEDIASUBTYPE_NULL	
-	};
-	REGFILTERPINS2 regFilterPins2 =
-	{
-		REG_PINFLAG_B_RENDERER,
-		1,
-		1,
-		&regPinTypes,
-		0,
-		NULL,
-		&CLSID_NULL
-	};
-	REGFILTER2 regFilter2;
-	regFilter2.dwVersion=2;
-	regFilter2.dwMerit=MERIT_DO_NOT_USE;
-	regFilter2.cPins2=1;
-	regFilter2.rgPins2=&regFilterPins2;
-	
-	
-	CComPtr<IFilterMapper2> pMapper;
-	HRESULT hr;
+    REGPINTYPES regPinTypes =
+    {
+        &MEDIATYPE_Video,
+        &MEDIASUBTYPE_NULL    
+    };
+    REGFILTERPINS2 regFilterPins2 =
+    {
+        REG_PINFLAG_B_RENDERER,
+        1,
+        1,
+        &regPinTypes,
+        0,
+        NULL,
+        &CLSID_NULL
+    };
+    REGFILTER2 regFilter2;
+    regFilter2.dwVersion=2;
+    regFilter2.dwMerit=MERIT_DO_NOT_USE;
+    regFilter2.cPins2=1;
+    regFilter2.rgPins2=&regFilterPins2;
+    
+    
+    CComPtr<IFilterMapper2> pMapper;
+    HRESULT hr;
 
-	hr=pMapper.CoCreateInstance(CLSID_FilterMapper2);
-	if(FAILED(hr))
-		return hr;
+    hr=pMapper.CoCreateInstance(CLSID_FilterMapper2);
+    if(FAILED(hr))
+        return hr;
 
-	// registers object, typelib and all interfaces in typelib
-	hr=_Module.RegisterServer(TRUE);
-	if(FAILED(hr))
-		return hr;
-	
-	//register filter as a directshow filter
-	hr=pMapper->RegisterFilter(CLSID_DSRendFilter,g_wszName,NULL,&CLSID_LegacyAmFilterCategory,NULL,&regFilter2);
-	return hr;
+    // registers object, typelib and all interfaces in typelib
+    hr=_Module.RegisterServer(TRUE);
+    if(FAILED(hr))
+        return hr;
+    
+    //register filter as a directshow filter
+    hr=pMapper->RegisterFilter(CLSID_DSRendFilter,g_wszName,NULL,&CLSID_LegacyAmFilterCategory,NULL,&regFilter2);
+    return hr;
 }
 
 /// DllUnregisterServer - Removes entries from the system registry
 STDAPI DllUnregisterServer(void)
 {
-	HRESULT hr;
-	CComPtr<IFilterMapper2> pMapper;
-	hr=pMapper.CoCreateInstance(CLSID_FilterMapper2);
-	if(FAILED(hr))
-		return hr;
+    HRESULT hr;
+    CComPtr<IFilterMapper2> pMapper;
+    hr=pMapper.CoCreateInstance(CLSID_FilterMapper2);
+    if(FAILED(hr))
+        return hr;
 
-	hr=pMapper->UnregisterFilter(&CLSID_LegacyAmFilterCategory, NULL, CLSID_DSRendFilter);
-	if(FAILED(hr))
-		return hr;
+    hr=pMapper->UnregisterFilter(&CLSID_LegacyAmFilterCategory, NULL, CLSID_DSRendFilter);
+    if(FAILED(hr))
+        return hr;
 
     return _Module.UnregisterServer(TRUE);
 }

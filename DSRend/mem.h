@@ -15,18 +15,6 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details
 /////////////////////////////////////////////////////////////////////////////
-//
-// Change Log
-//
-// Date          Developer             Changes
-//
-//
-/////////////////////////////////////////////////////////////////////////////
-// CVS Log
-//
-// $Log: not supported by cvs2svn $
-//
-/////////////////////////////////////////////////////////////////////////////
 
 /**
  * @file mem.h header file for optimized memcpy and aligned malloc.
@@ -43,8 +31,8 @@ extern "C"
     void memcpySSE(void* Dest, void* Src, size_t nBytes);
     void memcpyAMD(void* Dest, void* Src, size_t nBytes);
     void memcpySimple(void* Dest, void* Src, size_t nBytes);
-	void *aligned_malloc(size_t size, size_t alignment);
-	void aligned_free(void *x);
+    void *aligned_malloc(size_t size, size_t alignment);
+    void aligned_free(void *x);
 }
 
 #endif

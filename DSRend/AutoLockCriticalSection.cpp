@@ -15,19 +15,6 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details
 /////////////////////////////////////////////////////////////////////////////
-// Change Log
-//
-// Date          Developer             Changes
-//
-//
-/////////////////////////////////////////////////////////////////////////////
-// CVS Log
-//
-// $Log: not supported by cvs2svn $
-// Revision 1.1  2002/06/03 18:19:41  tobbej
-// moved CAutoLockCriticalSection
-//
-/////////////////////////////////////////////////////////////////////////////
 
 /**
  * @file AutoLockCriticalSection.cpp implementation of the CAutoLockCriticalSection class.
@@ -38,11 +25,11 @@
 
 CAutoLockCriticalSection::CAutoLockCriticalSection(CComAutoCriticalSection *pLock)
 {
-	m_pLock=pLock;
-	m_pLock->Lock();
+    m_pLock=pLock;
+    m_pLock->Lock();
 }
 
 CAutoLockCriticalSection::~CAutoLockCriticalSection()
 {
-	m_pLock->Unlock();
+    m_pLock->Unlock();
 }

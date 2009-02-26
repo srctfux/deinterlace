@@ -15,16 +15,6 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details
 /////////////////////////////////////////////////////////////////////////////
-// Change Log
-//
-// Date          Developer             Changes
-//
-//
-/////////////////////////////////////////////////////////////////////////////
-// CVS Log
-//
-// $Log: not supported by cvs2svn $
-/////////////////////////////////////////////////////////////////////////////
 
 /**
  * @file PersistStream.h interface for the CPersistStream class.
@@ -38,33 +28,33 @@
 #endif // _MSC_VER > 1000
 
 class CPersistStream :
-	public IPersistStream
+    public IPersistStream
 {
 public:
-	CPersistStream();
-	virtual ~CPersistStream();
-	
-	//IPersist
-	HRESULT STDMETHODCALLTYPE GetClassID(CLSID *pClsid)=0;
+    CPersistStream();
+    virtual ~CPersistStream();
+    
+    //IPersist
+    HRESULT STDMETHODCALLTYPE GetClassID(CLSID *pClsid)=0;
 
-	//IPersistStream
-	HRESULT STDMETHODCALLTYPE IsDirty();
-	HRESULT STDMETHODCALLTYPE Load(IStream *pStm);
-	HRESULT STDMETHODCALLTYPE Save(IStream *pStm, BOOL fClearDirty);
-	HRESULT STDMETHODCALLTYPE GetSizeMax(ULARGE_INTEGER *pcbSize);
-	
-	void SetDirty(bool bDirty);
-	
+    //IPersistStream
+    HRESULT STDMETHODCALLTYPE IsDirty();
+    HRESULT STDMETHODCALLTYPE Load(IStream *pStm);
+    HRESULT STDMETHODCALLTYPE Save(IStream *pStm, BOOL fClearDirty);
+    HRESULT STDMETHODCALLTYPE GetSizeMax(ULARGE_INTEGER *pcbSize);
+    
+    void SetDirty(bool bDirty);
+    
 protected:
-	virtual long GetSize()=0;
-	virtual HRESULT SaveToStream(IStream *pStream)=0;
-	virtual HRESULT LoadFromStream(IStream *pStream)=0;
-	virtual DWORD GetVersion();
-	
-	DWORD m_dwVersion;
+    virtual long GetSize()=0;
+    virtual HRESULT SaveToStream(IStream *pStream)=0;
+    virtual HRESULT LoadFromStream(IStream *pStream)=0;
+    virtual DWORD GetVersion();
+    
+    DWORD m_dwVersion;
 
 private:
-	bool m_bIsDirty;
+    bool m_bIsDirty;
 };
 
 #endif // !defined(AFX_PERSISTSTREAM_H__5C9B3612_6CD4_4AC3_A7EB_1D6FB740F777__INCLUDED_)

@@ -15,23 +15,6 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details
 /////////////////////////////////////////////////////////////////////////////
-// Change Log
-//
-// Date          Developer             Changes
-//
-//
-/////////////////////////////////////////////////////////////////////////////
-// CVS Log
-//
-// $Log: not supported by cvs2svn $
-// Revision 1.2  2002/07/06 16:38:30  tobbej
-// fixed SetObjects to follow specification
-//
-// Revision 1.1.1.1  2002/02/03 10:52:53  tobbej
-// First import of new direct show renderer filter
-//
-//
-/////////////////////////////////////////////////////////////////////////////
 
 /**
  * @file DSRendQualityPage.h Declaration of the CDSRendQualityPage
@@ -49,26 +32,26 @@ EXTERN_C const CLSID CLSID_DSRendQualityPage;
  * Propertypage for the filter.
  */
 class ATL_NO_VTABLE CDSRendQualityPage :
-	public CComObjectRootEx<CComMultiThreadModel>,
-	public CComCoClass<CDSRendQualityPage, &CLSID_DSRendQualityPage>,
-	public IPropertyPageImpl<CDSRendQualityPage>,
-	public CDialogImpl<CDSRendQualityPage>
+    public CComObjectRootEx<CComMultiThreadModel>,
+    public CComCoClass<CDSRendQualityPage, &CLSID_DSRendQualityPage>,
+    public IPropertyPageImpl<CDSRendQualityPage>,
+    public CDialogImpl<CDSRendQualityPage>
 {
 public:
-	CDSRendQualityPage() :
-		m_qualDrawnStart(0),
-		m_qualDroppedStart(0),
-		m_UpStreamDrawnStart(0),
-		m_UpStreamDroppedStart(0)
-	{
-		m_dwTitleID = IDS_TITLEDSRendQualityPage;
-		m_dwHelpFileID = IDS_HELPFILEDSRendQualityPage;
-		m_dwDocStringID = IDS_DOCSTRINGDSRendQualityPage;
-	}
-	HRESULT FinalConstruct();
-	HRESULT FinalRelease();
+    CDSRendQualityPage() :
+        m_qualDrawnStart(0),
+        m_qualDroppedStart(0),
+        m_UpStreamDrawnStart(0),
+        m_UpStreamDroppedStart(0)
+    {
+        m_dwTitleID = IDS_TITLEDSRendQualityPage;
+        m_dwHelpFileID = IDS_HELPFILEDSRendQualityPage;
+        m_dwDocStringID = IDS_DOCSTRINGDSRendQualityPage;
+    }
+    HRESULT FinalConstruct();
+    HRESULT FinalRelease();
 
-	enum {IDD = IDD_DSRENDQUALITYPAGE};
+    enum {IDD = IDD_DSRENDQUALITYPAGE};
 
 DECLARE_REGISTRY_RESOURCEID(IDR_DSRENDQUALITYPAGE)
 DECLARE_NOT_AGGREGATABLE(CDSRendQualityPage)
@@ -76,42 +59,42 @@ DECLARE_NOT_AGGREGATABLE(CDSRendQualityPage)
 DECLARE_PROTECT_FINAL_CONSTRUCT()
 
 BEGIN_COM_MAP(CDSRendQualityPage) 
-	COM_INTERFACE_ENTRY(IPropertyPage)
+    COM_INTERFACE_ENTRY(IPropertyPage)
 END_COM_MAP()
 
 BEGIN_MSG_MAP(CDSRendQualityPage)
-	CHAIN_MSG_MAP(IPropertyPageImpl<CDSRendQualityPage>)
-	MESSAGE_HANDLER(WM_TIMER, OnTimer)
-	//MESSAGE_HANDLER(WM_ERASEBKGND, OnEraseBkgnd)
-	//MESSAGE_HANDLER(WM_CTLCOLORSTATIC,OnCtlColorStatic)
-	COMMAND_HANDLER(IDC_RESET, BN_CLICKED, OnClickedReset)
-	COMMAND_HANDLER(IDC_RESTORE, BN_CLICKED, OnClickedRestore)
+    CHAIN_MSG_MAP(IPropertyPageImpl<CDSRendQualityPage>)
+    MESSAGE_HANDLER(WM_TIMER, OnTimer)
+    //MESSAGE_HANDLER(WM_ERASEBKGND, OnEraseBkgnd)
+    //MESSAGE_HANDLER(WM_CTLCOLORSTATIC,OnCtlColorStatic)
+    COMMAND_HANDLER(IDC_RESET, BN_CLICKED, OnClickedReset)
+    COMMAND_HANDLER(IDC_RESTORE, BN_CLICKED, OnClickedRestore)
 END_MSG_MAP()
 // Handler prototypes:
 //  LRESULT MessageHandler(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 //  LRESULT CommandHandler(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
 //  LRESULT NotifyHandler(int idCtrl, LPNMHDR pnmh, BOOL& bHandled);
 
-	STDMETHOD(Activate(HWND hWndParent,LPCRECT pRect,BOOL bModal));
-	STDMETHOD(Deactivate());
-	STDMETHOD(Apply());
-	STDMETHOD(SetObjects(ULONG nObjects, IUnknown** ppUnk ));
+    STDMETHOD(Activate(HWND hWndParent,LPCRECT pRect,BOOL bModal));
+    STDMETHOD(Deactivate());
+    STDMETHOD(Apply());
+    STDMETHOD(SetObjects(ULONG nObjects, IUnknown** ppUnk ));
 
 private:
-	void updateDialog();
-	void findUpstreamFilter();
-	CComPtr<IQualProp> m_pQuality;
-	int m_qualDrawnStart;
-	int m_qualDroppedStart;
+    void updateDialog();
+    void findUpstreamFilter();
+    CComPtr<IQualProp> m_pQuality;
+    int m_qualDrawnStart;
+    int m_qualDroppedStart;
 
-	CComPtr<IAMDroppedFrames> m_pUpstreamDF;
-	long m_UpStreamDrawnStart;
-	long m_UpStreamDroppedStart;
-	LRESULT OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
-	//LRESULT OnEraseBkgnd(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
-	//LRESULT OnCtlColorStatic(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
-	LRESULT OnClickedReset(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
-	LRESULT OnClickedRestore(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
+    CComPtr<IAMDroppedFrames> m_pUpstreamDF;
+    long m_UpStreamDrawnStart;
+    long m_UpStreamDroppedStart;
+    LRESULT OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
+    //LRESULT OnEraseBkgnd(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
+    //LRESULT OnCtlColorStatic(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
+    LRESULT OnClickedReset(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
+    LRESULT OnClickedRestore(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
 };
 
 #endif //__DSRENDQUALITYPAGE_H_

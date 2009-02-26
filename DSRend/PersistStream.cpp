@@ -15,16 +15,6 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details
 /////////////////////////////////////////////////////////////////////////////
-// Change Log
-//
-// Date          Developer             Changes
-//
-//
-/////////////////////////////////////////////////////////////////////////////
-// CVS Log
-//
-// $Log: not supported by cvs2svn $
-/////////////////////////////////////////////////////////////////////////////
 
 /**
  * @file PersistStream.cpp implementation of the CPersistStream class.
@@ -53,51 +43,51 @@ CPersistStream::~CPersistStream()
 
 HRESULT CPersistStream::IsDirty()
 {
-	return m_bIsDirty ? S_OK : S_FALSE;
+    return m_bIsDirty ? S_OK : S_FALSE;
 }
 
 HRESULT CPersistStream::Load(IStream *pStm)
 {
-	HRESULT hr=pStm->Read(&m_dwVersion,sizeof(DWORD),NULL);
-	if(FAILED(hr))
-	{
-		return hr;
-	}
-	return LoadFromStream(pStm);
+    HRESULT hr=pStm->Read(&m_dwVersion,sizeof(DWORD),NULL);
+    if(FAILED(hr))
+    {
+        return hr;
+    }
+    return LoadFromStream(pStm);
 }
 
 HRESULT CPersistStream::Save(IStream *pStm, BOOL fClearDirty)
 {
-	DWORD dwVer=GetVersion();
-	HRESULT hr=pStm->Write(&dwVer,sizeof(DWORD),NULL);
-	if(FAILED(hr))
-	{
-		return hr;
-	}
-	hr=SaveToStream(pStm);
-	if(SUCCEEDED(hr) && fClearDirty!=FALSE)
-	{
-		SetDirty(false);
-	}
-	return hr;
+    DWORD dwVer=GetVersion();
+    HRESULT hr=pStm->Write(&dwVer,sizeof(DWORD),NULL);
+    if(FAILED(hr))
+    {
+        return hr;
+    }
+    hr=SaveToStream(pStm);
+    if(SUCCEEDED(hr) && fClearDirty!=FALSE)
+    {
+        SetDirty(false);
+    }
+    return hr;
 }
 
 HRESULT CPersistStream::GetSizeMax(ULARGE_INTEGER *pcbSize)
 {
-	if(pcbSize==NULL)
-	{
-		return E_POINTER;
-	}
-	pcbSize->QuadPart=sizeof(DWORD)+GetSize();
-	return S_OK;
+    if(pcbSize==NULL)
+    {
+        return E_POINTER;
+    }
+    pcbSize->QuadPart=sizeof(DWORD)+GetSize();
+    return S_OK;
 }
 
 void CPersistStream::SetDirty(bool bDirty)
 {
-	m_bIsDirty=bDirty;
+    m_bIsDirty=bDirty;
 }
 
 DWORD CPersistStream::GetVersion()
 {
-	return 0;
+    return 0;
 }

@@ -15,18 +15,6 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details
 /////////////////////////////////////////////////////////////////////////////
-//
-// Change Log
-//
-// Date          Developer             Changes
-//
-//
-/////////////////////////////////////////////////////////////////////////////
-// CVS Log
-//
-// $Log: not supported by cvs2svn $
-//
-/////////////////////////////////////////////////////////////////////////////
 
 /**
  * @file memalloc.cpp implementation file for aligned malloc.
@@ -37,30 +25,30 @@
 //aligned malloc/free from tom barry
 void *aligned_malloc(size_t size, size_t alignment)
 {
-	struct B { BYTE* yy; };
-	size_t algn = 4;
-	size_t mask = 0xfffffffc;
-	B* pB;
+    struct B { BYTE* yy; };
+    size_t algn = 4;
+    size_t mask = 0xfffffffc;
+    B* pB;
 
-	BYTE* x;
-	BYTE* y;
+    BYTE* x;
+    BYTE* y;
 
-	while (algn < alignment)		// align to next power of 2
-	{
-		algn <<= 1;
-		mask <<= 1;
-	}
+    while (algn < alignment)        // align to next power of 2
+    {
+        algn <<= 1;
+        mask <<= 1;
+    }
 
-	x = (BYTE*)malloc(size+algn);
-	y = (BYTE*) (((unsigned int) (x+algn) & mask) - 4);
-	pB = (B*) y;
-	pB->yy = x;
-	return  y+4;
+    x = (BYTE*)malloc(size+algn);
+    y = (BYTE*) (((unsigned int) (x+algn) & mask) - 4);
+    pB = (B*) y;
+    pB->yy = x;
+    return  y+4;
 }
 
 void aligned_free(void *x)
 {
-	struct B { BYTE* yy; };
-	B* pB = (B*) ((BYTE*)x-4);
-	free(pB->yy);
+    struct B { BYTE* yy; };
+    B* pB = (B*) ((BYTE*)x-4);
+    free(pB->yy);
 }
