@@ -34,7 +34,7 @@ HRESULT CDSRendAboutPage::Activate(HWND hWndParent,LPCRECT pRect,BOOL bModal)
 
     if(SUCCEEDED(hr))
     {
-        char filename[300];
+        char filename[MAX_PATH];
         GetModuleFileName(_Module.GetModuleInstance(),filename,sizeof(filename));
         DWORD dwVerInfoSize=GetFileVersionInfoSize(filename,NULL);
         if(dwVerInfoSize!=0)
