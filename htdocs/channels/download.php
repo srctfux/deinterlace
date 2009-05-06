@@ -1,4 +1,8 @@
 <?php
+
+$filename=$_GET["filename"];
+$saveas=$_GET["saveas"];
+
 header("Content-disposition: attachment; filename=$saveas");
 header("Content-type: application/octetstream");
 header("Pragma: no-cache");
