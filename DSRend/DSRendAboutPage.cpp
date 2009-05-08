@@ -34,23 +34,23 @@ HRESULT CDSRendAboutPage::Activate(HWND hWndParent,LPCRECT pRect,BOOL bModal)
 
     if(SUCCEEDED(hr))
     {
-        char filename[MAX_PATH];
+        TCHAR filename[MAX_PATH];
         GetModuleFileName(_Module.GetModuleInstance(),filename,sizeof(filename));
         DWORD dwVerInfoSize=GetFileVersionInfoSize(filename,NULL);
         if(dwVerInfoSize!=0)
         {
             BYTE *VerInfoBuffer=NULL;
             
-            PSTR ProdVersion=NULL;
+            PTSTR ProdVersion=NULL;
             UINT ProdVersionLen=0;
             VerInfoBuffer=(BYTE*)malloc(dwVerInfoSize);
             GetFileVersionInfo(filename,0,dwVerInfoSize,VerInfoBuffer);
             
-            if(VerQueryValue(VerInfoBuffer,"\\StringFileInfo\\040904B0\\ProductVersion",(void**)&ProdVersion,&ProdVersionLen))
+            if(VerQueryValue(VerInfoBuffer,_T("\\StringFileInfo\\040904B0\\ProductVersion"),(void**)&ProdVersion,&ProdVersionLen))
             {
                 SetDlgItemText(IDC_ABOUT_VERSION,ProdVersion);
             }
-            SetDlgItemText(IDC_ABOUT_COMPILEDATE,__TIMESTAMP__);
+            SetDlgItemText(IDC_ABOUT_COMPILEDATE,_T(__TIMESTAMP__));
             free(VerInfoBuffer);
         }
     }

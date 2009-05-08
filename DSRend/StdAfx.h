@@ -37,6 +37,9 @@
 #endif
 #define _ATL_FREE_THREADED
 
+#define _KERNEL32_
+
+
 //ATL debuging debuging
 #ifdef _DEBUG
 
