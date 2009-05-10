@@ -2,6 +2,7 @@
 // Microsoft Developer Studio generated include file.
 // Used by DSRend.rc
 //
+#define IDC_STATIC                      -1
 #define IDS_PROJNAME                    100
 #define IDR_DSRENDFILTER                101
 #define IDR_DSRENDINPIN                 102
