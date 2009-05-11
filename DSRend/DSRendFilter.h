@@ -194,7 +194,7 @@ private:
     
     ///Event for waiting on a specific time, used in waitForTime
     CEvent m_refClockEvent;
-    DWORD m_refClockCookie;
+    DWORD_PTR m_refClockCookie;
 
     ///start time
     REFERENCE_TIME m_tStart;

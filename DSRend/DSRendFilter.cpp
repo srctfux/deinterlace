@@ -290,7 +290,7 @@ HRESULT CDSRendFilter::JoinFilterGraph(IFilterGraph *pGraph,LPCWSTR pName)
     //copy filter name if any
     if(pName!=NULL)
     {
-        int size=wcslen(pName)+1;
+        size_t size=wcslen(pName)+1;
         m_pFilterName=new WCHAR[size];
         wcsncpy(m_pFilterName,pName,size);
     }
