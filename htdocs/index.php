@@ -71,7 +71,7 @@
           (4.1.15)</a></li>
 
           <li><a href=
-          "http://prdownloads.sourceforge.net/deinterlace/DScaler4117.exe">Experimental
+          "http://prdownloads.sourceforge.net/deinterlace/DScaler4.1.17.exe">Experimental
           (4.1.17)</a></li>
         </ul>
 
@@ -112,7 +112,7 @@
       </ul>
 
       <p>These are explained in more detail on their own pages. There is also
-      some <a href="./olderstuff.htm">older work</a>.</p>
+      some <a href="./oldstuff.htm">older work</a>.</p>
 
       <h1>News</h1>
 
