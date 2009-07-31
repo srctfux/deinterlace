@@ -54,7 +54,19 @@
 //You may derive a class from CComModule and use it if you want to override
 //something, but do not change the name of _Module
 extern CComModule _Module;
+
+// strange hack seems to be required for ATL VS 2008 
+// another reason to get rid of ATL
+#if _MSC_VER >= 1500
+#define _ATL_DLL
+#endif
+
 #include <atlcom.h>
+
+#if _MSC_VER >= 1500
+#undef _ATL_DLL
+#endif
+
 #include <atlctl.h>
 
 //DShow stuff
@@ -63,6 +75,7 @@ extern CComModule _Module;
 #include <uuids.h>
 #include <vfwmsgs.h>
 #include <evcode.h>        //event codes
+
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
