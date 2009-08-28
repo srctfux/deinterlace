@@ -71,8 +71,8 @@
           (4.1.15)</a></li>
 
           <li><a href=
-          "http://sourceforge.net/projects/deinterlace/files/DScaler%20-%20Test%20Versions/4.1.18/DScaler4118.exe/download">Experimental
-          (4.1.18)</a></li>
+          "http://sourceforge.net/projects/deinterlace/files/DScaler%20-%20Test%20Versions/4.1.19/DScaler4119.exe/download">Experimental
+          (4.1.19)</a></li>
         </ul>
 
         <h3>Get Media Decoders</h3>
