@@ -28,5 +28,5 @@
 
 #After the first run, merely have SVN update the already checked out directory
 
-cd /home/groups/d/de/deinterlace/htdocs
+cd /home/project-web/deinterlace/htdocs
 svn update
